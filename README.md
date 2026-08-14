@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![CodeQL Security](https://img.shields.io/badge/CodeQL-Active-10B981?style=for-the-badge&logo=githubactions&logoColor=white)](.github/workflows/codeql.yml)
-[![PR Guardrails](https://img.shields.io/badge/PR_Guardrails-Enforced-F59E0B?style=for-the-badge&logo=githubactions&logoColor=white)](.github/workflows/pr-guardrails.yml)
+[![PR Gatekeeper](https://img.shields.io/badge/PR_Gatekeeper-Enforced-F59E0B?style=for-the-badge&logo=githubactions&logoColor=white)](.github/workflows/pr-gatekeeper.yml)
 
 > **CAREERFORGE** is a next-generation open-source contribution portal and standalone website showcase platform. Designed around a **Single-Repository Isolated Architecture**, it allows open-source contributors to build, preview, and refine standalone web templates under `public/showcase/` without risk of breaking core platform code.
 
@@ -15,7 +15,7 @@
 
 - 🏢 **Single-Repository Showcase Architecture**: 20 isolated static website project templates hosted in `public/showcase/` with live preview capabilities.
 - ⚡ **Zero-Database 24h Leaderboard**: Automated daily synchronization via GitHub Actions (`scripts/generate-leaderboard.mjs`) fetching merged PR metrics and publishing to `public/leaderboard.json`.
-- 🔒 **Automated Security Guardrails**: PR scope enforcement (`.github/workflows/pr-guardrails.yml`) preventing unauthorized modifications to core `src/` files and scanning for unsafe code patterns.
+- 🔒 **Automated PR Gatekeeper**: Scope enforcement (`.github/workflows/pr-gatekeeper.yml`) preventing unauthorized modifications to core `src/` files and auto-closing invalid PRs.
 - 🛡️ **CodeQL Vulnerability Scanning**: Continuous static application security testing (SAST) for JavaScript & TypeScript.
 - 🎨 **Modern Glassmorphic UI**: High-impact, dark-mode design system crafted with Tailwind CSS v4, Lucide icons, and responsive layouts.
 
@@ -31,8 +31,7 @@ carrers-frontend/
 │       ├── codeql.yml               # CodeQL SAST Security Scanner
 │       ├── issue-manager.yml        # First-Time Welcome & /claim Bot
 │       ├── leaderboard-sync.yml     # 24h Automated Leaderboard Sync
-│       ├── pr-gatekeeper.yml        # Scope Gatekeeper & Auto-Close Action
-│       └── pr-guardrails.yml        # Scope Enforcement & Security Check
+│       └── pr-gatekeeper.yml        # Scope Gatekeeper & Auto-Close Action
 ├── public/
 │   ├── leaderboard.json             # Flat-JSON Daily Leaderboard Data
 │   └── showcase/                    # 20 Standalone Website Templates
