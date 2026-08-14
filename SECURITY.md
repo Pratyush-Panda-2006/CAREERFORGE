@@ -1,6 +1,6 @@
 # 🔒 Security Policy
 
-PRISMA LABS takes the security of our application, infrastructure, and open-source ecosystem seriously. We appreciate the efforts of security researchers and contributors who help maintain a safe environment for everyone.
+CAREERFORGE takes the security of our application, infrastructure, and open-source ecosystem seriously. We appreciate the efforts of security researchers and contributors who help maintain a safe environment for everyone.
 
 ---
 
@@ -28,7 +28,7 @@ We actively support and release security updates for the following versions:
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-If you believe you have discovered a security vulnerability in PRISMA LABS or any of our showcase projects, please report it responsibly to our security response team:
+If you believe you have discovered a security vulnerability in CAREERFORGE or any of our showcase projects, please report it responsibly to our security response team:
 
 📧 **Security Response Email**: `security@prismalabs.io`
 
@@ -47,4 +47,4 @@ If you believe you have discovered a security vulnerability in PRISMA LABS or an
 - 🛠️ **Remediation**: Validated security vulnerabilities will be patched within **7 business days**.
 - 📢 **Coordinated Disclosure**: We request that reporters refrain from public disclosure until an official security advisory and patch have been released.
 
-Thank you for helping keep PRISMA LABS and our open-source community secure!
+Thank you for helping keep CAREERFORGE and our open-source community secure!

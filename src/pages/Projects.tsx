@@ -356,7 +356,7 @@ export default function Projects() {
   });
 
   return (
-    <div className="px-4 sm:px-6 md:px-12 py-8 max-w-7xl mx-auto w-full relative z-10">
+    <div className="px-4 sm:px-6 md:px-12 pt-4 sm:pt-8 pb-16 max-w-7xl mx-auto w-full relative z-10">
       {/* Header */}
       <div className="mb-8 animate-blur-fade-up" style={{ animationDelay: '100ms' }}>
         <div className="flex items-center gap-2 text-xs font-mono text-amber-400 mb-2 uppercase tracking-wider">

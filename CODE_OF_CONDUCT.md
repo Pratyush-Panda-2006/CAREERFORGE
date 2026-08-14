@@ -2,7 +2,7 @@
 
 ## 1. Our Pledge
 
-We as members, contributors, and leaders of **PRISMA LABS** pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
+We as members, contributors, and leaders of **CAREERFORGE** pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
 We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
 
@@ -42,7 +42,7 @@ This Code of Conduct applies within all project spaces, and it also applies when
 
 ## 5. Enforcement & Incident Reporting
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the PRISMA LABS community enforcement team at:
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the CAREERFORGE community enforcement team at:
 
 📧 **Email**: `conduct@prismalabs.io`
 

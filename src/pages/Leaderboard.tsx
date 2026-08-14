@@ -90,7 +90,7 @@ export default function Leaderboard() {
   const rank3 = top3[2];
 
   return (
-    <div className="px-4 sm:px-6 md:px-12 py-8 max-w-7xl mx-auto w-full relative z-10">
+    <div className="px-4 sm:px-6 md:px-12 pt-4 sm:pt-8 pb-16 max-w-7xl mx-auto w-full relative z-10">
       {/* Page Header */}
       <div className="text-center max-w-3xl mx-auto mb-10 animate-blur-fade-up" style={{ animationDelay: '100ms' }}>
         <div className="flex items-center justify-center gap-2 text-xs font-mono text-amber-400 mb-2 uppercase tracking-wider">
@@ -101,7 +101,7 @@ export default function Leaderboard() {
           Global Contributor Leaderboard
         </h1>
         <p className="text-gray-400 text-sm sm:text-base leading-relaxed font-light">
-          Rankings are dynamically updated based on merged pull requests across PRISMA LABS public repositories.
+          Rankings are dynamically updated based on merged pull requests across CAREERFORGE public repositories.
           {lastUpdated && (
             <span className="block mt-1 text-xs font-mono text-amber-400/80">
               Last Synced: {new Date(lastUpdated).toLocaleString()}
@@ -235,5 +235,3 @@ export default function Leaderboard() {
     </div>
   );
 }
-
-

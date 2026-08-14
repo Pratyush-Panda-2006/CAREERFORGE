@@ -2,7 +2,7 @@ import { Lock } from 'lucide-react';
 
 export default function Certificates() {
   return (
-    <div className="px-4 sm:px-6 md:px-12 py-16 max-w-5xl mx-auto w-full relative z-10 flex items-center justify-center min-h-[65vh]">
+    <div className="px-4 sm:px-6 md:px-12 pt-6 sm:pt-16 pb-16 max-w-5xl mx-auto w-full relative z-10 flex items-center justify-center min-h-[50vh] sm:min-h-[65vh]">
       <div className="liquid-glass p-8 md:p-12 rounded-2xl max-w-xl mx-auto text-center border border-white/10 shadow-2xl animate-blur-fade-up">
         {/* Icon */}
         <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(6,182,212,0.2)]">

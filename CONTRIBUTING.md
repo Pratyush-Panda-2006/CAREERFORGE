@@ -1,6 +1,6 @@
 # 🛠️ Open Source Contribution Guidelines
 
-Welcome to the PRISMA LABS Open Source Contribution Program! We run our community website projects within a single repository using an isolated public showcase architecture.
+Welcome to the CAREERFORGE Open Source Contribution Program! We run our community website projects within a single repository using an isolated public showcase architecture.
 
 To ensure stability, safety, and seamless live previews, all contributors must strictly adhere to the following rules:
 
@@ -50,6 +50,16 @@ To ensure stability, safety, and seamless live previews, all contributors must s
 - Open `http://localhost:5173/showcase/[your-project-folder]/index.html` in your browser to test your static HTML/CSS/JS template.
 - Ensure all relative paths (images, stylesheets, scripts) work correctly without console errors.
 
+### 📌 Rule 4: Mandatory Linked Issue Reference
+- Every Pull Request description **MUST** reference a tracked issue using keywords like `Closes #101`, `Fixes #12`, or `Resolves #5`. Unlinked PRs will fail automated validation.
+
+### 📌 Rule 5: One Project Folder Per Pull Request
+- All modified files in a PR **MUST** belong to **exactly one** showcase directory under `public/showcase/`. Modifying files across multiple showcase projects in a single PR is strictly prohibited.
+
+### 📌 Rule 6: Asset & File Size Guardian (Max 5MB / 15MB)
+- Individual asset files must not exceed **5 MB**.
+- Total aggregate asset changes across the PR must not exceed **15 MB**. Compress high-resolution media before submitting.
+
 ---
 
 ## 🚀 How to Submit a Contribution
@@ -60,4 +70,4 @@ To ensure stability, safety, and seamless live previews, all contributors must s
 4. Commit your changes with a descriptive message (e.g., `feat(ecommerce-store): add cart item counter`).
 5. Open a **Pull Request** referencing the issue number (e.g., `Fixes #101`).
 
-Thank you for contributing to PRISMA LABS Open Source! Happy coding! 🚀
+Thank you for contributing to CAREERFORGE Open Source! Happy coding! 🚀

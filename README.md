@@ -1,4 +1,4 @@
-# ⚡ PRISMA LABS — Open Source Platform & Isolated Showcase Architecture
+# ⚡ CAREERFORGE — Open Source Platform & Isolated Showcase Architecture
 
 [![Vite](https://img.shields.io/badge/Vite-8.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
@@ -7,7 +7,7 @@
 [![CodeQL Security](https://img.shields.io/badge/CodeQL-Active-10B981?style=for-the-badge&logo=githubactions&logoColor=white)](.github/workflows/codeql.yml)
 [![PR Guardrails](https://img.shields.io/badge/PR_Guardrails-Enforced-F59E0B?style=for-the-badge&logo=githubactions&logoColor=white)](.github/workflows/pr-guardrails.yml)
 
-> **PRISMA LABS** is a next-generation open-source contribution portal and standalone website showcase platform. Designed around a **Single-Repository Isolated Architecture**, it allows open-source contributors to build, preview, and refine standalone web templates under `public/showcase/` without risk of breaking core platform code.
+> **CAREERFORGE** is a next-generation open-source contribution portal and standalone website showcase platform. Designed around a **Single-Repository Isolated Architecture**, it allows open-source contributors to build, preview, and refine standalone web templates under `public/showcase/` without risk of breaking core platform code.
 
 ---
 
