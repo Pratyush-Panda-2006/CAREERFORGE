@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verified Certificates &amp; Credentials — PRISMA LABS Open Source</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="bg-ambient">
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+  </div>
+  <div class="vignette-overlay"></div>
+
+  <!-- Navigation Header -->
+  <nav class="site-nav">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo">
+        PRISMA <span class="brand-badge">CAREERS &amp; OS</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="projects.html">Projects &amp; Bounties</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="certificate.html" class="active">Certificates</a></li>
+        <li><a href="profile.html">My Profile</a></li>
+        <li><a href="../index.html" class="nav-parent-link">← Parent Site (PRISMA LABS)</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="content-wrapper">
+    
+    <!-- Page Header -->
+    <header style="margin-bottom: 2.5rem; text-align: center; max-width: 780px; margin: 0 auto 2.5rem;">
+      <span class="eyebrow-mono">// VERIFIABLE CREDENTIALS</span>
+      <h1 class="page-title">Open Source Certificate Verifier &amp; Generator</h1>
+      <p class="page-lead" style="margin: 0 auto;">
+        Verify any official PRISMA LABS Open Source Certificate by entering its Certificate ID below, or generate a live preview of your contributor certificate.
+      </p>
+    </header>
+
+    <!-- Certificate Search & Verification Box -->
+    <div class="glass-card glass-card-gold" style="max-width: 680px; margin: 0 auto 3.5rem; padding: 2rem;">
+      <h3 style="font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--accent-gold);">
+        Certificate ID Verification Lookup
+      </h3>
+      <p style="font-size: 0.875rem; color: var(--text-soft); margin-bottom: 1.25rem;">
+        Try entering sample ID: <code style="font-family: var(--font-mono); color: var(--accent-gold); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">PRISMA-CERT-2026-8942</code> or <code style="font-family: var(--font-mono); color: var(--accent-gold); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">PRISMA-CERT-2026-1042</code>
+      </p>
+      
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <input type="text" id="certLookupInput" class="input-field" style="flex: 1; min-width: 220px;" placeholder="e.g. PRISMA-CERT-2026-8942">
+        <button id="certLookupBtn" class="btn-primary" style="font-size: 0.875rem; padding: 0.65rem 1.25rem;">Verify Certificate</button>
+      </div>
+
+      <div id="certResultMsg"></div>
+    </div>
+
+    <!-- Live Interactive Certificate Preview Canvas -->
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <span class="eyebrow-mono">// LIVE CERTIFICATE PREVIEW</span>
+      <h2 style="font-family: var(--font-display); font-size: 1.75rem;">Official Certificate Display</h2>
+      
+      <div style="margin-top: 1rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+        <label for="certNameInput" style="font-size: 0.875rem; color: var(--text-soft);">Customize Name Preview:</label>
+        <input type="text" id="certNameInput" class="input-field" style="width: 240px; padding: 0.4rem 0.8rem;" placeholder="Enter Contributor Name">
+        <button onclick="window.print()" class="btn-secondary" style="font-size: 0.8125rem; padding: 0.4rem 0.9rem;">🖨️ Print / Save PDF</button>
+      </div>
+    </div>
+
+    <!-- Rendered Certificate Card -->
+    <div class="certificate-preview-box" id="certificateCard">
+      <div class="certificate-border-line">
+        
+        <div class="cert-header-logo">PRISMA LABS</div>
+        <div class="cert-subtitle">OPEN SOURCE CONTRIBUTION CERTIFICATE</div>
+
+        <div style="font-family: var(--font-mono); font-size: 0.8125rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1.5rem;">
+          THIS IS PROUDLY PRESENTED TO
+        </div>
+
+        <div class="cert-recipient-name" id="certRecipientDisplay">
+          Alex Rivera
+        </div>
+
+        <p class="cert-text">
+          In recognition of outstanding technical excellence, high-quality code contributions, and successful pull request merges in PRISMA LABS open-source public repositories.
+        </p>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+          <span class="tag tag-gold" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;">34 MERGED PRs</span>
+          <span class="tag tag-emerald" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;">6,420 CONTRIBUTOR PTS</span>
+          <span class="tag tag-cyan" style="font-size: 0.8125rem; padding: 0.4rem 0.8rem;">LEAD PROJECT CONTRIBUTOR</span>
+        </div>
+
+        <div class="cert-footer-details">
+          <div style="text-align: left;">
+            <div style="color: var(--text-main); font-weight: 600;">PRISMA LABS CORE ADMIN</div>
+            <div style="color: var(--text-dim); font-size: 0.75rem;">Verified Digital Signature: 0x8F92...C10B</div>
+          </div>
+
+          <div class="cert-seal">
+            PRISMA<br>VERIFIED<br>2026
+          </div>
+
+          <div style="text-align: right;">
+            <div style="color: var(--accent-gold); font-weight: 600;" id="certIdDisplay">PRISMA-CERT-2026-8942</div>
+            <div style="color: var(--text-dim); font-size: 0.75rem;">Issued: August 10, 2026</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-copy">
+        <span>&copy; 2026 PRISMA LABS CAREERS PORTAL</span>
+        <span style="color: var(--hairline);">•</span>
+        <span>PUBLIC OPEN SOURCE INITIATIVE</span>
+      </div>
+      <div>
+        <a href="../index.html" style="color: var(--accent-gold); text-decoration: none; font-family: var(--font-mono); font-size: 0.8125rem;">PRISMA LABS Parent Site ↗</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

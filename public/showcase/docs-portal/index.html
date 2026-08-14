@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prisma API — Developer Documentation Portal</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div className="layout">
+    <aside className="sidebar">
+      <div className="logo">📖 PRISMA DOCS</div>
+      <nav className="doc-nav">
+        <div className="section-title">GETTING STARTED</div>
+        <a href="#overview" className="active">Overview</a>
+        <a href="#authentication">Authentication</a>
+        <div className="section-title">CORE APIS</div>
+        <a href="#agents">Agent Dispatcher API</a>
+        <a href="#streaming">SSE Event Stream</a>
+        <a href="#rate-limits">Rate Limits</a>
+      </nav>
+    </aside>
+
+    <main className="content">
+      <section id="overview">
+        <span className="badge">v2.4.0 STABLE</span>
+        <h1>Prisma Agent Orchestrator API</h1>
+        <p className="lead">Interact with vector RAG pipelines, stream response tokens, and manage multi-agent worker nodes.</p>
+
+        <h2>Authentication Header</h2>
+        <p>All HTTP API requests require a Bearer token in your authorization header:</p>
+        <pre className="code-block"><code>Authorization: Bearer prisma_live_99a84b12c</code></pre>
+      </section>
+
+      <section id="agents" className="doc-section">
+        <h2>Dispatch Agent Task</h2>
+        <div className="endpoint-pill post"><span className="method">POST</span> /v1/agents/dispatch</div>
+        <pre className="code-block"><code>{
+  "agent_id": "rag-worker-01",
+  "prompt": "Analyze vector embeddings for chunk #92",
+  "max_tokens": 1024
+}</code></pre>
+      </section>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
