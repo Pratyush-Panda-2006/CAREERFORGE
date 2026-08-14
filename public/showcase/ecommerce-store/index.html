@@ -10,71 +10,96 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header className="navbar">
-    <div className="nav-container">
-      <div className="brand">
-        <span className="brand-icon">⚡</span>
-        <span className="brand-name">NEXUS STORE</span>
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name">NEXUS STORE</span>
       </div>
-      <div className="cart-badge" id="cartBadge">
+      <button class="cart-badge" id="cartBadge" onclick="toggleCartDrawer()">
         🛒 Cart (<span id="cartCount">0</span>)
-      </div>
+      </button>
     </div>
   </header>
 
-  <main className="container">
-    <section className="hero">
-      <div className="hero-tag">// SHOWCASE PROJECT #01</div>
-      <h1>Next-Gen Developer & Creator Gear</h1>
+  <main class="container">
+    <section class="hero">
+      <div class="hero-tag">// SHOWCASE PROJECT #01</div>
+      <h1>Next-Gen Developer &amp; Creator Gear</h1>
       <p>Explore high-performance hardware, mechanical keyboards, and AI workstations built for open-source builders.</p>
     </section>
 
-    <section className="controls">
-      <div className="category-tabs">
-        <button className="tab active" data-cat="all">All Gear</button>
-        <button className="tab" data-cat="keyboards">Keyboards</button>
-        <button className="tab" data-cat="audio">Audio</button>
-        <button className="tab" data-cat="displays">Monitors</button>
+    <section class="controls">
+      <div class="category-tabs">
+        <button class="tab active" data-cat="all">All Gear</button>
+        <button class="tab" data-cat="keyboards">Keyboards</button>
+        <button class="tab" data-cat="audio">Audio</button>
+        <button class="tab" data-cat="displays">Monitors</button>
       </div>
     </section>
 
-    <section className="products-grid" id="productsGrid">
-      <div className="card" data-category="keyboards">
-        <div className="card-badge">HOT</div>
-        <div className="card-img">⌨️</div>
+    <section class="products-grid" id="productsGrid">
+      <div class="card" data-id="p1" data-category="keyboards">
+        <div class="card-badge">HOT</div>
+        <div class="card-img">⌨️</div>
         <h3>CyberDeck Pro Mechanical</h3>
-        <p className="desc">Wireless split ergonomic keyboard with hot-swappable switches & RGB OLED matrix.</p>
-        <div className="card-footer">
-          <span className="price">$249.00</span>
-          <button className="add-btn" onclick="addToCart('CyberDeck Pro')">Add to Cart</button>
+        <p class="desc">Wireless split ergonomic keyboard with hot-swappable switches &amp; RGB OLED matrix.</p>
+        <div class="card-footer">
+          <span class="price">$249.00</span>
+          <div class="action-container" id="action-p1">
+            <button class="add-btn" onclick="addToCart('p1', 'CyberDeck Pro Mechanical', 249.00, '⌨️')">Add to Cart</button>
+          </div>
         </div>
       </div>
 
-      <div className="card" data-category="audio">
-        <div className="card-badge">NEW</div>
-        <div className="card-img">🎧</div>
+      <div class="card" data-id="p2" data-category="audio">
+        <div class="card-badge">NEW</div>
+        <div class="card-img">🎧</div>
         <h3>Acoustic Pulse ANC Headset</h3>
-        <p className="desc">Active noise-canceling studio monitors with ultra-low latency lossy spatial audio.</p>
-        <div className="card-footer">
-          <span className="price">$199.00</span>
-          <button className="add-btn" onclick="addToCart('Acoustic Pulse ANC')">Add to Cart</button>
+        <p class="desc">Active noise-canceling studio monitors with ultra-low latency lossy spatial audio.</p>
+        <div class="card-footer">
+          <span class="price">$199.00</span>
+          <div class="action-container" id="action-p2">
+            <button class="add-btn" onclick="addToCart('p2', 'Acoustic Pulse ANC Headset', 199.00, '🎧')">Add to Cart</button>
+          </div>
         </div>
       </div>
 
-      <div className="card" data-category="displays">
-        <div className="card-badge">PRO</div>
-        <div className="card-img">🖥️</div>
+      <div class="card" data-id="p3" data-category="displays">
+        <div class="card-badge">PRO</div>
+        <div class="card-img">🖥️</div>
         <h3>Horizon 32" Curved OLED</h3>
-        <p className="desc">240Hz 4K UHD QD-OLED display engineered for color accuracy and seamless coding.</p>
-        <div className="card-footer">
-          <span className="price">$899.00</span>
-          <button className="add-btn" onclick="addToCart('Horizon 32 OLED')">Add to Cart</button>
+        <p class="desc">240Hz 4K UHD QD-OLED display engineered for color accuracy and seamless coding.</p>
+        <div class="card-footer">
+          <span class="price">$899.00</span>
+          <div class="action-container" id="action-p3">
+            <button class="add-btn" onclick="addToCart('p3', 'Horizon 32 Curved OLED', 899.00, '🖥️')">Add to Cart</button>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <div id="toast" className="toast">Item added to cart!</div>
+  <!-- Slide-Over Cart Drawer & Backdrop -->
+  <div id="cartBackdrop" class="cart-backdrop" onclick="toggleCartDrawer()"></div>
+  <aside id="cartDrawer" class="cart-drawer">
+    <div class="drawer-header">
+      <h2>🛒 Shopping Cart</h2>
+      <button class="close-btn" onclick="toggleCartDrawer()">&times;</button>
+    </div>
+    <div class="drawer-body" id="cartItemsList">
+      <div class="empty-cart">Your cart is currently empty.</div>
+    </div>
+    <div class="drawer-footer">
+      <div class="total-row">
+        <span>Total:</span>
+        <span id="cartTotal">$0.00</span>
+      </div>
+      <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+    </div>
+  </aside>
+
+  <div id="toast" class="toast">Item added to cart!</div>
   <script src="script.js"></script>
 </body>
 </html>
