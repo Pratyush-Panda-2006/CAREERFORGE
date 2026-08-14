@@ -1,0 +1,109 @@
+name: Issue Welcome and Claim Bot
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  handle-first-issue:
+    name: Welcome First-Time Issue Creator
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Greet First-Time Issue Creator
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const author = context.payload.issue.user.login;
+            
+            // Check previous issues created by this user in this repo
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              creator: author,
+              state: 'all'
+            });
+
+            // If this is their first issue
+            if (issues.data.length <= 1) {
+              const welcomeMessage = `### 🎉 Welcome to CAREERFORGE, @${author}!\n\n` +
+                `Thank you for creating your very first issue in our repository. We are excited to have you contribute to our open-source showcase!\n\n` +
+                `---\n` +
+                `### 🚀 How to Claim & Work on this Issue:\n` +
+                `- Reply with **\`/claim\`** in the comments below to assign yourself.\n` +
+                `- Once assigned, you will have **24 hours** to open a linked Pull Request.\n` +
+                `- **Remember:** All code submissions must reside strictly within \`public/showcase/\`.\n\n` +
+                `Happy coding! 🛠️`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: welcomeMessage
+              });
+            }
+
+  handle-issue-claim:
+    name: Handle /claim Command
+    if: github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/claim')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign User and Set 24h Deadline
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commenter = context.payload.comment.user.login;
+            const issueNumber = context.payload.issue.number;
+            const currentAssignees = context.payload.issue.assignees.map(a => a.login);
+
+            // If already assigned to someone else
+            if (currentAssignees.length > 0 && !currentAssignees.includes(commenter)) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: `⚠️ @${commenter}, this issue is already assigned to @${currentAssignees.join(', @')}. Please choose an unassigned issue.`
+              });
+              return;
+            }
+
+            // Assign the user
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              assignees: [commenter]
+            });
+
+            // Add assigned label
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: ['claimed', 'in-progress']
+              });
+            } catch (err) {
+              console.log('Label add skipped/optional:', err.message);
+            }
+
+            const confirmMessage = `### 🎯 Issue Assigned!\n\n` +
+              `@${commenter} has claimed this issue!\n\n` +
+              `⏳ **24-Hour Timer Started:** Please open a draft or ready Pull Request referencing this issue within **24 hours**.\n` +
+              `If no PR is submitted within 24 hours, the issue will be automatically unassigned for other contributors.\n\n` +
+              `Good luck! 🚀`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: confirmMessage
+            });

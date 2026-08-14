@@ -27,7 +27,9 @@
 carrers-frontend/
 ├── .github/
 │   └── workflows/
+│       ├── claim-expiry-cron.yml    # 24h Claim Expiration & Auto-Unassign Cron
 │       ├── codeql.yml               # CodeQL SAST Security Scanner
+│       ├── issue-manager.yml        # First-Time Welcome & /claim Bot
 │       ├── leaderboard-sync.yml     # 24h Automated Leaderboard Sync
 │       ├── pr-gatekeeper.yml        # Scope Gatekeeper & Auto-Close Action
 │       └── pr-guardrails.yml        # Scope Enforcement & Security Check
