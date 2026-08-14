@@ -1,0 +1,42 @@
+name: 24h Automated Leaderboard Sync
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at 00:00 UTC
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  sync-leaderboard:
+    name: Fetch Merged PRs & Update Leaderboard JSON
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Run Leaderboard Sync Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/generate-leaderboard.mjs
+
+      - name: Commit & Push Updated Leaderboard JSON
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/leaderboard.json
+          if git diff --staged --quiet; then
+            echo "No changes in leaderboard.json to commit."
+          else
+            git commit -m "chore(leaderboard): automated 24h leaderboard update [skip ci]"
+            git push
+          fi

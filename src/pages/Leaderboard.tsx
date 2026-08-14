@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Crown, Trophy, GitPullRequest } from 'lucide-react';
 
 interface Contributor {
@@ -9,7 +9,7 @@ interface Contributor {
   mergedPRs: number;
 }
 
-const leaderboardData: Contributor[] = [
+const fallbackContributors: Contributor[] = [
   {
     rank: 1,
     name: 'Alex Rivera',
@@ -49,8 +49,34 @@ const leaderboardData: Contributor[] = [
 
 export default function Leaderboard() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [contributors, setContributors] = useState<Contributor[]>(fallbackContributors);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
-  const sortedData = [...leaderboardData].sort((a, b) => b.mergedPRs - a.mergedPRs);
+  useEffect(() => {
+    fetch('/leaderboard.json')
+      .then((res) => {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
+      })
+      .then((data) => {
+        if (data && Array.isArray(data.contributors) && data.contributors.length > 0) {
+          const parsed: Contributor[] = data.contributors.map((item: { rank?: number; username: string; merged_prs?: number }, idx: number) => ({
+            rank: item.rank || idx + 1,
+            name: item.username,
+            handle: `@${item.username}`,
+            avatar: item.username ? item.username.substring(0, 2).toUpperCase() : 'OS',
+            mergedPRs: item.merged_prs || 0,
+          }));
+          setContributors(parsed);
+          if (data.last_updated) setLastUpdated(data.last_updated);
+        }
+      })
+      .catch(() => {
+        // Fallback data remains active on fetch error
+      });
+  }, []);
+
+  const sortedData = [...contributors].sort((a, b) => b.mergedPRs - a.mergedPRs);
 
   const filteredContributors = sortedData.filter(
     (c) =>
@@ -76,6 +102,11 @@ export default function Leaderboard() {
         </h1>
         <p className="text-gray-400 text-sm sm:text-base leading-relaxed font-light">
           Rankings are dynamically updated based on merged pull requests across PRISMA LABS public repositories.
+          {lastUpdated && (
+            <span className="block mt-1 text-xs font-mono text-amber-400/80">
+              Last Synced: {new Date(lastUpdated).toLocaleString()}
+            </span>
+          )}
         </p>
       </div>
 
@@ -204,4 +235,5 @@ export default function Leaderboard() {
     </div>
   );
 }
+
 

@@ -1,0 +1,70 @@
+name: PR Scope & Safety Guardrails
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pr-guardrails:
+    name: Enforce File Scope & Security Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 1. Scope Check (Restricted to public/showcase/)
+        run: |
+          echo "Checking modified files in Pull Request..."
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          echo "Modified files:"
+          echo "$CHANGED_FILES"
+          
+          INVALID_FILES=""
+          for FILE in $CHANGED_FILES; do
+            if [[ ! "$FILE" =~ ^public/showcase/ ]]; then
+              INVALID_FILES="$INVALID_FILES\n- $FILE"
+            fi
+          done
+          
+          if [ -n "$INVALID_FILES" ]; then
+            echo -e "❌ PR Scope Guardrail Violation!\nContributors are strictly prohibited from modifying files outside of 'public/showcase/'.\nThe following restricted files were modified:$INVALID_FILES"
+            exit 1
+          fi
+          echo "✅ Scope Check Passed: All modified files are strictly within public/showcase/"
+
+      - name: 2. Security Syntax Scan
+        run: |
+          echo "Scanning modified files for unsafe syntax..."
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          
+          VIOLATIONS=0
+          for FILE in $CHANGED_FILES; do
+            if [ -f "$FILE" ]; then
+              if grep -n -E "eval\(|document\.cookie|src=['\"]http://" "$FILE"; then
+                echo "❌ Unsafe syntax detected in $FILE"
+                VIOLATIONS=$((VIOLATIONS+1))
+              fi
+            fi
+          done
+          
+          if [ $VIOLATIONS -gt 0 ]; then
+            echo "❌ Security Guardrail Failed: Found $VIOLATIONS unsafe syntax pattern(s) (eval(), document.cookie, or unencrypted HTTP script tags)."
+            exit 1
+          fi
+          echo "✅ Security Check Passed: No unsafe syntax detected."
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 3. Integrity Check (Build Verification)
+        run: |
+          npm ci || npm install
+          npm run build
+          echo "✅ Integrity Check Passed: Project built successfully."

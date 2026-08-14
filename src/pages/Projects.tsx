@@ -32,7 +32,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Vanilla CSS', 'JavaScript ES6'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/ecommerce-store/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/ecommerce-store',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#101', title: 'Add Cart Item Quantity Adjustment Controls', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#102', title: 'Implement Product Quick View Modal Dialog', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -48,7 +48,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'CSS Variables', 'JavaScript ES6'],
     activeIssuesCount: 2,
     previewUrl: '/showcase/agency-studio/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/agency-studio',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#201', title: 'Add Interactive Client Testimonials Carousel', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
       { id: '#202', title: 'Implement Contact Form Field Validation', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
@@ -64,7 +64,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Cyberpunk CSS', 'JS Countdown'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/festival-hub/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/festival-hub',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#301', title: 'Add Dynamic Stage Filter Tabs for Lineup', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#302', title: 'Ticket Pass Selection Checkout Drawer', level: 'Advanced', levelColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
@@ -80,7 +80,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Flexbox/Grid CSS', 'JavaScript'],
     activeIssuesCount: 4,
     previewUrl: '/showcase/saas-launchpad/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/saas-launchpad',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#401', title: 'Add Monthly / Annual Pricing Toggle Switcher', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#402', title: 'Interactive ROI Cost Calculator Widget', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -96,7 +96,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Terminal CSS', 'Fira Code'],
     activeIssuesCount: 2,
     previewUrl: '/showcase/developer-portfolio/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/developer-portfolio',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#501', title: 'Add CLI Command Line Typing Simulator', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#502', title: 'Interactive Project Tech Filter Pills', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -112,7 +112,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Sidebar Layout', 'Monospace CSS'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/docs-portal/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/docs-portal',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#601', title: 'Add One-Click Copy Button to Code Blocks', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#602', title: 'Live In-Page Search Filter for API Methods', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -128,7 +128,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Typography CSS', 'JavaScript'],
     activeIssuesCount: 2,
     previewUrl: '/showcase/culinary-bistro/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/culinary-bistro',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#701', title: 'Add Interactive Date & Time Table Picker Modal', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
       { id: '#702', title: 'Dietary Preference Filter (Vegan/GF)', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
@@ -144,7 +144,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Glassmorphism', 'JavaScript'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/real-estate-luxe/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/real-estate-luxe',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#801', title: 'Add Property Price Range Filter Slider', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
       { id: '#802', title: 'Virtual 360 Tour Lightbox Overlay', level: 'Advanced', levelColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
@@ -160,7 +160,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Emerald Glass', 'JetBrains Mono'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/fintech-vault/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/fintech-vault',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#901', title: 'Add APY Yield Compound Calculator Modal', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#902', title: 'Multi-Asset Token Deposit Form Validation', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -176,7 +176,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Glitch CSS', 'Orbitron Font'],
     activeIssuesCount: 2,
     previewUrl: '/showcase/gaming-esports-hub/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/gaming-esports-hub',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1001', title: 'Add Embedded Twitch Player Lightbox', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
       { id: '#1002', title: 'Interactive Tournament Bracket Visualizer', level: 'Advanced', levelColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
@@ -192,7 +192,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Teal Glass', 'JavaScript'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/health-vitality/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/health-vitality',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1101', title: 'Add Interactive Sleep Stage Breakdown Chart', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#1102', title: 'Biomarker Scan Progress Bar Animation', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -208,7 +208,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Outfit Font', 'JavaScript'],
     activeIssuesCount: 2,
     previewUrl: '/showcase/travel-odyssey/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/travel-odyssey',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1201', title: 'Add Interactive Destination Search Filtering', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#1202', title: 'Voyage Booking Request Modal Form', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -224,7 +224,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Indigo Theme', 'JavaScript'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/edtech-academy/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/edtech-academy',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1301', title: 'Add Syllabus Accordion Module Viewer', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#1302', title: 'Interactive Cohort Registration Form', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -240,7 +240,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Pink Accent', 'Space Grotesk'],
     activeIssuesCount: 2,
     previewUrl: '/showcase/podcast-audio-stream/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/podcast-audio-stream',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1401', title: 'Add Fixed Audio Player Sticky Control Bar', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
       { id: '#1402', title: 'Episode Search & Host Guest Filter', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
@@ -256,7 +256,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Eco Green CSS', 'JavaScript'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/nonprofit-impact/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/nonprofit-impact',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1501', title: 'Add Custom Tree Donation Tier Selector', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#1502', title: 'Live Satellite Rainforest Tracker Embed', level: 'Advanced', levelColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
@@ -272,7 +272,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Crimson Red', 'Orbitron'],
     activeIssuesCount: 2,
     previewUrl: '/showcase/automotive-hypercar/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/automotive-hypercar',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1601', title: 'Add 3D Rotational Car Color Customizer', level: 'Advanced', levelColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
       { id: '#1602', title: 'Hypercar Reservation Deposit Modal', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -288,7 +288,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Cyan Wave', 'JetBrains Mono'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/ai-voice-studio/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/ai-voice-studio',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1701', title: 'Add Multi-Voice Sample Audio Switcher', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
       { id: '#1702', title: 'Text-to-Speech Realtime Waveform Animation', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
@@ -304,7 +304,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Emerald Terminal', 'Fira Code'],
     activeIssuesCount: 2,
     previewUrl: '/showcase/cybersecurity-sentinel/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/cybersecurity-sentinel',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1801', title: 'Add Vulnerability Scan Terminal Output Log', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
       { id: '#1802', title: 'IP Blacklist Threat Feed Table Filter', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
@@ -320,7 +320,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Amber Gold', 'Cinzel Font'],
     activeIssuesCount: 2,
     previewUrl: '/showcase/luxury-realms/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/luxury-realms',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#1901', title: 'Add Private Jet Flight Route Estimator', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
       { id: '#1902', title: 'VIP Island Booking Inquiry Form Validation', level: 'Beginner', levelColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
@@ -336,7 +336,7 @@ const projectsData: Project[] = [
     tags: ['HTML5', 'Sky Blue', 'JetBrains Mono'],
     activeIssuesCount: 3,
     previewUrl: '/showcase/crypto-exchange-pro/index.html',
-    githubUrl: 'https://github.com/prisma-labs/showcase/tree/main/public/showcase/crypto-exchange-pro',
+    githubUrl: 'https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues',
     issues: [
       { id: '#2001', title: 'Add Live Orderbook Bid/Ask Spread Table', level: 'Intermediate', levelColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
       { id: '#2002', title: 'TradingView Lightweight Chart Widget Embed', level: 'Advanced', levelColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
@@ -475,7 +475,7 @@ export default function Projects() {
                 <ExternalLink size={14} />
               </a>
               <a
-                href={project.githubUrl}
+                href="https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues"
                 target="_blank"
                 rel="noreferrer"
                 className="w-full sm:w-1/2 liquid-glass text-white hover:bg-white/10 text-center px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all border border-white/10 active:scale-95 cursor-pointer"

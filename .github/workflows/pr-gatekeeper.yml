@@ -1,0 +1,115 @@
+name: Contributor PR Gatekeeper
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    branches: [ main ]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  validate-and-enforce:
+    name: "Showcase Scope & Security Gatekeeper"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      # Step 1: Detect illegal file modifications outside public/showcase/
+      - name: Check Modified File Scope
+        id: scope_check
+        run: |
+          git fetch origin main
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          echo "Files modified in PR:"
+          echo "$CHANGED_FILES"
+
+          VIOLATIONS=""
+          for file in $CHANGED_FILES; do
+            if [[ ! "$file" =~ ^public/showcase/ ]]; then
+              echo "Scope violation: $file"
+              VIOLATIONS+="- \`$file\`"$'\n'
+            fi
+          done
+
+          if [ -n "$VIOLATIONS" ]; then
+            echo "has_violations=true" >> $GITHUB_OUTPUT
+            {
+              echo "violated_files<<EOF"
+              echo "$VIOLATIONS"
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
+          else
+            echo "has_violations=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Step 2: Auto-Comment and Auto-Close if files outside showcase are touched
+      - name: Auto-Close PR for Scope Violation
+        if: steps.scope_check.outputs.has_violations == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const violatedFiles = `${{ steps.scope_check.outputs.violated_files }}`;
+            const author = context.payload.pull_request.user.login;
+            
+            const commentBody = `### ⛔ Pull Request Automatically Closed\n\n` +
+              `Hi @${author}, thank you for your contribution!\n\n` +
+              `To maintain repository integrity and zero-downtime stability, contributors are **strictly isolated to modifying files inside the \`public/showcase/\` directory**.\n\n` +
+              `**Detected unauthorized file modifications:**\n${violatedFiles}\n\n` +
+              `---\n` +
+              `### 🛠️ How to Fix This:\n` +
+              `1. Ensure your project assets (HTML, CSS, JS, images) reside **only** in \`public/showcase/your-project-folder/\`.\n` +
+              `2. Do not modify core app files (\`src/\`, \`package.json\`, \`.github/\`, etc.).\n` +
+              `3. Push the clean branch and open a new Pull Request.\n\n` +
+              `*This is an automated action by CAREERFORGE Gatekeeper.*`;
+
+            // Post comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: commentBody
+            });
+
+            // Close PR
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              state: 'closed'
+            });
+
+            core.setFailed("PR modified files outside public/showcase/. Automatically closed.");
+
+      # Step 3: Security & Dangerous Pattern Scan (Only runs if scope check passed)
+      - name: Scan Showcase Code for Dangerous Patterns
+        if: steps.scope_check.outputs.has_violations == 'false'
+        run: |
+          echo "Scanning showcase code for dangerous patterns (eval, cookie hijacking, unencrypted external scripts)..."
+          SUSPICIOUS=$(git diff origin/main...HEAD -- public/showcase/ | grep -E "(\beval\(|document\.cookie|<script.*src=[\"']http:\/\/)" || true)
+
+          if [ -n "$SUSPICIOUS" ]; then
+            echo "::error::Suspicious security pattern detected in showcase files:"
+            echo "$SUSPICIOUS"
+            exit 1
+          fi
+
+      # Step 4: Build Verification
+      - name: Setup Node.js & Verify Build
+        if: steps.scope_check.outputs.has_violations == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Run Build Test
+        if: steps.scope_check.outputs.has_violations == 'false'
+        run: |
+          npm ci || npm install
+          npm run build

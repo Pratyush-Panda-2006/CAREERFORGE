@@ -120,10 +120,15 @@ export default function Home() {
             </div>
             <div className="pt-4 border-t border-white/10 flex justify-between items-center text-xs">
               <span className="text-gray-400 font-mono">Admin: @prisma-lab-core</span>
-              <Link to="/projects" className="text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1">
+              <a
+                href="https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues"
+                target="_blank"
+                rel="noreferrer"
+                className="text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1 cursor-pointer"
+              >
                 <span>Claim Issue</span>
                 <ExternalLink size={14} />
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -150,10 +155,15 @@ export default function Home() {
             </div>
             <div className="pt-4 border-t border-white/10 flex justify-between items-center text-xs">
               <span className="text-gray-400 font-mono">Admin: @prisma-frontend</span>
-              <Link to="/projects" className="text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1">
+              <a
+                href="https://github.com/Pratyush-Panda-2006/CAREERFORGE/issues"
+                target="_blank"
+                rel="noreferrer"
+                className="text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1 cursor-pointer"
+              >
                 <span>Claim Issue</span>
                 <ExternalLink size={14} />
-              </Link>
+              </a>
             </div>
           </div>
         </div>
