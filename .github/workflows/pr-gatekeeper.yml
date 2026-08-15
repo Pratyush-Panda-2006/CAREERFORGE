@@ -2,7 +2,7 @@ name: Contributor PR Gatekeeper
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   pull-requests: write
@@ -15,17 +15,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Fetch PR Changed Files & Enforce Showcase Scope
-        id: pr-files
+      - name: Validate PR Description & Showcase Scope
+        id: gatekeeper
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prNumber = context.payload.pull_request.number;
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            const prBody = pr.body || '';
 
-            // Fetch all modified files in this PR
+            // 1. Verify Issue Linking Keyword in PR Description
+            // Matches: closes #12, fixes #12, resolve #12, closed #12, etc. (case-insensitive)
+            const issueLinkRegex = /\b(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+#\d+\b/i;
+            const hasLinkedIssue = issueLinkRegex.test(prBody);
+
+            if (!hasLinkedIssue) {
+              const issueMissingComment = `### ⚠️ Missing Linked Issue Keyword\n\n` +
+                `Hello @${pr.user.login},\n\n` +
+                `Your Pull Request description does not contain an issue-closing keyword.\n\n` +
+                `Please **edit your PR description** to link your claimed issue using one of the following formats:\n` +
+                `- \`Closes #<issue-number>\`\n` +
+                `- \`Fixes #<issue-number>\`\n` +
+                `- \`Resolves #<issue-number>\`\n\n` +
+                `*This ensures the corresponding issue is automatically closed when your PR is merged.*`;
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: issueMissingComment
+              });
+
+              core.setFailed("PR validation failed: No valid issue linking keyword found in PR description (e.g., 'Closes #123').");
+              return;
+            }
+
+            // 2. Fetch and Verify Modified Files
             const { data: files } = await github.rest.pulls.listFiles({
               owner,
               repo,
@@ -36,30 +64,27 @@ jobs:
             const filenames = files.map(f => f.filename);
             console.log("Modified files:", filenames);
 
-            // Check for unauthorized files outside public/showcase/
             const unauthorizedFiles = filenames.filter(f => !f.startsWith('public/showcase/'));
 
             if (unauthorizedFiles.length > 0) {
-              const commentBody = `### ⛔ Pull Request Automatically Closed\n\n` +
-                `Hello @${context.payload.pull_request.user.login},\n\n` +
-                `Thank you for your contribution, but our automated security bot has detected that this PR modifies files **outside** the designated showcase directory (\`public/showcase/\`).\n\n` +
-                `#### ❌ Unauthorized Files Detected:\n` +
+              const unauthorizedComment = `### ⛔ Pull Request Automatically Closed\n\n` +
+                `Hello @${pr.user.login},\n\n` +
+                `Our security bot detected changes **outside** the designated showcase directory (\`public/showcase/\`).\n\n` +
+                `#### ❌ Unauthorized Files:\n` +
                 unauthorizedFiles.map(f => `- \`${f}\``).join('\n') +
                 `\n\n---\n` +
                 `### 🛡️ Contribution Scope Policy:\n` +
-                `- To maintain repository stability, contributors are **only permitted** to add or modify files inside \`public/showcase/<your-template-name>/\`.\n` +
-                `- Core files such as \`src/\`, \`package.json\`, \`.github/\`, or configuration files cannot be modified directly.\n\n` +
-                `Please update your branch to only include changes within \`public/showcase/\` and feel free to open a new PR!`;
+                `- Contributions must be isolated inside \`public/showcase/<your-template-name>/\`.\n` +
+                `- Modifications to core files (\`src/\`, \`package.json\`, \`.github/\`, configs) are prohibited.\n\n` +
+                `Please update your branch to only modify files in \`public/showcase/\` and submit a new PR.`;
 
-              // 1. Post detailed explanation comment
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number: prNumber,
-                body: commentBody
+                body: unauthorizedComment
               });
 
-              // 2. Automatically close the PR
               await github.rest.pulls.update({
                 owner,
                 repo,
@@ -67,7 +92,7 @@ jobs:
                 state: 'closed'
               });
 
-              core.setFailed(`PR closed automatically: ${unauthorizedFiles.length} unauthorized file(s) modified.`);
+              core.setFailed(`PR closed: ${unauthorizedFiles.length} unauthorized file(s) modified.`);
             } else {
-              console.log("✅ All modified files are safely isolated within public/showcase/");
+              console.log("✅ All checks passed: valid issue link found and files isolated within public/showcase/");
             }
