@@ -105,8 +105,7 @@ carrers-frontend/
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/prisma-labs/carrers-frontend.git
-   cd carrers-frontend
+   https://github.com/Pratyush-Panda-2006/CAREERFORGE.git
    ```
 
 2. **Install dependencies**:
