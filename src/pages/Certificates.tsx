@@ -1,4 +1,5 @@
-import { Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Lock, ArrowRight } from 'lucide-react';
 
 export default function Certificates() {
   return (
@@ -23,6 +24,23 @@ export default function Certificates() {
         <p className="text-gray-300 text-sm sm:text-base leading-relaxed font-light">
           Certificates will be available and verifiable here after the 60-day contribution event officially concludes. Keep submitting PRs to qualify for excellence credentials!
         </p>
+
+        {/* Action Links */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <Link
+            to="/projects"
+            className="bg-white text-black font-medium px-6 py-2.5 rounded-full text-sm flex items-center gap-2 hover:bg-gray-200 transition-colors"
+          >
+            <span>Explore Projects</span>
+            <ArrowRight size={16} />
+          </Link>
+          <Link
+            to="/leaderboard"
+            className="liquid-glass text-white font-medium px-6 py-2.5 rounded-full text-sm flex items-center gap-2 hover:bg-white/10 transition-colors"
+          >
+            <span>Check Leaderboard</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
