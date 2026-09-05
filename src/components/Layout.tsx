@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from './Navbar';
+import Footer from './Footer';
 
 export default function Layout({ children }: { children?: React.ReactNode }) {
   return (
@@ -30,6 +31,9 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
       <main className="relative z-10 flex-1 flex flex-col">
         {children}
       </main>
+
+      {/* Persistent Footer (z-index 10) */}
+      <Footer />
     </div>
   );
 }
