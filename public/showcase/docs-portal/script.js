@@ -112,11 +112,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { passive: true });
 });
 
-// --- Global Snippet Copy Helper ---
-function copySnippet(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    alert(`Copied to clipboard:\n${text}`);
-  }).catch(() => {
-    prompt('Copy snippet:', text);
+// Copy only code text so controls never enter the clipboard payload.
+(() => {
+  document.querySelectorAll('pre').forEach((pre, index) => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'snippet-wrapper';
+    pre.before(wrapper);
+    wrapper.append(pre);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'snippet-copy';
+    button.textContent = 'Copy';
+    button.setAttribute('aria-label', `Copy code block ${index + 1}`);
+    const status = document.createElement('span');
+    status.className = 'snippet-status';
+    status.setAttribute('role', 'status');
+    wrapper.append(button, status);
+    let resetTimer;
+    button.addEventListener('click', async () => {
+      if (button.disabled) return;
+      clearTimeout(resetTimer);
+      button.disabled = true;
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+        await navigator.clipboard.writeText(code.textContent);
+        button.textContent = 'Copied! ✓';
+        status.textContent = 'Code copied.';
+      } catch {
+        button.textContent = 'Copy';
+        status.textContent = 'Could not copy. Select the code and copy it manually.';
+      } finally {
+        button.disabled = false;
+        resetTimer = setTimeout(() => { button.textContent = 'Copy'; status.textContent = ''; }, 2000);
+      }
+    });
   });
-}
+})();
