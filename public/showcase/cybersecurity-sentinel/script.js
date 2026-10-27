@@ -390,3 +390,29 @@ function renderAnalysis(pw) {
   });
   renderAnalysis('');
 })();
+
+// Copy the displayed sample only; never read credential-audit inputs.
+(() => {
+  const button = document.getElementById('copy-command');
+  const code = document.getElementById('sample-command-text');
+  const status = document.getElementById('copy-command-status');
+  if (!button || !code || !status) return;
+  let resetTimer;
+  button.addEventListener('click', async () => {
+    if (button.disabled) return;
+    clearTimeout(resetTimer);
+    button.disabled = true;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(code.textContent);
+      button.textContent = 'Copied! ✓';
+      status.textContent = 'Sample command copied.';
+    } catch {
+      button.textContent = 'Copy';
+      status.textContent = 'Could not copy. Select the command and copy it manually.';
+    } finally {
+      button.disabled = false;
+      resetTimer = setTimeout(() => { button.textContent = 'Copy'; status.textContent = ''; }, 2000);
+    }
+  });
+})();
