@@ -248,3 +248,35 @@ var CarbonCalc = {
     msg.hidden = false;
   });
 })();
+
+// Animate the existing displayed milestone once; keep its accessible name stable.
+(() => {
+  if (typeof document === 'undefined') return;
+  const counter = document.querySelector('[data-impact-counter]');
+  if (!counter || !window.requestAnimationFrame) return;
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  if (reducedMotion?.matches) return;
+  const target = Number(counter.dataset.impactCounter);
+  if (!Number.isFinite(target) || target < 0) return;
+  const finalText = counter.textContent;
+  let start;
+  let frame;
+  let finished = false;
+  const finish = () => {
+    finished = true;
+    cancelAnimationFrame(frame);
+    counter.textContent = finalText;
+    reducedMotion?.removeEventListener?.('change', onMotionChange);
+  };
+  const onMotionChange = event => { if (event.matches) finish(); };
+  reducedMotion?.addEventListener?.('change', onMotionChange);
+  const tick = now => {
+    if (finished) return;
+    start ??= now;
+    const progress = Math.min(1, Math.max(0, (now - start) / 1500));
+    counter.textContent = Math.floor(target * progress).toLocaleString('en-US') + '+';
+    if (progress < 1) frame = requestAnimationFrame(tick);
+    else finish();
+  };
+  frame = requestAnimationFrame(tick);
+})();
