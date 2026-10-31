@@ -157,3 +157,149 @@ function copySnippet(text) {
     input.focus();
   });
 })();
+
+/* ===============================================================
+   API Quota Status card (Issue #187)
+   Simulated hourly request quota: ring gauge, status chip and a
+   reset countdown. Nothing here talks to a real API.
+=============================================================== */
+(function initQuotaStatus() {
+  'use strict';
+  var card = document.getElementById('quota-card');
+  if (!card) return;
+
+  var LIMIT = 1000;
+  var WINDOW_MS = 60 * 60 * 1000;
+  var CIRCUMFERENCE = 326.73; // 2 * PI * r (r = 52 in the SVG)
+  var START_USED = 842;
+  var START_REMAINING_MS = (17 * 60 + 43) * 1000;
+
+  var el = {
+    gauge: document.getElementById('quota-gauge'),
+    ring: document.getElementById('quota-ring-fill'),
+    percent: document.getElementById('quota-percent'),
+    used: document.getElementById('quota-used'),
+    chip: document.getElementById('quota-chip'),
+    chipText: document.getElementById('quota-chip-text'),
+    chipIcon: card.querySelector('.quota-chip-icon'),
+    countdown: document.getElementById('quota-countdown'),
+    remaining: document.getElementById('quota-remaining'),
+    pace: document.getElementById('quota-pace'),
+    note: document.getElementById('quota-limit-note'),
+    headers: document.getElementById('quota-headers'),
+    event: document.getElementById('quota-event'),
+    spike: document.getElementById('quota-spike'),
+    pause: document.getElementById('quota-pause'),
+    skip: document.getElementById('quota-skip')
+  };
+  if (!el.gauge || !el.ring || !el.countdown) return;
+
+  var used = START_USED;
+  var resetAt = Date.now() + START_REMAINING_MS;
+  var live = true;
+  var lastStatus = '';
+
+  var STATUSES = {
+    healthy: { text: 'Healthy', icon: '●' },
+    warning: { text: 'Warning', icon: '▲' },
+    critical: { text: 'Critical', icon: '■' },
+    limit: { text: 'Limit reached', icon: '✕' }
+  };
+
+  function statusFor(n) {
+    if (n >= LIMIT) return 'limit';
+    var pct = (n / LIMIT) * 100;
+    if (pct >= 90) return 'critical';
+    if (pct >= 70) return 'warning';
+    return 'healthy';
+  }
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  function remainingMs() { return Math.max(0, resetAt - Date.now()); }
+
+  function formatClock(ms) {
+    var total = Math.ceil(ms / 1000);
+    return pad(Math.floor(total / 60)) + ':' + pad(total % 60);
+  }
+
+  function say(msg) { el.event.textContent = msg; }
+
+  function render() {
+    var ms = remainingMs();
+    var secs = Math.ceil(ms / 1000);
+    var pct = Math.round((used / LIMIT) * 100);
+    var status = statusFor(used);
+    var s = STATUSES[status];
+
+    el.ring.style.strokeDashoffset = (CIRCUMFERENCE * (1 - used / LIMIT)).toFixed(2);
+    el.percent.textContent = pct + '%';
+    el.used.textContent = used.toLocaleString('en-US');
+    el.remaining.textContent = (LIMIT - used).toLocaleString('en-US');
+
+    var elapsedMin = Math.max(1, (WINDOW_MS - ms) / 60000);
+    el.pace.textContent = Math.round(used / elapsedMin) + ' req/min';
+
+    el.countdown.textContent = formatClock(ms);
+    el.countdown.setAttribute('datetime', 'PT' + Math.floor(secs / 60) + 'M' + (secs % 60) + 'S');
+
+    el.gauge.setAttribute('aria-valuenow', used);
+    el.gauge.setAttribute('aria-valuetext', used.toLocaleString('en-US') + ' of ' + LIMIT.toLocaleString('en-US') + ' requests used, ' + pct + ' percent, ' + s.text.toLowerCase());
+
+    el.headers.textContent = 'X-RateLimit-Limit: ' + LIMIT + '\nX-RateLimit-Remaining: ' + (LIMIT - used) + '\nX-RateLimit-Reset: ' + secs;
+    el.note.hidden = status !== 'limit';
+    // aria-disabled (not disabled) so keyboard focus stays on the button when the limit is hit.
+    el.spike.setAttribute('aria-disabled', used >= LIMIT ? 'true' : 'false');
+
+    // Only touch the chip when the status changes so the polite live region stays quiet.
+    if (status !== lastStatus) {
+      card.setAttribute('data-status', status);
+      el.chip.className = 'quota-chip ' + status;
+      el.chipText.textContent = s.text;
+      el.chipIcon.textContent = s.icon;
+      lastStatus = status;
+    }
+  }
+
+  function resetWindow() {
+    used = 0;
+    resetAt = Date.now() + WINDOW_MS;
+    say('Quota reset. 0 of ' + LIMIT.toLocaleString('en-US') + ' requests used, next reset in 60 minutes.');
+    render();
+  }
+
+  function addRequests(n) {
+    used = Math.min(LIMIT, used + n);
+    render();
+  }
+
+  // One tick per second: check for reset, and add a little background traffic while live.
+  function tick() {
+    if (remainingMs() <= 0) { resetWindow(); return; }
+    if (live && used < LIMIT && Math.random() < 0.35) addRequests(1 + Math.floor(Math.random() * 2));
+    else render();
+  }
+
+  el.spike.addEventListener('click', function () {
+    if (used >= LIMIT) { say('Quota is already used up. Skip to reset to try again.'); return; }
+    var before = used;
+    addRequests(75);
+    say('Traffic spike simulated: ' + (used - before) + ' extra requests.');
+  });
+
+  el.pause.addEventListener('click', function () {
+    live = !live;
+    card.classList.toggle('is-paused', !live);
+    el.pause.textContent = live ? 'Pause live traffic' : 'Resume live traffic';
+    say(live ? 'Live traffic resumed.' : 'Live traffic paused. The reset countdown keeps running.');
+  });
+
+  el.skip.addEventListener('click', function () {
+    resetAt = Date.now() + 5000;
+    say('Skipped ahead, quota resets in 5 seconds.');
+    render();
+  });
+
+  render();
+  setInterval(tick, 1000);
+})();

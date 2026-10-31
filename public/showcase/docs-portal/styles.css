@@ -468,3 +468,300 @@ body {
 .topic-filter:focus-visible { outline: 2px solid #93c5fd; outline-offset: 3px; }
 .topic-filter-status { color: #cbd5e1; font-size: .8rem; margin: 8px 0; }
 .doc-nav .nav-link[hidden], .doc-nav .section-title[hidden] { display: none; }
+
+/* ===============================================================
+   API Quota Status card (Issue #187)
+   =============================================================== */
+.quota-card {
+  --quota-color: #f59e0b;
+  margin: 28px 0 8px;
+  padding: 22px 24px 20px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.quota-card[data-status="healthy"] { --quota-color: #10b981; }
+.quota-card[data-status="warning"] { --quota-color: #f59e0b; }
+.quota-card[data-status="critical"] { --quota-color: #f43f5e; }
+.quota-card[data-status="limit"] { --quota-color: #f43f5e; }
+
+.quota-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 18px;
+}
+
+.content .quota-title {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: 1.2rem;
+}
+
+.quota-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.quota-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: quotaPulse 2s ease-in-out infinite;
+}
+
+.quota-card.is-paused .quota-live-dot {
+  background: var(--muted);
+  box-shadow: none;
+  animation: none;
+}
+
+@keyframes quotaPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.quota-body {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.quota-gauge {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  flex-shrink: 0;
+}
+
+.quota-ring {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+.quota-ring circle {
+  fill: none;
+  stroke-width: 10;
+}
+
+.quota-ring-track {
+  stroke: rgba(255, 255, 255, 0.08);
+}
+
+.quota-ring-fill {
+  stroke: var(--quota-color);
+  stroke-linecap: round;
+  stroke-dasharray: 326.73;
+  stroke-dashoffset: 326.73;
+  filter: drop-shadow(0 0 6px var(--quota-color));
+  transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;
+}
+
+.quota-gauge-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.quota-percent {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: #fff;
+}
+
+.quota-percent-sub {
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.quota-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.quota-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.content .quota-count {
+  margin: 0;
+  font-size: 1rem;
+  color: #cbd5e1;
+}
+
+.quota-count strong {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.quota-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.quota-chip-icon { font-size: 0.65rem; }
+
+.quota-chip.healthy { color: #34d399; background: rgba(16, 185, 129, 0.14); border-color: rgba(16, 185, 129, 0.4); }
+.quota-chip.warning { color: #fbbf24; background: rgba(245, 158, 11, 0.14); border-color: rgba(245, 158, 11, 0.4); }
+.quota-chip.critical,
+.quota-chip.limit { color: #fb7185; background: rgba(244, 63, 94, 0.14); border-color: rgba(244, 63, 94, 0.45); }
+
+.quota-reset {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 16px 0;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.quota-reset-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.quota-timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.quota-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.quota-stats div {
+  padding: 8px 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.quota-stats dt {
+  font-size: 0.7rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.quota-stats dd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.content .quota-limit-note {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  color: #fecdd3;
+  background: rgba(244, 63, 94, 0.1);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  border-radius: 8px;
+}
+
+.quota-limit-note[hidden] { display: none; }
+
+.quota-headers {
+  margin: 18px 0 14px;
+  padding: 12px 16px;
+  font-size: 0.8rem;
+}
+
+.quota-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quota-btn {
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #f3f4f6;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.quota-btn:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent);
+}
+
+.quota-btn:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+.quota-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.content .quota-event {
+  margin: 12px 0 0;
+  min-height: 1.4em;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .quota-card { padding: 18px 16px 16px; }
+  .quota-body { flex-direction: column; align-items: stretch; gap: 20px; }
+  .quota-gauge { align-self: center; }
+  .quota-stats { grid-template-columns: 1fr; }
+  .quota-actions { flex-direction: column; }
+  .quota-btn { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quota-ring-fill { transition: none; }
+  .quota-live-dot { animation: none; }
+}

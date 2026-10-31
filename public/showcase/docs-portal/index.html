@@ -63,6 +63,59 @@
             <strong>Architecture Note:</strong> All API requests are processed through our global edge mesh. Regional routing is automatically inferred from client proximity unless an explicit <code>region</code> parameter is supplied.
           </div>
         </div>
+
+        <!-- BEGIN issue #187: API quota status card -->
+        <section class="quota-card" id="quota-card" aria-labelledby="quota-title">
+          <div class="quota-head">
+            <h2 class="quota-title" id="quota-title">API Quota Status</h2>
+            <span class="quota-live" aria-hidden="true"><span class="quota-live-dot"></span>Simulated live data</span>
+          </div>
+
+          <div class="quota-body">
+            <div class="quota-gauge" id="quota-gauge" role="meter" aria-label="Hourly request quota used" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="842" aria-valuetext="842 of 1,000 requests used, 84 percent">
+              <svg viewBox="0 0 120 120" class="quota-ring" aria-hidden="true" focusable="false">
+                <circle class="quota-ring-track" cx="60" cy="60" r="52"></circle>
+                <circle class="quota-ring-fill" id="quota-ring-fill" cx="60" cy="60" r="52"></circle>
+              </svg>
+              <div class="quota-gauge-label" aria-hidden="true">
+                <span class="quota-percent" id="quota-percent">84%</span>
+                <span class="quota-percent-sub">used</span>
+              </div>
+            </div>
+
+            <div class="quota-info">
+              <div class="quota-top-row">
+                <p class="quota-count"><strong id="quota-used">842</strong> / <span id="quota-limit">1,000</span> requests this hour</p>
+                <span class="quota-chip warning" id="quota-chip" role="status"><span class="quota-chip-icon" aria-hidden="true">▲</span><span id="quota-chip-text">Warning</span></span>
+              </div>
+
+              <div class="quota-reset">
+                <span class="quota-reset-label" id="quota-reset-label">Quota resets in</span>
+                <div class="quota-timer" role="timer" aria-labelledby="quota-reset-label"><time id="quota-countdown" datetime="PT17M43S">17:43</time></div>
+              </div>
+
+              <dl class="quota-stats">
+                <div><dt>Remaining</dt><dd id="quota-remaining">158</dd></div>
+                <div><dt>Window</dt><dd>60 min</dd></div>
+                <div><dt>Avg pace</dt><dd id="quota-pace">20 req/min</dd></div>
+              </dl>
+            </div>
+          </div>
+
+          <p class="quota-limit-note" id="quota-limit-note" hidden>Limit reached. New requests get <code>HTTP 429</code> with a <code>retry_after_seconds</code> value until the window resets.</p>
+
+          <pre class="code-block quota-headers" aria-label="Current rate limit response headers"><code id="quota-headers">X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 158
+X-RateLimit-Reset: 1063</code></pre>
+
+          <div class="quota-actions">
+            <button type="button" class="quota-btn" id="quota-spike">Simulate traffic spike</button>
+            <button type="button" class="quota-btn" id="quota-pause">Pause live traffic</button>
+            <button type="button" class="quota-btn" id="quota-skip">Skip to reset</button>
+          </div>
+          <p class="quota-event" id="quota-event" role="status">Numbers are simulated for this demo, nothing here calls the real API.</p>
+        </section>
+        <!-- END issue #187 -->
       </section>
 
       <!-- Authentication Section -->
