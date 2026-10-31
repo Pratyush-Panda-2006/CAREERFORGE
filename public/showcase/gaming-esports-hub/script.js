@@ -1123,3 +1123,301 @@ if (document.readyState === 'loading') {
   initMatchFilters();
 }
 })();
+
+/* ===== BEGIN issue #197: team leaderboard with win streaks and head-to-head ===== */
+(function () {
+  'use strict';
+
+  var body = document.getElementById('lb-body');
+  if (!body) return;
+
+  // Made-up demo data. Every best-of-3 series between the 8 teams, in schedule order.
+  // Each row is [round, teamA, teamB, mapsA, mapsB]. Everything on the board is computed from these rows.
+  var TEAMS = {
+    cyber:   { name: 'Team Cyber',    icon: '⚡', color: '#a855f7' },
+    neon:    { name: 'Neon Riders',   icon: '💠', color: '#f43f5e' },
+    phantom: { name: 'Phantom Squad', icon: '👻', color: '#06b6d4' },
+    apex:    { name: 'Apex Titans',   icon: '🔱', color: '#f59e0b' },
+    vortex:  { name: 'Vortex Prime',  icon: '🌀', color: '#60a5fa' },
+    storm:   { name: 'Storm Reapers', icon: '🌩️', color: '#10b981' },
+    iron:    { name: 'Iron Vanguard', icon: '🛡️', color: '#94a3b8' },
+    lunar:   { name: 'Lunar Wolves',  icon: '🐺', color: '#e879f9' }
+  };
+  var SERIES = [
+    [1, 'cyber', 'lunar', 2, 0], [1, 'neon', 'iron', 2, 1], [1, 'phantom', 'storm', 1, 2], [1, 'apex', 'vortex', 2, 0],
+    [2, 'cyber', 'iron', 2, 0], [2, 'lunar', 'storm', 0, 2], [2, 'neon', 'vortex', 1, 2], [2, 'phantom', 'apex', 2, 0],
+    [3, 'cyber', 'storm', 2, 0], [3, 'iron', 'vortex', 2, 0], [3, 'lunar', 'apex', 2, 0], [3, 'neon', 'phantom', 2, 0],
+    [4, 'cyber', 'vortex', 2, 0], [4, 'storm', 'apex', 2, 1], [4, 'iron', 'phantom', 1, 2], [4, 'lunar', 'neon', 1, 2],
+    [5, 'cyber', 'apex', 0, 2], [5, 'vortex', 'phantom', 1, 2], [5, 'storm', 'neon', 0, 2], [5, 'iron', 'lunar', 0, 2],
+    [6, 'cyber', 'phantom', 0, 2], [6, 'apex', 'neon', 2, 0], [6, 'vortex', 'lunar', 2, 1], [6, 'storm', 'iron', 2, 1],
+    [7, 'cyber', 'neon', 2, 1], [7, 'phantom', 'lunar', 2, 0], [7, 'apex', 'iron', 2, 1], [7, 'vortex', 'storm', 0, 2]
+  ];
+
+  var COLUMN_LABEL = { pts: 'Points', wins: 'Wins', diff: 'Map difference', streak: 'Win streak' };
+  var HOT_STREAK = 3;
+
+  function pointsFor(mine, theirs) {
+    if (mine > theirs) return theirs === 0 ? 3 : 2;
+    return mine === 0 ? 0 : 1;
+  }
+
+  function build() {
+    var rows = {};
+    Object.keys(TEAMS).forEach(function (id) {
+      rows[id] = { id: id, wins: 0, losses: 0, pts: 0, mapsWon: 0, mapsLost: 0, games: [], h2h: {} };
+    });
+    SERIES.forEach(function (s) {
+      [[s[1], s[2], s[3], s[4]], [s[2], s[1], s[4], s[3]]].forEach(function (g) {
+        var r = rows[g[0]];
+        var won = g[2] > g[3];
+        r.wins += won ? 1 : 0;
+        r.losses += won ? 0 : 1;
+        r.pts += pointsFor(g[2], g[3]);
+        r.mapsWon += g[2];
+        r.mapsLost += g[3];
+        var game = { round: s[0], opp: g[1], mine: g[2], theirs: g[3], won: won };
+        r.games.push(game);
+        r.h2h[g[1]] = game;
+      });
+    });
+    return rows;
+  }
+
+  function streakOf(games) {
+    var sorted = games.slice().sort(function (a, b) { return a.round - b.round; });
+    var last = sorted[sorted.length - 1];
+    var n = 0;
+    for (var i = sorted.length - 1; i >= 0 && sorted[i].won === last.won; i--) n++;
+    return last.won ? n : -n;
+  }
+
+  // Official order: points, then results between the teams tied on points, then map difference, then maps won.
+  function officialOrder(rows) {
+    var ids = Object.keys(rows);
+    var tied = {};
+    ids.forEach(function (id) { tied[rows[id].pts] = (tied[rows[id].pts] || []).concat(id); });
+    ids.forEach(function (id) {
+      var group = tied[rows[id].pts];
+      rows[id].miniWins = group.reduce(function (n, other) {
+        var g = other !== id && rows[id].h2h[other];
+        return n + (g && g.won ? 1 : 0);
+      }, 0);
+      rows[id].tieBroken = group.length > 1;
+    });
+    ids.sort(function (a, b) {
+      var x = rows[a], y = rows[b];
+      return (y.pts - x.pts) || (y.miniWins - x.miniWins) ||
+        ((y.mapsWon - y.mapsLost) - (x.mapsWon - x.mapsLost)) || (y.mapsWon - x.mapsWon) ||
+        (TEAMS[a].name < TEAMS[b].name ? -1 : 1);
+    });
+    ids.forEach(function (id, i) {
+      rows[id].rank = i + 1;
+      rows[id].diff = rows[id].mapsWon - rows[id].mapsLost;
+      rows[id].streak = streakOf(rows[id].games);
+    });
+    return ids;
+  }
+
+  var rows = build();
+  var official = officialOrder(rows);
+  var state = { key: 'pts', dir: 'desc', open: {} };
+
+  function metric(r, key) {
+    return key === 'wins' ? r.wins : key === 'diff' ? r.diff : key === 'streak' ? r.streak : -r.rank;
+  }
+
+  function sortedIds() {
+    var ids = official.slice();
+    ids.sort(function (a, b) {
+      var d = metric(rows[b], state.key) - metric(rows[a], state.key);
+      if (state.dir === 'asc') d = -d;
+      return d || (rows[a].rank - rows[b].rank);
+    });
+    return ids;
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  var FLAME_PATH = 'M12 2c1 3.5-1.5 5-3 7.5C7.6 11.7 8 13.5 9 14.5c-.1-1.6.7-2.6 1.7-3.4C11.4 13 14 14 14 17a2 2 0 0 1-4 0c-2.8-1-4-3.6-3.5-6C5.3 12.6 4 14.3 4 16.5 4 20 7.6 22 12 22s8-2.4 8-6.5c0-4.2-3.6-6-4.8-9.5-.5 1.2-1.2 2-2 2.6C13.7 7 14 4.5 12 2Z';
+  function flame() {
+    var ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('class', 'lb-flame');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    var path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', FLAME_PATH);
+    svg.appendChild(path);
+    return svg;
+  }
+
+  function streakCell(r) {
+    var td = el('td', 'lb-c-streak');
+    var n = Math.abs(r.streak);
+    var badge = el('span', 'lb-streak ' + (r.streak > 0 ? 'is-win' : 'is-loss'));
+    if (r.streak >= HOT_STREAK) {
+      badge.classList.add('is-hot');
+      if (r.streak >= 5) badge.classList.add('is-blaze');
+      badge.appendChild(flame());
+    }
+    badge.appendChild(el('span', '', (r.streak > 0 ? 'W' : 'L') + n));
+    badge.appendChild(el('span', 'sr-only', ' (' + n + (r.streak > 0 ? (n === 1 ? ' win' : ' wins') : (n === 1 ? ' loss' : ' losses')) + ' in a row)'));
+    td.appendChild(badge);
+    return td;
+  }
+
+  function detailPanel(r) {
+    var wrap = el('div', 'lb-detail-inner');
+    var games = r.games.slice().sort(function (a, b) { return a.round - b.round; });
+
+    var head = el('div', 'lb-detail-head');
+    head.appendChild(el('h3', 'lb-detail-title', TEAMS[r.id].name.toUpperCase() + ' // HEAD-TO-HEAD'));
+    var form = el('div', 'lb-form');
+    form.setAttribute('role', 'img');
+    form.setAttribute('aria-label', 'Form, oldest to newest: ' + games.map(function (g) { return g.won ? 'win' : 'loss'; }).join(', '));
+    games.forEach(function (g) { form.appendChild(el('span', 'lb-dot ' + (g.won ? 'is-win' : 'is-loss'), g.won ? 'W' : 'L')); });
+    head.appendChild(form);
+    wrap.appendChild(head);
+
+    var played = r.wins + r.losses;
+    var stats = el('dl', 'lb-stats');
+    [['Series', r.wins + '-' + r.losses], ['Win rate', Math.round(r.wins / played * 100) + '%'],
+     ['Maps', r.mapsWon + '-' + r.mapsLost], ['Points', String(r.pts)]].forEach(function (s) {
+      var d = el('div', 'lb-stat');
+      d.appendChild(el('dt', '', s[0]));
+      d.appendChild(el('dd', '', s[1]));
+      stats.appendChild(d);
+    });
+    wrap.appendChild(stats);
+
+    var list = el('ul', 'lb-h2h');
+    list.setAttribute('aria-label', 'Series results against every other team');
+    official.filter(function (id) { return id !== r.id; }).forEach(function (oid) {
+      var g = r.h2h[oid];
+      var li = el('li', 'lb-h2h-item ' + (g.won ? 'is-win' : 'is-loss'));
+      li.appendChild(el('span', 'lb-h2h-res', g.won ? 'W' : 'L'));
+      var mid = el('span', 'lb-h2h-mid');
+      mid.appendChild(el('span', 'lb-h2h-opp', 'vs ' + TEAMS[oid].name));
+      mid.appendChild(el('span', 'lb-h2h-meta', 'Round ' + g.round + ' • rank #' + rows[oid].rank));
+      li.appendChild(mid);
+      li.appendChild(el('span', 'lb-h2h-score', g.mine + '-' + g.theirs));
+      li.appendChild(el('span', 'sr-only', g.won ? ' win' : ' loss'));
+      list.appendChild(li);
+    });
+    wrap.appendChild(list);
+    return wrap;
+  }
+
+  function toggle(id, force) {
+    var open = force === undefined ? !state.open[id] : force;
+    state.open[id] = open;
+    var row = body.querySelector('tr[data-team="' + id + '"]');
+    var detail = document.getElementById('lb-detail-' + id);
+    if (!row || !detail) return;
+    row.classList.toggle('is-open', open);
+    row.querySelector('.lb-team-btn').setAttribute('aria-expanded', open ? 'true' : 'false');
+    detail.hidden = !open;
+  }
+
+  function render(animate) {
+    body.textContent = '';
+    sortedIds().forEach(function (id) {
+      var r = rows[id];
+      var t = TEAMS[id];
+      var tr = el('tr', 'lb-row' + (state.open[id] ? ' is-open' : ''));
+      tr.setAttribute('data-team', id);
+      tr.style.setProperty('--tc', t.color);
+
+      var rank = el('td', 'lb-c-rank');
+      var badge = el('span', 'lb-rank' + (r.rank <= 3 ? ' podium-' + r.rank : ''), String(r.rank));
+      badge.setAttribute('title', 'Official rank ' + r.rank + (r.tieBroken ? ' (tied on points, decided by head-to-head or map difference)' : ''));
+      rank.appendChild(badge);
+      rank.appendChild(el('span', 'sr-only', 'Rank ' + r.rank));
+      tr.appendChild(rank);
+
+      var teamTd = el('td', 'lb-c-team');
+      var btn = el('button', 'lb-team-btn');
+      btn.type = 'button';
+      btn.setAttribute('aria-expanded', state.open[id] ? 'true' : 'false');
+      btn.setAttribute('aria-controls', 'lb-detail-' + id);
+      btn.appendChild(el('span', 'lb-avatar', t.icon)).setAttribute('aria-hidden', 'true');
+      btn.appendChild(el('span', 'lb-name', t.name.toUpperCase()));
+      var chev = el('span', 'lb-chev');
+      chev.setAttribute('aria-hidden', 'true');
+      btn.appendChild(chev);
+      teamTd.appendChild(btn);
+      tr.appendChild(teamTd);
+
+      tr.appendChild(el('td', 'lb-c-wl', r.wins + '-' + r.losses));
+      var diff = el('td', 'lb-c-diff ' + (r.diff > 0 ? 'is-pos' : r.diff < 0 ? 'is-neg' : ''), (r.diff > 0 ? '+' : '') + r.diff);
+      tr.appendChild(diff);
+      tr.appendChild(el('td', 'lb-c-pts', String(r.pts)));
+      tr.appendChild(streakCell(r));
+      body.appendChild(tr);
+
+      var dtr = el('tr', 'lb-detail');
+      dtr.id = 'lb-detail-' + id;
+      dtr.hidden = !state.open[id];
+      dtr.style.setProperty('--tc', t.color);
+      var dtd = el('td');
+      dtd.colSpan = 6;
+      dtd.appendChild(detailPanel(r));
+      dtr.appendChild(dtd);
+      body.appendChild(dtr);
+    });
+
+    var ths = document.querySelectorAll('#lb-table thead th[data-sort]');
+    Array.prototype.forEach.call(ths, function (th) {
+      var active = th.getAttribute('data-sort') === state.key;
+      if (active) th.setAttribute('aria-sort', state.dir === 'desc' ? 'descending' : 'ascending');
+      else th.removeAttribute('aria-sort');
+      th.classList.toggle('is-sorted', active);
+      th.classList.toggle('is-asc', active && state.dir === 'asc');
+    });
+    if (animate) {
+      body.classList.remove('lb-swap');
+      void body.offsetWidth;
+      body.classList.add('lb-swap');
+    }
+  }
+
+  function setSort(key) {
+    if (state.key === key) state.dir = state.dir === 'desc' ? 'asc' : 'desc';
+    else { state.key = key; state.dir = 'desc'; }
+    render(true);
+    document.getElementById('lb-status').textContent =
+      'Sorted by ' + COLUMN_LABEL[key] + ', ' + (state.dir === 'desc' ? 'highest first' : 'lowest first') + '.';
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('#lb-table .lb-sort'), function (b) {
+    b.addEventListener('click', function () { setSort(b.getAttribute('data-sort')); });
+  });
+
+  body.addEventListener('click', function (e) {
+    var row = e.target.closest('tr.lb-row');
+    if (!row) return;
+    toggle(row.getAttribute('data-team'));
+  });
+
+  // Up and Down arrows move between the team buttons.
+  body.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    var btn = e.target.closest('.lb-team-btn');
+    if (!btn) return;
+    var all = Array.prototype.slice.call(body.querySelectorAll('.lb-team-btn'));
+    var next = all[all.indexOf(btn) + (e.key === 'ArrowDown' ? 1 : -1)];
+    if (next) {
+      e.preventDefault();
+      next.focus();
+    }
+  });
+
+  render(false);
+})();
+/* ===== END issue #197 ===== */
