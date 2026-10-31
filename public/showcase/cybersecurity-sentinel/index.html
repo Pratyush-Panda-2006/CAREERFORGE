@@ -183,6 +183,34 @@
       <li data-rule="pattern"><span class="mark" aria-hidden="true"></span><span class="rule-text">No repeated or sequential runs (aaa, 1234, qwerty)</span><span class="sr-only status-text"></span></li>
     </ul>
   </section>
+  <!-- ===== BEGIN issue #183: network port scanner simulator ===== -->
+  <section class="ps" id="portScanner" aria-labelledby="psTitle">
+    <div class="ps-tag">// NETWORK DEFENSE CONSOLE</div>
+    <h2 id="psTitle">Port Scanner Simulator</h2>
+    <p class="ps-note" role="note">Simulated. Nothing is sent over the network. Results and latencies are generated in your browser from the text you enter, so the same host always gives the same output.</p>
+
+    <form class="ps-form" id="psForm" novalidate>
+      <label class="audit-label" for="psTarget">Target IP address or hostname</label>
+      <div class="audit-input-row">
+        <input type="text" id="psTarget" class="audit-input" value="192.168.1.10" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" aria-describedby="psError psStatus" />
+        <button type="submit" class="audit-toggle ps-btn" id="psScanBtn">Scan Host</button>
+      </div>
+      <p class="ps-error" id="psError" role="alert" hidden></p>
+    </form>
+
+    <div class="ps-console" id="psConsole">
+      <div class="ps-radar" id="psRadar" aria-hidden="true"></div>
+      <p class="ps-status" id="psStatus" role="status" aria-live="polite">Enter a target and press Scan Host.</p>
+      <ul class="ps-results" id="psResults" aria-label="Port scan results">
+        <li class="ps-row" data-port="80"><span class="ps-port">80</span><span class="ps-svc">HTTP</span><span class="ps-state" data-state="idle">Not scanned</span><span class="ps-lat">-</span></li>
+        <li class="ps-row" data-port="443"><span class="ps-port">443</span><span class="ps-svc">HTTPS</span><span class="ps-state" data-state="idle">Not scanned</span><span class="ps-lat">-</span></li>
+        <li class="ps-row" data-port="22"><span class="ps-port">22</span><span class="ps-svc">SSH</span><span class="ps-state" data-state="idle">Not scanned</span><span class="ps-lat">-</span></li>
+        <li class="ps-row" data-port="21"><span class="ps-port">21</span><span class="ps-svc">FTP</span><span class="ps-state" data-state="idle">Not scanned</span><span class="ps-lat">-</span></li>
+      </ul>
+    </div>
+  </section>
+  <!-- ===== END issue #183 ===== -->
+
   <script src="script.js"></script>
 </body>
 </html>
