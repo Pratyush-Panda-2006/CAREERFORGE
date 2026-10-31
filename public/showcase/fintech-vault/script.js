@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Current Calculation Cache
   let currentProjection = null;
-  let compoundingFrequency = 12; // 12 = monthly, 1 = annually
+  let compoundingFrequency = 12;
 
   // Chart Dimensions within SVG viewBox 0 0 800 380
   const CHART_LAYOUT = {
@@ -127,9 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
     marginRight: 25,
     marginTop: 30,
     marginBottom: 50,
-    get plotW() { return this.viewW - this.marginLeft - this.marginRight; },
-    get plotH() { return this.viewH - this.marginTop - this.marginBottom; },
-    get baselineY() { return this.marginTop + this.plotH; }
+    get plotW() {
+      return this.viewW - this.marginLeft - this.marginRight;
+    },
+    get plotH() {
+      return this.viewH - this.marginTop - this.marginBottom;
+    },
+    get baselineY() {
+      return this.marginTop + this.plotH;
+    }
   };
 
   // --- Dynamic Multi-Currency Formatters ---
@@ -143,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (amount >= 1_000_000) {
       return sym + (amount / 1_000_000).toFixed(amount % 1_000_000 === 0 ? 0 : 1) + 'M';
     }
+
     if (amount >= 1_000) {
       return sym + (amount / 1_000).toFixed(amount % 1_000 === 0 ? 0 : 0) + 'k';
     }
@@ -152,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Compound Interest Calculation Engine ---
   function calculateGrowth(principal, monthlyContrib, annualRatePct, years, freq) {
     const rateDecimal = annualRatePct / 100;
-    const periodsPerYear = freq; // 12 or 1
+    const periodsPerYear = freq;
     const periodicRate = rateDecimal / periodsPerYear;
     const points = [];
 
@@ -169,13 +176,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     for (let yr = 1; yr <= years; yr++) {
       for (let p = 1; p <= periodsPerYear; p++) {
-        // Add periodic contribution
-        const contrib = (periodsPerYear === 12) ? monthlyContrib : (monthlyContrib * 12);
+        const contrib = periodsPerYear === 12
+          ? monthlyContrib
+          : monthlyContrib * 12;
+
         currentBalance = (currentBalance + contrib) * (1 + periodicRate);
         totalContributed += contrib;
       }
 
       const interest = Math.max(0, currentBalance - totalContributed);
+
       points.push({
         year: yr,
         principal: Math.round(totalContributed),
@@ -185,9 +195,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const finalPoint = points[points.length - 1];
-    const multiplier = totalContributed > 0 ? (finalPoint.wealth / totalContributed).toFixed(2) : '1.00';
-    const interestShare = finalPoint.wealth > 0 ? ((finalPoint.interest / finalPoint.wealth) * 100).toFixed(1) : 0;
-    const principalShare = finalPoint.wealth > 0 ? ((finalPoint.principal / finalPoint.wealth) * 100).toFixed(1) : 100;
+
+    const multiplier = totalContributed > 0
+      ? (finalPoint.wealth / totalContributed).toFixed(2)
+      : '1.00';
+
+    const interestShare = finalPoint.wealth > 0
+      ? ((finalPoint.interest / finalPoint.wealth) * 100).toFixed(1)
+      : 0;
+
+    const principalShare = finalPoint.wealth > 0
+      ? ((finalPoint.principal / finalPoint.wealth) * 100).toFixed(1)
+      : 100;
 
     return {
       points,
@@ -207,9 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Calculate clean maximum scale for Y-axis
   function calculateNiceMax(maxValue) {
     if (maxValue <= 0) return 10000;
-    const rawTarget = maxValue * 1.12; // 12% headroom
+
+    const rawTarget = maxValue * 1.12;
     const exponent = Math.floor(Math.log10(rawTarget));
     const fraction = rawTarget / Math.pow(10, exponent);
+
     let niceFraction;
 
     if (fraction <= 1.2) niceFraction = 1.2;
@@ -226,9 +247,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const { points, years } = projection;
     const maxVal = calculateNiceMax(projection.finalWealth);
 
-    const { marginLeft, marginTop, plotW, plotH, baselineY } = CHART_LAYOUT;
+    const {
+      marginLeft,
+      marginTop,
+      plotW,
+      plotH,
+      baselineY
+    } = CHART_LAYOUT;
 
-    // Helper functions for coordinate projection
     function getX(yr) {
       return marginLeft + (yr / years) * plotW;
     }
@@ -240,59 +266,92 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. Render Grid and Reference Labels ---
     chartGridGroup.innerHTML = '';
+
     const numYIntervals = 5;
 
     for (let i = 0; i <= numYIntervals; i++) {
       const gridVal = (maxVal / numYIntervals) * i;
       const yPos = getY(gridVal);
 
-      // Horizontal dashed gridline
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      const line = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'line'
+      );
+
       line.setAttribute('x1', marginLeft);
       line.setAttribute('y1', yPos);
       line.setAttribute('x2', marginLeft + plotW);
       line.setAttribute('y2', yPos);
-      line.setAttribute('stroke', i === 0 ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.08)');
-      line.setAttribute('stroke-dasharray', i === 0 ? 'none' : '4 4');
+      line.setAttribute(
+        'stroke',
+        i === 0
+          ? 'rgba(255, 255, 255, 0.2)'
+          : 'rgba(255, 255, 255, 0.08)'
+      );
+      line.setAttribute(
+        'stroke-dasharray',
+        i === 0 ? 'none' : '4 4'
+      );
       line.setAttribute('stroke-width', i === 0 ? '1.5' : '1');
+
       chartGridGroup.appendChild(line);
 
-      // Value text label
-      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      const text = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'text'
+      );
+
       text.setAttribute('x', marginLeft - 12);
       text.setAttribute('y', yPos + 4);
       text.setAttribute('text-anchor', 'end');
       text.setAttribute('fill', '#9ca3af');
       text.setAttribute('font-size', '11');
-      text.setAttribute('font-family', "'JetBrains Mono', monospace");
+      text.setAttribute(
+        'font-family',
+        "'JetBrains Mono', monospace"
+      );
+
       text.textContent = formatCompactCurrency(gridVal);
       chartGridGroup.appendChild(text);
     }
 
     // Vertical Year Gridlines
     const yearStep = years <= 10 ? 2 : (years <= 20 ? 5 : 10);
+
     for (let yr = 0; yr <= years; yr += yearStep) {
       const xPos = getX(yr);
 
       if (yr > 0 && yr < years) {
-        const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        const vLine = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'line'
+        );
+
         vLine.setAttribute('x1', xPos);
         vLine.setAttribute('y1', marginTop);
         vLine.setAttribute('x2', xPos);
         vLine.setAttribute('y2', baselineY);
         vLine.setAttribute('stroke', 'rgba(255, 255, 255, 0.05)');
         vLine.setAttribute('stroke-dasharray', '3 3');
+
         chartGridGroup.appendChild(vLine);
       }
 
-      // Year Label
-      const yearText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      const yearText = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'text'
+      );
+
       yearText.setAttribute('x', xPos);
       yearText.setAttribute('y', baselineY + 22);
       yearText.setAttribute('text-anchor', 'middle');
       yearText.setAttribute('fill', '#9ca3af');
       yearText.setAttribute('font-size', '11');
-      yearText.setAttribute('font-family', "'JetBrains Mono', monospace");
+      yearText.setAttribute(
+        'font-family',
+        "'JetBrains Mono', monospace"
+      );
+
       yearText.textContent = yr === 0 ? 'Start' : `Yr ${yr}`;
       chartGridGroup.appendChild(yearText);
     }
@@ -319,8 +378,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const firstX = getX(0).toFixed(1);
     const bottomY = baselineY.toFixed(1);
 
-    const principalAreaD = `${principalLineD} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
-    const wealthAreaD = `${wealthLineD} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
+    const principalAreaD =
+      `${principalLineD} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
+
+    const wealthAreaD =
+      `${wealthLineD} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
 
     principalLinePath.setAttribute('d', principalLineD);
     principalAreaPath.setAttribute('d', principalAreaD);
@@ -331,50 +393,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Update UI & Analytics ---
   function updateSimulation() {
-    const principal = Math.max(0, parseFloat(initialDepositInput.value) || 0);
-    const monthlyContrib = Math.max(0, parseFloat(monthlyContributionInput.value) || 0);
-    const annualRate = Math.max(0.1, parseFloat(annualRateInput.value) || 0.1);
-    const years = Math.max(1, parseInt(horizonYearsInput.value, 10) || 1);
+    const principal = Math.max(
+      0,
+      parseFloat(initialDepositInput.value) || 0
+    );
 
-    // Keep displays updated
+    const monthlyContrib = Math.max(
+      0,
+      parseFloat(monthlyContributionInput.value) || 0
+    );
+
+    const annualRate = Math.max(
+      0.1,
+      parseFloat(annualRateInput.value) || 0.1
+    );
+
+    const years = Math.max(
+      1,
+      parseInt(horizonYearsInput.value, 10) || 1
+    );
+
     initialDepositDisplay.textContent = formatCurrency(principal);
-    monthlyContributionDisplay.textContent = `${formatCurrency(monthlyContrib)} / mo`;
+    monthlyContributionDisplay.textContent =
+      `${formatCurrency(monthlyContrib)} / mo`;
+
     annualRateDisplay.textContent = `${annualRate.toFixed(1)}% APY`;
-    horizonYearsDisplay.textContent = `${years} Year${years > 1 ? 's' : ''}`;
+    horizonYearsDisplay.textContent =
+      `${years} Year${years > 1 ? 's' : ''}`;
 
-    // Execute Math Projection
-    currentProjection = calculateGrowth(principal, monthlyContrib, annualRate, years, compoundingFrequency);
+    currentProjection = calculateGrowth(
+      principal,
+      monthlyContrib,
+      annualRate,
+      years,
+      compoundingFrequency
+    );
 
-    // Update Summary Milestone Cards
-    finalWealthValue.textContent = formatCurrency(currentProjection.finalWealth);
-    finalWealthSub.textContent = `At Year ${years} • Compounded ${compoundingFrequency === 12 ? 'Monthly' : 'Annually'}`;
+    finalWealthValue.textContent =
+      formatCurrency(currentProjection.finalWealth);
 
-    totalPrincipalValue.textContent = formatCurrency(currentProjection.totalPrincipal);
-    principalShareSub.textContent = `${currentProjection.principalShare}% of portfolio`;
+    finalWealthSub.textContent =
+      `At Year ${years} • Compounded ${
+        compoundingFrequency === 12 ? 'Monthly' : 'Annually'
+      }`;
 
-    totalInterestValue.textContent = formatCurrency(currentProjection.totalInterest);
-    interestShareSub.textContent = `${currentProjection.interestShare}% pure growth`;
+    totalPrincipalValue.textContent =
+      formatCurrency(currentProjection.totalPrincipal);
 
-    wealthMultiplierValue.textContent = `${currentProjection.multiplier}x`;
+    principalShareSub.textContent =
+      `${currentProjection.principalShare}% of portfolio`;
 
-    // Render Chart
+    totalInterestValue.textContent =
+      formatCurrency(currentProjection.totalInterest);
+
+    interestShareSub.textContent =
+      `${currentProjection.interestShare}% pure growth`;
+
+    wealthMultiplierValue.textContent =
+      `${currentProjection.multiplier}x`;
+
     renderSvgChart(currentProjection);
-
-    // Render Milestone Table
     renderMilestoneTable(currentProjection);
   }
 
   // --- Render Milestone Table ---
   function renderMilestoneTable(projection) {
     if (!milestoneTableBody) return;
+
     milestoneTableBody.innerHTML = '';
 
     const { points, years } = projection;
-    // Pick key milestone intervals (e.g. 1, 5, 10, 15, 20, 25, 30, 40...)
     const intervals = [];
+
     for (let y = 1; y <= years; y++) {
       if (y === 1 || y % 5 === 0 || y === years) {
-        if (!intervals.includes(y)) intervals.push(y);
+        if (!intervals.includes(y)) {
+          intervals.push(y);
+        }
       }
     }
 
@@ -383,7 +478,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!pt) return;
 
       const row = document.createElement('tr');
-      const returnPct = pt.principal > 0 ? ((pt.interest / pt.principal) * 100).toFixed(0) : '0';
+
+      const returnPct = pt.principal > 0
+        ? ((pt.interest / pt.principal) * 100).toFixed(0)
+        : '0';
 
       row.innerHTML = `
         <td><span class="milestone-badge">Year ${pt.year}</span></td>
@@ -392,6 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td><strong>${formatCurrency(pt.wealth)}</strong></td>
         <td><span class="return-chip">+${returnPct}%</span></td>
       `;
+
       milestoneTableBody.appendChild(row);
     });
   }
@@ -410,7 +509,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   bindSync(initialDepositSlider, initialDepositInput, updateSimulation);
-  bindSync(monthlyContributionSlider, monthlyContributionInput, updateSimulation);
+  bindSync(
+    monthlyContributionSlider,
+    monthlyContributionInput,
+    updateSimulation
+  );
   bindSync(annualRateSlider, annualRateInput, updateSimulation);
   bindSync(horizonYearsSlider, horizonYearsInput, updateSimulation);
 
@@ -419,6 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       freqButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+
       compoundingFrequency = parseInt(btn.dataset.freq, 10) || 12;
       updateSimulation();
     });
@@ -454,6 +558,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Reset to Defaults ---
   if (resetDefaultsBtn) {
     resetDefaultsBtn.addEventListener('click', () => {
+      presetChips.forEach((c, idx) => {
+        c.classList.toggle('active', idx === 0);
+      });
       setCurrency('USD');
       presetChips.forEach((c, idx) => c.classList.toggle('active', idx === 0));
 
@@ -470,7 +577,10 @@ document.addEventListener('DOMContentLoaded', () => {
       horizonYearsSlider.value = 25;
 
       compoundingFrequency = 12;
-      freqButtons.forEach(b => b.classList.toggle('active', b.dataset.freq === '12'));
+
+      freqButtons.forEach(b => {
+        b.classList.toggle('active', b.dataset.freq === '12');
+      });
 
       updateSimulation();
     });
@@ -547,11 +657,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Toggle Milestone Table ---
   if (toggleBreakdownBtn && milestoneTableContainer) {
     toggleBreakdownBtn.addEventListener('click', () => {
-      const isHidden = milestoneTableContainer.style.display === 'none';
-      milestoneTableContainer.style.display = isHidden ? 'block' : 'none';
+      const isHidden =
+        milestoneTableContainer.style.display === 'none';
+
+      milestoneTableContainer.style.display =
+        isHidden ? 'block' : 'none';
+
       if (toggleArrow) {
         toggleArrow.textContent = isHidden ? '▲' : '▼';
       }
+
       toggleBreakdownBtn.classList.toggle('expanded', isHidden);
     });
   }
@@ -562,35 +677,65 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!currentProjection) return;
 
       const rect = chartSvg.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      const clientX = e.touches
+        ? e.touches[0].clientX
+        : e.clientX;
+
+      const clientY = e.touches
+        ? e.touches[0].clientY
+        : e.clientY;
 
       const relX = clientX - rect.left;
       const scaleX = CHART_LAYOUT.viewW / rect.width;
       const svgX = relX * scaleX;
 
-      const { marginLeft, plotW, marginTop, baselineY, plotH } = CHART_LAYOUT;
+      const {
+        marginLeft,
+        plotW,
+        marginTop,
+        baselineY,
+        plotH
+      } = CHART_LAYOUT;
 
       if (svgX < marginLeft || svgX > marginLeft + plotW) {
         hideTooltip();
         return;
       }
 
-      // Find closest year
       const yearRatio = (svgX - marginLeft) / plotW;
-      const targetYear = Math.round(yearRatio * currentProjection.years);
-      const clampedYear = Math.max(0, Math.min(targetYear, currentProjection.years));
 
-      const pt = currentProjection.points.find(p => p.year === clampedYear);
+      const targetYear = Math.round(
+        yearRatio * currentProjection.years
+      );
+
+      const clampedYear = Math.max(
+        0,
+        Math.min(targetYear, currentProjection.years)
+      );
+
+      const pt = currentProjection.points.find(
+        p => p.year === clampedYear
+      );
+
       if (!pt) {
         hideTooltip();
         return;
       }
 
-      const xPos = marginLeft + (pt.year / currentProjection.years) * plotW;
-      const maxVal = calculateNiceMax(currentProjection.finalWealth);
-      const yWealth = baselineY - (pt.wealth / maxVal) * plotH;
-      const yPrin = baselineY - (pt.principal / maxVal) * plotH;
+      const xPos =
+        marginLeft +
+        (pt.year / currentProjection.years) * plotW;
+
+      const maxVal = calculateNiceMax(
+        currentProjection.finalWealth
+      );
+
+      const yWealth =
+        baselineY - (pt.wealth / maxVal) * plotH;
+
+      const yPrin =
+        baselineY - (pt.principal / maxVal) * plotH;
 
       // Update Crosshair Guide Line
       crosshairLine.setAttribute('x1', xPos);
@@ -609,24 +754,35 @@ document.addEventListener('DOMContentLoaded', () => {
       principalDot.style.display = 'block';
 
       // Update Tooltip Content
-      tooltipYear.textContent = pt.year === 0 ? 'Starting Point (Year 0)' : `Projection Milestone — Year ${pt.year}`;
+      tooltipYear.textContent =
+        pt.year === 0
+          ? 'Starting Point (Year 0)'
+          : `Projection Milestone — Year ${pt.year}`;
+
       tooltipWealth.textContent = formatCurrency(pt.wealth);
       tooltipPrincipal.textContent = formatCurrency(pt.principal);
-      tooltipInterest.textContent = `+${formatCurrency(pt.interest)}`;
+      tooltipInterest.textContent =
+        `+${formatCurrency(pt.interest)}`;
 
       // Position Tooltip
       chartTooltip.style.display = 'block';
+
       const wrapperRect = svgWrapper.getBoundingClientRect();
+
       let tipX = clientX - wrapperRect.left + 15;
       let tipY = clientY - wrapperRect.top - 50;
 
-      // Ensure tooltip does not overflow right boundary
       if (tipX + 220 > wrapperRect.width) {
         tipX = clientX - wrapperRect.left - 230;
       }
-      if (tipY < 10) tipY = 10;
 
-      chartTooltip.style.left = `${Math.max(10, tipX)}px`;
+      if (tipY < 10) {
+        tipY = 10;
+      }
+
+      chartTooltip.style.left =
+        `${Math.max(10, tipX)}px`;
+
       chartTooltip.style.top = `${tipY}px`;
     }
 
@@ -640,27 +796,233 @@ document.addEventListener('DOMContentLoaded', () => {
     svgWrapper.addEventListener('mousemove', handlePointerMove);
     svgWrapper.addEventListener('mouseleave', hideTooltip);
 
-    svgWrapper.addEventListener('touchstart', handlePointerMove, { passive: true });
-    svgWrapper.addEventListener('touchmove', handlePointerMove, { passive: true });
+    svgWrapper.addEventListener(
+      'touchstart',
+      handlePointerMove,
+      { passive: true }
+    );
+
+    svgWrapper.addEventListener(
+      'touchmove',
+      handlePointerMove,
+      { passive: true }
+    );
+
     svgWrapper.addEventListener('touchend', hideTooltip);
+  }
+
+  // --- Foreign Exchange Converter (mock rates for showcase use) ---
+  const fxRates = {
+    USD: {
+      USD: 1,
+      EUR: 0.92,
+      GBP: 0.79,
+      JPY: 149.50,
+      CAD: 1.36
+    },
+    EUR: {
+      USD: 1.0870,
+      EUR: 1,
+      GBP: 0.8587,
+      JPY: 162.50,
+      CAD: 1.4783
+    },
+    GBP: {
+      USD: 1.2658,
+      EUR: 1.1645,
+      GBP: 1,
+      JPY: 189.24,
+      CAD: 1.7215
+    },
+    JPY: {
+      USD: 0.006689,
+      EUR: 0.006154,
+      GBP: 0.005284,
+      JPY: 1,
+      CAD: 0.009097
+    },
+    CAD: {
+      USD: 0.7353,
+      EUR: 0.6764,
+      GBP: 0.5809,
+      JPY: 109.93,
+      CAD: 1
+    }
+  };
+
+  const fxCurrencyMeta = {
+    USD: { flag: '🇺🇸', locale: 'en-US' },
+    EUR: { flag: '🇪🇺', locale: 'de-DE' },
+    GBP: { flag: '🇬🇧', locale: 'en-GB' },
+    JPY: { flag: '🇯🇵', locale: 'ja-JP' },
+    CAD: { flag: '🇨🇦', locale: 'en-CA' }
+  };
+
+  const fxFeeRate = 0.005;
+  const fxRateSpread = 0.0025;
+
+  const fxAmountInput = document.getElementById('fxAmount');
+  const fxFromSelect = document.getElementById('fxFromCurrency');
+  const fxToSelect = document.getElementById('fxToCurrency');
+  const fxReceiveAmount = document.getElementById('fxReceiveAmount');
+  const fxError = document.getElementById('fxError');
+
+  function formatFxCurrency(amount, currency) {
+    return new Intl.NumberFormat(
+      fxCurrencyMeta[currency].locale,
+      {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: currency === 'JPY' ? 0 : 2,
+        maximumFractionDigits: currency === 'JPY' ? 0 : 2
+      }
+    ).format(amount);
+  }
+
+  function formatFxRate(rate) {
+    return new Intl.NumberFormat('en-US', {
+      maximumSignificantDigits: 7
+    }).format(rate);
+  }
+
+  function updateFxConverter() {
+    if (!fxAmountInput || !fxFromSelect || !fxToSelect) {
+      return;
+    }
+
+    const amount = Number(fxAmountInput.value);
+    const from = fxFromSelect.value;
+    const to = fxToSelect.value;
+
+    const midRate = fxRates[from][to];
+    const guaranteedRate = midRate * (1 - fxRateSpread);
+
+    const validAmount =
+      Number.isFinite(amount) && amount > 0;
+
+    document.getElementById('fxFromFlag').textContent =
+      fxCurrencyMeta[from].flag;
+
+    document.getElementById('fxToFlag').textContent =
+      fxCurrencyMeta[to].flag;
+
+    document.getElementById('fxRateLine').textContent =
+      `1 ${from} = ${formatFxRate(midRate)} ${to} · indicative mid-market rate`;
+
+    if (!validAmount) {
+      fxError.hidden = false;
+      fxReceiveAmount.textContent = '—';
+
+      [
+        'fxMidRate',
+        'fxGuaranteedRate',
+        'fxGrossAmount',
+        'fxBankFee',
+        'fxNetAmount'
+      ].forEach(id => {
+        document.getElementById(id).textContent = '—';
+      });
+
+      return;
+    }
+
+    fxError.hidden = true;
+
+    const grossAmount = amount * guaranteedRate;
+    const bankFee = grossAmount * fxFeeRate;
+    const netAmount = grossAmount - bankFee;
+
+    fxReceiveAmount.textContent =
+      formatFxCurrency(netAmount, to);
+
+    document.getElementById('fxMidRate').textContent =
+      `1 ${from} = ${formatFxRate(midRate)} ${to}`;
+
+    document.getElementById('fxGuaranteedRate').textContent =
+      `1 ${from} = ${formatFxRate(guaranteedRate)} ${to}`;
+
+    document.getElementById('fxGrossAmount').textContent =
+      formatFxCurrency(grossAmount, to);
+
+    document.getElementById('fxBankFee').textContent =
+      `− ${formatFxCurrency(bankFee, to)}`;
+
+    document.getElementById('fxNetAmount').textContent =
+      formatFxCurrency(netAmount, to);
+  }
+
+  if (fxAmountInput && fxFromSelect && fxToSelect) {
+    [fxAmountInput, fxFromSelect, fxToSelect].forEach(control => {
+      control.addEventListener('input', updateFxConverter);
+      control.addEventListener('change', updateFxConverter);
+    });
+
+    document.getElementById('fxSwapBtn').addEventListener(
+      'click',
+      () => {
+        const previousFrom = fxFromSelect.value;
+
+        fxFromSelect.value = fxToSelect.value;
+        fxToSelect.value = previousFrom;
+
+        updateFxConverter();
+      }
+    );
+
+    const tickerPairs = [
+      ['USD', 'EUR'],
+      ['GBP', 'USD'],
+      ['USD', 'JPY'],
+      ['EUR', 'CAD']
+    ];
+
+    document.getElementById('fxTickerRates').innerHTML =
+      tickerPairs.map(([from, to]) => `
+        <span class="fx-ticker-item">
+          ${from}/${to}
+          <strong>${formatFxRate(fxRates[from][to])}</strong>
+        </span>
+      `).join('');
+
+    const updatedAt = new Date();
+
+    document.getElementById('fxUpdatedAt').textContent =
+      `Mock rates refreshed ${
+        updatedAt.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      }`;
+
+    updateFxConverter();
   }
 
   // --- Initial Render ---
   updateSimulation();
+
   console.log('ApexVault Growth Simulator initialized');
 });
 
 // --- ApexVault Global Deposit Modal Functions ---
 window.triggerDeposit = function triggerDeposit() {
   const modal = document.getElementById('depositModal');
-  if (modal) modal.style.display = 'flex';
+
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+
   document.body.style.overflow = 'hidden';
 };
 
 window.closeDepositModal = function closeDepositModal() {
   const modal = document.getElementById('depositModal');
-  if (modal) modal.style.display = 'none';
+
+  if (modal) {
+    modal.style.display = 'none';
+  }
+
   document.body.style.overflow = '';
+
   const notice = document.getElementById('depositSuccessNotice');
   if (notice) notice.style.display = 'none';
 };
@@ -668,7 +1030,11 @@ window.closeDepositModal = function closeDepositModal() {
 window.confirmDeposit = function confirmDeposit() {
   const amountInput = document.getElementById('depositAmount');
   const notice = document.getElementById('depositSuccessNotice');
-  if (notice) notice.style.display = 'block';
+
+  if (notice) {
+    notice.style.display = 'block';
+  }
+
   setTimeout(() => {
     window.closeDepositModal();
     alert(`Deposit of $${amountInput ? amountInput.value : '5,000'} USDC confirmed to Apex Prime Liquidity Vault.`);
