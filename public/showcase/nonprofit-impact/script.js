@@ -828,3 +828,214 @@ if (typeof window !== 'undefined') {
     setupEvents();
   }
 })();
+
+/* ===============================================================
+   Reforestation Species Directory (Issue #203)
+   Filter by native region, search, and sort by carbon absorption.
+=============================================================== */
+(function initSpeciesDirectory() {
+  'use strict';
+  if (typeof document === 'undefined') return;
+
+  var grid = document.getElementById('species-grid');
+  if (!grid) return;
+
+  // Rounded, approximate yearly CO2 uptake of a healthy mature tree (kg).
+  var SCALE_MAX_KG = 300;
+
+  var REGIONS = {
+    Africa: { color: '#f59e0b' },
+    Americas: { color: '#4ade80' },
+    Asia: { color: '#06b6d4' }
+  };
+
+  var SPECIES = [
+    { id: 'baobab', common: 'African Baobab', scientific: 'Adansonia digitata', region: 'Africa', range: 'Sub-Saharan savanna', lifespan: 1500, kg: 40, shape: 'baobab',
+      tags: ['Drought tolerant', 'Food source'], note: 'Stores water in its trunk and feeds people and wildlife through the dry season.' },
+    { id: 'umbrella-thorn', common: 'Umbrella Thorn Acacia', scientific: 'Vachellia tortilis', region: 'Africa', range: 'Sahel and East Africa', lifespan: 100, kg: 22, shape: 'umbrella',
+      tags: ['Nitrogen fixing', 'Soil restoring'], note: 'Fixes nitrogen and shades seedlings, so it is often the first species planted on degraded land.' },
+    { id: 'african-mahogany', common: 'African Mahogany', scientific: 'Khaya senegalensis', region: 'Africa', range: 'West and Central Africa', lifespan: 200, kg: 48, shape: 'broadleaf',
+      tags: ['Sustainable timber', 'Shade canopy'], note: 'Fast for a hardwood, and a sustainable timber crop that takes pressure off wild forest.' },
+    { id: 'marula', common: 'Marula', scientific: 'Sclerocarya birrea', region: 'Africa', range: 'Southern Africa', lifespan: 100, kg: 30, shape: 'broadleaf',
+      tags: ['Food source', 'Community income'], note: 'Its fruit is picked and sold by local cooperatives, which gives families a reason to keep the trees.' },
+
+    { id: 'douglas-fir', common: 'Douglas Fir', scientific: 'Pseudotsuga menziesii', region: 'Americas', range: 'Pacific Northwest, North America', lifespan: 500, kg: 180, shape: 'conifer',
+      tags: ['Old growth', 'Wildlife habitat'], note: 'Tall, long lived and dense, so one mature tree holds a lot of carbon for centuries.' },
+    { id: 'coast-redwood', common: 'Coast Redwood', scientific: 'Sequoia sempervirens', region: 'Americas', range: 'Northern California coast', lifespan: 2000, kg: 250, shape: 'conifer',
+      tags: ['Old growth', 'Fog capture'], note: 'The tallest tree on Earth. It pulls fog moisture from the air and keeps streams cool below.' },
+    { id: 'red-mangrove', common: 'Red Mangrove', scientific: 'Rhizophora mangle', region: 'Americas', range: 'Caribbean and Gulf coasts', lifespan: 100, kg: 75, shape: 'mangrove',
+      tags: ['Coastal protection', 'Fish nursery'], note: 'Prop roots break up waves and hold fish nurseries. Most of its carbon ends up in the mud below.' },
+    { id: 'brazil-nut', common: 'Brazil Nut', scientific: 'Bertholletia excelsa', region: 'Americas', range: 'Amazon basin', lifespan: 500, kg: 110, shape: 'broadleaf',
+      tags: ['Keystone species', 'Food source'], note: 'An emergent giant that is worth more standing than cut, so harvesters protect the forest around it.' },
+
+    { id: 'teak', common: 'Teak', scientific: 'Tectona grandis', region: 'Asia', range: 'South and Southeast Asia', lifespan: 150, kg: 52, shape: 'broadleaf',
+      tags: ['Sustainable timber', 'Long-lived wood'], note: 'Grown in mixed plantations, its durable wood keeps carbon locked up for decades.' },
+    { id: 'neem', common: 'Neem', scientific: 'Azadirachta indica', region: 'Asia', range: 'Indian subcontinent', lifespan: 200, kg: 28, shape: 'broadleaf',
+      tags: ['Drought tolerant', 'Medicinal'], note: 'Handles poor soil and heat, and village nurseries use it for shade, medicine and natural pest control.' },
+    { id: 'deodar-cedar', common: 'Deodar Cedar', scientific: 'Cedrus deodara', region: 'Asia', range: 'Western Himalaya', lifespan: 600, kg: 90, shape: 'conifer',
+      tags: ['Watershed guard', 'Old growth'], note: 'Roots bind steep Himalayan slopes, which cuts landslides and keeps river headwaters clean.' },
+    { id: 'asian-mangrove', common: 'Asian Mangrove', scientific: 'Rhizophora apiculata', region: 'Asia', range: 'Coasts of Southeast Asia', lifespan: 80, kg: 85, shape: 'mangrove',
+      tags: ['Coastal protection', 'Blue carbon'], note: 'Replanted along eroding shorelines to cut storm surge and lock carbon into coastal sediment.' }
+  ];
+
+  var SORTS = {
+    'carbon-desc': { label: 'highest carbon absorption first', cmp: function (a, b) { return b.kg - a.kg || a.common.localeCompare(b.common); } },
+    'carbon-asc': { label: 'lowest carbon absorption first', cmp: function (a, b) { return a.kg - b.kg || a.common.localeCompare(b.common); } },
+    'lifespan-desc': { label: 'longest lifespan first', cmp: function (a, b) { return b.lifespan - a.lifespan || a.common.localeCompare(b.common); } },
+    'name-asc': { label: 'name, A to Z', cmp: function (a, b) { return a.common.localeCompare(b.common); } }
+  };
+
+  // Simple botanical silhouettes. Static markup written here, never user input.
+  var TRUNK = '<path d="M46 108 Q48 86 47 70 L53 70 Q52 86 54 108 Z" fill="#8b5e34"/>';
+  var ILLUSTRATIONS = {
+    baobab: '<path d="M40 108 Q36 80 43 62 L57 62 Q64 80 60 108 Z" fill="#9a6b3f"/>' +
+      '<path d="M43 64 Q30 52 24 40 M43 64 Q40 46 38 34 M57 64 Q60 46 62 34 M57 64 Q70 52 76 40" stroke="#8b5e34" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="24" cy="36" r="9" fill="#4ade80"/><circle cx="38" cy="28" r="10" fill="#22c55e"/><circle cx="62" cy="28" r="10" fill="#22c55e"/><circle cx="76" cy="36" r="9" fill="#4ade80"/>',
+    umbrella: '<path d="M47 108 Q49 84 44 66 L48 66 Q54 84 53 108 Z" fill="#8b5e34"/>' +
+      '<ellipse cx="50" cy="52" rx="42" ry="12" fill="#22c55e"/><ellipse cx="50" cy="48" rx="34" ry="8" fill="#4ade80"/>',
+    broadleaf: TRUNK + '<circle cx="50" cy="48" r="24" fill="#22c55e"/><circle cx="34" cy="56" r="15" fill="#16a34a"/><circle cx="66" cy="56" r="15" fill="#16a34a"/><circle cx="50" cy="34" r="15" fill="#4ade80"/>',
+    conifer: '<rect x="47" y="92" width="6" height="16" fill="#8b5e34"/>' +
+      '<path d="M50 10 L68 42 L58 42 L76 72 L62 72 L82 98 L18 98 L38 72 L24 72 L42 42 L32 42 Z" fill="#16a34a"/>' +
+      '<path d="M50 10 L58 42 L50 42 Z M62 72 L76 72 L58 42 Z" fill="#22c55e" opacity="0.6"/>',
+    mangrove: '<path d="M50 70 Q36 82 26 108 M50 70 Q44 86 40 108 M50 70 Q56 86 60 108 M50 70 Q64 82 74 108" stroke="#8b5e34" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '<path d="M48 70 L48 52 L52 52 L52 70 Z" fill="#8b5e34"/>' +
+      '<circle cx="50" cy="40" r="20" fill="#10b981"/><circle cx="36" cy="46" r="12" fill="#059669"/><circle cx="64" cy="46" r="12" fill="#059669"/>' +
+      '<path d="M10 104 Q30 98 50 104 T90 104" stroke="#06b6d4" stroke-width="2" fill="none" opacity="0.7"/>'
+  };
+
+  var state = { region: 'all', query: '', sort: 'carbon-desc' };
+
+  function qs(id) { return document.getElementById(id); }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+
+  function getVisibleSpecies(s) {
+    var q = s.query.trim().toLowerCase();
+    return SPECIES.filter(function (sp) {
+      if (s.region !== 'all' && sp.region !== s.region) return false;
+      if (!q) return true;
+      var hay = (sp.common + ' ' + sp.scientific + ' ' + sp.range + ' ' + sp.region + ' ' + sp.tags.join(' ')).toLowerCase();
+      return hay.indexOf(q) !== -1;
+    }).sort((SORTS[s.sort] || SORTS['carbon-desc']).cmp);
+  }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function buildCard(sp) {
+    var li = el('li', 'sp-card');
+    li.style.setProperty('--region-color', REGIONS[sp.region].color);
+
+    var art = el('div', 'sp-art');
+    art.setAttribute('aria-hidden', 'true');
+    art.innerHTML = '<svg viewBox="0 0 100 110" focusable="false">' + ILLUSTRATIONS[sp.shape] + '</svg>';
+    li.appendChild(art);
+
+    var body = el('div', 'sp-body');
+    var top = el('div', 'sp-top');
+    top.appendChild(el('span', 'sp-region-badge', sp.region));
+    top.appendChild(el('span', 'sp-lifespan', 'Lives ~' + fmt(sp.lifespan) + ' yrs'));
+    body.appendChild(top);
+
+    body.appendChild(el('h3', 'sp-name', sp.common));
+    body.appendChild(el('p', 'sp-latin', sp.scientific));
+    body.appendChild(el('p', 'sp-range', '📍 ' + sp.range));
+    body.appendChild(el('p', 'sp-note', sp.note));
+
+    var meterWrap = el('div', 'sp-meter-wrap');
+    var meterHead = el('div', 'sp-meter-head');
+    meterHead.appendChild(el('span', 'sp-meter-label', 'Carbon absorption'));
+    meterHead.appendChild(el('strong', 'sp-meter-value', sp.kg + ' kg CO2 / yr'));
+    meterWrap.appendChild(meterHead);
+
+    var meter = el('div', 'sp-meter');
+    meter.setAttribute('role', 'meter');
+    meter.setAttribute('aria-label', sp.common + ' carbon absorption in kilograms of CO2 per year');
+    meter.setAttribute('aria-valuemin', '0');
+    meter.setAttribute('aria-valuemax', String(SCALE_MAX_KG));
+    meter.setAttribute('aria-valuenow', String(sp.kg));
+    meter.setAttribute('aria-valuetext', sp.kg + ' kilograms per year');
+    var fill = el('div', 'sp-meter-fill');
+    fill.style.setProperty('--w', Math.round(sp.kg / SCALE_MAX_KG * 100) + '%');
+    meter.appendChild(fill);
+    meterWrap.appendChild(meter);
+    meterWrap.appendChild(el('p', 'sp-forest', '1,000 trees absorb about ' + fmt(sp.kg) + ' t CO2 per year'));
+    body.appendChild(meterWrap);
+
+    var tags = el('ul', 'sp-tags');
+    tags.setAttribute('aria-label', 'Ecological impact');
+    sp.tags.forEach(function (t) { tags.appendChild(el('li', 'sp-tag', t)); });
+    body.appendChild(tags);
+
+    li.appendChild(body);
+    return li;
+  }
+
+  function updateCounts() {
+    var counts = { all: SPECIES.length, Africa: 0, Americas: 0, Asia: 0 };
+    SPECIES.forEach(function (sp) { counts[sp.region] += 1; });
+    Object.keys(counts).forEach(function (k) {
+      var node = document.querySelector('[data-count="' + k + '"]');
+      if (node) node.textContent = counts[k];
+    });
+  }
+
+  function render() {
+    var list = getVisibleSpecies(state);
+    grid.textContent = '';
+    list.forEach(function (sp) { grid.appendChild(buildCard(sp)); });
+    qs('species-empty').hidden = list.length !== 0;
+
+    var summary = qs('species-summary');
+    if (!list.length) {
+      summary.textContent = 'No species found.';
+      return;
+    }
+    var total = list.reduce(function (sum, sp) { return sum + sp.kg; }, 0);
+    var where = state.region === 'all' ? 'all regions' : state.region;
+    summary.textContent = 'Showing ' + list.length + ' species from ' + where +
+      ', ' + SORTS[state.sort].label + '. One mature tree of each together absorbs about ' + fmt(total) + ' kg CO2 per year.';
+  }
+
+  var regionBtns = document.querySelectorAll('.sp-region-btn');
+  regionBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      regionBtns.forEach(function (b) {
+        var on = b === btn;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      state.region = btn.getAttribute('data-region');
+      render();
+    });
+  });
+
+  qs('species-search').addEventListener('input', function (e) {
+    state.query = e.target.value;
+    render();
+  });
+
+  qs('species-sort').addEventListener('change', function (e) {
+    state.sort = e.target.value;
+    render();
+  });
+
+  qs('species-reset').addEventListener('click', function () {
+    state.region = 'all';
+    state.query = '';
+    qs('species-search').value = '';
+    regionBtns.forEach(function (b) {
+      var on = b.getAttribute('data-region') === 'all';
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    render();
+    regionBtns[0].focus();
+  });
+
+  updateCounts();
+  render();
+})();
