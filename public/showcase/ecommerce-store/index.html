@@ -16,9 +16,18 @@
         <span class="brand-icon">⚡</span>
         <span class="brand-name">NEXUS STORE</span>
       </div>
-      <button class="cart-badge" id="cartBadge" onclick="toggleCartDrawer()">
-        🛒 Cart (<span id="cartCount">0</span>)
-      </button>
+      <div class="nav-actions">
+        <!-- BEGIN issue #188: wishlist nav button -->
+        <button type="button" class="wish-nav-btn" id="wishNavBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="wishDrawer" aria-label="Wishlist, 0 items">
+          <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <span class="wish-nav-text">Wishlist</span>
+          <span class="wish-count" id="wishCount" aria-hidden="true">0</span>
+        </button>
+        <!-- END issue #188 -->
+        <button class="cart-badge" id="cartBadge" onclick="toggleCartDrawer()">
+          🛒 Cart (<span id="cartCount">0</span>)
+        </button>
+      </div>
     </div>
   </header>
 
@@ -41,6 +50,9 @@
     <section class="products-grid" id="productsGrid">
       <div class="card" data-id="p1" data-category="keyboards">
         <div class="card-badge">HOT</div>
+        <button type="button" class="wish-btn" data-wish="p1" aria-pressed="false" aria-label="Save CyberDeck Pro Mechanical to wishlist">
+          <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </button>
         <span class="stock-badge in-stock">In Stock</span>
         <div class="card-img">⌨️</div>
         <div class="card-rating-preview" onclick="filterReviewsForProduct('p1')" role="button" tabindex="0" aria-label="View CyberDeck Pro Mechanical 4.9 star reviews">
@@ -63,6 +75,9 @@
 
       <div class="card" data-id="p2" data-category="audio">
         <div class="card-badge">NEW</div>
+        <button type="button" class="wish-btn" data-wish="p2" aria-pressed="false" aria-label="Save Acoustic Pulse ANC Headset to wishlist">
+          <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </button>
         <span class="stock-badge low-stock">Only 3 Left</span>
         <div class="card-img">🎧</div>
         <div class="card-rating-preview" onclick="filterReviewsForProduct('p2')" role="button" tabindex="0" aria-label="View Acoustic Pulse ANC Headset 4.8 star reviews">
@@ -85,6 +100,9 @@
 
       <div class="card" data-id="p3" data-category="displays">
         <div class="card-badge">PRO</div>
+        <button type="button" class="wish-btn" data-wish="p3" aria-pressed="false" aria-label="Save Horizon 32 Curved OLED to wishlist">
+          <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </button>
         <span class="stock-badge in-stock">In Stock</span>
         <div class="card-img">🖥️</div>
         <div class="card-rating-preview" onclick="filterReviewsForProduct('p3')" role="button" tabindex="0" aria-label="View Horizon 32 Curved OLED 4.9 star reviews">
@@ -404,6 +422,30 @@
     </form>
   </div>
   <!-- ===== END issue #189 ===== -->
+
+  <!-- ===== BEGIN issue #188: Wishlist / Favorites Drawer ===== -->
+  <div id="wishBackdrop" class="wish-backdrop"></div>
+  <aside id="wishDrawer" class="wish-drawer" role="dialog" aria-modal="true" aria-labelledby="wishTitle" tabindex="-1">
+    <div class="drawer-header">
+      <h2 id="wishTitle">Wishlist <span class="wish-title-count" id="wishTitleCount">(0)</span></h2>
+      <button type="button" class="close-btn" id="wishClose" aria-label="Close wishlist">&times;</button>
+    </div>
+    <div class="drawer-body wish-body">
+      <div class="wish-empty" id="wishEmpty">
+        <div class="wish-empty-icon" aria-hidden="true">♡</div>
+        <h3>Your wishlist is empty</h3>
+        <p>Tap the heart on any product to save it here for later.</p>
+        <button type="button" class="wish-browse" id="wishBrowse">Browse gear</button>
+      </div>
+      <ul class="wish-list" id="wishList"></ul>
+    </div>
+    <div class="drawer-footer wish-footer" id="wishFooter" hidden>
+      <button type="button" class="wish-add-all" id="wishAddAll">Add all to cart</button>
+      <button type="button" class="wish-clear" id="wishClear">Clear wishlist</button>
+    </div>
+  </aside>
+  <p class="wish-sr" id="wishStatus" role="status" aria-live="polite"></p>
+  <!-- ===== END issue #188 ===== -->
 
   <div id="toast" class="toast">Item added to cart!</div>
   <script src="script.js"></script>

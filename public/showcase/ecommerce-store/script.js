@@ -1319,3 +1319,296 @@ window.openWriteReviewModal = openWriteReviewModal;
 window.closeWriteReviewModal = closeWriteReviewModal;
 window.setPickerRating = setPickerRating;
 window.handleReviewSubmit = handleReviewSubmit;
+
+/* ===== BEGIN issue #188: Wishlist / Favorites Drawer ===== */
+// Hearts on the product cards save product ids to localStorage. The drawer
+// and the badge read their data from the product cards, so there is no
+// second copy of names or prices to keep in sync.
+(function initWishlist() {
+  const WISH_KEY = 'nexusStoreWishlist';
+  const navBtn = document.getElementById('wishNavBtn');
+  const drawer = document.getElementById('wishDrawer');
+  const backdrop = document.getElementById('wishBackdrop');
+  const closeBtn = document.getElementById('wishClose');
+  const listEl = document.getElementById('wishList');
+  const emptyEl = document.getElementById('wishEmpty');
+  const footerEl = document.getElementById('wishFooter');
+  const countEl = document.getElementById('wishCount');
+  const titleCountEl = document.getElementById('wishTitleCount');
+  const statusEl = document.getElementById('wishStatus');
+  if (!navBtn || !drawer || !backdrop || !listEl) return;
+
+  const cards = Array.from(document.querySelectorAll('.products-grid .card[data-id]'));
+  const knownIds = cards.map((card) => card.dataset.id);
+  let saved = loadWishlist();
+  let lastFocus = null;
+
+  // Only ids that match a real product survive, so a hand-edited or old
+  // localStorage value can not break the page.
+  function loadWishlist() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(WISH_KEY));
+      if (!Array.isArray(raw)) return [];
+      const clean = [];
+      raw.forEach((id) => {
+        if (typeof id === 'string' && knownIds.includes(id) && !clean.includes(id)) clean.push(id);
+      });
+      return clean;
+    } catch {
+      return [];
+    }
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(WISH_KEY, JSON.stringify(saved));
+    } catch {
+      // storage can be blocked (private mode), the wishlist then lasts for this visit only
+    }
+  }
+
+  function productInfo(id) {
+    const card = document.querySelector(`.products-grid .card[data-id="${id}"]`);
+    if (!card) return null;
+    const stock = card.querySelector('.stock-badge');
+    const priceText = card.querySelector('.price').textContent.trim();
+    return {
+      id,
+      name: card.querySelector('h3').textContent.trim(),
+      price: priceText,
+      amount: parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0,
+      icon: card.querySelector('.card-img').textContent.trim(),
+      stockText: stock ? stock.textContent.trim() : '',
+      stockClass: stock ? stock.className : 'stock-badge'
+    };
+  }
+
+  // The card's own Add to Cart button turns into quantity controls once the
+  // item is in the cart, so call addToCart() directly. renderCart() uses the
+  // product names without the inch mark, so strip it here to keep one cart line.
+  function addToCartFromWishlist(info) {
+    addToCart(info.id, info.name.replace(/"/g, ''), info.amount, info.icon);
+  }
+
+  function announce(message) {
+    if (!statusEl) return;
+    statusEl.textContent = '';
+    // a short delay makes screen readers re-read the same message
+    setTimeout(() => { statusEl.textContent = message; }, 30);
+  }
+
+  function itemWord(n) {
+    return n === 1 ? '1 item' : `${n} items`;
+  }
+
+  function renderItem(info) {
+    const li = document.createElement('li');
+    li.className = 'wish-item';
+    li.dataset.id = info.id;
+
+    const icon = document.createElement('span');
+    icon.className = 'wish-item-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = info.icon;
+
+    const body = document.createElement('div');
+    body.className = 'wish-item-info';
+    const name = document.createElement('h3');
+    name.textContent = info.name;
+    const price = document.createElement('span');
+    price.className = 'wish-item-price';
+    price.textContent = info.price;
+    const stock = document.createElement('span');
+    stock.className = info.stockClass;
+    stock.textContent = info.stockText;
+    body.append(name, price, stock);
+
+    const actions = document.createElement('div');
+    actions.className = 'wish-item-actions';
+    const add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'wish-add';
+    add.dataset.id = info.id;
+    add.textContent = 'Add to Cart';
+    add.setAttribute('aria-label', `Add ${info.name} to cart`);
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'wish-remove';
+    remove.dataset.id = info.id;
+    remove.textContent = 'Remove';
+    remove.setAttribute('aria-label', `Remove ${info.name} from wishlist`);
+    actions.append(add, remove);
+
+    li.append(icon, body, actions);
+    return li;
+  }
+
+  function render() {
+    const n = saved.length;
+
+    document.querySelectorAll('.wish-btn').forEach((btn) => {
+      const on = saved.includes(btn.dataset.wish);
+      btn.classList.toggle('is-saved', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+
+    countEl.textContent = String(n);
+    countEl.classList.toggle('has-items', n > 0);
+    navBtn.setAttribute('aria-label', `Wishlist, ${itemWord(n)}`);
+    titleCountEl.textContent = `(${n})`;
+
+    listEl.replaceChildren();
+    // newest first
+    saved.slice().reverse().forEach((id) => {
+      const info = productInfo(id);
+      if (info) listEl.appendChild(renderItem(info));
+    });
+    emptyEl.hidden = n > 0;
+    listEl.hidden = n === 0;
+    footerEl.hidden = n === 0;
+  }
+
+  function bumpBadge() {
+    countEl.classList.remove('bump');
+    void countEl.offsetWidth;
+    countEl.classList.add('bump');
+  }
+
+  function toggleSaved(id) {
+    const info = productInfo(id);
+    if (!info) return;
+    const was = saved.includes(id);
+    saved = was ? saved.filter((x) => x !== id) : saved.concat(id);
+    persist();
+    render();
+    bumpBadge();
+    const msg = was ? `Removed ${info.name} from wishlist.` : `Saved ${info.name} to wishlist.`;
+    showToast(msg);
+    announce(`${msg} ${itemWord(saved.length)} in your wishlist.`);
+  }
+
+  function removeFromDrawer(id) {
+    const info = productInfo(id);
+    const items = Array.from(listEl.querySelectorAll('.wish-item'));
+    const idx = items.findIndex((li) => li.dataset.id === id);
+    saved = saved.filter((x) => x !== id);
+    persist();
+    render();
+    bumpBadge();
+    if (info) announce(`Removed ${info.name} from wishlist. ${itemWord(saved.length)} left.`);
+    // keep keyboard focus inside the drawer
+    const remaining = listEl.querySelectorAll('.wish-remove');
+    if (remaining.length) remaining[Math.min(idx, remaining.length - 1)].focus();
+    else document.getElementById('wishBrowse').focus();
+  }
+
+  function openDrawer() {
+    lastFocus = document.activeElement;
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+    navBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+  }
+
+  function closeDrawer(restoreFocus) {
+    if (!drawer.classList.contains('open')) return;
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+    navBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    if (restoreFocus) {
+      const target = lastFocus && document.contains(lastFocus) ? lastFocus : navBtn;
+      target.focus();
+    }
+  }
+
+  // Delegated click for the hearts on the product cards
+  document.addEventListener('click', (event) => {
+    const heart = event.target.closest('.wish-btn');
+    if (heart) toggleSaved(heart.dataset.wish);
+  });
+
+  navBtn.addEventListener('click', openDrawer);
+  closeBtn.addEventListener('click', () => closeDrawer(true));
+  backdrop.addEventListener('click', () => closeDrawer(false));
+
+  listEl.addEventListener('click', (event) => {
+    const remove = event.target.closest('.wish-remove');
+    if (remove) {
+      removeFromDrawer(remove.dataset.id);
+      return;
+    }
+    const add = event.target.closest('.wish-add');
+    if (add) {
+      const info = productInfo(add.dataset.id);
+      if (info) addToCartFromWishlist(info);
+    }
+  });
+
+  document.getElementById('wishAddAll').addEventListener('click', () => {
+    let added = 0;
+    saved.forEach((id) => {
+      const info = productInfo(id);
+      if (info) {
+        addToCartFromWishlist(info);
+        added += 1;
+      }
+    });
+    if (added) {
+      showToast(`Added ${itemWord(added)} from your wishlist to cart.`);
+      announce(`Added ${itemWord(added)} to cart.`);
+    }
+  });
+
+  document.getElementById('wishClear').addEventListener('click', () => {
+    saved = [];
+    persist();
+    render();
+    bumpBadge();
+    announce('Wishlist cleared.');
+    document.getElementById('wishBrowse').focus();
+  });
+
+  document.getElementById('wishBrowse').addEventListener('click', () => {
+    closeDrawer(false);
+    const first = document.querySelector('.wish-btn');
+    const grid = document.getElementById('productsGrid');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (grid) grid.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    if (first) first.focus({ preventScroll: true });
+  });
+
+  // Escape closes, Tab stays inside the open drawer
+  document.addEventListener('keydown', (event) => {
+    if (!drawer.classList.contains('open')) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeDrawer(true);
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusable = Array.from(drawer.querySelectorAll('button:not([disabled])')).filter((el) => el.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === drawer)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
+  // Another tab changed the list
+  window.addEventListener('storage', (event) => {
+    if (event.key === WISH_KEY) {
+      saved = loadWishlist();
+      render();
+    }
+  });
+
+  render();
+})();
+/* ===== END issue #188 ===== */
