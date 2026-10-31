@@ -145,6 +145,63 @@
   </section>
   <!-- ===== END issue #97 ===== -->
 
+  <!-- ===== BEGIN issue #182: CVE vulnerability explorer ===== -->
+  <section class="cve" id="cveExplorer" aria-labelledby="cveTitle">
+    <div class="cve-head">
+      <div>
+        <span class="cve-tag">// VULNERABILITY INTELLIGENCE</span>
+        <h2 id="cveTitle">CVE Vulnerability Explorer</h2>
+      </div>
+      <button type="button" class="cve-reset" id="cveReset">Reset filters</button>
+    </div>
+    <p class="cve-disclaimer" role="note">Sample data. Every entry below is invented for this demo, the IDs, products and scores do not describe real advisories. Results are sorted by CVSS score, highest first.</p>
+
+    <div class="cve-controls">
+      <fieldset class="cve-fieldset cve-severity" id="cveSeverity">
+        <legend>Severity</legend>
+        <div class="cve-pills">
+          <label><input type="radio" name="cve-sev" value="all" checked /><span class="cve-pill">All <small id="cveCountAll">0</small></span></label>
+          <label><input type="radio" name="cve-sev" value="critical" /><span class="cve-pill cve-p-critical"><i class="cve-dot" aria-hidden="true"></i>Critical 9.0-10.0 <small id="cveCountCritical">0</small></span></label>
+          <label><input type="radio" name="cve-sev" value="high" /><span class="cve-pill cve-p-high"><i class="cve-dot" aria-hidden="true"></i>High 7.0-8.9 <small id="cveCountHigh">0</small></span></label>
+          <label><input type="radio" name="cve-sev" value="medium" /><span class="cve-pill cve-p-medium"><i class="cve-dot" aria-hidden="true"></i>Medium 4.0-6.9 <small id="cveCountMedium">0</small></span></label>
+          <label><input type="radio" name="cve-sev" value="low" /><span class="cve-pill cve-p-low"><i class="cve-dot" aria-hidden="true"></i>Low 0.1-3.9 <small id="cveCountLow">0</small></span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="cve-fieldset cve-range" id="cveRange">
+        <legend>CVSS score range</legend>
+        <div class="cve-slider-row">
+          <label for="cveMin">Minimum <output id="cveMinOut" for="cveMin">0.0</output></label>
+          <input type="range" id="cveMin" min="0" max="10" step="0.1" value="0" />
+        </div>
+        <div class="cve-slider-row">
+          <label for="cveMax">Maximum <output id="cveMaxOut" for="cveMax">10.0</output></label>
+          <input type="range" id="cveMax" min="0" max="10" step="0.1" value="10" />
+        </div>
+        <div class="cve-scale" aria-hidden="true"><span class="cve-scale-span" id="cveScaleSpan"></span></div>
+        <div class="cve-scale-labels" aria-hidden="true"><span>0</span><span>2.5</span><span>5</span><span>7.5</span><span>10</span></div>
+      </fieldset>
+
+      <fieldset class="cve-fieldset cve-exploit" id="cveExploit">
+        <legend>Exploitability</legend>
+        <div class="cve-pills">
+          <label><input type="radio" name="cve-ex" value="any" checked /><span class="cve-pill">Any</span></label>
+          <label><input type="radio" name="cve-ex" value="active" /><span class="cve-pill">Exploited in the wild</span></label>
+          <label><input type="radio" name="cve-ex" value="poc" /><span class="cve-pill">Public PoC</span></label>
+          <label><input type="radio" name="cve-ex" value="none" /><span class="cve-pill">No known exploit</span></label>
+        </div>
+      </fieldset>
+    </div>
+
+    <p class="cve-showing" id="cveShowing" role="status" aria-live="polite" aria-atomic="true"></p>
+    <ul class="cve-list" id="cveList" aria-label="Matching vulnerabilities"></ul>
+    <div class="cve-empty" id="cveEmpty" hidden>
+      <p>No vulnerabilities match this score range and exploitability filter.</p>
+      <button type="button" class="cve-reset" id="cveEmptyReset">Reset filters</button>
+    </div>
+  </section>
+  <!-- ===== END issue #182 ===== -->
+
   <section class="audit-card" id="passwordAudit" aria-labelledby="auditTitle">
     <div class="audit-tag">// CREDENTIAL AUDIT</div>
     <h2 id="auditTitle">Password Strength Analyzer</h2>

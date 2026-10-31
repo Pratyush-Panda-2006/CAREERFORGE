@@ -149,6 +149,121 @@ body {
 }
 /* ===== END issue #97 ===== */
 
+/* ===== BEGIN issue #182: CVE vulnerability explorer ===== */
+.cve {
+  --cve-critical: #f43f5e;
+  --cve-high: #fb923c;
+  --cve-medium: #fbbf24;
+  --cve-low: #38bdf8;
+  max-width: 1000px; margin: 0 auto 80px; padding: 0 24px;
+}
+.cve-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 12px; }
+.cve-tag { display: block; color: #10b981; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 6px; }
+.cve h2 { font-size: 1.8rem; color: #fff; }
+.cve-reset {
+  background: transparent; color: #10b981; border: 1px solid #10b981; border-radius: 8px;
+  font: 700 0.85rem 'Fira Code', monospace; padding: 8px 16px; cursor: pointer;
+}
+.cve-reset:hover { background: rgba(16,185,129,0.12); }
+.cve-reset:focus-visible, .cve input:focus-visible, .cve input:focus-visible + .cve-pill { outline: 2px solid #34d399; outline-offset: 2px; }
+.cve-disclaimer {
+  font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #9ca3af;
+  border-left: 3px solid #10b981; padding: 4px 12px; margin-bottom: 16px;
+}
+.cve-controls {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px;
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px;
+}
+.cve-fieldset { border: 0; min-width: 0; }
+.cve-fieldset legend { font-size: 0.75rem; color: #9ca3af; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; padding: 0; }
+.cve-severity { grid-column: 1 / -1; }
+.cve-range { grid-column: 1 / 2; }
+.cve-exploit { grid-column: 2 / 3; }
+.cve-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.cve-pills label { cursor: pointer; }
+.cve-pills input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.cve-pill {
+  display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 600; color: #e5e7eb;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.03);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.cve-pill:hover { border-color: rgba(255,255,255,0.35); }
+.cve-pill small { font-size: 0.7rem; padding: 1px 6px; border-radius: 999px; background: rgba(255,255,255,0.08); }
+.cve-pills input:checked + .cve-pill { background: rgba(16,185,129,0.15); border-color: #10b981; box-shadow: 0 0 10px rgba(16,185,129,0.35); }
+.cve-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.cve-p-critical .cve-dot { background: var(--cve-critical); box-shadow: 0 0 6px var(--cve-critical); }
+.cve-p-high .cve-dot { background: var(--cve-high); box-shadow: 0 0 6px var(--cve-high); }
+.cve-p-medium .cve-dot { background: var(--cve-medium); box-shadow: 0 0 6px var(--cve-medium); }
+.cve-p-low .cve-dot { background: var(--cve-low); box-shadow: 0 0 6px var(--cve-low); }
+.cve-slider-row { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); align-items: center; gap: 10px; margin-bottom: 6px; }
+.cve-slider-row label { font-size: 0.8rem; color: #e5e7eb; display: flex; justify-content: space-between; gap: 8px; }
+.cve-slider-row output { color: #34d399; font-weight: 700; }
+.cve-slider-row input[type="range"] { width: 100%; accent-color: #10b981; margin: 0; }
+.cve-scale {
+  --cve-lo: 0%; --cve-hi: 0%;
+  position: relative; height: 6px; margin: 10px 0 4px; border-radius: 3px; overflow: hidden;
+  background: linear-gradient(90deg, var(--cve-low) 0 39%, var(--cve-medium) 40% 69%, var(--cve-high) 70% 89%, var(--cve-critical) 90% 100%);
+}
+.cve-scale::before { content: ""; position: absolute; inset: 0; background: rgba(3,7,18,0.78); }
+.cve-scale-span {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--cve-low) 0 39%, var(--cve-medium) 40% 69%, var(--cve-high) 70% 89%, var(--cve-critical) 90% 100%);
+  clip-path: inset(0 var(--cve-hi) 0 var(--cve-lo));
+}
+.cve-scale-labels { display: flex; justify-content: space-between; font-size: 0.68rem; color: #9ca3af; }
+.cve-showing { font-size: 0.8rem; color: #9ca3af; margin-bottom: 10px; min-height: 1.4em; }
+.cve-list { list-style: none; display: grid; gap: 10px; }
+.cve-item {
+  --cve-color: var(--cve-low);
+  display: flex; justify-content: space-between; align-items: center; gap: 20px;
+  padding: 14px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
+  border-left: 3px solid var(--cve-color); background: rgba(255,255,255,0.025);
+}
+.cve-item.cve-critical { --cve-color: var(--cve-critical); }
+.cve-item.cve-high { --cve-color: var(--cve-high); }
+.cve-item.cve-medium { --cve-color: var(--cve-medium); }
+.cve-item.cve-low { --cve-color: var(--cve-low); }
+.cve-main { min-width: 0; }
+.cve-idrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 4px; }
+.cve-id { font-size: 0.8rem; font-weight: 700; color: #e5e7eb; }
+.cve-exploit-badge { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+.cve-ex-active { color: #fb7185; border-color: rgba(244,63,94,0.5); background: rgba(244,63,94,0.1); }
+.cve-ex-poc { color: #fbbf24; border-color: rgba(251,191,36,0.45); background: rgba(251,191,36,0.08); }
+.cve-ex-none { color: #9ca3af; border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.03); }
+.cve .cve-title { font-family: 'Inter', sans-serif; font-size: 0.98rem; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.cve-meta { font-family: 'Inter', sans-serif; font-size: 0.78rem; color: #9ca3af; }
+.cve-score { flex: 0 0 150px; text-align: right; }
+.cve-badge {
+  display: inline-block; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; margin-bottom: 8px;
+  color: var(--cve-color); border: 1px solid var(--cve-color); background: rgba(255,255,255,0.03);
+  text-shadow: 0 0 8px var(--cve-color);
+}
+.cve-meter { display: block; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.cve-meter-fill {
+  display: block; height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.15), var(--cve-color));
+  box-shadow: 0 0 10px var(--cve-color);
+}
+.cve-empty { text-align: center; padding: 36px 20px; color: #9ca3af; border: 1px dashed rgba(255,255,255,0.15); border-radius: 10px; }
+.cve-empty p { margin-bottom: 14px; }
+@media (max-width: 760px) {
+  .cve-range, .cve-exploit { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .cve { padding: 0 16px; }
+  .cve h2 { font-size: 1.4rem; }
+  .cve-head { align-items: center; }
+  .cve-controls { padding: 12px; }
+  .cve-slider-row { grid-template-columns: 1fr; gap: 4px; }
+  .cve-item { flex-direction: column; align-items: stretch; gap: 10px; }
+  .cve-score { flex: none; text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cve-pill { transition: none; }
+}
+/* ===== END issue #182 ===== */
+
 /* Password strength analyzer */
 .audit-card {
   max-width: 600px;
