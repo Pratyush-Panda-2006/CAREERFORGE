@@ -10,17 +10,359 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header className="hero">
-    <div className="badge">🎙️ SUB-100MS VOICE SYNTHESIS</div>
+  <header class="hero">
+    <div class="badge">🎙️ SUB-100MS VOICE SYNTHESIS</div>
     <h1>Hyper-Realistic AI Voice Generation &amp; Dubbing</h1>
     <p>Clone voices in 29 languages with emotional nuance and instant WebSocket streaming.</p>
 
-    <div className="voice-preview-box">
-      <div className="wave-icon">🔊</div>
-      <div className="voice-name">Voice Model: "Aria — Studio Warmth"</div>
-      <button className="sample-btn" onclick="playVoiceSample()">Play Voice Sample 🔊</button>
+    <!-- Interactive Voice Models Grid -->
+    <div class="voice-models-container" aria-label="Available Voice Models">
+      <div class="voice-models-header">
+        <span class="section-tag">NEURAL VOICE PROFILES</span>
+        <span class="active-profile-count">4 Models Loaded</span>
+      </div>
+      <div class="voice-models-grid" id="voiceModelsGrid">
+        <div class="voice-model-card active" data-model-id="aria" data-base-pitch="1.0" data-base-speed="1.0" data-sample-text="Hello! I am Aria, a warm and natural conversational studio voice.">
+          <div class="model-badge">Active Model</div>
+          <div class="model-avatar">🎙️</div>
+          <div class="model-info">
+            <h3 class="model-name">Aria</h3>
+            <span class="model-tagline">Studio Warmth • Conversational</span>
+            <div class="model-meta">
+              <span class="meta-pill">en-US</span>
+              <span class="meta-pill emotion-indicator">Neutral</span>
+            </div>
+          </div>
+          <div class="model-wave-anim" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <button type="button" class="sample-play-btn" data-play-sample="aria" title="Play Aria voice sample" aria-label="Play Aria voice sample"><span class="sample-play-icon" aria-hidden="true">▶</span><span class="sample-play-label">Play sample</span><span class="sample-playing-indicator" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button type="button" class="select-model-btn" data-select="aria">Selected</button>
+        </div>
+
+        <div class="voice-model-card" data-model-id="marcus" data-base-pitch="0.85" data-base-speed="0.95" data-sample-text="Greetings. This is Marcus, delivering deep broadcast authority and resonance.">
+          <div class="model-badge">Deep Resonance</div>
+          <div class="model-avatar">📻</div>
+          <div class="model-info">
+            <h3 class="model-name">Marcus</h3>
+            <span class="model-tagline">Deep Broadcast • Narration</span>
+            <div class="model-meta">
+              <span class="meta-pill">en-GB</span>
+              <span class="meta-pill emotion-indicator">Authoritative</span>
+            </div>
+          </div>
+          <div class="model-wave-anim" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <button type="button" class="sample-play-btn" data-play-sample="marcus" title="Play Marcus voice sample" aria-label="Play Marcus voice sample"><span class="sample-play-icon" aria-hidden="true">▶</span><span class="sample-play-label">Play sample</span><span class="sample-playing-indicator" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button type="button" class="select-model-btn" data-select="marcus">Select Model</button>
+        </div>
+
+        <div class="voice-model-card" data-model-id="elena" data-base-pitch="1.15" data-base-speed="1.05" data-sample-text="System online. I am Elena, your ultra-crisp cybernetic neural assistant.">
+          <div class="model-badge">Ultra-Crisp</div>
+          <div class="model-avatar">🤖</div>
+          <div class="model-info">
+            <h3 class="model-name">Elena</h3>
+            <span class="model-tagline">Cybernetic Synth • AI Assistant</span>
+            <div class="model-meta">
+              <span class="meta-pill">en-US</span>
+              <span class="meta-pill emotion-indicator">Precision</span>
+            </div>
+          </div>
+          <div class="model-wave-anim" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <button type="button" class="sample-play-btn" data-play-sample="elena" title="Play Elena voice sample" aria-label="Play Elena voice sample"><span class="sample-play-icon" aria-hidden="true">▶</span><span class="sample-play-label">Play sample</span><span class="sample-playing-indicator" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button type="button" class="select-model-btn" data-select="elena">Select Model</button>
+        </div>
+
+        <div class="voice-model-card" data-model-id="leo" data-base-pitch="1.25" data-base-speed="1.20" data-sample-text="What's up everyone! Leo here, bringing dynamic energy and hype to your streams!">
+          <div class="model-badge">High Impact</div>
+          <div class="model-avatar">⚡</div>
+          <div class="model-info">
+            <h3 class="model-name">Leo</h3>
+            <span class="model-tagline">Energetic Streamer • Dynamic</span>
+            <div class="model-meta">
+              <span class="meta-pill">en-US</span>
+              <span class="meta-pill emotion-indicator">High Energy</span>
+            </div>
+          </div>
+          <div class="model-wave-anim" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <button type="button" class="sample-play-btn" data-play-sample="leo" title="Play Leo voice sample" aria-label="Play Leo voice sample"><span class="sample-play-icon" aria-hidden="true">▶</span><span class="sample-play-label">Play sample</span><span class="sample-playing-indicator" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button type="button" class="select-model-btn" data-select="leo">Select Model</button>
+        </div>
+      </div>
     </div>
+
+    <!-- Voice Studio Configuration & Tuner Panel -->
+    <section class="studio-tuner-card" id="studioTuner" aria-labelledby="tuner-heading">
+      <div class="tuner-header">
+        <div class="tuner-title-box">
+          <span class="badge" style="margin-bottom:4px;">🎛️ STUDIO TUNER CONFIGURATION</span>
+          <h2 id="tuner-heading">Neural Voice Pitch, Speed &amp; Emotion Engine</h2>
+          <p class="tuner-subtitle">Calibrate vocal formants, pacing tempo, and affective emotional resonance in real-time.</p>
+        </div>
+        <div class="tuner-status-pill" id="tunerStatusPill">
+          <span class="pulse-dot"></span>
+          <span id="tunerStatusText">Live DSP Ready</span>
+        </div>
+      </div>
+
+      <!-- Emotion Presets -->
+      <div class="emotion-section">
+        <label class="section-label">
+          <span>EMOTION PRESET</span>
+          <span class="label-hint">Sets automated pitch contour &amp; tempo dynamics</span>
+        </label>
+        <div class="emotion-presets" role="radiogroup" aria-label="Emotion Presets">
+          <button type="button" class="emotion-btn active" data-emotion="neutral" data-pitch="1.00" data-speed="1.00" aria-checked="true" role="radio">
+            <span class="emotion-icon">😐</span>
+            <span class="emotion-title">Neutral</span>
+            <span class="emotion-desc">Natural &amp; balanced</span>
+          </button>
+          <button type="button" class="emotion-btn" data-emotion="cheerful" data-pitch="1.25" data-speed="1.15" aria-checked="false" role="radio">
+            <span class="emotion-icon">😊</span>
+            <span class="emotion-title">Cheerful</span>
+            <span class="emotion-desc">Bright &amp; uplifted</span>
+          </button>
+          <button type="button" class="emotion-btn" data-emotion="professional" data-pitch="0.90" data-speed="0.95" aria-checked="false" role="radio">
+            <span class="emotion-icon">👔</span>
+            <span class="emotion-title">Professional</span>
+            <span class="emotion-desc">Measured &amp; authoritative</span>
+          </button>
+          <button type="button" class="emotion-btn" data-emotion="energetic" data-pitch="1.35" data-speed="1.30" aria-checked="false" role="radio">
+            <span class="emotion-icon">⚡</span>
+            <span class="emotion-title">Energetic</span>
+            <span class="emotion-desc">High-tempo &amp; dynamic</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive Neon Sliders -->
+      <div class="tuner-sliders-grid">
+        <!-- Pitch Slider -->
+        <div class="tuner-slider-card">
+          <div class="slider-head">
+            <div class="slider-title-grp">
+              <span class="slider-icon">🎵</span>
+              <div>
+                <label for="tunerPitch" class="slider-title">Voice Pitch</label>
+                <span class="slider-subtitle">Fundamental acoustic frequency ($F_0$)</span>
+              </div>
+            </div>
+            <div class="neon-value-chip" id="pitchChipContainer">
+              <span id="tunerPitchVal">1.00x</span>
+              <span class="chip-badge" id="pitchSemitoneBadge">0.0 st</span>
+            </div>
+          </div>
+          <div class="range-wrapper">
+            <input type="range" id="tunerPitch" min="0.5" max="2.0" step="0.05" value="1.0" aria-label="Voice Pitch Multiplier" />
+            <div class="slider-ticks">
+              <span>0.5x Deep</span>
+              <span>1.0x Normal</span>
+              <span>1.5x High</span>
+              <span>2.0x Squeak</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Speed Slider -->
+        <div class="tuner-slider-card">
+          <div class="slider-head">
+            <div class="slider-title-grp">
+              <span class="slider-icon">⏩</span>
+              <div>
+                <label for="tunerSpeed" class="slider-title">Speech Speed</label>
+                <span class="slider-subtitle">Phoneme cadence &amp; words-per-minute</span>
+              </div>
+            </div>
+            <div class="neon-value-chip" id="speedChipContainer">
+              <span id="tunerSpeedVal">1.00x</span>
+              <span class="chip-badge" id="speedWpmBadge">150 WPM</span>
+            </div>
+          </div>
+          <div class="range-wrapper">
+            <input type="range" id="tunerSpeed" min="0.5" max="2.0" step="0.05" value="1.0" aria-label="Speech Speed Multiplier" />
+            <div class="slider-ticks">
+              <span>0.5x Slow</span>
+              <span>1.0x Normal</span>
+              <span>1.5x Fast</span>
+              <span>2.0x Rapid</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Neural Telemetry & Visualizer -->
+      <div class="tuner-telemetry-box">
+        <div class="telemetry-spectrogram" id="telemetryVisualizer" aria-hidden="true">
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </div>
+        <div class="telemetry-readouts">
+          <div class="telemetry-item">
+            <span class="telemetry-lbl">ACTIVE MODEL:</span>
+            <span class="telemetry-val" id="activeModelName">Aria (Warm Studio)</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-lbl">EMOTION MODE:</span>
+            <span class="telemetry-val" id="activeEmotionName">Neutral 😐</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-lbl">ESTIMATED FREQUENCY:</span>
+            <span class="telemetry-val" id="telemetryFreq">220 Hz</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-lbl">SYNTHESIS LATENCY:</span>
+            <span class="telemetry-val highlight">38 ms</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Tuner Action Controls -->
+      <div class="tuner-actions">
+        <button type="button" class="tuner-btn primary" id="btnPreviewTunedVoice">
+          <span class="btn-icon">🔊</span> Play Tuned Sample
+        </button>
+        <button type="button" class="tuner-btn secondary" id="btnSyncWithTTS">
+          <span class="btn-icon">⬇️</span> Sync To Text Studio
+        </button>
+        <button type="button" class="tuner-btn ghost" id="btnResetTuner">
+          <span class="btn-icon">↺</span> Reset Defaults
+        </button>
+      </div>
+
+      <!-- Tuner Feedback Message -->
+      <div class="tuner-feedback" id="tunerFeedback" role="status" aria-live="polite">
+        Ready. Adjust sliders or select an emotion preset to customize acoustic parameters.
+      </div>
+
+      <!-- Multi-Track Audio Waveform Generator (Issue #175) -->
+      <div class="waveform-visualizer-container" id="waveformContainer" aria-label="Interactive Multi-Track Waveform Visualizer">
+        <div class="waveform-header">
+          <div class="waveform-title-row">
+            <div class="waveform-badge">
+              <span class="live-dot" aria-hidden="true"></span>
+              <span>MULTI-TRACK DSP WAVEFORM GENERATOR</span>
+            </div>
+            <div class="waveform-track-selector" role="tablist" aria-label="Audio Tracks">
+              <button type="button" class="track-tab active" data-track="voice" role="tab" aria-selected="true">
+                <span class="track-indicator voice"></span>
+                <span>Track 1: Neural Voice</span>
+              </button>
+              <button type="button" class="track-tab" data-track="harmony" role="tab" aria-selected="false">
+                <span class="track-indicator harmony"></span>
+                <span>Track 2: Ambient Harmony</span>
+              </button>
+              <button type="button" class="track-tab" data-track="master" role="tab" aria-selected="false">
+                <span class="track-indicator master"></span>
+                <span>Track 3: Master Output</span>
+              </button>
+            </div>
+          </div>
+          <div class="waveform-meta-chips">
+            <span class="meta-chip" id="wfSampleRate">48.0 kHz</span>
+            <span class="meta-chip" id="wfBands">64 Bands</span>
+            <span class="meta-chip highlight" id="wfFps">60 FPS</span>
+          </div>
+        </div>
+
+        <!-- Canvas Visualizer Frame -->
+        <div class="canvas-viewport">
+          <canvas id="voiceWaveform" width="900" height="190" aria-label="Real-time multi-track audio waveform visualizer" role="img"></canvas>
+          <div class="canvas-overlay-grid" aria-hidden="true"></div>
+          <div class="canvas-timecode" id="wfTimecode">00:00.00 / 00:05.00</div>
+          <div class="canvas-db-scale" aria-hidden="true">
+            <span>+6 dB</span>
+            <span>0 dB</span>
+            <span>-6 dB</span>
+            <span>-18 dB</span>
+            <span>-∞ dB</span>
+          </div>
+        </div>
+
+        <!-- Waveform Toolbar Controls -->
+        <div class="waveform-toolbar">
+          <div class="toolbar-left">
+            <button type="button" class="wf-ctl-btn primary" id="wfPlayBtn" aria-label="Play/Pause Waveform Simulation">
+              <span class="wf-btn-icon" id="wfPlayIcon">▶</span>
+              <span id="wfPlayLabel">Start Real-Time Stream</span>
+            </button>
+            <div class="style-toggle-group" role="group" aria-label="Visualizer Display Modes">
+              <button type="button" class="style-btn active" data-style="bars" title="Frequency Spectrum Bars">Spectrum Bars</button>
+              <button type="button" class="style-btn" data-style="wave" title="Continuous Oscilloscope Wave">Oscilloscope</button>
+              <button type="button" class="style-btn" data-style="particles" title="Floating Frequency Particles">Particles</button>
+            </div>
+          </div>
+
+          <div class="toolbar-right">
+            <div class="density-slider-wrap">
+              <label for="wfGainSlider">Gain:</label>
+              <input type="range" id="wfGainSlider" min="0.5" max="2.0" step="0.1" value="1.0" aria-label="Visualizer Sensitivity Gain" />
+              <span id="wfGainVal">1.0x</span>
+            </div>
+            <button type="button" class="wf-ctl-btn ghost" id="wfFreezeBtn" title="Freeze frame snapshot">
+              <span>❄️ Freeze</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
   </header>
+
+  <main class="studio" id="studio" aria-labelledby="studio-title">
+    <h2 id="studio-title">Text-to-Speech Studio</h2>
+    <p class="studio-intro">Type something, pick a voice from your browser and hear it spoken. This uses the built-in Web Speech API, so everything runs on your device.</p>
+
+    <p class="studio-unsupported" id="tts-unsupported" role="alert" hidden>
+      Speech synthesis is not supported in this browser, so the studio is disabled. Try a recent version of Chrome, Edge, Safari or Firefox.
+    </p>
+
+    <form class="studio-card" id="tts-form" novalidate>
+      <div class="field">
+        <label for="tts-text">Text to speak</label>
+        <textarea id="tts-text" rows="5" maxlength="2000" placeholder="Type or paste some text here...">Hello! This is Sonora, speaking straight from your browser.</textarea>
+        <span class="char-count" id="tts-count" aria-live="off">0 / 2000</span>
+      </div>
+
+      <div class="field">
+        <label for="tts-voice">Voice</label>
+        <select id="tts-voice"></select>
+        <span class="field-note" id="tts-voice-note"></span>
+      </div>
+
+      <div class="sliders">
+        <div class="field">
+          <label for="tts-rate">Rate <output id="tts-rate-out" for="tts-rate">1.0x</output></label>
+          <input type="range" id="tts-rate" min="0.5" max="2" step="0.1" value="1" />
+        </div>
+        <div class="field">
+          <label for="tts-pitch">Pitch <output id="tts-pitch-out" for="tts-pitch">1.0</output></label>
+          <input type="range" id="tts-pitch" min="0" max="2" step="0.1" value="1" />
+        </div>
+      </div>
+
+      <div class="eq" id="tts-eq" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="controls">
+        <button type="button" class="ctl ctl-play" id="tts-play">Play</button>
+        <button type="button" class="ctl" id="tts-pause" disabled>Pause</button>
+        <button type="button" class="ctl" id="tts-stop" disabled>Stop</button>
+      </div>
+
+      <p class="tts-status" id="tts-status" role="status" aria-live="polite">Ready.</p>
+    </form>
+  </main>
+
   <script src="script.js"></script>
 </body>
 </html>

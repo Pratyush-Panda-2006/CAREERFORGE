@@ -10,41 +10,274 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header className="hero">
-    <div className="overlay"></div>
-    <div className="hero-content">
-      <div className="event-date">OCTOBER 24-26 • TOKYO CYBER DOME</div>
-      <h1 className="glitch-title">PULSE WAVE 2026</h1>
-      <p className="subtitle">The premier 3-day immersive audio-visual synthesizer festival.</p>
+  <header class="hero">
+    <div class="overlay"></div>
+    <div class="hero-content">
+      <div class="event-date">OCTOBER 24-26 • TOKYO CYBER DOME</div>
+      <h1 class="glitch-title">PULSE WAVE 2026</h1>
+      <p class="subtitle">The premier 3-day immersive audio-visual synthesizer festival.</p>
 
-      <div className="countdown" id="timer">
-        <div className="time-unit"><span id="days">42</span><label>DAYS</label></div>
-        <div className="time-unit"><span id="hours">18</span><label>HOURS</label></div>
-        <div className="time-unit"><span id="mins">35</span><label>MINS</label></div>
+      <div class="countdown-wrapper">
+        <div class="countdown-status" aria-live="polite">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>LIVE EVENT COUNTDOWN // GATES OPEN IN</span>
+        </div>
+        <div class="countdown" id="timer" role="timer" aria-label="Festival start countdown">
+          <div class="time-unit">
+            <span class="time-value" id="days">42</span>
+            <label class="time-label">DAYS</label>
+          </div>
+          <div class="time-unit">
+            <span class="time-value" id="hours">18</span>
+            <label class="time-label">HOURS</label>
+          </div>
+          <div class="time-unit">
+            <span class="time-value" id="mins">35</span>
+            <label class="time-label">MINUTES</label>
+          </div>
+          <div class="time-unit seconds-unit">
+            <span class="time-value" id="secs">59</span>
+            <label class="time-label">SECONDS</label>
+          </div>
+        </div>
       </div>
     </div>
   </header>
+  <main class="lineup-container">
+    <h2>YOUR FESTIVAL EXPERIENCE</h2>
+<nav class="schedule-tabs" aria-label="Festival views">
+  <button class="schedule-tab active" id="lineup-tab" type="button" aria-selected="true">
+    Lineup
+  </button>
+  <button class="schedule-tab" id="schedule-tab" type="button" aria-selected="false">
+    My Schedule <span id="favorite-count">0</span>
+  </button>
+</nav>
 
-  <main className="lineup-container">
-    <h2>FEATURED HEADLINERS</h2>
-    <div className="lineup-grid">
-      <div className="artist-card">
-        <div className="artist-img">🎛️</div>
-        <h3>NEON APEX</h3>
-        <p>Main Stage • Oct 24</p>
-      </div>
-      <div className="artist-card">
-        <div className="artist-img">⚡</div>
-        <h3>CYBERNETIX</h3>
-        <p>Vortex Dome • Oct 25</p>
-      </div>
-      <div className="artist-card">
-        <div className="artist-img">🌌</div>
-        <h3>KINETIC VOID</h3>
-        <p>Main Stage • Oct 26</p>
-      </div>
+<section id="lineup-view" aria-labelledby="lineup-tab">
+  <div class="lineup-header-row">
+    <h3 class="section-title">FEATURED HEADLINERS &amp; STAGE LINEUP</h3>
+    <p class="section-sub">Experience 3 days of sound across our three sensory realms.</p>
+  </div>
+
+  <!-- Stage Filter Pills Bar (Issue #28) -->
+  <div class="stage-filter-wrapper" role="group" aria-label="Filter artists by stage">
+    <span class="stage-filter-label">FILTER BY STAGE:</span>
+    <div class="stage-filter-pills" id="stageFilterPills">
+      <button type="button" class="stage-pill active" data-stage="all" aria-pressed="true">
+        <span class="pill-dot all"></span> All Stages <span class="stage-count" id="countAll">(9)</span>
+      </button>
+      <button type="button" class="stage-pill" data-stage="main-stage" aria-pressed="false">
+        <span class="pill-dot main"></span> Main Stage <span class="stage-count">(3)</span>
+      </button>
+      <button type="button" class="stage-pill" data-stage="neon-arena" aria-pressed="false">
+        <span class="pill-dot neon"></span> Neon Arena <span class="stage-count">(3)</span>
+      </button>
+      <button type="button" class="stage-pill" data-stage="bass-vault" aria-pressed="false">
+        <span class="pill-dot bass"></span> Bass Vault <span class="stage-count">(3)</span>
+      </button>
     </div>
-  </main>
+  </div>
+
+  <!-- Filter Status Readout -->
+  <div class="lineup-status-bar" id="lineupStatusBar" aria-live="polite">
+    Showing all 9 headliners across all festival stages
+  </div>
+
+  <div class="lineup-grid" id="lineupGrid">
+    <!-- Main Stage Artists -->
+    <article class="artist-card" data-artist-id="neon-apex" data-stage="main-stage">
+      <button class="favorite-button" type="button" aria-label="Add NEON APEX to My Schedule" aria-pressed="false">
+        <span aria-hidden="true">♡</span>
+      </button>
+      <div class="artist-stage-tag main">MAIN STAGE</div>
+      <div class="artist-img" aria-hidden="true">🎛️</div>
+      <h3>NEON APEX</h3>
+      <p class="artist-details">Main Stage • Oct 24 • 21:00</p>
+      <span class="artist-genre">Cyberpunk Synthwave</span>
+    </article>
+
+    <article class="artist-card" data-artist-id="cyber-kinetic" data-stage="main-stage">
+      <button class="favorite-button" type="button" aria-label="Add CYBER KINETIC to My Schedule" aria-pressed="false">
+        <span aria-hidden="true">♡</span>
+      </button>
+      <div class="artist-stage-tag main">MAIN STAGE</div>
+      <div class="artist-img" aria-hidden="true">⚡</div>
+      <h3>CYBER KINETIC</h3>
+      <p class="artist-details">Main Stage • Oct 25 • 22:30</p>
+      <span class="artist-genre">Melodic Techno Live</span>
+    </article>
+
+    <article class="artist-card" data-artist-id="solar-flare" data-stage="main-stage">
+      <button class="favorite-button" type="button" aria-label="Add SOLAR FLARE to My Schedule" aria-pressed="false">
+        <span aria-hidden="true">♡</span>
+      </button>
+      <div class="artist-stage-tag main">MAIN STAGE</div>
+      <div class="artist-img" aria-hidden="true">☀️</div>
+      <h3>SOLAR FLARE</h3>
+      <p class="artist-details">Main Stage • Oct 26 • 20:00</p>
+      <span class="artist-genre">Progressive Trance</span>
+    </article>
+
+    <!-- Neon Arena Artists -->
+    <article class="artist-card" data-artist-id="aura-matrix" data-stage="neon-arena">
+      <button class="favorite-button" type="button" aria-label="Add AURA MATRIX to My Schedule" aria-pressed="false">
+        <span aria-hidden="true">♡</span>
+      </button>
+      <div class="artist-stage-tag neon">NEON ARENA</div>
+      <div class="artist-img" aria-hidden="true">🔮</div>
+      <h3>AURA MATRIX</h3>
+      <p class="artist-details">Neon Arena • Oct 24 • 19:30</p>
+      <span class="artist-genre">Electro House &amp; Laser Show</span>
+    </article>
+
+    <article class="artist-card" data-artist-id="synth-pulse" data-stage="neon-arena">
+      <button class="favorite-button" type="button" aria-label="Add SYNTH PULSE to My Schedule" aria-pressed="false">
+        <span aria-hidden="true">♡</span>
+      </button>
+      <div class="artist-stage-tag neon">NEON ARENA</div>
+      <div class="artist-img" aria-hidden="true">🎹</div>
+      <h3>SYNTH PULSE</h3>
+      <p class="artist-details">Neon Arena • Oct 25 • 21:15</p>
+      <span class="artist-genre">Analog Modular &amp; Chiptune</span>
+    </article>
+
+    <article class="artist-card" data-artist-id="hex-void" data-stage="neon-arena">
+      <button class="favorite-button" type="button" aria-label="Add HEX VOID to My Schedule" aria-pressed="false">
+        <span aria-hidden="true">♡</span>
+      </button>
+      <div class="artist-stage-tag neon">NEON ARENA</div>
+      <div class="artist-img" aria-hidden="true">🌌</div>
+      <h3>HEX VOID</h3>
+      <p class="artist-details">Neon Arena • Oct 26 • 22:45</p>
+      <span class="artist-genre">Industrial Darkwave EBM</span>
+    </article>
+
+    <!-- Bass Vault Artists -->
+    <article class="artist-card" data-artist-id="sub-zero" data-stage="bass-vault">
+      <button class="favorite-button" type="button" aria-label="Add SUB ZERO BASS to My Schedule" aria-pressed="false">
+        <span aria-hidden="true">♡</span>
+      </button>
+      <div class="artist-stage-tag bass">BASS VAULT</div>
+      <div class="artist-img" aria-hidden="true">🔊</div>
+      <h3>SUB ZERO BASS</h3>
+      <p class="artist-details">Bass Vault • Oct 24 • 23:00</p>
+      <span class="artist-genre">Sub-Bass Riddim &amp; Dubstep</span>
+    </article>
+
+    <article class="artist-card" data-artist-id="neural-collider" data-stage="bass-vault">
+      <button class="favorite-button" type="button" aria-label="Add NEURAL COLLIDER to My Schedule" aria-pressed="false">
+        <span aria-hidden="true">♡</span>
+      </button>
+      <div class="artist-stage-tag bass">BASS VAULT</div>
+      <div class="artist-img" aria-hidden="true">🧬</div>
+      <h3>NEURAL COLLIDER</h3>
+      <p class="artist-details">Bass Vault • Oct 25 • 20:45</p>
+      <span class="artist-genre">Neurofunk Drum &amp; Bass</span>
+    </article>
+
+    <article class="artist-card" data-artist-id="quantum-drop" data-stage="bass-vault">
+      <button class="favorite-button" type="button" aria-label="Add QUANTUM DROP to My Schedule" aria-pressed="false">
+        <span aria-hidden="true">♡</span>
+      </button>
+      <div class="artist-stage-tag bass">BASS VAULT</div>
+      <div class="artist-img" aria-hidden="true">💥</div>
+      <h3>QUANTUM DROP</h3>
+      <p class="artist-details">Bass Vault • Oct 26 • 21:30</p>
+      <span class="artist-genre">Future Bass &amp; Cyber Trap</span>
+    </article>
+  </div>
+</section>
+
+<!-- My Schedule View Section -->
+<section id="schedule-view" aria-labelledby="schedule-tab" hidden>
+  <div class="schedule-empty" id="schedule-empty">
+    <div class="empty-icon">🎧</div>
+    <h3>No Artists in Your Schedule</h3>
+    <p>Tap the heart on any artist in the lineup to pin them to your personal schedule.</p>
+  </div>
+  <div class="lineup-grid" id="scheduleGrid"></div>
+</section>
+</main>
+
+  <section class="tickets" id="tickets" aria-labelledby="tickets-title">
+    <h2 id="tickets-title">GET YOUR PASS</h2>
+    <p class="tickets-intro">Pick your tiers, add extras, and watch the total update. Groups of 5 or more tickets get 10% off.</p>
+
+    <div class="tickets-layout">
+      <form class="tickets-form" id="ticket-form" novalidate>
+        <fieldset class="tier-list">
+          <legend>Ticket tiers</legend>
+
+          <div class="tier-card" data-tier="ga">
+            <div class="tier-info">
+              <h3 id="tier-ga-name">General Admission</h3>
+              <p>3-day entry, all stages.</p>
+              <span class="tier-price">$149.00</span>
+            </div>
+            <div class="stepper" role="group" aria-labelledby="tier-ga-name">
+              <button type="button" class="step-btn" data-step="-1" aria-label="Remove one General Admission ticket">&minus;</button>
+              <input type="number" class="qty" id="qty-ga" min="0" max="10" value="0" inputmode="numeric" aria-label="General Admission quantity" />
+              <button type="button" class="step-btn" data-step="1" aria-label="Add one General Admission ticket">+</button>
+            </div>
+          </div>
+
+          <div class="tier-card" data-tier="vip">
+            <div class="tier-info">
+              <h3 id="tier-vip-name">VIP Access</h3>
+              <p>Raised viewing decks, lounge and private bars.</p>
+              <span class="tier-price">$349.00</span>
+            </div>
+            <div class="stepper" role="group" aria-labelledby="tier-vip-name">
+              <button type="button" class="step-btn" data-step="-1" aria-label="Remove one VIP Access ticket">&minus;</button>
+              <input type="number" class="qty" id="qty-vip" min="0" max="10" value="0" inputmode="numeric" aria-label="VIP Access quantity" />
+              <button type="button" class="step-btn" data-step="1" aria-label="Add one VIP Access ticket">+</button>
+            </div>
+          </div>
+
+          <div class="tier-card" data-tier="ultra">
+            <div class="tier-info">
+              <h3 id="tier-ultra-name">Ultra Platinum</h3>
+              <p>Front-of-stage pit, artist meet-ups, free merch pack.</p>
+              <span class="tier-price">$799.00</span>
+            </div>
+            <div class="stepper" role="group" aria-labelledby="tier-ultra-name">
+              <button type="button" class="step-btn" data-step="-1" aria-label="Remove one Ultra Platinum ticket">&minus;</button>
+              <input type="number" class="qty" id="qty-ultra" min="0" max="10" value="0" inputmode="numeric" aria-label="Ultra Platinum quantity" />
+              <button type="button" class="step-btn" data-step="1" aria-label="Add one Ultra Platinum ticket">+</button>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="addon-list">
+          <legend>Add-ons (price per ticket)</legend>
+          <label class="addon"><input type="checkbox" name="addon" value="tent" /> <span class="addon-name">Tent Camping</span> <span class="addon-price">$60.00</span></label>
+          <label class="addon"><input type="checkbox" name="addon" value="locker" /> <span class="addon-name">Locker</span> <span class="addon-price">$25.00</span></label>
+          <label class="addon"><input type="checkbox" name="addon" value="fastpass" /> <span class="addon-name">Fast-Pass</span> <span class="addon-price">$45.00</span></label>
+        </fieldset>
+      </form>
+
+      <aside class="order-panel" aria-labelledby="order-title">
+        <div class="holo-ticket" aria-hidden="true">
+          <span class="holo-event">PULSE WAVE 2026</span>
+          <span class="holo-tier" id="holo-tier">NO PASS SELECTED</span>
+          <span class="holo-count" id="holo-count">0 tickets</span>
+        </div>
+        <h3 id="order-title">Order summary</h3>
+        <div id="order-live" aria-live="polite" aria-atomic="true">
+          <ul class="order-lines" id="order-lines"></ul>
+          <dl class="totals">
+            <div class="total-row"><dt>Subtotal</dt><dd id="t-subtotal">$0.00</dd></div>
+            <div class="total-row" id="row-discount" hidden><dt>Group discount (10%)</dt><dd id="t-discount">-$0.00</dd></div>
+            <div class="total-row"><dt>Service fee (8%)</dt><dd id="t-fee">$0.00</dd></div>
+            <div class="total-row grand"><dt>Total</dt><dd id="t-total">$0.00</dd></div>
+          </dl>
+        </div>
+        <button type="button" class="checkout-btn" id="checkout-btn" disabled>Proceed to Checkout</button>
+        <p class="checkout-msg" id="checkout-msg" role="status"></p>
+      </aside>
+    </div>
+  </section>
 
   <script src="script.js"></script>
 </body>

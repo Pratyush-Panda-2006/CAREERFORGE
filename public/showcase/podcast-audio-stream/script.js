@@ -3,10 +3,18 @@ const speeds = [1, 1.25, 1.5, 2];
 let currentSpeedIndex = 0;
 
 let isPlaying = false;
+let selectedEpisode = '142';
 let currentTime = 0;
 const DURATION = 2880; // 48:00 in seconds
 let playInterval = null;
 let activeSegmentId = null;
+let volume = 1;
+let volumeBeforeMute = 1;
+
+const EPISODES = {
+  '141': { tag: 'NOW STREAMING • EP 141', title: 'Scaling Vector Databases to 10 Billion Chunks', guest: 'Guest: Marcus Vance (ChromaDB Creator)' },
+  '142': { tag: 'NOW STREAMING • EP 142', title: 'The Future of Agentic AI & Spatial Compute', guest: 'Guest: Dr. Aris Thorne (OpenAI Lead)' }
+};
 
 const TRANSCRIPT_EP142 = [
   {
@@ -109,6 +117,12 @@ function formatTime(seconds) {
 
 function toggleSpeed() {
   currentSpeedIndex = (currentSpeedIndex + 1) % speeds.length;
+  const currentSpeed = applySpeed();
+  saveState();
+  return currentSpeed;
+}
+
+function applySpeed() {
   const currentSpeed = speeds[currentSpeedIndex];
 
   // Update Hero speed button
@@ -132,29 +146,89 @@ function toggleSpeed() {
   return currentSpeed;
 }
 
-function playEpisode(epName) {
-  // Update dock headers
+function setEpisodeHeader(ep) {
+  const info = EPISODES[ep];
   const dockTag = document.getElementById('dock-ep-tag');
   const dockTitle = document.getElementById('dock-title');
   const dockGuest = document.getElementById('dock-guest');
+  if (dockTag) dockTag.textContent = info.tag;
+  if (dockTitle) dockTitle.textContent = info.title;
+  if (dockGuest) dockGuest.textContent = info.guest;
+}
 
-  if (epName.includes('141')) {
-    if (dockTag) dockTag.textContent = 'NOW STREAMING • EP 141';
-    if (dockTitle) dockTitle.textContent = 'Scaling Vector Databases to 10 Billion Chunks';
-    if (dockGuest) dockGuest.textContent = 'Guest: Marcus Vance (ChromaDB Creator)';
-  } else {
-    if (dockTag) dockTag.textContent = 'NOW STREAMING • EP 142';
-    if (dockTitle) dockTitle.textContent = 'The Future of Agentic AI & Spatial Compute';
-    if (dockGuest) dockGuest.textContent = 'Guest: Dr. Aris Thorne (OpenAI Lead)';
+function showDock() {
+  const dock = document.getElementById('player-dock');
+  if (dock) dock.hidden = false;
+  document.body.classList.add('has-mini-player');
+}
+
+function playEpisode(epName) {
+  const next = epName.includes('141') ? '141' : '142';
+  if (next !== selectedEpisode) {
+    currentTime = 0;
+    updateTimeUI(true);
   }
+  selectedEpisode = next;
+  setEpisodeHeader(selectedEpisode);
+  showDock();
 
   startPlayback();
+  updatePlayButtonIcon();
+  saveState();
+}
 
-  // Scroll player dock into view smoothly if not visible
-  const dock = document.getElementById('player-dock');
-  if (dock) {
-    dock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function applyVolume() {
+  const slider = document.getElementById('dock-volume');
+  if (slider) {
+    slider.value = Math.round(volume * 100);
+    slider.setAttribute('aria-valuetext', PlayerLogic.volumeLabel(volume));
   }
+  const muteBtn = document.getElementById('dock-mute-btn');
+  if (muteBtn) {
+    muteBtn.textContent = volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊';
+    muteBtn.setAttribute('aria-label', volume === 0 ? 'Unmute' : 'Mute');
+    muteBtn.setAttribute('title', volume === 0 ? 'Unmute' : 'Mute');
+  }
+  // The demo plays no real media, but keep any <audio> element in sync.
+  const audio = document.querySelector('audio');
+  if (audio) audio.volume = volume;
+}
+
+function setVolume(value) {
+  volume = PlayerLogic.clampVolume(value);
+  if (volume > 0) volumeBeforeMute = volume;
+  applyVolume();
+  saveState();
+}
+
+function toggleMute() {
+  setVolume(volume === 0 ? (volumeBeforeMute || 1) : 0);
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(PlayerLogic.STORAGE_KEY, PlayerLogic.serializeState({
+      episode: selectedEpisode, time: currentTime, volume, speedIndex: currentSpeedIndex
+    }));
+  } catch (e) { /* storage unavailable: player still works, just not remembered */ }
+}
+
+// Restore the last session as a paused mini player (no autoplay).
+function restoreState() {
+  let raw = null;
+  try { raw = localStorage.getItem(PlayerLogic.STORAGE_KEY); } catch (e) { return; }
+  const saved = PlayerLogic.parseState(raw, DURATION);
+  if (!saved || saved.time <= 0) return;
+  selectedEpisode = saved.episode;
+  currentTime = saved.time;
+  currentSpeedIndex = saved.speedIndex;
+  volume = saved.volume;
+  if (volume > 0) volumeBeforeMute = volume;
+  applySpeed();
+  setEpisodeHeader(selectedEpisode);
+  showDock();
+  updatePlayButtonIcon();
+  updateTimeUI(true);
 }
 
 function startPlayback() {
@@ -171,12 +245,14 @@ function startPlayback() {
       pausePlayback();
     }
     updateTimeUI();
+    if (Math.floor(currentTime) % 5 === 0) saveState();
   }, 250);
 }
 
 function pausePlayback() {
   isPlaying = false;
   updatePlayButtonIcon();
+  saveState();
   if (playInterval) {
     clearInterval(playInterval);
     playInterval = null;
@@ -192,10 +268,18 @@ function togglePlayPause() {
 }
 
 function updatePlayButtonIcon() {
+  document.querySelectorAll('.episodes .card').forEach(card => {
+    const selected = card.id === `card-${selectedEpisode}`;
+    card.classList.toggle('is-playing', selected && isPlaying);
+    card.classList.toggle('active-card', selected);
+    const label = card.querySelector('.ep-num');
+    if (label) label.textContent = `EP ${card.id.slice(5)}${selected ? ' • ACTIVE IN PLAYER' : ''}`;
+  });
   const dockPlayBtn = document.getElementById('dock-play-pause-btn');
   if (dockPlayBtn) {
     dockPlayBtn.textContent = isPlaying ? '⏸' : '▶';
     dockPlayBtn.setAttribute('title', isPlaying ? 'Pause Episode' : 'Play Episode');
+    dockPlayBtn.setAttribute('aria-pressed', String(isPlaying));
   }
 
   const heroPlayBtn = document.getElementById('hero-play-btn');
@@ -220,7 +304,10 @@ function updateTimeUI(forceScroll = false) {
   if (curLabel) curLabel.textContent = formatTime(currentTime);
 
   const scrubber = document.getElementById('dock-scrubber');
-  if (scrubber) scrubber.value = Math.floor(currentTime);
+  if (scrubber) {
+    scrubber.value = Math.floor(currentTime);
+    scrubber.setAttribute('aria-valuetext', `${formatTime(currentTime)} of ${formatTime(DURATION)}`);
+  }
 
   const fill = document.getElementById('scrubber-fill');
   if (fill) {
@@ -310,12 +397,22 @@ function filterTranscript(keyword) {
 document.addEventListener('DOMContentLoaded', () => {
   renderTranscript();
   updateTimeUI();
+  restoreState();
+  applyVolume();
+
+  const volumeSlider = document.getElementById('dock-volume');
+  if (volumeSlider) {
+    volumeSlider.addEventListener('input', (e) => setVolume(parseFloat(e.target.value) / 100));
+  }
+  const muteBtn = document.getElementById('dock-mute-btn');
+  if (muteBtn) muteBtn.addEventListener('click', toggleMute);
 
   // Scrubber events
   const scrubber = document.getElementById('dock-scrubber');
   if (scrubber) {
     scrubber.addEventListener('input', (e) => {
       seekTo(parseFloat(e.target.value));
+      saveState();
     });
   }
 

@@ -11,16 +11,140 @@
 </head>
 <body>
   <header className="hero">
+    <div class="soc-status"><span class="soc-status-dot" aria-hidden="true"></span><span>DEMO • THREAT LEVEL: GREEN</span></div>
     <div className="badge">🛡️ ZERO-TRUST SIEM PLATFORM</div>
     <h1>Autonomous Threat Prevention &amp; Incident Response</h1>
     <p>AI threat detection engine mitigating 99.98% of zero-day exploits before execution.</p>
-    <button className="scan-btn" onclick="runSecurityScan()">Initiate Full Vulnerability Scan ↗</button>
+    <button class="scan-btn" id="heroScanBtn" onclick="runSecurityScan()">Initiate Full Vulnerability Scan ↗</button>
   </header>
 
-  <main className="status-box">
-    <div className="status-row"><span className="title">SYSTEM DEFENSE STATUS:</span> <span className="val-secure">ACTIVE & PROTECTED</span></div>
-    <div className="status-row"><span className="title">PACKET THREAT RATE:</span> <span className="val-rate">0 THREATS DETECTED</span></div>
-  </main>
+  <section class="status-box">
+    <div class="status-row"><span class="title">SYSTEM DEFENSE STATUS:</span> <span class="val-secure">ACTIVE &amp; PROTECTED</span></div>
+    <div class="status-row"><span class="title">PACKET THREAT RATE:</span> <span class="val-rate">0 THREATS DETECTED</span></div>
+  </section>
+
+  <!-- ===== BEGIN Live Incident Response Filterable Timeline Feed (Issue #57) ===== -->
+  <section class="incident-feed" id="incidentFeed" aria-labelledby="feedTitle">
+    <div class="feed-header">
+      <div>
+        <div class="feed-live-status">
+          <span class="live-pulse-dot" aria-hidden="true"></span>
+          <span class="feed-tag">// REAL-TIME SOC TELEMETRY</span>
+        </div>
+        <h2 id="feedTitle">Live Incident Response Feed</h2>
+        <p class="feed-subtitle">Continuous autonomic detection, containment, and forensic telemetry stream.</p>
+      </div>
+
+      <div class="feed-controls">
+        <button type="button" class="feed-ctrl-btn" id="feedTogglePause" aria-label="Pause live stream">
+          <span class="ctrl-icon" id="feedPauseIcon">⏸️</span>
+          <span id="feedPauseText">Pause Live</span>
+        </button>
+        <button type="button" class="feed-ctrl-btn highlight" id="feedInjectBtn">
+          <span>⚡ Simulate Incident</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Severity Filter Bar & Search -->
+    <div class="feed-toolbar">
+      <div class="severity-filters" id="severityFilters" role="radiogroup" aria-label="Filter incidents by severity">
+        <button type="button" class="sev-pill active" data-severity="all" role="radio" aria-checked="true">
+          <span>All Events</span>
+          <span class="sev-count" id="countAll">0</span>
+        </button>
+        <button type="button" class="sev-pill sev-critical" data-severity="critical" role="radio" aria-checked="false">
+          <span class="sev-dot"></span>
+          <span>Critical</span>
+          <span class="sev-count" id="countCritical">0</span>
+        </button>
+        <button type="button" class="sev-pill sev-high" data-severity="high" role="radio" aria-checked="false">
+          <span class="sev-dot"></span>
+          <span>High</span>
+          <span class="sev-count" id="countHigh">0</span>
+        </button>
+        <button type="button" class="sev-pill sev-medium" data-severity="medium" role="radio" aria-checked="false">
+          <span class="sev-dot"></span>
+          <span>Medium</span>
+          <span class="sev-count" id="countMedium">0</span>
+        </button>
+        <button type="button" class="sev-pill sev-info" data-severity="info" role="radio" aria-checked="false">
+          <span class="sev-dot"></span>
+          <span>Info</span>
+          <span class="sev-count" id="countInfo">0</span>
+        </button>
+      </div>
+
+      <div class="feed-search-wrap">
+        <label for="incidentSearch" class="sr-only">Search incidents</label>
+        <input type="search" id="incidentSearch" class="feed-search-input" placeholder="Filter by CVE, IP, host, vector..." autocomplete="off" spellcheck="false" />
+        <span class="search-icon" aria-hidden="true">🔍</span>
+      </div>
+    </div>
+
+    <!-- Timeline Event Stream -->
+    <div class="timeline-container" id="timelineContainer" role="feed" aria-live="polite" aria-busy="false" aria-label="Incident response timeline">
+      <div class="timeline-rail" aria-hidden="true"></div>
+      <div class="timeline-stream" id="timelineStream">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+      <div class="timeline-empty" id="timelineEmpty" hidden>
+        <p>No security incidents match the selected filter criteria.</p>
+        <button type="button" class="feed-ctrl-btn" id="feedResetFilter">Reset Filters</button>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Live Incident Response Timeline Feed ===== -->
+
+  <!-- ===== BEGIN issue #97: global threat map ===== -->
+  <section class="tm" id="threat-map" aria-labelledby="tm-title">
+    <div class="tm-head">
+      <div>
+        <span class="tm-tag">// LIVE THREAT TELEMETRY</span>
+        <h2 id="tm-title">Global Threat Map</h2>
+      </div>
+      <button type="button" class="tm-pause" id="tm-pause">Pause</button>
+    </div>
+    <p class="tm-disclaimer" role="note">Simulated data. Every attack, city route, port and severity below is generated in your browser for this demo. Nothing here is real traffic.</p>
+
+    <fieldset class="tm-filter" id="tm-filter">
+      <legend>Filter by attack type</legend>
+      <label><input type="radio" name="tm-type" value="all" checked /><span>All</span></label>
+      <label><input type="radio" name="tm-type" value="DDoS" /><span class="tm-k-ddos">DDoS</span></label>
+      <label><input type="radio" name="tm-type" value="Ransomware" /><span class="tm-k-ransomware">Ransomware</span></label>
+      <label><input type="radio" name="tm-type" value="SQLi" /><span class="tm-k-sqli">SQLi</span></label>
+    </fieldset>
+
+    <div class="tm-stats" id="tm-stats" aria-label="Attack counters">
+      <div><span class="tm-stat-n" id="tm-count-all">0</span><span class="tm-stat-l">Total</span></div>
+      <div><span class="tm-stat-n tm-k-ddos" id="tm-count-DDoS">0</span><span class="tm-stat-l">DDoS</span></div>
+      <div><span class="tm-stat-n tm-k-ransomware" id="tm-count-Ransomware">0</span><span class="tm-stat-l">Ransomware</span></div>
+      <div><span class="tm-stat-n tm-k-sqli" id="tm-count-SQLi">0</span><span class="tm-stat-l">SQLi</span></div>
+    </div>
+
+    <div class="tm-map-wrap" id="tm-map-wrap">
+      <svg id="tm-map" viewBox="0 0 1000 500" role="img" aria-label="Simplified equirectangular world map with animated arcs for simulated attacks between city nodes. The attack log below lists each one in text.">
+        <g id="tm-grid"></g>
+        <g id="tm-land"></g>
+        <g id="tm-arcs"></g>
+        <g id="tm-nodes"></g>
+      </svg>
+      <div class="tm-sweep" aria-hidden="true"></div>
+    </div>
+    <p class="tm-latest" id="tm-latest">Waiting for the first simulated attack...</p>
+
+    <h3 class="tm-sub" id="tm-log-title">Attack log</h3>
+    <p class="tm-showing" id="tm-showing"></p>
+    <div class="tm-log-wrap" id="tm-log-wrap" tabindex="0" role="log" aria-live="off" aria-labelledby="tm-log-title">
+      <table class="tm-log">
+        <thead><tr><th scope="col">Time</th><th scope="col">Type</th><th scope="col">Route</th><th scope="col">Port</th><th scope="col">Severity</th></tr></thead>
+        <tbody id="tm-log-body"></tbody>
+      </table>
+      <p class="tm-empty" id="tm-empty" hidden>No attacks of this type yet.</p>
+    </div>
+  </section>
+  <!-- ===== END issue #97 ===== -->
+
   <section class="audit-card" id="passwordAudit" aria-labelledby="auditTitle">
     <div class="audit-tag">// CREDENTIAL AUDIT</div>
     <h2 id="auditTitle">Password Strength Analyzer</h2>

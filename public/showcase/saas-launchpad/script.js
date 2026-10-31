@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initTestimonialsCarousel();
   initRoiCalculator();
   initFaqAccordion();
+  initBillingToggle();
+  initIntegrationFilters();
 });
 
 function initFaqAccordion() {
@@ -454,4 +456,102 @@ function initRoiCalculator() {
   // Initial render (without animation delay)
   updateCalculator(false);
   console.log('CloudPulse SaaS Launchpad ROI Calculator ready');
+}
+
+/* Subscription Billing Toggle Module*/
+function initBillingToggle() {
+  const toggle = document.getElementById('billing-toggle');
+  const monthlyLabel = document.getElementById('monthly-label');
+  const annualLabel = document.getElementById('annual-label');
+  const billingNote = document.getElementById('billing-note');
+  const prices = document.querySelectorAll('.price-amount');
+  const billingLabels = document.querySelectorAll('.plan-billing');
+
+  if (!toggle || prices.length === 0) return;
+
+  function updateBilling(isAnnual) {
+    toggle.setAttribute('aria-checked', String(isAnnual));
+    toggle.setAttribute(
+      'aria-label',
+      isAnnual ? 'Switch to monthly billing' : 'Switch to annual billing'
+    );
+
+    monthlyLabel?.classList.toggle('active', !isAnnual);
+    annualLabel?.classList.toggle('active', isAnnual);
+
+    prices.forEach(price => {
+      const amount = Number(
+        isAnnual ? price.dataset.annual : price.dataset.monthly
+      );
+
+      if (!Number.isFinite(amount)) return;
+
+      price.textContent = `$${Number.isInteger(amount) ? amount : amount.toFixed(2)}`;
+    });
+
+    billingLabels.forEach(label => {
+      label.textContent = isAnnual
+        ? 'Billed annually'
+        : 'Billed monthly';
+    });
+
+    if (billingNote) {
+      billingNote.textContent = isAnnual
+        ? 'Annual billing selected — save 20% compared with monthly billing.'
+        : 'Billed monthly. Switch to annual to save 20%.';
+    }
+  }
+
+  toggle.addEventListener('click', () => {
+    const isAnnual = toggle.getAttribute('aria-checked') !== 'true';
+    updateBilling(isAnnual);
+  });
+
+  updateBilling(false);
+}
+
+function initIntegrationFilters() {
+  const search = document.getElementById('integration-search');
+  const list = document.getElementById('integration-list');
+  const count = document.getElementById('integration-count');
+  const empty = document.getElementById('integration-empty');
+  if (!search || !list || !count || !empty) return;
+  const cards = Array.from(list.querySelectorAll('[data-integration-name]'));
+  const buttons = document.querySelectorAll('button[data-integration-category]');
+  let category = 'all';
+  function update() {
+    const query = search.value.trim().toLocaleLowerCase();
+    let visible = 0;
+    cards.forEach(card => {
+      const name = card.dataset.integrationName;
+      const group = card.dataset.integrationCategory;
+      const matches = (category === 'all' || category === group) &&
+        `${name} ${group}`.toLocaleLowerCase().includes(query);
+      card.hidden = !matches;
+      if (matches) visible++;
+    });
+    count.textContent = `${visible} ${visible === 1 ? 'integration' : 'integrations'}`;
+    empty.hidden = visible !== 0;
+  }
+  search.disabled = false;
+  search.addEventListener('input', update);
+  search.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { search.value = ''; update(); }
+  });
+  buttons.forEach(button => {
+    button.disabled = false;
+    button.addEventListener('click', () => {
+      category = button.dataset.integrationCategory;
+      buttons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      update();
+    });
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || event.defaultPrevented) return;
+    const target = event.target;
+    if (target instanceof Element && (target.closest('input, textarea, select') || target.isContentEditable)) return;
+    event.preventDefault();
+    search.focus();
+  });
+  update();
 }

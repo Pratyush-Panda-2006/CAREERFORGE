@@ -1,5 +1,5 @@
-function reserveTable() {
-  alert('Table reservation system requested for Lumière Bistro!');
+function reserveTable(opener) {
+  openReservationModal(opener || byId('reserveBtn'));
 }
 
 // ---------------------------------------------------------------
@@ -320,3 +320,431 @@ function openCart(opener) {
   byId('newOrder').addEventListener('click', newOrder);
   renderOrder();
 })();
+
+// ---------------------------------------------------------------
+// Interactive Multi-step Table Reservation Wizard & Voucher Logic
+// ---------------------------------------------------------------
+const SEATING_NAMES = {
+  main: 'Main Dining Room',
+  counter: "Chef's Tasting Counter",
+  terrace: 'Glass Garden Terrace',
+  vault: 'Private Wine Vault'
+};
+
+const reservationState = {
+  step: 1,
+  party: 2,
+  partyLabel: '2 Pair',
+  dateIso: '',
+  dateFormatted: '',
+  area: 'main',
+  time: '',
+  guest: {
+    name: '',
+    phone: '',
+    email: '',
+    occasion: 'Romantic Date Night',
+    dietary: [],
+    notes: ''
+  },
+  code: ''
+};
+
+function formatDateIso(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function formatDisplayDate(isoStr) {
+  if (!isoStr) return '';
+  const parts = isoStr.split('-').map(Number);
+  const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+  return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function openReservationModal(opener) {
+  const modal = byId('reservationModal');
+  if (!reservationState.dateIso) {
+    const today = new Date();
+    reservationState.dateIso = formatDateIso(today);
+    reservationState.dateFormatted = formatDisplayDate(reservationState.dateIso);
+    const dateInput = byId('resDate');
+    if (dateInput) {
+      dateInput.value = reservationState.dateIso;
+      dateInput.min = reservationState.dateIso;
+    }
+  }
+  showDialog(modal, opener || byId('reserveBtn'));
+  setWizardStep(reservationState.step || 1);
+}
+
+function setWizardStep(targetStep) {
+  reservationState.step = targetStep;
+
+  // Toggle step panels
+  const s1 = byId('wizardStep1');
+  const s2 = byId('wizardStep2');
+  const s3 = byId('wizardStep3');
+  const sc = byId('wizardStepConfirm');
+  [s1, s2, s3, sc].forEach((st) => {
+    if (st) st.hidden = true;
+  });
+
+  if (targetStep === 1 && s1) s1.hidden = false;
+  else if (targetStep === 2 && s2) s2.hidden = false;
+  else if (targetStep === 3 && s3) s3.hidden = false;
+  else if (targetStep === 'confirm' && sc) sc.hidden = false;
+
+  // Update Stepper indicators
+  const ind1 = byId('stepIndicator1');
+  const ind2 = byId('stepIndicator2');
+  const ind3 = byId('stepIndicator3');
+  const line1 = byId('stepLine1');
+  const line2 = byId('stepLine2');
+
+  [ind1, ind2, ind3].forEach((ind) => {
+    if (ind) ind.classList.remove('active', 'completed');
+  });
+  if (line1) line1.classList.remove('completed');
+  if (line2) line2.classList.remove('completed');
+
+  if (targetStep === 1) {
+    if (ind1) ind1.classList.add('active');
+  } else if (targetStep === 2) {
+    if (ind1) ind1.classList.add('completed');
+    if (line1) line1.classList.add('completed');
+    if (ind2) ind2.classList.add('active');
+  } else if (targetStep === 3) {
+    if (ind1) ind1.classList.add('completed');
+    if (line1) line1.classList.add('completed');
+    if (ind2) ind2.classList.add('completed');
+    if (line2) line2.classList.add('completed');
+    if (ind3) ind3.classList.add('active');
+  } else if (targetStep === 'confirm') {
+    if (ind1) ind1.classList.add('completed');
+    if (line1) line1.classList.add('completed');
+    if (ind2) ind2.classList.add('completed');
+    if (line2) line2.classList.add('completed');
+    if (ind3) ind3.classList.add('completed');
+  }
+
+  updateRecapBars();
+}
+
+function updateRecapBars() {
+  const partyStr = `👥 ${reservationState.partyLabel || `${reservationState.party} Guests`}`;
+  const dateStr = reservationState.dateFormatted || reservationState.dateIso;
+  const areaStr = SEATING_NAMES[reservationState.area] || 'Main Dining Room';
+
+  const recapPartyDate = byId('recapPartyDate');
+  if (recapPartyDate) recapPartyDate.textContent = `${partyStr} • ${dateStr}`;
+
+  const recapArea = byId('recapArea');
+  if (recapArea) recapArea.textContent = areaStr;
+
+  const recapFull = byId('recapFullSelection');
+  if (recapFull) {
+    const timeStr = reservationState.time ? ` • ${reservationState.time}` : '';
+    recapFull.textContent = `${partyStr} • ${dateStr}${timeStr}`;
+  }
+
+  const recapArea3 = byId('recapAreaStep3');
+  if (recapArea3) recapArea3.textContent = areaStr;
+}
+
+function generateBookingVoucher() {
+  const randNum = Math.floor(10000 + Math.random() * 90000);
+  const code = `LUM-${randNum}`;
+  reservationState.code = code;
+
+  byId('voucherCode').textContent = code;
+  byId('vName').textContent = reservationState.guest.name;
+  byId('vDate').textContent = reservationState.dateFormatted;
+  byId('vTime').textContent = reservationState.time;
+  byId('vParty').textContent = `${reservationState.partyLabel || `${reservationState.party} Guests`}`;
+  byId('vArea').textContent = SEATING_NAMES[reservationState.area] || 'Main Dining Room';
+  byId('vOccasion').textContent = reservationState.guest.occasion;
+
+  const dietaryWrap = byId('vDietaryWrap');
+  const dietaryText = byId('vDietary');
+  const details = [];
+  if (reservationState.guest.dietary && reservationState.guest.dietary.length) {
+    details.push(reservationState.guest.dietary.join(', '));
+  }
+  if (reservationState.guest.notes) {
+    details.push(`"${reservationState.guest.notes}"`);
+  }
+
+  if (details.length) {
+    dietaryWrap.hidden = false;
+    dietaryText.textContent = details.join(' — ');
+  } else {
+    dietaryWrap.hidden = true;
+  }
+}
+
+function downloadCalendarEvent() {
+  const code = reservationState.code || 'LUM-RESERVATION';
+  const name = reservationState.guest.name || 'Valued Guest';
+  const party = reservationState.partyLabel || `${reservationState.party} Guests`;
+  const area = SEATING_NAMES[reservationState.area] || 'Main Dining Room';
+  const dateClean = (reservationState.dateIso || '').replace(/-/g, '');
+  const timeClean = (reservationState.time || '19:30').replace(':', '') + '00';
+
+  const icsData = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Lumière Bistro Paris//Table Reservation//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:res-${code}@lumierebistro.paris`,
+    `DTSTAMP:${dateClean}T120000Z`,
+    `DTSTART:${dateClean}T${timeClean}`,
+    `SUMMARY:Table Reservation - Lumière Artisanal Bistro (${code})`,
+    `DESCRIPTION:Tasting Table Reservation for ${name} (${party}). Seating Area: ${area}. Reference: ${code}. Address: 42 Rue de la Paix, 75002 Paris.`,
+    'LOCATION:42 Rue de la Paix, 75002 Paris, France',
+    'STATUS:CONFIRMED',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Lumiere_Reservation_${code}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function resetReservation() {
+  reservationState.step = 1;
+  reservationState.time = '';
+  reservationState.guest = {
+    name: '',
+    phone: '',
+    email: '',
+    occasion: 'Romantic Date Night',
+    dietary: [],
+    notes: ''
+  };
+
+  const form = byId('resGuestForm');
+  if (form) form.reset();
+
+  const slotBtns = document.querySelectorAll('.time-slot-btn');
+  slotBtns.forEach(btn => btn.classList.remove('active'));
+
+  const toStep3Btn = byId('toStep3');
+  if (toStep3Btn) toStep3Btn.disabled = true;
+
+  setWizardStep(1);
+}
+
+function initReservationWizard() {
+  const today = new Date();
+  reservationState.dateIso = formatDateIso(today);
+  reservationState.dateFormatted = formatDisplayDate(reservationState.dateIso);
+
+  const dateInput = byId('resDate');
+  if (dateInput) {
+    dateInput.value = reservationState.dateIso;
+    dateInput.min = reservationState.dateIso;
+    dateInput.addEventListener('change', () => {
+      if (dateInput.value) {
+        reservationState.dateIso = dateInput.value;
+        reservationState.dateFormatted = formatDisplayDate(dateInput.value);
+        document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+        updateRecapBars();
+      }
+    });
+  }
+
+  // Quick Dates
+  const quickDateBtns = document.querySelectorAll('.quick-date-btn');
+  quickDateBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      quickDateBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const target = new Date();
+      if (btn.dataset.offset !== undefined) {
+        target.setDate(target.getDate() + Number(btn.dataset.offset));
+      } else if (btn.dataset.preset === 'friday') {
+        const day = target.getDay();
+        const diff = (5 - day + 7) % 7 || 7;
+        target.setDate(target.getDate() + diff);
+      } else if (btn.dataset.preset === 'saturday') {
+        const day = target.getDay();
+        const diff = (6 - day + 7) % 7 || 7;
+        target.setDate(target.getDate() + diff);
+      }
+
+      const iso = formatDateIso(target);
+      reservationState.dateIso = iso;
+      reservationState.dateFormatted = formatDisplayDate(iso);
+      if (dateInput) dateInput.value = iso;
+      updateRecapBars();
+    });
+  });
+
+  // Party Size Pills
+  const partyPills = document.querySelectorAll('.party-pill');
+  partyPills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      partyPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      reservationState.party = Number(pill.dataset.guests);
+      reservationState.partyLabel = pill.textContent.trim().replace(/^👤|👥|✨/, '').trim();
+      updateRecapBars();
+    });
+  });
+
+  // Seating Area Radio Cards
+  const seatingCards = document.querySelectorAll('.seating-card');
+  seatingCards.forEach((card) => {
+    const radio = card.querySelector('input[type="radio"]');
+    if (radio) {
+      radio.addEventListener('change', () => {
+        seatingCards.forEach(c => c.classList.remove('active'));
+        if (radio.checked) {
+          card.classList.add('active');
+          reservationState.area = radio.value;
+          updateRecapBars();
+        }
+      });
+    }
+  });
+
+  // Step 1 -> Step 2
+  const toStep2Btn = byId('toStep2');
+  if (toStep2Btn) {
+    toStep2Btn.addEventListener('click', () => {
+      if (!reservationState.dateIso) {
+        if (dateInput) dateInput.focus();
+        return;
+      }
+      setWizardStep(2);
+    });
+  }
+
+  // Step 2 Time Slot Buttons
+  const slotBtns = document.querySelectorAll('.time-slot-btn');
+  const toStep3Btn = byId('toStep3');
+  slotBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      slotBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      reservationState.time = btn.dataset.time;
+      if (toStep3Btn) toStep3Btn.disabled = false;
+      updateRecapBars();
+    });
+  });
+
+  // Step 2 Navigation
+  const backToStep1Btn = byId('backToStep1');
+  if (backToStep1Btn) {
+    backToStep1Btn.addEventListener('click', () => setWizardStep(1));
+  }
+  if (toStep3Btn) {
+    toStep3Btn.addEventListener('click', () => {
+      if (!reservationState.time) return;
+      setWizardStep(3);
+    });
+  }
+
+  // Step 3 Navigation
+  const backToStep2Btn = byId('backToStep2');
+  if (backToStep2Btn) {
+    backToStep2Btn.addEventListener('click', () => setWizardStep(2));
+  }
+
+  // Step 3 Confirmation & Validation
+  const confirmBtn = byId('confirmReservation');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', () => {
+      const nameInput = byId('resName');
+      const phoneInput = byId('resPhone');
+      const emailInput = byId('resEmail');
+      const errName = byId('errName');
+      const errPhone = byId('errPhone');
+      const errEmail = byId('errEmail');
+
+      let valid = true;
+
+      // Validate Name
+      if (!nameInput.value.trim() || nameInput.value.trim().length < 2) {
+        errName.hidden = false;
+        valid = false;
+      } else {
+        errName.hidden = true;
+      }
+
+      // Validate Phone
+      if (!phoneInput.value.trim() || phoneInput.value.trim().length < 5) {
+        errPhone.hidden = false;
+        valid = false;
+      } else {
+        errPhone.hidden = true;
+      }
+
+      // Validate Email
+      const emailVal = emailInput.value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailVal || !emailRegex.test(emailVal)) {
+        errEmail.hidden = false;
+        valid = false;
+      } else {
+        errEmail.hidden = true;
+      }
+
+      if (!valid) return;
+
+      // Collect guest details
+      reservationState.guest.name = nameInput.value.trim();
+      reservationState.guest.phone = phoneInput.value.trim();
+      reservationState.guest.email = emailVal;
+      reservationState.guest.occasion = byId('resOccasion').value;
+      reservationState.guest.notes = byId('resSpecialNotes').value.trim();
+
+      // Collect dietary tags
+      const checkedDiets = document.querySelectorAll('#dietaryTags input[type="checkbox"]:checked');
+      reservationState.guest.dietary = Array.from(checkedDiets).map(c => c.value);
+
+      // Generate voucher & show confirmation
+      generateBookingVoucher();
+      setWizardStep('confirm');
+    });
+  }
+
+  // Voucher Action Buttons
+  const vCalBtn = byId('vCalBtn');
+  if (vCalBtn) vCalBtn.addEventListener('click', downloadCalendarEvent);
+
+  const vPrintBtn = byId('vPrintBtn');
+  if (vPrintBtn) vPrintBtn.addEventListener('click', () => window.print());
+
+  const vNewBtn = byId('vNewBtn');
+  if (vNewBtn) vNewBtn.addEventListener('click', resetReservation);
+
+  // Close Button
+  const closeBtn = byId('reservationClose');
+  if (closeBtn) closeBtn.addEventListener('click', () => hideDialog(byId('reservationModal')));
+
+  // Reserve Table Hero Button
+  const reserveBtn = byId('reserveBtn');
+  if (reserveBtn) {
+    reserveBtn.addEventListener('click', () => openReservationModal(reserveBtn));
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initReservationWizard);
+} else {
+  initReservationWizard();
+}

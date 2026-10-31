@@ -683,3 +683,107 @@ body {
     width: 120px;
   }
 }
+
+.episode-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 14px 0; }
+.episode-duration { padding: 4px 10px; border: 1px solid #64748b; border-radius: 999px; color: #e2e8f0; background: #111827; font-size: .8rem; font-variant-numeric: tabular-nums; }
+.episode-equalizer { display: inline-flex; gap: 3px; height: 20px; align-items: center; }
+.episode-equalizer i { width: 3px; height: 16px; background: #c4b5fd; transform: scaleY(.25); animation: episode-level .7s ease-in-out infinite alternate; animation-play-state: paused; }
+.episode-equalizer i:nth-child(2) { animation-delay: -.2s; }
+.episode-equalizer i:nth-child(3) { animation-delay: -.5s; }
+.episode-equalizer i:nth-child(4) { animation-delay: -.35s; }
+.is-playing .episode-equalizer i { animation-play-state: running; }
+@keyframes episode-level { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
+.episodes .grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+@media (prefers-reduced-motion: reduce) { .episode-equalizer i { animation: none; } }
+
+/* ==========================================================
+   Persistent mini player bar (fixed to the bottom of the viewport)
+   ========================================================== */
+.player-dock-section {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  max-width: none;
+  margin: 0;
+  padding: 0 12px 12px;
+  pointer-events: none;
+}
+.player-dock-section[hidden] { display: none; }
+body.has-mini-player { padding-bottom: 150px; }
+
+.player-dock-section .dock-container {
+  pointer-events: auto;
+  max-width: 1040px;
+  margin: 0 auto;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  padding: 12px 20px;
+  border-radius: 18px;
+  background: rgba(20, 16, 24, 0.72);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  animation: dock-rise .28s ease-out;
+}
+@keyframes dock-rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.player-dock-section .dock-now-playing { flex: 1 1 220px; min-width: 0; }
+.player-dock-section .dock-art { width: 48px; height: 48px; font-size: 1.7rem; }
+.player-dock-section .dock-info { min-width: 0; }
+.player-dock-section .dock-title {
+  font-size: 1rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-dock-section .dock-guest {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-dock-section .dock-timeline-wrap { flex: 2 1 340px; gap: 8px; }
+.player-dock-section .dock-controls-row { gap: 12px; }
+.player-dock-section .dock-play-pause-btn { width: 42px; height: 42px; font-size: 1.1rem; }
+
+.dock-volume { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.dock-vol-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+}
+.dock-vol-btn:hover { background: rgba(236, 72, 153, 0.15); border-color: var(--pink); }
+.dock-volume-slider {
+  width: 96px;
+  height: 6px;
+  accent-color: var(--pink);
+  cursor: pointer;
+}
+
+.player-dock-section button:focus-visible,
+.player-dock-section input:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  body.has-mini-player { padding-bottom: 230px; }
+  .player-dock-section { padding: 0 8px 8px; }
+  .player-dock-section .dock-container { padding: 10px 12px; gap: 8px 10px; }
+  .player-dock-section .dock-now-playing { flex-basis: 100%; gap: 10px; }
+  .player-dock-section .dock-timeline-wrap { flex: 1 1 100%; }
+  .player-dock-section .dock-controls-row { flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+  .player-dock-section .dock-volume { flex: 1 1 100%; }
+  .dock-volume-slider { flex: 1; width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .player-dock-section .dock-container { animation: none; } }

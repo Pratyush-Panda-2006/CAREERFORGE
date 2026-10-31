@@ -21,7 +21,7 @@
   </header>
 
   <!-- Interactive Mini Player Dock & Timeline Scrubber -->
-  <section class="player-dock-section" id="player-dock">
+  <section class="player-dock-section" id="player-dock" role="region" aria-label="Mini audio player" hidden>
     <div class="dock-container">
       <div class="dock-now-playing">
         <div class="dock-art">🎙️</div>
@@ -34,20 +34,25 @@
 
       <div class="dock-timeline-wrap">
         <div class="dock-controls-row">
-          <button type="button" class="dock-btn" id="dock-rewind-btn" title="Rewind 15 seconds">↺ 15s</button>
-          <button type="button" class="dock-play-pause-btn" id="dock-play-pause-btn" title="Play / Pause Episode">▶</button>
-          <button type="button" class="dock-btn" id="dock-forward-btn" title="Forward 15 seconds">15s ↻</button>
+          <button type="button" class="dock-btn" id="dock-rewind-btn" title="Rewind 15 seconds" aria-label="Rewind 15 seconds">↺ 15s</button>
+          <button type="button" class="dock-play-pause-btn" id="dock-play-pause-btn" title="Play Episode" aria-label="Play or pause episode">▶</button>
+          <button type="button" class="dock-btn" id="dock-forward-btn" title="Forward 15 seconds" aria-label="Forward 15 seconds">15s ↻</button>
           <button type="button" class="dock-speed-pill" id="dock-speed-pill" onclick="toggleSpeed()" title="Cycle Playback Speed">1x</button>
         </div>
 
         <div class="dock-scrubber-row">
           <span class="time-label" id="current-time-label">00:00</span>
           <div class="scrubber-bar-container">
-            <input type="range" class="dock-scrubber" id="dock-scrubber" min="0" max="2880" value="0" step="1" aria-label="Episode timeline scrubber" />
+            <input type="range" class="dock-scrubber" id="dock-scrubber" min="0" max="2880" value="0" step="1" aria-label="Episode timeline scrubber" aria-valuetext="00:00 of 48:00" />
             <div class="scrubber-fill" id="scrubber-fill"></div>
           </div>
           <span class="time-label" id="duration-label">48:00</span>
         </div>
+      </div>
+
+      <div class="dock-volume">
+        <button type="button" class="dock-vol-btn" id="dock-mute-btn" aria-label="Mute" title="Mute">🔊</button>
+        <input type="range" class="dock-volume-slider" id="dock-volume" min="0" max="100" value="100" step="1" aria-label="Volume" aria-valuetext="100%" />
       </div>
     </div>
   </section>
@@ -87,15 +92,18 @@
       <div class="card active-card" id="card-142" onclick="playEpisode('Ep 142')" style="cursor: pointer;">
         <div class="ep-num">EP 142 • ACTIVE IN PLAYER</div>
         <h3>The Future of Agentic AI &amp; Spatial Compute</h3>
-        <p>48 Mins • Guest: Dr. Aris Thorne (OpenAI Lead)</p>
+        <div class="episode-meta"><span class="episode-duration">48 min</span><span class="episode-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
+        <p>Guest: Dr. Aris Thorne (OpenAI Lead)</p>
       </div>
       <div class="card" id="card-141" onclick="playEpisode('Ep 141')" style="cursor: pointer;">
         <div class="ep-num">EP 141</div>
         <h3>Scaling Vector Databases to 10 Billion Chunks</h3>
-        <p>54 Mins • Guest: Marcus Vance (ChromaDB Creator)</p>
+        <div class="episode-meta"><span class="episode-duration">54 min</span><span class="episode-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
+        <p>Guest: Marcus Vance (ChromaDB Creator)</p>
       </div>
     </div>
   </main>
+  <script src="player-logic.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

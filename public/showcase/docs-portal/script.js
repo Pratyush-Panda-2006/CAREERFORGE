@@ -120,3 +120,40 @@ function copySnippet(text) {
     prompt('Copy snippet:', text);
   });
 }
+
+// Filter navigation topics without changing the article or its anchors.
+(() => {
+  const input = document.getElementById('topic-filter');
+  const nav = document.getElementById('doc-topic-nav');
+  const status = document.getElementById('topic-filter-status');
+  if (!input || !nav || !status) return;
+  const links = [...nav.querySelectorAll('a.nav-link')];
+  const headings = [...nav.querySelectorAll('.section-title')];
+  const filter = () => {
+    const query = input.value.trim().toLocaleLowerCase();
+    links.forEach(link => { link.hidden = !link.textContent.toLocaleLowerCase().includes(query); });
+    headings.forEach(heading => {
+      let sibling = heading.nextElementSibling;
+      let visible = false;
+      while (sibling && !sibling.classList.contains('section-title')) {
+        if (sibling.matches('a.nav-link') && !sibling.hidden) visible = true;
+        sibling = sibling.nextElementSibling;
+      }
+      heading.hidden = !visible;
+    });
+    const count = links.filter(link => !link.hidden).length;
+    status.textContent = !query ? '' : count ? `${count} topic${count === 1 ? '' : 's'} found.` : 'No topics found. Clear the filter to see all topics.';
+  };
+  input.addEventListener('input', filter);
+  input.addEventListener('search', filter);
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { input.value = ''; filter(); event.stopPropagation(); }
+  });
+  document.addEventListener('keydown', event => {
+    const target = event.target;
+    if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey || event.defaultPrevented) return;
+    if (target instanceof Element && (target.closest('input, textarea, select, [contenteditable]'))) return;
+    event.preventDefault();
+    input.focus();
+  });
+})();

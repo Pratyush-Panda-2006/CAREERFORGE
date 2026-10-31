@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TerraInitia — Global Reforestation & Ocean Climate Alliance</title>
+  <title>TerraInitia — Global Reforestation &amp; Ocean Climate Alliance</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <header class="hero">
@@ -15,6 +15,7 @@
     <h1>Restoring 10 Million Acres of Rainforest by 2030</h1>
     <p>Open-source satellite tracking &amp; verified community reforestation grants.</p>
     <button class="donate-btn" onclick="openDonateModal()">Plant 10 Trees ($15) ↗</button>
+    <button type="button" class="volunteer-btn" id="open-volunteer-modal">Join the Movement</button>
   </header>
 
   <main class="impact">
@@ -31,6 +32,118 @@
       <p>On-Chain Satellite Verification</p>
     </div>
   </main>
+
+  <!-- ===== Global Conservation Projects Directory (Issue #104) START ===== -->
+  <section class="conservation-directory" id="conservation-projects" aria-labelledby="directory-title">
+    <div class="directory-header">
+      <div class="pill">🍃 GLOBAL CONSERVATION DIRECTORY</div>
+      <h2 id="directory-title">Verified Ecosystem Reforestation Projects</h2>
+      <p class="directory-sub">Explore active field sanctuaries monitored by satellite sensors. Filter by biome, inspect GPS coordinates, and explore native tree species planted by indigenous stewards.</p>
+    </div>
+
+    <!-- Directory Summary Stats Bar -->
+    <div class="directory-summary-bar">
+      <div class="dir-summary-stat">
+        <span class="dir-stat-num" id="stat-total-ha">197,900 ha</span>
+        <span class="dir-stat-lbl">Hectares Under Protection</span>
+      </div>
+      <div class="dir-stat-sep" aria-hidden="true"></div>
+      <div class="dir-summary-stat">
+        <span class="dir-stat-num" id="stat-total-projects">8 Projects</span>
+        <span class="dir-stat-lbl">Active Conservation Sites</span>
+      </div>
+      <div class="dir-stat-sep" aria-hidden="true"></div>
+      <div class="dir-summary-stat">
+        <span class="dir-stat-num highlight-stat" id="stat-avg-survival">90.5%</span>
+        <span class="dir-stat-lbl">Average Sapling Survival</span>
+      </div>
+      <div class="dir-stat-sep" aria-hidden="true"></div>
+      <div class="dir-summary-stat">
+        <span class="dir-stat-num" id="stat-total-species">82 Species</span>
+        <span class="dir-stat-lbl">Native Flora Cataloged</span>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="directory-controls">
+      <div class="biome-filter-group" role="tablist" aria-label="Filter conservation projects by biome">
+        <button type="button" class="biome-btn active" role="tab" aria-selected="true" data-biome="all">
+          <span class="biome-icon" aria-hidden="true">🌍</span> All Biomes (<span id="count-all">8</span>)
+        </button>
+        <button type="button" class="biome-btn" role="tab" aria-selected="false" data-biome="Rainforest">
+          <span class="biome-icon" aria-hidden="true">🌿</span> Rainforest (<span id="count-rainforest">2</span>)
+        </button>
+        <button type="button" class="biome-btn" role="tab" aria-selected="false" data-biome="Coral Reefs">
+          <span class="biome-icon" aria-hidden="true">🪸</span> Coral Reefs (<span id="count-reefs">2</span>)
+        </button>
+        <button type="button" class="biome-btn" role="tab" aria-selected="false" data-biome="Boreal Forest">
+          <span class="biome-icon" aria-hidden="true">🌲</span> Boreal Forest (<span id="count-boreal">2</span>)
+        </button>
+        <button type="button" class="biome-btn" role="tab" aria-selected="false" data-biome="Savanna">
+          <span class="biome-icon" aria-hidden="true">🌾</span> Savanna (<span id="count-savanna">2</span>)
+        </button>
+      </div>
+
+      <div class="directory-search-wrapper">
+        <span class="dir-search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="directorySearchInput" placeholder="Search projects by name, country, species, or coordinates..." aria-label="Search conservation projects" autocomplete="off" />
+      </div>
+    </div>
+
+    <!-- Active Projects Grid -->
+    <div class="projects-grid" id="projectsGrid" role="region" aria-label="Conservation Projects List">
+      <!-- Generated dynamically in script.js -->
+    </div>
+  </section>
+
+  <!-- Species Planted Details Modal -->
+  <div class="species-modal-backdrop" id="speciesModalBackdrop" hidden aria-hidden="true">
+    <div class="species-modal" id="speciesModal" role="dialog" aria-modal="true" aria-labelledby="modalProjectTitle">
+      <div class="species-modal-header">
+        <div class="modal-badge-group">
+          <span class="modal-biome-badge" id="modalBiomeBadge">🌿 Rainforest</span>
+          <span class="modal-coord-pill" id="modalCoordPill">📍 Coordinates</span>
+        </div>
+        <button type="button" class="modal-close-icon" id="speciesModalCloseBtn" aria-label="Close species details modal">✕</button>
+      </div>
+
+      <h3 class="species-modal-title" id="modalProjectTitle">Project Title</h3>
+      <p class="species-modal-subtitle" id="modalProjectLocation">Location Description</p>
+
+      <!-- Key Project Quick Stats in Modal -->
+      <div class="modal-metrics-bar">
+        <div class="modal-metric-card">
+          <span class="modal-metric-val" id="modalMetricHa">0 ha</span>
+          <span class="modal-metric-lbl">Restored Area</span>
+        </div>
+        <div class="modal-metric-card">
+          <span class="modal-metric-val highlight-val" id="modalMetricSurvival">0%</span>
+          <span class="modal-metric-lbl">Survival Rate</span>
+        </div>
+        <div class="modal-metric-card">
+          <span class="modal-metric-val" id="modalMetricSpeciesCount">0</span>
+          <span class="modal-metric-lbl">Species Planted</span>
+        </div>
+      </div>
+
+      <div class="species-list-section">
+        <div class="species-list-heading">
+          <h4>Native Flora &amp; Keystone Species Catalog</h4>
+          <span class="species-list-meta">Verified Botanist Survey Data</span>
+        </div>
+        <div class="species-cards-container" id="speciesCardsContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <div class="species-modal-footer">
+        <button type="button" class="btn-modal-dismiss" id="speciesModalDismissBtn">Close Species Directory</button>
+        <button type="button" class="donate-btn" onclick="openDonateModal()">Sponsor This Reserve ↗</button>
+      </div>
+    </div>
+  </div>
+  <!-- ===== Global Conservation Projects Directory (Issue #104) END ===== -->
+
   <section class="calc" id="calculator" aria-labelledby="calc-title">
     <h2 id="calc-title">Carbon Footprint Calculator</h2>
     <p class="calc-sub">Estimate your yearly emissions in metric tons of CO2e and see which changes matter most.</p>
@@ -89,6 +202,66 @@
     </div>
     <p class="sources">Estimates only. Factors: car 0.17 kg CO2e/km and transit 0.07 kg/passenger-km (UK DEFRA conversion factors, rounded); flights about 100 kg per hour (approximate economy average, DEFRA); diet from Scarborough et al. 2014 (Climatic Change); electricity 0.44 kg/kWh (IEA world average grid) and gas 0.18 kg/kWh (DEFRA); benchmarks from Global Carbon Project; the $20/t offset price and 22 kg per tree per year are assumptions.</p>
   </section>
+  <dialog class="volunteer-modal" id="volunteer-modal"
+        aria-labelledby="volunteer-title">
+    <div class="modal-content">
+      <button type="button" class="modal-close"
+              id="close-volunteer-modal"
+              aria-label="Close volunteer form">
+        &times;
+      </button>
+
+      <div id="volunteer-form-view">
+        <p class="modal-eyebrow">MAKE A DIFFERENCE</p>
+        <h2 id="volunteer-title">Join the Movement</h2>
+        <p class="modal-description">
+          Choose a cause and take the first step toward a greener future.
+        </p>
+
+        <form id="volunteer-form">
+          <label for="volunteer-name">Full name</label>
+          <input type="text" id="volunteer-name" name="name"
+                placeholder="Your name" autocomplete="name"
+                required maxlength="100" />
+
+          <label for="volunteer-email">Email address</label>
+          <input type="email" id="volunteer-email" name="email"
+                placeholder="you@example.com" autocomplete="email"
+                required maxlength="254" />
+
+          <label for="volunteer-cause">Preferred cause</label>
+          <select id="volunteer-cause" name="cause" required>
+            <option value="">Select a cause</option>
+            <option value="reforestation">Rainforest reforestation</option>
+            <option value="ocean">Ocean conservation</option>
+            <option value="wildlife">Wildlife protection</option>
+            <option value="community">Community climate education</option>
+          </select>
+
+          <p id="volunteer-error" class="form-error"
+            role="alert" hidden></p>
+
+          <button type="submit" class="donate-btn volunteer-submit">
+            Sign me up
+          </button>
+        </form>
+      </div>
+
+      <section id="volunteer-success" class="volunteer-success"
+              aria-live="polite" hidden>
+        <div class="success-badge" aria-hidden="true">✓</div>
+        <h2>You're part of the movement!</h2>
+        <p id="volunteer-thank-you"></p>
+        <p class="demo-notice">
+          This is a demo. Your information has not been sent or saved.
+        </p>
+        <button type="button" class="donate-btn"
+                id="finish-volunteer">
+          Done
+        </button>
+      </section>
+    </div>
+  </dialog>
   <script src="script.js"></script>
 </body>
 </html>

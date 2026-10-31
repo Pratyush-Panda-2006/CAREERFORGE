@@ -19,29 +19,57 @@
     </div>
   </header>
 
-  <main class="listings">
+  <main class="listings" id="estates">
     <h2>Featured Estates</h2>
-    <div class="grid">
-      <div class="card" data-price="14500000">
-        <div class="card-badge">$14,500,000</div>
-        <div class="img-holder">🏰</div>
-        <h3>The Glass Horizon Villa</h3>
-        <p class="location">Malibu, California</p>
-        <div class="specs">
-          <span>5 Beds</span> • <span>7 Baths</span> • <span>9,200 sqft</span>
-        </div>
-        <button class="calc-estate-btn" onclick="applyEstatePrice(14500000)">Calculate Mortgage ↗</button>
-      </div>
+    <div class="listings-layout">
+      <aside class="filter-sidebar" aria-label="Estate filters">
+        <button type="button" class="filter-toggle" id="filter-toggle" aria-expanded="false" aria-controls="filter-panel">Filter Estates</button>
+        <div class="filter-panel" id="filter-panel">
+          <form id="filter-form" novalidate>
+            <fieldset class="filter-group">
+              <legend>Price Range</legend>
+              <p class="price-label" id="price-label">$1M – $25M+</p>
+              <div class="dual-range" id="price-track">
+                <input type="range" id="price-min" aria-label="Minimum price" min="1000000" max="25000000" step="500000" value="1000000" />
+                <input type="range" id="price-max" aria-label="Maximum price" min="1000000" max="25000000" step="500000" value="25000000" />
+              </div>
+              <div class="range-ends"><span>$1M</span><span>$25M+</span></div>
+            </fieldset>
 
-      <div class="card" data-price="22000000">
-        <div class="card-badge">$22,000,000</div>
-        <div class="img-holder">🏙️</div>
-        <h3>Skyline Sky-Penthouse</h3>
-        <p class="location">Tribeca, New York</p>
-        <div class="specs">
-          <span>4 Beds</span> • <span>5 Baths</span> • <span>6,800 sqft</span>
+            <div class="filter-group">
+              <label class="group-label" for="beds-min">Minimum Bedrooms</label>
+              <select id="beds-min" class="beds-select">
+                <option value="0">Any</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+                <option value="5">5+</option>
+                <option value="6">6+</option>
+              </select>
+            </div>
+
+            <fieldset class="filter-group">
+              <legend>Property Type</legend>
+              <div id="type-options" class="check-list"></div>
+            </fieldset>
+
+            <fieldset class="filter-group">
+              <legend>Special Amenities</legend>
+              <div id="amenity-options" class="check-list"></div>
+            </fieldset>
+
+            <button type="button" class="reset-btn" data-reset-filters>Reset Filters</button>
+          </form>
         </div>
-        <button class="calc-estate-btn" onclick="applyEstatePrice(22000000)">Calculate Mortgage ↗</button>
+      </aside>
+
+      <div class="listings-results">
+        <p class="estate-count" id="estate-count" role="status" aria-live="polite">Showing 6 of 6 Estates</p>
+        <div class="grid" id="estate-grid"></div>
+        <div class="estate-empty" id="estate-empty" hidden>
+          <p>No estates match these filters.</p>
+          <button type="button" class="reset-btn inline" data-reset-filters>Reset Filters</button>
+        </div>
       </div>
     </div>
   </main>
@@ -269,6 +297,7 @@
     </div>
   </section>
 
+  <script src="filters.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -18,7 +18,9 @@
     </div>
     <div class="nav-actions">
       <a href="#compound-engine" class="nav-link">Growth Engine</a>
-      <span class="balance-badge">Portfolio: $128,450.00</span>
+      <span class="balance-badge">Portfolio: <span id="portfolio-balance">$128,450.00</span>
+        <button type="button" id="balance-visibility" aria-controls="portfolio-balance" aria-pressed="false" aria-label="Hide balance" title="Hide balance"><span aria-hidden="true">◉</span></button>
+      </span>
       <button class="btn-primary" onclick="triggerDeposit()">Deposit Funds</button>
     </div>
   </header>
@@ -182,18 +184,47 @@
             <button type="button" id="resetDefaultsBtn" class="reset-btn" title="Reset to standard defaults">↺ Reset</button>
           </div>
 
+          <!-- Currency Selector 3-Way Toggle Group (USD, EUR, GBP) -->
+          <div class="currency-selector-card" role="region" aria-label="Base Currency Selector">
+            <div class="currency-selector-header">
+              <label class="currency-selector-label" id="currencySelectorLabel">Base Currency</label>
+              <span class="currency-status-pill" id="currencyStatusPill">
+                <span class="currency-dot"></span>
+                <span id="currencyActiveTag">USD ($)</span>
+              </span>
+            </div>
+            <div class="currency-toggle-group" role="radiogroup" aria-labelledby="currencySelectorLabel">
+              <button type="button" class="currency-toggle-btn active" data-currency="USD" data-symbol="$" data-rate="1.0" role="radio" aria-checked="true" id="currencyBtnUSD">
+                <span class="currency-btn-sym">$</span>
+                <span class="currency-btn-code">USD</span>
+              </button>
+              <button type="button" class="currency-toggle-btn" data-currency="EUR" data-symbol="€" data-rate="0.92" role="radio" aria-checked="false" id="currencyBtnEUR">
+                <span class="currency-btn-sym">€</span>
+                <span class="currency-btn-code">EUR</span>
+              </button>
+              <button type="button" class="currency-toggle-btn" data-currency="GBP" data-symbol="£" data-rate="0.79" role="radio" aria-checked="false" id="currencyBtnGBP">
+                <span class="currency-btn-sym">£</span>
+                <span class="currency-btn-code">GBP</span>
+              </button>
+            </div>
+            <div class="currency-footer-info">
+              <span class="currency-rate-info" id="currencyRateInfo">Reference FX: 1 USD ≈ 1.00 USD</span>
+              <span class="currency-mode-tag">Dynamic Yield</span>
+            </div>
+          </div>
+
           <!-- Parameter 1: Initial Deposit -->
           <div class="input-group">
             <div class="input-header">
-              <label for="initialDepositInput">Initial Investment ($)</label>
+              <label for="initialDepositInput" id="initialDepositLabel">Initial Investment ($)</label>
               <div class="value-display" id="initialDepositDisplay">$10,000</div>
             </div>
             <div class="input-field-wrap">
-              <span class="currency-symbol">$</span>
+              <span class="currency-symbol currency-symbol-dynamic" id="initialDepositSymbol">$</span>
               <input type="number" id="initialDepositInput" min="0" max="1000000" step="500" value="10000" class="num-input" />
             </div>
             <input type="range" id="initialDepositSlider" min="0" max="250000" step="500" value="10000" class="range-slider" />
-            <div class="slider-marks">
+            <div class="slider-marks" id="initialDepositMarks">
               <span>$0</span>
               <span>$50k</span>
               <span>$150k</span>
@@ -204,15 +235,15 @@
           <!-- Parameter 2: Monthly Contribution -->
           <div class="input-group">
             <div class="input-header">
-              <label for="monthlyContributionInput">Monthly Contribution ($)</label>
+              <label for="monthlyContributionInput" id="monthlyContributionLabel">Monthly Contribution ($)</label>
               <div class="value-display" id="monthlyContributionDisplay">$500 / mo</div>
             </div>
             <div class="input-field-wrap">
-              <span class="currency-symbol">$</span>
+              <span class="currency-symbol currency-symbol-dynamic" id="monthlyContributionSymbol">$</span>
               <input type="number" id="monthlyContributionInput" min="0" max="50000" step="50" value="500" class="num-input" />
             </div>
             <input type="range" id="monthlyContributionSlider" min="0" max="10000" step="50" value="500" class="range-slider" />
-            <div class="slider-marks">
+            <div class="slider-marks" id="monthlyContributionMarks">
               <span>$0</span>
               <span>$2,500</span>
               <span>$5,000</span>
@@ -407,6 +438,49 @@
     </div>
   </section>
 
+  <!-- Transaction Ledger -->
+  <section class="engine-section ledger-section" id="transaction-ledger" aria-labelledby="ledgerTitle">
+    <div class="engine-container">
+      <div class="section-header">
+        <h2 id="ledgerTitle">Transaction History</h2>
+        <p>Search by merchant, filter by category and date range, and sort by date or amount. Sample data for demonstration.</p>
+      </div>
+      <div class="ledger-controls">
+        <div class="ledger-field ledger-search">
+          <label for="ledgerSearch">Search merchant</label>
+          <input type="search" id="ledgerSearch" class="num-input" placeholder="e.g. Harbor" autocomplete="off" />
+        </div>
+        <div class="ledger-field">
+          <label for="ledgerFrom">From</label>
+          <input type="date" id="ledgerFrom" class="num-input" />
+        </div>
+        <div class="ledger-field">
+          <label for="ledgerTo">To</label>
+          <input type="date" id="ledgerTo" class="num-input" />
+        </div>
+        <button type="button" id="ledgerClear" class="reset-btn">Clear filters</button>
+      </div>
+      <p id="ledgerRangeError" class="ledger-error" role="alert" hidden>The start date must be on or before the end date.</p>
+      <div id="ledgerPills" class="ledger-pills" role="group" aria-label="Filter by category"></div>
+      <p id="ledgerStatus" class="ledger-status" role="status" aria-live="polite"></p>
+      <div class="milestone-table-container ledger-table-wrap" id="ledgerTableWrap">
+        <table class="milestone-table" id="ledgerTable">
+          <caption class="sr-only">Transaction history</caption>
+          <thead>
+            <tr>
+              <th scope="col" aria-sort="descending"><button type="button" class="ledger-sort" data-sort="date">Date <span class="sort-arrow" aria-hidden="true"></span></button></th>
+              <th scope="col">Merchant</th>
+              <th scope="col">Category</th>
+              <th scope="col" class="ledger-amount" aria-sort="none"><button type="button" class="ledger-sort" data-sort="amount">Amount <span class="sort-arrow" aria-hidden="true"></span></button></th>
+            </tr>
+          </thead>
+          <tbody id="ledgerBody"></tbody>
+        </table>
+      </div>
+      <p id="ledgerEmpty" class="ledger-empty" hidden>No transactions match these filters. Try a different search, category or date range.</p>
+    </div>
+  </section>
+
   <!-- Deposit Modal -->
   <div class="modal-backdrop" id="depositModal" style="display: none;">
     <div class="modal-card">
@@ -444,6 +518,7 @@
     </div>
   </footer>
 
+  <script src="ledger.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

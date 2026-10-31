@@ -10,27 +10,366 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header className="hero">
-    <div className="badge">1,900 HP • ALL-WHEEL VECTORING</div>
+  <header class="hero">
+    <div class="badge">1,900 HP • ALL-WHEEL VECTORING</div>
     <h1>APEX ZERO HYPERCAR</h1>
     <p>0 to 60 MPH in 1.74s • Carbon Monocoque Chassis • Solid-State Battery</p>
-    <button className="reserve-btn" onclick="reserveHypercar()">Reserve Allocation ↗</button>
+    <nav class="section-links" aria-label="Explore hypercar">
+      <a href="#launch-control">Launch Simulator</a>
+      <a href="#comparator">Specifications</a>
+      <a href="#wind-tunnel">Aerodynamics</a>
+      <a href="#configurator">Configure your order</a>
+    </nav>
+    <button class="reserve-btn" onclick="reserveHypercar()">Reserve Allocation ↗</button>
   </header>
 
-  <main className="specs-grid">
-    <div className="spec-card">
-      <span className="val">1.74s</span>
-      <span className="lbl">0-60 MPH</span>
+  <!-- ===== Launch Control 0-60 Simulation & Live G-Meter (Issue #177) START ===== -->
+  <section class="launch-sim-section" id="launch-control" aria-labelledby="lc-heading">
+    <div class="lc-container">
+      <div class="lc-badge">DYNAMIC TELEMETRY // LAUNCH CONTROL SYSTEM</div>
+      <h2 id="lc-heading">0–60 MPH ACCELERATION SIMULATOR &amp; LIVE G-METER</h2>
+      <p class="lc-intro">Experience the brutal acoustic and kinetic thrust of the Apex Zero. Engage launch control to simulate 0–60 mph acceleration in 1.74 seconds with active twin-axial G-force telemetry.</p>
+
+      <!-- Launch Control Staging Lights (Tree) -->
+      <div class="lc-staging-lights" id="lcStagingLights" aria-label="Launch Staging Tree" role="region">
+        <div class="staging-col"><span class="staging-light stage-amber" id="stageAmber1"></span><span class="light-label">PRE-STAGE</span></div>
+        <div class="staging-col"><span class="staging-light stage-amber" id="stageAmber2"></span><span class="light-label">STAGED</span></div>
+        <div class="staging-col"><span class="staging-light stage-amber" id="stageAmber3"></span><span class="light-label">BOOST</span></div>
+        <div class="staging-col"><span class="staging-light stage-green" id="stageGreen"></span><span class="light-label">LAUNCH</span></div>
+      </div>
+
+      <!-- Main Cockpit HUD Cluster -->
+      <div class="lc-cockpit-grid">
+        <!-- 1. Digital Speedometer & Redline Gauge -->
+        <div class="lc-hud-card lc-speedo-card">
+          <div class="hud-card-header">
+            <span class="hud-card-tag">DIGITAL TACH &amp; VELOCITY</span>
+            <span class="hud-status-chip" id="lcDriveMode">ALL-WHEEL VECTOR • TRACK</span>
+          </div>
+
+          <div class="speedo-gauge-wrap">
+            <svg class="speedo-arc-svg" viewBox="0 0 320 200" aria-hidden="true">
+              <!-- Background Arc -->
+              <path class="speedo-bg-track" d="M 40 170 A 120 120 0 1 1 280 170" />
+              <!-- Active Speed Arc (dynamically updated) -->
+              <path class="speedo-active-arc" id="speedoActiveArc" d="M 40 170 A 120 120 0 1 1 280 170" />
+              <!-- Redline Zone Marker -->
+              <path class="speedo-redline-arc" d="M 235 75 A 120 120 0 0 1 280 170" />
+            </svg>
+
+            <div class="speedo-center-readout">
+              <div class="speed-number" id="lcCurrentSpeed">0</div>
+              <div class="speed-unit">MPH</div>
+              <div class="rpm-readout" id="lcRpmReadout">0 RPM • 1ST GEAR</div>
+            </div>
+          </div>
+
+          <div class="speedo-footer-bar">
+            <div class="speedo-stat"><span class="lbl">POWER OUTPUT</span><span class="val highlight" id="lcKwOutput">0 kW (0 HP)</span></div>
+            <div class="speedo-stat"><span class="lbl">PEAK ACCEL</span><span class="val" id="lcPeakMph">0.0 MPH</span></div>
+            <div class="speedo-stat"><span class="lbl">SURFACE GRIP</span><span class="val" id="lcSurfaceGrip">99.8% OPTIMAL</span></div>
+          </div>
+        </div>
+
+        <!-- 2. Circular G-Force Dial Meter -->
+        <div class="lc-hud-card lc-gmeter-card">
+          <div class="hud-card-header">
+            <span class="hud-card-tag">DUAL-AXIS KINETIC G-METER</span>
+            <span class="hud-status-chip chip-g" id="lcGStatus">IDLE (0.00 G)</span>
+          </div>
+
+          <div class="gmeter-dial-wrap">
+            <svg class="gmeter-svg" viewBox="0 0 240 240" aria-label="Circular G-force Dial" role="img">
+              <!-- Radial rings -->
+              <circle cx="120" cy="120" r="100" class="g-ring-outer" />
+              <circle cx="120" cy="120" r="70" class="g-ring-mid" />
+              <circle cx="120" cy="120" r="35" class="g-ring-inner" />
+              <!-- Crosshair axes -->
+              <line x1="20" y1="120" x2="220" y2="120" class="g-axis" />
+              <line x1="120" y1="20" x2="120" y2="220" class="g-axis" />
+              <!-- Axis labels -->
+              <text x="120" y="15" class="g-axis-lbl" text-anchor="middle">+ACCEL</text>
+              <text x="120" y="235" class="g-axis-lbl" text-anchor="middle">-BRAKE</text>
+              <text x="12" y="124" class="g-axis-lbl" text-anchor="start">LAT L</text>
+              <text x="228" y="124" class="g-axis-lbl" text-anchor="end">LAT R</text>
+              <text x="120" y="82" class="g-ring-lbl" text-anchor="middle">1.0G</text>
+              <text x="120" y="48" class="g-ring-lbl" text-anchor="middle">2.0G</text>
+              <!-- Animated G-Force Indicator Puck -->
+              <circle cx="120" cy="120" r="8" class="g-puck" id="lcGPuck" />
+              <!-- Glow trail pulse -->
+              <circle cx="120" cy="120" r="14" class="g-puck-trail" id="lcGPuckTrail" />
+            </svg>
+
+            <div class="gmeter-numerical-readout">
+              <span class="g-primary-val" id="lcPrimaryG">0.00 G</span>
+              <span class="g-sub-lbl">LONGITUDINAL FORCE</span>
+            </div>
+          </div>
+
+          <div class="gmeter-footer-bar">
+            <div class="g-stat"><span class="lbl">LATERAL G</span><span class="val" id="lcLatG">0.00 G</span></div>
+            <div class="g-stat"><span class="lbl">MAX OBSERVED</span><span class="val peak" id="lcMaxG">0.00 G</span></div>
+            <div class="g-stat"><span class="lbl">AERODOWN</span><span class="val" id="lcAeroDown">+480 kg</span></div>
+          </div>
+        </div>
+
+        <!-- 3. Telemetry Stopwatch & Split Timeline -->
+        <div class="lc-hud-card lc-splits-card">
+          <div class="hud-card-header">
+            <span class="hud-card-tag">PRECISION TELEMETRY STOPWATCH</span>
+            <span class="hud-status-chip chip-timer" id="lcTimerStatus">STANDBY</span>
+          </div>
+
+          <div class="stopwatch-display">
+            <div class="stopwatch-digits" id="lcStopwatchDigits">0.000<span class="stopwatch-sec">s</span></div>
+            <div class="stopwatch-target">BENCHMARK TARGET: <strong>1.740s</strong></div>
+          </div>
+
+          <div class="splits-progress-track">
+            <div class="splits-progress-bar" id="lcSplitsProgressBar"></div>
+          </div>
+
+          <div class="splits-milestones">
+            <div class="milestone-item" id="ms0to30">
+              <span class="m-dot"></span>
+              <span class="m-lbl">0–30 MPH</span>
+              <span class="m-val" id="msVal0to30">-- s</span>
+            </div>
+            <div class="milestone-item" id="ms0to60">
+              <span class="m-dot"></span>
+              <span class="m-lbl">0–60 MPH</span>
+              <span class="m-val" id="msVal0to60">-- s</span>
+            </div>
+            <div class="milestone-item" id="ms0to100">
+              <span class="m-dot"></span>
+              <span class="m-lbl">0–100 MPH</span>
+              <span class="m-val" id="msVal0to100">-- s</span>
+            </div>
+          </div>
+
+          <div class="lc-actions-bar">
+            <button type="button" class="lc-launch-btn" id="lcLaunchBtn">
+              <span class="btn-icon">⚡</span>
+              <span class="btn-text">LAUNCH HYPERCAR</span>
+            </button>
+            <button type="button" class="lc-btn-ghost" id="lcResetBtn">
+              <span>↺ Reset</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Telemetry Status Readout Bar -->
+      <div class="lc-console-feedback" id="lcConsoleFeedback" role="status" aria-live="polite">
+        [LAUNCH CONTROL ARMED]: Hold Launch button to engage twin dual-inverter pre-stage spooling.
+      </div>
     </div>
-    <div className="spec-card">
-      <span className="val">258 MPH</span>
-      <span className="lbl">TOP SPEED</span>
+  </section>
+  <!-- ===== Launch Control 0-60 Simulation & Live G-Meter (Issue #177) END ===== -->
+
+  <!-- ===== Performance Comparator (issue #52) START ===== -->
+  <section class="cmp" id="comparator" aria-labelledby="cmp-title">
+    <h2 id="cmp-title">HEAD-TO-HEAD TELEMETRY</h2>
+    <p class="cmp-intro">Pit the Apex Zero against a supercar benchmark.</p>
+
+    <div class="cmp-bar-top">
+      <div class="cmp-pick">
+        <label for="cmp-rival">Rival</label>
+        <select id="cmp-rival"></select>
+      </div>
+      <p class="cmp-summary" id="cmp-summary" role="status" aria-live="polite"></p>
     </div>
-    <div className="spec-card">
-      <span className="val">520 MI</span>
-      <span className="lbl">EV RANGE</span>
+
+    <ul class="cmp-grid" id="cmp-grid" aria-label="Performance metrics"></ul>
+
+    <p class="cmp-key" id="cmp-key"></p>
+    <p class="cmp-warn"><strong>Figures are approximate.</strong> Rival numbers are rounded press and manufacturer style figures, the Apex Zero numbers are concept targets, and the quarter mile and G-force values are estimates. Use this as a demo, not as a spec sheet.</p>
+  </section>
+  <!-- ===== Performance Comparator (issue #52) END ===== -->
+
+  <main class="specs-grid">
+    <div class="spec-card">
+      <span class="val">1.74s</span>
+      <span class="lbl">0-60 MPH</span>
+    </div>
+    <div class="spec-card">
+      <span class="val">258 MPH</span>
+      <span class="lbl">TOP SPEED</span>
+    </div>
+    <div class="spec-card">
+      <span class="val">520 MI</span>
+      <span class="lbl">EV RANGE</span>
     </div>
   </main>
+
+  <!-- ===== 360° Vehicle Colorway & Wheel Configurator (issue #51) START ===== -->
+  <section class="cfg" id="configurator" aria-labelledby="cfg-title">
+    <div class="cfg-badge">BESPOKE ATELIER // SPECIFICATION STUDIO</div>
+    <h2 id="cfg-title">360° HYPERCAR COLORWAY &amp; WHEEL CONFIGURATOR</h2>
+    <p class="cfg-intro">Sculpt your bespoke Apex Zero allocation with factory-commissioned metallic finishes, aerodynamic wheel architectures, and interactive 360° viewpoint telemetry.</p>
+
+    <div class="cfg-viewport-card">
+      <!-- Stage HUD Top Bar -->
+      <div class="cfg-hud-header">
+        <div class="cfg-hud-stat">
+          <span class="cfg-hud-label">VIEW ANGLE</span>
+          <span class="cfg-hud-val" id="cfg-angle-display">000° // FRONT 3/4</span>
+        </div>
+        <div class="cfg-hud-stat">
+          <span class="cfg-hud-label">ACTIVE COLORWAY</span>
+          <span class="cfg-hud-val" id="cfg-color-display">APEX STEALTH BLACK</span>
+        </div>
+        <div class="cfg-hud-stat">
+          <span class="cfg-hud-label">WHEEL SPEC</span>
+          <span class="cfg-hud-val" id="cfg-wheel-display">21&quot; FORGED AERO TURBINE</span>
+        </div>
+        <div class="cfg-hud-stat">
+          <span class="cfg-hud-label">TOTAL ALLOCATION</span>
+          <span class="cfg-hud-val cfg-price-highlight" id="cfg-price-display">$2,400,000</span>
+        </div>
+      </div>
+
+      <!-- Main Interactive Visualizer Stage -->
+      <div class="cfg-stage-wrapper" id="cfg-stage-container">
+        <!-- Turntable Radial Floor Grid -->
+        <div class="cfg-turntable-grid" aria-hidden="true"></div>
+
+        <!-- Rendered SVG Hypercar Graphic with Dynamic Perspective Layers -->
+        <div class="cfg-car-stage" id="cfg-car-stage" role="img" aria-label="Interactive 360 view of Apex Zero Hypercar">
+          <!-- Dynamically populated by script.js -->
+        </div>
+
+        <!-- Lighting Reflection / Ground Glow FX -->
+        <div class="cfg-ground-glow" id="cfg-ground-glow" aria-hidden="true"></div>
+      </div>
+
+      <!-- 360 Rotation Controls & Viewpoint Switcher -->
+      <div class="cfg-rotation-bar">
+        <div class="cfg-angle-presets" role="tablist" aria-label="Camera perspective angles">
+          <button type="button" class="cfg-preset-btn active" data-angle="0" role="tab" aria-selected="true" id="cfg-tab-0">
+            <span class="cfg-preset-deg">000°</span> Front 3/4
+          </button>
+          <button type="button" class="cfg-preset-btn" data-angle="90" role="tab" aria-selected="false" id="cfg-tab-90">
+            <span class="cfg-preset-deg">090°</span> Side Aero
+          </button>
+          <button type="button" class="cfg-preset-btn" data-angle="180" role="tab" aria-selected="false" id="cfg-tab-180">
+            <span class="cfg-preset-deg">180°</span> Rear Diffuser
+          </button>
+          <button type="button" class="cfg-preset-btn" data-angle="270" role="tab" aria-selected="false" id="cfg-tab-270">
+            <span class="cfg-preset-deg">270°</span> Top Aero
+          </button>
+        </div>
+
+        <div class="cfg-slider-wrap">
+          <label for="cfg-azimuth-slider" class="cfg-slider-label">
+            <span>360° AZIMUTH ORBIT</span>
+            <span id="cfg-slider-deg" class="cfg-slider-deg">0°</span>
+          </label>
+          <input type="range" id="cfg-azimuth-slider" min="0" max="360" step="5" value="0" aria-label="Orbit 360 degree camera angle" />
+          <div class="cfg-orbit-ticks" aria-hidden="true">
+            <span>FRONT (0°)</span>
+            <span>PROFILE (90°)</span>
+            <span>REAR (180°)</span>
+            <span>TOP (270°)</span>
+            <span>FRONT (360°)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuration Control Studio Panels -->
+    <div class="cfg-controls-grid">
+      <!-- Panel 1: Exterior Paint Selection -->
+      <div class="cfg-panel">
+        <div class="cfg-panel-header">
+          <h3 class="cfg-panel-title">1. EXTERIOR PAINT FINISH</h3>
+          <span class="cfg-spec-code" id="cfg-paint-code">EXT-01 // STEALTH-BLK</span>
+        </div>
+        <p class="cfg-panel-desc">Hand-laid tri-coat metallic lacquers and exposed carbon weave finishes engineered for high-velocity light refraction.</p>
+        
+        <div class="cfg-color-swatches" id="cfg-paint-swatches" role="radiogroup" aria-label="Exterior Paint Finishes">
+          <!-- Swatches dynamically injected by script.js -->
+        </div>
+
+        <div class="cfg-paint-details">
+          <div class="cfg-detail-row">
+            <span class="cfg-detail-k">Coating Tech:</span>
+            <span class="cfg-detail-v" id="cfg-paint-tech">Satin Carbon Weave + Anti-Static Ceramic</span>
+          </div>
+          <div class="cfg-detail-row">
+            <span class="cfg-detail-k">Option Cost:</span>
+            <span class="cfg-detail-v" id="cfg-paint-cost">Standard (Included)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Wheel Architecture Selection -->
+      <div class="cfg-panel">
+        <div class="cfg-panel-header">
+          <h3 class="cfg-panel-title">2. WHEEL ARCHITECTURE</h3>
+          <span class="cfg-spec-code" id="cfg-wheel-code">WHL-01 // AERO-TURBINE</span>
+        </div>
+        <p class="cfg-panel-desc">Forged motorsport rims optimized in the wind tunnel to evacuate rotor thermal build-up and laminar drag.</p>
+
+        <div class="cfg-wheel-grid" id="cfg-wheel-options" role="radiogroup" aria-label="Wheel Options">
+          <!-- Wheel option cards injected by script.js -->
+        </div>
+      </div>
+
+      <!-- Panel 3: Performance Accents & Calipers -->
+      <div class="cfg-panel">
+        <div class="cfg-panel-header">
+          <h3 class="cfg-panel-title">3. BRAKE CALIPERS &amp; TECH ACCENTS</h3>
+          <span class="cfg-spec-code" id="cfg-caliper-code">BRK-01 // CRIMSON</span>
+        </div>
+        <p class="cfg-panel-desc">Monobloc 6-piston carbon-ceramic calipers with heat-resistant motorsport thermal coatings.</p>
+
+        <div class="cfg-caliper-swatches" id="cfg-caliper-swatches" role="radiogroup" aria-label="Brake Caliper Colors">
+          <!-- Caliper swatches injected by script.js -->
+        </div>
+
+        <div class="cfg-toggles-block">
+          <div class="cfg-toggle-row">
+            <div class="cfg-toggle-meta">
+              <span class="cfg-toggle-title">Track Aerodynamics Package</span>
+              <span class="cfg-toggle-sub">Extended carbon front canards &amp; active Gurney flap (+$18,000)</span>
+            </div>
+            <label class="cfg-switch" for="cfg-toggle-aero">
+              <input type="checkbox" id="cfg-toggle-aero">
+              <span class="cfg-slider"></span>
+            </label>
+          </div>
+          <div class="cfg-toggle-row">
+            <div class="cfg-toggle-meta">
+              <span class="cfg-toggle-title">Cyber Laser Matrix Headlights</span>
+              <span class="cfg-toggle-sub">Pulse-coded 600m laser high-beam projectors (+$9,500)</span>
+            </div>
+            <label class="cfg-switch" for="cfg-toggle-matrix">
+              <input type="checkbox" id="cfg-toggle-matrix" checked>
+              <span class="cfg-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Build Sheet Summary & Actions HUD Bar -->
+    <div class="cfg-summary-bar">
+      <div class="cfg-summary-info">
+        <div class="cfg-summary-title">APEX ZERO // BESPOKE BUILD SHEET</div>
+        <div class="cfg-summary-specs" id="cfg-summary-text">Apex Stealth Black • 21&quot; Forged Aero Turbine • Crimson Brembo Calipers • Cyber Matrix LED</div>
+      </div>
+      <div class="cfg-summary-actions">
+        <button type="button" class="cfg-btn cfg-btn-outline" id="cfg-reset-btn">Reset Spec</button>
+        <button type="button" class="cfg-btn cfg-btn-secondary" id="cfg-share-btn">Copy Build Link</button>
+        <button type="button" class="cfg-btn cfg-btn-primary" id="cfg-save-btn">Lock In Allocation ↗</button>
+      </div>
+    </div>
+
+    <!-- Live Toast Notification -->
+    <div class="cfg-toast" id="cfg-toast" role="status" aria-live="polite"></div>
+  </section>
+  <!-- ===== 360° Vehicle Colorway & Wheel Configurator (issue #51) END ===== -->
 
   <!-- ===== Virtual Wind Tunnel (issue #99) START ===== -->
   <section class="wt" id="wind-tunnel" aria-labelledby="wt-title">

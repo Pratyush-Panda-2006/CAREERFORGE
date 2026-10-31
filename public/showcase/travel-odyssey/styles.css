@@ -617,6 +617,94 @@ body {
 .card h3 { font-size: 1.2rem; margin-bottom: 6px; }
 .card p { color: #94a3b8; font-size: 0.85rem; }
 
+/* Adventure Difficulty Badges */
+.difficulty-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.badge-easy {
+  color: #a7f3d0;
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.badge-moderate {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.badge-extreme {
+  color: #fecdd3;
+  background: rgba(244, 63, 94, 0.15);
+  border-color: rgba(251, 113, 133, 0.4);
+}
+
+.voyage-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 12px 0 8px;
+}
+
+.voyage-toolbar .destination-filter-status {
+  margin: 0;
+}
+
+.flight-origin-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+}
+
+.flight-origin-control label {
+  color: #e0f2fe;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.flight-origin-control select {
+  width: auto;
+  min-height: 40px;
+  padding: 8px 12px;
+  color: #f8fafc;
+  background: #111d33;
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  border-radius: 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.flight-origin-control select:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 3px;
+}
+
+.flight-origin-control option {
+  color: #f8fafc;
+  background: #111d33;
+}
+
+.flight-estimate-note {
+  margin: 0 0 20px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .checklist-container {
@@ -629,4 +717,1019 @@ body {
   .add-gear-form {
     flex-direction: column;
   }
+  .voyage-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .flight-origin-control {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .flight-origin-control select {
+    width: 100%;
+  }
 }
+
+
+
+/* ==========================================================
+   Interactive Expedition Timeline — NSoC Issue #85
+   ========================================================== */
+
+.expedition-timeline-section {
+  max-width: 1040px;
+  margin: 0 auto 100px;
+  padding: 0 24px;
+}
+
+.timeline-container {
+  padding: 36px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.timeline-heading {
+  max-width: 680px;
+  margin-bottom: 28px;
+}
+
+.timeline-heading h2 {
+  margin: 8px 0 12px;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.7px;
+}
+
+.timeline-heading p {
+  color: #94a3b8;
+  line-height: 1.7;
+}
+
+.expedition-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 380px;
+  margin-bottom: 24px;
+}
+
+.expedition-selector label {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.expedition-selector select {
+  width: 100%;
+  padding: 12px 14px;
+  color: #f8fafc;
+  background: #111d42;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.expedition-selector select:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 3px;
+}
+
+.timeline-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.summary-label,
+.detail-label {
+  color: #38bdf8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.summary-item strong {
+  overflow-wrap: anywhere;
+  color: #f8fafc;
+  font-size: 0.95rem;
+}
+
+.expedition-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expedition-timeline::before {
+  position: absolute;
+  top: 28px;
+  bottom: 28px;
+  left: 27px;
+  width: 1px;
+  background: rgba(56, 189, 248, 0.22);
+  content: "";
+  pointer-events: none;
+}
+
+.timeline-loading {
+  padding: 24px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.timeline-day {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.timeline-day:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.timeline-day.is-active {
+  background: rgba(56, 189, 248, 0.055);
+  border-color: rgba(56, 189, 248, 0.6);
+}
+
+.timeline-day-toggle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 78px;
+  padding: 14px 18px 14px 12px;
+  color: #f8fafc;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.timeline-day-toggle:focus-visible,
+.timeline-activate-btn:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: -3px;
+}
+
+.timeline-day-number {
+  z-index: 1;
+  display: flex;
+  flex: 0 0 48px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: #111d42;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+}
+
+.timeline-day-number span {
+  color: #94a3b8;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.timeline-day-number strong {
+  color: #38bdf8;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.timeline-day-heading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.timeline-day-location {
+  font-size: 1rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.timeline-day-highlight {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.timeline-day-chevron {
+  display: flex;
+  flex: 0 0 30px;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.09);
+  border-radius: 50%;
+  font-size: 1.2rem;
+}
+
+.timeline-day-details[hidden] {
+  display: none;
+}
+
+.timeline-day-details {
+  padding: 0 22px 24px 76px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.timeline-day-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.5fr);
+  gap: 20px;
+  padding-top: 20px;
+}
+
+.waypoint-coordinate,
+.waypoint-elevation,
+.waypoint-activity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.waypoint-coordinate strong,
+.waypoint-elevation strong {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.waypoint-activity {
+  grid-column: 1 / -1;
+}
+
+.waypoint-activity p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.timeline-activate-btn {
+  justify-self: start;
+  padding: 10px 16px;
+  color: #07111f;
+  background: #38bdf8;
+  border: 1px solid #38bdf8;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.timeline-activate-btn:hover:not(:disabled) {
+  background: #7dd3fc;
+  transform: translateY(-1px);
+}
+
+.timeline-activate-btn:disabled {
+  color: #a7f3d0;
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  cursor: default;
+}
+
+.elevation-chart {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+}
+
+.elevation-chart-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.elevation-chart svg {
+  display: block;
+  width: 100%;
+  height: 110px;
+  overflow: visible;
+}
+
+.elevation-area {
+  fill: rgba(56, 189, 248, 0.12);
+}
+
+.elevation-line {
+  fill: none;
+  stroke: #38bdf8;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.elevation-point {
+  fill: #0b132b;
+  stroke: #7dd3fc;
+  stroke-width: 2;
+}
+
+.elevation-point.is-active {
+  fill: #38bdf8;
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+.elevation-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.timeline-feedback {
+  min-height: 24px;
+  margin-top: 18px;
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+.site-footer {
+  padding: 24px;
+  color: #64748b;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .expedition-timeline-section {
+    padding: 0 16px;
+    margin-bottom: 64px;
+  }
+
+  .timeline-container {
+    padding: 24px 16px;
+    border-radius: 18px;
+  }
+
+  .timeline-summary {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .timeline-summary .summary-item + .summary-item {
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .expedition-timeline::before {
+    left: 21px;
+  }
+
+  .timeline-day-toggle {
+    gap: 12px;
+    padding: 12px 10px;
+  }
+
+  .timeline-day-number {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .timeline-day-location {
+    font-size: 0.9rem;
+  }
+
+  .timeline-day-highlight {
+    font-size: 0.76rem;
+  }
+
+  .timeline-day-details {
+    padding: 0 14px 18px;
+  }
+
+  .timeline-day-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .waypoint-activity {
+    grid-column: auto;
+  }
+
+  .elevation-chart {
+    padding: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-day,
+  .timeline-activate-btn {
+    transition: none;
+  }
+}
+
+
+/* ===== BEGIN Issue #211: Expedition Budget Planner & Currency Converter ===== */
+.budget-planner-section {
+  margin: 90px auto 50px;
+  max-width: 1240px;
+  padding: 0 24px;
+}
+
+.planner-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.planner-header h2 {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #ffffff, #7dd3fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.planner-subtitle {
+  color: #94a3b8;
+  max-width: 720px;
+  margin: 10px auto 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.planner-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .planner-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Configuration Panel */
+.planner-config-panel {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 32px;
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.config-top-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .config-top-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.config-row-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .config-row-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.config-sub-label {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.planner-select {
+  background: #09101f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f3f4f6;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.planner-select:focus,
+.planner-select:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.currency-picker {
+  background: #0d1629;
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+}
+
+/* Stepper & Range Inputs */
+.stepper-wrap {
+  display: flex;
+  align-items: center;
+  background: #09101f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.stepper-btn {
+  background: transparent;
+  border: none;
+  color: #38bdf8;
+  font-size: 1.25rem;
+  font-weight: 800;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.stepper-btn:hover {
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.stepper-value {
+  padding: 8px 16px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  min-width: 44px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.planner-range {
+  accent-color: #38bdf8;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+/* Accommodation Tier Cards */
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.config-meta-info {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.tier-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 680px) {
+  .tier-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tier-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.tier-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tier-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.tier-card.active {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: #38bdf8;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.2);
+}
+
+.tier-card-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.tier-badge {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  background: #38bdf8;
+  color: #09101f;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+.tier-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tier-icon {
+  font-size: 1.5rem;
+}
+
+.tier-rate {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #38bdf8;
+}
+
+.tier-card h4 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.tier-card p {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+/* Addons Checkbox Grid */
+.addons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .addons-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.addon-checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.addon-checkbox-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.addon-check-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: transparent;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.addon-checkbox-card.active {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.addon-checkbox-card.active .addon-check-icon {
+  background: #38bdf8;
+  border-color: #38bdf8;
+  color: #09101f;
+}
+
+.addon-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.addon-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.addon-price {
+  font-size: 0.75rem;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+/* Right Column: Sleek Summary Card */
+.planner-summary-panel {
+  position: sticky;
+  top: 90px;
+}
+
+.summary-card {
+  background: linear-gradient(145deg, #0e172e, #070e1c);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(56, 189, 248, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-top-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #38bdf8;
+  margin-bottom: 8px;
+}
+
+.total-budget-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.total-currency-symbol {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.total-budget-val {
+  font-size: clamp(2.8rem, 4vw, 3.6rem);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+  text-shadow: 0 0 24px rgba(56, 189, 248, 0.35);
+}
+
+.total-currency-code {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.per-person-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  width: fit-content;
+  margin-bottom: 24px;
+}
+
+/* Stacked Allocation Progress Bar */
+.breakdown-chart-wrap {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.stacked-bar-track {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  margin: 10px 0 12px;
+}
+
+.bar-segment {
+  height: 100%;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bar-accommodation { background: #6366f1; }
+.bar-logistics { background: #0284c7; }
+.bar-gear { background: #10b981; }
+.bar-services { background: #f59e0b; }
+
+.chart-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-accommodation { background: #6366f1; }
+.dot-logistics { background: #0284c7; }
+.dot-gear { background: #10b981; }
+.dot-services { background: #f59e0b; }
+
+/* Itemized Receipt */
+.receipt-list {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+  color: #94a3b8;
+}
+
+.receipt-item-title {
+  color: #cbd5e1;
+}
+
+.receipt-item-val {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.eco-fee-row .receipt-item-title,
+.eco-fee-row .receipt-item-val {
+  color: #34d399;
+}
+
+/* Actions */
+.planner-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-save-estimate {
+  flex: 1;
+  background: linear-gradient(135deg, #38bdf8, #0284c7);
+  color: #09101f;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-save-estimate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(56, 189, 248, 0.5);
+}
+
+.btn-reset-planner {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-planner:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.saved-estimate-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #34d399;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 14px;
+}
+/* ===== END Issue #211 ===== */

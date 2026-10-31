@@ -41,43 +41,191 @@
     <section class="products-grid" id="productsGrid">
       <div class="card" data-id="p1" data-category="keyboards">
         <div class="card-badge">HOT</div>
+        <span class="stock-badge in-stock">In Stock</span>
         <div class="card-img">⌨️</div>
+        <div class="card-rating-preview" onclick="filterReviewsForProduct('p1')" role="button" tabindex="0" aria-label="View CyberDeck Pro Mechanical 4.9 star reviews">
+          <span class="rating-stars-small">★★★★★</span>
+          <span class="rating-val">4.9</span>
+          <span class="rating-count">(72)</span>
+        </div>
         <h3>CyberDeck Pro Mechanical</h3>
         <p class="desc">Wireless split ergonomic keyboard with hot-swappable switches &amp; RGB OLED matrix.</p>
         <div class="card-footer">
           <span class="price">$249.00</span>
-          <div class="action-container" id="action-p1">
-            <button class="add-btn" onclick="addToCart('p1', 'CyberDeck Pro Mechanical', 249.00, '⌨️')">Add to Cart</button>
+          <div class="card-actions-row">
+            <button type="button" class="quick-view-btn" onclick="openQuickView('p1')" aria-label="Quick view CyberDeck Pro Mechanical">Quick View 👁️</button>
+            <div class="action-container" id="action-p1">
+              <button class="add-btn" onclick="addToCart('p1', 'CyberDeck Pro Mechanical', 249.00, '⌨️')">Add to Cart</button>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="card" data-id="p2" data-category="audio">
         <div class="card-badge">NEW</div>
+        <span class="stock-badge low-stock">Only 3 Left</span>
         <div class="card-img">🎧</div>
+        <div class="card-rating-preview" onclick="filterReviewsForProduct('p2')" role="button" tabindex="0" aria-label="View Acoustic Pulse ANC Headset 4.8 star reviews">
+          <span class="rating-stars-small">★★★★★</span>
+          <span class="rating-val">4.8</span>
+          <span class="rating-count">(46)</span>
+        </div>
         <h3>Acoustic Pulse ANC Headset</h3>
         <p class="desc">Active noise-canceling studio monitors with ultra-low latency lossy spatial audio.</p>
         <div class="card-footer">
           <span class="price">$199.00</span>
-          <div class="action-container" id="action-p2">
-            <button class="add-btn" onclick="addToCart('p2', 'Acoustic Pulse ANC Headset', 199.00, '🎧')">Add to Cart</button>
+          <div class="card-actions-row">
+            <button type="button" class="quick-view-btn" onclick="openQuickView('p2')" aria-label="Quick view Acoustic Pulse ANC Headset">Quick View 👁️</button>
+            <div class="action-container" id="action-p2">
+              <button class="add-btn" onclick="addToCart('p2', 'Acoustic Pulse ANC Headset', 199.00, '🎧')">Add to Cart</button>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="card" data-id="p3" data-category="displays">
         <div class="card-badge">PRO</div>
+        <span class="stock-badge in-stock">In Stock</span>
         <div class="card-img">🖥️</div>
+        <div class="card-rating-preview" onclick="filterReviewsForProduct('p3')" role="button" tabindex="0" aria-label="View Horizon 32 Curved OLED 4.9 star reviews">
+          <span class="rating-stars-small">★★★★★</span>
+          <span class="rating-val">4.9</span>
+          <span class="rating-count">(30)</span>
+        </div>
         <h3>Horizon 32" Curved OLED</h3>
         <p class="desc">240Hz 4K UHD QD-OLED display engineered for color accuracy and seamless coding.</p>
         <div class="card-footer">
           <span class="price">$899.00</span>
-          <div class="action-container" id="action-p3">
-            <button class="add-btn" onclick="addToCart('p3', 'Horizon 32 Curved OLED', 899.00, '🖥️')">Add to Cart</button>
+          <div class="card-actions-row">
+            <button type="button" class="quick-view-btn" onclick="openQuickView('p3')" aria-label="Quick view Horizon 32 Curved OLED">Quick View 👁️</button>
+            <div class="action-container" id="action-p3">
+              <button class="add-btn" onclick="addToCart('p3', 'Horizon 32 Curved OLED', 899.00, '🖥️')">Add to Cart</button>
+            </div>
           </div>
         </div>
       </div>
     </section>
+    <!-- ===== BEGIN issue #189: Customer Reviews & Rating Breakdown Analytics Widget ===== -->
+    <section class="reviews-analytics-section" id="reviewsSection">
+      <div class="reviews-section-header">
+        <div class="reviews-header-titles">
+          <div class="hero-tag">// VERIFIED FEEDBACK &amp; TELEMETRY</div>
+          <h2 class="reviews-main-title">Customer Reviews &amp; Rating Breakdown</h2>
+          <p class="reviews-subtitle">Authentic reviews and rating distribution across developer setups and gear.</p>
+        </div>
+        <div class="reviews-header-actions">
+          <div class="product-filter-dropdown-wrap">
+            <label for="reviewProductSelect" class="sr-only">Filter by Gear</label>
+            <select id="reviewProductSelect" class="review-product-select" onchange="handleProductFilterChange(this.value)">
+              <option value="all">⭐ All Gear &amp; Products</option>
+              <option value="p1">⌨️ CyberDeck Pro Mechanical</option>
+              <option value="p2">🎧 Acoustic Pulse ANC Headset</option>
+              <option value="p3">🖥️ Horizon 32" Curved OLED</option>
+            </select>
+          </div>
+          <button type="button" class="write-review-btn" onclick="openWriteReviewModal()">
+            <span>✍️ Write a Review</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Rating Breakdown Analytics Card -->
+      <div class="analytics-card">
+        <!-- Left: Overall Score Summary -->
+        <div class="analytics-overall">
+          <div class="overall-score-wrap">
+            <span class="overall-score-number" id="overallScoreNumber">4.8</span>
+            <span class="overall-score-max">/ 5.0</span>
+          </div>
+          <div class="overall-stars" id="overallStars" aria-label="4.8 out of 5 stars">
+            ★★★★★
+          </div>
+          <div class="overall-count-label" id="overallCountLabel">Based on 148 verified reviews</div>
+          <div class="recommend-pill">
+            <span class="recommend-icon">✓</span>
+            <span id="recommendPercent">96%</span> of buyers recommend this
+          </div>
+        </div>
+
+        <!-- Middle: 5-Star to 1-Star Distribution Progress Bars -->
+        <div class="analytics-breakdown">
+          <h4 class="breakdown-title">Rating Distribution</h4>
+          <div class="breakdown-rows" id="breakdownRows">
+            <!-- 5-star to 1-star rows generated by JS with click-to-filter -->
+          </div>
+        </div>
+
+        <!-- Right: Verified Dimension Highlights -->
+        <div class="analytics-attributes">
+          <h4 class="attributes-title">Verified Metrics</h4>
+          <div class="attribute-pill-group">
+            <div class="attribute-pill">
+              <span class="attr-name">Build Quality</span>
+              <span class="attr-score">4.9 ★</span>
+            </div>
+            <div class="attribute-pill">
+              <span class="attr-name">Acoustics &amp; Feel</span>
+              <span class="attr-score">4.8 ★</span>
+            </div>
+            <div class="attribute-pill">
+              <span class="attr-name">Packaging &amp; Unboxing</span>
+              <span class="attr-score">4.9 ★</span>
+            </div>
+            <div class="attribute-pill">
+              <span class="attr-name">Value for Investment</span>
+              <span class="attr-score">4.7 ★</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Filtering & Sorting Controls Toolbar -->
+      <div class="reviews-toolbar">
+        <div class="filter-pills" id="filterPills" role="tablist" aria-label="Filter reviews by star rating">
+          <button type="button" class="star-filter-btn active" data-star="all" onclick="setStarFilter('all')">All (<span id="countStarAll">148</span>)</button>
+          <button type="button" class="star-filter-btn" data-star="5" onclick="setStarFilter(5)">5 ★ (<span id="countStar5">104</span>)</button>
+          <button type="button" class="star-filter-btn" data-star="4" onclick="setStarFilter(4)">4 ★ (<span id="countStar4">30</span>)</button>
+          <button type="button" class="star-filter-btn" data-star="3" onclick="setStarFilter(3)">3 ★ (<span id="countStar3">10</span>)</button>
+          <button type="button" class="star-filter-btn" data-star="2" onclick="setStarFilter(2)">2 ★ (<span id="countStar2">3</span>)</button>
+          <button type="button" class="star-filter-btn" data-star="1" onclick="setStarFilter(1)">1 ★ (<span id="countStar1">1</span>)</button>
+        </div>
+
+        <div class="filter-sub-controls">
+          <label class="verified-toggle-wrap">
+            <input type="checkbox" id="verifiedOnlyCheckbox" onchange="toggleVerifiedOnly(this.checked)" />
+            <span class="checkbox-custom"></span>
+            <span class="toggle-text">Verified Buyers Only</span>
+          </label>
+
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="reviewSearchInput" placeholder="Filter by keyword..." oninput="handleReviewSearch(this.value)" />
+          </div>
+
+          <div class="sort-select-wrap">
+            <label for="reviewSortSelect" class="sr-only">Sort reviews</label>
+            <select id="reviewSortSelect" onchange="setReviewSort(this.value)">
+              <option value="recent">Most Recent</option>
+              <option value="highest">Highest Rating</option>
+              <option value="lowest">Lowest Rating</option>
+              <option value="helpful">Most Helpful</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Filter Chips Banner -->
+      <div class="active-filter-banner" id="activeFilterBanner" hidden>
+        <span class="filter-banner-text" id="filterBannerText">Showing filtered reviews</span>
+        <button type="button" class="clear-filter-btn" onclick="clearAllFilters()">Clear Filters ✕</button>
+      </div>
+
+      <!-- Reviews Feed List -->
+      <div class="reviews-feed" id="reviewsFeed">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+    <!-- ===== END issue #189 ===== -->
   </main>
 
   <!-- Slide-Over Cart Drawer & Backdrop -->
@@ -117,6 +265,145 @@
       <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
     </div>
   </aside>
+
+  <!-- ===== BEGIN issue #63: Product Quick-View Modal with Thumbnail Gallery ===== -->
+  <div id="quickViewBackdrop" class="quickview-backdrop" onclick="closeQuickView()"></div>
+  <div id="quickViewModal" class="quickview-modal" role="dialog" aria-modal="true" aria-labelledby="qvTitle" hidden>
+    <button type="button" class="qv-close-btn" id="qvCloseBtn" onclick="closeQuickView()" aria-label="Close quick view">&times;</button>
+    <div class="qv-container">
+      <!-- Left Column: Gallery & Perspective Thumbnails -->
+      <div class="qv-gallery-col">
+        <div class="qv-main-display">
+          <span class="qv-badge" id="qvBadge">HOT</span>
+          <div class="qv-main-visual" id="qvMainVisual" role="img" aria-label="Product preview image">⌨️</div>
+          <span class="qv-view-label" id="qvViewLabel">Front Ergonomic View</span>
+        </div>
+        <div class="qv-thumbs" id="qvThumbs" role="tablist" aria-label="Product perspective thumbnails">
+          <!-- Populated dynamically by script.js -->
+        </div>
+      </div>
+
+      <!-- Right Column: Product Config & Instant Add-to-Cart -->
+      <div class="qv-details-col">
+        <div class="qv-header">
+          <span class="qv-category" id="qvCategory">KEYBOARDS</span>
+          <span class="stock-badge in-stock" id="qvStock">In Stock</span>
+        </div>
+        <h2 id="qvTitle" class="qv-title">CyberDeck Pro Mechanical</h2>
+        <div class="qv-price-row">
+          <span class="qv-price" id="qvPrice">$249.00</span>
+          <span class="qv-shipping-pill">⚡ Free Priority Delivery</span>
+        </div>
+        <p class="qv-desc" id="qvDesc">Wireless split ergonomic keyboard with hot-swappable switches &amp; RGB OLED matrix.</p>
+
+        <!-- Variants: Colorways -->
+        <div class="qv-variant-group" id="qvColorGroup">
+          <div class="qv-variant-label">
+            <span>Colorway</span>
+            <strong id="qvColorName">Stealth Matte Black</strong>
+          </div>
+          <div class="qv-swatches" id="qvColorSwatches" role="radiogroup" aria-label="Color options">
+            <!-- Swatches dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Variants: Options / Switches -->
+        <div class="qv-variant-group" id="qvOptionGroup">
+          <div class="qv-variant-label">
+            <span id="qvOptionLabel">Switch Mechanism</span>
+            <strong id="qvOptionValue">Gateron Oil King (Linear)</strong>
+          </div>
+          <div class="qv-pills" id="qvOptionPills" role="radiogroup" aria-label="Configuration options">
+            <!-- Pills dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Specs Matrix -->
+        <div class="qv-specs-matrix" id="qvSpecsMatrix">
+          <!-- Specs chips dynamically populated -->
+        </div>
+
+        <!-- Purchase Controls: Quantity & Add to Cart -->
+        <div class="qv-action-bar">
+          <div class="qv-qty-picker" role="group" aria-label="Select quantity">
+            <button type="button" class="qv-qty-btn" id="qvQtyMinus" onclick="adjustQuickViewQty(-1)" aria-label="Decrease quantity">-</button>
+            <span class="qv-qty-count" id="qvQtyCount">1</span>
+            <button type="button" class="qv-qty-btn" id="qvQtyPlus" onclick="adjustQuickViewQty(1)" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="qv-add-cart-btn" id="qvAddToCartBtn" onclick="addQuickViewToCart()">
+            <span>Add to Cart · </span><span id="qvAddTotal">$249.00</span>
+          </button>
+        </div>
+
+        <div class="qv-footer-links">
+          <button type="button" class="qv-view-cart-btn" onclick="openCartFromQuickView()">View Cart &amp; Checkout 🛒 ↗</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===== END issue #63 ===== -->
+
+  <!-- ===== BEGIN issue #189: Write a Review Modal ===== -->
+  <div id="writeReviewBackdrop" class="review-modal-backdrop" onclick="closeWriteReviewModal()"></div>
+  <div id="writeReviewModal" class="review-modal" role="dialog" aria-modal="true" aria-labelledby="writeReviewTitle" hidden>
+    <button type="button" class="review-modal-close" onclick="closeWriteReviewModal()" aria-label="Close review dialog">&times;</button>
+    <div class="review-modal-header">
+      <div class="hero-tag">// SUBMIT TELEMETRY</div>
+      <h3 id="writeReviewTitle">Write a Customer Review</h3>
+      <p>Share your field experience with developer equipment and custom gear.</p>
+    </div>
+    <form id="writeReviewForm" class="review-modal-form" onsubmit="handleReviewSubmit(event)">
+      <div class="form-group">
+        <label for="formProductSelect">Select Product</label>
+        <select id="formProductSelect" required>
+          <option value="p1">⌨️ CyberDeck Pro Mechanical</option>
+          <option value="p2">🎧 Acoustic Pulse ANC Headset</option>
+          <option value="p3">🖥️ Horizon 32" Curved OLED</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Overall Rating</label>
+        <div class="star-rating-picker" id="starPicker" role="radiogroup" aria-label="Choose star rating">
+          <button type="button" class="star-pick-btn active" data-val="1" onclick="setPickerRating(1)">★</button>
+          <button type="button" class="star-pick-btn active" data-val="2" onclick="setPickerRating(2)">★</button>
+          <button type="button" class="star-pick-btn active" data-val="3" onclick="setPickerRating(3)">★</button>
+          <button type="button" class="star-pick-btn active" data-val="4" onclick="setPickerRating(4)">★</button>
+          <button type="button" class="star-pick-btn active" data-val="5" onclick="setPickerRating(5)">★</button>
+          <span class="picker-rating-label" id="pickerRatingLabel">5 / 5 — Exceptional</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reviewerName">Your Name / Handle</label>
+          <input type="text" id="reviewerName" placeholder="e.g. Sarah Jenkins (Senior DevOps)" required />
+        </div>
+        <div class="form-group">
+          <label for="reviewerRole">Role or Tag (optional)</label>
+          <input type="text" id="reviewerRole" placeholder="e.g. Linux Kernel Contributor" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reviewHeadline">Review Headline</label>
+        <input type="text" id="reviewHeadline" placeholder="e.g. Incredible acoustic profile, seamless typing experience" required />
+      </div>
+      <div class="form-group">
+        <label for="reviewComment">Detailed Review Feedback</label>
+        <textarea id="reviewComment" rows="4" placeholder="Detail the switches, ergonomics, display clarity, build quality, or setup integration..." required></textarea>
+      </div>
+      <div class="form-group-checkbox">
+        <label class="verified-toggle-wrap">
+          <input type="checkbox" id="formVerifiedCheck" checked />
+          <span class="checkbox-custom"></span>
+          <span class="toggle-text">I am a verified purchaser of this hardware</span>
+        </label>
+      </div>
+      <div class="modal-form-actions">
+        <button type="button" class="btn-cancel" onclick="closeWriteReviewModal()">Cancel</button>
+        <button type="submit" class="btn-submit-review">Publish Review 🚀</button>
+      </div>
+    </form>
+  </div>
+  <!-- ===== END issue #189 ===== -->
 
   <div id="toast" class="toast">Item added to cart!</div>
   <script src="script.js"></script>

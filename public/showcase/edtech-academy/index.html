@@ -3,35 +3,285 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Synapse Academy — Interactive AI & Systems Learning</title>
+  <title>Synapse Academy — Interactive AI &amp; Systems Learning</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header className="hero">
-    <div className="tag">// NEXT-GEN EDTECH</div>
+  <header class="hero">
+    <div class="tag">// NEXT-GEN EDTECH</div>
     <h1>Master LLM Engineering &amp; Distributed Systems</h1>
     <p>Project-based interactive curriculum mentored by industry staff engineers.</p>
-    <button className="btn-primary" onclick="enrollNow()">Enroll in Cohort ↗</button>
+    <button class="btn-primary" onclick="enrollNow()">Enroll in Cohort ↗</button>
   </header>
 
-  <main className="courses">
+  <main class="courses">
     <h2>POPULAR LEARNING PATHS</h2>
-    <div className="grid">
-      <div className="card">
-        <div className="badge">ADVANCED</div>
+    <div class="grid">
+      <div class="card" data-course-progress="68">
+        <div class="badge">ADVANCED</div>
         <h3>LLM Inference Architecture</h3>
         <p>12 Weeks • vLLM, TensorRT, and Quantization</p>
+        <div class="card-progress-wrap">
+          <div class="card-progress-meta">
+            <span class="card-progress-lbl">Cohort Completion</span>
+            <span class="card-progress-val">68%</span>
+          </div>
+          <div class="card-progress-track">
+            <div class="card-progress-fill" style="width: 0%;" data-target-width="68%"></div>
+          </div>
+        </div>
       </div>
-      <div className="card">
-        <div className="badge">INTERMEDIATE</div>
-        <h3>Rust Kernel & eBPF Deep Dive</h3>
+      <div class="card" data-course-progress="42">
+        <div class="badge">INTERMEDIATE</div>
+        <h3>Rust Kernel &amp; eBPF Deep Dive</h3>
         <p>8 Weeks • Zero-copy Packet Filtering</p>
+        <div class="card-progress-wrap">
+          <div class="card-progress-meta">
+            <span class="card-progress-lbl">Cohort Completion</span>
+            <span class="card-progress-val">42%</span>
+          </div>
+          <div class="card-progress-track">
+            <div class="card-progress-fill" style="width: 0%;" data-target-width="42%"></div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Featured Course Completion Milestones Section (Issue #26) -->
+    <section class="milestones-section" id="courseMilestones" aria-labelledby="milestoneHeading">
+      <div class="milestone-card">
+        <div class="milestone-header">
+          <div class="milestone-title-grp">
+            <span class="milestone-badge">COHORT PROGRESSION TRACKER</span>
+            <h2 id="milestoneHeading">LLM Inference Architecture — Course Completion</h2>
+            <p class="milestone-sub">Track active milestone completion, live coding labs, and graduation requirements in real time.</p>
+          </div>
+          <div class="milestone-percentage-box">
+            <span class="percentage-number" id="milestonePercent">0%</span>
+            <span class="percentage-label">Completed</span>
+          </div>
+        </div>
+
+        <!-- Animated Progress Bar Component -->
+        <div class="progress-bar-container" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-labelledby="milestoneHeading">
+          <div class="progress-track" id="milestoneTrack">
+            <div class="progress-fill" id="milestoneProgressFill" style="width: 0%;" data-target="68">
+              <span class="progress-glow"></span>
+              <span class="progress-pin-head"></span>
+            </div>
+            <!-- Milestone Tick Nodes -->
+            <div class="milestone-ticks" aria-hidden="true">
+              <div class="tick-node completed" style="left: 0%;" data-percent="0">
+                <span class="tick-dot">✓</span>
+                <span class="tick-label">Start (0%)</span>
+              </div>
+              <div class="tick-node completed" style="left: 25%;" data-percent="25">
+                <span class="tick-dot">✓</span>
+                <span class="tick-label">Foundations (25%)</span>
+              </div>
+              <div class="tick-node completed" style="left: 50%;" data-percent="50">
+                <span class="tick-dot">✓</span>
+                <span class="tick-label">PagedAttention (50%)</span>
+              </div>
+              <div class="tick-node in-progress" style="left: 75%;" data-percent="75">
+                <span class="tick-dot">⚡</span>
+                <span class="tick-label">Multi-GPU (75%)</span>
+              </div>
+              <div class="tick-node locked" style="left: 100%;" data-percent="100">
+                <span class="tick-dot">🔒</span>
+                <span class="tick-label">Capstone (100%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Milestones Grid & Metrics -->
+        <div class="milestones-details-grid">
+          <div class="milestone-stat-item">
+            <span class="stat-icon">📚</span>
+            <div>
+              <span class="stat-value" id="statLectures">11 of 16 Lectures</span>
+              <span class="stat-title">Lectures Attended</span>
+            </div>
+          </div>
+          <div class="milestone-stat-item">
+            <span class="stat-icon">💻</span>
+            <div>
+              <span class="stat-value" id="statLabs">6 of 8 Labs</span>
+              <span class="stat-title">CUDA Kernels Passed</span>
+            </div>
+          </div>
+          <div class="milestone-stat-item">
+            <span class="stat-icon">🎓</span>
+            <div>
+              <span class="stat-value">Top 12% Cohort</span>
+              <span class="stat-title">Peer Benchmark</span>
+            </div>
+          </div>
+          <div class="milestone-stat-item">
+            <span class="stat-icon">⏱️</span>
+            <div>
+              <span class="stat-value" id="statGraduation">2 Weeks Left</span>
+              <span class="stat-title">Estimated Graduation</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Milestone Checkpoints Simulation -->
+        <div class="milestone-controls">
+          <span class="controls-label">Simulate Milestones:</span>
+          <button type="button" class="milestone-btn" data-target="25">
+            Module 1 (25%)
+          </button>
+          <button type="button" class="milestone-btn" data-target="50">
+            Midway (50%)
+          </button>
+          <button type="button" class="milestone-btn active" data-target="68">
+            Active Pace (68%)
+          </button>
+          <button type="button" class="milestone-btn" data-target="100">
+            Graduation (100%)
+          </button>
+          <button type="button" class="milestone-btn ghost" id="btnReplayProgress">
+            ↺ Replay Animation
+          </button>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <!-- ===== Course Syllabus Accordion Section (Issue #65) START ===== -->
+  <section class="syllabus-section" id="syllabus" aria-labelledby="syllabusTitle">
+    <div class="syllabus-header">
+      <div class="tag">// DETAILED CURRICULUM</div>
+      <h2 id="syllabusTitle">COURSE SYLLABUS &amp; ROADMAP</h2>
+      <p class="syllabus-subtitle">Explore lecture topics, estimated durations, and watch free lesson previews from our production systems engineers.</p>
+    </div>
+
+    <!-- Curriculum Meta Summary -->
+    <div class="syllabus-summary-bar">
+      <div class="summary-stats">
+        <div class="summary-stat-item">
+          <span class="stat-num" id="totalModulesCount">4</span>
+          <span class="stat-lbl">Core Modules</span>
+        </div>
+        <div class="summary-stat-divider" aria-hidden="true"></div>
+        <div class="summary-stat-item">
+          <span class="stat-num" id="totalLessonsCount">16</span>
+          <span class="stat-lbl">In-Depth Lectures</span>
+        </div>
+        <div class="summary-stat-divider" aria-hidden="true"></div>
+        <div class="summary-stat-item">
+          <span class="stat-num">14.5 hrs</span>
+          <span class="stat-lbl">Total Runtime</span>
+        </div>
+        <div class="summary-stat-divider" aria-hidden="true"></div>
+        <div class="summary-stat-item">
+          <span class="stat-num highlight-preview">5 Previews</span>
+          <span class="stat-lbl">Free Access</span>
+        </div>
+      </div>
+
+      <div class="summary-actions">
+        <button type="button" class="btn-text-action" id="expandAllBtn">Expand All</button>
+        <button type="button" class="btn-text-action" id="collapseAllBtn">Collapse All</button>
+      </div>
+    </div>
+
+    <!-- Search / Filter Lessons -->
+    <div class="syllabus-filter-bar">
+      <div class="syllabus-search-box">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="syllabusSearchInput" placeholder="Filter topics by keyword (e.g. KV Cache, Rust, eBPF)..." aria-label="Search syllabus lectures" autocomplete="off" />
+      </div>
+      <div class="syllabus-filter-chips" role="group" aria-label="Filter modules">
+        <button type="button" class="filter-chip active" data-filter="all">All Lectures</button>
+        <button type="button" class="filter-chip" data-filter="preview">Free Previews (5)</button>
+      </div>
+    </div>
+
+    <!-- Accordion Module List -->
+    <div class="syllabus-accordion" id="syllabusAccordion" role="region" aria-label="Course Syllabus Accordion">
+      <!-- Generated dynamically in script.js -->
+    </div>
+  </section>
+
+  <!-- Lesson Preview Video Modal -->
+  <div class="preview-modal-backdrop" id="previewModalBackdrop" hidden aria-hidden="true">
+    <div class="preview-modal" id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle">
+      <div class="modal-header">
+        <div class="modal-badge-row">
+          <span class="modal-module-tag" id="modalModuleTag">MODULE 01</span>
+          <span class="modal-duration-tag" id="modalDurationTag">⏱ 48 mins</span>
+          <span class="modal-status-tag">FREE PREVIEW</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="modalCloseBtn" aria-label="Close preview modal">✕</button>
+      </div>
+
+      <h3 class="modal-title" id="previewModalTitle">Lesson Preview</h3>
+
+      <!-- Video Player Simulation -->
+      <div class="video-player-container">
+        <div class="video-screen" id="videoScreen">
+          <div class="video-overlay" id="videoOverlay">
+            <button type="button" class="video-play-btn" id="videoPlayToggle" aria-label="Play sample lecture preview">
+              <span class="play-icon" id="playIconSvg" aria-hidden="true">▶</span>
+            </button>
+            <div class="video-overlay-text">Click to Play Sample Lecture Stream</div>
+          </div>
+          <!-- Simulated Animated Audio/Signal Waves -->
+          <div class="video-canvas-placeholder" id="videoVisualizer" aria-hidden="true">
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+          </div>
+          <div class="video-watermark">SYNAPSE ACADEMY // HD 1080P</div>
+        </div>
+
+        <!-- Video Control Bar -->
+        <div class="video-controls">
+          <button type="button" class="vid-btn" id="vidPlayBtn" aria-label="Play/Pause">▶</button>
+          <div class="vid-progress-track" id="vidProgressTrack" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">
+            <div class="vid-progress-fill" id="vidProgressFill" style="width: 15%;"></div>
+          </div>
+          <span class="vid-time" id="vidTimeDisplay">04:15 / 48:00</span>
+          <span class="vid-badge-hd">1080p HD</span>
+        </div>
+      </div>
+
+      <!-- Lesson Takeaways & Technical Summary -->
+      <div class="modal-lesson-body">
+        <div class="modal-section-title">Instructor Insights &amp; Learning Objectives</div>
+        <p class="modal-desc" id="modalLessonDesc"></p>
+
+        <div class="modal-takeaways-title">Key Core Competencies Covered:</div>
+        <ul class="modal-takeaways-list" id="modalTakeawaysList"></ul>
+
+        <div class="modal-code-preview" id="modalCodeBox">
+          <div class="code-box-header">
+            <span class="code-box-lang" id="modalCodeLang">Terminal / Architecture</span>
+            <span class="code-box-badge">Reference Sample</span>
+          </div>
+          <pre><code id="modalCodeSnippet"></code></pre>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="modalDismissBtn">Close Preview</button>
+        <button type="button" class="btn-primary" onclick="enrollNow()">Enroll in Full Cohort ↗</button>
+      </div>
+    </div>
+  </div>
+  <!-- ===== Course Syllabus Accordion Section (Issue #65) END ===== -->
+
   <section class="quiz" id="quiz" aria-labelledby="quizTitle">
     <h2 id="quizTitle">TEST YOUR SYSTEMS KNOWLEDGE</h2>
 
@@ -84,6 +334,188 @@
       </div>
     </div>
   </section>
+
+  <!-- ===== BEGIN Issue #191: Interactive Code Challenge Sandbox Editor & Live Syntax Test Runner ===== -->
+  <section class="code-sandbox-section" id="codeSandbox" aria-labelledby="sandboxHeading">
+    <div class="sandbox-header">
+      <div class="tag">// HANDS-ON SYSTEMS CODING SANDBOX</div>
+      <h2 id="sandboxHeading">INTERACTIVE CODE CHALLENGE &amp; TEST RUNNER</h2>
+      <p class="sandbox-subtitle">Write, test, and benchmark real-world systems algorithms with an in-browser sandbox and immediate test telemetry.</p>
+    </div>
+
+    <!-- Challenge Selector Tabs -->
+    <div class="sandbox-challenge-tabs" role="tablist" aria-label="Select Coding Challenge">
+      <button type="button" class="challenge-tab active" data-challenge-id="two-sum" onclick="selectSandboxChallenge('two-sum')" role="tab" aria-selected="true">
+        <span class="tab-badge easy">EASY</span>
+        <span class="tab-title">01: Two-Sum Memory Cache</span>
+      </button>
+      <button type="button" class="challenge-tab" data-challenge-id="valid-brackets" onclick="selectSandboxChallenge('valid-brackets')" role="tab" aria-selected="false">
+        <span class="tab-badge medium">MEDIUM</span>
+        <span class="tab-title">02: Syntax Bracket Validator</span>
+      </button>
+      <button type="button" class="challenge-tab" data-challenge-id="flatten-tensor" onclick="selectSandboxChallenge('flatten-tensor')" role="tab" aria-selected="false">
+        <span class="tab-badge hard">HARD</span>
+        <span class="tab-title">03: Flatten Tensor Matrix</span>
+      </button>
+    </div>
+
+    <div class="sandbox-workspace-grid">
+      <!-- Left Column: Problem Brief & Instructions -->
+      <div class="sandbox-brief-panel">
+        <div class="brief-header">
+          <div class="brief-meta">
+            <span class="brief-category" id="challengeCategory">SYSTEMS MEMORY MANAGEMENT</span>
+            <span class="brief-level-badge easy" id="challengeDifficulty">EASY • 5 PTS</span>
+          </div>
+          <h3 class="brief-title" id="challengeTitle">Two-Sum Memory Cache Lookup</h3>
+        </div>
+
+        <div class="brief-body">
+          <div class="brief-section-title">Problem Statement</div>
+          <p class="brief-desc" id="challengeDesc">
+            Given an array of allocated memory chunk sizes <code>nums</code> and a target buffer chunk <code>target</code>, return the indices of the two memory blocks such that they add up to exactly <code>target</code>.
+          </p>
+
+          <div class="brief-section-title">Example Test Case</div>
+          <div class="example-box">
+            <div class="example-row"><span class="ex-lbl">Input:</span> <code id="challengeExampleInput">nums = [2, 7, 11, 15], target = 9</code></div>
+            <div class="example-row"><span class="ex-lbl">Output:</span> <code id="challengeExampleOutput">[0, 1]</code></div>
+            <div class="example-row"><span class="ex-lbl">Explanation:</span> <span id="challengeExampleExplanation">nums[0] + nums[1] == 2 + 7 == 9, so we return [0, 1].</span></div>
+          </div>
+
+          <div class="brief-section-title">Constraints &amp; Rules</div>
+          <ul class="brief-constraints-list" id="challengeConstraints">
+            <li>Each input has exactly one valid solution.</li>
+            <li>You may not use the same element twice.</li>
+            <li>Target linear time complexity: <code>O(n)</code> using a Hash Map.</li>
+          </ul>
+
+          <!-- Hint Accordion -->
+          <div class="sandbox-hint-wrap">
+            <button type="button" class="btn-hint-toggle" id="btnHintToggle" onclick="toggleSandboxHint()">
+              <span>💡 Need an algorithmic hint?</span>
+              <span class="hint-chevron" id="hintChevron">▼</span>
+            </button>
+            <div class="sandbox-hint-content" id="sandboxHintContent" hidden>
+              <p id="challengeHintText">Store each visited element in a Map <code>(value =&gt; index)</code>. For each new element, check if <code>target - current</code> already exists in the map.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Code Editor & Live Test Console -->
+      <div class="sandbox-editor-panel">
+        <div class="editor-top-bar">
+          <div class="editor-file-info">
+            <span class="editor-file-icon">⚡</span>
+            <span class="editor-file-name" id="editorFileName">solution.js</span>
+            <span class="editor-env-pill">JavaScript (ES6+)</span>
+          </div>
+          <div class="editor-actions">
+            <button type="button" class="btn-editor-action" onclick="resetSandboxCode()" title="Reset to initial starter code">
+              <span>↺ Reset</span>
+            </button>
+            <button type="button" class="btn-editor-action" onclick="copySandboxCode()" title="Copy code to clipboard">
+              <span>📋 Copy</span>
+            </button>
+            <button type="button" class="btn-run-tests" id="btnRunTests" onclick="runSandboxTests()">
+              <span class="btn-icon">▶</span>
+              <span>Run Tests</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Editor Container with dynamic line numbers -->
+        <div class="editor-textarea-container" id="editorTextareaContainer">
+          <div class="editor-gutter" id="editorGutter" aria-hidden="true">1</div>
+          <textarea
+            id="codeEditorTextarea"
+            class="code-editor-textarea"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            aria-label="Code Editor"
+          ></textarea>
+        </div>
+
+        <!-- Bottom: Test Results & Execution Console -->
+        <div class="sandbox-console-panel" id="sandboxConsolePanel">
+          <div class="console-nav-bar">
+            <div class="console-tabs" role="tablist">
+              <button type="button" class="console-tab active" id="tabTestCases" onclick="switchConsoleTab('tests')">
+                <span>Test Cases</span>
+                <span class="console-count-pill" id="consoleTestCount">4/4</span>
+              </button>
+              <button type="button" class="console-tab" id="tabStdout" onclick="switchConsoleTab('stdout')">
+                <span>Console Output</span>
+                <span class="console-dot" id="consoleStdoutDot"></span>
+              </button>
+            </div>
+
+            <div class="console-telemetry-meta">
+              <span class="telemetry-runtime" id="telemetryRuntime">⏱ Ready</span>
+              <span class="telemetry-status-badge ready" id="telemetryStatusBadge">IDLE</span>
+            </div>
+          </div>
+
+          <!-- Tab Content: Test Case Results -->
+          <div class="console-tab-view" id="consoleTestsView">
+            <div class="test-results-list" id="testResultsList">
+              <div class="test-idle-placeholder">
+                <span class="placeholder-icon">🚀</span>
+                <p>Click <strong>Run Tests</strong> above to validate your solution against automated unit tests and benchmark execution time.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Stdout / Console.log stream -->
+          <div class="console-tab-view" id="consoleStdoutView" hidden>
+            <div class="stdout-console" id="stdoutConsole">
+              <span class="stdout-empty">// Standard console.log output will appear here when tests execute...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #191 ===== -->
+
+  <section class="flashcards" id="flashcards" aria-labelledby="fcTitle">
+    <h2 id="fcTitle">CODING FLASHCARDS</h2>
+    <p class="fc-lead">Spaced repetition: cards you miss come back sooner, cards you know come back later. Progress is saved in this browser only.</p>
+    <p class="fc-stats" id="fcStats"></p>
+
+    <div class="fc-study" id="fcStudy">
+      <div class="fc-meta"><span id="fcTopic"></span><span id="fcBox"></span></div>
+      <div class="fc-card" id="fcCard">
+        <div class="fc-face fc-front" id="fcFront"><span class="fc-label">Question</span><p id="fcQ"></p></div>
+        <div class="fc-face fc-back" id="fcBack" aria-hidden="true"><span class="fc-label">Answer</span><p id="fcA"></p></div>
+      </div>
+      <p class="fc-counter" id="fcCounter"></p>
+      <button type="button" class="btn-secondary fc-flip" id="fcFlip" aria-pressed="false">Show answer</button>
+      <div class="fc-rate" id="fcRate" role="group" aria-label="How well did you know it?" hidden>
+        <button type="button" class="fc-btn fc-again" id="fcRate-again">Again <kbd>1</kbd></button>
+        <button type="button" class="fc-btn fc-good" id="fcRate-good">Good <kbd>2</kbd></button>
+        <button type="button" class="fc-btn fc-easy" id="fcRate-easy">Easy <kbd>3</kbd></button>
+      </div>
+      <p class="quiz-hint">Tip: after showing the answer, press 1, 2 or 3 to rate it.</p>
+    </div>
+
+    <div class="fc-done" id="fcDone" hidden>
+      <h3>Session complete</h3>
+      <p id="fcDoneText"></p>
+      <button type="button" class="btn-secondary" id="fcRestart">Check for due cards</button>
+    </div>
+
+    <button type="button" class="fc-reset" id="fcReset">Reset progress</button>
+    <div class="fc-sr" id="fcLive" role="status" aria-live="polite"></div>
+  </section>
+
+  <!-- Notification Toast Container -->
+  <div class="edtech-toast-container" id="edtechToastContainer" aria-live="polite"></div>
+
   <script src="script.js"></script>
+  <script src="flashcards.js"></script>
 </body>
 </html>

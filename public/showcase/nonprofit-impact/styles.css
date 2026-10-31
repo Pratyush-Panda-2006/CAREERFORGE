@@ -1,29 +1,49 @@
 :root {
   --bg: #06180e;
-  --card: rgba(255, 255, 255, 0.04);
-  --border: rgba(34, 197, 94, 0.2);
+  --bg-card: rgba(14, 40, 24, 0.65);
+  --border: rgba(34, 197, 94, 0.22);
   --green: #22c55e;
+  --green-bright: #4ade80;
+  --green-light: #86efac;
+  --green-glow: rgba(34, 197, 94, 0.3);
+  --emerald: #10b981;
   --text: #f0fdf4;
+  --text-muted: #86efac;
+  --earth-warm: #f59e0b;
+  --earth-sand: #d97706;
+  --reef-blue: #06b6d4;
+  --boreal-teal: #14b8a6;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   background-color: var(--bg);
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(34, 197, 94, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.03) 0%, transparent 50%);
   color: var(--text);
   min-height: 100vh;
+  line-height: 1.5;
 }
 
 .hero {
   text-align: center;
-  padding: 80px 24px;
-  max-width: 800px;
+  padding: 80px 24px 60px;
+  max-width: 840px;
   margin: 0 auto;
 }
 
 .pill {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: rgba(34, 197, 94, 0.15);
   color: var(--green);
   border: 1px solid var(--border);
@@ -32,74 +52,1067 @@ body {
   font-size: 0.8rem;
   font-weight: 700;
   margin-bottom: 20px;
+  letter-spacing: 0.5px;
 }
 
-.hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 16px; }
-.hero p { color: #86efac; font-size: 1.1rem; margin-bottom: 32px; }
+.hero h1 {
+  font-size: clamp(2.1rem, 5vw, 3.2rem);
+  font-weight: 800;
+  margin-bottom: 16px;
+  line-height: 1.15;
+}
+
+.hero p {
+  color: var(--green-light);
+  font-size: 1.15rem;
+  margin-bottom: 32px;
+}
 
 .donate-btn {
   background: var(--green);
-  color: #000;
+  color: #042511;
   border: none;
   padding: 12px 28px;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 18px var(--green-glow);
+  font-family: inherit;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.donate-btn:hover {
+  background: var(--green-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(34, 197, 94, 0.5);
 }
 
 .impact {
-  max-width: 900px;
-  margin: 40px auto 80px;
+  max-width: 1000px;
+  margin: 20px auto 60px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
   padding: 0 24px;
 }
 
 .card {
-  background: var(--card);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 32px;
   text-align: center;
+  backdrop-filter: blur(8px);
+  transition: transform 0.25s ease, border-color 0.25s ease;
 }
 
-.card h3 { font-size: 2rem; color: var(--green); font-weight: 800; margin-bottom: 8px; }
-.card p { color: #86efac; font-size: 0.9rem; }
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(34, 197, 94, 0.45);
+}
 
-/* Carbon calculator */
-.calc { max-width: 1000px; margin: 0 auto 80px; padding: 0 24px; }
-.calc h2 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
-.calc-sub { color: #86efac; margin-bottom: 24px; }
-.calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; }
-.calc form, .results { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
-.calc fieldset { border: 0; margin-bottom: 20px; }
-.calc legend { font-weight: 700; color: var(--green); margin-bottom: 10px; }
-.calc label { display: block; font-size: 0.9rem; margin: 10px 0 4px; }
-.calc output { color: var(--green); font-weight: 700; }
-.calc input[type=range] { width: 100%; accent-color: var(--green); }
+.card h3 {
+  font-size: 2rem;
+  color: var(--green);
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.card p {
+  color: var(--green-light);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+/* ===============================================================
+   Conservation Projects Directory Section (Issue #104)
+=============================================================== */
+.conservation-directory {
+  max-width: 1200px;
+  margin: 40px auto 90px;
+  padding: 0 24px;
+}
+
+.directory-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.directory-header h2 {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.directory-sub {
+  color: var(--green-light);
+  font-size: 1.05rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Summary Bar */
+.directory-summary-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.dir-summary-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.dir-stat-num {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.dir-stat-num.highlight-stat {
+  color: var(--green-bright);
+  text-shadow: 0 0 12px var(--green-glow);
+}
+
+.dir-stat-lbl {
+  font-size: 0.78rem;
+  color: #a7f3d0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.dir-stat-sep {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+}
+
+/* Controls: Filters & Search */
+.directory-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.biome-filter-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.biome-btn {
+  background: rgba(14, 40, 24, 0.7);
+  border: 1px solid var(--border);
+  color: #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.biome-btn:hover {
+  border-color: var(--green);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.biome-btn.active {
+  background: rgba(34, 197, 94, 0.22);
+  border-color: var(--green);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.35);
+}
+
+.directory-search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+  max-width: 440px;
+}
+
+.dir-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.directory-search-wrapper input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 16px 10px 38px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.directory-search-wrapper input:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 14px var(--green-glow);
+}
+
+/* Project Cards Grid */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.project-card {
+  --biome-color: var(--green);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--biome-color);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  backdrop-filter: blur(10px);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(34, 197, 94, 0.4);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 20px -8px var(--biome-color);
+}
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.biome-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  color: var(--biome-color);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--biome-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.coord-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.project-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.project-location {
+  font-size: 0.85rem;
+  color: var(--green-light);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.project-desc {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+/* Statistics Grid Inside Project Card */
+.project-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+
+.p-stat-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.p-stat-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.p-stat-val.survival-val {
+  color: var(--green-bright);
+}
+
+.p-stat-lbl {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Mini Progress Bar for Survival Rate */
+.survival-mini-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.survival-mini-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-view-species {
+  width: 100%;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid var(--border);
+  color: var(--green-light);
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-view-species:hover {
+  background: rgba(34, 197, 94, 0.25);
+  border-color: var(--green);
+  color: #fff;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.35);
+}
+
+/* ===============================================================
+   Species Planted Details Modal
+=============================================================== */
+.species-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 12, 7, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.species-modal-backdrop:not([hidden]) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.species-modal {
+  background: #092014;
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(34, 197, 94, 0.25);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.95) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.species-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.modal-biome-badge {
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid var(--green);
+  color: var(--green);
+}
+
+.modal-coord-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 9px;
+  border-radius: 4px;
+}
+
+.modal-close-icon {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--green-light);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.modal-close-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.species-modal-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+  line-height: 1.25;
+}
+
+.species-modal-subtitle {
+  font-size: 0.95rem;
+  color: var(--green-light);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Modal Metrics Bar */
+.modal-metrics-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.modal-metric-card {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.modal-metric-val {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fff;
+  display: block;
+}
+
+.modal-metric-val.highlight-val {
+  color: var(--green-bright);
+}
+
+.modal-metric-lbl {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Species List Section */
+.species-list-section {
+  margin-bottom: 24px;
+}
+
+.species-list-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+}
+
+.species-list-heading h4 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.species-list-meta {
+  font-size: 0.78rem;
+  color: var(--green-light);
+}
+
+.species-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.species-item-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.species-item-card:hover {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.species-top-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.species-common-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.species-role-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--green-light);
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.species-scientific-name {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: #a7f3d0;
+}
+
+.species-ecological-role {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
+.species-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+
+.btn-modal-dismiss {
+  background: transparent;
+  color: var(--green-light);
+  border: 1px solid var(--border);
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-dismiss:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+/* ===============================================================
+   Carbon Calculator Section
+=============================================================== */
+.calc {
+  max-width: 1000px;
+  margin: 0 auto 80px;
+  padding: 0 24px;
+}
+
+.calc h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.calc-sub {
+  color: var(--green-light);
+  margin-bottom: 24px;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.calc form, .results {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.calc fieldset {
+  border: 0;
+  margin-bottom: 20px;
+}
+
+.calc legend {
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+
+.calc label {
+  display: block;
+  font-size: 0.9rem;
+  margin: 10px 0 4px;
+}
+
+.calc output {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.calc input[type=range] {
+  width: 100%;
+  accent-color: var(--green);
+}
+
 .calc select, .calc input[type=number] {
-  width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border);
-  background: #0b2a19; color: var(--text); font: inherit;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #0b2a19;
+  color: var(--text);
+  font: inherit;
 }
-.calc button:focus-visible, .calc input:focus-visible, .calc select:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
-.form-error { color: #fca5a5; margin-bottom: 12px; font-size: 0.9rem; }
-.results h3 { margin: 20px 0 8px; font-size: 1.05rem; }
-.gauge-label { text-align: center; margin-bottom: 12px; }
-.gauge-label strong { font-size: 2.4rem; color: var(--green); display: block; line-height: 1; }
-.gauge-label span { font-size: 0.85rem; color: #86efac; }
-.gauge { height: 14px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden; margin-bottom: 16px; }
-.gauge-fill { height: 100%; width: var(--pct, 0%); border-radius: 999px; transition: width 0.5s ease; background: var(--green); }
-.gauge-fill.ok { background: #eab308; }
-.gauge-fill.high { background: #f97316; }
-.results ul, .results ol { list-style: none; }
-.breakdown li, .bench li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-.tips { counter-reset: tip; }
-.tips li { counter-increment: tip; display: flex; justify-content: space-between; gap: 12px; padding: 8px 0 8px 32px; position: relative; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
-.tips li::before { content: counter(tip); position: absolute; left: 0; top: 8px; width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #000; font-weight: 700; text-align: center; font-size: 0.8rem; line-height: 22px; }
-.tips strong { color: var(--green); white-space: nowrap; }
-.offset { margin-top: 20px; font-size: 0.9rem; }
-.offset .donate-btn { margin-top: 12px; }
-.offset-msg { margin-top: 12px; color: #86efac; }
-.sources { margin-top: 20px; font-size: 0.75rem; color: #86efac; opacity: 0.8; }
-[hidden] { display: none !important; }
+
+.calc button:focus-visible, .calc input:focus-visible, .calc select:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.form-error {
+  color: #fca5a5;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.results h3 {
+  margin: 20px 0 8px;
+  font-size: 1.05rem;
+}
+
+.gauge-label {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.gauge-label strong {
+  font-size: 2.4rem;
+  color: var(--green);
+  display: block;
+  line-height: 1;
+}
+
+.gauge-label span {
+  font-size: 0.85rem;
+  color: var(--green-light);
+}
+
+.gauge {
+  height: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.gauge-fill {
+  height: 100%;
+  width: var(--pct, 0%);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+  background: var(--green);
+}
+
+.gauge-fill.ok {
+  background: #eab308;
+}
+
+.gauge-fill.high {
+  background: #f97316;
+}
+
+.results ul, .results ol {
+  list-style: none;
+}
+
+.breakdown li, .bench li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.tips {
+  counter-reset: tip;
+}
+
+.tips li {
+  counter-increment: tip;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0 8px 32px;
+  position: relative;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.tips li::before {
+  content: counter(tip);
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #000;
+  font-weight: 700;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 22px;
+}
+
+.tips strong {
+  color: var(--green);
+  white-space: nowrap;
+}
+
+.offset {
+  margin-top: 20px;
+  font-size: 0.9rem;
+}
+
+.offset .donate-btn {
+  margin-top: 12px;
+}
+
+.offset-msg {
+  margin-top: 12px;
+  color: var(--green-light);
+}
+
+.sources {
+  margin-top: 20px;
+  font-size: 0.75rem;
+  color: var(--green-light);
+  opacity: 0.8;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Volunteer signup modal */
+.volunteer-btn {
+  display: inline-block;
+  margin: 12px 0 0 8px;
+  padding: 12px 28px;
+  border: 1px solid var(--green);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.volunteer-btn:hover {
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.volunteer-modal {
+  width: min(92%, 480px);
+  max-height: 90vh;
+  margin: auto;
+  overflow-y: auto;
+  color: var(--text);
+  background: #0b2114;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0;
+}
+
+.volunteer-modal::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  position: relative;
+  padding: 32px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+.modal-eyebrow {
+  margin-bottom: 8px;
+  color: var(--green);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.modal-content h2 {
+  margin-bottom: 12px;
+  font-size: 1.65rem;
+}
+
+.modal-description {
+  margin-bottom: 22px;
+  color: var(--green-light);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+#volunteer-form label {
+  display: block;
+  margin: 14px 0 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+#volunteer-form input,
+#volunteer-form select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #06180e;
+  color: var(--text);
+  font: inherit;
+}
+
+#volunteer-form input:focus-visible,
+#volunteer-form select:focus-visible,
+.volunteer-modal button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.volunteer-submit {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.volunteer-success {
+  padding: 18px 0 4px;
+  text-align: center;
+}
+
+.success-badge {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  place-items: center;
+  border: 1px solid var(--green);
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--green);
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.volunteer-success p {
+  margin: 12px 0;
+  color: var(--green-light);
+  line-height: 1.6;
+}
+
+.volunteer-success .demo-notice {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.volunteer-success .donate-btn {
+  margin-top: 12px;
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 28px 20px;
+  }
+
+  .volunteer-btn {
+    margin-left: 0;
+  }
+}
+
+/* Responsive Adjustments & Accessibility */
+@media (max-width: 768px) {
+  .directory-summary-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dir-stat-sep {
+    display: none;
+  }
+
+  .directory-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .directory-search-wrapper {
+    max-width: 100%;
+  }
+
+  .species-modal-footer {
+    flex-direction: column;
+  }
+
+  .species-modal-footer button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero {
+    padding: 60px 16px 40px;
+  }
+
+  .conservation-directory, .calc, .impact {
+    padding: 0 16px;
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .species-modal {
+    padding: 20px 16px;
+  }
+
+  .modal-metrics-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .gauge-fill {
+    transition: none;
+  }
+}

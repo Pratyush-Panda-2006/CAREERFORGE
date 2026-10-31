@@ -149,26 +149,364 @@
   </section>
   <!-- ===== Fantasy Esports Roster Builder (Issue #102) END ===== -->
 
-  <main class="matches">
-    <h2>UPCOMING MATCHES</h2>
-    <div class="grid">
-      <div class="match-card">
-        <div class="team">TEAM CYBER</div>
-        <div class="vs">VS</div>
-        <div class="team">PHANTOM SQUAD</div>
-        <div class="time">18:00 UTC</div>
+  <!-- ===== Tournament Bracket (Issue #71) START ===== -->
+  <section class="bracket" id="tournament-bracket" aria-labelledby="bracket-title">
+    <h2 id="bracket-title">TOURNAMENT BRACKET</h2>
+    <p class="bracket-intro">Select any match to see each player's kills, deaths, assists and KDA. Teams and stats are made-up demo data.</p>
+    <div class="bracket-rounds" id="bracket-rounds"></div>
+    <p class="bracket-champion">Champion: <strong id="br-champion"></strong></p>
+    <dialog class="br-modal" id="br-modal" aria-labelledby="br-modal-title">
+      <div class="br-modal-head">
+        <h3 id="br-modal-title">Match stats</h3>
+        <button type="button" class="br-close" aria-label="Close match stats">&times;</button>
       </div>
-      <div class="match-card">
-        <div class="team">NEON RIDERS</div>
-        <div class="vs">VS</div>
-        <div class="team">APEX TITANS</div>
-        <div class="time">21:00 UTC</div>
+      <div id="br-modal-body"></div>
+      <p class="br-modal-note">KDA = (kills + assists) / deaths.</p>
+    </dialog>
+  </section>
+  <!-- ===== Tournament Bracket (Issue #71) END ===== -->
+
+  <main class="matches" id="tournament-matches" aria-labelledby="matches-title">
+    <div class="matches-header">
+      <div class="matches-tag">// CHAMPIONSHIP FIXTURES</div>
+      <h2 id="matches-title">TOURNAMENT MATCHUPS</h2>
+      <p class="matches-desc">Real-time schedule, live stage status, and upcoming fixtures for Vortex Global Season 4</p>
+      <div class="match-filter-tabs" role="tablist" aria-label="Filter tournament matches by status">
+        <button type="button" class="match-filter-tab active" data-filter="all" role="tab" aria-selected="true" aria-controls="tournament-matches">
+          ALL FIXTURES <span class="filter-count">(4)</span>
+        </button>
+        <button type="button" class="match-filter-tab filter-live" data-filter="live" role="tab" aria-selected="false" aria-controls="tournament-matches">
+          <span class="pulse-dot small" aria-hidden="true"></span>
+          LIVE NOW <span class="filter-count">(1)</span>
+        </button>
+        <button type="button" class="match-filter-tab filter-upcoming" data-filter="upcoming" role="tab" aria-selected="false" aria-controls="tournament-matches">
+          <span class="clock-icon" aria-hidden="true">⏱</span>
+          UPCOMING <span class="filter-count">(3)</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="matches-grid">
+      <!-- Match Card 1: LIVE NOW -->
+      <article class="match-card is-live" data-status="live" aria-label="Live Match: Team Cyber vs Phantom Squad">
+        <div class="match-card-top">
+          <span class="match-tier-pill">GRAND FINALS • BO5</span>
+          <span class="badge-status badge-live" aria-label="Status: Live Now" title="Live Broadcast in Progress • Round 25 Active">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            LIVE NOW
+          </span>
+        </div>
+
+        <div class="match-teams-row">
+          <div class="team-side team-left">
+            <div class="team-avatar team-cyber" aria-hidden="true" title="Team Cyber — Hover to inspect">⚡</div>
+            <div class="team-meta">
+              <span class="team-name">TEAM CYBER</span>
+              <span class="winloss-chip win-elite" title="Win/Loss Record: 14 Wins, 2 Losses (87.5% Win Rate)">14W - 2L | 88%</span>
+              <span class="team-seed">Seed #1 • Cyber District</span>
+            </div>
+          </div>
+
+          <div class="match-center-intel">
+            <span class="vs-badge">VS</span>
+            <div class="live-score-pill" aria-label="Score: 2 to 1">
+              <span class="score-num leader">2</span>
+              <span class="score-divider">:</span>
+              <span class="score-num">1</span>
+            </div>
+            <span class="live-map-tag">MAP 3: ASCENT</span>
+          </div>
+
+          <div class="team-side team-right">
+            <div class="team-meta text-right">
+              <span class="team-name">PHANTOM SQUAD</span>
+              <span class="winloss-chip win-high" title="Win/Loss Record: 11 Wins, 4 Losses (73.3% Win Rate)">11W - 4L | 73%</span>
+              <span class="team-seed">Seed #3 • Shadow Realm</span>
+            </div>
+            <div class="team-avatar team-phantom" aria-hidden="true" title="Phantom Squad — Hover to inspect">👻</div>
+          </div>
+        </div>
+
+        <div class="match-card-footer">
+          <div class="match-time-info">
+            <span class="time-label">LIVE BROADCAST</span>
+            <span class="time-val live-time">🔴 STAGE A • IN PROGRESS (ROUND 25)</span>
+          </div>
+          <button type="button" class="btn-match-action btn-watch-live" onclick="watchStream()" aria-label="Watch live stream for Team Cyber vs Phantom Squad">
+            ▶ Watch Stream
+          </button>
+        </div>
+      </article>
+
+      <!-- Match Card 2: UPCOMING TODAY -->
+      <article class="match-card is-upcoming" data-status="upcoming" aria-label="Upcoming Match: Neon Riders vs Apex Titans">
+        <div class="match-card-top">
+          <span class="match-tier-pill">UPPER BRACKET FINAL • BO3</span>
+          <span class="badge-status badge-upcoming" aria-label="Status: Upcoming" title="Scheduled Tournament Fixture">
+            <span class="clock-icon" aria-hidden="true">⏱</span>
+            UPCOMING
+          </span>
+        </div>
+
+        <div class="match-teams-row">
+          <div class="team-side team-left">
+            <div class="team-avatar team-neon" aria-hidden="true" title="Neon Riders — Hover to inspect">💠</div>
+            <div class="team-meta">
+              <span class="team-name">NEON RIDERS</span>
+              <span class="winloss-chip win-elite" title="Win/Loss Record: 13 Wins, 3 Losses (81.3% Win Rate)">13W - 3L | 81%</span>
+              <span class="team-seed">Seed #2 • Neo Tokyo</span>
+            </div>
+          </div>
+
+          <div class="match-center-intel">
+            <span class="vs-badge">VS</span>
+            <span class="match-format-chip">BEST OF 3</span>
+          </div>
+
+          <div class="team-side team-right">
+            <div class="team-meta text-right">
+              <span class="team-name">APEX TITANS</span>
+              <span class="winloss-chip win-mid" title="Win/Loss Record: 10 Wins, 6 Losses (62.5% Win Rate)">10W - 6L | 63%</span>
+              <span class="team-seed">Seed #4 • Olympus Sector</span>
+            </div>
+            <div class="team-avatar team-apex" aria-hidden="true" title="Apex Titans — Hover to inspect">🔱</div>
+          </div>
+        </div>
+
+        <div class="match-card-footer">
+          <div class="match-time-info">
+            <span class="time-label">SCHEDULED START</span>
+            <span class="time-val"><span class="sched-date">TODAY, OCT 29</span> • <strong class="sched-utc">21:00 UTC</strong> (IN ~2H)</span>
+          </div>
+          <button type="button" class="btn-match-action btn-notify" onclick="alert('Notification set for Neon Riders vs Apex Titans!')" aria-label="Set reminder for Neon Riders vs Apex Titans">
+            🔔 Remind Me
+          </button>
+        </div>
+      </article>
+
+      <!-- Match Card 3: UPCOMING TOMORROW -->
+      <article class="match-card is-upcoming" data-status="upcoming" aria-label="Upcoming Match: Vortex Prime vs Phantom Squad">
+        <div class="match-card-top">
+          <span class="match-tier-pill">LOWER BRACKET SEMIS • BO3</span>
+          <span class="badge-status badge-upcoming" aria-label="Status: Upcoming" title="Scheduled Tournament Fixture">
+            <span class="clock-icon" aria-hidden="true">⏱</span>
+            UPCOMING
+          </span>
+        </div>
+
+        <div class="match-teams-row">
+          <div class="team-side team-left">
+            <div class="team-avatar team-vortex" aria-hidden="true" title="Vortex Prime — Hover to inspect">🌀</div>
+            <div class="team-meta">
+              <span class="team-name">VORTEX PRIME</span>
+              <span class="winloss-chip win-mid" title="Win/Loss Record: 8 Wins, 7 Losses (53.3% Win Rate)">8W - 7L | 53%</span>
+              <span class="team-seed">Seed #5 • Core Citadel</span>
+            </div>
+          </div>
+
+          <div class="match-center-intel">
+            <span class="vs-badge">VS</span>
+            <span class="match-format-chip">BEST OF 3</span>
+          </div>
+
+          <div class="team-side team-right">
+            <div class="team-meta text-right">
+              <span class="team-name">PHANTOM SQUAD</span>
+              <span class="winloss-chip win-high" title="Win/Loss Record: 11 Wins, 4 Losses (73.3% Win Rate)">11W - 4L | 73%</span>
+              <span class="team-seed">Seed #3 • Shadow Realm</span>
+            </div>
+            <div class="team-avatar team-phantom" aria-hidden="true" title="Phantom Squad — Hover to inspect">👻</div>
+          </div>
+        </div>
+
+        <div class="match-card-footer">
+          <div class="match-time-info">
+            <span class="time-label">SCHEDULED START</span>
+            <span class="time-val"><span class="sched-date">TOMORROW, OCT 30</span> • <strong class="sched-utc">17:30 UTC</strong></span>
+          </div>
+          <button type="button" class="btn-match-action btn-notify" onclick="alert('Notification set for Vortex Prime vs Phantom Squad!')" aria-label="Set reminder for Vortex Prime vs Phantom Squad">
+            🔔 Remind Me
+          </button>
+        </div>
+      </article>
+
+      <!-- Match Card 4: UPCOMING FINALS -->
+      <article class="match-card is-upcoming" data-status="upcoming" aria-label="Upcoming Match: Apex Titans vs Neon Riders">
+        <div class="match-card-top">
+          <span class="match-tier-pill">CONSOLATION FINAL • BO3</span>
+          <span class="badge-status badge-upcoming" aria-label="Status: Upcoming" title="Scheduled Tournament Fixture">
+            <span class="clock-icon" aria-hidden="true">⏱</span>
+            UPCOMING
+          </span>
+        </div>
+
+        <div class="match-teams-row">
+          <div class="team-side team-left">
+            <div class="team-avatar team-apex" aria-hidden="true" title="Apex Titans — Hover to inspect">🔱</div>
+            <div class="team-meta">
+              <span class="team-name">APEX TITANS</span>
+              <span class="winloss-chip win-mid" title="Win/Loss Record: 10 Wins, 6 Losses (62.5% Win Rate)">10W - 6L | 63%</span>
+              <span class="team-seed">Seed #4 • Olympus Sector</span>
+            </div>
+          </div>
+
+          <div class="match-center-intel">
+            <span class="vs-badge">VS</span>
+            <span class="match-format-chip">BEST OF 3</span>
+          </div>
+
+          <div class="team-side team-right">
+            <div class="team-meta text-right">
+              <span class="team-name">NEON RIDERS</span>
+              <span class="winloss-chip win-elite" title="Win/Loss Record: 13 Wins, 3 Losses (81.3% Win Rate)">13W - 3L | 81%</span>
+              <span class="team-seed">Seed #2 • Neo Tokyo</span>
+            </div>
+            <div class="team-avatar team-neon" aria-hidden="true" title="Neon Riders — Hover to inspect">💠</div>
+          </div>
+        </div>
+
+        <div class="match-card-footer">
+          <div class="match-time-info">
+            <span class="time-label">SCHEDULED START</span>
+            <span class="time-val"><span class="sched-date">OCT 31, 2026</span> • <strong class="sched-utc">19:00 UTC</strong></span>
+          </div>
+          <button type="button" class="btn-match-action btn-notify" onclick="alert('Notification set for Apex Titans vs Neon Riders!')" aria-label="Set reminder for Apex Titans vs Neon Riders">
+            🔔 Remind Me
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <!-- ===== Team Standings & Win/Loss Summary Cards (Issue #32) ===== -->
+    <div class="team-standings-container" aria-label="Official Team Standings & Records">
+      <div class="standings-header">
+        <div class="standings-title-col">
+          <span class="standings-badge">POWER RANKINGS</span>
+          <h3 class="standings-title">SEASON 4 PRO TEAM RECORDS</h3>
+        </div>
+        <span class="standings-note">Win/Loss ratios calculated across all championship brackets</span>
+      </div>
+
+      <div class="team-summary-grid">
+        <!-- Team 1: Team Cyber -->
+        <div class="team-summary-card rank-1" role="region" aria-label="Team Cyber Standings">
+          <div class="tsc-rank">#1</div>
+          <div class="team-avatar team-cyber" aria-hidden="true" title="Team Cyber">⚡</div>
+          <div class="tsc-info">
+            <div class="tsc-name-row">
+              <span class="tsc-name">TEAM CYBER</span>
+              <span class="tsc-streak streak-w">W5</span>
+            </div>
+            <span class="winloss-chip win-elite">14W - 2L | 88%</span>
+            <span class="tsc-diff">+112 RD • 87.5% WR</span>
+          </div>
+        </div>
+
+        <!-- Team 2: Neon Riders -->
+        <div class="team-summary-card rank-2" role="region" aria-label="Neon Riders Standings">
+          <div class="tsc-rank">#2</div>
+          <div class="team-avatar team-neon" aria-hidden="true" title="Neon Riders">💠</div>
+          <div class="tsc-info">
+            <div class="tsc-name-row">
+              <span class="tsc-name">NEON RIDERS</span>
+              <span class="tsc-streak streak-w">W3</span>
+            </div>
+            <span class="winloss-chip win-elite">13W - 3L | 81%</span>
+            <span class="tsc-diff">+89 RD • 81.3% WR</span>
+          </div>
+        </div>
+
+        <!-- Team 3: Phantom Squad -->
+        <div class="team-summary-card rank-3" role="region" aria-label="Phantom Squad Standings">
+          <div class="tsc-rank">#3</div>
+          <div class="team-avatar team-phantom" aria-hidden="true" title="Phantom Squad">👻</div>
+          <div class="tsc-info">
+            <div class="tsc-name-row">
+              <span class="tsc-name">PHANTOM SQUAD</span>
+              <span class="tsc-streak streak-w">W2</span>
+            </div>
+            <span class="winloss-chip win-high">11W - 4L | 73%</span>
+            <span class="tsc-diff">+64 RD • 73.3% WR</span>
+          </div>
+        </div>
+
+        <!-- Team 4: Apex Titans -->
+        <div class="team-summary-card rank-4" role="region" aria-label="Apex Titans Standings">
+          <div class="tsc-rank">#4</div>
+          <div class="team-avatar team-apex" aria-hidden="true" title="Apex Titans">🔱</div>
+          <div class="tsc-info">
+            <div class="tsc-name-row">
+              <span class="tsc-name">APEX TITANS</span>
+              <span class="tsc-streak streak-l">L1</span>
+            </div>
+            <span class="winloss-chip win-mid">10W - 6L | 63%</span>
+            <span class="tsc-diff">+32 RD • 62.5% WR</span>
+          </div>
+        </div>
+
+        <!-- Team 5: Vortex Prime -->
+        <div class="team-summary-card rank-5" role="region" aria-label="Vortex Prime Standings">
+          <div class="tsc-rank">#5</div>
+          <div class="team-avatar team-vortex" aria-hidden="true" title="Vortex Prime">🌀</div>
+          <div class="tsc-info">
+            <div class="tsc-name-row">
+              <span class="tsc-name">VORTEX PRIME</span>
+              <span class="tsc-streak streak-w">W1</span>
+            </div>
+            <span class="winloss-chip win-mid">8W - 7L | 53%</span>
+            <span class="tsc-diff">+14 RD • 53.3% WR</span>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 
+  <section class="compare" id="compare" aria-labelledby="compare-title">
+    <h2 id="compare-title">PLAYER COMPARATOR</h2>
+    <p class="compare-intro">Pick two pros and see how they stack up head to head.</p>
+
+    <div class="compare-pickers">
+      <div class="picker picker-a">
+        <label for="player-a">Player A</label>
+        <select id="player-a"></select>
+        <span class="picker-team" id="team-a"></span>
+      </div>
+      <div class="picker picker-b">
+        <label for="player-b">Player B</label>
+        <select id="player-b"></select>
+        <span class="picker-team" id="team-b"></span>
+      </div>
+    </div>
+
+    <div class="compare-body">
+      <figure class="radar-fig">
+        <svg id="radar" viewBox="0 0 440 400" role="img" aria-labelledby="radar-title radar-desc">
+          <title id="radar-title">Radar chart comparing two players</title>
+          <desc id="radar-desc"></desc>
+        </svg>
+        <figcaption class="radar-legend">
+          <span class="lg lg-a" id="legend-a">Player A</span>
+          <span class="lg lg-b" id="legend-b">Player B</span>
+        </figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table class="compare-table" id="compare-table">
+          <caption class="sr-only">Stat comparison. The better value in each row is marked.</caption>
+          <thead>
+            <tr><th scope="col">Stat</th><th scope="col" id="th-a">Player A</th><th scope="col" id="th-b">Player B</th></tr>
+          </thead>
+          <tbody id="compare-body"></tbody>
+        </table>
+        <p class="compare-summary" id="compare-summary" role="status" aria-live="polite"></p>
+        <p class="compare-note">Reaction time is inverted on the chart because lower is better. Stats are made-up demo data.</p>
+      </div>
+    </div>
+  </section>
+
   <div id="fr-toast-container" class="fr-toast-container" aria-live="polite"></div>
 
   <script src="script.js"></script>
+  <script src="bracket.js"></script>
 </body>
 </html>

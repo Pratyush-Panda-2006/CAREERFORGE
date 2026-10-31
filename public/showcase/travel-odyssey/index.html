@@ -1,23 +1,38 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07111f" />
+  <meta
+    name="description"
+    content="Discover curated expedition travel, prepare your gear, and explore interactive day-by-day itineraries."
+  />
   <title>Odyssey — Curated Expedition Travel</title>
+
   <link rel="stylesheet" href="styles.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
 </head>
+
 <body>
   <header class="hero">
     <div class="brand">ODYSSEY EXPEDITIONS</div>
     <h1>Uncharted Journeys to the Outer Edges of Earth</h1>
     <p>Hand-crafted luxury eco-tours in Iceland, Patagonia, and Kyoto.</p>
-    
+
     <div class="search-bar">
-      <input type="text" placeholder="Where do you want to explore?" />
-      <button class="search-btn">Explore Voyages ↗</button>
+      <input
+        type="text"
+        placeholder="Where do you want to explore?"
+        aria-label="Search destinations"
+      />
+      <button type="button" class="search-btn">Explore Voyages ↗</button>
     </div>
   </header>
 
@@ -28,104 +43,599 @@
         <div class="checklist-header-text">
           <div class="section-tag">🎒 EXPEDITION PREPARATION</div>
           <h2>Interactive Packing Checklist</h2>
-          <p>Organize, track, and customize your extreme climate gear for mission-ready exploration.</p>
+          <p>
+            Organize, track, and customize your extreme climate gear
+            for mission-ready exploration.
+          </p>
         </div>
-        
+
         <!-- Animated Circular Readiness Progress Tracker -->
         <div class="readiness-card">
           <div class="circular-progress-wrap">
-            <svg class="progress-ring" width="104" height="104" viewBox="0 0 104 104">
-              <circle class="progress-ring-bg" cx="52" cy="52" r="42" />
-              <circle class="progress-ring-circle" id="progress-circle" cx="52" cy="52" r="42" />
+            <svg
+              class="progress-ring"
+              width="104"
+              height="104"
+              viewBox="0 0 104 104"
+              aria-label="Packing readiness progress"
+              role="img"
+            >
+              <circle
+                class="progress-ring-bg"
+                cx="52"
+                cy="52"
+                r="42"
+              />
+              <circle
+                class="progress-ring-circle"
+                id="progress-circle"
+                cx="52"
+                cy="52"
+                r="42"
+              />
             </svg>
+
             <div class="progress-value">
               <span id="readiness-percent">0%</span>
               <span class="progress-sub">READY</span>
             </div>
           </div>
+
           <div class="readiness-meta">
-            <div class="readiness-status" id="readiness-status">Preparation Needed</div>
-            <div class="readiness-count" id="readiness-count">0 of 0 items packed</div>
+            <div class="readiness-status" id="readiness-status">
+              Preparation Needed
+            </div>
+            <div class="readiness-count" id="readiness-count">
+              0 of 0 items packed
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Category Filter Tabs -->
       <div class="category-tabs" id="category-tabs" role="tablist">
-        <button class="cat-tab active" data-category="all" role="tab" aria-selected="true">
+        <button
+          type="button"
+          class="cat-tab active"
+          data-category="all"
+          role="tab"
+          aria-selected="true"
+        >
           All Gear <span class="tab-badge" id="badge-all">0</span>
         </button>
-        <button class="cat-tab" data-category="Clothing" role="tab" aria-selected="false">
+
+        <button
+          type="button"
+          class="cat-tab"
+          data-category="Clothing"
+          role="tab"
+          aria-selected="false"
+        >
           🧥 Clothing <span class="tab-badge" id="badge-clothing">0</span>
         </button>
-        <button class="cat-tab" data-category="Navigation Gear" role="tab" aria-selected="false">
-          🧭 Navigation Gear <span class="tab-badge" id="badge-navigation">0</span>
+
+        <button
+          type="button"
+          class="cat-tab"
+          data-category="Navigation Gear"
+          role="tab"
+          aria-selected="false"
+        >
+          🧭 Navigation Gear
+          <span class="tab-badge" id="badge-navigation">0</span>
         </button>
-        <button class="cat-tab" data-category="First Aid" role="tab" aria-selected="false">
-          🩹 First Aid <span class="tab-badge" id="badge-firstaid">0</span>
+
+        <button
+          type="button"
+          class="cat-tab"
+          data-category="First Aid"
+          role="tab"
+          aria-selected="false"
+        >
+          🩹 First Aid
+          <span class="tab-badge" id="badge-firstaid">0</span>
         </button>
-        <button class="cat-tab" data-category="Photography Equipment" role="tab" aria-selected="false">
-          📷 Photography Equipment <span class="tab-badge" id="badge-photo">0</span>
+
+        <button
+          type="button"
+          class="cat-tab"
+          data-category="Photography Equipment"
+          role="tab"
+          aria-selected="false"
+        >
+          📷 Photography Equipment
+          <span class="tab-badge" id="badge-photo">0</span>
         </button>
       </div>
 
       <!-- Add Custom Gear Form -->
       <form class="add-gear-form" id="add-gear-form">
-        <input type="text" id="gear-name-input" placeholder="Add custom gear item (e.g. Crampons, Thermal Flask)..." required autocomplete="off" />
-        <select id="gear-category-select" required aria-label="Gear category">
+        <input
+          type="text"
+          id="gear-name-input"
+          placeholder="Add custom gear item (e.g. Crampons, Thermal Flask)..."
+          required
+          autocomplete="off"
+        />
+
+        <select
+          id="gear-category-select"
+          required
+          aria-label="Gear category"
+        >
           <option value="Clothing">🧥 Clothing</option>
           <option value="Navigation Gear">🧭 Navigation Gear</option>
           <option value="First Aid">🩹 First Aid</option>
-          <option value="Photography Equipment">📷 Photography Equipment</option>
+          <option value="Photography Equipment">
+            📷 Photography Equipment
+          </option>
         </select>
+
         <button type="submit" class="add-gear-btn">+ Add Gear</button>
       </form>
 
       <!-- Checklist Items Container -->
       <div class="checklist-items-wrap">
         <div class="checklist-actions">
-          <span class="list-heading" id="current-filter-heading">All Gear Items</span>
+          <span class="list-heading" id="current-filter-heading">
+            All Gear Items
+          </span>
+
           <div class="action-buttons">
-            <button type="button" class="action-btn" id="check-all-btn">Check All</button>
+            <button type="button" class="action-btn" id="check-all-btn">
+              Check All
+            </button>
             <span class="action-sep">•</span>
-            <button type="button" class="action-btn" id="uncheck-all-btn">Uncheck All</button>
+
+            <button type="button" class="action-btn" id="uncheck-all-btn">
+              Uncheck All
+            </button>
             <span class="action-sep">•</span>
-            <button type="button" class="action-btn" id="reset-default-btn">Reset Defaults</button>
+
+            <button type="button" class="action-btn" id="reset-default-btn">
+              Reset Defaults
+            </button>
           </div>
         </div>
+
         <ul class="checklist-items" id="checklist-items">
           <!-- Dynamically populated via script.js -->
         </ul>
+
         <div class="empty-state" id="empty-state" style="display: none;">
-          <p>No gear items found in this category. Add one above to get started!</p>
+          <p>
+            No gear items found in this category. Add one above to get started!
+          </p>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Featured Voyages -->
   <main class="destinations">
     <h2>FEATURED VOYAGES</h2>
-    <div class="destination-filters" role="group" aria-label="Filter voyages by region">
-      <button type="button" class="destination-filter active" data-region-filter="all" aria-pressed="true">All</button>
-      <button type="button" class="destination-filter" data-region-filter="europe" aria-pressed="false">Europe</button>
-      <button type="button" class="destination-filter" data-region-filter="asia" aria-pressed="false">Asia</button>
-      <button type="button" class="destination-filter" data-region-filter="americas" aria-pressed="false">Americas</button>
-      <button type="button" class="destination-filter" data-region-filter="polar" aria-pressed="false">Polar Expeditions</button>
+
+    <div
+      class="destination-filters"
+      role="group"
+      aria-label="Filter voyages by region"
+    >
+      <button
+        type="button"
+        class="destination-filter active"
+        data-region-filter="all"
+        aria-pressed="true"
+      >
+        All
+      </button>
+
+      <button
+        type="button"
+        class="destination-filter"
+        data-region-filter="europe"
+        aria-pressed="false"
+      >
+        Europe
+      </button>
+
+      <button
+        type="button"
+        class="destination-filter"
+        data-region-filter="asia"
+        aria-pressed="false"
+      >
+        Asia
+      </button>
+
+      <button
+        type="button"
+        class="destination-filter"
+        data-region-filter="americas"
+        aria-pressed="false"
+      >
+        Americas
+      </button>
+
+      <button
+        type="button"
+        class="destination-filter"
+        data-region-filter="polar"
+        aria-pressed="false"
+      >
+        Polar Expeditions
+      </button>
     </div>
-    <p id="destination-filter-status" class="destination-filter-status" role="status">Showing all 2 voyages.</p>
+
+    <div class="voyage-toolbar">
+      <p
+        id="destination-filter-status"
+        class="destination-filter-status"
+        role="status"
+      >
+        Showing all 2 voyages.
+      </p>
+
+      <div class="flight-origin-control">
+        <label for="departure-airport">✈️ Flying from</label>
+        <select id="departure-airport" aria-describedby="flight-estimate-note">
+          <option value="JFK">JFK — New York</option>
+          <option value="LHR">LHR — London</option>
+          <option value="DEL">DEL — New Delhi</option>
+        </select>
+      </div>
+    </div>
+
+    <p id="flight-estimate-note" class="flight-estimate-note">
+      Flight durations are estimates. Time differences use current local time-zone offsets.
+    </p>
+
     <div class="grid">
-      <div class="card" data-region="europe">
+      <div class="card" data-region="europe" data-destination="reykjavik">
         <div class="card-img">🏔️</div>
+        <span class="difficulty-badge badge-moderate">Moderate</span>
         <h3>Reykjavik Aurora Glaciers</h3>
         <p>7 Days • Iceland Heli-Hiking</p>
+        <div class="flight-details" aria-label="Flight information">
+          <span class="flight-badge flight-duration" data-flight-duration></span>
+          <span class="flight-badge flight-time-difference" data-time-difference></span>
+        </div>
       </div>
-      <div class="card" data-region="asia">
+
+      <div class="card" data-region="asia" data-destination="kyoto">
         <div class="card-img">🏯</div>
+        <span class="difficulty-badge badge-easy">Easy</span>
         <h3>Kyoto Bamboo Sanctuary</h3>
         <p>10 Days • Private Tea Masters</p>
+        <div class="flight-details" aria-label="Flight information">
+          <span class="flight-badge flight-duration" data-flight-duration></span>
+          <span class="flight-badge flight-time-difference" data-time-difference></span>
+        </div>
       </div>
     </div>
   </main>
+
+  <!-- Interactive Expedition Timeline - NSoC Issue #85 -->
+  <section
+    class="expedition-timeline-section"
+    id="expedition-timeline"
+    aria-labelledby="timeline-title"
+  >
+    <div class="timeline-container">
+      <div class="timeline-heading">
+        <span class="section-tag">EXPEDITION FIELD JOURNAL</span>
+
+        <h2 id="timeline-title">Every Day Is a New Frontier</h2>
+
+        <p>
+          Follow your expedition day by day. Explore waypoints, discover
+          activities, check coordinates, and track elevation changes.
+        </p>
+      </div>
+
+      <!-- Expedition Selector -->
+      <div class="expedition-selector">
+        <label for="expedition-select">Choose your expedition</label>
+
+        <select id="expedition-select">
+          <option value="antarctic">Antarctic Crossing</option>
+          <option value="silk-road">Silk Road Odyssey</option>
+        </select>
+      </div>
+
+      <!-- Expedition Summary -->
+      <div
+        class="timeline-summary"
+        id="timeline-summary"
+        aria-live="polite"
+      >
+        <div class="summary-item">
+          <span class="summary-label">EXPEDITION</span>
+          <strong id="expedition-name">Antarctic Crossing</strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">DURATION</span>
+          <strong id="expedition-duration">10 days</strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">ACTIVE WAYPOINT</span>
+          <strong id="active-day-status">Day 1 · Ready to depart</strong>
+        </div>
+      </div>
+
+      <!-- JavaScript renders the ten collapsible day cards here. -->
+      <div
+        class="expedition-timeline"
+        id="expedition-timeline-list"
+        aria-label="Expedition itinerary"
+      >
+        <p class="timeline-loading">
+          Preparing your expedition itinerary…
+        </p>
+      </div>
+
+      <p
+        class="timeline-feedback"
+        id="timeline-feedback"
+        role="status"
+        aria-live="polite"
+      ></p>
+    </div>
+  </section>
+
+  <!-- ===== BEGIN Issue #211: Expedition Budget Planner with Currency Converter & Cost Breakdown ===== -->
+  <section class="budget-planner-section" id="budget-planner" aria-labelledby="budget-planner-title">
+    <div class="planner-container">
+      <div class="planner-header">
+        <span class="section-tag">💰 EXPEDITION BUDGET CALCULATOR</span>
+        <h2 id="budget-planner-title">Plan Your Odyssey Expedition Budget</h2>
+        <p class="planner-subtitle">
+          Customize accommodation tiers, specialized extreme climate gear packages, and certified mountain guide services with real-time multi-currency conversion.
+        </p>
+      </div>
+
+      <div class="planner-grid">
+        <!-- Left Column: Interactive Configuration Form -->
+        <div class="planner-config-panel">
+          <!-- Currency & Expedition Route Controls -->
+          <div class="config-top-row">
+            <div class="config-group">
+              <label for="planner-expedition-select" class="config-label">Expedition Route</label>
+              <select id="planner-expedition-select" class="planner-select" onchange="handlePlannerConfigChange()">
+                <option value="antarctic" data-days="10" data-base="3200">❄️ Antarctic Glacier Crossing (10 Days)</option>
+                <option value="silk-road" data-days="12" data-base="2800">🏜️ Silk Road Highland Caravan (12 Days)</option>
+                <option value="iceland" data-days="7" data-base="2100">🌋 Iceland Volcanic Traverse (7 Days)</option>
+                <option value="kyoto" data-days="8" data-base="2400">🏯 Kyoto Cultural Sanctuary (8 Days)</option>
+              </select>
+            </div>
+
+            <div class="config-group">
+              <label for="currency-select" class="config-label">Currency</label>
+              <select id="currency-select" class="planner-select currency-picker" onchange="handleCurrencyChange(this.value)">
+                <option value="USD">USD ($) — US Dollar</option>
+                <option value="EUR">EUR (€) — Euro</option>
+                <option value="GBP">GBP (£) — British Pound</option>
+                <option value="AUD">AUD (A$) — Australian Dollar</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Group Size & Duration Steppers -->
+          <div class="config-row-two-col">
+            <div class="config-group">
+              <label class="config-label">Number of Explorers</label>
+              <div class="stepper-wrap" role="group" aria-label="Adventurer count">
+                <button type="button" class="stepper-btn" onclick="adjustTravelers(-1)" aria-label="Decrease explorers">−</button>
+                <span class="stepper-value" id="travelers-count">2</span>
+                <button type="button" class="stepper-btn" onclick="adjustTravelers(1)" aria-label="Increase explorers">+</button>
+              </div>
+              <span class="config-sub-label">Shared expedition logistics</span>
+            </div>
+
+            <div class="config-group">
+              <label for="expedition-duration-range" class="config-label">Duration: <strong id="duration-display">10 Days</strong></label>
+              <input
+                type="range"
+                id="expedition-duration-range"
+                class="planner-range"
+                min="5"
+                max="21"
+                value="10"
+                step="1"
+                oninput="handleDurationChange(this.value)"
+              />
+              <span class="config-sub-label">Range: 5 to 21 expedition days</span>
+            </div>
+          </div>
+
+          <!-- Accommodation Tier Radio Cards -->
+          <div class="config-section">
+            <div class="config-section-header">
+              <span class="config-label">Accommodation Tier</span>
+              <span class="config-meta-info">Per person / night</span>
+            </div>
+
+            <div class="tier-cards-grid" role="radiogroup" aria-label="Accommodation Tiers">
+              <label class="tier-card" for="tier-standard">
+                <input type="radio" name="accommodation-tier" id="tier-standard" value="standard" onchange="handlePlannerConfigChange()" />
+                <div class="tier-card-content">
+                  <div class="tier-top">
+                    <span class="tier-icon">🏕️</span>
+                    <span class="tier-rate" id="tier-rate-standard">$95 / night</span>
+                  </div>
+                  <h4>Standard Alpine Basecamp</h4>
+                  <p>Weather-insulated 4-season geodesic dome with thermal sleep systems.</p>
+                </div>
+              </label>
+
+              <label class="tier-card active" for="tier-premium">
+                <input type="radio" name="accommodation-tier" id="tier-premium" value="premium" checked onchange="handlePlannerConfigChange()" />
+                <div class="tier-card-content">
+                  <div class="tier-badge">POPULAR</div>
+                  <div class="tier-top">
+                    <span class="tier-icon">🏡</span>
+                    <span class="tier-rate" id="tier-rate-premium">$220 / night</span>
+                  </div>
+                  <h4>Premium Eco-Lodge</h4>
+                  <p>Geothermal timber suites, private Finnish sauna &amp; organic field dining.</p>
+                </div>
+              </label>
+
+              <label class="tier-card" for="tier-luxury">
+                <input type="radio" name="accommodation-tier" id="tier-luxury" value="luxury" onchange="handlePlannerConfigChange()" />
+                <div class="tier-card-content">
+                  <div class="tier-top">
+                    <span class="tier-icon">✨</span>
+                    <span class="tier-rate" id="tier-rate-luxury">$390 / night</span>
+                  </div>
+                  <h4>Luxury Glamping Pods</h4>
+                  <p>Ultra-panoramic glass skylight pods with heated floors &amp; personal chef.</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Gear Rental Package Selector -->
+          <div class="config-section">
+            <label for="gear-package-select" class="config-label">Specialized Gear Rental Package</label>
+            <select id="gear-package-select" class="planner-select" onchange="handlePlannerConfigChange()">
+              <option value="none" data-rate="0">🎒 Bring Own Gear ($0) — Safety check included</option>
+              <option value="essential" data-rate="180" selected>🧭 Essential Arctic/Trek Kit ($180/person) — Crampons, GPS beacon, thermal poles</option>
+              <option value="technical" data-rate="340">🏔️ Pro Mountaineer Technical Kit ($340/person) — Ice axes, alpine harness, transceiver</option>
+              <option value="cinema" data-rate="520">📷 National Geographic Cinema Kit ($520/person) — 4K sealed rig, drone, solar bank</option>
+            </select>
+          </div>
+
+          <!-- Guided Tour & Expedition Service Add-ons -->
+          <div class="config-section">
+            <span class="config-label">Expedition Add-ons &amp; Security</span>
+            <div class="addons-grid">
+              <label class="addon-checkbox-card" for="addon-heli">
+                <input type="checkbox" id="addon-heli" data-cost="450" data-per-person="true" checked onchange="handlePlannerConfigChange()" />
+                <span class="addon-check-icon">✓</span>
+                <div class="addon-text">
+                  <span class="addon-title">🚁 Heli-Rescue &amp; Aerial Scouting Cover</span>
+                  <span class="addon-price" id="addon-cost-heli">+$450 / person</span>
+                </div>
+              </label>
+
+              <label class="addon-checkbox-card" for="addon-guide">
+                <input type="checkbox" id="addon-guide" data-cost="850" data-per-person="false" checked onchange="handlePlannerConfigChange()" />
+                <span class="addon-check-icon">✓</span>
+                <div class="addon-text">
+                  <span class="addon-title">🏔️ Dedicated UIAGM Mountain Master Guide</span>
+                  <span class="addon-price" id="addon-cost-guide">+$850 / expedition</span>
+                </div>
+              </label>
+
+              <label class="addon-checkbox-card" for="addon-photo">
+                <input type="checkbox" id="addon-photo" data-cost="220" data-per-person="true" onchange="handlePlannerConfigChange()" />
+                <span class="addon-check-icon">✓</span>
+                <div class="addon-text">
+                  <span class="addon-title">🌌 Aurora &amp; Astrophotography Masterclass</span>
+                  <span class="addon-price" id="addon-cost-photo">+$220 / person</span>
+                </div>
+              </label>
+
+              <label class="addon-checkbox-card" for="addon-gourmet">
+                <input type="checkbox" id="addon-gourmet" data-cost="380" data-per-person="true" onchange="handlePlannerConfigChange()" />
+                <span class="addon-check-icon">✓</span>
+                <div class="addon-text">
+                  <span class="addon-title">🍲 Wilderness Gourmet Dining Experience</span>
+                  <span class="addon-price" id="addon-cost-gourmet">+$380 / person</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Live Summary & Cost Breakdown Card -->
+        <div class="planner-summary-panel">
+          <div class="summary-card">
+            <div class="summary-top-tag">EXPEDITION INVESTMENT</div>
+            <div class="total-budget-wrap">
+              <span class="total-currency-symbol" id="summary-currency-symbol">$</span>
+              <span class="total-budget-val" id="summary-total-budget">7,890</span>
+              <span class="total-currency-code" id="summary-currency-code">USD</span>
+            </div>
+
+            <div class="per-person-pill">
+              <span class="pill-icon">👥</span>
+              <span>Rate: <strong id="summary-per-person">$3,945</strong> / explorer</span>
+            </div>
+
+            <!-- Cost Breakdown Stacked Bar -->
+            <div class="breakdown-chart-wrap">
+              <div class="chart-header">
+                <span>Budget Allocation</span>
+                <span id="chart-eco-note">Includes 2.5% Carbon Offset</span>
+              </div>
+              <div class="stacked-bar-track" id="stacked-bar-track">
+                <div class="bar-segment bar-accommodation" id="bar-seg-accommodation" style="width: 40%;" title="Accommodation"></div>
+                <div class="bar-segment bar-logistics" id="bar-seg-logistics" style="width: 35%;" title="Base Route & Permits"></div>
+                <div class="bar-segment bar-gear" id="bar-seg-gear" style="width: 10%;" title="Gear Packages"></div>
+                <div class="bar-segment bar-services" id="bar-seg-services" style="width: 15%;" title="Guides & Add-ons"></div>
+              </div>
+
+              <div class="chart-legend">
+                <div class="legend-item"><span class="legend-dot dot-accommodation"></span> Accommodation (<span id="pct-accommodation">40%</span>)</div>
+                <div class="legend-item"><span class="legend-dot dot-logistics"></span> Logistics &amp; Permits (<span id="pct-logistics">35%</span>)</div>
+                <div class="legend-item"><span class="legend-dot dot-gear"></span> Gear (<span id="pct-gear">10%</span>)</div>
+                <div class="legend-item"><span class="legend-dot dot-services"></span> Guides &amp; Services (<span id="pct-services">15%</span>)</div>
+              </div>
+            </div>
+
+            <!-- Itemized Receipt Breakdown -->
+            <div class="receipt-list">
+              <div class="receipt-row">
+                <span class="receipt-item-title">Base Expedition Logistics &amp; Permits</span>
+                <strong class="receipt-item-val" id="receipt-base">$3,200</strong>
+              </div>
+              <div class="receipt-row">
+                <span class="receipt-item-title" id="receipt-acc-label">Eco-Lodge Accommodation (10 nights)</span>
+                <strong class="receipt-item-val" id="receipt-accommodation">$2,200</strong>
+              </div>
+              <div class="receipt-row">
+                <span class="receipt-item-title" id="receipt-gear-label">Essential Arctic Gear Kit (2x)</span>
+                <strong class="receipt-item-val" id="receipt-gear">$360</strong>
+              </div>
+              <div class="receipt-row">
+                <span class="receipt-item-title">Certified Guides &amp; Selected Add-ons</span>
+                <strong class="receipt-item-val" id="receipt-services">$1,950</strong>
+              </div>
+              <div class="receipt-row eco-fee-row">
+                <span class="receipt-item-title">🌿 Arctic Preservation &amp; Carbon Offset (2.5%)</span>
+                <strong class="receipt-item-val" id="receipt-eco">$180</strong>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="planner-actions">
+              <button type="button" class="btn-save-estimate" id="btn-save-estimate" onclick="saveExpeditionEstimate()">
+                <span>💾 Save Expedition Estimate</span>
+              </button>
+              <button type="button" class="btn-reset-planner" id="btn-reset-planner" onclick="resetExpeditionBudget()">
+                <span>↺ Reset</span>
+              </button>
+            </div>
+
+            <div class="saved-estimate-status" id="saved-estimate-status" hidden>
+              <span class="status-icon">✓</span>
+              <span id="saved-estimate-text">Estimate saved to your browser session.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #211 ===== -->
+
+  <footer class="site-footer">
+    <p>© Odyssey Expeditions · Travel thoughtfully. Explore boldly.</p>
+  </footer>
+
+  <!-- Keep the existing script path so checklist and filter features continue working. -->
   <script src="script.js"></script>
 </body>
 </html>

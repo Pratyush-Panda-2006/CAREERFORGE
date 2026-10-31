@@ -30,14 +30,14 @@ All issues and pull requests in this repository follow the official **Nexus Spri
 > [!TIP]
 > - Our automated GitHub bots immediately attach the **`nsoc26`** label to any new issue and pull request.
 > - Maintainers assign the corresponding difficulty level tag (`level1`, `level2`, or `level3`) to reflect the points awarded upon merging.
-> - Contributor rankings and merged metrics are automatically updated every 24 hours on the live platform [Leaderboard](https://careerforge.live/leaderboard).
+> - Contributor rankings and merged metrics are automatically updated every 12 hours (at 12:00 PM noon and midnight UTC) on the live platform [Leaderboard](https://careerforge.live/leaderboard).
 
 ---
 
 ## 🌟 Key Features & Highlights
 
 - 🏢 **Single-Repository Showcase Architecture**: 20 isolated static website project templates hosted in `public/showcase/` with live preview capabilities.
-- ⚡ **Zero-Database 24h Leaderboard**: Automated daily synchronization via GitHub Actions (`scripts/generate-leaderboard.mjs`) fetching merged PR metrics and publishing to `public/leaderboard.json`.
+- ⚡ **Zero-Database 12h Leaderboard**: Automated 12-hour synchronization via GitHub Actions (`scripts/generate-leaderboard.mjs`) fetching merged PR metrics and publishing to `public/leaderboard.json`.
 - 🔒 **Automated PR Gatekeeper**: Scope enforcement (`.github/workflows/pr-gatekeeper.yml`) preventing unauthorized modifications to core `src/` files and auto-closing invalid PRs.
 - 🛡️ **CodeQL Vulnerability Scanning**: Continuous static application security testing (SAST) for JavaScript & TypeScript.
 - 🎨 **Modern Glassmorphic UI**: High-impact, dark-mode design system crafted with Tailwind CSS v4, Lucide icons, and responsive layouts.
@@ -54,7 +54,7 @@ carrers-frontend/
 │       ├── codeql.yml               # CodeQL SAST Security Scanner
 │       ├── dependency-review.yml    # PR Dependency Vulnerability & License Scanner
 │       ├── issue-manager.yml        # First-Time Welcome & /claim Bot
-│       ├── leaderboard-sync.yml     # 24h Automated Leaderboard Sync
+│       ├── leaderboard-sync.yml     # 12h Automated Leaderboard Sync (12pm & 12am UTC)
 │       ├── osv-scanner.yml          # Google OSV Open-Source Vulnerability Audit
 │       ├── pr-gatekeeper.yml        # Scope Gatekeeper & Auto-Close Action
 │       └── semgrep.yml              # Semgrep Client-Side SAST Security Scanner

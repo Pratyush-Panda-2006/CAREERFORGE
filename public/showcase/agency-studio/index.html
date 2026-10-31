@@ -10,38 +10,122 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header className="navbar">
-    <div className="brand">AETHERIA ✦ STUDIO</div>
-    <nav className="nav-links">
+  <header class="navbar">
+    <div class="brand">AETHERIA ✦ STUDIO</div>
+    <nav class="nav-links">
       <a href="#work">Work</a>
       <a href="#services">Services</a>
       <a href="#estimator">Estimator</a>
-      <a href="#contact" className="cta-btn">Start Project</a>
+      <a href="#contact" class="cta-btn">Start Project</a>
     </nav>
   </header>
 
   <main>
-    <section className="hero">
-      <div className="badge">// CREATIVE WEBSITES & BRANDING</div>
+    <section class="hero">
+      <div class="badge">// CREATIVE WEBSITES & BRANDING</div>
       <h1>We craft liquid digital experiences for high-growth tech brands.</h1>
       <p>A specialized design and development collective engineering award-winning web platforms.</p>
     </section>
 
-    <section id="work" className="portfolio">
-      <h2>Selected Client Work</h2>
-      <div className="grid">
-        <div className="project-card">
-          <div className="project-preview purple-gradient">🌐</div>
-          <div className="project-meta">
+    <section id="work" class="portfolio">
+      <div class="portfolio-header">
+        <div>
+          <span class="badge">// SELECTED CLIENT WORK</span>
+          <h2>Featured Case Studies &amp; Architectural Systems</h2>
+        </div>
+        <p class="portfolio-sub">Explore our comprehensive engineering case studies, product challenges, and validated business impact.</p>
+      </div>
+
+      <div class="grid">
+        <div class="project-card" data-project-id="solana-pay">
+          <div class="project-preview purple-gradient">
+            <span class="preview-icon">🌐</span>
+            <div class="preview-overlay">
+              <span class="preview-badge">Tap to View Case Study</span>
+            </div>
+          </div>
+          <div class="project-meta">
+            <div class="project-tags">
+              <span class="tag">Web3 Fintech</span>
+              <span class="tag">Mobile Architecture</span>
+            </div>
             <h3>Solana Pay Mobile Web3 App</h3>
-            <span>UI/UX Design • Fullstack Dev</span>
+            <p class="project-desc">Sub-second QR settlement and non-custodial crypto payment experience built for 500k+ daily transacting users.</p>
+            <div class="project-action-row">
+              <span class="metric-pill">+340% Mobile Checkout</span>
+              <button type="button" class="view-case-study-btn" data-project="solana-pay" aria-haspopup="dialog">
+                View Case Study ↗
+              </button>
+            </div>
           </div>
         </div>
-        <div className="project-card">
-          <div className="project-preview cyan-gradient">⚡</div>
-          <div className="project-meta">
+
+        <div class="project-card" data-project-id="vortex-ai">
+          <div class="project-preview cyan-gradient">
+            <span class="preview-icon">⚡</span>
+            <div class="preview-overlay">
+              <span class="preview-badge">Tap to View Case Study</span>
+            </div>
+          </div>
+          <div class="project-meta">
+            <div class="project-tags">
+              <span class="tag">AI SaaS</span>
+              <span class="tag">WebGL 3D</span>
+            </div>
             <h3>Vortex AI Neural Interface</h3>
-            <span>Design System • WebGL 3D</span>
+            <p class="project-desc">Spatial node-based model training studio and 60fps WebGL particle visualizer powering generative voice and audio synthesis.</p>
+            <div class="project-action-row">
+              <span class="metric-pill">42ms Latency Reduction</span>
+              <button type="button" class="view-case-study-btn" data-project="vortex-ai" aria-haspopup="dialog">
+                View Case Study ↗
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card" data-project-id="krypton-protocol">
+          <div class="project-preview emerald-gradient">
+            <span class="preview-icon">💎</span>
+            <div class="preview-overlay">
+              <span class="preview-badge">Tap to View Case Study</span>
+            </div>
+          </div>
+          <div class="project-meta">
+            <div class="project-tags">
+              <span class="tag">DeFi Analytics</span>
+              <span class="tag">Design System</span>
+            </div>
+            <h3>Krypton Hyper-Yield Protocol</h3>
+            <p class="project-desc">Institutional decentralized liquidity vault management platform with real-time risk hedging telemetry and order execution.</p>
+            <div class="project-action-row">
+              <span class="metric-pill">$180M+ TVL Managed</span>
+              <button type="button" class="view-case-study-btn" data-project="krypton-protocol" aria-haspopup="dialog">
+                View Case Study ↗
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card" data-project-id="chronos-atelier">
+          <div class="project-preview gold-gradient">
+            <span class="preview-icon">👑</span>
+            <div class="preview-overlay">
+              <span class="preview-badge">Tap to View Case Study</span>
+            </div>
+          </div>
+          <div class="project-meta">
+            <div class="project-tags">
+              <span class="tag">Luxury Brand</span>
+              <span class="tag">3D Configurator</span>
+            </div>
+            <h3>Chronos Luxury Watch Atelier</h3>
+            <p class="project-desc">Bespoke Swiss horology e-commerce experience featuring interactive 360° bezel and complication customizer.</p>
+            <div class="project-action-row">
+              <span class="metric-pill">4.9 ★ Customer Rating</span>
+              <button type="button" class="view-case-study-btn" data-project="chronos-atelier" aria-haspopup="dialog">
+                View Case Study ↗
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -99,6 +183,89 @@
       </div>
     </section>
   </main>
+
+  <!-- Project Case Study Sliding Modal Drawer -->
+  <div class="case-study-drawer-overlay" id="caseStudyDrawerOverlay" aria-hidden="true" hidden>
+    <aside class="case-study-drawer" id="caseStudyDrawer" role="dialog" aria-modal="true" aria-labelledby="csDrawerTitle" tabindex="-1">
+      <div class="drawer-header">
+        <div class="drawer-header-meta">
+          <span class="drawer-badge" id="csDrawerCategory">Web3 Fintech</span>
+          <span class="drawer-date" id="csDrawerDate">Q2 2026 • 8 Weeks</span>
+        </div>
+        <button type="button" class="drawer-close-btn" id="csDrawerCloseBtn" aria-label="Close Case Study Modal">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+
+      <div class="drawer-scroll-body">
+        <div class="drawer-intro">
+          <h2 class="drawer-title" id="csDrawerTitle">Solana Pay Mobile Web3 App</h2>
+          <p class="drawer-tagline" id="csDrawerTagline">Frictionless micropayments architecture &amp; high-throughput mobile wallet experience.</p>
+        </div>
+
+        <!-- Interactive Image Gallery Carousel -->
+        <div class="drawer-gallery" aria-label="Project Visual Gallery">
+          <div class="gallery-viewport" id="galleryViewport">
+            <!-- Injected by script.js -->
+          </div>
+          <div class="gallery-controls">
+            <button type="button" class="gallery-nav-btn prev" id="galleryPrevBtn" aria-label="Previous Slide">‹</button>
+            <div class="gallery-dots" id="galleryDots" role="tablist" aria-label="Gallery Slides"></div>
+            <button type="button" class="gallery-nav-btn next" id="galleryNextBtn" aria-label="Next Slide">›</button>
+          </div>
+          <div class="gallery-caption-bar">
+            <span class="gallery-caption" id="galleryCaption">Slide 1: Primary Mobile Wallet Flow</span>
+          </div>
+        </div>
+
+        <!-- Project Meta Tags -->
+        <div class="drawer-tags-wrap" id="csDrawerTags"></div>
+
+        <!-- Executive Challenge & Strategic Solution -->
+        <div class="drawer-narrative-grid">
+          <div class="drawer-card">
+            <div class="drawer-card-icon">⚡</div>
+            <h3>The Challenge</h3>
+            <p id="csDrawerChallenge"></p>
+          </div>
+
+          <div class="drawer-card">
+            <div class="drawer-card-icon">✦</div>
+            <h3>Strategic Solution</h3>
+            <p id="csDrawerSolution"></p>
+          </div>
+        </div>
+
+        <!-- Impact & Key Results Metrics -->
+        <div class="drawer-metrics-section">
+          <h3>Impact &amp; Key Business Metrics</h3>
+          <div class="metrics-grid" id="csDrawerMetrics"></div>
+        </div>
+
+        <!-- Client Testimonial & Quote Card -->
+        <div class="drawer-quote-card">
+          <div class="quote-mark">“</div>
+          <blockquote class="quote-text" id="csDrawerQuote"></blockquote>
+          <div class="quote-author">
+            <div class="author-avatar" id="csDrawerAuthorAvatar">👤</div>
+            <div class="author-info">
+              <span class="author-name" id="csDrawerAuthorName"></span>
+              <span class="author-role" id="csDrawerAuthorRole"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <button type="button" class="drawer-action-btn primary" id="csDrawerEstimateBtn">
+          Estimate Similar Project ✦
+        </button>
+        <button type="button" class="drawer-action-btn secondary" id="csDrawerCloseFooterBtn">
+          Close Case Study
+        </button>
+      </div>
+    </aside>
+  </div>
 
   <script src="script.js"></script>
 </body>

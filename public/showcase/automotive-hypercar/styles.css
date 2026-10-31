@@ -44,6 +44,67 @@ body {
   box-shadow: 0 0 20px rgba(239,68,68,0.5);
 }
 
+/* ===== Performance Comparator (issue #52) START ===== */
+.cmp {
+  --cmp-red: #ef4444;
+  --cmp-silver: #cbd5e1;
+  --cmp-amber: #f59e0b;
+  --cmp-muted: #9ca3af;
+  --cmp-line: rgba(255,255,255,0.1);
+  max-width: 1000px;
+  margin: 60px auto 0;
+  padding: 0 24px;
+}
+.cmp * { min-width: 0; }
+.cmp h2 { font-family: 'Orbitron', sans-serif; text-align: center; letter-spacing: 3px; margin-bottom: 12px; }
+.cmp-intro { text-align: center; color: var(--cmp-muted); margin-bottom: 24px; }
+.cmp-bar-top { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; margin-bottom: 16px; padding: 14px 16px; border: 1px solid var(--cmp-line); border-radius: 12px; background: rgba(255,255,255,0.03); }
+.cmp-pick { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cmp-pick label { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; letter-spacing: 2px; color: var(--cmp-muted); }
+.cmp-pick select { background: #0d0d10; color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1rem; max-width: 100%; }
+.cmp-pick select:focus-visible { outline: 2px solid var(--cmp-red); outline-offset: 2px; }
+.cmp-summary { flex: 1 1 260px; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; line-height: 1.5; color: #fff; }
+
+/* HUD panel: carbon fibre weave + telemetry grid lines */
+.cmp-grid {
+  list-style: none;
+  display: grid;
+  gap: 1px;
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(239,68,68,0.06) 1px, transparent 1px) 0 0 / 100% 40px,
+    repeating-linear-gradient(45deg, #0c0c0e 0 3px, #151518 3px 6px),
+    #0b0b0d;
+}
+.cmp-row { padding: 16px 18px; border-bottom: 1px solid var(--cmp-line); }
+.cmp-row:last-child { border-bottom: 0; }
+.cmp-row-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; margin-bottom: 10px; }
+.cmp-metric { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 2px; }
+.cmp-hint { color: var(--cmp-muted); font-size: 0.8rem; }
+.cmp-car[hidden] { display: none; }
+.cmp-car { --c: var(--cmp-red); display: grid; grid-template-columns: minmax(80px, 150px) minmax(0, 1fr) minmax(86px, auto); align-items: center; gap: 12px; margin-top: 8px; }
+.cmp-car.cmp-rival-a { --c: var(--cmp-silver); }
+.cmp-car.cmp-rival-b { --c: var(--cmp-amber); }
+.cmp-name { color: var(--c); font-size: 0.85rem; font-weight: 600; overflow-wrap: anywhere; }
+.cmp-track { height: 14px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.cmp-fill { display: block; height: 100%; width: 0; background: var(--c); box-shadow: 0 0 12px var(--c); transition: width 0.8s cubic-bezier(.2,.8,.2,1); }
+.cmp-val { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; text-align: right; white-space: nowrap; }
+.cmp-best { display: inline-block; margin-left: 6px; padding: 1px 6px; border: 1px solid #34d399; border-radius: 3px; color: #34d399; font-size: 0.65rem; letter-spacing: 1px; vertical-align: 1px; }
+.cmp-best[hidden] { display: none; }
+.cmp-key { margin-top: 14px; color: var(--cmp-muted); font-size: 0.85rem; }
+.cmp-warn { margin-top: 10px; padding: 12px 14px; border-left: 3px solid var(--cmp-amber); background: rgba(245,158,11,0.08); color: #e5e7eb; font-size: 0.9rem; }
+@media (prefers-reduced-motion: reduce) {
+  .cmp-fill { transition: none; }
+}
+@media (max-width: 560px) {
+  .cmp { padding: 0 14px; }
+  .cmp-car { grid-template-columns: minmax(0, 1fr) auto; }
+  .cmp-track { grid-column: 1 / -1; grid-row: 2; }
+}
+/* ===== Performance Comparator (issue #52) END ===== */
+
 .specs-grid {
   max-width: 900px;
   margin: 60px auto;
@@ -113,3 +174,1241 @@ body {
   .wt-layout { grid-template-columns: 1fr; }
 }
 /* ===== Virtual Wind Tunnel (issue #99) END ===== */
+
+/* ===== 360° Vehicle Colorway & Wheel Configurator (issue #51) START ===== */
+.cfg {
+  --cfg-red: #ef4444;
+  --cfg-cyan: #22d3ee;
+  --cfg-amber: #f59e0b;
+  --cfg-muted: #9ca3af;
+  --cfg-line: rgba(255, 255, 255, 0.12);
+  --cfg-surface: rgba(18, 18, 24, 0.7);
+  --cfg-gold: #fbbf24;
+  max-width: 1100px;
+  margin: 60px auto;
+  padding: 0 24px;
+}
+
+.cfg-badge {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--cfg-red);
+  font-size: 0.75rem;
+  letter-spacing: 2.5px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.cfg h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ffffff 40%, var(--cfg-red) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cfg-intro {
+  text-align: center;
+  color: var(--cfg-muted);
+  max-width: 720px;
+  margin: 0 auto 36px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Viewport Card */
+.cfg-viewport-card {
+  background: radial-gradient(circle at 50% 20%, rgba(239,68,68,0.06) 0%, rgba(10,10,14,0.95) 75%), #070709;
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(239,68,68,0.15);
+  overflow: hidden;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+/* HUD Top Telemetry Bar */
+.cfg-hud-header {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--cfg-line);
+}
+
+.cfg-hud-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cfg-hud-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: var(--cfg-muted);
+}
+
+.cfg-hud-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cfg-price-highlight {
+  color: var(--cfg-gold);
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+}
+
+/* Stage Area */
+.cfg-stage-wrapper {
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 24px 30px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 55%, rgba(255,255,255,0.02) 0%, transparent 70%);
+}
+
+.cfg-turntable-grid {
+  position: absolute;
+  bottom: 20px;
+  width: 90%;
+  height: 120px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.03);
+  transform: perspective(600px) rotateX(65deg);
+  pointer-events: none;
+}
+
+.cfg-ground-glow {
+  position: absolute;
+  bottom: 35px;
+  width: 60%;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.35);
+  filter: blur(25px);
+  pointer-events: none;
+  transition: background 0.5s ease;
+}
+
+.cfg-car-stage {
+  width: 100%;
+  max-width: 820px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.cfg-car-stage svg {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+}
+
+/* 360 Rotation & Azimuth Bar */
+.cfg-rotation-bar {
+  padding: 16px 24px 22px;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid var(--cfg-line);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cfg-angle-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.cfg-preset-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--cfg-line);
+  color: #d1d5db;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+.cfg-preset-deg {
+  color: var(--cfg-muted);
+  font-size: 0.68rem;
+}
+
+.cfg-preset-btn:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cfg-preset-btn.active {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--cfg-red);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.35);
+}
+
+.cfg-preset-btn.active .cfg-preset-deg {
+  color: var(--cfg-red);
+}
+
+.cfg-slider-wrap {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.cfg-slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: var(--cfg-muted);
+  margin-bottom: 8px;
+}
+
+.cfg-slider-deg {
+  color: var(--cfg-cyan);
+  font-weight: 700;
+}
+
+.cfg-slider-wrap input[type="range"] {
+  width: 100%;
+  accent-color: var(--cfg-red);
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.cfg-slider-wrap input[type="range"]:focus-visible {
+  outline: 2px solid var(--cfg-cyan);
+  outline-offset: 4px;
+}
+
+.cfg-orbit-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 0.65rem;
+  font-family: 'Orbitron', sans-serif;
+  color: var(--cfg-muted);
+  letter-spacing: 1px;
+}
+
+/* Controls Grid (Panels) */
+.cfg-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.cfg-panel {
+  background: var(--cfg-surface);
+  border: 1px solid var(--cfg-line);
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.3s ease;
+}
+
+.cfg-panel:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.cfg-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.cfg-panel-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  color: #fff;
+}
+
+.cfg-spec-code {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 1.5px;
+  color: var(--cfg-cyan);
+}
+
+.cfg-panel-desc {
+  font-size: 0.82rem;
+  color: var(--cfg-muted);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+/* Color Swatches */
+.cfg-color-swatches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.cfg-swatch-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--cfg-line);
+  border-radius: 10px;
+  padding: 12px 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.cfg-swatch-btn:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cfg-swatch-btn.active {
+  border-color: var(--cfg-red);
+  background: rgba(239, 68, 68, 0.08);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.3);
+}
+
+.cfg-swatch-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.35), 0 3px 10px rgba(0, 0, 0, 0.6);
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.cfg-swatch-btn.active .cfg-swatch-circle {
+  transform: scale(1.12);
+  border-color: #fff;
+  box-shadow: 0 0 16px currentColor;
+}
+
+.cfg-swatch-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.cfg-swatch-cost {
+  font-size: 0.68rem;
+  color: var(--cfg-muted);
+}
+
+/* Paint Details Box */
+.cfg-paint-details {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cfg-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.cfg-detail-k { color: var(--cfg-muted); }
+.cfg-detail-v { color: #fff; font-weight: 600; }
+
+/* Wheel Selection Grid */
+.cfg-wheel-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cfg-wheel-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--cfg-line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.cfg-wheel-card:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cfg-wheel-card.active {
+  border-color: var(--cfg-cyan);
+  background: rgba(34, 211, 238, 0.08);
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.25);
+}
+
+.cfg-wheel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cfg-wheel-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.cfg-wheel-spec {
+  font-size: 0.72rem;
+  color: var(--cfg-muted);
+}
+
+.cfg-wheel-price {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cfg-cyan);
+  white-space: nowrap;
+}
+
+/* Caliper Swatches */
+.cfg-caliper-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.cfg-caliper-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--cfg-line);
+  border-radius: 8px;
+  padding: 10px 4px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.cfg-caliper-btn:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.cfg-caliper-btn.active {
+  border-color: var(--cfg-amber);
+  background: rgba(245, 158, 11, 0.08);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+}
+
+.cfg-caliper-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+.cfg-caliper-label {
+  font-size: 0.7rem;
+  color: #d1d5db;
+  text-align: center;
+}
+
+/* Toggle Switches */
+.cfg-toggles-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid var(--cfg-line);
+  padding-top: 14px;
+}
+
+.cfg-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.cfg-toggle-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cfg-toggle-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.cfg-toggle-sub {
+  font-size: 0.7rem;
+  color: var(--cfg-muted);
+}
+
+.cfg-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.cfg-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cfg-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cfg-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cfg-switch input:checked + .cfg-slider {
+  background-color: var(--cfg-red);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.cfg-switch input:checked + .cfg-slider:before {
+  transform: translateX(20px);
+}
+
+/* Summary HUD Bottom Bar */
+.cfg-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 24px;
+  background: rgba(18, 18, 24, 0.9);
+  border: 1px solid var(--cfg-line);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.cfg-summary-info {
+  flex: 1 1 300px;
+}
+
+.cfg-summary-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: var(--cfg-muted);
+  margin-bottom: 4px;
+}
+
+.cfg-summary-specs {
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.cfg-summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cfg-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.cfg-btn-outline {
+  background: transparent;
+  border: 1px solid var(--cfg-line);
+  color: var(--cfg-muted);
+}
+.cfg-btn-outline:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.cfg-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.cfg-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: var(--cfg-cyan);
+  color: var(--cfg-cyan);
+}
+
+.cfg-btn-primary {
+  background: var(--cfg-red);
+  border: none;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+.cfg-btn-primary:hover {
+  background: #dc2626;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
+  transform: translateY(-1px);
+}
+
+/* Toast */
+.cfg-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: #111827;
+  border: 1px solid var(--cfg-cyan);
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(34,211,238,0.3);
+  z-index: 9999;
+  transform: translateY(100px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+}
+
+.cfg-toast.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 680px) {
+  .cfg { padding: 0 14px; }
+  .cfg h2 { font-size: 1.5rem; }
+  .cfg-controls-grid { grid-template-columns: 1fr; }
+  .cfg-color-swatches { grid-template-columns: repeat(2, 1fr); }
+  .cfg-summary-bar { flex-direction: column; align-items: stretch; }
+  .cfg-summary-actions { flex-direction: column; }
+  .cfg-btn { width: 100%; text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfg-car-stage,
+  .cfg-preset-btn,
+  .cfg-swatch-btn,
+  .cfg-wheel-card,
+  .cfg-toast {
+    transition: none !important;
+  }
+}
+/* ===== 360° Vehicle Colorway & Wheel Configurator (issue #51) END ===== */
+
+html { scroll-behavior: smooth; }
+#comparator, #wind-tunnel, #configurator { scroll-margin-top: 2rem; }
+.section-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; margin: 24px 0; }
+.section-links a { color: #e2e8f0; text-underline-offset: 5px; }
+.section-links a:hover { color: #fff; }
+.section-links a:focus-visible { outline: 3px solid #fff; outline-offset: 5px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+
+/* ==========================================================
+   Launch Control 0-60 Simulation & Live G-Meter (Issue #177)
+   ========================================================== */
+.launch-sim-section {
+  padding: 60px 24px;
+  background: radial-gradient(circle at center, rgba(239, 68, 68, 0.08) 0%, rgba(5, 5, 5, 0.98) 75%);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.launch-sim-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ef4444, #f59e0b, transparent);
+}
+
+.lc-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.lc-badge {
+  font-family: 'Orbitron', sans-serif;
+  color: #ef4444;
+  font-size: 0.78rem;
+  letter-spacing: 2.5px;
+  margin-bottom: 12px;
+}
+
+.launch-sim-section h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.1rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.lc-intro {
+  color: #9ca3af;
+  font-size: 1.02rem;
+  max-width: 820px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+
+/* Launch Staging Lights Tree */
+.lc-staging-lights {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin-bottom: 32px;
+  background: rgba(15, 15, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 12px 28px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.staging-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.staging-light {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1f2937;
+  border: 2px solid #374151;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.staging-light.stage-amber.active {
+  background: #f59e0b;
+  border-color: #fbbf24;
+  box-shadow: 0 0 18px #f59e0b, 0 0 30px rgba(245, 158, 11, 0.8);
+}
+
+.staging-light.stage-green.active {
+  background: #10b981;
+  border-color: #34d399;
+  box-shadow: 0 0 22px #10b981, 0 0 35px rgba(16, 185, 129, 0.85);
+  animation: launch-flash 0.4s infinite alternate;
+}
+
+@keyframes launch-flash {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.15); filter: brightness(1.3); }
+}
+
+.light-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  color: #6b7280;
+  letter-spacing: 1px;
+}
+
+/* Cockpit HUD Cluster Grid */
+.lc-cockpit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.lc-hud-card {
+  background: rgba(15, 15, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(14px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lc-hud-card:hover {
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(239, 68, 68, 0.15);
+}
+
+.hud-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hud-card-tag {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #ef4444;
+  letter-spacing: 1.5px;
+}
+
+.hud-status-chip {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.68rem;
+  color: #38bdf8;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.hud-status-chip.chip-g {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.hud-status-chip.chip-timer {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* 1. Speedometer HUD Card */
+.speedo-gauge-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 16px;
+}
+
+.speedo-arc-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.speedo-bg-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+.speedo-active-arc {
+  fill: none;
+  stroke: url(#speedo-grad);
+  stroke: #ef4444;
+  stroke-width: 14;
+  stroke-linecap: round;
+  stroke-dasharray: 430;
+  stroke-dashoffset: 430; /* 0 is full, 430 is empty */
+  transition: stroke-dashoffset 0.06s linear;
+  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.7));
+}
+
+.speedo-redline-arc {
+  fill: none;
+  stroke: rgba(239, 68, 68, 0.35);
+  stroke-width: 12;
+  stroke-dasharray: 4 6;
+}
+
+.speedo-center-readout {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -45%);
+  text-align: center;
+}
+
+.speed-number {
+  font-family: 'Orbitron', monospace;
+  font-size: 3.4rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+}
+
+.speed-unit {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 2px;
+  color: #ef4444;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.rpm-readout {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.68rem;
+  color: #9ca3af;
+  margin-top: 6px;
+  letter-spacing: 1px;
+}
+
+.speedo-footer-bar, .gmeter-footer-bar {
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
+}
+
+.speedo-stat, .g-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.speedo-stat .lbl, .g-stat .lbl {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.62rem;
+  color: #6b7280;
+  letter-spacing: 1px;
+}
+
+.speedo-stat .val, .g-stat .val {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.speedo-stat .val.highlight {
+  color: #f59e0b;
+}
+
+.g-stat .val.peak {
+  color: #ef4444;
+}
+
+/* 2. G-Force Circular Dial Meter */
+.gmeter-dial-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 250px;
+  margin: 0 auto 16px;
+}
+
+.gmeter-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.g-ring-outer {
+  fill: rgba(5, 5, 5, 0.5);
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 2;
+}
+
+.g-ring-mid {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-dasharray: 4 4;
+}
+
+.g-ring-inner {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+}
+
+.g-axis {
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 1;
+}
+
+.g-axis-lbl {
+  fill: #6b7280;
+  font-family: 'Orbitron', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.g-ring-lbl {
+  fill: rgba(255, 255, 255, 0.3);
+  font-family: 'Orbitron', monospace;
+  font-size: 8px;
+}
+
+.g-puck {
+  fill: #ef4444;
+  stroke: #fff;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 10px #ef4444);
+  transition: cx 0.05s ease, cy 0.05s ease;
+}
+
+.g-puck-trail {
+  fill: rgba(239, 68, 68, 0.25);
+  stroke: rgba(239, 68, 68, 0.6);
+  stroke-width: 1.5;
+  transition: cx 0.05s ease, cy 0.05s ease;
+}
+
+.gmeter-numerical-readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.g-primary-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #f59e0b;
+  text-shadow: 0 0 14px rgba(245, 158, 11, 0.6);
+}
+
+.g-sub-lbl {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  color: #9ca3af;
+  letter-spacing: 1px;
+}
+
+/* 3. Stopwatch & Split Timeline */
+.stopwatch-display {
+  text-align: center;
+  margin: 12px 0 20px;
+}
+
+.stopwatch-digits {
+  font-family: 'Orbitron', monospace;
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: #38bdf8;
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.6);
+  line-height: 1;
+}
+
+.stopwatch-sec {
+  font-size: 1.4rem;
+  color: #9ca3af;
+  margin-left: 4px;
+}
+
+.stopwatch-target {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 6px;
+  font-family: 'Orbitron', monospace;
+}
+
+.stopwatch-target strong {
+  color: #10b981;
+}
+
+.splits-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.splits-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #38bdf8, #ef4444);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+  transition: width 0.05s linear;
+}
+
+.splits-milestones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.milestone-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s ease;
+}
+
+.milestone-item.achieved {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.milestone-item .m-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4b5563;
+  margin-right: 8px;
+}
+
+.milestone-item.achieved .m-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.milestone-item .m-lbl {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  font-weight: 700;
+}
+
+.milestone-item .m-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
+  color: #d1d5db;
+}
+
+.milestone-item.achieved .m-val {
+  color: #34d399;
+  font-weight: 700;
+}
+
+/* Action Buttons */
+.lc-actions-bar {
+  display: flex;
+  gap: 12px;
+}
+
+.lc-launch-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  color: #fff;
+  border: none;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+  transition: all 0.2s ease;
+}
+
+.lc-launch-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+  filter: brightness(1.15);
+}
+
+.lc-launch-btn.is-active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.7);
+}
+
+.lc-btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: #9ca3af;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lc-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Console Feedback */
+.lc-console-feedback {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  letter-spacing: 1px;
+}

@@ -14,7 +14,7 @@
     <div className="brand">LUMIÈRE BISTRO</div>
     <h1>Artisanal Gastronomy &amp; Fine Wines</h1>
     <p>Seasonal farm-to-table tasting menus curated by Chef Gabriel Laurent in downtown Paris.</p>
-    <button className="reserve-btn" onclick="reserveTable()">Reserve a Table</button>
+    <button type="button" class="reserve-btn" id="reserveBtn" onclick="reserveTable()" aria-haspopup="dialog" aria-controls="reservationModal">Reserve a Table</button>
     <button type="button" class="order-btn order-hero" id="orderOnline">Order Online</button>
   </header>
 
@@ -40,8 +40,80 @@
         <p>Cognac flambéed lobster foam, saffron tuile, and micro tarragon.</p>
         <button type="button" class="order-btn" data-order="bisque" aria-label="Order Online: Brittany Lobster Bisque">Order Online</button>
       </div>
-    </div>
   </main>
+
+  <!-- ===== BEGIN issue #101: Digital Sommelier Wine Pairing Recommendation Finder ===== -->
+  <section class="sommelier-section" id="sommelier" aria-labelledby="sommelier-title">
+    <div class="sommelier-header">
+      <div class="sommelier-kicker">CAVE &amp; CELLIER PRIVÉ • ÉLÉONORE MOREAU</div>
+      <h2 id="sommelier-title">Digital Sommelier &amp; Wine Pairing Finder</h2>
+      <p>Discover Michelin-calibrated pairings tailored to our culinary creations. Select your entrée below to explore cellar vintages, grape varietals, aroma bouquets, and sensory intensity ratings.</p>
+    </div>
+
+    <!-- Entrée Selection Carousel / Tabs -->
+    <div class="entree-picker" role="region" aria-label="Entrée selection">
+      <span class="picker-label">Step 1: Select Your Chosen Entrée</span>
+      <div class="entree-tabs" role="tablist" aria-label="Entrée dishes">
+        <button type="button" class="entree-tab active" data-entree="steak-frites" role="tab" aria-selected="true">
+          <span class="tab-emoji">🥩</span>
+          <span class="tab-text">
+            <strong>Steak Frites</strong>
+            <small>Charred Ribeye &amp; Bordelaise</small>
+          </span>
+        </button>
+
+        <button type="button" class="entree-tab" data-entree="duck-confit" role="tab" aria-selected="false">
+          <span class="tab-emoji">🍗</span>
+          <span class="tab-text">
+            <strong>Duck Confit</strong>
+            <small>Périgord &amp; Orange Gastrique</small>
+          </span>
+        </button>
+
+        <button type="button" class="entree-tab" data-entree="truffle-risotto" role="tab" aria-selected="false">
+          <span class="tab-emoji">🍚</span>
+          <span class="tab-text">
+            <strong>Truffle Risotto</strong>
+            <small>Winter Truffle &amp; Parmigiano</small>
+          </span>
+        </button>
+
+        <button type="button" class="entree-tab" data-entree="salmon" role="tab" aria-selected="false">
+          <span class="tab-emoji">🐟</span>
+          <span class="tab-text">
+            <strong>Wild Salmon</strong>
+            <small>Beurre Blanc &amp; Caviar</small>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Entrée Profile Banner -->
+    <div class="entree-profile-card" id="entreeProfileCard">
+      <!-- Populated dynamically by script.js -->
+    </div>
+
+    <!-- Wine Recommendations Display -->
+    <div class="sommelier-results-wrap" role="region" aria-label="Sommelier wine recommendations">
+      <div class="results-controls">
+        <div class="results-heading-group">
+          <span class="results-badge">CELLAR PAIRINGS</span>
+          <h3>Recommended Vintage Pairings</h3>
+        </div>
+
+        <div class="wine-style-filter" role="radiogroup" aria-label="Filter wine style">
+          <button type="button" class="style-filter-btn active" data-filter="all" aria-checked="true">All Cellar</button>
+          <button type="button" class="style-filter-btn" data-filter="red" aria-checked="false">Red Wines</button>
+          <button type="button" class="style-filter-btn" data-filter="white" aria-checked="false">White Wines</button>
+        </div>
+      </div>
+
+      <div class="wine-cards-grid" id="wineCardsGrid">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+    </div>
+  </section>
+  <!-- ===== END issue #101 ===== -->
   <!-- Floating order tray button -->
   <button type="button" class="tray-btn" id="trayBtn" aria-haspopup="dialog" aria-controls="cartPanel">
     <span>Your order</span>
@@ -75,7 +147,368 @@
     </form>
   </div>
 
-  <!-- Slide-out checkout bill -->
+  <!-- Multi-step Reservation Wizard Modal -->
+  <div class="dialog reservation-dialog" id="reservationModal" role="dialog" aria-modal="true" aria-labelledby="wizardTitle" hidden>
+    <div class="dialog-head">
+      <div>
+        <span class="wizard-badge">LUMIÈRE PARIS</span>
+        <h2 id="wizardTitle">Table Reservation</h2>
+      </div>
+      <button type="button" class="icon-btn" id="reservationClose" aria-label="Close reservation wizard">&times;</button>
+    </div>
+
+    <!-- Stepper Indicator -->
+    <div class="wizard-stepper" id="wizardStepper" role="tablist" aria-label="Reservation Steps">
+      <div class="wizard-step-indicator active" id="stepIndicator1" data-step="1">
+        <span class="step-num">1</span>
+        <span class="step-label">Party &amp; Date</span>
+      </div>
+      <div class="wizard-step-line" id="stepLine1"></div>
+      <div class="wizard-step-indicator" id="stepIndicator2" data-step="2">
+        <span class="step-num">2</span>
+        <span class="step-label">Time &amp; Seating</span>
+      </div>
+      <div class="wizard-step-line" id="stepLine2"></div>
+      <div class="wizard-step-indicator" id="stepIndicator3" data-step="3">
+        <span class="step-num">3</span>
+        <span class="step-label">Guest Details</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Party Size, Date & Seating Area -->
+    <div class="wizard-step active" id="wizardStep1" data-step="1">
+      <div class="res-section-title">
+        <h3>Step 1 &mdash; Choose Party Size &amp; Date</h3>
+        <p>Curated seating for intimate tastings and private gatherings.</p>
+      </div>
+
+      <!-- Party Size Selector -->
+      <fieldset class="field-group" id="partyGroup">
+        <legend>Number of Guests</legend>
+        <div class="party-pills" id="partyPills">
+          <button type="button" class="party-pill" data-guests="1">👤 1 Solo</button>
+          <button type="button" class="party-pill active" data-guests="2">👥 2 Pair</button>
+          <button type="button" class="party-pill" data-guests="3">👥 3 Guests</button>
+          <button type="button" class="party-pill" data-guests="4">👥 4 Table</button>
+          <button type="button" class="party-pill" data-guests="5">👥 5 Party</button>
+          <button type="button" class="party-pill" data-guests="6">👥 6 Large</button>
+          <button type="button" class="party-pill" data-guests="8">✨ 8+ Salon</button>
+        </div>
+      </fieldset>
+
+      <!-- Date Selection -->
+      <fieldset class="field-group" id="dateGroup">
+        <legend>Reservation Date</legend>
+        <div class="quick-dates" id="quickDates">
+          <button type="button" class="quick-date-btn active" data-offset="0">Today</button>
+          <button type="button" class="quick-date-btn" data-offset="1">Tomorrow</button>
+          <button type="button" class="quick-date-btn" data-preset="friday">This Friday</button>
+          <button type="button" class="quick-date-btn" data-preset="saturday">This Saturday</button>
+        </div>
+        <div class="date-input-wrap">
+          <label for="resDate" class="input-sublabel">Or select a calendar date:</label>
+          <input type="date" id="resDate" class="styled-date-input" required />
+        </div>
+      </fieldset>
+
+      <!-- Seating Area Selection -->
+      <fieldset class="field-group" id="areaGroup">
+        <legend>Preferred Dining Ambiance</legend>
+        <div class="seating-grid" id="seatingGrid">
+          <label class="seating-card active">
+            <input type="radio" name="seatingArea" value="main" checked />
+            <span class="seating-icon">🕯️</span>
+            <span class="seating-info">
+              <strong>Main Dining Room</strong>
+              <small>Warm crystal chandeliers &amp; Parisian bistro charm</small>
+            </span>
+          </label>
+          <label class="seating-card">
+            <input type="radio" name="seatingArea" value="counter" />
+            <span class="seating-icon">🔪</span>
+            <span class="seating-info">
+              <strong>Chef's Tasting Counter</strong>
+              <small>Front-row view of Chef Gabriel Laurent's open kitchen</small>
+            </span>
+          </label>
+          <label class="seating-card">
+            <input type="radio" name="seatingArea" value="terrace" />
+            <span class="seating-icon">🌿</span>
+            <span class="seating-info">
+              <strong>Glass Garden Terrace</strong>
+              <small>Heated botanical veranda overlooking private courtyard</small>
+            </span>
+          </label>
+          <label class="seating-card">
+            <input type="radio" name="seatingArea" value="vault" />
+            <span class="seating-icon">🍷</span>
+            <span class="seating-info">
+              <strong>Private Wine Vault</strong>
+              <small>Intimate stone alcove surrounded by vintage Grand Crus</small>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="wizard-footer">
+        <div></div>
+        <button type="button" class="order-btn solid" id="toStep2">Select Time Slot &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Interactive Time Slots with Availability Chips -->
+    <div class="wizard-step" id="wizardStep2" data-step="2" hidden>
+      <div class="res-section-title">
+        <h3>Step 2 &mdash; Select Seating Time Slot</h3>
+        <p>Tasting seatings allow a relaxed 2-hour culinary journey.</p>
+      </div>
+
+      <div class="res-recap-bar" id="recapBarStep2">
+        <span id="recapPartyDate">👥 2 Guests &bull; Today</span>
+        <span class="recap-badge" id="recapArea">Main Dining Room</span>
+      </div>
+
+      <!-- Service Time Slots Groups -->
+      <div class="time-services" id="timeServices">
+        <!-- Early Service -->
+        <div class="service-block">
+          <div class="service-head">
+            <span class="service-icon">🌅</span>
+            <div>
+              <h4>Early Twilight Service</h4>
+              <small>17:30 &ndash; 18:30</small>
+            </div>
+          </div>
+          <div class="slot-grid">
+            <button type="button" class="time-slot-btn" data-time="17:30" data-chip="available">
+              <span class="slot-time">17:30</span>
+              <span class="slot-chip chip-avail">Available</span>
+            </button>
+            <button type="button" class="time-slot-btn" data-time="18:00" data-chip="popular">
+              <span class="slot-time">18:00</span>
+              <span class="slot-chip chip-pop">Popular 🔥</span>
+            </button>
+            <button type="button" class="time-slot-btn" data-time="18:30" data-chip="limited">
+              <span class="slot-time">18:30</span>
+              <span class="slot-chip chip-ltd">2 Tables Left</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Prime Evening Service -->
+        <div class="service-block">
+          <div class="service-head">
+            <span class="service-icon">✨</span>
+            <div>
+              <h4>Prime Gastronomic Service</h4>
+              <small>19:00 &ndash; 20:30 &bull; Peak Ambiance</small>
+            </div>
+          </div>
+          <div class="slot-grid">
+            <button type="button" class="time-slot-btn" data-time="19:00" data-chip="prime">
+              <span class="slot-time">19:00</span>
+              <span class="slot-chip chip-prime">Prime ✨</span>
+            </button>
+            <button type="button" class="time-slot-btn" data-time="19:30" data-chip="prime">
+              <span class="slot-time">19:30</span>
+              <span class="slot-chip chip-prime">Prime ✨</span>
+            </button>
+            <button type="button" class="time-slot-btn" data-time="20:00" data-chip="limited">
+              <span class="slot-time">20:00</span>
+              <span class="slot-chip chip-ltd">1 Table Left</span>
+            </button>
+            <button type="button" class="time-slot-btn" data-time="20:30" data-chip="available">
+              <span class="slot-time">20:30</span>
+              <span class="slot-chip chip-avail">Available</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Late Night Service -->
+        <div class="service-block">
+          <div class="service-head">
+            <span class="service-icon">🌙</span>
+            <div>
+              <h4>Late Night Wine &amp; Supper</h4>
+              <small>21:00 &ndash; 22:00 &bull; Intimate Vibe</small>
+            </div>
+          </div>
+          <div class="slot-grid">
+            <button type="button" class="time-slot-btn" data-time="21:00" data-chip="available">
+              <span class="slot-time">21:00</span>
+              <span class="slot-chip chip-avail">Available</span>
+            </button>
+            <button type="button" class="time-slot-btn" data-time="21:30" data-chip="special">
+              <span class="slot-time">21:30</span>
+              <span class="slot-chip chip-spec">Sommelier Pick 🍷</span>
+            </button>
+            <button type="button" class="time-slot-btn" data-time="22:00" data-chip="available">
+              <span class="slot-time">22:00</span>
+              <span class="slot-chip chip-avail">Available</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wizard-footer">
+        <button type="button" class="order-btn" id="backToStep1">&larr; Back</button>
+        <button type="button" class="order-btn solid" id="toStep3" disabled>Guest Details &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Guest Details & Special Requests -->
+    <div class="wizard-step" id="wizardStep3" data-step="3" hidden>
+      <div class="res-section-title">
+        <h3>Step 3 &mdash; Guest Information &amp; Requests</h3>
+        <p>Please provide your booking contact and dietary preferences.</p>
+      </div>
+
+      <!-- Recap Bar -->
+      <div class="res-recap-bar" id="recapBarStep3">
+        <span id="recapFullSelection">👥 2 Guests &bull; Today &bull; 19:30</span>
+        <span class="recap-badge" id="recapAreaStep3">Main Dining Room</span>
+      </div>
+
+      <form id="resGuestForm" novalidate onsubmit="return false;">
+        <div class="form-row-2">
+          <div class="field">
+            <label for="resName">Full Name *</label>
+            <input type="text" id="resName" placeholder="e.g. Geneviève Dubois" required autocomplete="name" />
+            <span class="field-error" id="errName" hidden>Please enter your full name</span>
+          </div>
+          <div class="field">
+            <label for="resPhone">Mobile Phone *</label>
+            <input type="tel" id="resPhone" placeholder="e.g. +33 6 12 34 56 78" required autocomplete="tel" />
+            <span class="field-error" id="errPhone" hidden>Please enter a contact phone number</span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label for="resEmail">Email Address (for voucher confirmation) *</label>
+            <input type="email" id="resEmail" placeholder="genevieve@example.com" required autocomplete="email" />
+            <span class="field-error" id="errEmail" hidden>Please enter a valid email address</span>
+          </div>
+          <div class="field">
+            <label for="resOccasion">Dining Occasion</label>
+            <select id="resOccasion" class="styled-select">
+              <option value="Casual Dinner">Casual Gastronomic Dinner</option>
+              <option value="Romantic Date Night" selected>Romantic Date Night</option>
+              <option value="Anniversary">Anniversary Celebration 🥂</option>
+              <option value="Birthday Celebration">Birthday Celebration 🎂</option>
+              <option value="Business Entertaining">Business Entertaining</option>
+              <option value="Special Milestone">Special Milestone Tasting</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Dietary Preferences -->
+        <fieldset class="field-group">
+          <legend>Dietary Preferences &amp; Allergies</legend>
+          <div class="dietary-tags" id="dietaryTags">
+            <label class="dietary-chip">
+              <input type="checkbox" name="diet" value="Gluten-Free" />
+              <span>🌾 Gluten-Free</span>
+            </label>
+            <label class="dietary-chip">
+              <input type="checkbox" name="diet" value="Vegetarian" />
+              <span>🌱 Vegetarian</span>
+            </label>
+            <label class="dietary-chip">
+              <input type="checkbox" name="diet" value="Vegan" />
+              <span>🥗 Vegan</span>
+            </label>
+            <label class="dietary-chip">
+              <input type="checkbox" name="diet" value="Nut Allergy" />
+              <span>🥜 Nut Allergy</span>
+            </label>
+            <label class="dietary-chip">
+              <input type="checkbox" name="diet" value="Shellfish Allergy" />
+              <span>🦐 Shellfish Allergy</span>
+            </label>
+            <label class="dietary-chip">
+              <input type="checkbox" name="diet" value="Dairy-Free" />
+              <span>🥛 Dairy-Free</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="resSpecialNotes">Special Requests or Table Notes (Optional)</label>
+          <input type="text" id="resSpecialNotes" maxlength="160" placeholder="Quiet corner, celebrating 5th anniversary, wheelchair access, etc." autocomplete="off" />
+        </div>
+
+        <div class="wizard-footer">
+          <button type="button" class="order-btn" id="backToStep2">&larr; Back</button>
+          <button type="button" class="order-btn solid confirm-btn" id="confirmReservation">Confirm Table &amp; Generate Voucher ✨</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Step 4: Booking Voucher & Confirmation -->
+    <div class="wizard-step wizard-confirmation" id="wizardStepConfirm" hidden>
+      <div class="voucher-card" id="voucherCard">
+        <div class="voucher-top-banner">
+          <div class="voucher-status">
+            <span class="voucher-check-icon">✓</span>
+            <span>RESERVATION CONFIRMED</span>
+          </div>
+          <div class="voucher-code-wrap">
+            <span class="code-label">BOOKING REF</span>
+            <span class="voucher-code" id="voucherCode">LUM-84920</span>
+          </div>
+        </div>
+
+        <div class="voucher-brand">
+          <div class="brand">LUMIÈRE PARIS</div>
+          <h3>Gastronomic Table Voucher</h3>
+          <p class="voucher-address">42 Rue de la Paix, 75002 Paris &bull; +33 1 42 68 55 00</p>
+        </div>
+
+        <div class="voucher-grid">
+          <div class="v-item">
+            <span class="v-label">GUEST NAME</span>
+            <strong id="vName">Geneviève Dubois</strong>
+          </div>
+          <div class="v-item">
+            <span class="v-label">DATE</span>
+            <strong id="vDate">Wed, Oct 28, 2026</strong>
+          </div>
+          <div class="v-item">
+            <span class="v-label">SEATING TIME</span>
+            <strong id="vTime" class="gold-text">19:30 Prime</strong>
+          </div>
+          <div class="v-item">
+            <span class="v-label">PARTY SIZE</span>
+            <strong id="vParty">2 Guests</strong>
+          </div>
+          <div class="v-item">
+            <span class="v-label">SEATING AMBIANCE</span>
+            <strong id="vArea">Main Dining Room</strong>
+          </div>
+          <div class="v-item">
+            <span class="v-label">OCCASION</span>
+            <strong id="vOccasion">Romantic Date Night</strong>
+          </div>
+        </div>
+
+        <div class="voucher-dietary" id="vDietaryWrap" hidden>
+          <span class="v-label">DIETARY &amp; REQUESTS:</span>
+          <span id="vDietary">Gluten-Free, Quiet Corner</span>
+        </div>
+
+        <div class="voucher-notice">
+          <p>✨ <em>Tables are graciously held for 15 minutes. Complimentary sommelier welcome upon arrival.</em></p>
+        </div>
+      </div>
+
+      <div class="voucher-actions">
+        <button type="button" class="order-btn" id="vCalBtn">📅 Add to Calendar (.ics)</button>
+        <button type="button" class="order-btn" id="vPrintBtn">🖨️ Print Voucher</button>
+        <button type="button" class="order-btn solid" id="vNewBtn">Reserve Another Table</button>
+      </div>
+    </div>
+  </div>
   <aside class="dialog cart-panel" id="cartPanel" role="dialog" aria-modal="true" aria-labelledby="cartTitle" hidden>
     <div class="dialog-head">
       <h2 id="cartTitle">Your takeout order</h2>

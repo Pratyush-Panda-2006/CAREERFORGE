@@ -338,16 +338,571 @@
     </div>
   </section>
 
+  <section class="nutrition-section" id="nutrition-section">
+    <div class="nutrition-container">
+      <header class="nutrition-header">
+        <span class="pill">🥗 PERSONALIZED NUTRITION</span>
+        <h2>Daily Macro Nutrition Calculator</h2>
+        <p>Estimate your daily calorie needs and macronutrient targets based on your body measurements, activity, and goal.</p>
+      </header>
+
+      <div class="nutrition-layout">
+        <!-- Input Form -->
+        <form class="nutrition-form" id="nutrition-form">
+          <h3>Your Profile</h3>
+
+          <div class="nutrition-input-grid">
+            <div class="nutrition-field">
+              <label for="nutrition-age">Age (years)</label>
+              <input type="number" id="nutrition-age" min="18" max="100" placeholder="e.g. 25" required />
+            </div>
+
+            <div class="nutrition-field">
+              <label for="nutrition-sex">Sex used for BMR equation</label>
+              <select id="nutrition-sex" required>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+              </select>
+            </div>
+
+            <div class="nutrition-field">
+              <label for="nutrition-weight">Weight (kg)</label>
+              <input type="number" id="nutrition-weight" min="20" max="350" step="0.1" placeholder="e.g. 65" required />
+            </div>
+
+            <div class="nutrition-field">
+              <label for="nutrition-height">Height (cm)</label>
+              <input type="number" id="nutrition-height" min="100" max="250" step="0.1" placeholder="e.g. 170" required />
+            </div>
+          </div>
+
+          <div class="nutrition-field">
+            <label for="nutrition-activity">Activity level</label>
+            <select id="nutrition-activity" required>
+              <option value="1.2">Sedentary — little or no exercise</option>
+              <option value="1.375">Lightly active — 1–3 days/week</option>
+              <option value="1.55" selected>Moderately active — 3–5 days/week</option>
+              <option value="1.725">Very active — 6–7 days/week</option>
+              <option value="1.9">Extra active — intense physical activity</option>
+            </select>
+          </div>
+
+          <fieldset class="nutrition-goals">
+            <legend>Your goal</legend>
+
+            <label class="nutrition-goal-option">
+              <input type="radio" name="nutrition-goal" value="loss" />
+              <span>
+                <strong>Weight Loss</strong>
+                <small>Reduced calorie target</small>
+              </span>
+            </label>
+
+            <label class="nutrition-goal-option">
+              <input type="radio" name="nutrition-goal" value="maintain" checked />
+              <span>
+                <strong>Maintenance</strong>
+                <small>Maintain current weight</small>
+              </span>
+            </label>
+
+            <label class="nutrition-goal-option">
+              <input type="radio" name="nutrition-goal" value="gain" />
+              <span>
+                <strong>Muscle Gain</strong>
+                <small>Support muscle development</small>
+              </span>
+            </label>
+          </fieldset>
+
+          <button type="submit" class="nutrition-submit-btn">
+            Calculate My Macros →
+          </button>
+
+          <p class="nutrition-error" id="nutrition-error" role="alert" hidden></p>
+        </form>
+
+        <!-- Results Dashboard -->
+        <div class="nutrition-results" id="nutrition-results" aria-live="polite" aria-atomic="true">
+          <div class="nutrition-results-heading">
+            <span class="nutrition-results-icon">⚡</span>
+            <div>
+              <h3>Your Daily Targets</h3>
+              <p>Enter your details to calculate your estimates.</p>
+            </div>
+          </div>
+
+          <div class="calorie-result">
+            <span>Estimated Daily Calories</span>
+            <strong id="nutrition-calories">—</strong>
+            <small>kcal per day</small>
+          </div>
+
+          <div class="macro-results-grid">
+            <article class="macro-card macro-protein">
+              <div class="macro-card-heading">
+                <span class="macro-dot"></span>
+                <h4>Protein</h4>
+              </div>
+              <strong><span id="nutrition-protein">—</span><small> g</small></strong>
+              <div class="macro-progress-track">
+                <div class="macro-progress-fill" id="protein-progress"></div>
+              </div>
+              <p id="protein-calories">— kcal</p>
+            </article>
+
+            <article class="macro-card macro-carbs">
+              <div class="macro-card-heading">
+                <span class="macro-dot"></span>
+                <h4>Carbohydrates</h4>
+              </div>
+              <strong><span id="nutrition-carbs">—</span><small> g</small></strong>
+              <div class="macro-progress-track">
+                <div class="macro-progress-fill" id="carbs-progress"></div>
+              </div>
+              <p id="carbs-calories">— kcal</p>
+            </article>
+
+            <article class="macro-card macro-fats">
+              <div class="macro-card-heading">
+                <span class="macro-dot"></span>
+                <h4>Fats</h4>
+              </div>
+              <strong><span id="nutrition-fats">—</span><small> g</small></strong>
+              <div class="macro-progress-track">
+                <div class="macro-progress-fill" id="fats-progress"></div>
+              </div>
+              <p id="fats-calories">— kcal</p>
+            </article>
+          </div>
+
+          <div class="nutrition-breakdown">
+            <div>
+              <span>Basal Metabolic Rate</span>
+              <strong id="nutrition-bmr">— kcal</strong>
+            </div>
+            <div>
+              <span>Activity-adjusted needs</span>
+              <strong id="nutrition-maintenance">— kcal</strong>
+            </div>
+          </div>
+
+          <p class="nutrition-disclaimer">
+            These calculations are estimates, not medical advice. Individual energy and nutrient needs vary.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Interactive Meal Planner & Macronutrient Distribution Chart (Issue #199) START ===== -->
+  <section class="meal-planner-section" id="meal-planner-section" aria-labelledby="meal-planner-title">
+    <div class="meal-planner-container">
+      <header class="meal-planner-header">
+        <span class="pill">🥑 LONGEVITY NUTRITION ENGINE</span>
+        <h2 id="meal-planner-title">Daily Meal Planner &amp; Macro Balance</h2>
+        <p>Log your breakfast, lunch, dinner, and snacks to track your real-time caloric intake and macronutrient distribution balance against cellular vitality targets.</p>
+      </header>
+
+      <!-- Planner Action & Target Controls Bar -->
+      <div class="planner-controls-bar">
+        <div class="planner-target-info">
+          <span class="target-label">Daily Goal Target:</span>
+          <div class="target-badge-group">
+            <span class="target-pill pill-cal" id="mp-display-target-cal">2,200 kcal</span>
+            <span class="target-pill pill-p" id="mp-display-target-p">138g Protein</span>
+            <span class="target-pill pill-c" id="mp-display-target-c">248g Carbs</span>
+            <span class="target-pill pill-f" id="mp-display-target-f">73g Fats</span>
+          </div>
+        </div>
+        <div class="planner-actions-group">
+          <button type="button" class="btn-planner btn-preset" id="mp-btn-sample-day" title="Populate with a balanced longevity meal plan">
+            ✨ Load Sample Day
+          </button>
+          <button type="button" class="btn-planner btn-custom-log" id="mp-btn-open-log" title="Log a custom food item">
+            + Log Food Item
+          </button>
+          <button type="button" class="btn-planner btn-reset" id="mp-btn-reset-plan" title="Clear all logged meals">
+            ↺ Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Layout: 2 Columns -->
+      <div class="meal-planner-layout">
+        <!-- Left Column: Meal Categories / Slots -->
+        <div class="meal-slots-column">
+          <!-- Breakfast Slot -->
+          <article class="meal-slot-card" data-slot="breakfast">
+            <div class="slot-header">
+              <div class="slot-title-wrap">
+                <span class="slot-icon">🌅</span>
+                <div>
+                  <h3 class="slot-name">Breakfast</h3>
+                  <span class="slot-macros" id="slot-macros-breakfast">0g P • 0g C • 0g F</span>
+                </div>
+              </div>
+              <div class="slot-header-actions">
+                <span class="slot-cal-badge" id="slot-cal-breakfast">0 kcal</span>
+                <button type="button" class="slot-add-btn" data-slot="breakfast" aria-label="Add breakfast item">+ Add</button>
+              </div>
+            </div>
+            <ul class="slot-items-list" id="slot-items-breakfast" aria-label="Breakfast items">
+              <!-- Dynamically populated -->
+            </ul>
+          </article>
+
+          <!-- Lunch Slot -->
+          <article class="meal-slot-card" data-slot="lunch">
+            <div class="slot-header">
+              <div class="slot-title-wrap">
+                <span class="slot-icon">☀️</span>
+                <div>
+                  <h3 class="slot-name">Lunch</h3>
+                  <span class="slot-macros" id="slot-macros-lunch">0g P • 0g C • 0g F</span>
+                </div>
+              </div>
+              <div class="slot-header-actions">
+                <span class="slot-cal-badge" id="slot-cal-lunch">0 kcal</span>
+                <button type="button" class="slot-add-btn" data-slot="lunch" aria-label="Add lunch item">+ Add</button>
+              </div>
+            </div>
+            <ul class="slot-items-list" id="slot-items-lunch" aria-label="Lunch items">
+              <!-- Dynamically populated -->
+            </ul>
+          </article>
+
+          <!-- Dinner Slot -->
+          <article class="meal-slot-card" data-slot="dinner">
+            <div class="slot-header">
+              <div class="slot-title-wrap">
+                <span class="slot-icon">🌙</span>
+                <div>
+                  <h3 class="slot-name">Dinner</h3>
+                  <span class="slot-macros" id="slot-macros-dinner">0g P • 0g C • 0g F</span>
+                </div>
+              </div>
+              <div class="slot-header-actions">
+                <span class="slot-cal-badge" id="slot-cal-dinner">0 kcal</span>
+                <button type="button" class="slot-add-btn" data-slot="dinner" aria-label="Add dinner item">+ Add</button>
+              </div>
+            </div>
+            <ul class="slot-items-list" id="slot-items-dinner" aria-label="Dinner items">
+              <!-- Dynamically populated -->
+            </ul>
+          </article>
+
+          <!-- Snacks & Supplements Slot -->
+          <article class="meal-slot-card" data-slot="snacks">
+            <div class="slot-header">
+              <div class="slot-title-wrap">
+                <span class="slot-icon">🍏</span>
+                <div>
+                  <h3 class="slot-name">Snacks &amp; Boosts</h3>
+                  <span class="slot-macros" id="slot-macros-snacks">0g P • 0g C • 0g F</span>
+                </div>
+              </div>
+              <div class="slot-header-actions">
+                <span class="slot-cal-badge" id="slot-cal-snacks">0 kcal</span>
+                <button type="button" class="slot-add-btn" data-slot="snacks" aria-label="Add snack item">+ Add</button>
+              </div>
+            </div>
+            <ul class="slot-items-list" id="slot-items-snacks" aria-label="Snack items">
+              <!-- Dynamically populated -->
+            </ul>
+          </article>
+        </div>
+
+        <!-- Right Column: Macro Donut Chart & Balance Summary -->
+        <div class="macro-balance-column">
+          <div class="macro-chart-card">
+            <div class="chart-header">
+              <span class="chart-tag">// DISTRIBUTION BALANCE</span>
+              <h3>Macronutrient Energy Ratio</h3>
+              <p>Energy contribution calculated from logged protein (4 kcal/g), carbohydrates (4 kcal/g), and lipids (9 kcal/g).</p>
+            </div>
+
+            <!-- SVG Donut Chart Wrap -->
+            <div class="donut-chart-wrapper">
+              <div class="donut-svg-container">
+                <svg viewBox="0 0 200 200" class="donut-svg" role="img" aria-label="Macronutrient distribution donut chart">
+                  <!-- Base Track Ring -->
+                  <circle class="donut-track" cx="100" cy="100" r="70" />
+                  <!-- Fats Segment (Amber) -->
+                  <circle class="donut-segment segment-fats" id="donut-segment-fats" cx="100" cy="100" r="70" />
+                  <!-- Carbs Segment (Emerald) -->
+                  <circle class="donut-segment segment-carbs" id="donut-segment-carbs" cx="100" cy="100" r="70" />
+                  <!-- Protein Segment (Sky Cyan) -->
+                  <circle class="donut-segment segment-protein" id="donut-segment-protein" cx="100" cy="100" r="70" />
+                </svg>
+                <!-- Centered Inner Metrics -->
+                <div class="donut-inner-content">
+                  <span class="donut-inner-label">Total Logged</span>
+                  <div class="donut-cal-total">
+                    <span id="mp-total-calories">0</span>
+                    <small>kcal</small>
+                  </div>
+                  <span class="donut-inner-target">of <strong id="mp-target-calories-val">2,200</strong> kcal</span>
+                  <div class="donut-delta-chip delta-on-track" id="mp-delta-chip">
+                    <span id="mp-delta-text">2,200 kcal remaining</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Donut Legend Pills -->
+              <div class="donut-legend">
+                <div class="legend-item">
+                  <span class="legend-dot dot-protein"></span>
+                  <div class="legend-info">
+                    <span class="legend-name">Protein</span>
+                    <strong class="legend-pct" id="legend-protein-pct">0%</strong>
+                  </div>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot dot-carbs"></span>
+                  <div class="legend-info">
+                    <span class="legend-name">Carbs</span>
+                    <strong class="legend-pct" id="legend-carbs-pct">0%</strong>
+                  </div>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot dot-fats"></span>
+                  <div class="legend-info">
+                    <span class="legend-name">Fats</span>
+                    <strong class="legend-pct" id="legend-fats-pct">0%</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Target vs Current Progress Cards -->
+            <div class="macro-bars-list">
+              <!-- Protein Bar -->
+              <div class="macro-bar-card bar-protein">
+                <div class="bar-header">
+                  <span class="bar-name">🥩 Protein</span>
+                  <span class="bar-vals"><strong id="mp-cur-protein">0</strong> / <span id="mp-tgt-protein">138</span>g</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill" id="mp-bar-protein" style="width: 0%;"></div>
+                </div>
+                <div class="bar-footer">
+                  <span id="mp-cal-protein">0 kcal</span>
+                  <span id="mp-pct-protein">0% of target</span>
+                </div>
+              </div>
+
+              <!-- Carbs Bar -->
+              <div class="macro-bar-card bar-carbs">
+                <div class="bar-header">
+                  <span class="bar-name">🌾 Carbohydrates</span>
+                  <span class="bar-vals"><strong id="mp-cur-carbs">0</strong> / <span id="mp-tgt-carbs">248</span>g</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill" id="mp-bar-carbs" style="width: 0%;"></div>
+                </div>
+                <div class="bar-footer">
+                  <span id="mp-cal-carbs">0 kcal</span>
+                  <span id="mp-pct-carbs">0% of target</span>
+                </div>
+              </div>
+
+              <!-- Fats Bar -->
+              <div class="macro-bar-card bar-fats">
+                <div class="bar-header">
+                  <span class="bar-name">🥑 Healthy Fats</span>
+                  <span class="bar-vals"><strong id="mp-cur-fats">0</strong> / <span id="mp-tgt-fats">73</span>g</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill" id="mp-bar-fats" style="width: 0%;"></div>
+                </div>
+                <div class="bar-footer">
+                  <span id="mp-cal-fats">0 kcal</span>
+                  <span id="mp-pct-fats">0% of target</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vitality Macro Insight Note -->
+            <div class="vitality-insight-box" id="mp-vitality-insight">
+              <span class="insight-icon">💡</span>
+              <p id="mp-insight-text">Log your breakfast and meals to visualize your daily energy ratio and metabolic balance.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Add Food Modal Dialog -->
+    <dialog class="food-modal" id="food-modal" aria-labelledby="food-modal-title">
+      <div class="food-modal-box">
+        <div class="food-modal-header">
+          <div class="food-modal-heading-wrap">
+            <span class="pill">🍎 NUTRITION LOG</span>
+            <h3 id="food-modal-title">Log Food Item</h3>
+          </div>
+          <button type="button" class="food-modal-close" id="food-modal-close" aria-label="Close dialog">&times;</button>
+        </div>
+
+        <!-- Quick Longevity Presets -->
+        <div class="preset-chips-section">
+          <span class="preset-label">Quick Add Longevity Favorites:</span>
+          <div class="preset-chips-grid">
+            <button type="button" class="preset-chip" data-name="Avocado Toast &amp; Poached Eggs" data-slot="breakfast" data-cal="380" data-p="18" data-c="28" data-f="22">
+              🥑 Avocado &amp; Eggs (380 kcal)
+            </button>
+            <button type="button" class="preset-chip" data-name="Organic Steel-Cut Oats with Berries" data-slot="breakfast" data-cal="320" data-p="12" data-c="54" data-f="6">
+              🥣 Steel-Cut Oats (320 kcal)
+            </button>
+            <button type="button" class="preset-chip" data-name="Wild Salmon &amp; Quinoa Super-Bowl" data-slot="lunch" data-cal="580" data-p="44" data-c="48" data-f="22">
+              🥗 Salmon Quinoa Bowl (580 kcal)
+            </button>
+            <button type="button" class="preset-chip" data-name="Grilled Chicken Breast &amp; Sweet Potato" data-slot="lunch" data-cal="490" data-p="48" data-c="42" data-f="12">
+              🍗 Chicken &amp; Sweet Potato (490 kcal)
+            </button>
+            <button type="button" class="preset-chip" data-name="Mediterranean Lentil &amp; Kale Stew" data-slot="dinner" data-cal="410" data-p="22" data-c="62" data-f="8">
+              🍲 Lentil &amp; Kale Stew (410 kcal)
+            </button>
+            <button type="button" class="preset-chip" data-name="Greek Yogurt with Walnuts &amp; Honey" data-slot="snacks" data-cal="240" data-p="20" data-c="14" data-f="12">
+              🫐 Greek Yogurt &amp; Walnuts (240 kcal)
+            </button>
+          </div>
+        </div>
+
+        <form class="food-form" id="food-form">
+          <div class="food-form-row">
+            <div class="food-form-field field-grow">
+              <label for="food-input-name">Food or Meal Name</label>
+              <input type="text" id="food-input-name" placeholder="e.g. Quinoa Salmon Bowl" required />
+            </div>
+            <div class="food-form-field">
+              <label for="food-input-slot">Meal Slot</label>
+              <select id="food-input-slot" required>
+                <option value="breakfast">🌅 Breakfast</option>
+                <option value="lunch" selected>☀️ Lunch</option>
+                <option value="dinner">🌙 Dinner</option>
+                <option value="snacks">🍏 Snacks &amp; Boosts</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="food-macros-row">
+            <div class="food-form-field">
+              <label for="food-input-cal">Calories (kcal)</label>
+              <input type="number" id="food-input-cal" min="0" max="3000" placeholder="e.g. 450" required />
+            </div>
+            <div class="food-form-field">
+              <label for="food-input-protein">Protein (g)</label>
+              <input type="number" id="food-input-protein" min="0" max="300" placeholder="e.g. 35" required />
+            </div>
+            <div class="food-form-field">
+              <label for="food-input-carbs">Carbs (g)</label>
+              <input type="number" id="food-input-carbs" min="0" max="500" placeholder="e.g. 45" required />
+            </div>
+            <div class="food-form-field">
+              <label for="food-input-fats">Fats (g)</label>
+              <input type="number" id="food-input-fats" min="0" max="200" placeholder="e.g. 15" required />
+            </div>
+          </div>
+
+          <div class="food-form-actions">
+            <button type="button" class="btn-planner btn-cancel" id="food-modal-cancel">Cancel</button>
+            <button type="submit" class="btn-planner btn-submit-food">Add to Meal Plan ✨</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+  </section>
+  <!-- ===== Interactive Meal Planner & Macronutrient Distribution Chart (Issue #199) END ===== -->
+
+  <section class="hydration-section" id="hydration-section">
+    <div class="hydration-card">
+      <div class="hydration-header">
+        <div>
+          <span class="hydration-eyebrow">DAILY WELLNESS</span>
+          <h2>Water Intake Tracker</h2>
+          <p>Stay hydrated, one glass at a time.</p>
+        </div>
+        <div class="hydration-icon" aria-hidden="true">💧</div>
+      </div>
+
+      <div class="hydration-summary" aria-live="polite">
+        <div>
+          <strong id="water-count">0</strong>
+          <span>/ 8 glasses</span>
+        </div>
+        <span id="water-status">Let's get started!</span>
+      </div>
+
+      <div
+        class="hydration-progress-track"
+        id="water-progress-track"
+        role="progressbar"
+        aria-label="Daily water intake"
+        aria-valuemin="0"
+        aria-valuemax="8"
+        aria-valuenow="0"
+      >
+        <div class="hydration-progress-fill" id="water-progress"></div>
+      </div>
+
+      <div class="water-glasses" id="water-glasses" aria-hidden="true">
+        <span class="water-glass">🥛</span>
+        <span class="water-glass">🥛</span>
+        <span class="water-glass">🥛</span>
+        <span class="water-glass">🥛</span>
+        <span class="water-glass">🥛</span>
+        <span class="water-glass">🥛</span>
+        <span class="water-glass">🥛</span>
+        <span class="water-glass">🥛</span>
+      </div>
+
+      <div class="hydration-controls">
+        <button
+          type="button"
+          class="water-btn water-btn-minus"
+          id="water-decrease"
+          aria-label="Remove one glass of water"
+          disabled
+        >−</button>
+
+        <span class="hydration-control-label">Log a glass of water</span>
+
+        <button
+          type="button"
+          class="water-btn water-btn-plus"
+          id="water-increase"
+          aria-label="Add one glass of water"
+        >+</button>
+      </div>
+
+      <p class="hydration-note" id="water-message">
+        Every glass counts. 💚
+      </p>
+    </div>
+  </section>
+
   <main class="metrics">
     <div class="card">
       <div class="icon">❤️</div>
       <h3>Heart Rate Variability</h3>
       <div class="val">68 ms <span class="tag-good">Optimal</span></div>
     </div>
-    <div class="card">
+    <div class="card sleep-score-card">
       <div class="icon">🌙</div>
-      <h3>Deep Sleep Score</h3>
-      <div class="val">92% <span class="tag-good">Excellent</span></div>
+      <h3>Sleep Quality Score</h3>
+      <div class="sleep-score-ring score-optimal" data-score="88">
+        <svg viewBox="0 0 120 120" role="img" aria-label="Sleep quality score: 88 out of 100, Optimal">
+          <circle class="sleep-ring-track" cx="60" cy="60" r="50"></circle>
+          <circle class="sleep-ring-progress" cx="60" cy="60" r="50"></circle>
+        </svg>
+        <div class="sleep-score-center">
+          <span class="sleep-score-number">88</span>
+          <span class="sleep-score-label">/ 100</span>
+        </div>
+      </div>
+      <div class="sleep-score-status" aria-live="polite">Optimal</div>
+      <p class="sleep-score-description">Your sleep quality score</p>
     </div>
     <div class="card">
       <div class="icon">⚡</div>

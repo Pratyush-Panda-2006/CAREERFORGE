@@ -14,21 +14,286 @@
     <div className="brand">AURA REALMS</div>
     <h1>Exclusive Private Island Charters &amp; Aviation</h1>
     <p>Tailored ultra-high-net-worth concierge experiences across Seychelles, St. Barts, and the Swiss Alps.</p>
-    <button className="book-btn" onclick="inquireConcierge()">Private Inquiry ↗</button>
+    <button type="button" class="book-btn" onclick="inquireConcierge()">Request Briefing ↗</button>
   </header>
 
-  <main className="destinations">
-    <div className="card">
-      <div className="icon">🏝️</div>
+  <main class="destinations" aria-label="Featured luxury stays and experiences">
+    <article class="card">
+      <div class="icon" aria-hidden="true">🏝️</div>
       <h3>The Azure Atoll Sanctuary</h3>
       <p>Private Island • Maldives • Max 12 Guests</p>
-    </div>
-    <div className="card">
-      <div className="icon">🛩️</div>
+      <ul class="amenity-badges" aria-label="Island amenities">
+        <li class="amenity-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 20h18M6 20V9l6-5 6 5v11M9 20v-6h6v6M4 9h16"/></svg>
+          <span>Helipad</span>
+        </li>
+        <li class="amenity-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17h18l-2 3H6l-3-3ZM5 14l7-8 7 8M12 6V3M8 14h8"/></svg>
+          <span>Private Dock</span>
+        </li>
+        <li class="amenity-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h16M6 20v-7h12v7M8 13V7h8v6M10 7V4h4v3M9 10h6"/></svg>
+          <span>Michelin Chef</span>
+        </li>
+        <li class="amenity-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 8h18l-2 11H5L3 8ZM7 8V5h10v3M8 12h8M10 15h4"/></svg>
+          <span>Infinity Pool</span>
+        </li>
+        <li class="amenity-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 3h8v4l-2 2v4l3 3v5H7v-5l3-3V9L8 7V3ZM8 17h8M10 6h4"/></svg>
+          <span>Wine Cellar</span>
+        </li>
+      </ul>
+    </article>
+    <article class="card">
+      <div class="icon" aria-hidden="true">🛩️</div>
       <h3>Global Express 7500 Jet</h3>
       <p>Intercontinental Flight • Custom Interiors</p>
-    </div>
+      <ul class="amenity-badges" aria-label="Private jet amenities">
+        <li class="amenity-badge"><span class="amenity-glyph" aria-hidden="true">✦</span><span>Private Hangar</span></li>
+        <li class="amenity-badge"><span class="amenity-glyph" aria-hidden="true">♨</span><span>Onboard Chef</span></li>
+        <li class="amenity-badge"><span class="amenity-glyph" aria-hidden="true">◇</span><span>Executive Suite</span></li>
+        <li class="amenity-badge"><span class="amenity-glyph" aria-hidden="true">⌁</span><span>Premium Wi-Fi</span></li>
+      </ul>
+    </article>
   </main>
+
+  <!-- ===== BEGIN issue #103: Private Aviation Fleet Explorer & Cabin Interior Walkthrough ===== -->
+  <section class="fleet-section" id="fleet" aria-labelledby="fleet-title">
+    <div class="fleet-intro">
+      <div class="fleet-kicker">AURA AVIATION DIVISION</div>
+      <h2 id="fleet-title">Private Jet Charter Fleet Explorer</h2>
+      <p>Explore our bespoke global charter fleet across Heavy, Super-Midsize, and Light jets. Inspect transcontinental flight range arcs, speed specifications, and embark on high-resolution cabin interior walkthroughs.</p>
+    </div>
+
+    <!-- Fleet Filter Controls, Hub Picker & Currency Format Toggle -->
+    <div class="fleet-controls" role="region" aria-label="Fleet filters and currency">
+      <div class="fleet-filter-group" role="tablist" aria-label="Aircraft category">
+        <button type="button" class="fleet-tab active" data-category="all" role="tab" aria-selected="true">All Fleet (4)</button>
+        <button type="button" class="fleet-tab" data-category="heavy" role="tab" aria-selected="false">Heavy &amp; Ultra-Long (2)</button>
+        <button type="button" class="fleet-tab" data-category="midsize" role="tab" aria-selected="false">Super-Midsize (1)</button>
+        <button type="button" class="fleet-tab" data-category="light" role="tab" aria-selected="false">Light Jet (1)</button>
+      </div>
+
+      <div class="fleet-pricing-controls">
+        <!-- Currency Format Toggle (USD, EUR, GBP, AED) -->
+        <div class="fleet-currency-group" role="radiogroup" aria-label="Currency format selector">
+          <span class="currency-group-label">CURRENCY:</span>
+          <button type="button" class="currency-pill active" data-currency="USD" role="radio" aria-checked="true" id="currUSD">$ USD</button>
+          <button type="button" class="currency-pill" data-currency="EUR" role="radio" aria-checked="false" id="currEUR">€ EUR</button>
+          <button type="button" class="currency-pill" data-currency="GBP" role="radio" aria-checked="false" id="currGBP">£ GBP</button>
+          <button type="button" class="currency-pill" data-currency="AED" role="radio" aria-checked="false" id="currAED">AED</button>
+        </div>
+
+        <!-- Rate Period Toggle (Hourly vs Daily) -->
+        <div class="fleet-period-group" role="group" aria-label="Rate frequency">
+          <button type="button" class="period-pill active" data-period="hour" id="periodHour">Hourly</button>
+          <button type="button" class="period-pill" data-period="day" id="periodDay">Daily (8h Block)</button>
+        </div>
+      </div>
+
+      <div class="fleet-hub-selector">
+        <label for="departureHubSelect">Departure Hub Range Overlay:</label>
+        <select id="departureHubSelect" aria-label="Departure hub range origin">
+          <option value="london">London Farnborough (EGLF)</option>
+          <option value="newyork">New York Teterboro (KTEB)</option>
+          <option value="dubai">Dubai Al Maktoum (DWC)</option>
+          <option value="geneva">Geneva Cointrin (LSGG)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Aircraft Cards Grid -->
+    <div class="fleet-grid" id="fleetGrid" role="region" aria-label="Aircraft fleet list">
+      <!-- Dynamically rendered by script.js -->
+    </div>
+  </section>
+
+  <!-- Cabin Interior Walkthrough Lightbox Modal -->
+  <div class="fleet-modal-overlay" id="fleetModalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalAircraftTitle" hidden>
+    <div class="fleet-modal-container">
+      <div class="fleet-modal-header">
+        <div class="fleet-modal-title-wrap">
+          <span class="fleet-badge modal-badge" id="modalAircraftCategory">HEAVY JET</span>
+          <h2 id="modalAircraftTitle">Bombardier Global 7500</h2>
+          <p class="modal-callsign" id="modalAircraftCallsign">Registration: 9H-AURA • Flagship Ultra-Long Range</p>
+        </div>
+        <button type="button" class="fleet-modal-close" id="modalCloseBtn" aria-label="Close cabin walkthrough">&times;</button>
+      </div>
+
+      <div class="fleet-modal-body">
+        <!-- Visualizer Tour / Range Map Container -->
+        <div class="fleet-tour-viewport">
+          <div class="fleet-tour-views-nav" role="tablist" aria-label="Tour view switch">
+            <button type="button" class="tour-view-tab active" id="tabPhotoTour" role="tab" aria-selected="true">Cabin Interior Walkthrough</button>
+            <button type="button" class="tour-view-tab" id="tabRangeMap" role="tab" aria-selected="false">Interactive Range Arc Map</button>
+          </div>
+
+          <!-- Photo Tour View -->
+          <div class="tour-photo-stage" id="tourPhotoStage">
+            <div class="tour-main-frame" id="tourMainFrame">
+              <div class="tour-slide-banner" id="tourSlideBanner">
+                <span class="tour-slide-counter" id="tourSlideCounter">1 / 4</span>
+                <span class="tour-slide-caption" id="tourSlideCaption">Master Executive Stateroom</span>
+              </div>
+              <div class="tour-visual-canvas" id="tourVisualCanvas" role="img" aria-label="Aircraft cabin interior photo">
+                <!-- SVG / Canvas interior illustration rendered by JS -->
+              </div>
+              <button type="button" class="tour-nav-btn prev" id="tourPrevBtn" aria-label="Previous interior space">&#10094;</button>
+              <button type="button" class="tour-nav-btn next" id="tourNextBtn" aria-label="Next interior space">&#10095;</button>
+            </div>
+
+            <!-- Thumbnails Switcher -->
+            <div class="tour-thumbs" id="tourThumbs" role="group" aria-label="Cabin photo thumbnails"></div>
+          </div>
+
+          <!-- Range Map Overlay View -->
+          <div class="tour-range-stage" id="tourRangeStage" hidden>
+            <div class="range-map-header">
+              <div class="range-stat">
+                <span class="range-stat-label">Maximum Range</span>
+                <strong class="range-stat-val" id="rangeDisplayMiles">7,700 NM</strong>
+                <span class="range-stat-sub" id="rangeDisplayKm">(14,260 KM)</span>
+              </div>
+              <div class="range-stat">
+                <span class="range-stat-label">Non-Stop Flight Time</span>
+                <strong class="range-stat-val" id="rangeDisplayTime">Up to 16.5 Hours</strong>
+                <span class="range-stat-sub">Direct polar &amp; trans-oceanic routes</span>
+              </div>
+              <div class="range-stat">
+                <span class="range-stat-label">Cruising Ceiling</span>
+                <strong class="range-stat-val" id="rangeDisplayCeiling">51,000 FT</strong>
+                <span class="range-stat-sub">Above commercial airline weather</span>
+              </div>
+            </div>
+            <div class="range-map-canvas" id="rangeMapCanvas">
+              <!-- Interactive SVG Range Radar Map -->
+            </div>
+            <div class="range-reachable-chips" id="rangeReachableChips">
+              <!-- Destinations in range pills -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Cabin Specs & Amenities Checklist Column -->
+        <div class="fleet-modal-sidebar">
+          <div class="modal-spec-cards">
+            <div class="m-spec">
+              <span class="m-spec-icon">⚡</span>
+              <div>
+                <span class="m-spec-title">Cruising Speed</span>
+                <strong id="modalSpecSpeed">Mach 0.90 / 982 km/h</strong>
+              </div>
+            </div>
+            <div class="m-spec">
+              <span class="m-spec-icon">👥</span>
+              <div>
+                <span class="m-spec-title">Passenger Capacity</span>
+                <strong id="modalSpecPax">19 Passengers (Sleeps 10)</strong>
+              </div>
+            </div>
+            <div class="m-spec">
+              <span class="m-spec-icon">🏔️</span>
+              <div>
+                <span class="m-spec-title">Cabin Altitude</span>
+                <strong id="modalSpecAltitude">2,900 ft @ 45,000 ft</strong>
+              </div>
+            </div>
+            <div class="m-spec">
+              <span class="m-spec-icon">💼</span>
+              <div>
+                <span class="m-spec-title">Luggage Capacity</span>
+                <strong id="modalSpecBaggage">195 cu ft (25 full bags)</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cabin Amenities Checklist -->
+          <div class="modal-amenities-wrap">
+            <h3 class="modal-amenities-heading">Cabin Interior Amenities</h3>
+            <ul class="modal-amenities-list" id="modalAmenitiesList">
+              <!-- Dynamically populated checklist -->
+            </ul>
+          </div>
+
+          <!-- Quote / Charter Action -->
+          <div class="modal-charter-action">
+            <div class="modal-charter-price-row">
+              <span class="charter-label">Indicative Charter Rate</span>
+              <strong class="charter-rate" id="modalCharterRate">$14,500 <small>/ flight hour</small></strong>
+            </div>
+            <button type="button" class="btn-charter-reserve" id="btnCharterInquire">Request Tail Allocation ↗</button>
+            <div class="charter-inquiry-toast" id="charterInquiryToast" hidden>
+              ✓ VIP Flight Desk holds allocation 9H-AURA. Our concierge will contact you in under 15 minutes.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===== END issue #103 ===== -->
+
+  <!-- ===== BEGIN issue #76: travel curator and printable itinerary ===== -->
+  <section class="lr" id="curator" aria-labelledby="lr-title">
+    <div class="lr-intro lr-noprint">
+      <div class="lr-kicker">THE CURATOR</div>
+      <h2 id="lr-title">Build Your Itinerary</h2>
+      <p>Add the destinations you like, choose how long to stay and layer on a yacht or private jet. The package cost updates as you go. Rates are illustrative demo prices and nothing is booked.</p>
+    </div>
+
+    <div class="lr-layout">
+      <div class="lr-cards lr-noprint" id="lr-cards" role="group" aria-label="Destinations"></div>
+
+      <aside class="lr-summary" id="lr-summary" aria-labelledby="lr-summary-title">
+        <div class="lr-print-head" aria-hidden="true">
+          <div class="lr-print-brand">AURA REALMS</div>
+          <div class="lr-print-sub">Private Itinerary &amp; Estimate</div>
+        </div>
+        <h3 id="lr-summary-title">Your package</h3>
+        <div class="lr-guest lr-noprint">
+          <label for="lr-guest">Prepared for (optional)</label>
+          <input id="lr-guest" type="text" maxlength="60" autocomplete="off" placeholder="Guest name" />
+        </div>
+        <p class="lr-guest-print" id="lr-guest-print" hidden></p>
+        <p class="lr-date" id="lr-date"></p>
+        <p class="lr-empty" id="lr-empty">No destinations yet. Use "Add to itinerary" on a card to start.</p>
+        <table class="lr-lines" id="lr-lines" hidden>
+          <caption class="lr-sr">Itemised package cost</caption>
+          <thead><tr><th scope="col">Item</th><th scope="col" class="lr-num">Amount</th></tr></thead>
+          <tbody id="lr-lines-body"></tbody>
+        </table>
+        <div class="lr-total" role="status" aria-live="polite" aria-atomic="true">
+          <span>Package total</span>
+          <strong id="lr-total">$0</strong>
+        </div>
+        <p class="lr-fine">Demo pricing for illustration. Nothing is booked or charged.</p>
+        <button type="button" class="lr-print-btn lr-noprint" id="lr-print" disabled>Print Itinerary</button>
+      </aside>
+    </div>
+  </section>
+  <!-- ===== END issue #76 ===== -->
+
+  <div class="concierge-overlay" id="conciergeModal" role="dialog" aria-modal="true" aria-labelledby="conciergeTitle" hidden>
+    <section class="concierge-card">
+      <button type="button" class="concierge-close" aria-label="Close inquiry" onclick="closeConcierge()">&times;</button>
+      <p class="concierge-kicker">AURA REALMS · PRIVATE DESK</p>
+      <h2 id="conciergeTitle">Request a Private Briefing</h2>
+      <p class="concierge-intro">Choose your preferred channel and our concierge will arrange a discreet callback.</p>
+      <form id="conciergeForm" class="concierge-form">
+        <fieldset>
+          <legend>Preferred contact method</legend>
+          <label><input type="radio" name="conciergeMethod" value="Signal" checked> Signal</label>
+          <label><input type="radio" name="conciergeMethod" value="WhatsApp VIP"> WhatsApp VIP</label>
+          <label><input type="radio" name="conciergeMethod" value="Private Phone"> Private Phone</label>
+        </fieldset>
+        <label for="conciergeContact">Contact details</label>
+        <input id="conciergeContact" name="contact" type="text" autocomplete="off" required maxlength="120" placeholder="Phone number or account name">
+        <button class="concierge-submit" type="submit">Arrange my briefing</button>
+      </form>
+      <div class="concierge-confirmation" id="conciergeConfirmation" role="status" hidden></div>
+    </section>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>

@@ -57,6 +57,64 @@ document.addEventListener('DOMContentLoaded', () => {
   const milestoneTableContainer = document.getElementById('milestoneTableContainer');
   const milestoneTableBody = document.getElementById('milestoneTableBody');
 
+  // Currency Support Config ($ USD, € EUR, £ GBP)
+  const CURRENCY_MAP = {
+    USD: {
+      symbol: '$',
+      code: 'USD',
+      name: 'US Dollar',
+      rate: 1.0,
+      initialMarks: ['$0', '$50k', '$150k', '$250k+'],
+      monthlyMarks: ['$0', '$2,500', '$5,000', '$10,000+'],
+      presets: [
+        '$500/mo • 8.5% • 25 Yrs',
+        '$1.2k/mo • 11.5% • 30 Yrs',
+        '$2.5k/mo • 9.0% • 15 Yrs',
+        '$250/mo • 5.2% • 10 Yrs'
+      ]
+    },
+    EUR: {
+      symbol: '€',
+      code: 'EUR',
+      name: 'Euro',
+      rate: 0.92,
+      initialMarks: ['€0', '€50k', '€150k', '€250k+'],
+      monthlyMarks: ['€0', '€2,500', '€5,000', '€10,000+'],
+      presets: [
+        '€500/mo • 8.5% • 25 Yrs',
+        '€1.2k/mo • 11.5% • 30 Yrs',
+        '€2.5k/mo • 9.0% • 15 Yrs',
+        '€250/mo • 5.2% • 10 Yrs'
+      ]
+    },
+    GBP: {
+      symbol: '£',
+      code: 'GBP',
+      name: 'British Pound',
+      rate: 0.79,
+      initialMarks: ['£0', '£50k', '£150k', '£250k+'],
+      monthlyMarks: ['£0', '£2,500', '£5,000', '£10,000+'],
+      presets: [
+        '£500/mo • 8.5% • 25 Yrs',
+        '£1.2k/mo • 11.5% • 30 Yrs',
+        '£2.5k/mo • 9.0% • 15 Yrs',
+        '£250/mo • 5.2% • 10 Yrs'
+      ]
+    }
+  };
+  let currentCurrencyKey = 'USD';
+
+  // Currency Selector DOM References
+  const currencyToggleButtons = document.querySelectorAll('.currency-toggle-btn');
+  const currencyActiveTag = document.getElementById('currencyActiveTag');
+  const currencyRateInfo = document.getElementById('currencyRateInfo');
+  const initialDepositLabel = document.getElementById('initialDepositLabel');
+  const monthlyContributionLabel = document.getElementById('monthlyContributionLabel');
+  const dynamicCurrencySymbols = document.querySelectorAll('.currency-symbol-dynamic');
+  const initialDepositMarks = document.getElementById('initialDepositMarks');
+  const monthlyContributionMarks = document.getElementById('monthlyContributionMarks');
+  const portfolioBalance = document.getElementById('portfolio-balance');
+
   // Current Calculation Cache
   let currentProjection = null;
   let compoundingFrequency = 12;
@@ -80,25 +138,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // --- Formatters ---
+  // --- Dynamic Multi-Currency Formatters ---
   function formatCurrency(amount) {
-    return '$' + Math.round(amount).toLocaleString('en-US');
+    const sym = CURRENCY_MAP[currentCurrencyKey].symbol;
+    return sym + Math.round(amount).toLocaleString('en-US');
   }
 
   function formatCompactCurrency(amount) {
+    const sym = CURRENCY_MAP[currentCurrencyKey].symbol;
     if (amount >= 1_000_000) {
-      return '$' + (amount / 1_000_000).toFixed(
-        amount % 1_000_000 === 0 ? 0 : 1
-      ) + 'M';
+      return sym + (amount / 1_000_000).toFixed(amount % 1_000_000 === 0 ? 0 : 1) + 'M';
     }
 
     if (amount >= 1_000) {
-      return '$' + (amount / 1_000).toFixed(
-        amount % 1_000 === 0 ? 0 : 0
-      ) + 'k';
+      return sym + (amount / 1_000).toFixed(amount % 1_000 === 0 ? 0 : 0) + 'k';
     }
-
-    return '$' + Math.round(amount);
+    return sym + Math.round(amount);
   }
 
   // --- Compound Interest Calculation Engine ---
@@ -506,6 +561,8 @@ document.addEventListener('DOMContentLoaded', () => {
       presetChips.forEach((c, idx) => {
         c.classList.toggle('active', idx === 0);
       });
+      setCurrency('USD');
+      presetChips.forEach((c, idx) => c.classList.toggle('active', idx === 0));
 
       initialDepositInput.value = 10000;
       initialDepositSlider.value = 10000;
@@ -528,6 +585,74 @@ document.addEventListener('DOMContentLoaded', () => {
       updateSimulation();
     });
   }
+
+  // --- 3-Way Currency Selector Toggle Logic ---
+  function setCurrency(currencyCode) {
+    if (!CURRENCY_MAP[currencyCode]) return;
+    currentCurrencyKey = currencyCode;
+    const config = CURRENCY_MAP[currencyCode];
+
+    // 1. Update Active Button States
+    currencyToggleButtons.forEach(btn => {
+      const isMatch = btn.dataset.currency === currencyCode;
+      btn.classList.toggle('active', isMatch);
+      btn.setAttribute('aria-checked', String(isMatch));
+    });
+
+    // 2. Update Status Indicators
+    if (currencyActiveTag) {
+      currencyActiveTag.textContent = `${config.code} (${config.symbol})`;
+    }
+    if (currencyRateInfo) {
+      currencyRateInfo.textContent = `Reference FX: 1 USD ≈ ${config.rate.toFixed(2)} ${config.code}`;
+    }
+
+    // 3. Update Input Parameter Labels
+    if (initialDepositLabel) {
+      initialDepositLabel.textContent = `Initial Investment (${config.symbol})`;
+    }
+    if (monthlyContributionLabel) {
+      monthlyContributionLabel.textContent = `Monthly Contribution (${config.symbol})`;
+    }
+
+    // 4. Update Dynamic Input Prefix Spans
+    dynamicCurrencySymbols.forEach(span => {
+      span.textContent = config.symbol;
+    });
+
+    // 5. Update Slider Marks
+    if (initialDepositMarks && config.initialMarks) {
+      initialDepositMarks.innerHTML = config.initialMarks.map(m => `<span>${m}</span>`).join('');
+    }
+    if (monthlyContributionMarks && config.monthlyMarks) {
+      monthlyContributionMarks.innerHTML = config.monthlyMarks.map(m => `<span>${m}</span>`).join('');
+    }
+
+    // 6. Update Strategy Preset Chip Subtitles
+    const presetDescElements = document.querySelectorAll('.preset-chip .chip-desc');
+    if (presetDescElements.length === config.presets.length) {
+      presetDescElements.forEach((el, idx) => {
+        el.textContent = config.presets[idx];
+      });
+    }
+
+    // 7. Update Portfolio Balance in Navbar (if not masked)
+    if (portfolioBalance && !portfolioBalance.textContent.includes('•')) {
+      const basePortfolioUsd = 128450;
+      const convertedPortfolio = basePortfolioUsd * config.rate;
+      portfolioBalance.textContent = `${config.symbol}${Math.round(convertedPortfolio).toLocaleString('en-US')}.00`;
+    }
+
+    // 8. Re-execute Simulation Engine to recalculate interest & re-render SVG chart, summary cards, and tables
+    updateSimulation();
+  }
+
+  currencyToggleButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.dataset.currency;
+      if (code) setCurrency(code);
+    });
+  });
 
   // --- Toggle Milestone Table ---
   if (toggleBreakdownBtn && milestoneTableContainer) {
@@ -879,7 +1004,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- ApexVault Global Deposit Modal Functions ---
-function triggerDeposit() {
+window.triggerDeposit = function triggerDeposit() {
   const modal = document.getElementById('depositModal');
 
   if (modal) {
@@ -887,9 +1012,9 @@ function triggerDeposit() {
   }
 
   document.body.style.overflow = 'hidden';
-}
+};
 
-function closeDepositModal() {
+window.closeDepositModal = function closeDepositModal() {
   const modal = document.getElementById('depositModal');
 
   if (modal) {
@@ -899,13 +1024,10 @@ function closeDepositModal() {
   document.body.style.overflow = '';
 
   const notice = document.getElementById('depositSuccessNotice');
+  if (notice) notice.style.display = 'none';
+};
 
-  if (notice) {
-    notice.style.display = 'none';
-  }
-}
-
-function confirmDeposit() {
+window.confirmDeposit = function confirmDeposit() {
   const amountInput = document.getElementById('depositAmount');
   const notice = document.getElementById('depositSuccessNotice');
 
@@ -914,12 +1036,26 @@ function confirmDeposit() {
   }
 
   setTimeout(() => {
-    closeDepositModal();
-
-    alert(
-      `Deposit of $${
-        amountInput ? amountInput.value : '5,000'
-      } USDC confirmed to Apex Prime Liquidity Vault.`
-    );
+    window.closeDepositModal();
+    alert(`Deposit of $${amountInput ? amountInput.value : '5,000'} USDC confirmed to Apex Prime Liquidity Vault.`);
   }, 1200);
-}
+};
+
+// Presentation-only balance masking for this demo; no persistent storage.
+(() => {
+  const amount = document.getElementById('portfolio-balance');
+  const button = document.getElementById('balance-visibility');
+  if (!amount || !button) return;
+  const original = amount.textContent;
+  let hidden = false;
+  button.addEventListener('click', () => {
+    hidden = !hidden;
+    amount.textContent = hidden ? '••••••••' : original;
+    if (hidden) amount.setAttribute('aria-label', 'Balance hidden');
+    else amount.removeAttribute('aria-label');
+    button.setAttribute('aria-pressed', String(hidden));
+    button.setAttribute('aria-label', hidden ? 'Show balance' : 'Hide balance');
+    button.title = hidden ? 'Show balance' : 'Hide balance';
+    button.firstElementChild.textContent = hidden ? '◎' : '◉';
+  });
+})();

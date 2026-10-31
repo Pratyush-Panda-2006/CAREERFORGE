@@ -1,9 +1,12 @@
-name: 24h Automated Leaderboard Sync
+name: Automated Leaderboard Sync (12h)
 
 on:
-  # schedule:
-  #   - cron: '0 0 * * *' # Runs daily at 00:00 UTC (Paused)
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  schedule:
+    - cron: '0 0,12 * * *' # Runs every 12 hours (at 00:00 midnight and 12:00 noon UTC)
+  workflow_dispatch: # Allows manual trigger from GitHub UI / CLI
+
+permissions:
+  contents: write
 
 jobs:
   sync-leaderboard:
@@ -37,6 +40,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes in leaderboard.json to commit."
           else
-            git commit -m "chore(leaderboard): automated 24h leaderboard update [skip ci]"
+            git commit -m "chore(leaderboard): automated 12h leaderboard update [skip ci]"
             git push
           fi

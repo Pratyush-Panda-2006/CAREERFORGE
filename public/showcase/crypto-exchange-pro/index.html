@@ -10,36 +10,253 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header className="navbar">
-    <div className="brand">⚡ VORTEX DEX</div>
-    <div className="status">● ORDERBOOK ENGINE: MATCHING (0.4ms)</div>
+  <header class="navbar">
+    <div class="brand">⚡ VORTEX DEX</div>
+    <div class="status">● ORDERBOOK ENGINE: MATCHING (0.4ms)</div>
   </header>
 
-  <main className="trading-container">
-    <div className="hero">
-      <div className="pill">ON-CHAIN DERIVATIVES</div>
+  <main class="trading-container">
+    <div class="hero">
+      <div class="pill">ON-CHAIN DERIVATIVES</div>
       <h1>100x Leverage Decentralized Futures</h1>
       <p>Self-custodial perpetual trading with deep orderbook liquidity &amp; zero gas fees.</p>
     </div>
 
-    <div className="ticker-grid">
-      <div className="ticker-card">
-        <span className="pair">BTC-PERP</span>
-        <span className="price">$94,250.00</span>
-        <span className="change green">+4.82%</span>
+    <div class="ticker-grid">
+      <div class="ticker-card">
+        <span class="pair">BTC-PERP</span>
+        <span class="price" id="tick-btc-price">$94,250.00</span>
+        <span class="change green" id="tick-btc-change">+4.82%</span>
       </div>
-      <div className="ticker-card">
-        <span className="pair">ETH-PERP</span>
-        <span className="price">$3,840.50</span>
-        <span className="change green">+6.15%</span>
+      <div class="ticker-card">
+        <span class="pair">ETH-PERP</span>
+        <span class="price" id="tick-eth-price">$3,840.50</span>
+        <span class="change green" id="tick-eth-change">+6.15%</span>
       </div>
-      <div className="ticker-card">
-        <span className="pair">SOL-PERP</span>
-        <span className="price">$214.80</span>
-        <span className="change green">+12.40%</span>
+      <div class="ticker-card">
+        <span class="pair">SOL-PERP</span>
+        <span class="price" id="tick-sol-price">$214.80</span>
+        <span class="change green" id="tick-sol-change">+12.40%</span>
       </div>
     </div>
   </main>
+
+  <!-- ===== BEGIN Quick Swap Order Execution Panel (Issue #53) ===== -->
+  <section class="swap-section" id="swapSection" aria-labelledby="swapTitle">
+    <div class="swap-card" id="swapCard">
+      <div class="swap-head">
+        <div>
+          <span class="swap-tag">// VORTEX AMM ROUTER</span>
+          <h2 id="swapTitle">Instant Token Swap</h2>
+        </div>
+        <div class="swap-head-actions">
+          <div class="route-badge" title="Smart routing enabled">
+            <span class="route-dot"></span>
+            <span>OPTIMUM ROUTE</span>
+          </div>
+          <button type="button" class="swap-settings-btn" id="swapSettingsBtn" aria-label="Toggle swap settings">⚙️</button>
+        </div>
+      </div>
+
+      <!-- Settings Dropdown (Gas speed & Custom slippage) -->
+      <div class="swap-settings-panel" id="swapSettingsPanel" hidden>
+        <div class="setting-item">
+          <span class="setting-title">Execution Speed (Gas Priority)</span>
+          <div class="gas-options" id="gasOptions">
+            <button type="button" class="gas-btn" data-speed="standard">Standard (10 Gwei)</button>
+            <button type="button" class="gas-btn active" data-speed="fast">Fast (15 Gwei)</button>
+            <button type="button" class="gas-btn" data-speed="instant">Instant (25 Gwei)</button>
+          </div>
+        </div>
+      </div>
+
+      <form id="swapForm" novalidate onsubmit="return false;">
+        <!-- Pay Token Box -->
+        <div class="swap-token-box" id="payBox">
+          <div class="token-box-top">
+            <label for="swapPayAmount" class="box-label">You Pay</label>
+            <div class="box-balance">
+              <span>Balance: <strong id="payBalance">4.5000</strong></span>
+              <button type="button" class="max-btn" id="payMaxBtn">MAX</button>
+            </div>
+          </div>
+          <div class="token-box-input-row">
+            <input type="number" id="swapPayAmount" class="token-input" placeholder="0.0" step="any" min="0" autocomplete="off" />
+            <div class="token-select-wrap">
+              <select id="payTokenSelect" class="token-select" aria-label="Select token to pay">
+                <option value="ETH" selected>🔷 ETH</option>
+                <option value="BTC">₿ BTC</option>
+                <option value="SOL">🟣 SOL</option>
+                <option value="USDC">💵 USDC</option>
+                <option value="USDT">💲 USDT</option>
+                <option value="VORTEX">⚡ VORTEX</option>
+              </select>
+            </div>
+          </div>
+          <div class="token-fiat-val" id="payFiatVal">≈ $0.00 USD</div>
+        </div>
+
+        <!-- Direction Flip Button -->
+        <div class="swap-flip-wrap">
+          <button type="button" class="swap-flip-btn" id="swapFlipBtn" aria-label="Swap pay and receive tokens" title="Invert token pair">
+            <span class="flip-icon">⇄</span>
+          </button>
+        </div>
+
+        <!-- Receive Token Box -->
+        <div class="swap-token-box" id="receiveBox">
+          <div class="token-box-top">
+            <label for="swapReceiveAmount" class="box-label">You Receive (Estimated)</label>
+            <div class="box-balance">
+              <span>Balance: <strong id="receiveBalance">5,000.00</strong></span>
+            </div>
+          </div>
+          <div class="token-box-input-row">
+            <input type="number" id="swapReceiveAmount" class="token-input" placeholder="0.0" readonly step="any" />
+            <div class="token-select-wrap">
+              <select id="receiveTokenSelect" class="token-select" aria-label="Select token to receive">
+                <option value="ETH">🔷 ETH</option>
+                <option value="BTC">₿ BTC</option>
+                <option value="SOL">🟣 SOL</option>
+                <option value="USDC" selected>💵 USDC</option>
+                <option value="USDT">💲 USDT</option>
+                <option value="VORTEX">⚡ VORTEX</option>
+              </select>
+            </div>
+          </div>
+          <div class="token-fiat-val" id="receiveFiatVal">≈ $0.00 USD</div>
+        </div>
+
+        <!-- Slippage Tolerance Controls -->
+        <div class="slippage-box">
+          <div class="slippage-head">
+            <span class="slippage-title">Slippage Tolerance</span>
+            <span class="slippage-current" id="currentSlippageLabel">0.5%</span>
+          </div>
+          <div class="slippage-pills" id="slippagePills">
+            <button type="button" class="slip-btn" data-slip="0.1">0.1%</button>
+            <button type="button" class="slip-btn active" data-slip="0.5">0.5%</button>
+            <button type="button" class="slip-btn" data-slip="1.0">1.0%</button>
+            <div class="custom-slip-wrap">
+              <input type="number" id="customSlipInput" class="custom-slip-input" placeholder="Custom" min="0.01" max="50" step="0.1" />
+              <span class="custom-slip-pct">%</span>
+            </div>
+          </div>
+          <div class="slippage-warning" id="slippageWarning" hidden>
+            ⚠️ High slippage tolerance (&gt;2%) may result in frontrunning and unfavorable execution rates.
+          </div>
+        </div>
+
+        <!-- Detailed Order Execution & Fee Breakdown -->
+        <div class="order-breakdown" id="orderBreakdown">
+          <div class="breakdown-row">
+            <span class="breakdown-label">Exchange Rate</span>
+            <span class="breakdown-val" id="rateDisplay">1 ETH = 3,840.50 USDC</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Minimum Received</span>
+            <span class="breakdown-val" id="minReceivedDisplay">--</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Price Impact</span>
+            <span class="breakdown-val green" id="priceImpactDisplay">&lt; 0.01%</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Order Routing</span>
+            <span class="breakdown-val" id="routingDisplay">Vortex Smart Router (eBPF AMM)</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Estimated Network Gas Fee</span>
+            <span class="breakdown-val" id="gasFeeDisplay">~$1.42 (15 Gwei)</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Protocol Fee (0.05%)</span>
+            <span class="breakdown-val green" id="protocolFeeDisplay">$0.00 (Waived for Stakers)</span>
+          </div>
+        </div>
+
+        <!-- Execute Swap Button -->
+        <button type="button" class="execute-swap-btn" id="executeSwapBtn" disabled>
+          <span id="swapBtnText">Enter an amount</span>
+        </button>
+      </form>
+
+      <!-- Transaction Confirmation Card (Receipt) -->
+      <div class="swap-receipt-card" id="swapReceiptCard" hidden>
+        <div class="receipt-icon">⚡</div>
+        <h3>Swap Order Executed!</h3>
+        <p class="receipt-sub">Transaction confirmed on-chain in 0.4ms.</p>
+        <div class="receipt-details">
+          <div class="rc-row">
+            <span>Swapped</span>
+            <strong id="rcSwapped">1.00 ETH</strong>
+          </div>
+          <div class="rc-row">
+            <span>Received</span>
+            <strong id="rcReceived" class="green">3,840.50 USDC</strong>
+          </div>
+          <div class="rc-row">
+            <span>Tx Hash</span>
+            <code class="tx-hash" id="rcTxHash">0x7a8f...4e92</code>
+          </div>
+          <div class="rc-row">
+            <span>Gas Paid</span>
+            <span id="rcGas">$1.42</span>
+          </div>
+        </div>
+        <button type="button" class="receipt-btn" id="receiptDismissBtn">Make Another Swap</button>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Quick Swap Order Execution Panel ===== -->
+
+  <section class="market" aria-labelledby="market-title">
+    <div class="market-head">
+      <h2 id="market-title">Live Market</h2>
+      <div class="toggle-group" role="group" aria-label="Trading pair" id="pair-group">
+        <button type="button" class="toggle" data-pair="btc" aria-pressed="true">BTC-PERP</button>
+        <button type="button" class="toggle" data-pair="eth" aria-pressed="false">ETH-PERP</button>
+        <button type="button" class="toggle" data-pair="sol" aria-pressed="false">SOL-PERP</button>
+      </div>
+      <div class="toggle-group" role="group" aria-label="Chart interval" id="interval-group">
+        <button type="button" class="toggle" data-interval="1H" aria-pressed="false">1H</button>
+        <button type="button" class="toggle" data-interval="24H" aria-pressed="true">24H</button>
+        <button type="button" class="toggle" data-interval="1W" aria-pressed="false">1W</button>
+        <button type="button" class="toggle" data-interval="1M" aria-pressed="false">1M</button>
+      </div>
+    </div>
+
+    <dl class="market-stats">
+      <div><dt>Last price</dt><dd id="stat-last">--</dd></div>
+      <div><dt>24h change</dt><dd id="stat-change">--</dd></div>
+      <div><dt>Period high</dt><dd id="stat-high">--</dd></div>
+      <div><dt>Period low</dt><dd id="stat-low">--</dd></div>
+    </dl>
+
+    <div class="market-body">
+      <div class="chart-wrap" id="chart-wrap">
+        <svg id="chart" viewBox="0 0 800 380" tabindex="0" role="img" aria-label="Candlestick price chart. Use left and right arrow keys to inspect candles."></svg>
+        <div class="chart-tip" id="chart-tip" role="status" hidden></div>
+        <p class="chart-legend"><span class="lg-ma7">MA 7</span> <span class="lg-ma25">MA 25</span> <span class="lg-note">Simulated data, nothing here is a real market.</span></p>
+      </div>
+
+      <div class="orderbook" aria-label="Order book">
+        <h3>Order book</h3>
+        <table class="ob-table" id="ob-asks">
+          <caption class="sr-only">Asks (sell orders)</caption>
+          <thead><tr><th scope="col">Price</th><th scope="col">Size</th><th scope="col">Total</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="ob-mid" id="ob-mid">--</div>
+        <table class="ob-table" id="ob-bids">
+          <caption class="sr-only">Bids (buy orders)</caption>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <p class="sr-only" id="chart-status" aria-live="polite"></p>
+  </section>
+
   <script src="script.js"></script>
 </body>
 </html>
