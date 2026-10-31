@@ -928,3 +928,133 @@ function renderAnalysis(pw) {
   renderIncidents();
 })();
 
+/* ===== BEGIN issue #183: network port scanner simulator ===== */
+(function initPortScanner() {
+  const form = document.getElementById('psForm');
+  const input = document.getElementById('psTarget');
+  const button = document.getElementById('psScanBtn');
+  const consoleEl = document.getElementById('psConsole');
+  const status = document.getElementById('psStatus');
+  const error = document.getElementById('psError');
+  const rows = Array.from(document.querySelectorAll('#psResults .ps-row'));
+  if (!form || !input || !button || !consoleEl || !status || !error || !rows.length) return;
+
+  const STEP_MS = 650;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const STATE_TEXT = { idle: 'Not scanned', scanning: 'Scanning', open: 'Open', closed: 'Closed', filtered: 'Filtered (timeout)' };
+  let timers = [];
+
+  // A host is an IPv4 address (each octet 0-255) or a dotted hostname of letters, digits and hyphens.
+  function parseTarget(raw) {
+    const value = raw.trim().toLowerCase();
+    if (!value) return { error: 'Enter an IP address or hostname.' };
+    if (value.length > 253) return { error: 'That hostname is too long.' };
+    if (/^[0-9.]+$/.test(value)) {
+      const parts = value.split('.');
+      const ok = parts.length === 4 && parts.every((p) => /^\d{1,3}$/.test(p) && Number(p) <= 255);
+      return ok ? { host: value } : { error: 'Not a valid IPv4 address. Use four numbers from 0 to 255.' };
+    }
+    const labels = value.split('.');
+    const ok = labels.every((l) => /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(l));
+    return ok ? { host: value } : { error: 'Not a valid hostname. Use letters, digits, hyphens and dots.' };
+  }
+
+  // Small seeded generator so one host always produces the same scan.
+  function seedFrom(text) {
+    let h = 2166136261;
+    for (let i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  function makeRandom(seed) {
+    let s = seed || 1;
+    return () => {
+      s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+  }
+
+  function simulate(host) {
+    const rand = makeRandom(seedFrom(host));
+    const base = 8 + Math.floor(rand() * 70);
+    return rows.map((row) => {
+      const roll = rand();
+      const state = roll < 0.45 ? 'open' : roll < 0.8 ? 'closed' : 'filtered';
+      const latency = state === 'filtered' ? null : Math.round(base + rand() * 90);
+      return { row, state, latency };
+    });
+  }
+
+  function speedOf(ms) {
+    return ms < 40 ? 'fast' : ms < 100 ? 'ok' : 'slow';
+  }
+
+  function paint(row, state, latency) {
+    const stateEl = row.querySelector('.ps-state');
+    const latEl = row.querySelector('.ps-lat');
+    stateEl.dataset.state = state;
+    stateEl.textContent = STATE_TEXT[state];
+    row.classList.toggle('scanning', state === 'scanning');
+    if (latency == null) {
+      latEl.textContent = state === 'filtered' ? 'timeout' : '-';
+      latEl.removeAttribute('data-speed');
+    } else {
+      latEl.textContent = latency + ' ms';
+      latEl.dataset.speed = speedOf(latency);
+    }
+  }
+
+  function finish(host, results) {
+    const open = results.filter((r) => r.state === 'open').length;
+    consoleEl.classList.remove('scanning');
+    consoleEl.setAttribute('aria-busy', 'false');
+    button.disabled = false;
+    button.textContent = 'Scan Host';
+    status.textContent = 'Scan of ' + host + ' complete (simulated): ' + open + ' of ' + results.length + ' ports open.';
+  }
+
+  function runScan(host) {
+    timers.forEach(clearTimeout);
+    timers = [];
+    const results = simulate(host);
+    rows.forEach((row) => paint(row, 'idle', null));
+    consoleEl.classList.add('scanning');
+    consoleEl.setAttribute('aria-busy', 'true');
+    button.disabled = true;
+    button.textContent = 'Scanning...';
+    status.textContent = 'Scanning ' + host + ' (simulated)...';
+
+    results.forEach((result, i) => {
+      const delay = reduceMotion ? 0 : STEP_MS * i;
+      timers.push(setTimeout(() => paint(result.row, 'scanning', null), delay));
+      timers.push(setTimeout(() => {
+        paint(result.row, result.state, result.latency);
+        if (i === results.length - 1) finish(host, results);
+      }, delay + (reduceMotion ? 0 : STEP_MS * 0.9)));
+    });
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (button.disabled) return;
+    const parsed = parseTarget(input.value);
+    if (parsed.error) {
+      error.textContent = parsed.error;
+      error.hidden = false;
+      input.setAttribute('aria-invalid', 'true');
+      input.focus();
+      return;
+    }
+    error.hidden = true;
+    input.removeAttribute('aria-invalid');
+    runScan(parsed.host);
+  });
+
+  input.addEventListener('input', () => {
+    error.hidden = true;
+    input.removeAttribute('aria-invalid');
+  });
+})();
+/* ===== END issue #183 ===== */
