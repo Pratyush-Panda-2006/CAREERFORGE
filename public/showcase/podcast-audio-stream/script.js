@@ -115,6 +115,35 @@ function formatTime(seconds) {
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
+function loadBookmarks() {
+  try { return PlayerLogic.parseBookmarks(localStorage.getItem(PlayerLogic.BOOKMARKS_KEY)); }
+  catch (e) { return []; }
+}
+
+function renderBookmarks() {
+  const tray = document.getElementById('bookmarks-tray');
+  if (!tray) return;
+  tray.replaceChildren();
+  loadBookmarks().forEach(bookmark => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'bookmark-chip';
+    button.textContent = `${formatTime(bookmark.time)} — ${bookmark.note}`;
+    button.title = `Jump to ${formatTime(bookmark.time)}`;
+    button.addEventListener('click', () => { jumpToTimestamp(bookmark.time); saveState(); });
+    tray.appendChild(button);
+  });
+}
+
+function saveBookmark() {
+  const note = window.prompt('Add a note for this moment:');
+  if (!note || !note.trim()) return;
+  const bookmarks = loadBookmarks();
+  bookmarks.push({ time: Math.floor(currentTime), note: note.trim() });
+  try { localStorage.setItem(PlayerLogic.BOOKMARKS_KEY, JSON.stringify(bookmarks)); } catch (e) { return; }
+  renderBookmarks();
+}
+
 function toggleSpeed() {
   currentSpeedIndex = (currentSpeedIndex + 1) % speeds.length;
   const currentSpeed = applySpeed();
@@ -399,6 +428,9 @@ document.addEventListener('DOMContentLoaded', () => {
   updateTimeUI();
   restoreState();
   applyVolume();
+  renderBookmarks();
+  const bookmarkButton = document.getElementById('bookmark-moment-btn');
+  if (bookmarkButton) bookmarkButton.addEventListener('click', saveBookmark);
 
   const volumeSlider = document.getElementById('dock-volume');
   if (volumeSlider) {
