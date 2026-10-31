@@ -38,6 +38,7 @@
           <button type="button" class="dock-play-pause-btn" id="dock-play-pause-btn" title="Play Episode" aria-label="Play or pause episode">▶</button>
           <button type="button" class="dock-btn" id="dock-forward-btn" title="Forward 15 seconds" aria-label="Forward 15 seconds">15s ↻</button>
           <button type="button" class="dock-speed-pill" id="dock-speed-pill" onclick="toggleSpeed()" title="Cycle Playback Speed">1x</button>
+          <button type="button" class="dock-speed-pill dock-eq-pill" id="dock-eq-pill" title="Open the equalizer" aria-label="Equalizer preset: Flat. Open equalizer">EQ Flat</button>
         </div>
 
         <div class="dock-scrubber-row">
@@ -56,6 +57,41 @@
       </div>
     </div>
   </section>
+
+  <!-- ===== Audio Equalizer Preset Selector (Issue #205) START ===== -->
+  <section class="eq-section" id="eq-section" aria-labelledby="eq-title">
+    <div class="eq-container">
+      <div class="eq-header">
+        <div class="eq-header-left">
+          <div class="tag">🎚️ AUDIO PROFILE</div>
+          <h2 id="eq-title">Equalizer</h2>
+          <p>Pick a preset for how you listen, or drag the bands to make your own.</p>
+        </div>
+        <div class="eq-active-badge" id="eq-active-badge">
+          <span class="eq-badge-label">Active preset</span>
+          <strong id="eq-active-name">Flat</strong>
+        </div>
+      </div>
+
+      <div class="eq-presets" id="eq-presets" role="radiogroup" aria-label="Equalizer preset">
+        <!-- Preset buttons generated in script.js -->
+      </div>
+      <p class="eq-description" id="eq-description"></p>
+
+      <div class="eq-stage">
+        <div class="eq-scale" aria-hidden="true"><span>+12 dB</span><span>0</span><span>-12 dB</span></div>
+        <div class="eq-bands" id="eq-bands">
+          <svg class="eq-curve" id="eq-curve" viewBox="0 0 500 200" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path id="eq-curve-path" d="" />
+          </svg>
+          <!-- Band sliders generated in script.js -->
+        </div>
+      </div>
+      <p class="eq-hint">Focus a band and use the arrow keys (Page Up and Page Down for bigger steps, Home and End for the limits). This is a simulation, the demo does not process real audio.</p>
+      <p class="eq-status" id="eq-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+  <!-- ===== Audio Equalizer Preset Selector (Issue #205) END ===== -->
 
   <!-- Interactive Transcript Reader Section -->
   <section class="transcript-section" id="episode-transcript-section">

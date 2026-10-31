@@ -466,3 +466,266 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('Waveform Audio Stream Player with Interactive Transcript loaded');
 });
+
+/* ===============================================================
+   Audio Equalizer Preset Selector (Issue #205)
+   Simulated 5-band EQ: presets move the band sliders, dragging a
+   band switches to a custom curve. No real audio is processed.
+=============================================================== */
+(function initEqualizer() {
+  'use strict';
+  var bandsEl = document.getElementById('eq-bands');
+  var presetsEl = document.getElementById('eq-presets');
+  if (!bandsEl || !presetsEl) return;
+
+  var EQ_KEY = 'waveform-eq';
+  var MIN_DB = -12;
+  var MAX_DB = 12;
+
+  var BANDS = [
+    { freq: '60 Hz', name: 'Sub bass' },
+    { freq: '230 Hz', name: 'Bass' },
+    { freq: '910 Hz', name: 'Mids' },
+    { freq: '3.6 kHz', name: 'Presence' },
+    { freq: '14 kHz', name: 'Air' }
+  ];
+
+  var PRESETS = [
+    { id: 'flat', label: 'Flat', icon: '➖', gains: [0, 0, 0, 0, 0], text: 'No tone shaping. The episode sounds as it was mixed.' },
+    { id: 'speech', label: 'Speech', icon: '🗣️', gains: [-6, -2, 3, 5, 2], text: 'Trims low rumble and lifts the vocal range so voices stay clear on small speakers.' },
+    { id: 'bass', label: 'Bass Boost', icon: '🔊', gains: [8, 5, 1, 0, -1], text: 'Adds weight to the low end for headphones and car stereos.' },
+    { id: 'treble', label: 'Treble', icon: '✨', gains: [-2, -1, 0, 5, 8], text: 'Brightens consonants and detail, handy for noisy commutes.' },
+    { id: 'studio', label: 'Studio Acoustic', icon: '🎙️', gains: [3, 1, -1, 2, 4], text: 'A gentle smile curve: warm lows and a little air, like a treated studio room.' }
+  ];
+
+  var state = { preset: 'flat', gains: PRESETS[0].gains.slice() };
+  var bandNodes = [];
+  var presetNodes = [];
+
+  function clampDb(v) {
+    var n = Math.round(Number(v));
+    if (!isFinite(n)) return 0;
+    return Math.min(Math.max(n, MIN_DB), MAX_DB);
+  }
+
+  function dbText(v) { return (v > 0 ? '+' : '') + v + ' dB'; }
+
+  function findPreset(id) {
+    for (var i = 0; i < PRESETS.length; i++) if (PRESETS[i].id === id) return PRESETS[i];
+    return null;
+  }
+
+  // Name of the preset whose gains equal the current curve, or 'custom'.
+  function matchPreset(gains) {
+    for (var i = 0; i < PRESETS.length; i++) {
+      var same = true;
+      for (var j = 0; j < gains.length; j++) if (PRESETS[i].gains[j] !== gains[j]) same = false;
+      if (same) return PRESETS[i].id;
+    }
+    return 'custom';
+  }
+
+  function save() {
+    try { localStorage.setItem(EQ_KEY, JSON.stringify({ preset: state.preset, gains: state.gains })); } catch (e) { /* storage blocked: EQ still works */ }
+  }
+
+  function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(EQ_KEY); } catch (e) { return; }
+    if (!raw) return;
+    try {
+      var data = JSON.parse(raw);
+      if (!data || !Array.isArray(data.gains) || data.gains.length !== BANDS.length) return;
+      state.gains = data.gains.map(clampDb);
+      state.preset = matchPreset(state.gains);
+    } catch (e) { /* ignore bad stored value */ }
+  }
+
+  // Smooth path through the five band points (Catmull-Rom converted to Beziers).
+  function curvePath(gains) {
+    var pts = gains.map(function (g, i) {
+      return [50 + i * 100, 100 - (g / MAX_DB) * 100];
+    });
+    var d = 'M' + pts[0][0] + ' ' + pts[0][1];
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p0 = pts[i - 1] || pts[i];
+      var p1 = pts[i];
+      var p2 = pts[i + 1];
+      var p3 = pts[i + 2] || p2;
+      var c1x = p1[0] + (p2[0] - p0[0]) / 6;
+      var c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      var c2x = p2[0] - (p3[0] - p1[0]) / 6;
+      var c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += ' C' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ' ' + c2y.toFixed(1) + ' ' + p2[0] + ' ' + p2[1];
+    }
+    return d;
+  }
+
+  function buildPresets() {
+    PRESETS.forEach(function (p, i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'eq-preset-btn';
+      btn.setAttribute('role', 'radio');
+      btn.dataset.preset = p.id;
+      var icon = document.createElement('span');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.textContent = p.icon;
+      btn.appendChild(icon);
+      btn.appendChild(document.createTextNode(' ' + p.label));
+      btn.addEventListener('click', function () { applyPreset(p.id); });
+      btn.addEventListener('keydown', function (e) {
+        var dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+        if (!dir) return;
+        e.preventDefault();
+        var next = presetNodes[(i + dir + PRESETS.length) % PRESETS.length];
+        next.focus();
+        applyPreset(next.dataset.preset);
+      });
+      presetsEl.appendChild(btn);
+      presetNodes.push(btn);
+    });
+  }
+
+  function buildBands() {
+    BANDS.forEach(function (b, i) {
+      var col = document.createElement('div');
+      col.className = 'eq-band';
+
+      var val = document.createElement('span');
+      val.className = 'eq-band-value';
+      col.appendChild(val);
+
+      var track = document.createElement('div');
+      track.className = 'eq-track';
+      track.tabIndex = 0;
+      track.setAttribute('role', 'slider');
+      track.setAttribute('aria-orientation', 'vertical');
+      track.setAttribute('aria-label', b.freq + ' ' + b.name + ' band');
+      track.setAttribute('aria-valuemin', String(MIN_DB));
+      track.setAttribute('aria-valuemax', String(MAX_DB));
+      var fill = document.createElement('div');
+      fill.className = 'eq-fill';
+      var knob = document.createElement('div');
+      knob.className = 'eq-knob';
+      track.appendChild(fill);
+      track.appendChild(knob);
+      col.appendChild(track);
+
+      var freq = document.createElement('span');
+      freq.className = 'eq-band-freq';
+      freq.textContent = b.freq;
+      col.appendChild(freq);
+
+      bindTrack(track, i);
+      bandsEl.appendChild(col);
+      bandNodes.push({ col: col, val: val, track: track, fill: fill, knob: knob });
+    });
+  }
+
+  function valueFromPointer(track, clientY) {
+    var r = track.getBoundingClientRect();
+    var ratio = (clientY - r.top) / r.height;
+    return clampDb(MAX_DB - ratio * (MAX_DB - MIN_DB));
+  }
+
+  function bindTrack(track, index) {
+    var dragging = false;
+    track.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      track.classList.add('dragging');
+      track.focus();
+      if (track.setPointerCapture) track.setPointerCapture(e.pointerId);
+      setBand(index, valueFromPointer(track, e.clientY));
+      e.preventDefault();
+    });
+    track.addEventListener('pointermove', function (e) {
+      if (dragging) setBand(index, valueFromPointer(track, e.clientY));
+    });
+    function stop() { dragging = false; track.classList.remove('dragging'); }
+    track.addEventListener('pointerup', stop);
+    track.addEventListener('pointercancel', stop);
+    track.addEventListener('keydown', function (e) {
+      var cur = state.gains[index];
+      var next = null;
+      if (e.key === 'ArrowUp' || e.key === 'ArrowRight') next = cur + 1;
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') next = cur - 1;
+      else if (e.key === 'PageUp') next = cur + 3;
+      else if (e.key === 'PageDown') next = cur - 3;
+      else if (e.key === 'Home') next = MIN_DB;
+      else if (e.key === 'End') next = MAX_DB;
+      if (next === null) return;
+      e.preventDefault();
+      setBand(index, clampDb(next));
+    });
+  }
+
+  function setBand(index, db) {
+    if (state.gains[index] === db) return;
+    state.gains[index] = db;
+    state.preset = matchPreset(state.gains);
+    render(false);
+    save();
+  }
+
+  function applyPreset(id) {
+    var p = findPreset(id);
+    if (!p) return;
+    state.preset = id;
+    state.gains = p.gains.slice();
+    render(true);
+    save();
+  }
+
+  function render(announce) {
+    var preset = findPreset(state.preset);
+    var name = preset ? preset.label : 'Custom';
+
+    state.gains.forEach(function (g, i) {
+      var n = bandNodes[i];
+      var pct = (g - MIN_DB) / (MAX_DB - MIN_DB) * 100;
+      n.track.style.setProperty('--pos', pct + '%');
+      n.track.style.setProperty('--fill-h', Math.abs(g) / (MAX_DB - MIN_DB) * 100 + '%');
+      n.track.classList.toggle('is-cut', g < 0);
+      n.track.setAttribute('aria-valuenow', String(g));
+      n.track.setAttribute('aria-valuetext', dbText(g));
+      n.val.textContent = dbText(g);
+      n.col.classList.toggle('is-boost', g > 0);
+    });
+
+    presetNodes.forEach(function (btn) {
+      var on = btn.dataset.preset === state.preset;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-checked', String(on));
+      // Roving tabindex: the checked preset is the tab stop (first one when Custom).
+      btn.tabIndex = on || (!preset && btn === presetNodes[0]) ? 0 : -1;
+    });
+
+    document.getElementById('eq-active-name').textContent = name;
+    document.getElementById('eq-active-badge').classList.toggle('is-custom', !preset);
+    document.getElementById('eq-description').textContent = preset ? preset.text : 'Custom curve. Choose a preset to reset the bands.';
+    document.getElementById('eq-curve-path').setAttribute('d', curvePath(state.gains));
+
+    var pill = document.getElementById('dock-eq-pill');
+    if (pill) {
+      pill.textContent = 'EQ ' + name;
+      pill.setAttribute('aria-label', 'Equalizer preset: ' + name + '. Open equalizer');
+    }
+    if (announce) document.getElementById('eq-status').textContent = name + ' preset applied.';
+  }
+
+  var dockPill = document.getElementById('dock-eq-pill');
+  if (dockPill) {
+    dockPill.addEventListener('click', function () {
+      var section = document.getElementById('eq-section');
+      section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var target = presetsEl.querySelector('[tabindex="0"]');
+      if (target) target.focus({ preventScroll: true });
+    });
+  }
+
+  buildPresets();
+  buildBands();
+  load();
+  render(false);
+})();
