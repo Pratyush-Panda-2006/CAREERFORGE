@@ -1074,3 +1074,163 @@ body {
     align-items: flex-start;
   }
 }
+
+
+/* ==========================================================
+   Foreign Exchange Converter
+   ========================================================== */
+.fx-section {
+  max-width: 1260px;
+  margin: 0 auto 80px;
+  padding: 0 24px;
+}
+.fx-container {
+  padding: 42px 40px 30px;
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  border-radius: 28px;
+  background: radial-gradient(circle at 8% 0%, rgba(6, 182, 212, 0.09), transparent 42%),
+              radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.07), transparent 38%),
+              rgba(255, 255, 255, 0.02);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.35);
+}
+.fx-heading {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 30px;
+}
+.fx-heading h2 {
+  color: #fff;
+  font-size: clamp(1.8rem, 4vw, 2.35rem);
+  margin-bottom: 10px;
+  letter-spacing: -0.03em; }
+.fx-heading p {
+  color: var(--text-muted);
+}
+.fx-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+  align-items: stretch; }
+.fx-converter-card, .fx-breakdown-card {
+  background: rgba(7, 10, 19, 0.72);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 26px;
+  min-width: 0;
+}
+.fx-card-topline, .fx-breakdown-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.fx-card-label {
+  color: var(--text-muted);
+  font: 700 0.7rem 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+}
+.fx-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--emerald-light);
+  font: 700 0.68rem 'JetBrains Mono', monospace; }
+.fx-live-dot {
+  width: 7px;
+  height: 7px;
+  display: inline-block;
+  border-radius: 50%;
+  background: var(--emerald-light);
+  box-shadow: 0 0 10px var(--emerald);
+}
+.fx-field-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 0 0 8px; }
+.fx-amount-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.035); }
+.fx-amount-row:focus-within {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(6,182,212,0.1);
+ }
+.fx-amount-row input, .fx-amount-row output {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #fff;
+  font: 700 clamp(1.25rem, 3vw, 1.75rem) 'JetBrains Mono', monospace;
+}
+.fx-amount-row input {
+  appearance: textfield;
+}
+.fx-amount-row input::-webkit-inner-spin-button, .fx-amount-row input::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.fx-result-row output {
+  color: var(--emerald-light);
+}
+.fx-currency-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border); }
+.fx-flag {
+  font-size: 1.35rem;
+  filter: drop-shadow(0 0 7px rgba(56,189,248,0.35));
+}
+.fx-currency-control select {
+  color: #fff;
+  background: #111a2b;
+  border: 0; outline: 0;
+  font: 700 0.95rem 'JetBrains Mono', monospace;
+  cursor: pointer; }
+.fx-currency-control option { background: #111a2b; color: #fff; }
+.fx-swap-row { display: flex; align-items: center; gap: 12px; margin: 13px 0; }
+.fx-divider { height: 1px; flex: 1; background: var(--border); }
+.fx-swap-btn { width: 38px; height: 38px; border: 1px solid rgba(6,182,212,0.35); border-radius: 50%; color: var(--cyan-light); background: rgba(6,182,212,0.1); font-size: 1.3rem; cursor: pointer; transition: transform .2s, background .2s; }
+.fx-swap-btn:hover { transform: rotate(180deg); background: rgba(6,182,212,0.2); }
+.fx-rate-line { margin-top: 16px; color: var(--cyan-light); font: 500 0.78rem 'JetBrains Mono', monospace; }
+.fx-error { margin-top: 10px; color: #fca5a5; font-size: 0.8rem; }
+.fx-error[hidden] { display: none; }
+.fx-breakdown-heading { margin-bottom: 20px; }
+.fx-breakdown-heading h3 { margin-top: 5px; color: #fff; font-size: 1.2rem; }
+.fx-shield { color: var(--emerald-light); font-size: 1.7rem; text-shadow: 0 0 15px var(--emerald-glow); }
+.fx-breakdown-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: #d1d5db; font-size: 0.84rem; }
+.fx-breakdown-row strong { color: #fff; text-align: right; font: 600 0.82rem 'JetBrains Mono', monospace; }
+.fx-breakdown-row small { display: block; margin-top: 3px; color: var(--text-dim); font-size: 0.7rem; }
+.fx-fee-row strong { color: #fca5a5; }
+.fx-total-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 20px; color: var(--emerald-light); font-weight: 700; }
+.fx-total-row strong { text-align: right; font: 800 1.15rem 'JetBrains Mono', monospace; }
+.fx-disclaimer { margin-top: 18px; color: var(--text-dim); font-size: 0.7rem; line-height: 1.5; }
+.fx-ticker { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; margin-top: 20px; padding: 16px 18px; border: 1px solid var(--border); border-radius: 14px; background: rgba(0,0,0,0.2); }
+.fx-ticker-title { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font: 700 0.68rem 'JetBrains Mono', monospace; letter-spacing: .7px; }
+.fx-ticker-rates { display: flex; flex: 1; flex-wrap: wrap; gap: 18px; }
+.fx-ticker-item { color: var(--text-muted); font: 0.72rem 'JetBrains Mono', monospace; white-space: nowrap; }
+.fx-ticker-item strong { color: var(--emerald-light); margin-left: 4px; }
+.fx-updated { color: var(--text-dim); font: 0.68rem 'JetBrains Mono', monospace; }
+@media (max-width: 768px) {
+  .fx-container { padding: 30px 20px 22px; }
+  .fx-layout { grid-template-columns: 1fr; }
+  .fx-converter-card, .fx-breakdown-card { padding: 21px; }
+  .fx-ticker { align-items: flex-start; flex-direction: column; gap: 12px; }
+}
+@media (max-width: 420px) {
+  .fx-section { padding: 0 14px; }
+  .fx-amount-row { padding: 11px 9px; gap: 7px; }
+  .fx-currency-control { gap: 5px; padding-left: 8px; }
+  .fx-currency-control select { font-size: 0.82rem; }
+  .fx-ticker-rates { gap: 10px; }
+}
