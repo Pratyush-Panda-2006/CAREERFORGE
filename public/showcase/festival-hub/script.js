@@ -312,3 +312,266 @@ function initTicketCalculator() {
 
   render();
 }
+
+// ---------------------------------------------------------------
+// Venue Map Stage Locator (Issue #193)
+// Pins on the venue map open a popover with that stage's sets. The
+// headliners are read from the lineup cards so they stay in sync.
+// ---------------------------------------------------------------
+(function initVenueMap() {
+  'use strict';
+  var frame = document.getElementById('vm-frame');
+  var pop = document.getElementById('vm-popover');
+  if (!frame || !pop) return;
+
+  var triggers = Array.prototype.slice.call(document.querySelectorAll('#venue-map .vm-pin, #venue-map .vm-chip'));
+  var zones = Array.prototype.slice.call(document.querySelectorAll('#venue-map .vm-zone'));
+  var kickerEl = document.getElementById('vm-pop-kicker');
+  var titleEl = document.getElementById('vm-pop-title');
+  var descEl = document.getElementById('vm-pop-desc');
+  var setsEl = document.getElementById('vm-pop-sets');
+  var daysEl = document.getElementById('vm-days');
+  var closeBtn = document.getElementById('vm-pop-close');
+  var filterBtn = document.getElementById('vm-pop-filter');
+  var narrowQuery = window.matchMedia('(max-width: 760px)');
+  var reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  var STAGES = {
+    'main-stage': {
+      name: 'Main Stage', color: '#ec4899',
+      kicker: 'Stage 1 | Capacity 40,000',
+      desc: 'The big one. Full LED wall, laser rig and the closing set of every night.',
+      support: [
+        { day: 'Oct 24', time: '19:30', artist: 'GHOST CIRCUIT', genre: 'Opening set' },
+        { day: 'Oct 25', time: '20:30', artist: 'LUMEN DRIFT', genre: 'Opening set' },
+        { day: 'Oct 26', time: '18:30', artist: 'KAIRO STATIC', genre: 'Opening set' }
+      ]
+    },
+    'neon-arena': {
+      name: 'Neon Arena', color: '#06b6d4',
+      kicker: 'Stage 2 | Capacity 15,000',
+      desc: 'A domed arena with 360 degree projection, built for lasers and live modular rigs.',
+      support: [
+        { day: 'Oct 24', time: '18:00', artist: 'PRISM DIVISION', genre: 'Opening set' },
+        { day: 'Oct 25', time: '19:45', artist: 'LASER BLOOM', genre: 'Opening set' },
+        { day: 'Oct 26', time: '21:00', artist: 'VOLTAGE NUN', genre: 'Opening set' }
+      ]
+    },
+    'bass-vault': {
+      name: 'Bass Vault', color: '#10b981',
+      kicker: 'Stage 3 | Capacity 12,000',
+      desc: 'A concrete bunker with a sub-bass wall. Bring ear protection.',
+      support: [
+        { day: 'Oct 24', time: '21:45', artist: 'LOW ORBIT', genre: 'Opening set' },
+        { day: 'Oct 25', time: '19:15', artist: 'RIFT CARTEL', genre: 'Opening set' },
+        { day: 'Oct 26', time: '20:00', artist: 'GRIND THEORY', genre: 'Opening set' }
+      ]
+    },
+    'chill-oasis': {
+      name: 'Chill Oasis', color: '#a855f7',
+      kicker: 'Stage 4 | Capacity 6,000',
+      desc: 'Lakeside lounge with hammocks, soft lighting and slower sets between the big nights.',
+      support: [
+        { day: 'Oct 24', time: '17:00', artist: 'DAWN STATIC', genre: 'Ambient downtempo' },
+        { day: 'Oct 24', time: '19:30', artist: 'MOSSWAVE', genre: 'Balearic chill' },
+        { day: 'Oct 25', time: '16:30', artist: 'TIDAL MIND', genre: 'Ambient' },
+        { day: 'Oct 25', time: '20:15', artist: 'SOFT CIRCUIT', genre: 'Lo-fi house' },
+        { day: 'Oct 26', time: '17:30', artist: 'KOI SIGNAL', genre: 'Deep house' },
+        { day: 'Oct 26', time: '22:00', artist: 'AFTERGLOW ENSEMBLE', genre: 'Live ambient closer', headliner: true }
+      ]
+    }
+  };
+
+  var openId = null;
+  var openTrigger = null;
+
+  // Headliners come from the lineup cards: "Main Stage • Oct 24 • 21:00".
+  function headlinersFor(stageId) {
+    var out = [];
+    var cards = document.querySelectorAll('.artist-card[data-stage="' + stageId + '"]');
+    Array.prototype.forEach.call(cards, function (card) {
+      var h = card.querySelector('h3');
+      var d = card.querySelector('.artist-details');
+      var g = card.querySelector('.artist-genre');
+      if (!h || !d) return;
+      var parts = d.textContent.split('•').map(function (p) { return p.trim(); });
+      if (parts.length < 3) return;
+      out.push({ day: parts[1], time: parts[2], artist: h.textContent.trim(), genre: g ? g.textContent.trim() : '', headliner: true });
+    });
+    return out;
+  }
+
+  function setsFor(stageId) {
+    var sets = headlinersFor(stageId).concat(STAGES[stageId].support);
+    sets.sort(function (a, b) {
+      return (a.day + a.time).localeCompare(b.day + b.time);
+    });
+    return sets;
+  }
+
+  var activeDay = null;
+  var shownSets = [];
+
+  function renderSets(stageId) {
+    shownSets = setsFor(stageId);
+    var days = [];
+    shownSets.forEach(function (s) { if (days.indexOf(s.day) === -1) days.push(s.day); });
+    if (days.indexOf(activeDay) === -1) activeDay = days[0];
+
+    daysEl.textContent = '';
+    days.forEach(function (day) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'vm-day-btn';
+      btn.textContent = day;
+      btn.setAttribute('aria-pressed', day === activeDay ? 'true' : 'false');
+      btn.addEventListener('click', function () {
+        activeDay = day;
+        Array.prototype.forEach.call(daysEl.children, function (other) {
+          other.setAttribute('aria-pressed', other === btn ? 'true' : 'false');
+        });
+        renderDay();
+        placePopover(frame.querySelector('.vm-pin[data-stage="' + stageId + '"]'));
+      });
+      daysEl.appendChild(btn);
+    });
+    renderDay();
+  }
+
+  function renderDay() {
+    setsEl.textContent = '';
+    shownSets.filter(function (s) { return s.day === activeDay; }).forEach(function (s) {
+      var li = document.createElement('li');
+      if (s.headliner) li.className = 'is-headliner';
+      var time = document.createElement('span');
+      time.className = 'vm-set-time';
+      time.textContent = s.time;
+      var info = document.createElement('span');
+      info.className = 'vm-set-info';
+      var name = document.createElement('strong');
+      name.textContent = s.artist;
+      var genre = document.createElement('span');
+      genre.className = 'vm-set-genre';
+      genre.textContent = s.genre;
+      info.append(name, genre);
+      li.append(time, info);
+      if (s.headliner) {
+        var tag = document.createElement('span');
+        tag.className = 'vm-set-tag';
+        tag.textContent = 'Headliner';
+        li.appendChild(tag);
+      }
+      setsEl.appendChild(li);
+    });
+  }
+
+  // On wide screens the popover floats next to the pin. On narrow screens
+  // CSS puts it under the map, so no inline position is used.
+  function placePopover(pin) {
+    if (narrowQuery.matches) {
+      pop.style.left = '';
+      pop.style.top = '';
+      return;
+    }
+    var fr = frame.getBoundingClientRect();
+    var pr = pin.getBoundingClientRect();
+    var px = pr.left - fr.left + pr.width / 2;
+    var py = pr.top - fr.top + pr.height / 2;
+    var w = pop.offsetWidth;
+    var h = pop.offsetHeight;
+    var left = px + 64;
+    if (left + w > fr.width - 8) left = px - 64 - w;
+    left = Math.max(8, Math.min(left, fr.width - w - 8));
+    var top = Math.max(8, Math.min(py - h / 2, fr.height - h - 8));
+    pop.style.left = Math.round(left) + 'px';
+    pop.style.top = Math.round(top) + 'px';
+  }
+
+  function syncTriggers() {
+    triggers.forEach(function (t) {
+      var on = t.getAttribute('data-stage') === openId;
+      t.classList.toggle('is-active', on);
+      t.setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+    zones.forEach(function (z) {
+      z.classList.toggle('is-active', z.getAttribute('data-zone') === openId);
+    });
+  }
+
+  function openStage(stageId, trigger) {
+    var stage = STAGES[stageId];
+    if (!stage) return;
+    var pin = frame.querySelector('.vm-pin[data-stage="' + stageId + '"]');
+    openId = stageId;
+    openTrigger = trigger;
+    pop.style.setProperty('--vm-accent', stage.color);
+    kickerEl.textContent = stage.kicker;
+    titleEl.textContent = stage.name;
+    descEl.textContent = stage.desc;
+    renderSets(stageId);
+    filterBtn.hidden = !document.querySelector('.stage-pill[data-stage="' + stageId + '"]');
+    // restart the entrance animation when switching between stages
+    pop.hidden = true;
+    void pop.offsetWidth;
+    pop.hidden = false;
+    placePopover(pin);
+    syncTriggers();
+    pop.scrollTop = 0;
+    pop.focus({ preventScroll: !narrowQuery.matches });
+    if (narrowQuery.matches) {
+      pop.scrollIntoView({ block: 'nearest', behavior: reduceQuery.matches ? 'auto' : 'smooth' });
+    }
+  }
+
+  function closePopover(returnFocus) {
+    if (openId === null) return;
+    var back = openTrigger;
+    openId = null;
+    openTrigger = null;
+    pop.hidden = true;
+    syncTriggers();
+    if (returnFocus && back) back.focus();
+  }
+
+  triggers.forEach(function (t) {
+    t.addEventListener('click', function () {
+      var id = t.getAttribute('data-stage');
+      if (openId === id) closePopover(true);
+      else openStage(id, t);
+    });
+  });
+
+  closeBtn.addEventListener('click', function () { closePopover(true); });
+
+  filterBtn.addEventListener('click', function () {
+    var id = openId;
+    var pill = document.querySelector('.stage-pill[data-stage="' + id + '"]');
+    if (!pill) return;
+    var lineupTab = document.getElementById('lineup-tab');
+    var lineupView = document.getElementById('lineup-view');
+    if (lineupView && lineupView.hidden && lineupTab) lineupTab.click();
+    pill.click();
+    closePopover(false);
+    pill.scrollIntoView({ block: 'center', behavior: reduceQuery.matches ? 'auto' : 'smooth' });
+    pill.focus({ preventScroll: true });
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && openId !== null) {
+      e.preventDefault();
+      closePopover(true);
+    }
+  });
+
+  document.addEventListener('click', function (e) {
+    if (openId === null) return;
+    if (pop.contains(e.target)) return;
+    if (e.target.closest && e.target.closest('#venue-map .vm-pin, #venue-map .vm-chip')) return;
+    closePopover(false);
+  });
+
+  window.addEventListener('resize', function () {
+    if (openId === null) return;
+    placePopover(frame.querySelector('.vm-pin[data-stage="' + openId + '"]'));
+  });
+})();

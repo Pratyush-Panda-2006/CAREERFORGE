@@ -200,6 +200,115 @@
 </section>
 </main>
 
+  <!-- BEGIN issue #193: venue map stage locator -->
+  <section class="venue-map" id="venue-map" aria-labelledby="venue-map-title">
+    <h2 id="venue-map-title">VENUE MAP</h2>
+    <p class="venue-map-intro">Find your way around the Cyber Dome. Tap a pin to see who plays on that stage and when.</p>
+
+    <div class="vm-frame" id="vm-frame">
+      <div class="vm-map" id="vm-map">
+        <svg class="vm-svg" viewBox="0 0 800 480" aria-hidden="true" focusable="false">
+          <defs>
+            <pattern id="vm-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.07)" />
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width="800" height="480" rx="18" fill="#100a22" />
+          <rect x="0" y="0" width="800" height="480" rx="18" fill="url(#vm-grid)" />
+          <rect x="14" y="14" width="772" height="452" rx="14" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="2" stroke-dasharray="6 8" />
+
+          <!-- walkways -->
+          <g fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M400 440 V290" />
+            <path d="M400 210 V150" />
+            <path d="M355 250 H215" />
+            <path d="M445 250 H585" />
+            <path d="M400 290 Q400 380 540 392" />
+            <path d="M400 330 Q400 392 262 392" />
+          </g>
+          <circle cx="400" cy="250" r="46" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.18)" stroke-width="2" />
+          <text class="vm-svg-label" x="400" y="248" text-anchor="middle">INFO</text>
+          <text class="vm-svg-label" x="400" y="264" text-anchor="middle">+ FIRST AID</text>
+
+          <!-- 1 Main Stage -->
+          <g class="vm-zone" data-zone="main-stage">
+            <ellipse class="vm-zone-crowd" cx="400" cy="128" rx="150" ry="70" fill="rgba(236,72,153,0.09)" stroke="rgba(236,72,153,0.4)" stroke-width="2" stroke-dasharray="3 7" />
+            <rect class="vm-zone-core" x="318" y="46" width="164" height="38" rx="8" fill="rgba(236,72,153,0.3)" stroke="#ec4899" stroke-width="2" />
+            <path d="M338 46 V30 M400 46 V26 M462 46 V30" stroke="rgba(236,72,153,0.6)" stroke-width="3" stroke-linecap="round" />
+          </g>
+
+          <!-- 2 Neon Arena -->
+          <g class="vm-zone" data-zone="neon-arena">
+            <circle class="vm-zone-crowd" cx="150" cy="250" r="86" fill="rgba(6,182,212,0.08)" stroke="rgba(6,182,212,0.4)" stroke-width="2" stroke-dasharray="3 7" />
+            <circle class="vm-zone-core" cx="150" cy="250" r="52" fill="rgba(6,182,212,0.22)" stroke="#06b6d4" stroke-width="2" />
+            <circle cx="150" cy="250" r="26" fill="none" stroke="rgba(6,182,212,0.55)" stroke-width="2" />
+          </g>
+
+          <!-- 3 Bass Vault -->
+          <g class="vm-zone" data-zone="bass-vault">
+            <polygon class="vm-zone-crowd" points="650,160 724,203 724,297 650,340 576,297 576,203" fill="rgba(16,185,129,0.08)" stroke="rgba(16,185,129,0.4)" stroke-width="2" stroke-dasharray="3 7" />
+            <polygon class="vm-zone-core" points="650,196 692,220 692,280 650,304 608,280 608,220" fill="rgba(16,185,129,0.22)" stroke="#10b981" stroke-width="2" />
+            <polygon points="650,226 672,238 672,262 650,274 628,262 628,238" fill="none" stroke="rgba(16,185,129,0.55)" stroke-width="2" />
+          </g>
+
+          <!-- 4 Chill Oasis -->
+          <g class="vm-zone" data-zone="chill-oasis">
+            <ellipse class="vm-zone-crowd" cx="640" cy="392" rx="110" ry="58" fill="rgba(168,85,247,0.08)" stroke="rgba(168,85,247,0.4)" stroke-width="2" stroke-dasharray="3 7" />
+            <ellipse class="vm-zone-core" cx="640" cy="396" rx="62" ry="28" fill="rgba(168,85,247,0.25)" stroke="#a855f7" stroke-width="2" />
+            <g fill="rgba(168,85,247,0.5)">
+              <circle cx="560" cy="366" r="9" /><circle cx="590" cy="352" r="7" /><circle cx="700" cy="350" r="9" />
+              <circle cx="732" cy="380" r="7" /><circle cx="728" cy="424" r="9" /><circle cx="570" cy="428" r="7" />
+            </g>
+          </g>
+
+          <!-- landmarks -->
+          <g>
+            <rect x="150" y="372" width="112" height="46" rx="8" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.45)" stroke-width="2" />
+            <text class="vm-svg-label" x="206" y="400" text-anchor="middle">FOOD COURT</text>
+            <path d="M366 446 H434 V470 H366 Z" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.35)" stroke-width="2" />
+            <text class="vm-svg-label" x="400" y="462" text-anchor="middle">MAIN GATE</text>
+          </g>
+        </svg>
+
+        <button type="button" class="vm-pin" data-stage="main-stage" style="left:50%;top:27%" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover">
+          <span class="vm-pin-num" aria-hidden="true">1</span>
+          <span class="vm-pin-label">Main Stage</span>
+        </button>
+        <button type="button" class="vm-pin" data-stage="neon-arena" style="left:18.75%;top:52%" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover">
+          <span class="vm-pin-num" aria-hidden="true">2</span>
+          <span class="vm-pin-label">Neon Arena</span>
+        </button>
+        <button type="button" class="vm-pin" data-stage="bass-vault" style="left:81.25%;top:52%" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover">
+          <span class="vm-pin-num" aria-hidden="true">3</span>
+          <span class="vm-pin-label">Bass Vault</span>
+        </button>
+        <button type="button" class="vm-pin" data-stage="chill-oasis" style="left:80%;top:82.5%" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover">
+          <span class="vm-pin-num" aria-hidden="true">4</span>
+          <span class="vm-pin-label">Chill Oasis</span>
+        </button>
+      </div>
+
+      <div class="vm-popover" id="vm-popover" role="dialog" aria-labelledby="vm-pop-title" tabindex="-1" hidden>
+        <button type="button" class="vm-pop-close" id="vm-pop-close" aria-label="Close stage details">&times;</button>
+        <p class="vm-pop-kicker" id="vm-pop-kicker"></p>
+        <h3 id="vm-pop-title"></h3>
+        <p class="vm-pop-desc" id="vm-pop-desc"></p>
+        <h4 class="vm-pop-sub" id="vm-pop-sub">Upcoming sets</h4>
+        <div class="vm-days" id="vm-days" role="group" aria-labelledby="vm-pop-sub"></div>
+        <ul class="vm-pop-sets" id="vm-pop-sets" aria-live="polite"></ul>
+        <button type="button" class="vm-pop-filter" id="vm-pop-filter">See this stage in the lineup</button>
+      </div>
+    </div>
+
+    <ul class="vm-legend" aria-label="Stages">
+      <li><button type="button" class="vm-chip" data-stage="main-stage" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover"><span class="vm-chip-num" aria-hidden="true">1</span> Main Stage</button></li>
+      <li><button type="button" class="vm-chip" data-stage="neon-arena" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover"><span class="vm-chip-num" aria-hidden="true">2</span> Neon Arena</button></li>
+      <li><button type="button" class="vm-chip" data-stage="bass-vault" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover"><span class="vm-chip-num" aria-hidden="true">3</span> Bass Vault</button></li>
+      <li><button type="button" class="vm-chip" data-stage="chill-oasis" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover"><span class="vm-chip-num" aria-hidden="true">4</span> Chill Oasis</button></li>
+    </ul>
+  </section>
+  <!-- END issue #193 -->
+
   <section class="tickets" id="tickets" aria-labelledby="tickets-title">
     <h2 id="tickets-title">GET YOUR PASS</h2>
     <p class="tickets-intro">Pick your tiers, add extras, and watch the total update. Groups of 5 or more tickets get 10% off.</p>
