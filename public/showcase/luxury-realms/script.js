@@ -1091,3 +1091,821 @@ function closeConcierge() {
 })();
 /* ===== END issue #103 ===== */
 
+
+/* ===== BEGIN issue #201: virtual video walkthrough player with chapters ===== */
+(function () {
+  'use strict';
+
+  var W = 960;
+  var H = 540;
+  var DURATION = 170;
+  var SPEEDS = [1, 1.5, 2];
+
+  // Start times are in seconds. A chapter runs until the next one starts.
+  var CHAPTERS = [
+    { id: 'arrival', title: 'Estate Arrival', start: 0, scene: 'arrival', desc: 'Dusk approach along the lantern-lit drive.' },
+    { id: 'suite', title: 'Master Suite', start: 28, scene: 'suite', desc: 'Sea-facing owner suite with a private dressing room.' },
+    { id: 'helipad', title: 'Private Helipad', start: 62, scene: 'helipad', desc: 'Cliffside pad with a two minute transfer to the jet.' },
+    { id: 'cellar', title: 'Wine Cellar', start: 98, scene: 'cellar', desc: 'Vaulted stone cellar holding 2,400 bottles.' },
+    { id: 'terrace', title: 'Infinity Terrace', start: 132, scene: 'terrace', desc: 'Edgeless pool that melts into the horizon at sunset.' }
+  ];
+
+  var openBtn = document.getElementById('vt-open');
+  var dialog = document.getElementById('vt-dialog');
+  if (!openBtn || !dialog || typeof dialog.showModal !== 'function') return;
+
+  var canvas = document.getElementById('vt-canvas');
+  var seek = document.getElementById('vt-seek');
+  var ticks = document.getElementById('vt-ticks');
+  var playBtn = document.getElementById('vt-play');
+  var prevBtn = document.getElementById('vt-prev');
+  var nextBtn = document.getElementById('vt-next');
+  var speedBtn = document.getElementById('vt-speed');
+  var fullBtn = document.getElementById('vt-full');
+  var closeBtn = document.getElementById('vt-close');
+  var curEl = document.getElementById('vt-cur');
+  var durEl = document.getElementById('vt-dur');
+  var player = document.getElementById('vt-player');
+  var stage = document.getElementById('vt-stage');
+  var capNum = document.getElementById('vt-cap-num');
+  var capTitle = document.getElementById('vt-cap-title');
+  var chapterList = document.getElementById('vt-chapter-list');
+  var chips = document.getElementById('vt-chips');
+  var live = document.getElementById('vt-live');
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var motion = reduceMotion ? 0.25 : 1;
+
+  var state = { t: 0, playing: false, speed: 1, chapter: -1, ended: false, opener: null };
+  var rafId = 0;
+  var lastStamp = 0;
+  var chapterEls = [];
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+  function fmt(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    return Math.floor(sec / 60) + ':' + pad(sec % 60);
+  }
+  function spoken(sec) {
+    sec = Math.floor(sec);
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return (m ? m + (m === 1 ? ' minute ' : ' minutes ') : '') + s + (s === 1 ? ' second' : ' seconds');
+  }
+  function chapterEnd(i) { return i + 1 < CHAPTERS.length ? CHAPTERS[i + 1].start : DURATION; }
+  function chapterAt(t) {
+    var idx = 0;
+    for (var i = 0; i < CHAPTERS.length; i++) if (t >= CHAPTERS[i].start) idx = i;
+    return idx;
+  }
+
+  // ---------- Procedural footage (no video file, everything is drawn on canvas) ----------
+  function rng(seed) {
+    var s = seed;
+    return function () {
+      s = (s * 16807) % 2147483647;
+      return (s - 1) / 2147483646;
+    };
+  }
+  var rand = rng(2026);
+  var STARS = [];
+  for (var si = 0; si < 70; si++) STARS.push([rand(), rand(), rand()]);
+
+  function vgrad(c, h, stops) {
+    var g = c.createLinearGradient(0, 0, 0, h);
+    for (var i = 0; i < stops.length; i++) g.addColorStop(stops[i][0], stops[i][1]);
+    return g;
+  }
+  function glow(c, x, y, r, rgb, a) {
+    var g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(' + rgb + ',' + a + ')');
+    g.addColorStop(1, 'rgba(' + rgb + ',0)');
+    c.fillStyle = g;
+    c.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  function rrect(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+  function stars(c, t, limitY, alpha) {
+    c.fillStyle = '#fff';
+    for (var i = 0; i < STARS.length; i++) {
+      var s = STARS[i];
+      c.globalAlpha = alpha * (0.35 + 0.65 * Math.abs(Math.sin(t * 1.1 + s[2] * 20)));
+      c.fillRect(s[0] * W, s[1] * limitY, 1.8, 1.8);
+    }
+    c.globalAlpha = 1;
+  }
+
+  function sceneArrival(c, p, t) {
+    var hz = H * 0.58;
+    c.fillStyle = vgrad(c, hz, [[0, '#120b24'], [0.55, '#5b2a4a'], [1, '#f59e0b']]);
+    c.fillRect(0, 0, W, hz);
+    stars(c, t, hz * 0.55, 0.9);
+    c.fillStyle = '#0c0a10';
+    c.fillRect(0, hz, W, H - hz);
+    // driveway
+    c.fillStyle = '#1d1722';
+    c.beginPath();
+    c.moveTo(W / 2 - 10, hz);
+    c.lineTo(W / 2 - 330, H);
+    c.lineTo(W / 2 + 330, H);
+    c.lineTo(W / 2 + 10, hz);
+    c.closePath();
+    c.fill();
+    // villa, pushes in slowly
+    c.save();
+    c.translate(W / 2, hz);
+    var sc = 1 + p * 0.28 * motion;
+    c.scale(sc, sc);
+    c.fillStyle = '#07050b';
+    c.fillRect(-300, -64, 600, 64);
+    c.fillRect(-190, -108, 250, 46);
+    c.fillRect(-310, -70, 620, 6);
+    c.fillRect(-200, -114, 270, 6);
+    for (var i = 0; i < 9; i++) {
+      var a = 0.75 + 0.25 * Math.sin(t * 1.7 + i * 2.3) * motion;
+      c.fillStyle = 'rgba(252,211,77,' + a + ')';
+      c.fillRect(-270 + i * 62, -48, 34, 30);
+      if (i > 1 && i < 6) c.fillRect(-170 + (i - 2) * 58, -96, 30, 24);
+    }
+    c.restore();
+    // cypress trees
+    c.fillStyle = '#06050a';
+    [[-420, 96], [-340, 70], [380, 90], [460, 64]].forEach(function (tr) {
+      c.beginPath();
+      c.ellipse(W / 2 + tr[0], hz - tr[1] + 18, 18, tr[1], 0, 0, Math.PI * 2);
+      c.fill();
+    });
+    // receding lanterns
+    for (var k = 0; k < 7; k++) {
+      var f = ((k / 7) + p * 0.9 * motion + t * 0.01 * motion) % 1;
+      var e = f * f;
+      var y = hz + (H - hz) * e;
+      var off = 14 + 320 * e;
+      var r = 2 + 9 * e;
+      [-1, 1].forEach(function (side) {
+        glow(c, W / 2 + side * off, y - r * 2, r * 7, '253,224,138', 0.55);
+        c.fillStyle = '#fde68a';
+        c.beginPath();
+        c.arc(W / 2 + side * off, y - r * 2, r * 0.7, 0, Math.PI * 2);
+        c.fill();
+      });
+    }
+  }
+
+  function sceneSuite(c, p, t) {
+    var pan = -p * 60 * motion;
+    c.fillStyle = vgrad(c, H, [[0, '#2a1d14'], [1, '#150f0b']]);
+    c.fillRect(0, 0, W, H);
+    c.save();
+    c.translate(pan, 0);
+    // sea-view window
+    c.fillStyle = vgrad(c, 330, [[0, '#07102a'], [0.6, '#12315c'], [1, '#0b1e3d']]);
+    c.fillRect(560, 70, 340, 270);
+    c.fillStyle = '#fef3c7';
+    c.beginPath();
+    c.arc(800, 140, 24, 0, Math.PI * 2);
+    c.fill();
+    glow(c, 800, 140, 90, '254,243,199', 0.25);
+    c.strokeStyle = 'rgba(254,243,199,0.35)';
+    c.lineWidth = 2;
+    for (var i = 0; i < 9; i++) {
+      var wy = 230 + i * 11;
+      var wob = Math.sin(t * 0.9 + i) * 10 * motion;
+      c.beginPath();
+      c.moveTo(780 - i * 4 + wob, wy);
+      c.lineTo(820 + i * 4 + wob, wy);
+      c.stroke();
+    }
+    c.strokeStyle = '#3b2a18';
+    c.lineWidth = 10;
+    c.strokeRect(560, 70, 340, 270);
+    c.beginPath();
+    c.moveTo(730, 70);
+    c.lineTo(730, 340);
+    c.stroke();
+    // curtains
+    c.fillStyle = '#6b4a2a';
+    [[520, 1], [900, -1]].forEach(function (cu) {
+      c.beginPath();
+      c.moveTo(cu[0], 50);
+      c.lineTo(cu[0] + cu[1] * 70, 50);
+      for (var y = 50; y <= 360; y += 10) {
+        c.lineTo(cu[0] + cu[1] * (70 + Math.sin(y * 0.09 + t * 0.8) * 5 * motion), y);
+      }
+      c.lineTo(cu[0], 360);
+      c.closePath();
+      c.fill();
+    });
+    // floor and rug
+    c.fillStyle = '#120d09';
+    c.fillRect(-80, 390, W + 160, H);
+    c.fillStyle = '#3a2a1b';
+    rrect(c, 60, 440, 520, 70, 10);
+    c.fill();
+    // bed
+    c.fillStyle = '#3a2616';
+    rrect(c, 120, 170, 380, 150, 10);
+    c.fill();
+    c.fillStyle = vgrad(c, 400, [[0, '#e7c98a'], [0.75, '#c99a48'], [1, '#8c6a2c']]);
+    rrect(c, 100, 300, 420, 100, 12);
+    c.fill();
+    c.fillStyle = '#f6efde';
+    rrect(c, 150, 262, 130, 50, 14);
+    c.fill();
+    rrect(c, 330, 262, 130, 50, 14);
+    c.fill();
+    c.fillStyle = 'rgba(0,0,0,0.18)';
+    c.fillRect(100, 340, 420, 6);
+    // bedside lamp
+    c.fillStyle = '#2a1b0f';
+    c.fillRect(548, 330, 70, 60);
+    var fl = 0.55 + 0.1 * Math.sin(t * 6) * motion;
+    glow(c, 583, 290, 170, '255,200,110', fl);
+    c.fillStyle = '#fde68a';
+    c.beginPath();
+    c.moveTo(560, 330);
+    c.lineTo(606, 330);
+    c.lineTo(596, 286);
+    c.lineTo(570, 286);
+    c.closePath();
+    c.fill();
+    c.restore();
+  }
+
+  function sceneHelipad(c, p, t) {
+    var hz = H * 0.5;
+    c.fillStyle = vgrad(c, hz, [[0, '#1d1240'], [0.5, '#a3345b'], [1, '#fb923c']]);
+    c.fillRect(0, 0, W, hz);
+    c.fillStyle = vgrad(c, H - hz, [[0, '#7c2d3a'], [0.15, '#14213d'], [1, '#080d1c']]);
+    c.save();
+    c.translate(0, hz);
+    c.fillRect(0, 0, W, H - hz);
+    c.restore();
+    // sun glint on water
+    c.strokeStyle = 'rgba(253,186,116,0.35)';
+    c.lineWidth = 2;
+    for (var i = 0; i < 10; i++) {
+      var y = hz + 8 + i * 10;
+      c.beginPath();
+      c.moveTo(W * 0.3 + Math.sin(t + i) * 14 * motion, y);
+      c.lineTo(W * 0.7 + Math.sin(t * 1.2 + i) * 14 * motion, y);
+      c.stroke();
+    }
+    // cliff pad
+    c.fillStyle = '#0f0c14';
+    c.beginPath();
+    c.moveTo(0, H);
+    c.lineTo(0, 380);
+    c.lineTo(W, 370);
+    c.lineTo(W, H);
+    c.closePath();
+    c.fill();
+    var cx = W / 2;
+    var cy = 430;
+    c.fillStyle = '#26212c';
+    c.beginPath();
+    c.ellipse(cx, cy, 250, 56, 0, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = '#f59e0b';
+    c.lineWidth = 4;
+    c.beginPath();
+    c.ellipse(cx, cy, 218, 47, 0, 0, Math.PI * 2);
+    c.stroke();
+    c.fillStyle = '#f59e0b';
+    c.font = '700 64px Cinzel, serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.save();
+    c.translate(cx, cy);
+    c.scale(1, 0.32);
+    c.fillText('H', 0, 0);
+    c.restore();
+    // pulsing perimeter lights
+    for (var j = 0; j < 16; j++) {
+      var ang = (j / 16) * Math.PI * 2;
+      var on = 0.45 + 0.55 * Math.max(0, Math.sin(t * 3 - j * 0.6));
+      var lx = cx + Math.cos(ang) * 240;
+      var ly = cy + Math.sin(ang) * 54;
+      glow(c, lx, ly, 18, '253,224,138', on * 0.8);
+      c.fillStyle = 'rgba(254,243,199,' + (0.4 + on * 0.6) + ')';
+      c.fillRect(lx - 2, ly - 2, 4, 4);
+    }
+    // helicopter descends over the chapter and settles
+    var land = Math.min(1, p / 0.7);
+    var ease = 1 - Math.pow(1 - land, 3);
+    var hx = cx + (1 - ease) * 260 * motion;
+    var hy = 150 + ease * 205;
+    c.fillStyle = '#0a0810';
+    c.beginPath();
+    c.ellipse(hx, hy, 62, 24, 0, 0, Math.PI * 2);
+    c.fill();
+    c.fillRect(hx + 40, hy - 6, 88, 8);
+    c.beginPath();
+    c.moveTo(hx + 126, hy - 24);
+    c.lineTo(hx + 138, hy - 24);
+    c.lineTo(hx + 128, hy + 2);
+    c.closePath();
+    c.fill();
+    c.strokeStyle = '#0a0810';
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(hx - 40, hy + 34);
+    c.lineTo(hx + 40, hy + 34);
+    c.moveTo(hx - 22, hy + 20);
+    c.lineTo(hx - 26, hy + 34);
+    c.moveTo(hx + 22, hy + 20);
+    c.lineTo(hx + 26, hy + 34);
+    c.stroke();
+    c.fillStyle = 'rgba(125,211,252,0.55)';
+    c.beginPath();
+    c.ellipse(hx - 24, hy - 4, 24, 12, 0, 0, Math.PI * 2);
+    c.fill();
+    // rotor
+    var spinning = land < 1 || p < 0.9;
+    c.fillStyle = 'rgba(10,8,16,' + (spinning ? 0.35 : 0.8) + ')';
+    c.beginPath();
+    c.ellipse(hx, hy - 30, 150, 8, 0, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = '#0a0810';
+    c.lineWidth = 3;
+    var blade = Math.cos(t * 28) * 150;
+    c.beginPath();
+    c.moveTo(hx - blade, hy - 30);
+    c.lineTo(hx + blade, hy - 30);
+    c.stroke();
+    c.fillRect(hx - 3, hy - 30, 6, 10);
+  }
+
+  function sceneCellar(c, p, t) {
+    var pan = -p * 80 * motion;
+    c.fillStyle = vgrad(c, H, [[0, '#120d0a'], [1, '#050403']]);
+    c.fillRect(0, 0, W, H);
+    c.save();
+    c.translate(pan, 0);
+    // stone arches
+    for (var a = 0; a < 5; a++) {
+      var ax = 40 + a * 240;
+      c.strokeStyle = '#4a3b2c';
+      c.lineWidth = 14;
+      c.beginPath();
+      c.moveTo(ax, 380);
+      c.lineTo(ax, 190);
+      c.arc(ax + 110, 190, 110, Math.PI, 0);
+      c.lineTo(ax + 220, 380);
+      c.stroke();
+      // rack lattice inside the arch
+      c.fillStyle = '#1b130d';
+      c.fillRect(ax + 10, 190, 200, 190);
+      c.strokeStyle = '#3a2a1a';
+      c.lineWidth = 3;
+      for (var ry = 0; ry < 4; ry++) {
+        c.strokeRect(ax + 10, 200 + ry * 44, 200, 44);
+        for (var rx = 0; rx < 5; rx++) {
+          var bx = ax + 30 + rx * 40;
+          var by = 222 + ry * 44;
+          c.fillStyle = '#2b3a22';
+          c.beginPath();
+          c.arc(bx, by, 14, 0, Math.PI * 2);
+          c.fill();
+          c.fillStyle = '#0d1409';
+          c.beginPath();
+          c.arc(bx, by, 9, 0, Math.PI * 2);
+          c.fill();
+          c.fillStyle = 'rgba(255,255,255,0.18)';
+          c.fillRect(bx - 7, by - 8, 4, 4);
+        }
+      }
+    }
+    // stone floor and tasting table
+    c.fillStyle = '#1a140f';
+    c.fillRect(-100, 380, W + 600, H);
+    c.fillStyle = '#4a3220';
+    rrect(c, 300, 400, 260, 26, 6);
+    c.fill();
+    c.fillRect(320, 426, 14, 80);
+    c.fillRect(526, 426, 14, 80);
+    // glasses
+    c.strokeStyle = 'rgba(254,243,199,0.7)';
+    c.lineWidth = 2;
+    [350, 430, 500].forEach(function (gx) {
+      c.beginPath();
+      c.moveTo(gx - 10, 360);
+      c.quadraticCurveTo(gx, 388, gx + 10, 360);
+      c.moveTo(gx, 380);
+      c.lineTo(gx, 400);
+      c.stroke();
+    });
+    // candle
+    var flick = 0.7 + 0.3 * Math.sin(t * 9) * Math.sin(t * 5.3);
+    glow(c, 430, 360, 280, '255,190,100', 0.42 * (1 - (1 - flick) * motion));
+    c.fillStyle = '#f5ecd7';
+    c.fillRect(424, 372, 12, 28);
+    c.fillStyle = '#fbbf24';
+    c.beginPath();
+    c.ellipse(430, 364, 4, 9 * (0.85 + 0.15 * flick), 0, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+  }
+
+  function sceneTerrace(c, p, t) {
+    var hz = H * 0.5;
+    var push = 1 + p * 0.12 * motion;
+    c.save();
+    c.translate(W / 2, hz);
+    c.scale(push, push);
+    c.translate(-W / 2, -hz);
+    c.fillStyle = vgrad(c, hz, [[0, '#2b1458'], [0.45, '#d9486b'], [0.85, '#fbbf24'], [1, '#fde68a']]);
+    c.fillRect(-60, -60, W + 120, hz + 60);
+    var sunY = hz - 90 + p * 86;
+    glow(c, W / 2, sunY, 240, '253,224,138', 0.55);
+    c.fillStyle = '#fff3c4';
+    c.beginPath();
+    c.arc(W / 2, sunY, 42, 0, Math.PI * 2);
+    c.fill();
+    c.save();
+    c.beginPath();
+    c.rect(-60, hz, W + 120, H);
+    c.clip();
+    c.fillStyle = vgrad(c, H, [[0, '#0c3a5c'], [1, '#07182b']]);
+    c.fillRect(-60, hz, W + 120, H - hz);
+    c.fillStyle = 'rgba(255,230,160,0.4)';
+    for (var i = 0; i < 12; i++) {
+      var y = hz + 6 + i * i * 1.3;
+      var w = 40 + i * 14 + Math.sin(t * 1.5 + i) * 18 * motion;
+      c.fillRect(W / 2 - w / 2, y, w, 2 + i * 0.2);
+    }
+    c.restore();
+    c.restore();
+    // pool deck and infinity pool
+    c.fillStyle = '#1b1620';
+    c.fillRect(0, 392, W, H - 392);
+    c.fillStyle = vgrad(c, 530, [[0, '#2dd4bf'], [0.55, '#0e9aa7'], [1, '#0a6e86']]);
+    c.fillRect(70, 404, W - 140, 108);
+    // pool shimmer, reflection of the sun
+    c.fillStyle = 'rgba(255,243,196,0.28)';
+    for (var k = 0; k < 7; k++) {
+      var sx = W / 2 - 120 + k * 36 + Math.sin(t * 1.6 + k * 1.7) * 10 * motion;
+      c.fillRect(sx, 412 + k * 12, 70, 3);
+    }
+    c.fillStyle = '#f8fafc';
+    c.fillRect(70, 400, W - 140, 5);
+    // loungers
+    c.fillStyle = '#0a0810';
+    [[120, 1], [W - 120, -1]].forEach(function (l) {
+      c.beginPath();
+      c.moveTo(l[0] - l[1] * 50, 470);
+      c.lineTo(l[0] + l[1] * 20, 470);
+      c.lineTo(l[0] + l[1] * 56, 440);
+      c.lineTo(l[0] + l[1] * 48, 434);
+      c.lineTo(l[0] + l[1] * 10, 456);
+      c.lineTo(l[0] - l[1] * 50, 456);
+      c.closePath();
+      c.fill();
+    });
+  }
+
+  var SCENES = {
+    arrival: sceneArrival,
+    suite: sceneSuite,
+    helipad: sceneHelipad,
+    cellar: sceneCellar,
+    terrace: sceneTerrace
+  };
+
+  function paint(target, sceneName, p, t) {
+    var c = target.getContext('2d');
+    var sx = target.width / W;
+    c.save();
+    c.scale(sx, sx);
+    c.globalAlpha = 1;
+    c.clearRect(0, 0, W, H);
+    SCENES[sceneName](c, p, t);
+    // vignette
+    var v = c.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.62);
+    v.addColorStop(0, 'rgba(0,0,0,0)');
+    v.addColorStop(1, 'rgba(0,0,0,0.55)');
+    c.fillStyle = v;
+    c.fillRect(0, 0, W, H);
+    c.restore();
+  }
+
+  function renderFrame() {
+    var i = chapterAt(state.t);
+    var ch = CHAPTERS[i];
+    var span = chapterEnd(i) - ch.start;
+    var local = state.t - ch.start;
+    paint(canvas, ch.scene, Math.min(1, local / span), state.t);
+  }
+
+  // ---------- UI ----------
+  function setPlayIcon() {
+    var mode = state.ended ? 'replay' : state.playing ? 'pause' : 'play';
+    playBtn.setAttribute('data-mode', mode);
+    playBtn.setAttribute('aria-label', mode === 'pause' ? 'Pause' : mode === 'replay' ? 'Replay tour' : 'Play');
+    stage.classList.toggle('is-paused', !state.playing);
+  }
+
+  function announce(msg) {
+    if (!dialog.open) return;
+    live.textContent = '';
+    window.setTimeout(function () { live.textContent = msg; }, 30);
+  }
+
+  function showCaption(i) {
+    capNum.textContent = 'CHAPTER ' + (i + 1) + ' / ' + CHAPTERS.length;
+    capTitle.textContent = CHAPTERS[i].title;
+    // restart the CSS animation so the lower third fades in on each change
+    var cap = capNum.parentNode;
+    cap.classList.remove('vt-cap-show');
+    void cap.offsetWidth;
+    cap.classList.add('vt-cap-show');
+    canvas.setAttribute('aria-label', 'Simulated walkthrough footage: ' + CHAPTERS[i].title);
+  }
+
+  function updateChapterUI(i, userDriven) {
+    for (var k = 0; k < chapterEls.length; k++) {
+      var on = k === i;
+      chapterEls[k].btn.classList.toggle('is-active', on);
+      chapterEls[k].btn.classList.toggle('is-done', k < i);
+      if (on) chapterEls[k].btn.setAttribute('aria-current', 'true');
+      else chapterEls[k].btn.removeAttribute('aria-current');
+      if (k < i) chapterEls[k].fill.style.width = '100%';
+      else if (k > i) chapterEls[k].fill.style.width = '0%';
+    }
+    showCaption(i);
+    announce('Chapter ' + (i + 1) + ' of ' + CHAPTERS.length + ': ' + CHAPTERS[i].title + ', starts at ' + fmt(CHAPTERS[i].start));
+    if (userDriven) {
+      var cur = chapterEls[i].btn;
+      if (cur.scrollIntoView && chapterList.scrollHeight > chapterList.clientHeight) cur.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function updateTime() {
+    var i = state.chapter;
+    var ch = CHAPTERS[i];
+    var pct = (state.t - ch.start) / (chapterEnd(i) - ch.start);
+    chapterEls[i].fill.style.width = Math.max(0, Math.min(100, pct * 100)) + '%';
+    curEl.textContent = fmt(state.t);
+    seek.value = String(Math.floor(state.t));
+    seek.setAttribute('aria-valuetext', spoken(state.t) + ' of ' + spoken(DURATION) + ', chapter ' + ch.title);
+    seek.style.setProperty('--vt-pos', (state.t / DURATION * 100) + '%');
+  }
+
+  function setTime(t, userDriven) {
+    state.t = Math.max(0, Math.min(DURATION, t));
+    var idx = chapterAt(state.t);
+    if (idx !== state.chapter) {
+      state.chapter = idx;
+      updateChapterUI(idx, userDriven);
+    }
+    updateTime();
+    renderFrame();
+  }
+
+  function tick(stamp) {
+    if (!state.playing) return;
+    var dt = Math.min((stamp - lastStamp) / 1000, 0.1);
+    lastStamp = stamp;
+    var next = state.t + dt * state.speed;
+    if (next >= DURATION) {
+      setTime(DURATION, false);
+      state.ended = true;
+      pause();
+      announce('End of the tour. Press play to watch again.');
+      return;
+    }
+    setTime(next, false);
+    rafId = window.requestAnimationFrame(tick);
+  }
+
+  function play() {
+    if (state.ended || state.t >= DURATION) {
+      state.ended = false;
+      state.chapter = -1;
+      setTime(0, true);
+    }
+    state.playing = true;
+    setPlayIcon();
+    lastStamp = performance.now();
+    window.cancelAnimationFrame(rafId);
+    rafId = window.requestAnimationFrame(tick);
+  }
+
+  function pause() {
+    state.playing = false;
+    window.cancelAnimationFrame(rafId);
+    setPlayIcon();
+  }
+
+  function toggle() {
+    if (state.playing) pause();
+    else play();
+  }
+
+  function seekTo(t) {
+    state.ended = false;
+    setTime(t, true);
+    setPlayIcon();
+  }
+
+  function goChapter(i, autoplay) {
+    i = Math.max(0, Math.min(CHAPTERS.length - 1, i));
+    state.chapter = -1;
+    seekTo(CHAPTERS[i].start);
+    if (autoplay) play();
+  }
+
+  // Previous chapter restarts the current one when we are more than 3s into it.
+  function prevChapter() {
+    var i = chapterAt(state.t);
+    if (state.t - CHAPTERS[i].start > 3) goChapter(i, state.playing);
+    else goChapter(i - 1, state.playing);
+  }
+  function nextChapter() {
+    var i = chapterAt(state.t);
+    if (i + 1 < CHAPTERS.length) goChapter(i + 1, state.playing);
+  }
+
+  function cycleSpeed() {
+    var i = SPEEDS.indexOf(state.speed);
+    state.speed = SPEEDS[(i + 1) % SPEEDS.length];
+    speedBtn.textContent = state.speed + 'x';
+    speedBtn.setAttribute('aria-label', 'Playback speed ' + state.speed + 'x. Activate to change.');
+  }
+
+  function fullscreenEl() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+  function toggleFullscreen() {
+    if (fullscreenEl()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else if (player.requestFullscreen || player.webkitRequestFullscreen) {
+      var r = (player.requestFullscreen || player.webkitRequestFullscreen).call(player);
+      if (r && r.catch) r.catch(function () {});
+    }
+  }
+  function syncFullscreenUI() {
+    var on = fullscreenEl() === player;
+    fullBtn.setAttribute('aria-label', on ? 'Exit full screen' : 'Enter full screen');
+    player.classList.toggle('is-fullscreen', on);
+  }
+  if (!(player.requestFullscreen || player.webkitRequestFullscreen)) fullBtn.hidden = true;
+  document.addEventListener('fullscreenchange', syncFullscreenUI);
+  document.addEventListener('webkitfullscreenchange', syncFullscreenUI);
+
+  // ---------- Build chapters, ticks, chips and posters ----------
+  CHAPTERS.forEach(function (ch, i) {
+    var li = document.createElement('li');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'vt-chapter';
+    btn.setAttribute('data-index', String(i));
+
+    var thumb = document.createElement('canvas');
+    thumb.className = 'vt-chapter-thumb';
+    thumb.width = 240;
+    thumb.height = 135;
+    thumb.setAttribute('aria-hidden', 'true');
+    paint(thumb, ch.scene, 0.4, ch.start + (chapterEnd(i) - ch.start) * 0.4);
+
+    var text = document.createElement('span');
+    text.className = 'vt-chapter-text';
+    var time = document.createElement('span');
+    time.className = 'vt-chapter-time';
+    time.textContent = fmt(ch.start);
+    var name = document.createElement('span');
+    name.className = 'vt-chapter-name';
+    name.textContent = ch.title;
+    var desc = document.createElement('span');
+    desc.className = 'vt-chapter-desc';
+    desc.textContent = ch.desc + ' (' + fmt(chapterEnd(i) - ch.start) + ')';
+    text.appendChild(time);
+    text.appendChild(name);
+    text.appendChild(desc);
+
+    var bar = document.createElement('span');
+    bar.className = 'vt-chapter-bar';
+    bar.setAttribute('aria-hidden', 'true');
+    var fill = document.createElement('span');
+    fill.className = 'vt-chapter-fill';
+    bar.appendChild(fill);
+
+    btn.appendChild(thumb);
+    btn.appendChild(text);
+    btn.appendChild(bar);
+    btn.addEventListener('click', function () { goChapter(i, true); });
+    li.appendChild(btn);
+    chapterList.appendChild(li);
+    chapterEls.push({ btn: btn, fill: fill });
+
+    var tickEl = document.createElement('span');
+    tickEl.className = 'vt-tick';
+    tickEl.style.left = (ch.start / DURATION * 100) + '%';
+    ticks.appendChild(tickEl);
+
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'vt-chip';
+    chip.setAttribute('aria-haspopup', 'dialog');
+    var chipTime = document.createElement('span');
+    chipTime.className = 'vt-chip-time';
+    chipTime.textContent = fmt(ch.start);
+    var chipName = document.createElement('span');
+    chipName.textContent = ch.title;
+    chip.appendChild(chipTime);
+    chip.appendChild(chipName);
+    chip.addEventListener('click', function () { openTour(i, chip); });
+    chips.appendChild(chip);
+  });
+
+  durEl.textContent = fmt(DURATION);
+  seek.max = String(DURATION);
+  paint(document.getElementById('vt-poster-canvas'), 'terrace', 0.3, 144);
+
+  // ---------- Open and close ----------
+  function openTour(chapterIndex, opener) {
+    state.opener = opener || openBtn;
+    if (!dialog.open) dialog.showModal();
+    document.documentElement.classList.add('vt-lock');
+    if (typeof chapterIndex === 'number') {
+      state.chapter = -1;
+      state.ended = false;
+      setTime(CHAPTERS[chapterIndex].start, true);
+    } else if (state.t === 0 || state.ended) {
+      state.chapter = -1;
+      state.ended = false;
+      setTime(0, true);
+    } else {
+      renderFrame();
+    }
+    play();
+    playBtn.focus();
+  }
+
+  function onClosed() {
+    pause();
+    document.documentElement.classList.remove('vt-lock');
+    if (fullscreenEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    if (state.opener && state.opener.focus) state.opener.focus();
+  }
+
+  openBtn.addEventListener('click', function () { openTour(undefined, openBtn); });
+  closeBtn.addEventListener('click', function () { dialog.close(); });
+  dialog.addEventListener('close', onClosed);
+  // Click on the dark backdrop (the dialog element itself) closes the tour.
+  dialog.addEventListener('mousedown', function (e) {
+    if (e.target === dialog) dialog.close();
+  });
+
+  playBtn.addEventListener('click', toggle);
+  prevBtn.addEventListener('click', prevChapter);
+  nextBtn.addEventListener('click', nextChapter);
+  speedBtn.addEventListener('click', cycleSpeed);
+  fullBtn.addEventListener('click', toggleFullscreen);
+  stage.addEventListener('click', toggle);
+  stage.addEventListener('dblclick', toggleFullscreen);
+  seek.addEventListener('input', function () { seekTo(Number(seek.value)); });
+
+  dialog.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = e.target.tagName;
+    var onSeek = e.target === seek;
+    var onButton = tag === 'BUTTON';
+    var key = e.key;
+    if (key === 'k' || key === 'K') {
+      e.preventDefault();
+      toggle();
+    } else if (key === ' ' && !onButton) {
+      e.preventDefault();
+      toggle();
+    } else if ((key === 'ArrowLeft' || key === 'ArrowRight') && !onSeek) {
+      e.preventDefault();
+      seekTo(state.t + (key === 'ArrowRight' ? 5 : -5));
+    } else if (key === 'n' || key === 'N') {
+      e.preventDefault();
+      nextChapter();
+    } else if (key === 'p' || key === 'P') {
+      e.preventDefault();
+      prevChapter();
+    } else if (key === 'f' || key === 'F') {
+      e.preventDefault();
+      toggleFullscreen();
+    } else if (key >= '1' && key <= String(CHAPTERS.length)) {
+      e.preventDefault();
+      goChapter(Number(key) - 1, true);
+    }
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state.playing) pause();
+  });
+
+  setTime(0, false);
+  setPlayIcon();
+})();
+/* ===== END issue #201 ===== */
