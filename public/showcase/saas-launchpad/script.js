@@ -555,3 +555,165 @@ function initIntegrationFilters() {
   });
   update();
 }
+
+/* ==========================================================
+   Customer Onboarding Checklist
+   ========================================================== */
+document.addEventListener('DOMContentLoaded', initOnboardingChecklist);
+
+function initOnboardingChecklist() {
+  const list = document.getElementById('onb-list');
+  const countEl = document.getElementById('onb-count');
+  const percentEl = document.getElementById('onb-percent');
+  const progress = document.getElementById('onb-progress');
+  const fill = document.getElementById('onb-progress-fill');
+  const banner = document.getElementById('onb-celebrate');
+  const resetBtn = document.getElementById('onb-reset');
+  const status = document.getElementById('onb-status');
+  const canvas = document.getElementById('onb-confetti');
+  if (!list || !countEl || !percentEl || !progress || !fill || !banner || !resetBtn || !status) return;
+
+  const STORAGE_KEY = 'cloudpulse-onboarding-steps';
+  const steps = Array.from(list.querySelectorAll('.onb-step'));
+  const total = steps.length;
+  const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function readSaved() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      return Array.isArray(saved) ? saved : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function save() {
+    try {
+      const done = steps.filter(s => s.querySelector('.onb-check').checked).map(s => s.dataset.step);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(done));
+    } catch (err) {
+      /* storage can be blocked, the checklist still works for this visit */
+    }
+  }
+
+  function render(announce) {
+    const done = steps.filter(s => s.querySelector('.onb-check').checked).length;
+    const pct = Math.round((done / total) * 100);
+    const complete = done === total;
+    const nextStep = steps.find(s => !s.querySelector('.onb-check').checked);
+
+    steps.forEach(step => {
+      const checked = step.querySelector('.onb-check').checked;
+      const badge = step.querySelector('.onb-badge');
+      step.classList.toggle('is-done', checked);
+      step.classList.toggle('is-next', step === nextStep);
+      badge.textContent = checked ? 'Done' : (step === nextStep ? 'Up next' : '');
+    });
+
+    const summary = `${done} of ${total} steps complete`;
+    countEl.textContent = summary;
+    percentEl.textContent = `${pct}%`;
+    fill.style.width = `${pct}%`;
+    progress.setAttribute('aria-valuenow', String(pct));
+    progress.setAttribute('aria-valuetext', summary);
+    progress.classList.toggle('is-complete', complete);
+    percentEl.classList.toggle('is-complete', complete);
+    banner.hidden = !complete;
+    resetBtn.disabled = done === 0;
+
+    if (announce) status.textContent = `${announce} ${summary}, ${pct} percent.${complete ? ' All set, your team is live.' : ''}`;
+    return complete;
+  }
+
+  /* Confetti: a short canvas burst, skipped when the visitor prefers reduced motion. */
+  let confettiFrame = 0;
+  function launchConfetti() {
+    if (!canvas || motionQuery.matches || !canvas.getContext) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cancelAnimationFrame(confettiFrame);
+
+    const colors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#f3f4f6'];
+    const originY = Math.min(height * 0.45, height - 120);
+    const pieces = Array.from({ length: 140 }, () => {
+      const angle = (-Math.PI / 2) + (Math.random() - 0.5) * 1.6;
+      const speed = 7 + Math.random() * 9;
+      return {
+        x: width / 2,
+        y: originY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 6 + Math.random() * 6,
+        rot: Math.random() * Math.PI,
+        spin: (Math.random() - 0.5) * 0.35,
+        color: colors[Math.floor(Math.random() * colors.length)]
+      };
+    });
+    canvas.classList.add('is-active');
+    const start = performance.now();
+
+    function frame(now) {
+      const elapsed = now - start;
+      ctx.clearRect(0, 0, width, height);
+      ctx.globalAlpha = Math.max(0, Math.min(1, (3200 - elapsed) / 800));
+      pieces.forEach(p => {
+        p.vy += 0.28;
+        p.vx *= 0.992;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.spin;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        ctx.restore();
+      });
+      if (elapsed < 3200) {
+        confettiFrame = requestAnimationFrame(frame);
+      } else {
+        ctx.clearRect(0, 0, width, height);
+        canvas.classList.remove('is-active');
+      }
+    }
+    confettiFrame = requestAnimationFrame(frame);
+  }
+
+  function stopConfetti() {
+    cancelAnimationFrame(confettiFrame);
+    if (canvas) canvas.classList.remove('is-active');
+  }
+
+  // Restore progress from the last visit (no confetti on load).
+  const saved = readSaved();
+  steps.forEach(step => {
+    step.querySelector('.onb-check').checked = saved.includes(step.dataset.step);
+  });
+  render('');
+  status.textContent = '';
+
+  list.addEventListener('change', event => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || !input.classList.contains('onb-check')) return;
+    const title = document.getElementById(input.getAttribute('aria-labelledby')).textContent.trim();
+    const complete = render(`${title} marked ${input.checked ? 'complete' : 'not complete'}.`);
+    save();
+    if (complete && input.checked) launchConfetti();
+    else stopConfetti();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    steps.forEach(step => { step.querySelector('.onb-check').checked = false; });
+    stopConfetti();
+    render('Checklist reset.');
+    save();
+    steps[0].querySelector('.onb-check').focus();
+  });
+}
