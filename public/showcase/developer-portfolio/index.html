@@ -32,6 +32,46 @@
           <span class="tag">Kubernetes</span>
           <span class="tag">WebAssembly</span>
         </div>
+        <!-- Resume Download Dropdown-->
+        <div class="resume-download">
+          <button
+            type="button"
+            class="resume-trigger"
+            id="resumeTrigger"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="resumeDropdown"
+          >
+            <span>↓</span> Download Resume
+            <span class="resume-arrow">▾</span>
+          </button>
+
+          <div class="resume-dropdown" id="resumeDropdown" hidden>
+            <button type="button" data-resume-format="pdf">
+              <span class="format-icon">PDF</span>
+              <span>
+                <strong>Download PDF</strong>
+                <small>Portable document format</small>
+              </span>
+            </button>
+
+            <button type="button" data-resume-format="txt">
+              <span class="format-icon">TXT</span>
+              <span>
+                <strong>View Plaintext</strong>
+                <small>Download as .txt</small>
+              </span>
+            </button>
+
+            <button type="button" data-resume-format="json">
+              <span class="format-icon">{ }</span>
+              <span>
+                <strong>Inspect JSON</strong>
+                <small>View structured resume data</small>
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -231,6 +271,45 @@
         </form>
       </div>
     </section>
+  </div>
+
+  <!-- JSON Resume Modal-->
+  <div class="resume-json-overlay" id="resumeJsonOverlay" hidden></div>
+  <div
+    class="resume-json-modal"
+    id="resumeJsonModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="resumeJsonTitle"
+    hidden
+  >
+    <div class="terminal-header">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+
+      <span class="terminal-title">dev@kernel-box: resume.json</span>
+
+      <button
+        type="button"
+        class="resume-json-close"
+        id="resumeJsonClose"
+        aria-label="Close JSON resume"
+      >&times;</button>
+    </div>
+
+    <div class="resume-json-body">
+      <div class="resume-json-heading">
+        <h2 id="resumeJsonTitle">JSON Resume</h2>
+        <span>// structured_profile.json</span>
+      </div>
+
+      <pre><code id="resumeJsonContent"></code></pre>
+
+      <button type="button" id="resumeJsonCopy" class="resume-copy-btn">
+        Copy JSON
+      </button>
+    </div>
   </div>
 
   <!-- Keyboard Shortcuts Cheat-Sheet Modal (Issue #59) -->

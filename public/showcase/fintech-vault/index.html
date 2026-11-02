@@ -46,6 +46,103 @@
     </div>
   </main>
 
+
+  <!-- Foreign Exchange Converter -->
+  <section class="fx-section" id="currency-converter" aria-labelledby="fx-title">
+    <div class="fx-container">
+      <div class="fx-heading">
+        <div class="tag">// GLOBAL FOREIGN EXCHANGE</div>
+        <h2 id="fx-title">Currency Exchange Converter</h2>
+        <p>Convert across five major currencies with a transparent rate and fee breakdown.</p>
+      </div>
+
+      <div class="fx-layout">
+        <div class="fx-converter-card">
+          <div class="fx-card-topline">
+            <span class="fx-card-label">CONVERSION DETAILS</span>
+            <span class="fx-live-pill"><span class="fx-live-dot"></span> MOCK LIVE RATES</span>
+          </div>
+
+          <label class="fx-field-label" for="fxAmount">You send</label>
+          <div class="fx-amount-row">
+            <input id="fxAmount" type="number" min="0" step="any" value="1000" inputmode="decimal" />
+            <div class="fx-currency-control">
+              <span class="fx-flag" id="fxFromFlag" aria-hidden="true">🇺🇸</span>
+              <select id="fxFromCurrency" aria-label="Currency to convert from">
+                <option value="USD" selected>USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="JPY">JPY</option>
+                <option value="CAD">CAD</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fx-swap-row">
+            <span class="fx-divider"></span>
+            <button type="button" id="fxSwapBtn" class="fx-swap-btn" aria-label="Swap currencies" title="Swap currencies">⇅</button>
+            <span class="fx-divider"></span>
+          </div>
+
+          <label class="fx-field-label" for="fxToCurrency">Recipient gets</label>
+          <div class="fx-amount-row fx-result-row">
+            <output id="fxReceiveAmount" aria-live="polite">—</output>
+            <div class="fx-currency-control">
+              <span class="fx-flag" id="fxToFlag" aria-hidden="true">🇪🇺</span>
+              <select id="fxToCurrency" aria-label="Currency to convert to">
+                <option value="USD">USD</option>
+                <option value="EUR" selected>EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="JPY">JPY</option>
+                <option value="CAD">CAD</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="fx-rate-line" id="fxRateLine">1 USD = — EUR</p>
+          <p class="fx-error" id="fxError" role="alert" hidden>Enter an amount greater than zero.</p>
+        </div>
+
+        <aside class="fx-breakdown-card" aria-label="Conversion fee breakdown">
+          <div class="fx-breakdown-heading">
+            <div>
+              <span class="fx-card-label">TRANSPARENT PRICING</span>
+              <h3>Conversion breakdown</h3>
+            </div>
+            <span class="fx-shield" aria-hidden="true">◈</span>
+          </div>
+          <div class="fx-breakdown-row">
+            <span>Mid-market rate</span>
+            <strong id="fxMidRate">—</strong>
+          </div>
+          <div class="fx-breakdown-row">
+            <span>Guaranteed rate <small>(0.25% rate spread)</small></span>
+            <strong id="fxGuaranteedRate">—</strong>
+          </div>
+          <div class="fx-breakdown-row">
+            <span>Converted before fee</span>
+            <strong id="fxGrossAmount">—</strong>
+          </div>
+          <div class="fx-breakdown-row fx-fee-row">
+            <span>Bank fee <small>(0.50%)</small></span>
+            <strong id="fxBankFee">—</strong>
+          </div>
+          <div class="fx-total-row">
+            <span>Recipient receives</span>
+            <strong id="fxNetAmount">—</strong>
+          </div>
+          <p class="fx-disclaimer">Demo rates are mock values for this showcase, not executable market quotes. Fees are illustrative.</p>
+        </aside>
+      </div>
+
+      <div class="fx-ticker">
+        <div class="fx-ticker-title"><span class="fx-live-dot"></span> RATE SNAPSHOT</div>
+        <div class="fx-ticker-rates" id="fxTickerRates"></div>
+        <span class="fx-updated" id="fxUpdatedAt">Rates updated just now</span>
+      </div>
+    </div>
+  </section>
+
   <!-- Interactive Compound Interest Wealth Projection Engine -->
   <section class="engine-section" id="compound-engine">
     <div class="engine-container">

@@ -2,6 +2,7 @@
 // browser (exposes window.PlayerLogic) and evaluated by player-logic.test.mjs.
 (function (root) {
   var STORAGE_KEY = 'waveform-mini-player';
+  var BOOKMARKS_KEY = 'waveform-episode-bookmarks';
   var SPEEDS = [1, 1.25, 1.5, 2];
 
   function clamp(value, min, max) {
@@ -20,6 +21,19 @@
 
   function volumeLabel(volume) {
     return Math.round(clampVolume(volume) * 100) + '%';
+  }
+
+  function parseBookmarks(raw) {
+    if (!raw) return [];
+    try {
+      var bookmarks = JSON.parse(raw);
+      if (!Array.isArray(bookmarks)) return [];
+      return bookmarks.filter(function (bookmark) {
+        return bookmark && Number.isFinite(Number(bookmark.time)) && typeof bookmark.note === 'string';
+      }).map(function (bookmark) {
+        return { time: Math.max(0, Math.floor(Number(bookmark.time))), note: bookmark.note };
+      });
+    } catch (e) { return []; }
   }
 
   function serializeState(state) {
@@ -48,11 +62,13 @@
 
   root.PlayerLogic = {
     STORAGE_KEY: STORAGE_KEY,
+    BOOKMARKS_KEY: BOOKMARKS_KEY,
     SPEEDS: SPEEDS,
     clampVolume: clampVolume,
     clampTime: clampTime,
     volumeLabel: volumeLabel,
     serializeState: serializeState,
     parseState: parseState
+    ,parseBookmarks: parseBookmarks
   };
 })(typeof window !== 'undefined' ? window : globalThis);
