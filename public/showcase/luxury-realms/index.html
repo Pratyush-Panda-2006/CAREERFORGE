@@ -58,6 +58,87 @@
     </article>
   </main>
 
+  <!-- ===== BEGIN issue #201: virtual video walkthrough player with chapters ===== -->
+  <section class="vt-section" id="video-tour" aria-labelledby="vt-section-title">
+    <div class="vt-intro">
+      <div class="vt-kicker">VIRTUAL WALKTHROUGH</div>
+      <h2 id="vt-section-title">Tour The Azure Atoll Sanctuary</h2>
+      <p>A guided architectural film of the estate in five chapters. Jump straight to the Master Suite, the Private Helipad, the Wine Cellar or the Infinity Terrace.</p>
+    </div>
+    <div class="vt-feature">
+      <button type="button" class="vt-poster" id="vt-open" aria-haspopup="dialog" aria-label="Play the virtual video tour, 2 minutes 50 seconds">
+        <canvas id="vt-poster-canvas" width="960" height="540" aria-hidden="true"></canvas>
+        <span class="vt-poster-play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+        </span>
+        <span class="vt-poster-meta" aria-hidden="true">
+          <span>5 chapters</span>
+          <span>2:50</span>
+        </span>
+      </button>
+      <div class="vt-chips" id="vt-chips" role="group" aria-label="Open the tour at a chapter"></div>
+    </div>
+  </section>
+
+  <dialog class="vt-dialog" id="vt-dialog" aria-labelledby="vt-title">
+    <div class="vt-shell">
+      <div class="vt-head">
+        <div>
+          <p class="vt-kicker">AURA REALMS · VIRTUAL TOUR</p>
+          <h2 id="vt-title">The Azure Atoll Sanctuary</h2>
+        </div>
+        <button type="button" class="vt-close" id="vt-close" aria-label="Close video tour">&times;</button>
+      </div>
+      <div class="vt-body">
+        <div class="vt-player" id="vt-player">
+          <div class="vt-stage" id="vt-stage">
+            <canvas id="vt-canvas" width="960" height="540" role="img" aria-label="Simulated walkthrough footage"></canvas>
+            <span class="vt-sim-tag">SIMULATED PREVIEW</span>
+            <div class="vt-caption" id="vt-caption" aria-hidden="true">
+              <span class="vt-cap-num" id="vt-cap-num"></span>
+              <span class="vt-cap-title" id="vt-cap-title"></span>
+            </div>
+            <div class="vt-paused-mark" id="vt-paused-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+            </div>
+          </div>
+          <div class="vt-controls">
+            <div class="vt-scrub">
+              <input type="range" id="vt-seek" class="vt-seek" min="0" max="170" step="1" value="0" aria-label="Seek position">
+              <div class="vt-ticks" id="vt-ticks" aria-hidden="true"></div>
+            </div>
+            <div class="vt-bar">
+              <button type="button" class="vt-btn" id="vt-prev" aria-label="Previous chapter">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5v14M19 5.5v13L9 12l10-6.5Z"/></svg>
+              </button>
+              <button type="button" class="vt-btn vt-btn-main" id="vt-play" aria-label="Play">
+                <svg class="vt-i-play" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                <svg class="vt-i-pause" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14M16 5v14"/></svg>
+                <svg class="vt-i-replay" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4.5h4.5"/></svg>
+              </button>
+              <button type="button" class="vt-btn" id="vt-next" aria-label="Next chapter">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 5v14M5 5.5v13L15 12 5 5.5Z"/></svg>
+              </button>
+              <span class="vt-time" id="vt-time"><span id="vt-cur">0:00</span> / <span id="vt-dur">2:50</span></span>
+              <span class="vt-spacer"></span>
+              <button type="button" class="vt-btn vt-btn-text" id="vt-speed" aria-label="Playback speed 1x. Activate to change.">1x</button>
+              <button type="button" class="vt-btn" id="vt-full" aria-label="Enter full screen">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <aside class="vt-chapters" aria-labelledby="vt-chapters-title">
+          <h3 id="vt-chapters-title">Chapters</h3>
+          <ol class="vt-chapter-list" id="vt-chapter-list"></ol>
+        </aside>
+      </div>
+      <p class="vt-hints">Space or K play/pause · Left/Right seek 5s · N / P next/previous chapter · 1-5 jump to chapter · F full screen · Esc close</p>
+      <div class="vt-live" id="vt-live" role="status" aria-live="polite"></div>
+    </div>
+  </dialog>
+  <!-- ===== END issue #201 ===== -->
+
   <!-- ===== BEGIN issue #103: Private Aviation Fleet Explorer & Cabin Interior Walkthrough ===== -->
   <section class="fleet-section" id="fleet" aria-labelledby="fleet-title">
     <div class="fleet-intro">
