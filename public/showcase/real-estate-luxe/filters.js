@@ -2,12 +2,12 @@
 // Pure logic lives in EstateFilter so it can be tested with node --test.
 
 var ESTATES = [
-  { id: 'glass-horizon', name: 'The Glass Horizon Villa', location: 'Malibu, California', icon: '🏰', price: 14500000, beds: 5, baths: 7, sqft: 9200, type: 'Villa', amenities: ['Infinity Pool', 'Ocean View', 'Home Cinema'] },
-  { id: 'skyline-penthouse', name: 'Skyline Sky-Penthouse', location: 'Tribeca, New York', icon: '🏙️', price: 22000000, beds: 4, baths: 5, sqft: 6800, type: 'Penthouse', amenities: ['Private Elevator', 'Rooftop Terrace', 'Wine Cellar'] },
-  { id: 'aspen-ridge', name: 'Aspen Ridge Lodge', location: 'Aspen, Colorado', icon: '🏔️', price: 35000000, beds: 8, baths: 10, sqft: 14500, type: 'Villa', amenities: ['Ski-In / Ski-Out', 'Wine Cellar', 'Home Cinema'] },
-  { id: 'azur-chateau', name: 'Château des Roches', location: "Côte d'Azur, France", icon: '🏯', price: 18500000, beds: 9, baths: 8, sqft: 16000, type: 'Château', amenities: ['Infinity Pool', 'Wine Cellar', 'Vineyard'] },
-  { id: 'cay-island', name: 'Private Cay Island', location: 'Exuma, Bahamas', icon: '🏝️', price: 12000000, beds: 6, baths: 6, sqft: 7400, type: 'Island', amenities: ['Helipad', 'Private Marina', 'Ocean View'] },
-  { id: 'wilshire-terrace', name: 'Wilshire Terrace Penthouse', location: 'Beverly Hills, California', icon: '🌆', price: 2800000, beds: 2, baths: 3, sqft: 2900, type: 'Penthouse', amenities: ['Private Elevator', 'Rooftop Terrace'] }
+  { id: 'glass-horizon', name: 'The Glass Horizon Villa', location: 'Malibu, California', icon: '🏰', price: 14500000, beds: 5, baths: 7, sqft: 9200, type: 'Villa', amenities: ['Infinity Pool', 'Ocean View', 'Home Cinema'], neighborhood: { walk: 94, transit: 82, airport: '18 min', restaurants: 4 } },
+  { id: 'skyline-penthouse', name: 'Skyline Sky-Penthouse', location: 'Tribeca, New York', icon: '🏙️', price: 22000000, beds: 4, baths: 5, sqft: 6800, type: 'Penthouse', amenities: ['Private Elevator', 'Rooftop Terrace', 'Wine Cellar'], neighborhood: { walk: 99, transit: 96, airport: '25 min', restaurants: 12 } },
+  { id: 'aspen-ridge', name: 'Aspen Ridge Lodge', location: 'Aspen, Colorado', icon: '🏔️', price: 35000000, beds: 8, baths: 10, sqft: 14500, type: 'Villa', amenities: ['Ski-In / Ski-Out', 'Wine Cellar', 'Home Cinema'], neighborhood: { walk: 76, transit: 58, airport: '10 min', restaurants: 3 } },
+  { id: 'azur-chateau', name: 'Château des Roches', location: "Côte d'Azur, France", icon: '🏯', price: 18500000, beds: 9, baths: 8, sqft: 16000, type: 'Château', amenities: ['Infinity Pool', 'Wine Cellar', 'Vineyard'], neighborhood: { walk: 68, transit: 54, airport: '35 min', restaurants: 6 } },
+  { id: 'cay-island', name: 'Private Cay Island', location: 'Exuma, Bahamas', icon: '🏝️', price: 12000000, beds: 6, baths: 6, sqft: 7400, type: 'Island', amenities: ['Helipad', 'Private Marina', 'Ocean View'], neighborhood: { walk: 42, transit: 25, airport: '8 min', restaurants: 1 } },
+  { id: 'wilshire-terrace', name: 'Wilshire Terrace Penthouse', location: 'Beverly Hills, California', icon: '🌆', price: 2800000, beds: 2, baths: 3, sqft: 2900, type: 'Penthouse', amenities: ['Private Elevator', 'Rooftop Terrace'], neighborhood: { walk: 91, transit: 79, airport: '22 min', restaurants: 8 } }
 ];
 
 var EstateFilter = (function () {
@@ -104,21 +104,72 @@ if (typeof document !== 'undefined') {
       });
     }
 
-    function cardHtml(e) {
-      return '<div class="card" data-price="' + e.price + '">' +
-        '<div class="card-badge">' + EstateFilter.formatMoney(e.price) + '</div>' +
-        '<div class="img-holder" aria-hidden="true">' + e.icon + '</div>' +
-        '<h3>' + esc(e.name) + '</h3>' +
-        '<p class="location">' + esc(e.location) + '</p>' +
-        '<div class="specs">' +
-          '<span class="spec-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18v8H3zM5 12V7h6v5M3 16h18M5 20v2M19 20v2"/></svg><span>' + e.beds + ' Beds</span></span>' +
-          '<span class="spec-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12V5a2 2 0 0 1 4 0v7M4 9h4M4 12h16v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM7 20v2M17 20v2"/></svg><span>' + e.baths + ' Baths</span></span>' +
-          '<span class="spec-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M3 3l7 7M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7M16 21h5v-5M21 21l-7-7"/></svg><span>' + e.sqft.toLocaleString('en-US') + ' sqft</span></span>' +
+function cardHtml(e) {
+  var n = e.neighborhood;
+
+  function walkLabel(score) {
+    if (score >= 90) return "Walker's Paradise";
+    if (score >= 70) return "Very Walkable";
+    if (score >= 50) return "Somewhat Walkable";
+    return "Car-Dependent";
+  }
+
+  function transitLabel(score) {
+    if (score >= 90) return "Rider's Paradise";
+    if (score >= 70) return "Excellent Transit";
+    if (score >= 50) return "Good Transit";
+    return "Limited Transit";
+  }
+
+  return '<div class="card" data-price="' + e.price + '">' +
+    '<div class="card-badge">' + EstateFilter.formatMoney(e.price) + '</div>' +
+    '<div class="img-holder" aria-hidden="true">' + e.icon + '</div>' +
+    '<h3>' + esc(e.name) + '</h3>' +
+    '<p class="location">' + esc(e.location) + '</p>' +
+
+    '<div class="specs">' +
+      '<span class="spec-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18v8H3zM5 12V7h6v5M3 16h18M5 20v2M19 20v2"/></svg><span>' + e.beds + ' Beds</span></span>' +
+      '<span class="spec-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12V5a2 2 0 0 1 4 0v7M4 9h4M4 12h16v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM7 20v2M17 20v2"/></svg><span>' + e.baths + ' Baths</span></span>' +
+      '<span class="spec-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M3 3l7 7M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7M16 21h5v-5M21 21l-7-7"/></svg><span>' + e.sqft.toLocaleString('en-US') + ' sqft</span></span>' +
+    '</div>' +
+
+    '<p class="estate-meta"><span class="type-tag">' +
+    esc(e.type) + '</span> ' + e.amenities.map(esc).join(' · ') + '</p>' +
+
+    '<section class="neighborhood-card" aria-label="Neighborhood information">' +
+      '<div class="neighborhood-heading">' +
+        '<span class="neighborhood-kicker">LOCATION INTELLIGENCE</span>' +
+        '<h4>Neighborhood Scores</h4>' +
+      '</div>' +
+
+      '<div class="neighborhood-scores">' +
+        '<div class="score-item">' +
+          '<div class="score-circle"><span>' + n.walk + '</span><small>/100</small></div>' +
+          '<div><strong>Walk Score</strong><span>' + walkLabel(n.walk) + '</span></div>' +
         '</div>' +
-        '<p class="estate-meta"><span class="type-tag">' + esc(e.type) + '</span> ' + e.amenities.map(esc).join(' · ') + '</p>' +
-        '<button type="button" class="calc-estate-btn" onclick="applyEstatePrice(' + e.price + ')">Calculate Mortgage ↗</button>' +
-      '</div>';
-    }
+
+        '<div class="score-item">' +
+          '<div class="score-circle"><span>' + n.transit + '</span><small>/100</small></div>' +
+          '<div><strong>Transit Score</strong><span>' + transitLabel(n.transit) + '</span></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="neighborhood-details">' +
+        '<div class="neighborhood-detail">' +
+          '<span aria-hidden="true">✈</span>' +
+          '<div><small>Private Airport</small><strong>' + esc(n.airport) + ' away</strong></div>' +
+        '</div>' +
+        '<div class="neighborhood-detail">' +
+          '<span aria-hidden="true">✦</span>' +
+          '<div><small>Michelin Restaurants</small><strong>' + n.restaurants + ' nearby</strong></div>' +
+        '</div>' +
+      '</div>' +
+    '</section>' +
+
+    '<button type="button" class="calc-estate-btn" onclick="applyEstatePrice(' +
+    e.price + ')">Calculate Mortgage ↗</button>' +
+  '</div>';
+}
 
     function checkboxGroup(containerId, name, values) {
       var box = document.getElementById(containerId);

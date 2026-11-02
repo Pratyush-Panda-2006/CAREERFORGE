@@ -2016,3 +2016,579 @@ body {
   font-weight: 600;
 }
 
+
+
+/* ===== BEGIN Issue #196: Live Twitch Stream Broadcast Status Badge & Cinema Modal ===== */
+.hero-badge-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.hero-actions-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Animated Twitch Live Stream Badge */
+.twitch-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(145, 70, 255, 0.14);
+  border: 1px solid rgba(145, 70, 255, 0.45);
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(145, 70, 255, 0.25);
+  transition: all 0.25s ease;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.twitch-live-badge:hover {
+  transform: translateY(-2px);
+  border-color: #9146ff;
+  background: rgba(145, 70, 255, 0.22);
+  box-shadow: 0 0 25px rgba(145, 70, 255, 0.5), 0 0 10px rgba(6, 182, 212, 0.3);
+}
+
+.twitch-live-badge:focus-visible {
+  outline: 2px solid #a855f7;
+  outline-offset: 3px;
+}
+
+.pulsing-live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444, 0 0 18px #ef4444;
+  display: inline-block;
+  flex-shrink: 0;
+  animation: twitchLivePulse 1.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.pulsing-live-dot.small {
+  width: 8px;
+  height: 8px;
+}
+
+@keyframes twitchLivePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 8px #ef4444, 0 0 16px #ef4444;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.75;
+    box-shadow: 0 0 16px #ef4444, 0 0 24px #ef4444;
+  }
+}
+
+.live-tag {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+}
+
+.twitch-badge-divider {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.8rem;
+}
+
+.twitch-logo-svg {
+  color: #bf94ff;
+  filter: drop-shadow(0 0 6px #9146ff);
+}
+
+.channel-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #e9d5ff;
+}
+
+.viewer-count {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  font-size: 0.84rem;
+  color: #22d3ee;
+  text-shadow: 0 0 10px rgba(34, 211, 238, 0.6);
+  transition: all 0.3s ease;
+}
+
+.viewer-label {
+  font-size: 0.78rem;
+  color: #c084fc;
+}
+
+.btn-twitch-chat {
+  background: rgba(145, 70, 255, 0.16);
+  border: 1px solid rgba(145, 70, 255, 0.5);
+  color: #e9d5ff;
+  font-family: 'Orbitron', sans-serif;
+  padding: 13px 22px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(145, 70, 255, 0.3);
+  transition: all 0.25s ease;
+}
+
+.btn-twitch-chat:hover {
+  transform: translateY(-2px);
+  background: rgba(145, 70, 255, 0.28);
+  border-color: #9146ff;
+  box-shadow: 0 0 28px rgba(145, 70, 255, 0.6);
+  color: #ffffff;
+}
+
+/* Live Stream Cinema Modal */
+.twitch-stream-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 4, 10, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.twitch-stream-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.twitch-stream-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.96);
+  width: 95%;
+  max-width: 1140px;
+  max-height: 90vh;
+  background: #090614;
+  border: 1px solid rgba(145, 70, 255, 0.4);
+  border-radius: 18px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 35px rgba(145, 70, 255, 0.25);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.twitch-stream-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.stream-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  background: rgba(18, 14, 33, 0.95);
+  border-bottom: 1px solid rgba(145, 70, 255, 0.25);
+  gap: 16px;
+}
+
+.stream-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.stream-live-pill {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 2px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.stream-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stream-header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.stream-viewers-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #22d3ee;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.viewers-lbl {
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+.stream-close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stream-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* Modal Layout Body */
+.stream-layout-body {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  height: 540px;
+}
+
+@media (max-width: 860px) {
+  .stream-layout-body {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+/* Video Player Screen */
+.stream-video-container {
+  display: flex;
+  flex-direction: column;
+  background: #020106;
+  border-right: 1px solid rgba(145, 70, 255, 0.25);
+}
+
+.stream-screen {
+  flex: 1;
+  position: relative;
+  background: linear-gradient(135deg, #090514, #050a1a);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.stream-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.stream-scoreboard-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10, 6, 20, 0.85);
+  border: 1px solid rgba(145, 70, 255, 0.35);
+  border-radius: 10px;
+  padding: 8px 18px;
+  max-width: 480px;
+  margin: 0 auto;
+  font-family: 'Orbitron', sans-serif;
+  z-index: 10;
+}
+
+.hud-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-team.red { color: #f43f5e; }
+.hud-team.blue { color: #38bdf8; }
+.hud-team-name { font-weight: 800; font-size: 0.9rem; }
+.hud-score { font-size: 1.3rem; font-weight: 900; }
+
+.hud-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.hud-match-point {
+  font-size: 0.65rem;
+  color: #f59e0b;
+  letter-spacing: 1px;
+}
+
+.hud-clock {
+  font-size: 0.85rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Audio Wave Visualizer */
+.stream-gameplay-canvas {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  height: 90px;
+  z-index: 5;
+}
+
+.audio-wave-bar {
+  width: 10px;
+  background: linear-gradient(180deg, #9146ff, #06b6d4);
+  border-radius: 4px;
+  animation: audioWaveBounce 1.2s infinite ease-in-out alternate;
+}
+
+.audio-wave-bar:nth-child(1) { height: 35%; animation-delay: 0.1s; }
+.audio-wave-bar:nth-child(2) { height: 60%; animation-delay: 0.3s; }
+.audio-wave-bar:nth-child(3) { height: 90%; animation-delay: 0.2s; }
+.audio-wave-bar:nth-child(4) { height: 45%; animation-delay: 0.5s; }
+.audio-wave-bar:nth-child(5) { height: 80%; animation-delay: 0.4s; }
+.audio-wave-bar:nth-child(6) { height: 70%; animation-delay: 0.15s; }
+.audio-wave-bar:nth-child(7) { height: 95%; animation-delay: 0.35s; }
+.audio-wave-bar:nth-child(8) { height: 50%; animation-delay: 0.25s; }
+.audio-wave-bar:nth-child(9) { height: 75%; animation-delay: 0.45s; }
+.audio-wave-bar:nth-child(10) { height: 40%; animation-delay: 0.05s; }
+
+@keyframes audioWaveBounce {
+  0% { transform: scaleY(0.3); opacity: 0.5; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+
+.stream-killfeed {
+  align-self: flex-end;
+  background: rgba(0, 0, 0, 0.7);
+  border-left: 3px solid #f43f5e;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  color: #f3f4f6;
+  z-index: 10;
+}
+
+.stream-watermark {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+  z-index: 10;
+}
+
+/* Video Control Bar */
+.stream-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  background: rgba(14, 10, 26, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ctrl-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ctrl-btn:hover {
+  background: rgba(145, 70, 255, 0.25);
+  border-color: #9146ff;
+  color: #fff;
+}
+
+.stream-status-pill {
+  font-size: 0.72rem;
+  font-family: 'Orbitron', sans-serif;
+  color: #10b981;
+  margin-left: auto;
+}
+
+.stream-quality-badge {
+  font-size: 0.72rem;
+  font-family: 'Orbitron', sans-serif;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Stream Chat Sidebar */
+.stream-chat-container {
+  display: flex;
+  flex-direction: column;
+  background: #090614;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(18, 14, 33, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header-title span:first-child {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: #ffffff;
+}
+
+.chat-sub-mode {
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.chat-live-indicator {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  color: #10b981;
+}
+
+.chat-messages-feed {
+  flex: 1;
+  padding: 14px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.chat-msg-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.chat-badge {
+  font-size: 0.64rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.chat-badge.mod { background: #10b981; color: #022c22; }
+.chat-badge.vip { background: #f59e0b; color: #451a03; }
+.chat-badge.sub { background: #9146ff; color: #fff; }
+
+.chat-user {
+  font-weight: 700;
+}
+
+.chat-text {
+  color: #e2e8f0;
+}
+
+.chat-input-form {
+  display: flex;
+  padding: 12px 14px;
+  background: rgba(18, 14, 33, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 8px;
+}
+
+.chat-input-form input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.chat-input-form input:focus {
+  border-color: #9146ff;
+  box-shadow: 0 0 0 2px rgba(145, 70, 255, 0.25);
+}
+
+.chat-send-btn {
+  background: #9146ff;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chat-send-btn:hover {
+  background: #772ce8;
+}
+/* ===== END Issue #196 ===== */

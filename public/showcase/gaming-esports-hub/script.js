@@ -1123,3 +1123,187 @@ if (document.readyState === 'loading') {
   initMatchFilters();
 }
 })();
+
+
+/* ===== BEGIN Issue #196: Live Twitch Stream Broadcast Status Badge & Chat Simulator ===== */
+(function initTwitchBroadcast() {
+  'use strict';
+
+  var currentViewers = 142850;
+  var isPlaying = true;
+  var isMuted = false;
+  var chatInterval = null;
+
+  var SAMPLE_CHATTERS = [
+    { name: 'NeonStriker', badge: 'sub', color: '#c084fc', text: 'TENZ IS UNREAL TODAY!! 🔥' },
+    { name: 'ViperMain24', badge: 'mod', color: '#10b981', text: 'Keep chat clean folks, match point incoming!' },
+    { name: 'AeroClutch', badge: 'vip', color: '#f59e0b', text: 'Boaster with the 1v3 read?? NO WAY' },
+    { name: 'SentinelsFan_99', badge: 'sub', color: '#f43f5e', text: 'SEN CITY LETS GOOOOO 🔴' },
+    { name: 'KyotoDrifter', badge: '', color: '#38bdf8', text: 'What an insane grand finals series' },
+    { name: 'ChronoGamer', badge: 'sub', color: '#a855f7', text: '142k viewers hype!!' },
+    { name: 'PixelPhantom', badge: '', color: '#e2e8f0', text: 'Map 5 overtime pleaseeee' },
+    { name: 'GlitchMaster', badge: 'vip', color: '#f59e0b', text: 'That operator flick was disgustingly fast' }
+  ];
+
+  function formatViewerK(num) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+
+  function updateViewerDisplays() {
+    var heroViewerEl = document.getElementById('twitchViewerCount');
+    if (heroViewerEl) {
+      heroViewerEl.textContent = formatViewerK(currentViewers);
+    }
+
+    var modalViewerEl = document.getElementById('modalViewerCount');
+    if (modalViewerEl) {
+      modalViewerEl.textContent = currentViewers.toLocaleString();
+    }
+  }
+
+  // Realistic Viewer Fluctuation Loop
+  setInterval(function () {
+    var delta = Math.floor(Math.random() * 85) - 40;
+    currentViewers = Math.max(139000, Math.min(148000, currentViewers + delta));
+    updateViewerDisplays();
+  }, 2800);
+
+  function escapeChatHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function appendChatMessage(msg) {
+    var feed = document.getElementById('chatMessagesFeed');
+    if (!feed) return;
+
+    var row = document.createElement('div');
+    row.className = 'chat-msg-row';
+
+    var badgeHtml = '';
+    if (msg.badge) {
+      badgeHtml = '<span class="chat-badge ' + escapeChatHtml(msg.badge) + '">' + escapeChatHtml(msg.badge.toUpperCase()) + '</span>';
+    }
+
+    row.innerHTML = badgeHtml +
+      '<span class="chat-user" style="color: ' + escapeChatHtml(msg.color || '#fff') + '">' + escapeChatHtml(msg.name) + ':</span>' +
+      '<span class="chat-text">' + escapeChatHtml(msg.text) + '</span>';
+
+    feed.appendChild(row);
+
+    // Keep max 40 messages
+    while (feed.children.length > 40) {
+      feed.removeChild(feed.firstChild);
+    }
+
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  function startChatSimulator() {
+    if (chatInterval) return;
+
+    // Seed initial messages
+    SAMPLE_CHATTERS.slice(0, 5).forEach(function (m) {
+      appendChatMessage(m);
+    });
+
+    chatInterval = setInterval(function () {
+      var randIndex = Math.floor(Math.random() * SAMPLE_CHATTERS.length);
+      appendChatMessage(SAMPLE_CHATTERS[randIndex]);
+    }, 2200);
+  }
+
+  function openStreamModal(focusChat) {
+    var modal = document.getElementById('twitchStreamModal');
+    var backdrop = document.getElementById('twitchStreamBackdrop');
+    if (modal && backdrop) {
+      modal.hidden = false;
+      modal.classList.add('open');
+      backdrop.classList.add('open');
+      startChatSimulator();
+      updateViewerDisplays();
+
+      if (focusChat) {
+        var input = document.getElementById('chatUserMessageInput');
+        if (input) setTimeout(function () { input.focus(); }, 150);
+      }
+    }
+  }
+
+  function closeStreamModal() {
+    var modal = document.getElementById('twitchStreamModal');
+    var backdrop = document.getElementById('twitchStreamBackdrop');
+    if (modal && backdrop) {
+      modal.classList.remove('open');
+      backdrop.classList.remove('open');
+      setTimeout(function () {
+        modal.hidden = true;
+      }, 250);
+    }
+  }
+
+  function toggleStreamPlayback() {
+    isPlaying = !isPlaying;
+    var btn = document.getElementById('streamPlayBtn');
+    var visualizer = document.getElementById('streamVisualizer');
+
+    if (btn) {
+      btn.textContent = isPlaying ? '⏸ Pause' : '▶ Play';
+    }
+
+    if (visualizer) {
+      visualizer.style.filter = isPlaying ? 'none' : 'grayscale(1) opacity(0.4)';
+    }
+  }
+
+  function toggleStreamMute() {
+    isMuted = !isMuted;
+    var btn = document.getElementById('streamMuteBtn');
+    if (btn) {
+      btn.textContent = isMuted ? '🔇 Unmute' : '🔊 Mute';
+    }
+  }
+
+  function handleSendChatMessage(e) {
+    e.preventDefault();
+    var input = document.getElementById('chatUserMessageInput');
+    if (!input) return;
+
+    var text = input.value.trim();
+    if (!text) return;
+
+    appendChatMessage({
+      name: 'You (Explorer)',
+      badge: 'vip',
+      color: '#22d3ee',
+      text: text
+    });
+
+    input.value = '';
+  }
+
+  // Escape key closes modal
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closeStreamModal();
+    }
+  });
+
+  // Global window bindings for inline HTML attributes
+  window.watchStream = function watchStream() {
+    openStreamModal(false);
+  };
+  window.openTwitchStreamModal = openStreamModal;
+  window.closeStreamModal = closeStreamModal;
+  window.toggleStreamPlayback = toggleStreamPlayback;
+  window.toggleStreamMute = toggleStreamMute;
+  window.handleSendChatMessage = handleSendChatMessage;
+
+  // Initial render
+  updateViewerDisplays();
+})();
+/* ===== END Issue #196 ===== */

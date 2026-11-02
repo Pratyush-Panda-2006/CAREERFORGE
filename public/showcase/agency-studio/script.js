@@ -4,6 +4,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   initCaseStudyDrawer();
   initEstimator();
+  initReviewModal();
+  initFaqAccordion();
 });
 
 // ---------------------------------------------------------------
@@ -602,5 +604,475 @@ function initEstimator() {
     }
     email.removeAttribute('aria-invalid');
     msg.textContent = `Request noted for ${email.value.trim()}. Spec: ${specSummary(calculateEstimate(estState))}`;
+  });
+}
+
+/*CLIENT REVIEW SUBMISSION MODAL */
+
+function initReviewModal() {
+  const overlay = document.getElementById('reviewModalOverlay');
+  const modal = document.getElementById('reviewModal');
+  const openBtn = document.getElementById('openReviewModal');
+  const closeBtn = document.getElementById('closeReviewModal');
+  const cancelBtn = document.getElementById('cancelReviewBtn');
+
+  const form = document.getElementById('reviewForm');
+  const nameInput = document.getElementById('reviewClientName');
+  const titleInput = document.getElementById('reviewTitle');
+  const messageInput = document.getElementById('reviewMessage');
+
+  const starSelector = document.getElementById('starSelector');
+  const ratingLabel = document.getElementById('ratingLabel');
+
+  const tagSelector = document.getElementById('reviewTagSelector');
+
+  const charCount = document.getElementById('reviewCharCount');
+  const formMessage = document.getElementById('reviewFormMessage');
+
+  const reviewsGrid = document.getElementById('reviewsGrid');
+  const averageRating = document.getElementById('averageRating');
+  const reviewCount = document.getElementById('reviewCount');
+
+  const STORAGE_KEY = 'aetheriaClientReviews';
+
+  if (!overlay || !modal || !form) return;
+
+  let selectedRating = 0;
+  let selectedTags = [];
+  let previousFocus = null;
+
+  const ratingTexts = {
+    1: 'Poor',
+    2: 'Fair',
+    3: 'Good',
+    4: 'Very Good',
+    5: 'Excellent'
+  };
+
+
+  // Load saved reviews safely
+  function getSavedReviews() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+      if (!Array.isArray(saved)) return [];
+
+      return saved.filter(review =>
+        review &&
+        typeof review.name === 'string' &&
+        typeof review.title === 'string' &&
+        typeof review.message === 'string' &&
+        Number.isInteger(review.rating) &&
+        review.rating >= 1 &&
+        review.rating <= 5 &&
+        Array.isArray(review.tags)
+      );
+    } catch (error) {
+      console.error('Could not load saved reviews:', error);
+      return [];
+    }
+  }
+
+
+  // Save reviews
+  function saveReviews(reviews) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
+      return true;
+    } catch (error) {
+      console.error('Could not save reviews:', error);
+      return false;
+    }
+  }
+
+
+  // Open modal
+  function openModal() {
+    previousFocus = document.activeElement;
+
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    resetMessage();
+
+    setTimeout(() => {
+      nameInput.focus();
+    }, 50);
+  }
+
+
+  // Close modal
+  function closeModal() {
+    overlay.hidden = true;
+    document.body.style.overflow = '';
+
+    if (previousFocus) {
+      previousFocus.focus();
+    }
+  }
+
+
+  // Reset form messages
+  function resetMessage() {
+    formMessage.textContent = '';
+    formMessage.classList.remove('success');
+  }
+
+
+  // Reset rating
+  function resetRating() {
+    selectedRating = 0;
+
+    starSelector.querySelectorAll('.rating-star').forEach(star => {
+      star.classList.remove('active', 'hovered');
+      star.setAttribute('aria-pressed', 'false');
+    });
+
+    ratingLabel.textContent = 'Select a rating';
+  }
+
+
+  // Update star appearance
+  function updateStars(rating) {
+    starSelector.querySelectorAll('.rating-star').forEach(star => {
+      const value = Number(star.dataset.rating);
+
+      star.classList.toggle('active', value <= rating);
+      star.setAttribute(
+        'aria-pressed',
+        String(value === selectedRating)
+      );
+    });
+  }
+
+
+  // Star selection
+  starSelector.addEventListener('click', event => {
+    const star = event.target.closest('.rating-star');
+
+    if (!star) return;
+
+    selectedRating = Number(star.dataset.rating);
+
+    updateStars(selectedRating);
+
+    ratingLabel.textContent = ratingTexts[selectedRating];
+    resetMessage();
+  });
+
+
+  // Star hover preview
+  starSelector.addEventListener('mouseover', event => {
+    const star = event.target.closest('.rating-star');
+
+    if (!star) return;
+
+    const hoverRating = Number(star.dataset.rating);
+
+    starSelector.querySelectorAll('.rating-star').forEach(item => {
+      item.classList.toggle(
+        'hovered',
+        Number(item.dataset.rating) <= hoverRating
+      );
+    });
+  });
+
+
+  starSelector.addEventListener('mouseleave', () => {
+    starSelector.querySelectorAll('.rating-star').forEach(star => {
+      star.classList.remove('hovered');
+    });
+
+    updateStars(selectedRating);
+  });
+
+
+  // Tag selection
+  tagSelector.addEventListener('click', event => {
+    const tagButton = event.target.closest('.review-tag-option');
+
+    if (!tagButton) return;
+
+    const tag = tagButton.dataset.tag;
+
+    if (selectedTags.includes(tag)) {
+      selectedTags = selectedTags.filter(item => item !== tag);
+      tagButton.classList.remove('selected');
+      tagButton.setAttribute('aria-pressed', 'false');
+    } else {
+      selectedTags.push(tag);
+      tagButton.classList.add('selected');
+      tagButton.setAttribute('aria-pressed', 'true');
+    }
+
+    resetMessage();
+  });
+
+
+  // Character counter
+  messageInput.addEventListener('input', () => {
+    charCount.textContent = messageInput.value.length;
+  });
+
+
+  // Generate initials
+  function getInitials(name) {
+    return name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map(part => part.charAt(0).toUpperCase())
+      .join('');
+  }
+
+
+  // Create a review card safely
+  function createReviewCard(review) {
+    const card = document.createElement('article');
+    card.className = 'review-card';
+
+    const top = document.createElement('div');
+    top.className = 'review-card-top';
+
+    const stars = document.createElement('span');
+    stars.className = 'review-stars';
+    stars.textContent = '★'.repeat(review.rating) +
+      '☆'.repeat(5 - review.rating);
+
+    const date = document.createElement('span');
+    date.className = 'review-date';
+    date.textContent = 'Just now';
+
+    top.append(stars, date);
+
+    const title = document.createElement('h3');
+    title.textContent = review.title;
+
+    const message = document.createElement('p');
+    message.textContent = review.message;
+
+    const tagsContainer = document.createElement('div');
+    tagsContainer.className = 'review-tags';
+
+    review.tags.forEach(tag => {
+      const tagElement = document.createElement('span');
+      tagElement.textContent = tag;
+      tagsContainer.appendChild(tagElement);
+    });
+
+    const author = document.createElement('div');
+    author.className = 'review-author';
+
+    const avatar = document.createElement('span');
+    avatar.className = 'review-avatar';
+    avatar.textContent = getInitials(review.name);
+
+    const authorInfo = document.createElement('div');
+
+    const authorName = document.createElement('strong');
+    authorName.textContent = review.name;
+
+    const project = document.createElement('span');
+    project.textContent = 'Client Review';
+
+    authorInfo.append(authorName, project);
+    author.append(avatar, authorInfo);
+
+    card.append(top, title, message, tagsContainer, author);
+
+    return card;
+  }
+
+
+  // Display saved reviews
+  function renderSavedReviews() {
+    const reviews = getSavedReviews();
+
+    reviews.forEach(review => {
+      reviewsGrid.appendChild(createReviewCard(review));
+    });
+
+    updateReviewSummary(reviews);
+  }
+
+
+  // Update average rating and review count
+  function updateReviewSummary(reviews) {
+    const featuredCount = 4;
+    const featuredAverage = 4.9;
+
+    const totalCount = featuredCount + reviews.length;
+
+    const totalRating =
+      featuredAverage * featuredCount +
+      reviews.reduce((sum, review) => sum + review.rating, 0);
+
+    const average = totalRating / totalCount;
+
+    averageRating.textContent = average.toFixed(1);
+
+    reviewCount.textContent =
+      `${totalCount} client reviews`;
+  }
+
+
+  // Submit review
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+
+    resetMessage();
+
+    const name = nameInput.value.trim();
+    const title = titleInput.value.trim();
+    const message = messageInput.value.trim();
+
+    if (!name || !title || !message) {
+      formMessage.textContent = 'Please complete all required fields.';
+      return;
+    }
+
+    if (selectedRating === 0) {
+      formMessage.textContent = 'Please select a star rating.';
+      return;
+    }
+
+    if (selectedTags.length === 0) {
+      formMessage.textContent = 'Please select at least one project category.';
+      return;
+    }
+
+    if (name.length > 50 || title.length > 70 || message.length > 500) {
+      formMessage.textContent = 'Please check the maximum character limits.';
+      return;
+    }
+
+    const newReview = {
+      name,
+      title,
+      message,
+      rating: selectedRating,
+      tags: [...selectedTags],
+      date: new Date().toISOString()
+    };
+
+    const reviews = getSavedReviews();
+
+    reviews.push(newReview);
+
+    if (!saveReviews(reviews)) {
+      formMessage.textContent = 'Unable to save your review. Please try again.';
+      return;
+    }
+
+    // Add the new card to the beginning
+    reviewsGrid.prepend(createReviewCard(newReview));
+
+    updateReviewSummary(reviews);
+
+    formMessage.textContent = 'Your review has been submitted successfully!';
+    formMessage.classList.add('success');
+
+    // Reset form
+    form.reset();
+    selectedTags = [];
+
+    tagSelector.querySelectorAll('.review-tag-option').forEach(tag => {
+      tag.classList.remove('selected');
+      tag.setAttribute('aria-pressed', 'false');
+    });
+
+    resetRating();
+    charCount.textContent = '0';
+
+    // Close modal after successful submission
+    setTimeout(() => {
+      closeModal();
+      resetMessage();
+    }, 1400);
+  });
+
+
+  // Open and close events
+  openBtn.addEventListener('click', openModal);
+
+  closeBtn.addEventListener('click', closeModal);
+
+  cancelBtn.addEventListener('click', closeModal);
+
+
+  // Close when clicking outside the modal
+  overlay.addEventListener('click', event => {
+    if (event.target === overlay) {
+      closeModal();
+    }
+  });
+
+
+  // Escape key and basic focus management
+  document.addEventListener('keydown', event => {
+    if (overlay.hidden) return;
+
+    if (event.key === 'Escape') {
+      closeModal();
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      const focusableElements = modal.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled])'
+      );
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === lastElement
+      ) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    }
+  });
+
+
+  // Load existing reviews on page load
+  renderSavedReviews();
+/* =========================================
+   CLIENT FAQ ACCORDION
+   ======================================= */
+function initFaqAccordion() {
+  const faqItems = document.querySelectorAll('.faq-item');
+
+  if (!faqItems.length) return;
+
+  faqItems.forEach(item => {
+    const question = item.querySelector('.faq-question');
+    const answer = item.querySelector('.faq-answer');
+
+    if (!question || !answer) return;
+
+    question.addEventListener('click', () => {
+      const isCurrentlyOpen =
+        question.getAttribute('aria-expanded') === 'true';
+
+      faqItems.forEach(faqItem => {
+        const faqQuestion = faqItem.querySelector('.faq-question');
+        const faqAnswer = faqItem.querySelector('.faq-answer');
+
+        faqItem.classList.remove('active');
+        faqQuestion.setAttribute('aria-expanded', 'false');
+        faqAnswer.hidden = true;
+      });
+
+      if (!isCurrentlyOpen) {
+        item.classList.add('active');
+        question.setAttribute('aria-expanded', 'true');
+        answer.hidden = false;
+      }
+    });
   });
 }
