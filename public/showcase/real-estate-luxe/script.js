@@ -267,3 +267,280 @@ document.addEventListener('DOMContentLoaded', () => {
   calculateMortgage();
   console.log('Vanguard Real Estate Mortgage Calculator Engine loaded');
 });
+
+/* ==========================================================
+   Property comparison (up to 2 estates, side-by-side drawer)
+   Cards are rendered by filters.js and re-rendered on every filter
+   change, so the checkboxes are added by a MutationObserver and the
+   selection lives here, keyed by estate id.
+   ========================================================== */
+(function () {
+  const MAX_COMPARE = 2;
+  // Land size is not part of the ESTATES data, so the demo values live here.
+  const ACREAGE = {
+    'glass-horizon': 2.4,
+    'aspen-ridge': 38,
+    'azur-chateau': 12.5,
+    'cay-island': 40
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('estate-grid');
+    const tray = document.getElementById('cmp-tray');
+    const overlay = document.getElementById('cmp-overlay');
+    const drawer = document.getElementById('cmp-drawer');
+    const table = document.getElementById('cmp-table');
+    const chipsEl = document.getElementById('cmp-chips');
+    const countEl = document.getElementById('cmp-tray-count');
+    const noteEl = document.getElementById('cmp-tray-note');
+    const openBtn = document.getElementById('cmp-open');
+    const clearBtn = document.getElementById('cmp-clear');
+    const closeBtn = document.getElementById('cmp-close');
+    const resetBtn = document.getElementById('cmp-reset');
+    const statusEl = document.getElementById('cmp-status');
+    if (!grid || !tray || !overlay || !drawer || !table || typeof ESTATES === 'undefined') return;
+
+    const byId = {};
+    const byName = {};
+    ESTATES.forEach(e => { byId[e.id] = e; byName[e.name] = e; });
+
+    let selected = [];
+    let lastTrigger = null;
+    const inertTargets = ['.hero', '.listings', '.calculator-section', '#cmp-tray']
+      .map(sel => document.querySelector(sel)).filter(Boolean);
+
+    const money = n => '$' + Math.round(n).toLocaleString('en-US');
+    const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // A warning replaces the tray note for a few seconds, then the normal hint comes back.
+    let noteTimer = 0;
+    function defaultNote() {
+      return selected.length === MAX_COMPARE ? 'Ready to compare.' : 'Select ' + (MAX_COMPARE - selected.length) + ' more to compare side by side.';
+    }
+    function warn(msg) {
+      noteEl.textContent = msg;
+      announce(msg);
+      clearTimeout(noteTimer);
+      noteTimer = setTimeout(() => { noteEl.textContent = defaultNote(); }, 4000);
+    }
+
+    function announce(msg) {
+      statusEl.textContent = '';
+      // a short delay makes repeated identical messages get read again
+      setTimeout(() => { statusEl.textContent = msg; }, 30);
+    }
+
+    /* ---------- card checkboxes ---------- */
+    function decorateCards() {
+      grid.querySelectorAll('.card').forEach(card => {
+        const nameEl = card.querySelector('h3');
+        const estate = nameEl && byName[nameEl.textContent.trim()];
+        if (!estate) return;
+        if (!card.querySelector('.cmp-toggle')) {
+          const label = document.createElement('label');
+          label.className = 'cmp-toggle';
+          label.innerHTML = '<input type="checkbox" class="cmp-check" value="' + escapeHtml(estate.id) + '" aria-label="Compare ' + escapeHtml(estate.name) + '">' +
+            '<span class="cmp-toggle-box" aria-hidden="true"></span><span class="cmp-toggle-text">Compare</span>';
+          const anchor = card.querySelector('.calc-estate-btn');
+          card.insertBefore(label, anchor);
+        }
+      });
+      syncCards();
+    }
+
+    function syncCards() {
+      const full = selected.length >= MAX_COMPARE;
+      grid.querySelectorAll('.cmp-check').forEach(input => {
+        const on = selected.includes(input.value);
+        input.checked = on;
+        input.setAttribute('aria-disabled', String(full && !on));
+        const card = input.closest('.card');
+        card.classList.toggle('is-compared', on);
+        card.classList.toggle('cmp-locked', full && !on);
+      });
+    }
+
+    new MutationObserver(decorateCards).observe(grid, { childList: true });
+
+    grid.addEventListener('click', event => {
+      const input = event.target;
+      if (!(input instanceof HTMLInputElement) || !input.classList.contains('cmp-check')) return;
+      if (!input.checked) return; // unchecking is always allowed
+      // click fires after the box toggled, so a checked box here means "add"
+      if (selected.length >= MAX_COMPARE) {
+        event.preventDefault();
+        warn('You can compare ' + MAX_COMPARE + ' estates at a time. Remove one to pick another.');
+      }
+    });
+
+    grid.addEventListener('change', event => {
+      const input = event.target;
+      if (!(input instanceof HTMLInputElement) || !input.classList.contains('cmp-check')) return;
+      const id = input.value;
+      if (input.checked && !selected.includes(id) && selected.length < MAX_COMPARE) {
+        selected.push(id);
+        announce(byId[id].name + ' added to comparison. ' + selected.length + ' of ' + MAX_COMPARE + ' selected.');
+      } else if (!input.checked) {
+        selected = selected.filter(s => s !== id);
+        announce(byId[id].name + ' removed from comparison. ' + selected.length + ' of ' + MAX_COMPARE + ' selected.');
+      }
+      update();
+    });
+
+    /* ---------- tray ---------- */
+    function update() {
+      syncCards();
+      const n = selected.length;
+      tray.hidden = n === 0;
+      document.body.classList.toggle('cmp-has-tray', n > 0);
+      countEl.textContent = n + ' / ' + MAX_COMPARE;
+      clearTimeout(noteTimer);
+      noteEl.textContent = defaultNote();
+      chipsEl.innerHTML = selected.map(id =>
+        '<li class="cmp-chip"><span>' + escapeHtml(byId[id].name) + '</span>' +
+        '<button type="button" class="cmp-chip-x" data-remove="' + escapeHtml(id) + '" aria-label="Remove ' + escapeHtml(byId[id].name) + ' from comparison">&times;</button></li>'
+      ).join('');
+      openBtn.setAttribute('aria-disabled', String(n < MAX_COMPARE));
+    }
+
+    chipsEl.addEventListener('click', event => {
+      const btn = event.target.closest('[data-remove]');
+      if (!btn) return;
+      const id = btn.dataset.remove;
+      selected = selected.filter(s => s !== id);
+      announce(byId[id].name + ' removed from comparison. ' + selected.length + ' of ' + MAX_COMPARE + ' selected.');
+      update();
+      // keep keyboard users in the tray, or send them back to the card checkbox
+      const next = chipsEl.querySelector('.cmp-chip-x');
+      if (next) next.focus();
+      else {
+        const box = grid.querySelector('.cmp-check[value="' + id + '"]');
+        if (box) box.focus();
+      }
+    });
+
+    function clearAll(message) {
+      selected = [];
+      update();
+      announce(message || 'Comparison cleared.');
+    }
+
+    clearBtn.addEventListener('click', () => {
+      clearAll();
+      const first = grid.querySelector('.cmp-check');
+      if (first) first.focus();
+    });
+
+    /* ---------- drawer ---------- */
+    function row(label, cells, bestIndex, badge) {
+      return '<tr><th scope="row">' + label + '</th>' + cells.map((html, i) =>
+        '<td class="' + (i === bestIndex ? 'is-best' : '') + '"><span class="cmp-val">' + html + '</span>' +
+        (i === bestIndex ? '<span class="cmp-badge">' + badge + '</span>' : '') + '</td>'
+      ).join('') + '</tr>';
+    }
+
+    // Index of the winning estate for a numeric row, or -1 on a tie / missing data.
+    function best(values, higherWins) {
+      if (values.some(v => v == null) || values[0] === values[1]) return -1;
+      const winner = higherWins ? Math.max(values[0], values[1]) : Math.min(values[0], values[1]);
+      return values.indexOf(winner);
+    }
+
+    function renderTable() {
+      const [a, b] = selected.map(id => byId[id]);
+      const pair = [a, b];
+      const acres = pair.map(e => (ACREAGE[e.id] == null ? null : ACREAGE[e.id]));
+      const perSqft = pair.map(e => e.price / e.sqft);
+      const pool = pair.map(e => e.amenities.includes('Infinity Pool'));
+      const poolBest = pool[0] === pool[1] ? -1 : (pool[0] ? 0 : 1);
+
+      let html = '<caption class="cmp-sr">Side-by-side comparison of ' + escapeHtml(a.name) + ' and ' + escapeHtml(b.name) + '</caption>';
+      html += '<thead><tr><td class="cmp-corner"><span class="cmp-sr">Feature</span></td>' + pair.map(e =>
+        '<th scope="col" class="cmp-col-head"><span class="cmp-col-icon" aria-hidden="true">' + e.icon + '</span>' +
+        '<span class="cmp-col-name">' + escapeHtml(e.name) + '</span>' +
+        '<span class="cmp-col-loc">' + escapeHtml(e.location) + '</span></th>').join('') + '</tr></thead><tbody>';
+      html += row('Price', pair.map(e => money(e.price)), best(pair.map(e => e.price), false), 'Lower price');
+      html += row('Price per sq ft', perSqft.map(v => money(v)), best(perSqft.map(Math.round), false), 'Better value');
+      html += row('Square footage', pair.map(e => e.sqft.toLocaleString('en-US') + ' sq ft'), best(pair.map(e => e.sqft), true), 'More space');
+      html += row('Bedrooms', pair.map(e => String(e.beds)), best(pair.map(e => e.beds), true), 'More bedrooms');
+      html += row('Bathrooms', pair.map(e => String(e.baths)), best(pair.map(e => e.baths), true), 'More baths');
+      html += row('Infinity pool', pool.map(p => p ? 'Yes' : 'No'), poolBest, 'Has pool');
+      html += row('Acreage', acres.map(v => v == null ? 'N/A' : v + ' acres'), best(acres, true), 'More land');
+      html += row('Property type', pair.map(e => escapeHtml(e.type)), -1, '');
+      html += '</tbody><tfoot><tr><th scope="row"><span class="cmp-sr">Actions</span></th>' + pair.map(e =>
+        '<td><button type="button" class="cmp-btn cmp-btn-ghost cmp-mortgage" data-mortgage="' + e.price + '">Calculate Mortgage ↗</button></td>').join('') + '</tr></tfoot>';
+      table.innerHTML = html;
+    }
+
+    function openDrawer() {
+      if (selected.length < MAX_COMPARE) {
+        const left = MAX_COMPARE - selected.length;
+        warn('Select ' + left + ' more ' + (left === 1 ? 'estate' : 'estates') + ' to compare side by side.');
+        return;
+      }
+      lastTrigger = document.activeElement;
+      renderTable();
+      overlay.hidden = false;
+      inertTargets.forEach(el => { el.inert = true; });
+      document.body.classList.add('cmp-open');
+      // let the browser paint the hidden state first so the slide-in animates
+      requestAnimationFrame(() => overlay.classList.add('is-open'));
+      drawer.focus();
+      announce('Comparing ' + byId[selected[0]].name + ' and ' + byId[selected[1]].name + '.');
+    }
+
+    function closeDrawer(restoreFocus) {
+      if (overlay.hidden) return;
+      overlay.classList.remove('is-open');
+      overlay.hidden = true;
+      inertTargets.forEach(el => { el.inert = false; });
+      document.body.classList.remove('cmp-open');
+      if (restoreFocus !== false) {
+        const target = lastTrigger && document.contains(lastTrigger) && !lastTrigger.closest('[hidden]') ? lastTrigger : openBtn;
+        target.focus();
+      }
+    }
+
+    openBtn.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', () => closeDrawer());
+    resetBtn.addEventListener('click', () => {
+      closeDrawer(false);
+      clearAll('Comparison cleared.');
+      const first = grid.querySelector('.cmp-check');
+      if (first) first.focus();
+    });
+    overlay.addEventListener('click', event => { if (event.target === overlay) closeDrawer(); });
+
+    table.addEventListener('click', event => {
+      const btn = event.target.closest('[data-mortgage]');
+      if (!btn) return;
+      closeDrawer(false);
+      if (typeof applyEstatePrice === 'function') applyEstatePrice(Number(btn.dataset.mortgage));
+    });
+
+    document.addEventListener('keydown', event => {
+      if (overlay.hidden) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeDrawer();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      // keep Tab inside the dialog
+      const focusable = Array.from(drawer.querySelectorAll('button:not([disabled])')).filter(el => el.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === drawer)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    decorateCards();
+    update();
+  });
+})();
