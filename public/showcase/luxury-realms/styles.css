@@ -1436,3 +1436,120 @@ body {
   .amenity-badge:hover { transform: none; }
 }
 /* ===== END issue #75 ===== */
+
+/* Concierge inquiry form enhancements */
+.concierge-form select,
+.concierge-form input[type="date"],
+.concierge-form input[type="number"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  margin: 8px 0 18px;
+  color: #f5f0e6;
+  background: #1b1820;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.concierge-form select:focus,
+.concierge-form input:focus {
+  outline: 2px solid rgba(245, 158, 11, 0.65);
+  outline-offset: 2px;
+}
+
+.concierge-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.concierge-field-row > div {
+  min-width: 0;
+}
+
+.concierge-confirmation {
+  margin-top: 18px;
+  padding: 16px;
+  line-height: 1.7;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+@media (max-width: 520px) {
+  .concierge-field-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .concierge-card {
+    padding: 24px 18px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* Fix concierge modal scrolling and submit button */
+.concierge-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.concierge-overlay[hidden] {
+  display: none;
+}
+
+.concierge-card {
+  position: relative;
+  width: min(100%, 540px);
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  margin: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d99e35 #17141a;
+}
+
+.concierge-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.concierge-submit {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 50px;
+  cursor: pointer;
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.concierge-close {
+  z-index: 3;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .concierge-overlay {
+    padding: 10px;
+    place-items: start center;
+  }
+
+  .concierge-card {
+    width: 100%;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    padding: 24px 18px;
+  }
+}

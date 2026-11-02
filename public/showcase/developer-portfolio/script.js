@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTerminal();
   initShortcuts();
   initProjectFilters();
+  initResumeDownload();
 });
 
 // Virtual file system: objects are directories, strings are files.
@@ -454,4 +455,282 @@ function initProjectFilters() {
   });
   selectCategory('all');
   toolbar.hidden = false;
+}
+
+// Resume Download Dropdown - Issue #184
+function initResumeDownload() {
+  const trigger = document.getElementById('resumeTrigger');
+  const dropdown = document.getElementById('resumeDropdown');
+  const jsonModal = document.getElementById('resumeJsonModal');
+  const overlay = document.getElementById('resumeJsonOverlay');
+  const closeBtn = document.getElementById('resumeJsonClose');
+  const jsonContent = document.getElementById('resumeJsonContent');
+  const copyBtn = document.getElementById('resumeJsonCopy');
+
+  if (!trigger || !dropdown || !jsonModal || !overlay) return;
+
+  // Resume information from the existing portfolio.
+  const resume = {
+    name: 'Alex Vance',
+    title: 'Senior Distributed Systems & Rust Kernel Developer',
+    summary:
+      'Building high-throughput microservice mesh routers, eBPF network monitors, and WebAssembly runtimes.',
+    contact: {
+      email: 'alex@example.dev',
+      github: 'github.com/alexvance',
+      note: 'Placeholder contact details for this demo portfolio.'
+    },
+    skills: [
+      { name: 'HTML & CSS', category: 'Frontend', proficiency: 90 },
+      { name: 'JavaScript', category: 'Frontend', proficiency: 80 },
+      { name: 'Go', category: 'Backend', proficiency: 75 },
+      { name: 'REST APIs', category: 'Backend', proficiency: 70 },
+      { name: 'Docker', category: 'DevOps', proficiency: 65 },
+      { name: 'Kubernetes', category: 'DevOps', proficiency: 60 },
+      { name: 'Linux', category: 'Systems', proficiency: 85 },
+      { name: 'Rust', category: 'Systems', proficiency: 55 }
+    ],
+    technicalExpertise: {
+      languages: ['Rust', 'Go', 'C', 'TypeScript'],
+      platforms: ['Kubernetes', 'eBPF', 'WebAssembly', 'Linux'],
+      interests: [
+        'Packet processing',
+        'Schedulers',
+        'Observability'
+      ]
+    },
+    projects: [
+      {
+        name: 'hyper-mesh-router',
+        language: 'Rust',
+        stars: '4.8k',
+        description:
+          'Zero-allocation HTTP/3 load balancer compiled to eBPF byte-code.'
+      },
+      {
+        name: 'wasm-container-daemon',
+        language: 'Go',
+        stars: '2.3k',
+        description:
+          'Ultra-lightweight OCI compliant container runtime running WASM binaries in under 5ms.'
+      }
+    ]
+  };
+
+  const jsonString = JSON.stringify(resume, null, 2);
+
+  function toggleDropdown(forceClose = false) {
+    const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+
+    dropdown.hidden = forceClose || isOpen;
+    trigger.setAttribute(
+      'aria-expanded',
+      String(!dropdown.hidden)
+    );
+  }
+
+  function downloadFile(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
+  function generateTextResume() {
+    const text = [
+      resume.name,
+      resume.title,
+      '',
+      'PROFESSIONAL SUMMARY',
+      resume.summary,
+      '',
+      'CONTACT',
+      `Email: ${resume.contact.email}`,
+      `GitHub: ${resume.contact.github}`,
+      resume.contact.note,
+      '',
+      'TECHNICAL SKILLS',
+      ...resume.skills.map(
+        skill =>
+          `${skill.name} - ${skill.category} (${skill.proficiency}%)`
+      ),
+      '',
+      'TECHNICAL EXPERTISE',
+      `Languages: ${resume.technicalExpertise.languages.join(', ')}`,
+      `Platforms: ${resume.technicalExpertise.platforms.join(', ')}`,
+      `Interests: ${resume.technicalExpertise.interests.join(', ')}`,
+      '',
+      'PROJECTS',
+      ...resume.projects.map(
+        project =>
+          `${project.name} (${project.language}, ${project.stars} stars)\n${project.description}`
+      )
+    ].join('\n');
+
+    downloadFile(text, 'alex-vance-resume.txt', 'text/plain');
+  }
+
+  function generatePDF() {
+    const printWindow = window.open('', '_blank');
+
+    if (!printWindow) {
+      alert('Please allow pop-ups to generate the PDF.');
+      return;
+    }
+
+    const skillItems = resume.skills.map(skill =>
+      `<li>${skill.name} — ${skill.category} (${skill.proficiency}%)</li>`
+    ).join('');
+
+    const projectItems = resume.projects.map(project =>
+      `<article>
+        <h3>${project.name}</h3>
+        <p>${project.description}</p>
+        <small>${project.language} | ${project.stars} stars</small>
+      </article>`
+    ).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Alex Vance - Resume</title>
+        <style>
+          body {
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 0 25px;
+            color: #222;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+          }
+          h1 { margin-bottom: 4px; }
+          h2 {
+            margin-top: 25px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ccc;
+          }
+          h3 { margin-bottom: 4px; }
+          .subtitle { color: #555; }
+          li { margin-bottom: 5px; }
+          article { margin-bottom: 15px; }
+          @media print {
+            body { margin: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>${resume.name}</h1>
+        <p class="subtitle">${resume.title}</p>
+
+        <h2>Professional Summary</h2>
+        <p>${resume.summary}</p>
+
+        <h2>Contact</h2>
+        <p>Email: ${resume.contact.email}</p>
+        <p>GitHub: ${resume.contact.github}</p>
+        <small>${resume.contact.note}</small>
+
+        <h2>Technical Skills</h2>
+        <ul>${skillItems}</ul>
+
+        <h2>Technical Expertise</h2>
+        <p><strong>Languages:</strong>
+          ${resume.technicalExpertise.languages.join(', ')}
+        </p>
+        <p><strong>Platforms:</strong>
+          ${resume.technicalExpertise.platforms.join(', ')}
+        </p>
+        <p><strong>Interests:</strong>
+          ${resume.technicalExpertise.interests.join(', ')}
+        </p>
+
+        <h2>Projects</h2>
+        ${projectItems}
+      </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  }
+
+  function openJsonModal() {
+    jsonContent.textContent = jsonString;
+    jsonModal.hidden = false;
+    overlay.hidden = false;
+    closeBtn.focus();
+  }
+
+  function closeJsonModal() {
+    jsonModal.hidden = true;
+    overlay.hidden = true;
+    trigger.focus();
+  }
+
+  trigger.addEventListener('click', () => {
+    toggleDropdown();
+  });
+
+  dropdown.addEventListener('click', event => {
+    const button = event.target.closest('[data-resume-format]');
+    if (!button) return;
+
+    const format = button.dataset.resumeFormat;
+    toggleDropdown(true);
+
+    if (format === 'pdf') {
+      generatePDF();
+    } else if (format === 'txt') {
+      generateTextResume();
+    } else if (format === 'json') {
+      openJsonModal();
+    }
+  });
+
+  document.addEventListener('click', event => {
+    if (
+      !event.target.closest('.resume-download')
+    ) {
+      toggleDropdown(true);
+    }
+  });
+
+  closeBtn.addEventListener('click', closeJsonModal);
+  overlay.addEventListener('click', closeJsonModal);
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(jsonString);
+      copyBtn.textContent = 'Copied!';
+    } catch (error) {
+      copyBtn.textContent = 'Copy unavailable';
+    }
+
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy JSON';
+    }, 1800);
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      if (!jsonModal.hidden) {
+        closeJsonModal();
+      } else {
+        toggleDropdown(true);
+      }
+    }
+  });
 }

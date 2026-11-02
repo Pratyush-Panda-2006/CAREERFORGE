@@ -312,3 +312,71 @@ function initTicketCalculator() {
 
   render();
 }
+
+// ---------------------------------------------------------------
+// Interactive Festival Weather Forecast (Issue #192)
+// ---------------------------------------------------------------
+
+function initFestivalWeather() {
+  const weatherGrid = document.getElementById('weatherGrid');
+
+  if (!weatherGrid) return;
+
+  const weatherCards = weatherGrid.querySelectorAll('.weather-card');
+
+  const detailIcon = document.getElementById('detailIcon');
+  const detailCondition = document.getElementById('detailCondition');
+  const detailDescription = document.getElementById('detailDescription');
+  const detailSunset = document.getElementById('detailSunset');
+
+  const forecast = [
+    {
+      icon: '☀️',
+      condition: 'Sunny',
+      description: 'Clear skies expected throughout the festival day. Perfect conditions for outdoor performances.',
+      sunset: '17:00 JST'
+    },
+    {
+      icon: '🌧️',
+      condition: 'Light Rain',
+      description: 'Occasional light rainfall expected. Festival attendees should consider carrying rain protection.',
+      sunset: '16:59 JST'
+    },
+    {
+      icon: '🌙',
+      condition: 'Clear Night',
+      description: 'A mostly clear evening with comfortable temperatures for the final festival performances.',
+      sunset: '16:58 JST'
+    }
+  ];
+
+  function selectForecast(index) {
+    const selected = forecast[index];
+
+    if (!selected) return;
+
+    // Update selected card
+    weatherCards.forEach((card, cardIndex) => {
+      const isActive = cardIndex === index;
+
+      card.classList.toggle('active', isActive);
+      card.setAttribute('aria-pressed', String(isActive));
+    });
+
+    // Update forecast details
+    detailIcon.textContent = selected.icon;
+    detailCondition.textContent = selected.condition;
+    detailDescription.textContent = selected.description;
+    detailSunset.textContent = selected.sunset;
+  }
+
+  weatherCards.forEach((card) => {
+    card.addEventListener('click', () => {
+      const dayIndex = Number(card.dataset.day);
+      selectForecast(dayIndex);
+    });
+  });
+
+  // Display the first day's forecast by default
+  selectForecast(0);
+}

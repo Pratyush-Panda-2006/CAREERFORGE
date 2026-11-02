@@ -44,3 +44,69 @@ test('parseState sanitizes out-of-range fields', () => {
   assert.deepEqual({ ...s }, { episode: '142', time: 2880, volume: 1, speedIndex: 0 });
   assert.equal(parseState('{}', 2880).volume, 1);
 });
+
+test('bookmark control prompts, persists, renders, and seeks to a saved moment', () => {
+  class Element {
+    constructor(id = '') {
+      this.id = id;
+      this.children = [];
+      this.listeners = {};
+      this.attributes = {};
+      this.style = {};
+      this.classList = { add() {}, remove() {}, toggle() {} };
+      this.dataset = {};
+      this.value = '';
+      this.textContent = '';
+    }
+    addEventListener(type, listener) { this.listeners[type] = listener; }
+    click() { this.listeners.click?.({ target: this }); }
+    appendChild(child) { this.children.push(child); }
+    replaceChildren(...children) { this.children = children; }
+    setAttribute(name, value) { this.attributes[name] = value; }
+    querySelector() { return null; }
+  }
+
+  const elements = new Map(['bookmark-moment-btn', 'bookmarks-tray', 'current-time-label',
+    'dock-scrubber', 'scrubber-fill', 'player-dock', 'dock-volume'].map(id => [id, new Element(id)]));
+  const storage = new Map();
+  const listeners = {};
+  const document = {
+    body: { classList: { add() {} } },
+    addEventListener(type, listener) { listeners[type] = listener; },
+    getElementById(id) { return elements.get(id) || null; },
+    createElement() { return new Element(); },
+    querySelector() { return null; },
+    querySelectorAll() { return []; }
+  };
+  const context = {
+    document,
+    localStorage: {
+      getItem(key) { return storage.get(key) ?? null; },
+      setItem(key, value) { storage.set(key, value); }
+    },
+    window: { prompt: () => '  Key idea  ' },
+    console,
+    setInterval: () => 1,
+    clearInterval() {}
+  };
+  vm.runInNewContext(readFileSync(new URL('./player-logic.js', import.meta.url), 'utf8'), context);
+  context.PlayerLogic = context.window.PlayerLogic;
+  vm.runInNewContext(readFileSync(new URL('./script.js', import.meta.url), 'utf8'), context);
+  listeners.DOMContentLoaded();
+
+  elements.get('dock-scrubber').listeners.input({ target: { value: '125' } });
+  elements.get('bookmark-moment-btn').click();
+
+  assert.deepEqual(JSON.parse(storage.get('waveform-episode-bookmarks')), [{ time: 125, note: 'Key idea' }]);
+  const tray = elements.get('bookmarks-tray');
+  assert.equal(tray.children.length, 1);
+  assert.match(tray.children[0].textContent, /02:05.*Key idea/);
+
+  context.window.prompt = () => '  ';
+  elements.get('bookmark-moment-btn').click();
+  assert.equal(JSON.parse(storage.get('waveform-episode-bookmarks')).length, 1);
+
+  tray.children[0].click();
+  assert.equal(elements.get('current-time-label').textContent, '02:05');
+  assert.equal(JSON.parse(storage.get('waveform-mini-player')).time, 125);
+});
