@@ -11,10 +11,30 @@
 </head>
 <body>
   <header class="hero">
-    <div class="badge">LIVE TOURNAMENT // SEASON 4</div>
+    <div class="hero-badge-row">
+      <div class="badge">LIVE TOURNAMENT // SEASON 4</div>
+      <!-- ===== BEGIN Issue #196: Live Twitch Stream Broadcast Status Badge ===== -->
+      <div class="twitch-live-badge" id="twitchLiveBadge" onclick="watchStream()" role="button" tabindex="0" aria-label="🔴 Live on Twitch with 142.8K Viewers — Click to watch stream">
+        <span class="twitch-badge-glow" aria-hidden="true"></span>
+        <span class="pulsing-live-dot" aria-hidden="true"></span>
+        <span class="live-tag">LIVE ON TWITCH</span>
+        <span class="twitch-badge-divider" aria-hidden="true">•</span>
+        <svg class="twitch-logo-svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+          <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+        </svg>
+        <span class="channel-name">/VortexArenaLive</span>
+        <span class="twitch-badge-divider" aria-hidden="true">•</span>
+        <span class="viewer-count" id="twitchViewerCount">142.8K</span>
+        <span class="viewer-label">Viewers</span>
+      </div>
+      <!-- ===== END Issue #196 ===== -->
+    </div>
     <h1>VORTEX GLOBAL CHAMPIONSHIP</h1>
-    <p>$500,000 PRIZE POOL • 16 PRO TEAMS • LIVE ON TWITCH</p>
-    <button class="btn-glitch" onclick="watchStream()">🔴 Watch Live Stream</button>
+    <p>$500,000 PRIZE POOL • 16 PRO TEAMS • GRAND FINALS</p>
+    <div class="hero-actions-group">
+      <button class="btn-glitch" onclick="watchStream()">🔴 Watch Live Stream</button>
+      <button class="btn-twitch-chat" onclick="openTwitchStreamModal(true)">💬 Open Live Chat</button>
+    </div>
   </header>
 
   <!-- ===== Fantasy Esports Roster Builder (Issue #102) START ===== -->
@@ -508,5 +528,106 @@
 
   <script src="script.js"></script>
   <script src="bracket.js"></script>
+  <!-- ===== BEGIN Issue #196: Live Stream Cinema Modal & Chat Simulator ===== -->
+  <div id="twitchStreamBackdrop" class="twitch-stream-backdrop" onclick="closeStreamModal()"></div>
+  <div id="twitchStreamModal" class="twitch-stream-modal" role="dialog" aria-modal="true" aria-labelledby="streamModalTitle" hidden>
+    <div class="stream-modal-header">
+      <div class="stream-header-left">
+        <span class="pulsing-live-dot small" aria-hidden="true"></span>
+        <span class="stream-live-pill">LIVE ON TWITCH</span>
+        <h3 id="streamModalTitle" class="stream-title">VORTEX GLOBAL CHAMPIONSHIP — GRAND FINALS | Sentinels vs Fnatic [Map 5 Decider]</h3>
+      </div>
+      <div class="stream-header-right">
+        <div class="stream-viewers-tag">
+          <span class="viewer-eye" aria-hidden="true">👁️</span>
+          <span id="modalViewerCount">142,850</span>
+          <span class="viewers-lbl">watching</span>
+        </div>
+        <button type="button" class="stream-close-btn" onclick="closeStreamModal()" aria-label="Close live stream modal">&times;</button>
+      </div>
+    </div>
+
+    <div class="stream-layout-body">
+      <!-- Left: Broadcast Cinema Video Screen -->
+      <div class="stream-video-container">
+        <div class="stream-screen" id="streamScreen">
+          <div class="stream-scoreboard-hud">
+            <div class="hud-team red">
+              <span class="hud-team-name">SENTINELS</span>
+              <span class="hud-score">12</span>
+            </div>
+            <div class="hud-center">
+              <span class="hud-match-point">MATCH POINT</span>
+              <span class="hud-clock">0:38</span>
+            </div>
+            <div class="hud-team blue">
+              <span class="hud-score">11</span>
+              <span class="hud-team-name">FNATIC</span>
+            </div>
+          </div>
+
+          <!-- Animated Audio & Game Signal Waves -->
+          <div class="stream-gameplay-canvas" id="streamVisualizer" aria-hidden="true">
+            <div class="audio-wave-bar"></div>
+            <div class="audio-wave-bar"></div>
+            <div class="audio-wave-bar"></div>
+            <div class="audio-wave-bar"></div>
+            <div class="audio-wave-bar"></div>
+            <div class="audio-wave-bar"></div>
+            <div class="audio-wave-bar"></div>
+            <div class="audio-wave-bar"></div>
+            <div class="audio-wave-bar"></div>
+            <div class="audio-wave-bar"></div>
+          </div>
+
+          <div class="stream-killfeed" id="streamKillfeed">
+            <span class="kill-entry">⚡ <strong>TenZ</strong> [Operator] headshot <strong>Boaster</strong></span>
+          </div>
+
+          <div class="stream-watermark">
+            <span class="wm-twitch">TWITCH.TV / VORTEXARENALIVE</span>
+            <span class="wm-res">1080p60 • ULTRA HD</span>
+          </div>
+        </div>
+
+        <!-- Video Player Controls -->
+        <div class="stream-controls-bar">
+          <button type="button" class="ctrl-btn" id="streamPlayBtn" onclick="toggleStreamPlayback()" aria-label="Pause/Play stream">⏸ Pause</button>
+          <button type="button" class="ctrl-btn" id="streamMuteBtn" onclick="toggleStreamMute()" aria-label="Mute/Unmute stream">🔊 Mute</button>
+          <div class="stream-status-pill">● 0.8s LATENCY TO BROADCASTER</div>
+          <div class="stream-quality-badge">SOURCE (1080p60)</div>
+        </div>
+      </div>
+
+      <!-- Right: Real-time Live Twitch Chat -->
+      <aside class="stream-chat-container" id="streamChatContainer" aria-label="Live Stream Chat">
+        <div class="chat-header">
+          <div class="chat-header-title">
+            <span>STREAM CHAT</span>
+            <span class="chat-sub-mode">Subscribers &amp; Followers</span>
+          </div>
+          <span class="chat-live-indicator">● LIVE</span>
+        </div>
+
+        <div class="chat-messages-feed" id="chatMessagesFeed" role="log" aria-live="polite">
+          <!-- Populated dynamically by script.js -->
+        </div>
+
+        <form class="chat-input-form" id="chatInputForm" onsubmit="handleSendChatMessage(event)">
+          <input
+            type="text"
+            id="chatUserMessageInput"
+            placeholder="Send a message in chat..."
+            maxlength="140"
+            autocomplete="off"
+            aria-label="Send a chat message"
+          />
+          <button type="submit" class="chat-send-btn" aria-label="Send message">➤</button>
+        </form>
+      </aside>
+    </div>
+  </div>
+  <!-- ===== END Issue #196 ===== -->
+
 </body>
 </html>

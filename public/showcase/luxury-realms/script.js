@@ -1,28 +1,147 @@
-function inquireConcierge() {
-  var modal = document.getElementById('conciergeModal');
-  if (!modal) return;
-  modal.hidden = false;
-  var contact = document.getElementById('conciergeContact');
-  if (contact) contact.focus();
-}
-
-function closeConcierge() {
-  var modal = document.getElementById('conciergeModal');
-  if (modal) modal.hidden = true;
-}
-
+/* ===== Concierge inquiry modal ===== */
 (function () {
+  'use strict';
+
+  var modal = document.getElementById('conciergeModal');
   var form = document.getElementById('conciergeForm');
-  if (!form) return;
+
+  if (!modal || !form) return;
+
+  var closeButton = document.getElementById('conciergeClose');
+  var contactInput = document.getElementById('conciergeContact');
+  var arrivalInput = document.getElementById('conciergeArrival');
+  var departureInput = document.getElementById('conciergeDeparture');
+  var confirmation = document.getElementById('conciergeConfirmation');
+
+  var lastFocusedElement = null;
+
+  function getLocalDateValue(date) {
+    var year = date.getFullYear();
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var day = String(date.getDate()).padStart(2, '0');
+
+    return year + '-' + month + '-' + day;
+  }
+
+  var today = getLocalDateValue(new Date());
+
+  arrivalInput.min = today;
+  departureInput.min = today;
+
+  // Keep departure date on or after arrival date.
+  arrivalInput.addEventListener('change', function () {
+    departureInput.min = arrivalInput.value || today;
+
+    if (
+      departureInput.value &&
+      departureInput.value < departureInput.min
+    ) {
+      departureInput.value = '';
+    }
+  });
+
+  // Open concierge modal.
+  window.inquireConcierge = function () {
+    lastFocusedElement = document.activeElement;
+
+    form.reset();
+    form.hidden = false;
+
+    confirmation.hidden = true;
+    confirmation.textContent = '';
+
+    arrivalInput.min = today;
+    departureInput.min = today;
+
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    if (contactInput) {
+      contactInput.focus();
+    }
+  };
+
+  // Close concierge modal.
+  window.closeConcierge = function () {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+
+    if (
+      lastFocusedElement &&
+      typeof lastFocusedElement.focus === 'function'
+    ) {
+      lastFocusedElement.focus();
+    }
+  };
+
+  // Close using close button.
+  if (closeButton) {
+    closeButton.addEventListener(
+      'click',
+      window.closeConcierge
+    );
+  }
+
+  // Close when clicking outside the modal card.
+  modal.addEventListener('click', function (event) {
+    if (event.target === modal) {
+      window.closeConcierge();
+    }
+  });
+
+  // Close using Escape key.
+  window.addEventListener('keydown', function (event) {
+    if (!modal.hidden && event.key === 'Escape') {
+      window.closeConcierge();
+    }
+  });
+
+  // Handle inquiry form submission.
   form.addEventListener('submit', function (event) {
     event.preventDefault();
+
     if (!form.reportValidity()) return;
+
     var data = new FormData(form);
-    var confirmation = document.getElementById('conciergeConfirmation');
-    confirmation.textContent = 'Your ' + data.get('conciergeMethod') + ' briefing request is confirmed. Our private desk will be in touch shortly.';
-    confirmation.hidden = false;
+
+    var destination = data.get('destination');
+    var arrival = data.get('arrival');
+    var departure = data.get('departure');
+    var guests = data.get('guests');
+    var method = data.get('conciergeMethod');
+
+    // Validate date range.
+    if (departure < arrival) {
+      departureInput.setCustomValidity(
+        'Departure must be after arrival.'
+      );
+
+      departureInput.reportValidity();
+      departureInput.setCustomValidity('');
+
+      return;
+    }
+
+    // Display confirmation.
+    confirmation.textContent =
+      'Thank you. Your inquiry for ' +
+      destination +
+      ' from ' +
+      arrival +
+      ' to ' +
+      departure +
+      ' for ' +
+      guests +
+      ' guest(s) has been received. ' +
+      'Your preferred contact method is ' +
+      method +
+      '. This is a demo confirmation; no booking has been made.';
+
     form.hidden = true;
+    confirmation.hidden = false;
+    confirmation.focus();
   });
+
 })();
 
 /* ===== BEGIN issue #76: travel curator and printable itinerary ===== */

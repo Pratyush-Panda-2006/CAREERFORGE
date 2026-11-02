@@ -231,6 +231,198 @@ function runSecurityScan() {
 })();
 /* ===== END issue #97 ===== */
 
+/* ===== BEGIN issue #182: CVE vulnerability explorer ===== */
+(function initCveExplorer() {
+  'use strict';
+  var listEl = document.getElementById('cveList');
+  var minEl = document.getElementById('cveMin');
+  var maxEl = document.getElementById('cveMax');
+  if (!listEl || !minEl || !maxEl) return;
+
+  var minOut = document.getElementById('cveMinOut');
+  var maxOut = document.getElementById('cveMaxOut');
+  var scaleEl = document.querySelector('#cveRange .cve-scale');
+  var showingEl = document.getElementById('cveShowing');
+  var emptyEl = document.getElementById('cveEmpty');
+  var sevRadios = document.querySelectorAll('input[name="cve-sev"]');
+  var exRadios = document.querySelectorAll('input[name="cve-ex"]');
+
+  // Scores are kept in tenths (98 = 9.8) so range comparisons never hit float rounding.
+  var BANDS = {
+    all: { label: 'All severities', lo: 0, hi: 100 },
+    critical: { label: 'Critical', lo: 90, hi: 100 },
+    high: { label: 'High', lo: 70, hi: 89 },
+    medium: { label: 'Medium', lo: 40, hi: 69 },
+    low: { label: 'Low', lo: 1, hi: 39 }
+  };
+
+  var EXPLOIT = {
+    active: { label: 'Exploited in the wild', icon: '⚠' },
+    poc: { label: 'Public PoC', icon: '◆' },
+    none: { label: 'No known exploit', icon: '○' }
+  };
+
+  // Invented demo entries, none of these describe a real advisory.
+  var CVES = [
+    { id: 'CVE-2026-10430', title: 'Unauthenticated command injection in the Zenith firmware updater', product: 'Zenith Updater 2.1', date: '2026-10-27', score: 100, ex: 'active' },
+    { id: 'CVE-2026-10412', title: 'Remote code execution through the Sentinel Edge Gateway admin API', product: 'Edge Gateway 4.2', date: '2026-10-24', score: 98, ex: 'active' },
+    { id: 'CVE-2026-10388', title: 'Authentication bypass in the VaultSync SSO connector', product: 'VaultSync 3.7', date: '2026-10-21', score: 91, ex: 'active' },
+    { id: 'CVE-2026-09977', title: 'Unsafe deserialization in the Orbit Queue message broker', product: 'Orbit Queue 1.9', date: '2026-10-09', score: 90, ex: 'poc' },
+    { id: 'CVE-2026-10105', title: 'SQL injection in the HelioCRM report builder', product: 'HelioCRM 8.0', date: '2026-10-16', score: 88, ex: 'active' },
+    { id: 'CVE-2026-09750', title: 'Path traversal in the NimbusFS file server download handler', product: 'NimbusFS 5.3', date: '2026-10-02', score: 81, ex: 'poc' },
+    { id: 'CVE-2026-10231', title: 'Local privilege escalation in the Kestrel endpoint agent driver', product: 'Kestrel Agent 6.4', date: '2026-10-19', score: 78, ex: 'poc' },
+    { id: 'CVE-2026-09601', title: 'Heap overflow when decoding crafted images in PixelDecode', product: 'PixelDecode 0.14', date: '2026-09-28', score: 75, ex: 'none' },
+    { id: 'CVE-2026-10290', title: 'Server side request forgery in the Lattice webhook relay', product: 'Lattice Relay 2.6', date: '2026-10-22', score: 72, ex: 'none' },
+    { id: 'CVE-2026-09418', title: 'Stored cross-site scripting in the Pylon admin dashboard', product: 'Pylon 11.2', date: '2026-09-17', score: 61, ex: 'poc' },
+    { id: 'CVE-2026-10347', title: 'Weak TLS cipher fallback in the Quill mail relay', product: 'Quill Relay 3.0', date: '2026-10-25', score: 56, ex: 'none' },
+    { id: 'CVE-2026-10019', title: 'Open redirect on the Meridian login page', product: 'Meridian Portal 7.5', date: '2026-10-11', score: 54, ex: 'none' },
+    { id: 'CVE-2026-09833', title: 'Information disclosure in the Tessera log exporter', product: 'Tessera 2.2', date: '2026-10-05', score: 53, ex: 'none' },
+    { id: 'CVE-2026-09266', title: 'Cross-site request forgery on the Basalt settings form', product: 'Basalt CMS 4.8', date: '2026-09-09', score: 43, ex: 'poc' },
+    { id: 'CVE-2026-09102', title: 'Verbose error messages leak stack traces in the Cobalt API', product: 'Cobalt API 1.12', date: '2026-08-30', score: 37, ex: 'none' },
+    { id: 'CVE-2026-09555', title: 'Clickjacking possible on the Ember status page', product: 'Ember Status 2.0', date: '2026-09-23', score: 31, ex: 'none' },
+    { id: 'CVE-2026-08871', title: 'Missing HTTP security headers in the Ridge CDN console', product: 'Ridge Console 9.1', date: '2026-08-14', score: 21, ex: 'none' }
+  ];
+
+  var state = { min: 0, max: 100, ex: 'any' };
+
+  function bandOf(score) {
+    if (score >= 90) return 'critical';
+    if (score >= 70) return 'high';
+    if (score >= 40) return 'medium';
+    return 'low';
+  }
+
+  function fmt(tenths) { return (tenths / 10).toFixed(1); }
+
+  function exMatches(c) { return state.ex === 'any' || c.ex === state.ex; }
+
+  // The severity pill that matches the current range exactly, or '' for a custom range.
+  function matchingBand() {
+    for (var k in BANDS) {
+      if (BANDS[k].lo === state.min && BANDS[k].hi === state.max) return k;
+    }
+    return '';
+  }
+
+  function badge(tag, cls, text) {
+    var s = document.createElement(tag);
+    s.className = cls;
+    s.textContent = text;
+    return s;
+  }
+
+  function buildItem(c) {
+    var band = bandOf(c.score);
+    var li = document.createElement('li');
+    li.className = 'cve-item cve-' + band;
+
+    var main = document.createElement('div');
+    main.className = 'cve-main';
+    var idRow = document.createElement('div');
+    idRow.className = 'cve-idrow';
+    idRow.appendChild(badge('span', 'cve-id', c.id));
+    idRow.appendChild(badge('span', 'cve-exploit-badge cve-ex-' + c.ex, EXPLOIT[c.ex].icon + ' ' + EXPLOIT[c.ex].label));
+    main.appendChild(idRow);
+    main.appendChild(badge('h3', 'cve-title', c.title));
+    main.appendChild(badge('p', 'cve-meta', c.product + ' · Published ' + c.date));
+
+    var score = document.createElement('div');
+    score.className = 'cve-score';
+    score.appendChild(badge('span', 'cve-badge', fmt(c.score) + ' ' + BANDS[band].label));
+    var meter = document.createElement('span');
+    meter.className = 'cve-meter';
+    meter.setAttribute('aria-hidden', 'true');
+    var fill = document.createElement('span');
+    fill.className = 'cve-meter-fill';
+    fill.style.width = c.score + '%';
+    meter.appendChild(fill);
+    score.appendChild(meter);
+
+    li.appendChild(main);
+    li.appendChild(score);
+    return li;
+  }
+
+  function render() {
+    var shown = CVES.filter(function (c) { return c.score >= state.min && c.score <= state.max && exMatches(c); });
+
+    listEl.textContent = '';
+    shown.forEach(function (c) { listEl.appendChild(buildItem(c)); });
+    emptyEl.hidden = shown.length > 0;
+
+    minOut.textContent = fmt(state.min);
+    maxOut.textContent = fmt(state.max);
+    minEl.setAttribute('aria-valuetext', fmt(state.min));
+    maxEl.setAttribute('aria-valuetext', fmt(state.max));
+    scaleEl.style.setProperty('--cve-lo', state.min + '%');
+    scaleEl.style.setProperty('--cve-hi', (100 - state.max) + '%');
+
+    // Counts on the pills follow the exploitability filter only, so a pill shows what it would give you.
+    var counts = { all: 0, critical: 0, high: 0, medium: 0, low: 0 };
+    CVES.forEach(function (c) { if (exMatches(c)) { counts.all++; counts[bandOf(c.score)]++; } });
+    for (var k in counts) {
+      var el = document.getElementById('cveCount' + k.charAt(0).toUpperCase() + k.slice(1));
+      if (el) el.textContent = counts[k];
+    }
+
+    var band = matchingBand();
+    for (var i = 0; i < sevRadios.length; i++) sevRadios[i].checked = sevRadios[i].value === band;
+
+    var range = 'CVSS ' + fmt(state.min) + ' to ' + fmt(state.max);
+    var exText = state.ex === 'any' ? '' : ', ' + EXPLOIT[state.ex].label.toLowerCase();
+    showingEl.textContent = 'Showing ' + shown.length + ' of ' + CVES.length + ' vulnerabilities (' + range + exText + ').';
+  }
+
+  function onSlider(which) {
+    var v = Math.round(parseFloat((which === 'min' ? minEl : maxEl).value) * 10);
+    if (which === 'min') state.min = Math.min(v, state.max);
+    else state.max = Math.max(v, state.min);
+    // Keep the thumbs honest when one tries to cross the other.
+    minEl.value = state.min / 10;
+    maxEl.value = state.max / 10;
+    render();
+  }
+
+  function syncSliders() {
+    minEl.value = state.min / 10;
+    maxEl.value = state.max / 10;
+  }
+
+  function reset() {
+    state.min = 0; state.max = 100; state.ex = 'any';
+    syncSliders();
+    for (var i = 0; i < exRadios.length; i++) exRadios[i].checked = exRadios[i].value === 'any';
+    render();
+  }
+
+  minEl.addEventListener('input', function () { onSlider('min'); });
+  maxEl.addEventListener('input', function () { onSlider('max'); });
+
+  for (var i = 0; i < sevRadios.length; i++) {
+    sevRadios[i].addEventListener('change', function (e) {
+      var b = BANDS[e.target.value];
+      if (!b) return;
+      state.min = b.lo; state.max = b.hi;
+      syncSliders();
+      render();
+    });
+  }
+  for (var j = 0; j < exRadios.length; j++) {
+    exRadios[j].addEventListener('change', function (e) {
+      state.ex = e.target.value;
+      render();
+    });
+  }
+  document.getElementById('cveReset').addEventListener('click', reset);
+  document.getElementById('cveEmptyReset').addEventListener('click', function () {
+    reset();
+    document.getElementById('cveReset').focus();
+  });
+
+  render();
+})();
+/* ===== END issue #182 ===== */
+
 // ---------------------------------------------------------------
 // Password strength analyzer
 // ---------------------------------------------------------------
@@ -928,3 +1120,133 @@ function renderAnalysis(pw) {
   renderIncidents();
 })();
 
+/* ===== BEGIN issue #183: network port scanner simulator ===== */
+(function initPortScanner() {
+  const form = document.getElementById('psForm');
+  const input = document.getElementById('psTarget');
+  const button = document.getElementById('psScanBtn');
+  const consoleEl = document.getElementById('psConsole');
+  const status = document.getElementById('psStatus');
+  const error = document.getElementById('psError');
+  const rows = Array.from(document.querySelectorAll('#psResults .ps-row'));
+  if (!form || !input || !button || !consoleEl || !status || !error || !rows.length) return;
+
+  const STEP_MS = 650;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const STATE_TEXT = { idle: 'Not scanned', scanning: 'Scanning', open: 'Open', closed: 'Closed', filtered: 'Filtered (timeout)' };
+  let timers = [];
+
+  // A host is an IPv4 address (each octet 0-255) or a dotted hostname of letters, digits and hyphens.
+  function parseTarget(raw) {
+    const value = raw.trim().toLowerCase();
+    if (!value) return { error: 'Enter an IP address or hostname.' };
+    if (value.length > 253) return { error: 'That hostname is too long.' };
+    if (/^[0-9.]+$/.test(value)) {
+      const parts = value.split('.');
+      const ok = parts.length === 4 && parts.every((p) => /^\d{1,3}$/.test(p) && Number(p) <= 255);
+      return ok ? { host: value } : { error: 'Not a valid IPv4 address. Use four numbers from 0 to 255.' };
+    }
+    const labels = value.split('.');
+    const ok = labels.every((l) => /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(l));
+    return ok ? { host: value } : { error: 'Not a valid hostname. Use letters, digits, hyphens and dots.' };
+  }
+
+  // Small seeded generator so one host always produces the same scan.
+  function seedFrom(text) {
+    let h = 2166136261;
+    for (let i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  function makeRandom(seed) {
+    let s = seed || 1;
+    return () => {
+      s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+  }
+
+  function simulate(host) {
+    const rand = makeRandom(seedFrom(host));
+    const base = 8 + Math.floor(rand() * 70);
+    return rows.map((row) => {
+      const roll = rand();
+      const state = roll < 0.45 ? 'open' : roll < 0.8 ? 'closed' : 'filtered';
+      const latency = state === 'filtered' ? null : Math.round(base + rand() * 90);
+      return { row, state, latency };
+    });
+  }
+
+  function speedOf(ms) {
+    return ms < 40 ? 'fast' : ms < 100 ? 'ok' : 'slow';
+  }
+
+  function paint(row, state, latency) {
+    const stateEl = row.querySelector('.ps-state');
+    const latEl = row.querySelector('.ps-lat');
+    stateEl.dataset.state = state;
+    stateEl.textContent = STATE_TEXT[state];
+    row.classList.toggle('scanning', state === 'scanning');
+    if (latency == null) {
+      latEl.textContent = state === 'filtered' ? 'timeout' : '-';
+      latEl.removeAttribute('data-speed');
+    } else {
+      latEl.textContent = latency + ' ms';
+      latEl.dataset.speed = speedOf(latency);
+    }
+  }
+
+  function finish(host, results) {
+    const open = results.filter((r) => r.state === 'open').length;
+    consoleEl.classList.remove('scanning');
+    consoleEl.setAttribute('aria-busy', 'false');
+    button.disabled = false;
+    button.textContent = 'Scan Host';
+    status.textContent = 'Scan of ' + host + ' complete (simulated): ' + open + ' of ' + results.length + ' ports open.';
+  }
+
+  function runScan(host) {
+    timers.forEach(clearTimeout);
+    timers = [];
+    const results = simulate(host);
+    rows.forEach((row) => paint(row, 'idle', null));
+    consoleEl.classList.add('scanning');
+    consoleEl.setAttribute('aria-busy', 'true');
+    button.disabled = true;
+    button.textContent = 'Scanning...';
+    status.textContent = 'Scanning ' + host + ' (simulated)...';
+
+    results.forEach((result, i) => {
+      const delay = reduceMotion ? 0 : STEP_MS * i;
+      timers.push(setTimeout(() => paint(result.row, 'scanning', null), delay));
+      timers.push(setTimeout(() => {
+        paint(result.row, result.state, result.latency);
+        if (i === results.length - 1) finish(host, results);
+      }, delay + (reduceMotion ? 0 : STEP_MS * 0.9)));
+    });
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (button.disabled) return;
+    const parsed = parseTarget(input.value);
+    if (parsed.error) {
+      error.textContent = parsed.error;
+      error.hidden = false;
+      input.setAttribute('aria-invalid', 'true');
+      input.focus();
+      return;
+    }
+    error.hidden = true;
+    input.removeAttribute('aria-invalid');
+    runScan(parsed.host);
+  });
+
+  input.addEventListener('input', () => {
+    error.hidden = true;
+    input.removeAttribute('aria-invalid');
+  });
+})();
+/* ===== END issue #183 ===== */
