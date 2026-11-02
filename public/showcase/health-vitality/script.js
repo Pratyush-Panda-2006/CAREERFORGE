@@ -921,3 +921,147 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize display
   renderMealPlanner();
 });
+
+//daily sleep tracker
+document.addEventListener('DOMContentLoaded', () => {
+  const STEP_GOAL = 10000;
+  const STORAGE_KEY = 'vitalityAI-step-tracker';
+
+  const countDisplay = document.getElementById('step-count');
+  const progressFill = document.getElementById('step-progress-fill');
+  const progressTrack = document.getElementById('step-progress-track');
+  const percentageDisplay = document.getElementById('step-percentage');
+  const remainingDisplay = document.getElementById('steps-remaining');
+  const statusDisplay = document.getElementById('step-status');
+  const messageDisplay = document.getElementById('step-tracker-message');
+
+  const manualInput = document.getElementById('step-manual-input');
+  const decreaseButton = document.getElementById('step-decrease');
+  const increaseButton = document.getElementById('step-increase');
+  const badges = document.querySelectorAll('.step-badge');
+
+  // Stop if the tracker is not present.
+  if (
+    !countDisplay ||
+    !progressFill ||
+    !progressTrack ||
+    !manualInput ||
+    !decreaseButton ||
+    !increaseButton
+  ) {
+    return;
+  }
+
+  const today = new Date().toLocaleDateString('en-CA');
+
+  let stepCount = 0;
+
+  // Restore today's saved count.
+  try {
+    const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+    if (
+      savedData &&
+      savedData.date === today &&
+      Number.isInteger(savedData.count) &&
+      savedData.count >= 0
+    ) {
+      stepCount = savedData.count;
+    }
+  } catch (error) {
+    console.warn('Unable to restore step tracker data:', error);
+  }
+
+  function saveSteps() {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          date: today,
+          count: stepCount
+        })
+      );
+    } catch (error) {
+      console.warn('Unable to save step tracker data:', error);
+    }
+  }
+
+  function updateStepTracker() {
+    const percentage = Math.min(
+      (stepCount / STEP_GOAL) * 100,
+      100
+    );
+
+    const remaining = Math.max(STEP_GOAL - stepCount, 0);
+
+    countDisplay.textContent = stepCount.toLocaleString('en-US');
+    manualInput.value = stepCount;
+
+    progressFill.style.width = `${percentage}%`;
+    progressTrack.setAttribute('aria-valuenow', Math.min(stepCount, STEP_GOAL));
+
+    percentageDisplay.textContent = `${Math.round(percentage)}% completed`;
+
+    remainingDisplay.textContent = remaining > 0
+      ? `${remaining.toLocaleString('en-US')} steps remaining`
+      : 'Daily goal completed!';
+
+    decreaseButton.disabled = stepCount === 0;
+
+    // Update status and feedback.
+    if (stepCount === 0) {
+      statusDisplay.textContent = 'Ready to get moving?';
+      messageDisplay.textContent = 'Every step counts. Keep moving at your own pace! 💚';
+    } else if (stepCount >= STEP_GOAL) {
+      statusDisplay.textContent = 'Daily goal achieved! 🎉';
+      messageDisplay.textContent = 'Congratulations! You have reached your daily step goal.';
+    } else {
+      statusDisplay.textContent = `${Math.round(percentage)}% of your daily goal`;
+      messageDisplay.textContent = 'Nice progress! Every step brings you closer to your goal.';
+    }
+
+    // Unlock milestone badges.
+    badges.forEach(badge => {
+      const milestone = Number(badge.dataset.milestone);
+      const unlocked = stepCount >= milestone;
+
+      badge.classList.toggle('unlocked', unlocked);
+      badge.classList.toggle('locked', !unlocked);
+
+      badge.setAttribute('aria-label',
+        `${badge.querySelector('strong').textContent}: ${unlocked ? 'Unlocked' : 'Locked'}`
+      );
+    });
+
+    saveSteps();
+  }
+
+  // Add 500 steps.
+  increaseButton.addEventListener('click', () => {
+    stepCount = Math.min(stepCount + 500, 100000);
+    updateStepTracker();
+  });
+
+  // Remove 500 steps.
+  decreaseButton.addEventListener('click', () => {
+    stepCount = Math.max(stepCount - 500, 0);
+    updateStepTracker();
+  });
+
+  // Allow manual step-count entry.
+  manualInput.addEventListener('change', () => {
+    const enteredValue = Number(manualInput.value);
+
+    if (!Number.isInteger(enteredValue) || enteredValue < 0) {
+      manualInput.value = stepCount;
+      return;
+    }
+
+    stepCount = Math.min(enteredValue, 100000);
+    updateStepTracker();
+  });
+
+  updateStepTracker();
+
+  console.log('VitalityAI Daily Step Tracker ready');
+});

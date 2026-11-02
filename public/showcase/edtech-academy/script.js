@@ -1651,3 +1651,152 @@ function showCertificate(name) {
   renderChallenge('two-sum');
 })();
 /* ===== END Issue #191 ===== */
+
+/* ===== BEGIN Issue #190: Student Testimonials Slider ===== */
+(function initTestimonialSlider() {
+  'use strict';
+
+  const slider = document.getElementById('testimonialSlider');
+  const track = document.getElementById('testimonialTrack');
+  const prevBtn = document.getElementById('testimonialPrev');
+  const nextBtn = document.getElementById('testimonialNext');
+  const dotsContainer = document.getElementById('testimonialDots');
+  const status = document.getElementById('testimonialStatus');
+
+  if (!slider || !track || !prevBtn || !nextBtn || !dotsContainer) return;
+
+  const cards = Array.from(track.querySelectorAll('.testimonial-card'));
+
+  if (!cards.length) return;
+
+  let currentIndex = 0;
+  let maxIndex = 0;
+  let resizeTimer;
+
+  function getVisibleCards() {
+    if (window.innerWidth <= 640) return 1;
+    if (window.innerWidth <= 1024) return 2;
+    return 3;
+  }
+
+  function getStepSize() {
+    if (cards.length < 2) return cards[0].getBoundingClientRect().width;
+
+    const first = cards[0].getBoundingClientRect();
+    const second = cards[1].getBoundingClientRect();
+
+    return second.left - first.left;
+  }
+
+  function createDots() {
+    dotsContainer.replaceChildren();
+
+    const totalDots = maxIndex + 1;
+
+    for (let i = 0; i < totalDots; i++) {
+      const dot = document.createElement('button');
+
+      dot.type = 'button';
+      dot.className = 'testimonial-dot';
+      dot.setAttribute('aria-label', `Go to testimonial position ${i + 1}`);
+
+      dot.addEventListener('click', () => {
+        currentIndex = i;
+        updateSlider();
+      });
+
+      dotsContainer.appendChild(dot);
+    }
+  }
+
+  function updateSlider() {
+    const step = getStepSize();
+
+    track.style.transform = `translateX(-${currentIndex * step}px)`;
+
+    const dots = dotsContainer.querySelectorAll('.testimonial-dot');
+
+    dots.forEach((dot, index) => {
+      const isActive = index === currentIndex;
+
+      dot.classList.toggle('active', isActive);
+      dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+    });
+
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex >= maxIndex;
+
+    if (status) {
+      status.textContent = `Showing testimonial ${currentIndex + 1} of ${cards.length}`;
+    }
+  }
+
+  function recalculateSlider() {
+    const visibleCards = getVisibleCards();
+
+    maxIndex = Math.max(0, cards.length - visibleCards);
+    currentIndex = Math.min(currentIndex, maxIndex);
+
+    createDots();
+    updateSlider();
+  }
+
+  function goNext() {
+    if (currentIndex < maxIndex) {
+      currentIndex++;
+      updateSlider();
+    }
+  }
+
+  function goPrevious() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      updateSlider();
+    }
+  }
+
+  prevBtn.addEventListener('click', goPrevious);
+  nextBtn.addEventListener('click', goNext);
+
+  // Keyboard navigation
+  slider.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      goNext();
+    }
+
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      goPrevious();
+    }
+  });
+
+  // Touch swipe support
+  let touchStartX = 0;
+
+  track.addEventListener('touchstart', (event) => {
+    touchStartX = event.changedTouches[0].screenX;
+  }, { passive: true });
+
+  track.addEventListener('touchend', (event) => {
+    const touchEndX = event.changedTouches[0].screenX;
+    const difference = touchStartX - touchEndX;
+
+    if (Math.abs(difference) < 40) return;
+
+    if (difference > 0) {
+      goNext();
+    } else {
+      goPrevious();
+    }
+  }, { passive: true });
+
+  // Recalculate visible cards when the viewport changes
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(recalculateSlider, 150);
+  });
+
+  recalculateSlider();
+})();
+/* ===== END Issue #190 ===== */

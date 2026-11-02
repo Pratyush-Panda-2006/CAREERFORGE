@@ -1,137 +1,186 @@
-/* ===== Performance Comparator (issue #52) START ===== */
+/* ===== Hypercar Comparison Matrix (issue #176) START ===== */
 (function () {
   'use strict';
 
-  // ---- Data block. Every figure is approximate (see the note on the page). ----
-  var CARS = {
-    apex:   { name: 'Apex Zero (concept)',      cls: '',              zeroSixty: 1.74, quarterMile: 8.9, topSpeed: 258, gForce: 1.8 },
-    chiron: { name: 'Bugatti Chiron Super Sport', cls: 'cmp-rival-a', zeroSixty: 2.4,  quarterMile: 9.5, topSpeed: 273, gForce: 1.5 },
-    jesko:  { name: 'Koenigsegg Jesko',         cls: 'cmp-rival-b',   zeroSixty: 2.5,  quarterMile: 9.3, topSpeed: 300, gForce: 1.6 }
-  };
-  var HERO = 'apex';
-  var RIVALS = ['chiron', 'jesko'];
-  var ALL_RIVALS = 'both';
-  var DEFAULT_RIVAL = 'chiron';
-
-  // lowerIsBetter rows are inverted: the bar is best / value, so the best car always fills 100%.
-  var METRICS = [
-    { key: 'zeroSixty',   label: '0-60 MPH',     unit: ' s',   decimals: 2, lowerIsBetter: true },
-    { key: 'quarterMile', label: 'QUARTER MILE', unit: ' s',   decimals: 1, lowerIsBetter: true },
-    { key: 'topSpeed',    label: 'TOP SPEED',    unit: ' mph', decimals: 0, lowerIsBetter: false },
-    { key: 'gForce',      label: 'PEAK G-FORCE', unit: ' g',   decimals: 1, lowerIsBetter: false }
+  const vehicles = [
+    {
+      id: 'apex',
+      name: 'Apex Zero',
+      horsepower: 1900,
+      horsepowerLabel: '1,900 hp*',
+      topSpeed: 258,
+      topSpeedLabel: '258 mph*',
+      downforce: null,
+      downforceLabel: '480 kg*',
+      curbWeight: null,
+      curbWeightLabel: 'N/P'
+    },
+    {
+      id: 'bugatti',
+      name: 'Bugatti Chiron Super Sport 300+',
+      horsepower: 1578,
+      horsepowerLabel: '1,578 hp',
+      topSpeed: 273,
+      topSpeedLabel: '273 mph',
+      downforce: null,
+      downforceLabel: 'N/P',
+      curbWeight: 1995,
+      curbWeightLabel: '1,995 kg'
+    },
+    {
+      id: 'jesko',
+      name: 'Koenigsegg Jesko Attack',
+      horsepower: 1600,
+      horsepowerLabel: '1,600 hp',
+      topSpeed: null,
+      topSpeedLabel: 'N/P',
+      downforce: 700,
+      downforceLabel: '700 kg @ 250 km/h',
+      curbWeight: 1420,
+      curbWeightLabel: '1,420 kg'
+    },
+    {
+      id: 'ssc',
+      name: 'SSC Tuatara',
+      horsepower: 1750,
+      horsepowerLabel: '1,750 hp',
+      topSpeed: null,
+      topSpeedLabel: 'N/P',
+      downforce: null,
+      downforceLabel: 'N/P',
+      curbWeight: null,
+      curbWeightLabel: 'N/P'
+    }
   ];
 
-  var els = {};
-  var rowRefs = {};   // metric key -> { carId -> { wrap, fill, val, tag } }
+  const metrics = [
+    {
+      key: 'horsepower',
+      label: 'HORSEPOWER',
+      higherIsBetter: true,
+      comparable: true
+    },
+    {
+      key: 'topSpeed',
+      label: 'TOP SPEED',
+      higherIsBetter: true,
+      comparable: false
+    },
+    {
+      key: 'downforce',
+      label: 'AERODYNAMIC DOWNFORCE',
+      higherIsBetter: true,
+      comparable: false
+    },
+    {
+      key: 'curbWeight',
+      label: 'CURB WEIGHT',
+      higherIsBetter: false,
+      comparable: true
+    }
+  ];
 
-  // ---- Pure helpers ----
-  function activeCars(selection) {
-    return selection === ALL_RIVALS ? [HERO].concat(RIVALS) : [HERO, selection];
+  const tableBody = document.getElementById('cmp-table-body');
+  const focusSelect = document.getElementById('cmp-focus');
+  const summary = document.getElementById('cmp-summary');
+
+  if (!tableBody || !focusSelect || !summary) return;
+
+  function getWinner(metric) {
+    if (!metric.comparable) return null;
+
+    // Exclude Apex because its specifications are fictional concept targets.
+    const publishedVehicles = vehicles.filter(vehicle =>
+      vehicle.id !== 'apex' &&
+      typeof vehicle[metric.key] === 'number'
+    );
+
+    if (!publishedVehicles.length) return null;
+
+    const bestValue = metric.higherIsBetter
+      ? Math.max(...publishedVehicles.map(vehicle => vehicle[metric.key]))
+      : Math.min(...publishedVehicles.map(vehicle => vehicle[metric.key]));
+
+    return publishedVehicles.find(
+      vehicle => vehicle[metric.key] === bestValue
+    )?.id || null;
   }
 
-  function bestValue(metric, ids) {
-    var values = ids.map(function (id) { return CARS[id][metric.key]; });
-    return metric.lowerIsBetter ? Math.min.apply(null, values) : Math.max.apply(null, values);
-  }
+  function renderMatrix() {
+    tableBody.innerHTML = '';
 
-  // Bar width in percent, relative to the best value in the row.
-  function barPercent(metric, value, best) {
-    return (metric.lowerIsBetter ? best / value : value / best) * 100;
-  }
+    metrics.forEach(metric => {
+      const row = document.createElement('tr');
+      const heading = document.createElement('th');
 
-  function fmt(metric, value) { return value.toFixed(metric.decimals) + metric.unit; }
+      heading.scope = 'row';
+      heading.textContent = metric.label;
+      row.appendChild(heading);
 
-  function el(tag, cls, text) {
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text !== undefined) n.textContent = text;
-    return n;
-  }
+      const winner = getWinner(metric);
 
-  // ---- Build once, then only update widths so the bars animate between selections ----
-  function build() {
-    METRICS.forEach(function (m) {
-      var row = el('li', 'cmp-row');
-      var head = el('div', 'cmp-row-head');
-      head.appendChild(el('span', 'cmp-metric', m.label));
-      head.appendChild(el('span', 'cmp-hint', m.lowerIsBetter ? 'lower is better, bar inverted' : 'higher is better'));
-      row.appendChild(head);
-      rowRefs[m.key] = {};
-      [HERO].concat(RIVALS).forEach(function (id) {
-        var wrap = el('div', 'cmp-car ' + CARS[id].cls);
-        wrap.appendChild(el('span', 'cmp-name', CARS[id].name));
-        var track = el('span', 'cmp-track');
-        track.setAttribute('aria-hidden', 'true');
-        var fill = el('span', 'cmp-fill');
-        track.appendChild(fill);
-        wrap.appendChild(track);
-        var val = el('span', 'cmp-val');
-        var num = el('span', null, '');
-        var tag = el('span', 'cmp-best', 'BEST');
-        val.appendChild(num);
-        val.appendChild(tag);
-        wrap.appendChild(val);
-        row.appendChild(wrap);
-        rowRefs[m.key][id] = { wrap: wrap, fill: fill, num: num, tag: tag };
+      vehicles.forEach(vehicle => {
+        const cell = document.createElement('td');
+        cell.dataset.car = vehicle.id;
+
+        const value = document.createElement('span');
+        const displayValue = vehicle[`${metric.key}Label`];
+
+        value.textContent = displayValue;
+
+        if (displayValue === 'N/P') {
+          value.classList.add('cmp-unavailable');
+        }
+
+        cell.appendChild(value);
+
+        if (winner === vehicle.id) {
+          cell.classList.add('cmp-winner');
+
+          const badge = document.createElement('span');
+          badge.className = 'cmp-badge';
+          badge.textContent = 'LEADER';
+
+          cell.appendChild(badge);
+        }
+
+        row.appendChild(cell);
       });
-      els.grid.appendChild(row);
+
+      tableBody.appendChild(row);
     });
   }
 
-  function update() {
-    var selection = els.select.value;
-    var ids = activeCars(selection);
-    var wins = 0;
-    METRICS.forEach(function (m) {
-      var best = bestValue(m, ids);
-      var refs = rowRefs[m.key];
-      Object.keys(refs).forEach(function (id) {
-        var r = refs[id];
-        var shown = ids.indexOf(id) !== -1;
-        r.wrap.hidden = !shown;
-        if (!shown) return;
-        var v = CARS[id][m.key];
-        r.num.textContent = fmt(m, v);
-        r.fill.style.width = barPercent(m, v, best).toFixed(1) + '%';
-        r.tag.hidden = v !== best;
-      });
-      if (CARS[HERO][m.key] === best) wins++;
+  function updateFocus() {
+    const selected = focusSelect.value;
+    const columns = document.querySelectorAll(
+      '.cmp-table [data-car]'
+    );
+
+    columns.forEach(column => {
+      column.hidden = selected !== 'all' &&
+        column.dataset.car !== selected;
     });
-    var rivalNames = ids.slice(1).map(function (id) { return CARS[id].name; }).join(' and ');
-    els.summary.textContent = 'Apex Zero leads in ' + wins + ' of ' + METRICS.length + ' metrics against ' + rivalNames + '.';
-    els.key.textContent = 'Bar length shows how close a car is to the best value in that row (100% is the best). 0-60 and quarter mile are inverted because a lower time is better.';
+
+    if (selected === 'all') {
+      summary.textContent =
+        'Comparing all four vehicles across four performance metrics.';
+    } else {
+      const vehicle = vehicles.find(car => car.id === selected);
+
+      summary.textContent = vehicle
+        ? `Focusing on ${vehicle.name}.`
+        : 'Vehicle selected.';
+    }
   }
 
-  function init() {
-    els.grid = document.getElementById('cmp-grid');
-    if (!els.grid) return;
-    els.select = document.getElementById('cmp-rival');
-    els.summary = document.getElementById('cmp-summary');
-    els.key = document.getElementById('cmp-key');
+  renderMatrix();
+  updateFocus();
 
-    RIVALS.forEach(function (id) {
-      var o = document.createElement('option');
-      o.value = id;
-      o.textContent = CARS[id].name;
-      els.select.appendChild(o);
-    });
-    var both = document.createElement('option');
-    both.value = ALL_RIVALS;
-    both.textContent = 'Both benchmarks (3-way)';
-    els.select.appendChild(both);
-    els.select.value = DEFAULT_RIVAL;
+  focusSelect.addEventListener('change', updateFocus);
 
-    build();
-    update();   // first pass: bars sit at 0 until the next frame so they animate in
-    var fills = els.grid.querySelectorAll('.cmp-fill');
-    for (var i = 0; i < fills.length; i++) fills[i].style.width = '0%';
-    requestAnimationFrame(function () { requestAnimationFrame(update); });
-    els.select.addEventListener('change', update);
-  }
-
-  document.addEventListener('DOMContentLoaded', init);
 })();
-/* ===== Performance Comparator (issue #52) END ===== */
+/* ===== Hypercar Comparison Matrix (issue #176) END ===== */
 
 window.reserveHypercar = function reserveHypercar() {
   alert('Apex Zero Hypercar Reservation Allocation Request Received!');

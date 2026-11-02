@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header className="hero">
+  <header class="hero">
     <div className="brand">AURA REALMS</div>
     <h1>Exclusive Private Island Charters &amp; Aviation</h1>
     <p>Tailored ultra-high-net-worth concierge experiences across Seychelles, St. Barts, and the Swiss Alps.</p>
@@ -272,27 +272,121 @@
     </div>
   </section>
   <!-- ===== END issue #76 ===== -->
+<div
+  class="concierge-overlay"
+  id="conciergeModal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="conciergeTitle"
+  hidden
+>
+  <section class="concierge-card">
+    <button
+      type="button"
+      class="concierge-close"
+      id="conciergeClose"
+      aria-label="Close inquiry"
+    >&times;</button>
 
-  <div class="concierge-overlay" id="conciergeModal" role="dialog" aria-modal="true" aria-labelledby="conciergeTitle" hidden>
-    <section class="concierge-card">
-      <button type="button" class="concierge-close" aria-label="Close inquiry" onclick="closeConcierge()">&times;</button>
-      <p class="concierge-kicker">AURA REALMS · PRIVATE DESK</p>
-      <h2 id="conciergeTitle">Request a Private Briefing</h2>
-      <p class="concierge-intro">Choose your preferred channel and our concierge will arrange a discreet callback.</p>
-      <form id="conciergeForm" class="concierge-form">
-        <fieldset>
-          <legend>Preferred contact method</legend>
-          <label><input type="radio" name="conciergeMethod" value="Signal" checked> Signal</label>
-          <label><input type="radio" name="conciergeMethod" value="WhatsApp VIP"> WhatsApp VIP</label>
-          <label><input type="radio" name="conciergeMethod" value="Private Phone"> Private Phone</label>
-        </fieldset>
-        <label for="conciergeContact">Contact details</label>
-        <input id="conciergeContact" name="contact" type="text" autocomplete="off" required maxlength="120" placeholder="Phone number or account name">
-        <button class="concierge-submit" type="submit">Arrange my briefing</button>
-      </form>
-      <div class="concierge-confirmation" id="conciergeConfirmation" role="status" hidden></div>
-    </section>
-  </div>
+    <p class="concierge-kicker">AURA REALMS · PRIVATE DESK</p>
+
+    <h2 id="conciergeTitle">Your Bespoke Journey</h2>
+
+    <p class="concierge-intro">
+      Share your preferences and our concierge team will help curate
+      your private experience.
+    </p>
+
+    <form id="conciergeForm" class="concierge-form">
+
+      <label for="conciergeDestination">Preferred destination</label>
+      <select id="conciergeDestination" name="destination" required>
+        <option value="">Select a destination</option>
+        <option value="Maldives">Maldives</option>
+        <option value="Seychelles">Seychelles</option>
+        <option value="St. Barts">St. Barts</option>
+        <option value="Swiss Alps">Swiss Alps</option>
+        <option value="Undecided">Undecided</option>
+      </select>
+
+      <div class="concierge-field-row">
+        <div>
+          <label for="conciergeArrival">Arrival date</label>
+          <input
+            type="date"
+            id="conciergeArrival"
+            name="arrival"
+            required
+          />
+        </div>
+
+        <div>
+          <label for="conciergeDeparture">Departure date</label>
+          <input
+            type="date"
+            id="conciergeDeparture"
+            name="departure"
+            required
+          />
+        </div>
+      </div>
+
+      <label for="conciergeGuests">Number of guests</label>
+      <input
+        type="number"
+        id="conciergeGuests"
+        name="guests"
+        min="1"
+        max="30"
+        value="2"
+        required
+      />
+
+      <fieldset>
+        <legend>Preferred contact method</legend>
+
+        <label>
+          <input type="radio" name="conciergeMethod" value="Signal" checked>
+          Signal
+        </label>
+
+        <label>
+          <input type="radio" name="conciergeMethod" value="WhatsApp VIP">
+          WhatsApp VIP
+        </label>
+
+        <label>
+          <input type="radio" name="conciergeMethod" value="Private Phone">
+          Private Phone
+        </label>
+      </fieldset>
+
+      <label for="conciergeContact">Contact details</label>
+      <input
+        id="conciergeContact"
+        name="contact"
+        type="text"
+        autocomplete="off"
+        required
+        maxlength="120"
+        placeholder="Phone number or account name"
+      />
+
+      <button class="concierge-submit" type="submit">
+        Submit Inquiry ↗
+      </button>
+    </form>
+
+    <div
+      class="concierge-confirmation"
+      id="conciergeConfirmation"
+      role="status"
+      aria-live="polite"
+      tabindex="-1"
+      hidden
+    ></div>
+  </section>
+</div>
 
   <script src="script.js"></script>
 </body>
