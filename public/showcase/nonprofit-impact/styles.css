@@ -2230,6 +2230,179 @@ body {
 
 }
 
+/* ===============================================================
+   Community Donor Wall (Issue #202)
+================================================================== */
+
+.donor-wall {
+  max-width: 1200px;
+  margin: 0 auto 80px;
+  padding: 0 24px;
+  overflow: hidden;
+}
+
+.donor-wall-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.donor-wall-header h2 {
+  color: #fff;
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.donor-wall-header p {
+  color: var(--green-light);
+  font-size: 0.95rem;
+}
+
+.donor-wall-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-bottom: 20px;
+  color: var(--green-light);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  background: var(--green-bright);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--green);
+}
+
+.demo-label {
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--green);
+  font-size: 0.65rem;
+}
+
+.donor-marquee {
+  position: relative;
+  overflow: hidden;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+.donor-track {
+  display: flex;
+  width: max-content;
+  animation: donor-scroll 35s linear infinite;
+}
+
+.donor-list {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 16px;
+  padding-right: 16px;
+}
+
+.donor-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.donor-card:hover {
+  border-color: var(--green);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.donor-flag {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.donor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.donor-name {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.donor-impact {
+  color: var(--green-light);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+@keyframes donor-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.donor-marquee:hover .donor-track,
+.donor-marquee:focus-within .donor-track {
+  animation-play-state: paused;
+}
+
+.donor-wall-note {
+  margin-top: 14px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 520px) {
+  .donor-wall {
+    padding: 0 16px;
+  }
+
+  .donor-card {
+    min-width: 190px;
+    padding: 12px 14px;
+  }
+
+  .donor-track {
+    animation-duration: 28s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .donor-track {
+    animation: none;
+  }
+
+  .donor-marquee {
+    overflow-x: auto;
+    mask-image: none;
+  }
+}
 
 /* Donation amount selector — Issue #77 */
 .donation-modal {
