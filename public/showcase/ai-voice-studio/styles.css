@@ -269,6 +269,70 @@ body {
   to { height: 13px; }
 }
 
+/* ---------- Sample Volume & Mute Controls ---------- */
+.sample-audio-controls {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  border-radius: 8px;
+}
+
+.sample-volume-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #94a3b8;
+  font: 600 0.7rem 'JetBrains Mono', monospace;
+}
+
+.sample-volume-label output {
+  color: var(--cyan);
+}
+
+.sample-volume-slider {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--cyan);
+  cursor: pointer;
+}
+
+.sample-mute-btn {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  padding: 7px 9px;
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  border-radius: 7px;
+  background: rgba(6, 182, 212, 0.08);
+  color: #a5f3fc;
+  font: 600 0.7rem 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.sample-mute-btn:hover,
+.sample-mute-btn:focus-visible {
+  background: rgba(6, 182, 212, 0.2);
+  border-color: var(--cyan);
+}
+
+.sample-mute-btn:focus-visible,
+.sample-volume-slider:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+.sample-mute-btn[aria-pressed="true"] {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sample-play-btn.playing .sample-playing-indicator i { animation: none; height: 8px; }
 }

@@ -112,6 +112,12 @@ function initVoiceStudioTuner() {
   let isPlayingAudio = false;
   let activeSampleButton = null;
   let activeSampleUtterance = null;
+  const sampleAudioSettings = {
+  aria: { volume: 1, previousVolume: 1, muted: false },
+  marcus: { volume: 1, previousVolume: 1, muted: false },
+  elena: { volume: 1, previousVolume: 1, muted: false },
+  leo: { volume: 1, previousVolume: 1, muted: false }
+  };
 
   function resetSampleButton(button) {
     if (!button) return;
@@ -154,6 +160,8 @@ function initVoiceStudioTuner() {
     utterance.lang = model.lang;
     utterance.pitch = model.basePitch;
     utterance.rate = model.baseSpeed;
+    const audioSettings = sampleAudioSettings[button.dataset.playSample];
+    utterance.volume = audioSettings.muted ? 0 : audioSettings.volume;
 
     activeSampleButton = button;
     activeSampleUtterance = utterance;
@@ -268,6 +276,73 @@ function initVoiceStudioTuner() {
       event.stopPropagation();
       playModelSample(button);
     });
+  });
+
+  // Individual voice sample volume and mute controls.
+  document.querySelectorAll('.sample-audio-controls').forEach((controls) => {
+    const modelId = controls.dataset.model;
+    const settings = sampleAudioSettings[modelId];
+
+    if (!settings) return;
+
+    const slider = controls.querySelector('.sample-volume-slider');
+    const output = controls.querySelector('.sample-volume-label output');
+    const muteBtn = controls.querySelector('.sample-mute-btn');
+
+    function updateVolumeUI() {
+      slider.value = settings.volume;
+      output.textContent = `${Math.round(settings.volume * 100)}%`;
+
+      muteBtn.textContent = settings.muted ? '🔇 Unmute' : '🔊 Mute';
+      muteBtn.setAttribute('aria-pressed', String(settings.muted));
+      muteBtn.setAttribute(
+        'aria-label',
+        `${settings.muted ? 'Unmute' : 'Mute'} ${modelId} preview`
+      );
+    }
+
+    slider.addEventListener('input', () => {
+      settings.volume = Number(slider.value);
+
+      if (settings.volume > 0) {
+        settings.previousVolume = settings.volume;
+        settings.muted = false;
+      } else {
+        settings.muted = true;
+      }
+
+      if (
+        activeSampleUtterance &&
+        activeSampleButton?.dataset.playSample === modelId
+      ) {
+        activeSampleUtterance.volume = settings.muted ? 0 : settings.volume;
+      }
+
+      updateVolumeUI();
+    });
+
+    muteBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+
+      if (settings.muted) {
+        settings.muted = false;
+        settings.volume = settings.previousVolume || 1;
+      } else {
+        settings.previousVolume = settings.volume || 1;
+        settings.muted = true;
+      }
+
+      if (
+        activeSampleUtterance &&
+        activeSampleButton?.dataset.playSample === modelId
+      ) {
+        activeSampleUtterance.volume = settings.muted ? 0 : settings.volume;
+      }
+
+      updateVolumeUI();
+    });
+
+    updateVolumeUI();
   });
 
   // Sliders Input Listeners
