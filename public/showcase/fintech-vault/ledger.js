@@ -71,7 +71,30 @@ var Ledger = (function () {
     return { count: list.length, moneyIn: Math.round(inn * 100) / 100, moneyOut: Math.round(out * 100) / 100 };
   }
 
-  return { CATEGORIES: CATEGORIES, TRANSACTIONS: TRANSACTIONS, filter: filter, sort: sort, money: money, formatAmount: formatAmount, summarize: summarize };
+  /**
+   * Generates formatted CSV string from transaction objects
+   */
+  function toCSV(list) {
+    var headers = ['Transaction ID', 'Date', 'Merchant / Counterparty', 'Category', 'Type', 'Amount (USD)'];
+    var lines = [headers.join(',')];
+    (list || []).forEach(function (t) {
+      var escapedMerchant = '"' + String(t.merchant || '').replace(/"/g, '""') + '"';
+      var escapedCategory = '"' + String(t.category || '').replace(/"/g, '""') + '"';
+      var type = t.amount >= 0 ? 'Credit (Deposit)' : 'Debit (Withdrawal)';
+      var formattedAmt = (t.amount >= 0 ? '+' : '-') + Math.abs(t.amount).toFixed(2);
+      lines.push([
+        t.id,
+        t.date,
+        escapedMerchant,
+        escapedCategory,
+        type,
+        formattedAmt
+      ].join(','));
+    });
+    return lines.join('\r\n');
+  }
+
+  return { CATEGORIES: CATEGORIES, TRANSACTIONS: TRANSACTIONS, filter: filter, sort: sort, money: money, formatAmount: formatAmount, summarize: summarize, toCSV: toCSV };
 })();
 
 (function () {
@@ -90,6 +113,23 @@ var Ledger = (function () {
     var wrap = document.getElementById('ledgerTableWrap');
     var sortBtns = document.querySelectorAll('[data-sort]');
     var state = { category: 'All', key: 'date', dir: 'desc' };
+
+    // Export Statement Controls (Issue #194)
+    var exportWrap = document.getElementById('exportDropdownWrap');
+    var exportBtn = document.getElementById('ledgerExportBtn');
+    var exportMenu = document.getElementById('exportMenu');
+    var exportCsvBtn = document.getElementById('exportCsvBtn');
+    var exportPdfBtn = document.getElementById('exportPdfBtn');
+    var stmtModal = document.getElementById('statementModal');
+    var stmtBody = document.getElementById('statementTableBody');
+    var stmtCount = document.getElementById('stmtCount');
+    var stmtCredits = document.getElementById('stmtCredits');
+    var stmtDebits = document.getElementById('stmtDebits');
+    var stmtPeriod = document.getElementById('stmtPeriod');
+    var stmtDate = document.getElementById('stmtDate');
+    var stmtId = document.getElementById('stmtId');
+    var toast = document.getElementById('fintechToast');
+    var currentFilteredRows = Ledger.TRANSACTIONS.slice();
 
     function el(tag, cls, text) {
       var e = document.createElement(tag);
@@ -141,6 +181,8 @@ var Ledger = (function () {
         s.count + (s.count === 1 ? ' transaction' : ' transactions') + ' shown. Money in ' + Ledger.money(s.moneyIn) +
         ', money out ' + Ledger.money(s.moneyOut) + '.';
 
+      currentFilteredRows = rows;
+
       sortBtns.forEach(function (btn) {
         var active = btn.getAttribute('data-sort') === state.key;
         btn.parentNode.setAttribute('aria-sort', active ? (state.dir === 'asc' ? 'ascending' : 'descending') : 'none');
@@ -169,6 +211,172 @@ var Ledger = (function () {
       setPressed('All');
       render();
     });
+    var toastTimer = null;
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('visible');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        toast.classList.remove('visible');
+      }, 4000);
+    }
+
+    function toggleExportMenu(force) {
+      if (!exportMenu || !exportBtn) return;
+      var shouldOpen = force !== undefined ? force : exportMenu.hidden;
+      if (shouldOpen) {
+        exportMenu.hidden = false;
+        exportBtn.setAttribute('aria-expanded', 'true');
+      } else {
+        exportMenu.hidden = true;
+        exportBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    if (exportBtn) {
+      exportBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleExportMenu();
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      if (exportWrap && !exportWrap.contains(e.target)) {
+        toggleExportMenu(false);
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        toggleExportMenu(false);
+        if (stmtModal && !stmtModal.hidden) {
+          window.closeStatementModal();
+        }
+      }
+    });
+
+    // CSV Export Handler
+    function exportCSV() {
+      var rowsToExport = (currentFilteredRows && currentFilteredRows.length > 0)
+        ? currentFilteredRows
+        : Ledger.TRANSACTIONS;
+      var csvData = Ledger.toCSV(rowsToExport);
+      var blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      var today = new Date().toISOString().split('T')[0];
+      link.href = url;
+      link.setAttribute('download', 'ApexVault_Statement_' + today + '.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 500);
+      toggleExportMenu(false);
+      showToast('📥 CSV Statement downloaded successfully (' + rowsToExport.length + ' transactions)');
+    }
+
+    if (exportCsvBtn) {
+      exportCsvBtn.addEventListener('click', exportCSV);
+    }
+
+    // PDF / Printable Statement Modal Handler
+    function openStatementModal() {
+      var rows = (currentFilteredRows && currentFilteredRows.length > 0)
+        ? currentFilteredRows
+        : Ledger.TRANSACTIONS;
+      var s = Ledger.summarize(rows);
+
+      if (stmtCount) stmtCount.textContent = rows.length;
+      if (stmtCredits) stmtCredits.textContent = '+' + Ledger.money(s.moneyIn);
+      if (stmtDebits) stmtDebits.textContent = '-' + Ledger.money(s.moneyOut);
+
+      var now = new Date();
+      if (stmtDate) {
+        stmtDate.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      }
+      if (stmtId) {
+        stmtId.textContent = 'AV-' + now.getFullYear() + '-' + Math.floor(10000 + Math.random() * 90000);
+      }
+
+      if (stmtPeriod) {
+        if (from && from.value && to && to.value) {
+          stmtPeriod.textContent = from.value + ' to ' + to.value;
+        } else if (from && from.value) {
+          stmtPeriod.textContent = 'From ' + from.value;
+        } else if (to && to.value) {
+          stmtPeriod.textContent = 'Until ' + to.value;
+        } else {
+          stmtPeriod.textContent = 'Complete Ledger History';
+        }
+      }
+
+      if (stmtBody) {
+        stmtBody.textContent = '';
+        rows.forEach(function (t) {
+          var tr = document.createElement('tr');
+
+          var tdDate = document.createElement('td');
+          tdDate.textContent = t.date;
+          tr.appendChild(tdDate);
+
+          var tdId = document.createElement('td');
+          var code = document.createElement('code');
+          code.textContent = 'AV-' + String(t.id).padStart(5, '0');
+          tdId.appendChild(code);
+          tr.appendChild(tdId);
+
+          var tdMerch = document.createElement('td');
+          var strong = document.createElement('strong');
+          strong.textContent = t.merchant;
+          tdMerch.appendChild(strong);
+          tr.appendChild(tdMerch);
+
+          var tdCat = document.createElement('td');
+          var badge = document.createElement('span');
+          badge.className = 'ledger-badge';
+          badge.textContent = t.category;
+          tdCat.appendChild(badge);
+          tr.appendChild(tdCat);
+
+          var tdAmt = document.createElement('td');
+          tdAmt.className = 'text-right ' + (t.amount >= 0 ? 'ledger-in' : 'ledger-out');
+          tdAmt.textContent = Ledger.formatAmount(t.amount);
+          tr.appendChild(tdAmt);
+
+          stmtBody.appendChild(tr);
+        });
+      }
+
+      if (stmtModal) stmtModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      toggleExportMenu(false);
+    }
+
+    if (exportPdfBtn) {
+      exportPdfBtn.addEventListener('click', openStatementModal);
+    }
+
+    window.closeStatementModal = function () {
+      if (stmtModal) stmtModal.hidden = true;
+      document.body.style.overflow = '';
+    };
+
+    window.printStatementDoc = function () {
+      window.print();
+    };
+
+    if (stmtModal) {
+      stmtModal.addEventListener('click', function (e) {
+        if (e.target === stmtModal) {
+          window.closeStatementModal();
+        }
+      });
+    }
+
+    window.exportLedgerCSV = exportCSV;
+    window.openStatementModal = openStatementModal;
+
     render();
   });
 })();

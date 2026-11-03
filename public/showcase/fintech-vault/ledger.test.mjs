@@ -64,3 +64,21 @@ test('summarize totals money in and out', () => {
   const s = L.summarize([{ amount: 100.1 }, { amount: -40.2 }, { amount: 0.2 }]);
   assert.equal(JSON.stringify(s), JSON.stringify({ count: 3, moneyIn: 100.3, moneyOut: 40.2 }));
 });
+
+test('toCSV produces valid CSV header and formatted rows', () => {
+  const sample = [
+    { id: 1, date: '2026-10-27', merchant: 'Apex Prime USDC Vault', category: 'Investments', amount: -5000 },
+    { id: 2, date: '2026-10-25', merchant: 'Apex Prime USDC Vault', category: 'Dividends', amount: 212.4 }
+  ];
+  const csv = L.toCSV(sample);
+  const lines = csv.split('\r\n');
+  assert.equal(lines[0], 'Transaction ID,Date,Merchant / Counterparty,Category,Type,Amount (USD)');
+  assert.equal(lines.length, 3);
+  assert.equal(lines[1], '1,2026-10-27,"Apex Prime USDC Vault","Investments",Debit (Withdrawal),-5000.00');
+  assert.equal(lines[2], '2,2026-10-25,"Apex Prime USDC Vault","Dividends",Credit (Deposit),+212.40');
+});
+
+test('toCSV handles empty array gracefully', () => {
+  const csv = L.toCSV([]);
+  assert.equal(csv, 'Transaction ID,Date,Merchant / Counterparty,Category,Type,Amount (USD)');
+});
