@@ -1059,3 +1059,26 @@ window.confirmDeposit = function confirmDeposit() {
     button.firstElementChild.textContent = hidden ? '◎' : '◉';
   });
 })();
+
+// ==========================================================
+// Issue #194: Quick Export Transaction Report (CSV & PDF)
+// ==========================================================
+(() => {
+  // Expose convenient global utility for programmatic transaction CSV exports
+  window.triggerTransactionCSVDownload = function (transactions) {
+    var list = transactions || (typeof Ledger !== 'undefined' ? Ledger.TRANSACTIONS : []);
+    if (typeof Ledger !== 'undefined' && Ledger.toCSV) {
+      var csvData = Ledger.toCSV(list);
+      var blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      var dateStr = new Date().toISOString().split('T')[0];
+      a.href = url;
+      a.download = `ApexVault_Transactions_${dateStr}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+  };
+})();

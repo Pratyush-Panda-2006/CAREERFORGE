@@ -459,6 +459,31 @@
           <input type="date" id="ledgerTo" class="num-input" />
         </div>
         <button type="button" id="ledgerClear" class="reset-btn">Clear filters</button>
+        <!-- ===== BEGIN Issue #194: Export Statement Dropdown ===== -->
+        <div class="export-dropdown-wrap" id="exportDropdownWrap">
+          <button type="button" id="ledgerExportBtn" class="export-btn" aria-haspopup="true" aria-expanded="false" aria-controls="exportMenu">
+            <span class="export-icon" aria-hidden="true">📥</span>
+            <span>Export Statement</span>
+            <span class="export-chevron" aria-hidden="true">▼</span>
+          </button>
+          <div class="export-menu" id="exportMenu" role="menu" hidden>
+            <button type="button" class="export-menu-item" id="exportCsvBtn" role="menuitem">
+              <span class="export-badge-fmt csv">CSV</span>
+              <div class="export-item-desc">
+                <strong>Export Spreadsheet (.csv)</strong>
+                <span>Formatted ledger for Excel &amp; Sheets</span>
+              </div>
+            </button>
+            <button type="button" class="export-menu-item" id="exportPdfBtn" role="menuitem">
+              <span class="export-badge-fmt pdf">PDF</span>
+              <div class="export-item-desc">
+                <strong>Print / PDF Statement (.pdf)</strong>
+                <span>Official institution-grade statement</span>
+              </div>
+            </button>
+          </div>
+        </div>
+        <!-- ===== END Issue #194 ===== -->
       </div>
       <p id="ledgerRangeError" class="ledger-error" role="alert" hidden>The start date must be on or before the end date.</p>
       <div id="ledgerPills" class="ledger-pills" role="group" aria-label="Filter by category"></div>
@@ -520,5 +545,85 @@
 
   <script src="ledger.js"></script>
   <script src="script.js"></script>
+  <!-- ===== BEGIN Issue #194: Print-Optimized Statement Modal & Toast ===== -->
+  <div class="statement-modal-backdrop" id="statementModal" hidden>
+    <div class="statement-modal-card" role="dialog" aria-modal="true" aria-labelledby="statementDocTitle">
+      <div class="statement-modal-actions no-print">
+        <div class="statement-modal-status">
+          <span class="print-indicator">●</span>
+          <span>Print-Optimized Financial Statement Preview</span>
+        </div>
+        <div class="statement-btn-group">
+          <button type="button" class="btn-print-action" onclick="printStatementDoc()">🖨️ Print / Save as PDF</button>
+          <button type="button" class="btn-modal-close" onclick="closeStatementModal()" aria-label="Close statement preview">&times;</button>
+        </div>
+      </div>
+
+      <!-- Printable Statement Sheet -->
+      <div class="statement-sheet" id="statementPrintSheet">
+        <header class="statement-doc-header">
+          <div class="statement-brand-col">
+            <div class="statement-logo">💎 APEXVAULT</div>
+            <div class="statement-sub">Institutional Wealth &amp; Custody Engine</div>
+            <div class="statement-addr">One Financial Plaza, Suite 4200 • New York, NY 10005</div>
+          </div>
+          <div class="statement-meta-col">
+            <h2 id="statementDocTitle" class="statement-doc-title">TRANSACTION STATEMENT</h2>
+            <div class="statement-meta-item"><span>Statement ID:</span> <strong id="stmtId">AV-2026-88412</strong></div>
+            <div class="statement-meta-item"><span>Issue Date:</span> <strong id="stmtDate">November 3, 2026</strong></div>
+            <div class="statement-meta-item"><span>Period:</span> <strong id="stmtPeriod">All Transactions</strong></div>
+          </div>
+        </header>
+
+        <section class="statement-account-summary">
+          <div class="summary-box">
+            <span class="summary-lbl">Portfolio Tier</span>
+            <strong class="summary-val">Prime Institutional (USDC / BTC)</strong>
+          </div>
+          <div class="summary-box">
+            <span class="summary-lbl">Transactions Shown</span>
+            <strong class="summary-val" id="stmtCount">12</strong>
+          </div>
+          <div class="summary-box">
+            <span class="summary-lbl">Total Credits (Inflow)</span>
+            <strong class="summary-val green" id="stmtCredits">+$7,498.55</strong>
+          </div>
+          <div class="summary-box">
+            <span class="summary-lbl">Total Debits (Outflow)</span>
+            <strong class="summary-val red" id="stmtDebits">-$9,464.98</strong>
+          </div>
+        </section>
+
+        <table class="statement-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Transaction ID</th>
+              <th>Merchant / Counterparty</th>
+              <th>Category</th>
+              <th class="text-right">Amount (USD)</th>
+            </tr>
+          </thead>
+          <tbody id="statementTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+
+        <footer class="statement-doc-footer">
+          <div class="doc-disclaimer">
+            This document serves as an official transaction record for the ApexVault prime custody portfolio. All settlement figures reflect verified on-chain and institutional ledger balances.
+          </div>
+          <div class="doc-auth-seal">
+            <span>VERIFIED LEDGER INTEGRITY</span>
+            <code>SHA-256: 4f8b9e81c720...9d2a</code>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <div id="fintechToast" class="fintech-toast" role="status" aria-live="polite"></div>
+  <!-- ===== END Issue #194 ===== -->
+
 </body>
 </html>
