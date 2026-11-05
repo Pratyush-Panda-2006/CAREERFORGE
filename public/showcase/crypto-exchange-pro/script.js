@@ -106,6 +106,13 @@ function svgEl(name, attrs, text) {
   return el;
 }
 
+// Accumulate from the best price outward; never mutate the displayed book.
+function cumulativeDepth(rows, isBid) {
+  let total = 0;
+  return rows.slice().sort((a, b) => isBid ? b.price - a.price : a.price - b.price)
+    .map(row => ({ price: row.price, total: (total += row.size) }));
+}
+
 function initMarket() {
   const svg = document.getElementById('chart');
   if (!svg) return;
@@ -135,6 +142,102 @@ function initMarket() {
   let asks = [];
   let bids = [];
   let obRng = makeRng(4242);
+  const depthSvg = document.getElementById('depth-chart');
+  const depthTip = document.getElementById('depth-tooltip');
+  const depthReadout = document.getElementById('depth-readout');
+  let depthSelection = null;
+
+  function depthLevels() {
+    return [
+      ...cumulativeDepth(bids, true).reverse().map(row => ({ ...row, side: 'bid' })),
+      ...cumulativeDepth(asks, false).map(row => ({ ...row, side: 'ask' }))
+    ];
+  }
+
+  function renderDepth(announceSelection = false) {
+    if (!depthSvg) return;
+    const levels = depthLevels();
+    const width = Math.max(200, Math.round(depthSvg.clientWidth) || 800);
+    const left = 54, right = width - 16, top = 20, bottom = 218;
+    depthSvg.setAttribute('viewBox', `0 0 ${width} 260`);
+    depthSvg.textContent = '';
+    const defs = svgEl('defs');
+    ['bid', 'ask'].forEach(side => {
+      const gradient = svgEl('linearGradient', { id: `depth-${side}-fill`, x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
+      gradient.append(svgEl('stop', { offset: '0%', 'stop-color': side === 'bid' ? '#10b981' : '#ef4444', 'stop-opacity': 0.45 }),
+        svgEl('stop', { offset: '100%', 'stop-color': side === 'bid' ? '#10b981' : '#ef4444', 'stop-opacity': 0.04 }));
+      defs.appendChild(gradient);
+    });
+    depthSvg.appendChild(defs);
+    if (!levels.length) { depthTip.hidden = true; return; }
+    const minPrice = levels[0].price, maxPrice = levels[levels.length - 1].price;
+    const maxTotal = Math.max(...levels.map(row => row.total), 1e-9) * 1.1;
+    const xOf = price => left + (price - minPrice) / (maxPrice - minPrice || 1) * (right - left);
+    const yOf = volume => bottom - volume / maxTotal * (bottom - top);
+    for (let i = 0; i <= 4; i++) {
+      const total = maxTotal * i / 4, y = yOf(total);
+      depthSvg.append(svgEl('line', { x1: left, x2: right, y1: y, y2: y, class: 'grid-line' }),
+        svgEl('text', { x: left - 8, y: y + 4, 'text-anchor': 'end', class: 'axis-label' }, total.toFixed(1)));
+    }
+    const prices = width < 480 ? [minPrice, maxPrice] : [minPrice, (minPrice + maxPrice) / 2, maxPrice];
+    prices.forEach((price, index) => {
+      const anchor = index === 0 ? 'start' : index === prices.length - 1 ? 'end' : 'middle';
+      depthSvg.appendChild(svgEl('text', { x: xOf(price), y: bottom + 24, 'text-anchor': anchor, class: 'axis-label' }, formatPrice(price, PAIRS[state.pair].decimals)));
+    });
+    depthSvg.appendChild(svgEl('text', { x: left, y: 12, class: 'axis-label' }, `${state.pair.toUpperCase()} volume`));
+    ['bid', 'ask'].forEach(side => {
+      const points = levels.filter(row => row.side === side);
+      if (!points.length) return;
+      const curve = points.map(row => `${xOf(row.price)},${yOf(row.total)}`).join(' ');
+      depthSvg.append(svgEl('polygon', { points: `${xOf(points[0].price)},${bottom} ${curve} ${xOf(points[points.length - 1].price)},${bottom}`, fill: `url(#depth-${side}-fill)` }),
+        svgEl('polyline', { points: curve, class: `depth-curve depth-${side}` }));
+    });
+    if (depthSelection !== null && levels[depthSelection]) {
+      const row = levels[depthSelection], x = xOf(row.price), y = yOf(row.total);
+      depthSvg.append(svgEl('line', { x1: x, x2: x, y1: top, y2: bottom, class: 'crosshair' }),
+        svgEl('line', { x1: left, x2: right, y1: y, y2: y, class: 'crosshair' }),
+        svgEl('circle', { cx: x, cy: y, r: 4, class: `depth-marker depth-${row.side}` }));
+      const text = `${row.side === 'bid' ? 'Buy (bid)' : 'Sell (ask)'} · $${formatPrice(row.price, PAIRS[state.pair].decimals)} · Cumulative ${row.total.toFixed(3)} ${state.pair.toUpperCase()}`;
+      depthTip.textContent = text;
+      depthTip.dataset.price = String(row.price);
+      depthTip.dataset.total = String(row.total);
+      depthTip.dataset.side = row.side;
+      depthTip.hidden = false;
+      if (announceSelection) depthReadout.textContent = text;
+    } else {
+      depthTip.hidden = true;
+      if (announceSelection) depthReadout.textContent = '';
+    }
+  }
+
+  if (depthSvg) {
+    const inspectPointer = event => {
+      const bounds = depthSvg.getBoundingClientRect();
+      const fraction = Math.min(1, Math.max(0, ((event.clientX - bounds.left) - 54) / (bounds.width - 70)));
+      const levels = depthLevels();
+      if (!levels.length) return;
+      const price = levels[0].price + fraction * (levels[levels.length - 1].price - levels[0].price);
+      depthSelection = levels.reduce((best, row, i) => Math.abs(row.price - price) < Math.abs(levels[best].price - price) ? i : best, 0);
+      renderDepth(event.type === 'pointerdown');
+    };
+    depthSvg.addEventListener('pointermove', inspectPointer);
+    depthSvg.addEventListener('pointerdown', inspectPointer);
+    const clearDepth = () => { depthSelection = null; renderDepth(true); };
+    depthSvg.addEventListener('pointerleave', event => {
+      if (event.pointerType !== 'touch') clearDepth();
+    });
+    depthSvg.addEventListener('blur', clearDepth);
+    depthSvg.addEventListener('keydown', event => {
+      if (!['ArrowLeft','ArrowRight','Escape'].includes(event.key)) return;
+      event.preventDefault();
+      if (event.key === 'Escape') { clearDepth(); return; }
+      const count = depthLevels().length;
+      const current = depthSelection === null ? Math.floor(count / 2) - 1 : depthSelection;
+      depthSelection = Math.max(0, Math.min(count - 1, current + (event.key === 'ArrowRight' ? 1 : -1)));
+      renderDepth(true);
+    });
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => renderDepth()).observe(depthSvg);
+  }
 
   function buildSeries() {
     candles = generateCandles(state.pair, state.interval, engines[state.pair].price, Date.now());
@@ -348,6 +451,7 @@ function initMarket() {
     renderStats();
     renderBook();
     renderChart();
+    renderDepth();
   }
 
   // ---- interaction ---------------------------------------------------
@@ -377,6 +481,7 @@ function initMarket() {
     const btn = e.target.closest('[data-pair]');
     if (!btn || btn.dataset.pair === state.pair) return;
     state.pair = btn.dataset.pair;
+    depthSelection = null;
     state.hover = null;
     state.tick = 0;
     setPressed('pair-group', 'data-pair', state.pair);
