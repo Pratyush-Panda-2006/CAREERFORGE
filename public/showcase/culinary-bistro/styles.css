@@ -1496,3 +1496,877 @@ body {
 }
 /* ===== END issue #101 ===== */
 
+/* ==========================================================
+   Issue #181: Chef Special Tasting Menu Multi-Course Timeline
+   Parisian Bistro Aesthetic & Interactive Accordion Feed
+   ========================================================== */
+
+.tasting-section {
+  position: relative;
+  background: radial-gradient(circle at 50% 0%, #1e1512 0%, #0d0a09 60%, #080605 100%);
+  border-top: 1px solid rgba(212, 175, 55, 0.25);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  padding: 80px 24px 100px;
+  color: #f3f4f6;
+  overflow: hidden;
+}
+
+.tasting-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #f59e0b 50%, transparent 100%);
+  opacity: 0.8;
+}
+
+.tasting-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* --- Section Header --- */
+.tasting-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.tasting-kicker {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #f59e0b;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: inline-block;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 6px 16px;
+  border-radius: 999px;
+}
+
+.tasting-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  color: #fff;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 12px 0 16px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+}
+
+.tasting-subtitle {
+  font-size: 1.05rem;
+  color: #cbd5e1;
+  max-width: 780px;
+  margin: 0 auto 28px;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+.tasting-meta-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 0.86rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.meta-pill.price-pill {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.08);
+  color: #fcd34d;
+}
+
+.meta-pill.gold-pill {
+  border-color: rgba(212, 175, 55, 0.5);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(180, 83, 9, 0.2) 100%);
+  color: #fef3c7;
+}
+
+/* --- Timeline Controls Bar --- */
+.timeline-controls-bar {
+  background: rgba(18, 14, 13, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 20px;
+  padding: 22px 24px;
+  margin-bottom: 50px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+/* Stepper Progress Bar */
+.course-stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.course-stepper::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 30px;
+  right: 30px;
+  height: 2px;
+  background: linear-gradient(90deg, #b45309 0%, #f59e0b 50%, #d97706 100%);
+  opacity: 0.35;
+  z-index: 1;
+}
+
+.stepper-node {
+  position: relative;
+  z-index: 2;
+  background: #140f0e;
+  border: 2px solid rgba(212, 175, 55, 0.4);
+  border-radius: 14px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 96px;
+  flex-shrink: 0;
+}
+
+.stepper-node:hover {
+  border-color: #f59e0b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.25);
+}
+
+.stepper-node.active {
+  background: linear-gradient(135deg, #2b1810 0%, #170d0a 100%);
+  border-color: #f59e0b;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+.stepper-badge {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f59e0b;
+  line-height: 1;
+}
+
+.stepper-label {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.stepper-node.active .stepper-label {
+  color: #fff;
+}
+
+.stepper-node.stepper-dimmed {
+  opacity: 0.35;
+}
+
+/* Timeline Action Controls */
+.timeline-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.filter-btn-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.course-filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.course-filter-btn:hover {
+  color: #fff;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.course-filter-btn.active {
+  background: #f59e0b;
+  color: #0f0b09;
+  border-color: #f59e0b;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+}
+
+.accordion-toggle-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-toggle-all, .btn-wine-flight-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #e2e8f0;
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+}
+
+.btn-toggle-all:hover, .btn-wine-flight-toggle:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.btn-wine-flight-toggle.active {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: #f59e0b;
+  color: #fcd34d;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+}
+
+/* --- 7-Course Timeline Feed --- */
+.courses-timeline-feed {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-left: 56px;
+}
+
+/* Elegant Center-Left Timeline Spine */
+.courses-timeline-feed::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  left: 23px;
+  width: 2px;
+  background: linear-gradient(180deg, #f59e0b 0%, rgba(212, 175, 55, 0.4) 50%, #78350f 100%);
+  opacity: 0.6;
+}
+
+/* Individual Course Card */
+.tasting-course-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tasting-course-card.hidden-course {
+  display: none !important;
+}
+
+/* Timeline Pin */
+.timeline-node-pin {
+  position: absolute;
+  left: -56px;
+  top: 32px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+
+.node-ring {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #140f0e;
+  border: 2px solid #f59e0b;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+  transition: all 0.3s ease;
+}
+
+.node-num {
+  position: relative;
+  z-index: 2;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.tasting-course-card:hover .node-ring {
+  transform: scale(1.12);
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.6);
+  border-color: #fde047;
+}
+
+.tasting-course-card.expanded .node-ring {
+  background: #f59e0b;
+  border-color: #fef08a;
+}
+
+.tasting-course-card.expanded .node-num {
+  color: #0f0b09;
+}
+
+/* Course Card Body */
+.course-card-inner {
+  background: #120e0d;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 20px;
+  padding: 26px 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.tasting-course-card:hover .course-card-inner {
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65), 0 0 24px rgba(245, 158, 11, 0.1);
+  transform: translateY(-2px);
+}
+
+.tasting-course-card.expanded .course-card-inner {
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.75), 0 0 30px rgba(245, 158, 11, 0.12);
+}
+
+/* Card Header Interactive Row */
+.course-card-header {
+  display: grid;
+  grid-template-columns: 86px 1fr auto;
+  gap: 22px;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.course-card-header:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+/* Dish Media & Hover Zoom */
+.course-dish-media {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  background: radial-gradient(circle, #2a1811 0%, #150d0a 100%);
+  border: 1.5px solid rgba(212, 175, 55, 0.4);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dish-emoji {
+  font-size: 2.3rem;
+  line-height: 1;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.course-index-tag {
+  position: absolute;
+  bottom: -7px;
+  background: #f59e0b;
+  color: #0f0b09;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.tasting-course-card:hover .course-dish-media {
+  border-color: #f59e0b;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+}
+
+.tasting-course-card:hover .dish-emoji {
+  transform: scale(1.18);
+}
+
+/* Course Titles & Descriptions */
+.course-title-col {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.course-meta-tags {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.course-stage-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #f59e0b;
+}
+
+.course-provenance-badge {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.course-title-fr {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.course-title-en {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fcd34d;
+  margin: 0 0 4px;
+}
+
+.course-brief-desc {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Expand Button */
+.course-expand-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #f59e0b;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.course-expand-btn:hover {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+  color: #fff;
+}
+
+.expand-chevron {
+  font-size: 0.7rem;
+  transition: transform 0.25s ease;
+}
+
+/* --- Expandable Details Drawer --- */
+.drawer-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.3) 50%, transparent 100%);
+  margin: 22px 0 24px;
+}
+
+.drawer-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+/* Chef's Inspiration Box */
+.chef-inspiration-box {
+  background: linear-gradient(135deg, rgba(30, 20, 16, 0.7) 0%, rgba(18, 14, 12, 0.7) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-left: 3px solid #f59e0b;
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.box-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+
+.chef-quote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: #f3f4f6;
+  line-height: 1.65;
+  margin: 0 0 14px;
+  position: relative;
+}
+
+.quote-mark {
+  font-size: 1.4rem;
+  color: #f59e0b;
+  line-height: 0;
+  vertical-align: middle;
+  padding: 0 2px;
+}
+
+.chef-signature {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  text-align: right;
+  font-weight: 500;
+}
+
+/* Wine Pairing Box */
+.wine-pairing-box {
+  background: linear-gradient(135deg, rgba(20, 15, 18, 0.8) 0%, rgba(13, 10, 12, 0.8) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.wine-flight-active .wine-pairing-box {
+  border-color: #f59e0b;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+}
+
+.box-kicker.wine-kicker {
+  color: #fcd34d;
+}
+
+.flight-tag {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #0f0b09;
+  background: #f59e0b;
+  padding: 2px 7px;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+}
+
+.wine-bottle-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.wine-appellation {
+  font-size: 0.8rem;
+  color: #f59e0b;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.wine-tasting-notes {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+  margin: 0 0 14px;
+  flex: 1;
+}
+
+.wine-serving-temp {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wine-serving-temp strong {
+  color: #fef08a;
+}
+
+/* Sensory Meters Bar & Allergens */
+.course-sensory-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px 18px;
+}
+
+.sensory-metrics {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.metric-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metric-label {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-meter {
+  width: 60px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.meter-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+  border-radius: 3px;
+}
+
+.dietary-notices {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dietary-title {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.allergen-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+/* Pulse Highlight Animation when jumping from Stepper */
+.pulse-highlight .course-card-inner {
+  animation: cardHighlightPulse 1.4s ease-out;
+}
+
+@keyframes cardHighlightPulse {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); border-color: #f59e0b; }
+  50% { box-shadow: 0 0 35px 8px rgba(245, 158, 11, 0.35); border-color: #fde047; }
+  100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border-color: rgba(212, 175, 55, 0.22); }
+}
+
+/* --- Experience Booking CTA Card --- */
+.tasting-cta-card {
+  margin-top: 60px;
+  background: linear-gradient(135deg, #241611 0%, #160e0b 100%);
+  border: 2px solid rgba(212, 175, 55, 0.4);
+  border-radius: 24px;
+  padding: 36px 42px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 28px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 30px rgba(245, 158, 11, 0.15);
+}
+
+.cta-content {
+  flex: 1 1 420px;
+}
+
+.cta-kicker {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #f59e0b;
+  margin-bottom: 8px;
+}
+
+.cta-content h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.85rem;
+  color: #fff;
+  margin: 0 0 10px;
+  line-height: 1.25;
+}
+
+.cta-content p {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cta-price-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.price-from {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.price-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  color: #f59e0b;
+  line-height: 1;
+}
+
+.price-unit {
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+.tasting-book-btn {
+  padding: 14px 28px;
+  font-size: 1rem;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+}
+
+/* --- Responsive Media Queries --- */
+@media (max-width: 860px) {
+  .courses-timeline-feed {
+    padding-left: 0;
+  }
+
+  .courses-timeline-feed::before,
+  .timeline-node-pin {
+    display: none;
+  }
+
+  .drawer-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .course-card-header {
+    grid-template-columns: 70px 1fr;
+  }
+
+  .course-header-actions {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+  }
+
+  .course-expand-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tasting-cta-card {
+    padding: 28px 24px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cta-actions {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .tasting-section {
+    padding: 60px 16px 80px;
+  }
+
+  .course-card-inner {
+    padding: 20px 16px;
+  }
+
+  .course-card-header {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .course-dish-media {
+    margin: 0 auto;
+  }
+
+  .course-meta-tags {
+    justify-content: center;
+  }
+
+  .timeline-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-btn-group,
+  .accordion-toggle-group {
+    justify-content: center;
+  }
+
+  .sensory-metrics {
+    justify-content: center;
+  }
+}

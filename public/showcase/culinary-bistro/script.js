@@ -1,4 +1,4 @@
-function reserveTable(opener) {
+window.reserveTable = function reserveTable(opener) {
   openReservationModal(opener || byId('reserveBtn'));
 }
 
@@ -747,4 +747,443 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initReservationWizard);
 } else {
   initReservationWizard();
+}
+
+// =========================================================================
+// Issue #181: Chef Special Tasting Menu Interactive Multi-Course Timeline
+// =========================================================================
+
+const TASTING_COURSES = [
+  {
+    id: 1,
+    roman: 'I',
+    type: 'savory',
+    stage: 'Amuse-Bouche',
+    titleFr: "L'Éveil des Sens — Huître & Gelée de Champagne",
+    titleEn: 'Brittany Gillardeau Oyster & Champagne Granité',
+    emoji: '🦪',
+    description: 'Chilled Gillardeau oyster served on crushed sea ice with vintage Champagne granité, shallot mignonette pearls, sea fennel, and fresh cucumber essence.',
+    chefInspiration: 'A brisk morning at the fishing port of Cancale, where ocean brine meets the crisp minerality of Reims cellars. This opener awakens the palate with pure maritime energy and delicate effervescence.',
+    winePairing: {
+      wine: 'NV Delamotte Blanc de Blancs Brut Champagne',
+      region: 'Le Mesnil-sur-Oger, Champagne',
+      notes: 'Chalky minerality, white flowers, brioche and razor-sharp acidity that electrifies the oyster brine.',
+      temp: '6°C'
+    },
+    provenance: 'Cancale, Brittany & Reims',
+    allergens: ['Molluscs', 'Sulfites'],
+    sensory: { acidity: 95, richness: 20, complexity: 85 }
+  },
+  {
+    id: 2,
+    roman: 'II',
+    type: 'savory',
+    stage: 'Premier Entrée',
+    titleFr: 'La Terre & La Forêt — Velouté de Champignons Sauvages',
+    titleEn: 'Foraged Wild Forest Velouté & Périgord Truffle',
+    emoji: '🍄',
+    description: 'Velvety morel and black trompette reduction finished with roasted hazelnut oil, toasted pain au levain crisp, and shaved black winter truffle tableside.',
+    chefInspiration: 'Memories of autumn mushroom foraging in the damp undergrowth of the Fontainebleau forest with my grandfather. The intoxicating scent of oak moss and fallen leaves captured in a single warm bowl.',
+    winePairing: {
+      wine: '2021 Domaine Huet Vouvray Le Haut-Lieu Demi-Sec',
+      region: 'Vouvray, Loire Valley',
+      notes: 'Quince, baked orchard pears, acacia honey, and limestone tension balancing the deep earthiness of the truffles.',
+      temp: '10°C'
+    },
+    provenance: 'Fontainebleau & Périgord',
+    allergens: ['Dairy', 'Gluten', 'Nuts'],
+    sensory: { acidity: 35, richness: 80, complexity: 90 }
+  },
+  {
+    id: 3,
+    roman: 'III',
+    type: 'savory',
+    stage: 'Poisson',
+    titleFr: "L'Océan Atlantique — Turbot Rôti au Beurre Noisette",
+    titleEn: 'Pan-Roasted Atlantic Turbot & Smoked Parsnip',
+    emoji: '🐟',
+    description: 'Line-caught Brittany turbot basted in golden foaming butter, served over silky smoked parsnip mousseline, sea asparagus, and citrus yuzu emulsion.',
+    chefInspiration: 'A tribute to classic French technique where pristine Atlantic turbot is honored by nutty hazelnut butter and seaside botanicals. Precision cooking ensures the flesh remains succulent and pearlescent.',
+    winePairing: {
+      wine: '2020 Domaine Leflaive Puligny-Montrachet',
+      region: 'Côte de Beaune, Burgundy',
+      notes: 'Toasted almond, crushed limestone, lemon curd, and a long saline finish harmonizing with the brown butter.',
+      temp: '12°C'
+    },
+    provenance: 'Atlantic Coast & Brittany',
+    allergens: ['Fish', 'Dairy'],
+    sensory: { acidity: 65, richness: 75, complexity: 88 }
+  },
+  {
+    id: 4,
+    roman: 'IV',
+    type: 'savory',
+    stage: "Viande d'Exception",
+    titleFr: 'La Chasse & Terroir — Canard de Challans Rôti aux Cerises',
+    titleEn: 'Challans Duck Breast with Spiced Griottines & Foie Gras',
+    emoji: '🦆',
+    description: 'Dry-aged spiced Challans duck breast, caramelized griottine cherry gastrique, parsnip ribbons, glazed salsify, and pan-seared Landes foie gras.',
+    chefInspiration: 'The gentle pastoral hills of the Vendée, blending savory game richness with sweet-tart orchard cherries macerated in kirsch. Duck and cherries are an immortal pair of the French culinary soul.',
+    winePairing: {
+      wine: '2018 Domaine Georges Roumier Chambolle-Musigny',
+      region: 'Côte de Nuits, Burgundy',
+      notes: 'Wild strawberries, violets, velvety forest floor tannins, and exotic baking spice matching the spiced duck.',
+      temp: '16°C'
+    },
+    provenance: 'Vendée & Landes',
+    allergens: ['Dairy', 'Sulfites'],
+    sensory: { acidity: 60, richness: 85, complexity: 92 }
+  },
+  {
+    id: 5,
+    roman: 'V',
+    type: 'savory',
+    stage: 'Le Plat Signature',
+    titleFr: 'Le Chef-d’Œuvre — Filet de Bœuf Wagyu Saisi & Moelle',
+    titleEn: 'Seared Wagyu A5 Filet Mignon & Roasted Bone Marrow',
+    emoji: '🥩',
+    description: 'Charred A5 Wagyu tenderloin, silky pomme purée robuchon-style, smoked bone marrow croquette, and 48-hour simmered Bordelaise jus with 40-year balsamic.',
+    chefInspiration: 'The culmination of balance: melting richness grounded by French culinary heritage and intense reduction sauces simmered over 48 hours. A celebration of patience and absolute ingredient supremacy.',
+    winePairing: {
+      wine: '2015 Château Margaux Premier Grand Cru Classé',
+      region: 'Margaux, Bordeaux',
+      notes: 'Cassis, graphite, dried cedar, black truffles, and majestic aristocratic tannins built for prime red meat.',
+      temp: '17°C'
+    },
+    provenance: 'Périgord & Bordeaux',
+    allergens: ['Dairy', 'Gluten', 'Sulfites'],
+    sensory: { acidity: 40, richness: 98, complexity: 98 }
+  },
+  {
+    id: 6,
+    roman: 'VI',
+    type: 'sweet',
+    stage: 'L’Entremets Fromager',
+    titleFr: 'La Ronde des Fromages — Comté 36 Mois & Rayon de Miel',
+    titleEn: '36-Month Aged Comté & Wild Mountain Honeycomb',
+    emoji: '🧀',
+    description: 'Granular reserve Comté from Fort Saint-Antoine cave affineur, artisanal walnut pain de seigle, wildflower mountain honeycomb, and poached mirabelle plum.',
+    chefInspiration: 'The Jura highlands where mountain cows graze on alpine flora, producing cheese of peerless complexity with toasted hazelnut crystals. A contemplative bridge between savory terroirs and dessert.',
+    winePairing: {
+      wine: '2016 Domaine Macle Château-Chalon Vin Jaune',
+      region: 'Château-Chalon, Jura',
+      notes: 'Walnut skin, curry leaf, dried apple, fenugreek, and piercing oxidative vitality that elevates aged Comté.',
+      temp: '14°C'
+    },
+    provenance: 'Fort Saint-Antoine, Jura',
+    allergens: ['Dairy', 'Nuts', 'Gluten'],
+    sensory: { acidity: 70, richness: 65, complexity: 94 }
+  },
+  {
+    id: 7,
+    roman: 'VII',
+    type: 'sweet',
+    stage: 'Le Grand Dessert',
+    titleFr: 'L’Apothéose Gourmande — Sphère au Chocolat Valrhona & Fleur de Sel',
+    titleEn: 'Valrhona Guanaja Chocolate Dome & Warm Salted Caramel',
+    emoji: '🍫',
+    description: 'Crisp 70% Valrhona Guanaja dark chocolate sphere, Tahitian vanilla bean namelaka, praline feuilletine crunch, tableside hot Guérande salted caramel pour, and 24K edible gold.',
+    chefInspiration: 'A theatrical finale: melting crisp chocolate under steaming amber caramel, capturing the bittersweet beauty of Parisian twilight over the Seine. Decadent, textural, and memorable.',
+    winePairing: {
+      wine: "2017 Château d'Yquem Premier Cru Supérieur",
+      region: 'Sauternes, Bordeaux',
+      notes: 'Candied apricots, saffron, beeswax, orange marmalade, and infinite honeyed botrytis length.',
+      temp: '11°C'
+    },
+    provenance: 'Lyon & Guérande',
+    allergens: ['Dairy', 'Gluten', 'Soy'],
+    sensory: { acidity: 45, richness: 90, complexity: 95 }
+  }
+];
+
+function initTastingMenuTimeline() {
+  const stepperNav = byId('courseStepper');
+  const feed = byId('coursesTimelineFeed');
+  if (!stepperNav || !feed) return;
+
+  let activeFilter = 'all';
+  let wineFlightActive = false;
+  let allExpanded = false;
+
+  // 1. Render Stepper Nodes
+  function renderStepper() {
+    stepperNav.innerHTML = '';
+    TASTING_COURSES.forEach((c) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `stepper-node ${c.id === 1 ? 'active' : ''}`;
+      btn.id = `stepperNode-${c.id}`;
+      btn.setAttribute('data-course-id', c.id);
+      btn.setAttribute('aria-label', `Course ${c.roman}: ${c.stage} - ${c.titleEn}`);
+
+      btn.innerHTML = `
+        <span class="stepper-badge">${c.roman}</span>
+        <span class="stepper-label">${c.stage}</span>
+      `;
+
+      btn.addEventListener('click', () => {
+        scrollToCourse(c.id);
+      });
+
+      stepperNav.appendChild(btn);
+    });
+  }
+
+  // 2. Render Course Cards in Timeline Feed
+  function renderCourses() {
+    feed.innerHTML = '';
+
+    TASTING_COURSES.forEach((c) => {
+      const card = document.createElement('article');
+      card.className = `tasting-course-card ${c.type}`;
+      card.id = `courseCard-${c.id}`;
+      card.setAttribute('data-id', c.id);
+      card.setAttribute('data-type', c.type);
+
+      const isHidden = (activeFilter === 'savory' && c.type !== 'savory') ||
+                       (activeFilter === 'sweet' && c.type !== 'sweet');
+      if (isHidden) {
+        card.classList.add('hidden-course');
+      }
+
+      card.innerHTML = `
+        <!-- Timeline Connector Node -->
+        <div class="timeline-node-pin">
+          <span class="node-ring"></span>
+          <span class="node-num">${c.roman}</span>
+        </div>
+
+        <div class="course-card-inner">
+          <div class="course-card-header" id="courseHeader-${c.id}" tabindex="0" role="button" aria-expanded="false" aria-controls="courseDrawer-${c.id}">
+            <div class="course-dish-media">
+              <span class="dish-emoji" aria-hidden="true">${c.emoji}</span>
+              <span class="course-index-tag">ACTE ${c.roman}</span>
+            </div>
+
+            <div class="course-title-col">
+              <div class="course-meta-tags">
+                <span class="course-stage-badge">${c.stage}</span>
+                <span class="course-provenance-badge">📍 ${c.provenance}</span>
+              </div>
+              <h3 class="course-title-fr">${c.titleFr}</h3>
+              <h4 class="course-title-en">${c.titleEn}</h4>
+              <p class="course-brief-desc">${c.description}</p>
+            </div>
+
+            <div class="course-header-actions">
+              <button type="button" class="course-expand-btn" aria-label="Toggle Chef Gabriel's inspiration notes for Course ${c.roman}">
+                <span class="expand-text">Inspiration &amp; Wine Pairing</span>
+                <span class="expand-chevron" aria-hidden="true">▼</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Expandable Details Drawer -->
+          <div class="course-drawer" id="courseDrawer-${c.id}" hidden>
+            <div class="drawer-divider"></div>
+
+            <div class="drawer-content-grid">
+              <!-- Chef's Inspiration Story -->
+              <div class="chef-inspiration-box">
+                <div class="box-kicker">
+                  <span class="chef-toque">👨‍🍳</span>
+                  <span>CHEF GABRIEL LAURENT &mdash; HISTOIRE &amp; INSPIRATION</span>
+                </div>
+                <blockquote class="chef-quote">
+                  <span class="quote-mark open">“</span>
+                  ${c.chefInspiration}
+                  <span class="quote-mark close">”</span>
+                </blockquote>
+                <div class="chef-signature">
+                  <em>&mdash; Gabriel Laurent, Chef de Cuisine</em>
+                </div>
+              </div>
+
+              <!-- Sommelier Wine Pairing Box -->
+              <div class="wine-pairing-box">
+                <div class="box-kicker wine-kicker">
+                  <span class="wine-glass-icon">🍷</span>
+                  <span>ACCORD METS &amp; VINS &bull; SOMMELIER CRU PAIRING</span>
+                  <span class="flight-tag" hidden>✨ Active Flight Included</span>
+                </div>
+                <div class="wine-bottle-name">${c.winePairing.wine}</div>
+                <div class="wine-appellation">AOC ${c.winePairing.region}</div>
+                <p class="wine-tasting-notes">${c.winePairing.notes}</p>
+                <div class="wine-serving-temp">
+                  <span>Optimal Cellar Temperature: <strong>${c.winePairing.temp}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sensory & Dietary Highlights Footer -->
+            <div class="course-sensory-bar">
+              <div class="sensory-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">Acidity</span>
+                  <div class="metric-meter"><div class="meter-bar" style="width: ${c.sensory.acidity}%;"></div></div>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Richness</span>
+                  <div class="metric-meter"><div class="meter-bar" style="width: ${c.sensory.richness}%;"></div></div>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Complexity</span>
+                  <div class="metric-meter"><div class="meter-bar" style="width: ${c.sensory.complexity}%;"></div></div>
+                </div>
+              </div>
+
+              <div class="dietary-notices">
+                <span class="dietary-title">Allergens:</span>
+                ${c.allergens.map(a => `<span class="allergen-pill">${a}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Event listener to toggle drawer
+      const header = card.querySelector('.course-card-header');
+      const expandBtn = card.querySelector('.course-expand-btn');
+
+      function toggle() {
+        const isCurrentlyExpanded = card.classList.contains('expanded');
+        setCourseExpanded(c.id, !isCurrentlyExpanded);
+      }
+
+      header.addEventListener('click', (e) => {
+        if (!e.target.closest('.course-expand-btn')) {
+          toggle();
+        }
+      });
+      expandBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggle();
+      });
+
+      // Keyboard accessibility
+      header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+      });
+
+      feed.appendChild(card);
+    });
+  }
+
+  function setCourseExpanded(courseId, expand) {
+    const card = byId(`courseCard-${courseId}`);
+    const header = byId(`courseHeader-${courseId}`);
+    const drawer = byId(`courseDrawer-${courseId}`);
+    if (!card || !header || !drawer) return;
+
+    if (expand) {
+      card.classList.add('expanded');
+      header.setAttribute('aria-expanded', 'true');
+      drawer.hidden = false;
+      const chevron = header.querySelector('.expand-chevron');
+      if (chevron) chevron.textContent = '▲';
+    } else {
+      card.classList.remove('expanded');
+      header.setAttribute('aria-expanded', 'false');
+      drawer.hidden = true;
+      const chevron = header.querySelector('.expand-chevron');
+      if (chevron) chevron.textContent = '▼';
+    }
+  }
+
+  function scrollToCourse(courseId) {
+    // Update Stepper active state
+    document.querySelectorAll('.stepper-node').forEach((node) => {
+      const match = node.getAttribute('data-course-id') === String(courseId);
+      node.classList.toggle('active', match);
+    });
+
+    const card = byId(`courseCard-${courseId}`);
+    if (card) {
+      if (card.classList.contains('hidden-course')) {
+        // Switch filter to 'all' if the selected course was hidden
+        setFilter('all');
+      }
+      setCourseExpanded(courseId, true);
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('pulse-highlight');
+      setTimeout(() => card.classList.remove('pulse-highlight'), 1600);
+    }
+  }
+
+  function setFilter(type) {
+    activeFilter = type;
+    document.querySelectorAll('.course-filter-btn').forEach((btn) => {
+      const match = btn.getAttribute('data-filter') === type;
+      btn.classList.toggle('active', match);
+      btn.setAttribute('aria-pressed', match ? 'true' : 'false');
+    });
+
+    TASTING_COURSES.forEach((c) => {
+      const card = byId(`courseCard-${c.id}`);
+      const step = byId(`stepperNode-${c.id}`);
+      const hide = (type === 'savory' && c.type !== 'savory') ||
+                   (type === 'sweet' && c.type !== 'sweet');
+      if (card) card.classList.toggle('hidden-course', hide);
+      if (step) step.classList.toggle('stepper-dimmed', hide);
+    });
+  }
+
+  // Filter Buttons
+  document.querySelectorAll('.course-filter-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setFilter(btn.getAttribute('data-filter'));
+    });
+  });
+
+  // Expand / Collapse All Stories Toggle
+  const expandAllBtn = byId('expandAllCoursesBtn');
+  const toggleAllLabel = byId('toggleAllLabel');
+  if (expandAllBtn) {
+    expandAllBtn.addEventListener('click', () => {
+      allExpanded = !allExpanded;
+      TASTING_COURSES.forEach((c) => {
+        setCourseExpanded(c.id, allExpanded);
+      });
+      if (toggleAllLabel) {
+        toggleAllLabel.textContent = allExpanded ? 'Collapse All Stories' : 'Expand All Stories';
+      }
+      expandAllBtn.querySelector('.icon').textContent = allExpanded ? '📕' : '📖';
+    });
+  }
+
+  // Wine Pairing Flight Toggle
+  const wineToggle = byId('wineFlightToggle');
+  const wineFlightState = byId('wineFlightState');
+  if (wineToggle) {
+    wineToggle.addEventListener('click', () => {
+      wineFlightActive = !wineFlightActive;
+      wineToggle.setAttribute('aria-pressed', String(wineFlightActive));
+      wineToggle.classList.toggle('active', wineFlightActive);
+      feed.classList.toggle('wine-flight-active', wineFlightActive);
+      if (wineFlightState) {
+        wineFlightState.textContent = wineFlightActive ? 'Active (+€95)' : 'Off';
+      }
+      document.querySelectorAll('.flight-tag').forEach(tag => {
+        tag.hidden = !wineFlightActive;
+      });
+    });
+  }
+
+  // Initial Render
+  renderStepper();
+  renderCourses();
+  // Auto-expand Course 1 for immediate delightful preview
+  setCourseExpanded(1, true);
+}
+
+window.TASTING_COURSES = TASTING_COURSES;
+window.initTastingMenuTimeline = initTastingMenuTimeline;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTastingMenuTimeline);
+} else {
+  initTastingMenuTimeline();
 }
