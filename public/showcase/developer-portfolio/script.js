@@ -28,6 +28,9 @@ const EXECUTABLES = ['hello.sh'];
 
 const HELP_LINES = [
   ['help', 'show this list'],
+  ['skills', 'show technical skills'],
+  ['projects', 'list portfolio project files'],
+  ['contact', 'show demo contact details'],
   ['ls [path]', 'list directory contents'],
   ['cd [path]', 'change directory (supports .., ~ and absolute paths)'],
   ['pwd', 'print the working directory'],
@@ -119,6 +122,9 @@ function initTerminal() {
         screen.appendChild(row);
       });
     },
+    skills() { lines(FS['skills.txt']); },
+    projects() { lines(FS.projects['README.md']); printLs(FS.projects); },
+    contact() { lines(FS['contact.txt']); },
     pwd() { line(toPathString(cwd)); },
     ls(args) {
       const target = args[0] ? resolvePath(cwd, args[0]) : cwd;
@@ -179,15 +185,26 @@ function initTerminal() {
     }
   }
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const raw = input.value;
+  function submitCommand(raw) {
     run(raw);
     input.value = '';
     historyIndex = history.length;
     draft = '';
     updatePrompt();
     screen.scrollTop = screen.scrollHeight;
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitCommand(input.value);
+  });
+
+  const shortcuts = document.getElementById('vterm-shortcuts');
+  if (shortcuts) shortcuts.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-terminal-command]');
+    if (!button || !shortcuts.contains(button)) return;
+    submitCommand(button.dataset.terminalCommand);
+    input.focus({ preventScroll: true });
   });
 
   input.addEventListener('keydown', (e) => {
