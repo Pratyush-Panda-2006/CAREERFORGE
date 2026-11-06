@@ -2,7 +2,48 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('VortexDEX Exchange Pro engine ready');
   initMarket();
   initQuickSwap();
+  initTokenDiscovery();
 });
+
+function initTokenDiscovery() {
+  const search = document.getElementById('token-search');
+  const body = document.getElementById('token-market-body');
+  if (!search || !body) return;
+  const rows = Array.from(body.querySelectorAll('tr'));
+  const buttons = Array.from(document.querySelectorAll('button[data-token-category]'));
+  const results = document.getElementById('token-results');
+  const empty = document.getElementById('token-empty');
+  let category = 'all';
+
+  function update() {
+    const query = search.value.trim().toLowerCase();
+    let count = 0;
+    rows.forEach(row => {
+      const name = row.dataset.tokenName.toLowerCase();
+      const symbol = row.dataset.tokenSymbol.toLowerCase();
+      const matches = (category === 'all' || row.dataset.tokenCategory === category)
+        && (name.includes(query) || symbol.includes(query));
+      row.hidden = !matches;
+      if (matches) count++;
+    });
+    buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.tokenCategory === category)));
+    results.textContent = `${count} ${count === 1 ? 'token' : 'tokens'} shown`;
+    empty.hidden = count !== 0;
+  }
+
+  search.addEventListener('input', update);
+  buttons.forEach(button => button.addEventListener('click', () => {
+    category = button.dataset.tokenCategory;
+    update();
+  }));
+  document.getElementById('token-reset').addEventListener('click', () => {
+    search.value = '';
+    category = 'all';
+    update();
+    search.focus();
+  });
+  update();
+}
 
 /* ------------------------------------------------------------------
    Mock market engine. Everything is simulated: a seeded PRNG drives the
