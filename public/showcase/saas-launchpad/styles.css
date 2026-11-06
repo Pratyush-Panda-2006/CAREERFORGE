@@ -2010,3 +2010,380 @@ body {
   .onb-progress-fill, .onb-box, .onb-box svg, .onb-step, .onb-title { transition: none; }
   .onb-celebrate { animation: none; }
 }
+
+/* ===== BEGIN Issue #303: Product Feature Tour Modal with Step-by-Step Navigation Carousel ===== */
+.btn-tour {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+  transition: all 0.25s ease;
+}
+
+.btn-tour:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+}
+
+.tour-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.82);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: none;
+}
+
+.tour-backdrop.open {
+  display: block;
+}
+
+.tour-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 860px;
+  width: 92%;
+  background: #0b1120;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(139, 92, 246, 0.15);
+  color: #f3f4f6;
+  padding: 0;
+  z-index: 1001;
+  display: none;
+  overflow: hidden;
+}
+
+.tour-modal.open {
+  display: block;
+}
+
+.tour-modal-header {
+  padding: 24px 28px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tour-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #a78bfa;
+  letter-spacing: 1.5px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tour-heading {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.tour-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.tour-close-btn:hover {
+  color: #ffffff;
+}
+
+.tour-carousel {
+  position: relative;
+  overflow: hidden;
+  min-height: 380px;
+}
+
+.tour-slides-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+}
+
+.tour-slide {
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  padding: 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+@media (max-width: 720px) {
+  .tour-slide {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+}
+
+/* Illustration Mockups */
+.tour-slide-illustration {
+  background: #030712;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.mockup-header {
+  background: #0f172a;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mockup-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.mockup-dot.red { background: #ef4444; }
+.mockup-dot.yellow { background: #f59e0b; }
+.mockup-dot.green { background: #10b981; }
+
+.mockup-title {
+  margin-left: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.mockup-body {
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.trace-span {
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 3px solid #3b82f6;
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.trace-span.root { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.1); color: #c4b5fd; }
+.trace-span.child-1 { margin-left: 10px; border-color: #38bdf8; }
+.trace-span.child-2 { margin-left: 10px; border-color: #10b981; }
+.trace-span.child-3 { margin-left: 10px; border-color: #f59e0b; }
+
+.span-time {
+  color: #94a3b8;
+}
+
+.anomaly-flag {
+  color: #ef4444;
+}
+
+.anomaly-chart-sim {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px 8px;
+  border-radius: 6px;
+}
+
+.wave-bar {
+  flex: 1;
+  background: #3b82f6;
+  border-radius: 3px;
+}
+
+.wave-bar.alert { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
+.h-30 { height: 30%; }
+.h-35 { height: 35%; }
+.h-40 { height: 40%; }
+.h-45 { height: 45%; }
+.h-50 { height: 50%; }
+.h-85 { height: 85%; }
+.h-90 { height: 90%; }
+.h-95 { height: 95%; }
+
+.anomaly-action-note {
+  font-size: 0.7rem;
+  color: #10b981;
+  margin-top: 6px;
+}
+
+.route-node {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  padding: 8px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.route-pipe {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.route-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.route-chip {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: #cbd5e1;
+}
+
+.opt-score-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  display: inline-block;
+  align-self: flex-start;
+  font-weight: 700;
+}
+
+.opt-stat-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.green-text {
+  color: #34d399;
+}
+
+/* Info Side */
+.tour-slide-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.slide-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #38bdf8;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+}
+
+.tour-slide-info h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.tour-slide-info p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.slide-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+/* Modal Footer */
+.tour-modal-footer {
+  padding: 18px 28px;
+  background: #090e1a;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tour-nav-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tour-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.tour-nav-btn.primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  color: #ffffff;
+}
+
+.tour-nav-btn.primary:hover {
+  filter: brightness(1.15);
+}
+
+.tour-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tour-step-dots {
+  display: flex;
+  gap: 10px;
+}
+
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #334155;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.step-dot:hover {
+  background: #64748b;
+}
+
+.step-dot.active {
+  background: #38bdf8;
+  transform: scale(1.3);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+/* ===== END Issue #303 ===== */

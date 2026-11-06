@@ -24,6 +24,7 @@
     <p>Monitor token latency, prompt costs, and API throughput in a single glassmorphic dashboard.</p>
     <div class="cta-group">
       <button class="btn btn-lg btn-primary">Deploy Cluster ↗</button>
+      <button type="button" class="btn btn-lg btn-tour" id="openTourBtn">Take Product Tour ⚡</button>
       <a href="#roi-calculator" class="btn btn-lg btn-secondary">Calculate ROI ↓</a>
     </div>
   </header>
@@ -811,6 +812,160 @@
       </div>
     </div>
   </section>
+
+  <!-- ===== BEGIN Issue #303: Product Feature Tour Modal with Step-by-Step Navigation Carousel ===== -->
+  <div id="tourBackdrop" class="tour-backdrop" onclick="closeTourModal()"></div>
+  <dialog id="tourModal" class="tour-modal" aria-labelledby="tourTitle">
+    <div class="tour-modal-header">
+      <div class="tour-header-meta">
+        <span class="tour-tag">// CLOUDPULSE PRODUCT WALKTHROUGH</span>
+        <h2 id="tourTitle" class="tour-heading">Autonomous Observability Tour</h2>
+      </div>
+      <button type="button" class="tour-close-btn" id="tourCloseBtn" onclick="closeTourModal()" aria-label="Close product tour">&times;</button>
+    </div>
+
+    <div class="tour-carousel" id="tourCarousel">
+      <div class="tour-slides-track" id="tourSlidesTrack">
+        <!-- Slide 1: Realtime Distributed Tracing -->
+        <div class="tour-slide active" data-slide="0">
+          <div class="tour-slide-illustration">
+            <div class="mockup-header">
+              <span class="mockup-dot red"></span>
+              <span class="mockup-dot yellow"></span>
+              <span class="mockup-dot green"></span>
+              <span class="mockup-title">trace-stream :: cluster-us-east-1</span>
+            </div>
+            <div class="mockup-body trace-visual">
+              <div class="trace-span root"><span class="span-label">POST /api/v2/generate</span><span class="span-time">184ms</span></div>
+              <div class="trace-span child-1"><span class="span-label">↳ auth-jwt-verify</span><span class="span-time">12ms</span></div>
+              <div class="trace-span child-2"><span class="span-label">↳ vector-search (pgvector)</span><span class="span-time">48ms</span></div>
+              <div class="trace-span child-3"><span class="span-label">↳ gemini-3.8-flash stream</span><span class="span-time">124ms</span></div>
+            </div>
+          </div>
+          <div class="tour-slide-info">
+            <span class="slide-badge">CAPABILITY 01 / 04</span>
+            <h3>Distributed LLM Tracing</h3>
+            <p>Trace every inference request down to the millisecond across multi-agent pipelines, vector retrieval embeddings, and model provider endpoints with zero instrumentation overhead.</p>
+            <ul class="slide-feature-list">
+              <li>✓ Sub-millisecond token latency attribution</li>
+              <li>✓ End-to-end context injection tracking</li>
+              <li>✓ Automatic OpenTelemetry (OTel) v1.3 compliance</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Slide 2: Anomaly Detection -->
+        <div class="tour-slide" data-slide="1">
+          <div class="tour-slide-illustration">
+            <div class="mockup-header">
+              <span class="mockup-dot red"></span>
+              <span class="mockup-dot yellow"></span>
+              <span class="mockup-dot green"></span>
+              <span class="mockup-title">anomaly-radar :: live-telemetry</span>
+            </div>
+            <div class="mockup-body anomaly-visual">
+              <div class="anomaly-metric-row">
+                <span>Token Spikes (TPM):</span>
+                <strong class="anomaly-flag">⚠️ +340% Deviation Detected</strong>
+              </div>
+              <div class="anomaly-chart-sim">
+                <div class="wave-bar h-30"></div><div class="wave-bar h-40"></div><div class="wave-bar h-35"></div>
+                <div class="wave-bar h-50"></div><div class="wave-bar h-45"></div><div class="wave-bar h-95 alert"></div>
+                <div class="wave-bar h-90 alert"></div><div class="wave-bar h-85 alert"></div><div class="wave-bar h-40"></div>
+              </div>
+              <div class="anomaly-action-note">Auto-mitigation: Rate limit clamped for IP pool 192.0.2.0/24</div>
+            </div>
+          </div>
+          <div class="tour-slide-info">
+            <span class="slide-badge">CAPABILITY 02 / 04</span>
+            <h3>Predictive Anomaly Detection</h3>
+            <p>Statistical machine learning baselines model your nominal traffic curves, detecting token exhaustion, runaway loops, and hallucinations before they impact customer production budgets.</p>
+            <ul class="slide-feature-list">
+              <li>✓ Real-time sliding window outlier detection</li>
+              <li>✓ Automated circuit-breaking for runaway agent loops</li>
+              <li>✓ Root-cause clustering and noise suppression</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Slide 3: Alert Routing -->
+        <div class="tour-slide" data-slide="2">
+          <div class="tour-slide-illustration">
+            <div class="mockup-header">
+              <span class="mockup-dot red"></span>
+              <span class="mockup-dot yellow"></span>
+              <span class="mockup-dot green"></span>
+              <span class="mockup-title">incident-dispatch :: auto-route</span>
+            </div>
+            <div class="mockup-body route-visual">
+              <div class="route-node source">🚨 P0: High Error Rate (504 Gateway)</div>
+              <div class="route-pipe">↓↓ AI Diagnostic Analysis ↓↓</div>
+              <div class="route-channels">
+                <div class="route-chip">💬 #incident-war-room (Slack)</div>
+                <div class="route-chip">📟 On-Call SRE (PagerDuty)</div>
+                <div class="route-chip">⚙️ Webhook (Auto-rollback)</div>
+              </div>
+            </div>
+          </div>
+          <div class="tour-slide-info">
+            <span class="slide-badge">CAPABILITY 03 / 04</span>
+            <h3>Intelligent Alert Routing</h3>
+            <p>Contextual alerts enriched with full error payloads, stack traces, and suggested remediation steps routed directly to Slack, PagerDuty, Discord, or automated webhooks.</p>
+            <ul class="slide-feature-list">
+              <li>✓ Zero alert fatigue with deduplication</li>
+              <li>✓ Escalation policies based on SLA tier</li>
+              <li>✓ Bi-directional Slack command triage</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Slide 4: Autonomous Fleet Optimization -->
+        <div class="tour-slide" data-slide="3">
+          <div class="tour-slide-illustration">
+            <div class="mockup-header">
+              <span class="mockup-dot red"></span>
+              <span class="mockup-dot yellow"></span>
+              <span class="mockup-dot green"></span>
+              <span class="mockup-title">optimizer :: cost-efficiency</span>
+            </div>
+            <div class="mockup-body opt-visual">
+              <div class="opt-score-badge">99.4% SLA Maintained</div>
+              <div class="opt-stat-grid">
+                <div><span>Model Fallback:</span> <strong>Tiered Router</strong></div>
+                <div><span>Monthly Cost:</span> <strong class="green-text">-42% Reduction</strong></div>
+                <div><span>Cache Hit Ratio:</span> <strong>78.3% Semantic</strong></div>
+              </div>
+            </div>
+          </div>
+          <div class="tour-slide-info">
+            <span class="slide-badge">CAPABILITY 04 / 04</span>
+            <h3>Autonomous Cost Optimization</h3>
+            <p>Dynamically routes incoming user queries between lightweight and heavyweight models based on prompt complexity, maximizing response velocity while slicing monthly API expenditures.</p>
+            <ul class="slide-feature-list">
+              <li>✓ Semantic vector response caching</li>
+              <li>✓ Model cascading and auto-fallback</li>
+              <li>✓ Instant deployment across Kubernetes & Serverless</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carousel Footer Controls -->
+    <div class="tour-modal-footer">
+      <button type="button" class="tour-nav-btn" id="tourPrevBtn" aria-label="Previous feature slide">← Previous</button>
+      
+      <div class="tour-step-dots" role="tablist" aria-label="Tour navigation dots">
+        <button type="button" class="step-dot active" data-step="0" role="tab" aria-selected="true" aria-label="Slide 1"></button>
+        <button type="button" class="step-dot" data-step="1" role="tab" aria-selected="false" aria-label="Slide 2"></button>
+        <button type="button" class="step-dot" data-step="2" role="tab" aria-selected="false" aria-label="Slide 3"></button>
+        <button type="button" class="step-dot" data-step="3" role="tab" aria-selected="false" aria-label="Slide 4"></button>
+      </div>
+
+      <button type="button" class="tour-nav-btn primary" id="tourNextBtn" aria-label="Next feature slide">Next →</button>
+    </div>
+  </dialog>
+  <!-- ===== END Issue #303 ===== -->
 
   <footer class="footer">
     <div class="footer-content">
