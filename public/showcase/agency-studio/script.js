@@ -432,12 +432,18 @@ function initCaseStudyDrawer() {
 }
 
 // ---------------------------------------------------------------
-// Project scope estimator
+// Project scope estimator & ROI Configurator (Issue #267)
 // ---------------------------------------------------------------
 const PROJECT_TYPES = [
-  { id: 'branding', label: 'Branding', base: 6000, weeks: 4, note: 'Logo, palette, type system' },
-  { id: 'webapp', label: 'Web App', base: 18000, weeks: 10, note: 'Design plus full-stack build' },
-  { id: 'uiux', label: 'UI/UX Design', base: 9000, weeks: 6, note: 'Research, flows, hi-fi screens' }
+  { id: 'branding', label: 'Branding & Identity', base: 6000, weeks: 4, note: 'Logo, palette, type system', baseLift: 0.12 },
+  { id: 'webapp', label: 'Full-Stack Web App', base: 18000, weeks: 10, note: 'Design plus full-stack build', baseLift: 0.28 },
+  { id: 'uiux', label: 'UI/UX Design System', base: 9000, weeks: 6, note: 'Research, flows, hi-fi screens', baseLift: 0.20 }
+];
+
+const SENIORITY_LEVELS = [
+  { id: 'mid', label: 'Mid-Level Squad', rate: 1.0, pace: 1.0, note: '1.0x · Core product squad' },
+  { id: 'senior', label: 'Senior Product Leads', rate: 1.35, pace: 0.85, note: '1.35x · Top-tier tech & design leads' },
+  { id: 'principal', label: 'Principal & Director', rate: 1.75, pace: 0.7, note: '1.75x · Executive design & architecture' }
 ];
 
 const URGENCY = [
@@ -448,33 +454,58 @@ const URGENCY = [
 ];
 
 const ADDONS = [
-  { id: 'guidelines', label: 'Brand guidelines', cost: 1200, weeks: 1 },
-  { id: 'cms', label: 'CMS integration', cost: 3500, weeks: 2 },
-  { id: 'motion', label: 'Motion design', cost: 2800, weeks: 2 },
-  { id: 'seo', label: 'SEO setup', cost: 1500, weeks: 1 },
-  { id: 'analytics', label: 'Analytics dashboard', cost: 2400, weeks: 1 }
+  { id: 'guidelines', label: 'Brand guidelines & assets', cost: 1200, weeks: 1, lift: 0.04 },
+  { id: 'design-system', label: 'Design System & Component Library', cost: 4500, weeks: 2, lift: 0.16 },
+  { id: 'cms', label: 'Headless CMS integration', cost: 3500, weeks: 2, lift: 0.08 },
+  { id: 'motion', label: '3D Interactive & WebGL Motion', cost: 3800, weeks: 2, lift: 0.14 },
+  { id: 'funnel-opt', label: 'Conversion Funnel Optimization', cost: 4200, weeks: 1, lift: 0.22 },
+  { id: 'seo', label: 'Technical SEO & Performance Audit', cost: 1800, weeks: 1, lift: 0.10 },
+  { id: 'analytics', label: 'Executive Analytics & Attribution', cost: 2400, weeks: 1, lift: 0.06 }
 ];
 
 const RANGE_LOW = 0.9;
 const RANGE_HIGH = 1.15;
 
-const estState = { type: 'webapp', urgency: 1, addons: new Set() };
+const estState = {
+  type: 'webapp',
+  seniority: 'senior',
+  urgency: 1,
+  addons: new Set(),
+  monthlyRev: 50000,
+  convRate: 2.5
+};
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
 function roundTo100(n) { return Math.round(n / 100) * 100; }
 
 function calculateEstimate(state) {
-  const type = PROJECT_TYPES.find((t) => t.id === state.type);
-  const urgency = URGENCY[state.urgency];
+  const type = PROJECT_TYPES.find((t) => t.id === state.type) || PROJECT_TYPES[1];
+  const seniority = SENIORITY_LEVELS.find((s) => s.id === state.seniority) || SENIORITY_LEVELS[1];
+  const urgency = URGENCY[state.urgency] || URGENCY[1];
   const addons = ADDONS.filter((a) => state.addons.has(a.id));
   const addonCost = addons.reduce((sum, a) => sum + a.cost, 0);
   const addonWeeks = addons.reduce((sum, a) => sum + a.weeks, 0);
-  const subtotal = type.base + addonCost;
+
+  const baseWithSeniority = Math.round(type.base * seniority.rate);
+  const subtotal = Math.round((type.base + addonCost) * seniority.rate);
   const total = Math.round(subtotal * urgency.price);
   const adjustment = total - subtotal;
-  const weeks = (type.weeks + addonWeeks) * urgency.pace;
+  const weeks = Math.round((type.weeks + addonWeeks) * urgency.pace * seniority.pace);
+
+  // ROI Modeling calculations
+  const rawLift = type.baseLift + addons.reduce((sum, a) => sum + (a.lift || 0), 0);
+  const seniorityBoost = seniority.id === 'principal' ? 1.25 : (seniority.id === 'senior' ? 1.12 : 1.0);
+  const liftPct = Math.min(0.85, rawLift * seniorityBoost);
+  const annualRev = (state.monthlyRev || 50000) * 12;
+  const annualUplift = Math.round(annualRev * liftPct);
+  const monthlyUplift = annualUplift / 12;
+  const paybackMonths = monthlyUplift > 0 ? (total / monthlyUplift).toFixed(1) : 'N/A';
+  const roiMultiplier = total > 0 ? ((annualUplift * 3) / total).toFixed(1) : '0.0';
+
   return {
-    type, urgency, addons, subtotal, adjustment, total,
+    type, seniority, urgency, addons, subtotal, adjustment, total,
+    baseWithSeniority,
+    liftPct, annualUplift, paybackMonths, roiMultiplier,
     low: roundTo100(total * RANGE_LOW),
     high: roundTo100(total * RANGE_HIGH),
     weeksLow: Math.max(1, Math.ceil(weeks * 0.9)),
@@ -508,42 +539,92 @@ function buildPill(input, title, sub) {
 
 function buildEstimatorControls() {
   const types = document.getElementById('typeOptions');
-  PROJECT_TYPES.forEach((t) => {
-    const input = estEl('input', {
-      type: 'radio',
-      name: 'estType',
-      value: t.id
+  if (types) {
+    types.replaceChildren();
+    PROJECT_TYPES.forEach((t) => {
+      const input = estEl('input', {
+        type: 'radio',
+        name: 'estType',
+        value: t.id
+      });
+      if (t.id === estState.type) input.checked = true;
+      input.addEventListener('change', () => {
+        estState.type = t.id;
+        renderEstimate();
+      });
+      types.append(buildPill(input, t.label, `${usd.format(t.base)} · ${t.note}`));
     });
-    if (t.id === estState.type) input.checked = true;
-    input.addEventListener('change', () => {
-      estState.type = t.id;
-      renderEstimate();
+  }
+
+  const seniorityBox = document.getElementById('seniorityOptions');
+  if (seniorityBox) {
+    seniorityBox.replaceChildren();
+    SENIORITY_LEVELS.forEach((s) => {
+      const input = estEl('input', {
+        type: 'radio',
+        name: 'estSeniority',
+        value: s.id
+      });
+      if (s.id === estState.seniority) input.checked = true;
+      input.addEventListener('change', () => {
+        estState.seniority = s.id;
+        renderEstimate();
+      });
+      seniorityBox.append(buildPill(input, s.label, s.note));
     });
-    types.append(buildPill(input, t.label, `${usd.format(t.base)} · ${t.note}`));
-  });
+  }
 
   const addons = document.getElementById('addonOptions');
-  ADDONS.forEach((a) => {
-    const input = estEl('input', {
-      type: 'checkbox',
-      name: 'estAddon',
-      value: a.id
+  if (addons) {
+    addons.replaceChildren();
+    ADDONS.forEach((a) => {
+      const input = estEl('input', {
+        type: 'checkbox',
+        name: 'estAddon',
+        value: a.id
+      });
+      if (estState.addons.has(a.id)) input.checked = true;
+      input.addEventListener('change', () => {
+        if (input.checked) estState.addons.add(a.id);
+        else estState.addons.delete(a.id);
+        renderEstimate();
+      });
+      addons.append(buildPill(input, a.label, `+${usd.format(a.cost)} / +${a.weeks} wk${a.weeks > 1 ? 's' : ''}`));
     });
-    input.addEventListener('change', () => {
-      if (input.checked) estState.addons.add(a.id);
-      else estState.addons.delete(a.id);
-      renderEstimate();
-    });
-    addons.append(buildPill(input, a.label, `+${usd.format(a.cost)} / +${a.weeks} wk${a.weeks > 1 ? 's' : ''}`));
-  });
+  }
 
   const ticks = document.getElementById('urgencyTicks');
-  URGENCY.forEach((u) => ticks.append(estEl('span', { text: u.label })));
+  if (ticks) {
+    ticks.replaceChildren();
+    URGENCY.forEach((u) => ticks.append(estEl('span', { text: u.label })));
+  }
 
-  document.getElementById('urgency').addEventListener('input', (event) => {
-    estState.urgency = Number(event.target.value);
-    renderEstimate();
-  });
+  const urgencySlider = document.getElementById('urgency');
+  if (urgencySlider) {
+    urgencySlider.addEventListener('input', (event) => {
+      estState.urgency = Number(event.target.value);
+      renderEstimate();
+    });
+  }
+
+  // Baseline ROI inputs
+  const monthlyRevInput = document.getElementById('roiMonthlyRev');
+  if (monthlyRevInput) {
+    monthlyRevInput.addEventListener('input', (event) => {
+      const val = parseFloat(event.target.value) || 0;
+      estState.monthlyRev = Math.max(0, val);
+      renderEstimate();
+    });
+  }
+
+  const convRateInput = document.getElementById('roiConvRate');
+  if (convRateInput) {
+    convRateInput.addEventListener('input', (event) => {
+      const val = parseFloat(event.target.value) || 0;
+      estState.convRate = Math.max(0, val);
+      renderEstimate();
+    });
+  }
 }
 
 function addRow(tbody, label, value, cls) {
@@ -554,27 +635,58 @@ function addRow(tbody, label, value, cls) {
 function renderEstimate() {
   const e = calculateEstimate(estState);
   const slider = document.getElementById('urgency');
-  slider.setAttribute('aria-valuetext', e.urgency.label);
-  document.getElementById('urgencyLabel').textContent = e.urgency.label;
-  document.getElementById('urgencyHint').textContent = e.urgency.hint;
+  if (slider) {
+    slider.setAttribute('aria-valuetext', e.urgency.label);
+    const urgencyLabel = document.getElementById('urgencyLabel');
+    if (urgencyLabel) urgencyLabel.textContent = e.urgency.label;
+    const urgencyHint = document.getElementById('urgencyHint');
+    if (urgencyHint) urgencyHint.textContent = e.urgency.hint;
+  }
 
-  document.getElementById('invRange').textContent = `${usd.format(e.low)} to ${usd.format(e.high)}`;
-  document.getElementById('invWeeks').textContent = `Estimated delivery: ${e.weeksLow} to ${e.weeksHigh} weeks`;
+  const invRange = document.getElementById('invRange');
+  if (invRange) invRange.textContent = `${usd.format(e.low)} to ${usd.format(e.high)}`;
+
+  const invWeeks = document.getElementById('invWeeks');
+  if (invWeeks) invWeeks.textContent = `Estimated delivery: ${e.weeksLow} to ${e.weeksHigh} weeks`;
 
   const rows = document.getElementById('invRows');
-  rows.replaceChildren();
-  addRow(rows, `${e.type.label} base`, usd.format(e.type.base));
-  e.addons.forEach((a) => addRow(rows, a.label, `+${usd.format(a.cost)}`));
-  addRow(rows, 'Subtotal', usd.format(e.subtotal), 'sub');
-  const sign = e.adjustment < 0 ? '-' : '+';
-  addRow(rows, `${e.urgency.label} timeline (x${e.urgency.price})`, `${sign}${usd.format(Math.abs(e.adjustment))}`);
-  document.getElementById('invTotal').textContent = usd.format(e.total);
+  if (rows) {
+    rows.replaceChildren();
+    addRow(rows, `${e.type.label} (${e.seniority.label})`, usd.format(e.baseWithSeniority));
+    e.addons.forEach((a) => addRow(rows, a.label, `+${usd.format(Math.round(a.cost * e.seniority.rate))}`));
+    addRow(rows, 'Subtotal', usd.format(e.subtotal), 'sub');
+    const sign = e.adjustment < 0 ? '-' : '+';
+    addRow(rows, `${e.urgency.label} timeline (x${e.urgency.price})`, `${sign}${usd.format(Math.abs(e.adjustment))}`);
+  }
+
+  const invTotal = document.getElementById('invTotal');
+  if (invTotal) invTotal.textContent = usd.format(e.total);
+
+  // Update ROI Projection Card
+  const roiMultiplierBadge = document.getElementById('roiMultiplierBadge');
+  if (roiMultiplierBadge) roiMultiplierBadge.textContent = `${e.roiMultiplier}x ROI`;
+
+  const roiLiftVal = document.getElementById('roiLiftVal');
+  if (roiLiftVal) roiLiftVal.textContent = `+${Math.round(e.liftPct * 100)}%`;
+
+  const roiAnnualUplift = document.getElementById('roiAnnualUplift');
+  if (roiAnnualUplift) roiAnnualUplift.textContent = usd.format(e.annualUplift);
+
+  const roiPaybackVal = document.getElementById('roiPaybackVal');
+  if (roiPaybackVal) roiPaybackVal.textContent = `${e.paybackMonths} mos`;
+
+  const roiVisFill = document.getElementById('roiVisFill');
+  if (roiVisFill) {
+    const meterPct = Math.min(100, Math.max(10, Math.round(e.liftPct * 100 * 1.6)));
+    roiVisFill.style.width = `${meterPct}%`;
+  }
+
   return e;
 }
 
 function specSummary(e) {
   const addons = e.addons.length ? e.addons.map((a) => a.label).join(', ') : 'no add-ons';
-  return `${e.type.label}, ${e.urgency.label.toLowerCase()} timeline, ${addons}: ${usd.format(e.low)} to ${usd.format(e.high)} over ${e.weeksLow} to ${e.weeksHigh} weeks.`;
+  return `${e.type.label} (${e.seniority.label}), ${e.urgency.label.toLowerCase()} timeline, ${addons}: ${usd.format(e.low)} to ${usd.format(e.high)} over ${e.weeksLow} to ${e.weeksHigh} weeks. Projected ROI: ${e.roiMultiplier}x with +${Math.round(e.liftPct * 100)}% conversion lift.`;
 }
 
 function initEstimator() {
@@ -584,28 +696,77 @@ function initEstimator() {
 
   const btn = document.getElementById('quoteBtn');
   const box = document.getElementById('quoteBox');
-  btn.addEventListener('click', () => {
-    const open = box.hidden;
-    box.hidden = !open;
-    btn.setAttribute('aria-expanded', String(open));
-    if (open) document.getElementById('quoteEmail').focus();
-  });
+  if (btn && box) {
+    btn.addEventListener('click', () => {
+      const open = box.hidden;
+      box.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      if (open) document.getElementById('quoteEmail').focus();
+    });
+  }
 
-  document.getElementById('quoteForm').addEventListener('submit', (event) => {
-    event.preventDefault();
-    const email = document.getElementById('quoteEmail');
-    const msg = document.getElementById('quoteMsg');
-    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
-    msg.classList.toggle('error', !valid);
-    if (!valid) {
-      email.setAttribute('aria-invalid', 'true');
-      msg.textContent = 'Enter a valid email address so we can reply.';
-      email.focus();
-      return;
-    }
-    email.removeAttribute('aria-invalid');
-    msg.textContent = `Request noted for ${email.value.trim()}. Spec: ${specSummary(calculateEstimate(estState))}`;
-  });
+  const exportBtn = document.getElementById('exportBriefBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const e = calculateEstimate(estState);
+      const briefData = {
+        title: "Aetheria Studio — Project Scope & ROI Brief",
+        generatedAt: new Date().toISOString(),
+        configuration: {
+          projectType: e.type.label,
+          teamSeniority: e.seniority.label,
+          timelinePace: e.urgency.label,
+          deliverables: e.addons.map((a) => a.label)
+        },
+        financials: {
+          investmentRange: `${usd.format(e.low)} - ${usd.format(e.high)}`,
+          finalEstimate: usd.format(e.total),
+          deliveryWeeks: `${e.weeksLow} - ${e.weeksHigh} weeks`
+        },
+        roiProjections: {
+          projectedConversionLift: `+${Math.round(e.liftPct * 100)}%`,
+          projectedAnnualRevenueUplift: usd.format(e.annualUplift),
+          estimatedPaybackPeriod: `${e.paybackMonths} months`,
+          threeYearRoiMultiplier: `${e.roiMultiplier}x`
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(briefData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Aetheria_Project_Scope_Brief.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      const originalText = exportBtn.innerHTML;
+      exportBtn.innerHTML = '<span style="color:#86efac">✓ Brief Exported!</span>';
+      setTimeout(() => {
+        exportBtn.innerHTML = originalText;
+      }, 2200);
+    });
+  }
+
+  const quoteForm = document.getElementById('quoteForm');
+  if (quoteForm) {
+    quoteForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const email = document.getElementById('quoteEmail');
+      const msg = document.getElementById('quoteMsg');
+      const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+      msg.classList.toggle('error', !valid);
+      if (!valid) {
+        email.setAttribute('aria-invalid', 'true');
+        msg.textContent = 'Enter a valid email address so we can reply.';
+        email.focus();
+        return;
+      }
+      email.removeAttribute('aria-invalid');
+      msg.textContent = `Request noted for ${email.value.trim()}. Spec: ${specSummary(calculateEstimate(estState))}`;
+    });
+  }
 }
 
 /*CLIENT REVIEW SUBMISSION MODAL */

@@ -263,8 +263,11 @@
 </section>
 
 <section id="estimator" class="estimator" aria-labelledby="estTitle">
-  <h2 id="estTitle">Project Scope Estimator</h2>
-  <p class="est-intro">Pick a scope and see a ballpark price and timeline. Final quotes follow a short discovery call.</p>
+  <div class="est-header-wrap">
+    <span class="badge">// CLIENT DELIVERABLES &amp; IMPACT</span>
+    <h2 id="estTitle">Project Scope &amp; ROI Estimator</h2>
+    <p class="est-intro">Configure your custom deliverables, team seniority, and pace. View real-time cost projections alongside estimated conversion lift and ROI horizons.</p>
+  </div>
 
   <div class="est-layout">
     <form class="est-form" id="estForm" onsubmit="return false">
@@ -274,7 +277,12 @@
       </fieldset>
 
       <fieldset class="est-group">
-        <legend>2. Timeline</legend>
+        <legend>2. Team Seniority Squad</legend>
+        <div class="pill-row" id="seniorityOptions"></div>
+      </fieldset>
+
+      <fieldset class="est-group">
+        <legend>3. Timeline &amp; Delivery Pace</legend>
         <label class="est-label" for="urgency">How soon do you need it? <strong id="urgencyLabel"></strong></label>
         <input type="range" id="urgency" min="0" max="3" step="1" value="1" aria-describedby="urgencyHint" />
         <div class="range-ticks" aria-hidden="true" id="urgencyTicks"></div>
@@ -282,13 +290,28 @@
       </fieldset>
 
       <fieldset class="est-group">
-        <legend>3. Deliverable add-ons</legend>
+        <legend>4. Deliverable add-ons &amp; Growth Accelerators</legend>
         <div class="pill-row" id="addonOptions"></div>
+      </fieldset>
+
+      <!-- Client ROI Metric Baseline Inputs -->
+      <fieldset class="est-group roi-inputs-group">
+        <legend>5. Business Baseline (for ROI Modeling)</legend>
+        <div class="roi-inputs-grid">
+          <div>
+            <label class="est-label" for="roiMonthlyRev">Current Monthly Revenue ($)</label>
+            <input type="number" id="roiMonthlyRev" class="est-input" value="50000" min="5000" step="5000" aria-label="Current Monthly Revenue in USD" />
+          </div>
+          <div>
+            <label class="est-label" for="roiConvRate">Current Conversion Rate (%)</label>
+            <input type="number" id="roiConvRate" class="est-input" value="2.5" min="0.1" max="50" step="0.1" aria-label="Current Conversion Rate percentage" />
+          </div>
+        </div>
       </fieldset>
     </form>
 
     <aside class="invoice" aria-labelledby="invTitle">
-      <h3 id="invTitle">Estimate</h3>
+      <h3 id="invTitle">Scope &amp; Investment</h3>
       <div class="inv-summary" id="invSummary" role="status" aria-live="polite" aria-atomic="true">
         <div class="inv-range" id="invRange"></div>
         <div class="inv-weeks" id="invWeeks"></div>
@@ -300,7 +323,41 @@
           <tr><th scope="row">Estimate</th><td id="invTotal"></td></tr>
         </tfoot>
       </table>
-      <button type="button" class="quote-btn" id="quoteBtn" aria-expanded="false" aria-controls="quoteBox">Request Quote with this Spec</button>
+
+      <!-- Dynamic ROI Projection Card -->
+      <div class="roi-projection-card" id="roiProjectionCard">
+        <div class="roi-card-header">
+          <span class="roi-tag">PROJECTED ROI IMPACT</span>
+          <span class="roi-multiplier-badge" id="roiMultiplierBadge">4.8x ROI</span>
+        </div>
+        <div class="roi-metrics-grid">
+          <div class="roi-metric">
+            <span class="roi-metric-lbl">Conversion Lift</span>
+            <span class="roi-metric-val" id="roiLiftVal">+34%</span>
+          </div>
+          <div class="roi-metric">
+            <span class="roi-metric-lbl">Annual Rev Uplift</span>
+            <span class="roi-metric-val" id="roiAnnualUplift">$204,000</span>
+          </div>
+          <div class="roi-metric">
+            <span class="roi-metric-lbl">Payback Period</span>
+            <span class="roi-metric-val" id="roiPaybackVal">2.1 mos</span>
+          </div>
+        </div>
+        <!-- Visual Comparison Track -->
+        <div class="roi-vis-track">
+          <div class="roi-vis-fill" id="roiVisFill" style="width: 65%;"></div>
+        </div>
+        <p class="roi-disclaimer">*Estimated based on Aetheria benchmark data across similar client verticals.</p>
+      </div>
+
+      <div class="est-action-buttons">
+        <button type="button" class="quote-btn outline" id="exportBriefBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Scope Brief
+        </button>
+        <button type="button" class="quote-btn solid" id="quoteBtn" aria-expanded="false" aria-controls="quoteBox">Request Quote with this Spec</button>
+      </div>
 
       <div class="quote-box" id="quoteBox" hidden>
         <form id="quoteForm" novalidate>
