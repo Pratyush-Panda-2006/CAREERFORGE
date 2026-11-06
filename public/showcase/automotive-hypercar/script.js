@@ -1,3 +1,33 @@
+/* Reveal each specification once; the final text remains available without JS. */
+(function () {
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const numbers = document.querySelectorAll('.spec-number');
+  if (motion.matches || !('IntersectionObserver' in window)) return;
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      observer.unobserve(entry.target);
+      const number = entry.target;
+      const target = Number(number.dataset.value);
+      const decimals = Number(number.dataset.decimals);
+      const suffix = number.dataset.suffix || '';
+      const card = number.closest('.spec-card');
+      if (card) card.classList.add('is-visible');
+      let start;
+      const frame = now => {
+        if (motion.matches) { number.textContent = target.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + suffix; return; }
+        if (start === undefined) start = now;
+        const progress = Math.min(1, (now - start) / 1000);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        number.textContent = (target * eased).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + suffix;
+        if (progress < 1) requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    });
+  }, { threshold: 0.3 });
+  numbers.forEach(number => observer.observe(number));
+})();
+
 /* ===== Hypercar Comparison Matrix (issue #176) START ===== */
 (function () {
   'use strict';

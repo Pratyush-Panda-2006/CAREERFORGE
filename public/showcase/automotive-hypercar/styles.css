@@ -109,7 +109,7 @@ body {
   max-width: 900px;
   margin: 60px auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
   padding: 0 24px;
 }
@@ -118,12 +118,21 @@ body {
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
-  padding: 32px;
+  padding: 24px 12px;
   text-align: center;
+  transition: border-color 250ms ease, background-color 250ms ease, box-shadow 250ms ease;
 }
 
 .val { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; color: #ef4444; display: block; margin-bottom: 6px; }
 .lbl { font-size: 0.8rem; color: #9ca3af; letter-spacing: 1px; }
+.spec-card .val { font-family: 'Orbitron', 'Courier New', monospace; font-size: clamp(1.3rem, 2vw, 1.85rem); font-variant-numeric: tabular-nums; text-shadow: 0 0 16px rgba(239,68,68,0.3); }
+.spec-card:hover { border-color: rgba(239,68,68,0.55); background-color: rgba(239,68,68,0.08); box-shadow: 0 0 22px rgba(239,68,68,0.16); }
+.spec-card.is-visible .val { animation: spec-glow 2.4s ease-in-out 2; }
+.spec-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@keyframes spec-glow { 50% { text-shadow: 0 0 24px rgba(239,68,68,0.65); } }
+@media (prefers-reduced-motion: reduce) { .spec-card { transition: none; } .spec-card.is-visible .val { animation: none; } }
+@media (max-width: 800px) { .specs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .specs-grid { grid-template-columns: 1fr; } }
 
 /* ===== Virtual Wind Tunnel (issue #99) START ===== */
 .wt {
