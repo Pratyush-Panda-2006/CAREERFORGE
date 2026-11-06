@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initStageFilters();
   initScheduleTabs();
   initTicketCalculator();
+  initPackingChecklist();
 });
 
 // ---------------------------------------------------------------
@@ -643,3 +644,154 @@ function initFestivalWeather() {
     placePopover(frame.querySelector('.vm-pin[data-stage="' + openId + '"]'));
   });
 })();
+
+// ---------------------------------------------------------------
+// Festival Survival Packing Checklist (Issue #287)
+// ---------------------------------------------------------------
+function initPackingChecklist() {
+  const section = document.getElementById('packing-checklist');
+  if (!section) return;
+
+  const STORAGE_KEY = 'festival_packing_checklist';
+  const checkboxes = Array.from(section.querySelectorAll('.packing-checkbox'));
+  const resetBtn = document.getElementById('packing-reset-btn');
+  const checkAllBtn = document.getElementById('packing-checkall-btn');
+
+  const countCamping = document.getElementById('count-camping');
+  const countGear = document.getElementById('count-gear');
+  const countHealth = document.getElementById('count-health');
+
+  const barCamping = document.getElementById('bar-camping');
+  const barGear = document.getElementById('bar-gear');
+  const barHealth = document.getElementById('bar-health');
+
+  const overallCount = document.getElementById('packing-overall-count');
+  const overallPct = document.getElementById('packing-overall-pct');
+  const overallBar = document.getElementById('packing-overall-bar');
+  const overallTrack = document.getElementById('packing-overall-track');
+  const readinessStatus = document.getElementById('packing-readiness-status');
+
+  // Load state from localStorage
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  // Save state to localStorage
+  function saveState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // Ignore quota errors
+    }
+  }
+
+  function updateUI() {
+    const state = {};
+    let totalChecked = 0;
+    const catStats = {
+      camping: { total: 0, checked: 0 },
+      gear: { total: 0, checked: 0 },
+      health: { total: 0, checked: 0 }
+    };
+
+    checkboxes.forEach((cb) => {
+      const cat = cb.getAttribute('data-cat') || 'gear';
+      if (!catStats[cat]) catStats[cat] = { total: 0, checked: 0 };
+      catStats[cat].total++;
+
+      if (cb.checked) {
+        state[cb.id] = true;
+        totalChecked++;
+        catStats[cat].checked++;
+      } else {
+        state[cb.id] = false;
+      }
+
+      // Toggle row style
+      const row = cb.closest('.packing-item-row');
+      if (row) {
+        row.classList.toggle('is-packed', cb.checked);
+      }
+    });
+
+    saveState(state);
+
+    // Update categories
+    if (countCamping && barCamping && catStats.camping) {
+      countCamping.textContent = `${catStats.camping.checked} / ${catStats.camping.total}`;
+      const pct = catStats.camping.total > 0 ? (catStats.camping.checked / catStats.camping.total) * 100 : 0;
+      barCamping.style.width = `${pct}%`;
+    }
+
+    if (countGear && barGear && catStats.gear) {
+      countGear.textContent = `${catStats.gear.checked} / ${catStats.gear.total}`;
+      const pct = catStats.gear.total > 0 ? (catStats.gear.checked / catStats.gear.total) * 100 : 0;
+      barGear.style.width = `${pct}%`;
+    }
+
+    if (countHealth && barHealth && catStats.health) {
+      countHealth.textContent = `${catStats.health.checked} / ${catStats.health.total}`;
+      const pct = catStats.health.total > 0 ? (catStats.health.checked / catStats.health.total) * 100 : 0;
+      barHealth.style.width = `${pct}%`;
+    }
+
+    // Update overall
+    const totalItems = checkboxes.length;
+    const overallPercentage = totalItems > 0 ? Math.round((totalChecked / totalItems) * 100) : 0;
+
+    if (overallCount) overallCount.textContent = `${totalChecked} / ${totalItems}`;
+    if (overallPct) overallPct.textContent = `${overallPercentage}%`;
+    if (overallBar) overallBar.style.width = `${overallPercentage}%`;
+    if (overallTrack) overallTrack.setAttribute('aria-valuenow', String(overallPercentage));
+
+    if (readinessStatus) {
+      if (overallPercentage === 100) {
+        readinessStatus.textContent = 'MISSION READY // DEPLOYED';
+        readinessStatus.classList.add('complete');
+      } else if (overallPercentage > 0) {
+        readinessStatus.textContent = 'PACKING IN PROGRESS';
+        readinessStatus.classList.remove('complete');
+      } else {
+        readinessStatus.textContent = 'PREPARING GEAR';
+        readinessStatus.classList.remove('complete');
+      }
+    }
+  }
+
+  // Restore saved state
+  const saved = loadState();
+  checkboxes.forEach((cb) => {
+    if (saved[cb.id] === true) {
+      cb.checked = true;
+    }
+    cb.addEventListener('change', updateUI);
+  });
+
+  // Action listeners
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      checkboxes.forEach((cb) => {
+        cb.checked = false;
+      });
+      updateUI();
+    });
+  }
+
+  if (checkAllBtn) {
+    checkAllBtn.addEventListener('click', () => {
+      checkboxes.forEach((cb) => {
+        cb.checked = true;
+      });
+      updateUI();
+    });
+  }
+
+  // Initial calculation
+  updateUI();
+}
+
