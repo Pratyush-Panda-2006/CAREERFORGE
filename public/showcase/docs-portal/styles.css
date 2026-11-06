@@ -815,3 +815,72 @@ body {
   .quota-ring-fill { transition: none; }
   .quota-live-dot { animation: none; }
 }
+
+/* ==========================================================
+   Issue #22: Copy Code Snippet Button & Toast Feedback
+   ========================================================== */
+.code-block,
+pre.has-copy-btn {
+  position: relative;
+}
+
+.copy-code-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  color: #94a3b8;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  z-index: 5;
+  opacity: 0.85;
+}
+
+.copy-code-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
+  opacity: 1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.copy-code-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+.copy-code-btn .copy-icon {
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.copy-code-btn.copied {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #34d399;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+
+.copy-code-btn.copied .copy-icon {
+  font-weight: 700;
+  color: #34d399;
+}
+
+/* Ensure code text doesn't clash with copy button */
+.code-block code {
+  display: block;
+  padding-right: 64px;
+}

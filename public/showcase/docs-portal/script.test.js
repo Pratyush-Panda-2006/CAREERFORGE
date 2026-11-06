@@ -11,7 +11,7 @@ test('copies a section URL and shows toast feedback when its heading link is cli
   const toast = {
     textContent: '',
     setAttribute() {},
-    classList: { add(name) { this.visible = name === 'visible'; }, remove(name) { this.visible = false; } },
+    classList: { add(name) { this.visible = name === 'visible'; }, remove() { this.visible = false; } },
   };
   const body = { appendChild(child) { this.child = child; } };
   const headings = ['h2', 'h3'].map((tagName, index) => ({
@@ -117,4 +117,88 @@ test('opens the section and shows fallback toast feedback when clipboard copying
   assert.equal(window.location.hash, 'fallback-section');
   assert.equal(toast.textContent, 'Section link opened');
   assert.equal(toast.classList.visible, true, 'fallback toast should be shown');
+});
+
+test('injects copy code button into pre blocks, copies snippet, and shows checkmark and toast feedback', async () => {
+  const source = await readFile(new URL('./script.js', import.meta.url), 'utf8');
+  const listeners = {};
+  const timeouts = [];
+  let copiedText = '';
+
+  const toast = {
+    textContent: '',
+    setAttribute() {},
+    classList: { add(name) { this.visible = name === 'visible'; }, remove() { this.visible = false; } },
+  };
+
+  const codeEl = { textContent: 'Authorization: Bearer prisma_live_12345' };
+  let copyBtn = null;
+  const preEl = {
+    classList: { add() {} },
+    querySelector: selector => selector === 'code' ? codeEl : selector === '.copy-code-btn' ? copyBtn : null,
+    appendChild(child) { copyBtn = child; },
+    textContent: 'Authorization: Bearer prisma_live_12345',
+  };
+
+  const document = {
+    addEventListener: (name, callback) => { listeners[name] = callback; },
+    body: { appendChild() {} },
+    getElementById: () => null,
+    querySelector: selector => selector === '.copy-link-toast' ? toast : null,
+    querySelectorAll: selector => selector === 'pre' ? [preEl] : [],
+    createElement: tagName => {
+      const elem = {
+        tagName,
+        classList: {
+          classes: new Set(),
+          add(c) { this.classes.add(c); },
+          remove(c) { this.classes.delete(c); },
+          contains(c) { return this.classes.has(c); }
+        },
+        setAttribute(k, v) { this[k] = v; },
+        appendChild(c) { this.children = this.children || []; this.children.push(c); },
+        addEventListener(ev, cb) { this[ev] = cb; },
+        textContent: '',
+      };
+      return elem;
+    },
+  };
+
+  const window = {
+    location: { origin: 'https://docs.example', pathname: '/api', hash: '' },
+    addEventListener() {},
+    requestAnimationFrame() {},
+    setTimeout(cb, d) { timeouts.push({ cb, d }); },
+    clearTimeout() {},
+  };
+
+  vm.runInNewContext(source, {
+    document,
+    window,
+    navigator: { clipboard: { writeText: async txt => { copiedText = txt; } } },
+    console,
+  });
+
+  listeners.DOMContentLoaded();
+
+  assert.ok(copyBtn, 'copy button should be injected into the pre element');
+  assert.equal(copyBtn.className, 'copy-code-btn');
+  assert.equal(copyBtn['aria-label'], 'Copy code snippet to clipboard');
+
+  // Trigger click
+  let prevented = false;
+  let stopped = false;
+  await copyBtn.click({ preventDefault() { prevented = true; }, stopPropagation() { stopped = true; } });
+
+  assert.equal(prevented, true);
+  assert.equal(stopped, true);
+  assert.equal(copiedText, 'Authorization: Bearer prisma_live_12345');
+  assert.equal(copyBtn.classList.contains('copied'), true);
+  assert.equal(toast.textContent, 'Code snippet copied to clipboard');
+  assert.equal(toast.classList.visible, true);
+
+  // Advance timer for feedback reset
+  timeouts.forEach(t => t.cb());
+  assert.equal(copyBtn.classList.contains('copied'), false);
+  assert.equal(toast.classList.visible, false);
 });
