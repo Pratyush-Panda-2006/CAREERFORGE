@@ -1065,3 +1065,228 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('VitalityAI Daily Step Tracker ready');
 });
+
+/* ===== BEGIN Issue #293: Intermittent Fasting Tracker ===== */
+document.addEventListener('DOMContentLoaded', () => {
+  const section = document.getElementById('fasting-tracker-section');
+  if (!section) return;
+
+  // Elements
+  const protoButtons = section.querySelectorAll('.f-proto-btn');
+  const timerDigits = document.getElementById('fastingTimerDigits');
+  const remainingLabel = document.getElementById('fastingRemainingLabel');
+  const pctBadge = document.getElementById('fastingPctBadge');
+  const statusPill = document.getElementById('fastingStatusPill');
+  const outerRing = document.getElementById('fastOuterRing');
+  const innerRing = document.getElementById('fastInnerRing');
+  const toggleBtn = document.getElementById('fastingToggleBtn');
+  const toggleIcon = document.getElementById('fastingToggleIcon');
+  const toggleText = document.getElementById('fastingToggleText');
+  const resetBtn = document.getElementById('fastingResetBtn');
+  const simButtons = section.querySelectorAll('.sim-btn');
+
+  const glucoseVal = document.getElementById('fastGlucoseVal');
+  const ketoneVal = document.getElementById('fastKetoneVal');
+  const startVal = document.getElementById('fastStartVal');
+  const targetVal = document.getElementById('fastTargetVal');
+
+  const stages = [
+    { id: 'stage-anabolic', name: 'Anabolic State', minHour: 0, maxHour: 4 },
+    { id: 'stage-catabolic', name: 'Catabolic Phase', minHour: 4, maxHour: 12 },
+    { id: 'stage-fatburn', name: 'Fat Burning (Lipolysis)', minHour: 12, maxHour: 18 },
+    { id: 'stage-ketosis', name: 'Ketosis & Autophagy', minHour: 18, maxHour: 99 }
+  ];
+
+  const OUTER_CIRCUMFERENCE = 628.32; // 2 * PI * 100
+  const INNER_CIRCUMFERENCE = 515.22; // 2 * PI * 82
+
+  let targetHours = 16;
+  let elapsedSeconds = 14 * 3600 + 25 * 60; // Start with 14h 25m in fat burning
+  let isRunning = true;
+  // Timer loop
+  setInterval(() => {
+    if (isRunning) {
+      elapsedSeconds += 1;
+      updateFastingUI();
+    }
+  }, 1000);
+    const hrs = Math.floor(totalSecs / 3600);
+    const mins = Math.floor((totalSecs % 3600) / 60);
+    const secs = totalSecs % 60;
+    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function updateFastingUI() {
+    const elapsedHours = elapsedSeconds / 3600;
+    const targetSeconds = targetHours * 3600;
+    const progressFraction = Math.min(1.0, elapsedSeconds / targetSeconds);
+    const pct = Math.round((elapsedSeconds / targetSeconds) * 100);
+
+    // Digits
+    if (timerDigits) {
+      timerDigits.textContent = formatTime(elapsedSeconds);
+    }
+
+    // Remaining or Overachieved
+    if (remainingLabel) {
+      if (elapsedSeconds < targetSeconds) {
+        const remainingSec = targetSeconds - elapsedSeconds;
+        const rHrs = Math.floor(remainingSec / 3600);
+        const rMins = Math.floor((remainingSec % 3600) / 60);
+        remainingLabel.textContent = `${rHrs}h ${rMins}m remaining`;
+      } else {
+        const extraSec = elapsedSeconds - targetSeconds;
+        const eHrs = Math.floor(extraSec / 3600);
+        const eMins = Math.floor((extraSec % 3600) / 60);
+        remainingLabel.textContent = `Goal reached! (+${eHrs}h ${eMins}m extra)`;
+      }
+    }
+
+    if (pctBadge) {
+      pctBadge.textContent = `${pct}% of ${targetHours}h Goal`;
+    }
+
+    // Status Pill
+    if (statusPill) {
+      if (!isRunning) {
+        statusPill.className = 'fasting-status-pill idle';
+        statusPill.textContent = 'FASTING PAUSED';
+      } else if (elapsedSeconds >= targetSeconds) {
+        statusPill.className = 'fasting-status-pill completed';
+        statusPill.textContent = 'TARGET ACHIEVED';
+      } else {
+        statusPill.className = 'fasting-status-pill';
+        statusPill.textContent = 'FASTING ACTIVE';
+      }
+    }
+
+    // Outer Ring (Overall Progress)
+    if (outerRing) {
+      const offset = OUTER_CIRCUMFERENCE * (1 - progressFraction);
+      outerRing.style.strokeDashoffset = offset;
+    }
+
+    // Active Stage & Inner Ring
+    let currentStage = stages[0];
+    for (const st of stages) {
+      const el = document.getElementById(st.id);
+      if (!el) continue;
+
+      const badge = el.querySelector('.stage-status-badge');
+
+      if (elapsedHours >= st.maxHour) {
+        el.className = 'milestone-item completed';
+        if (badge) badge.textContent = 'Completed';
+      } else if (elapsedHours >= st.minHour && elapsedHours < st.maxHour) {
+        el.className = 'milestone-item active';
+        if (badge) badge.textContent = 'Current Stage';
+        currentStage = st;
+      } else {
+        el.className = 'milestone-item locked';
+        if (badge) badge.textContent = 'Locked';
+      }
+    }
+
+    // Inner Ring (Current Stage Progress)
+    if (innerRing) {
+      const stageSpan = Math.min(24, currentStage.maxHour) - currentStage.minHour;
+      const stageProgress = Math.max(0, Math.min(1.0, (elapsedHours - currentStage.minHour) / stageSpan));
+      const innerOffset = INNER_CIRCUMFERENCE * (1 - stageProgress);
+      innerRing.style.strokeDashoffset = innerOffset;
+    }
+
+    // Biometrics models
+    if (glucoseVal) {
+      let glucose = 102;
+      if (elapsedHours >= 18) glucose = 74;
+      else if (elapsedHours >= 12) glucose = 79;
+      else if (elapsedHours >= 4) glucose = 88;
+      glucoseVal.textContent = `${glucose} mg/dL (Optimal)`;
+    }
+
+    if (ketoneVal) {
+      let ketone = 0.1;
+      if (elapsedHours >= 20) ketone = 1.8;
+      else if (elapsedHours >= 18) ketone = 1.2;
+      else if (elapsedHours >= 14) ketone = 0.8;
+      else if (elapsedHours >= 12) ketone = 0.4;
+      ketoneVal.textContent = `${ketone} mmol/L`;
+    }
+
+    // Update timestamps
+    if (startVal && targetVal) {
+      const startTime = new Date(Date.now() - (elapsedSeconds * 1000));
+      const targetTime = new Date(startTime.getTime() + (targetHours * 3600 * 1000));
+      startVal.textContent = startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      targetVal.textContent = targetTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+  }
+
+  // Toggle button
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      isRunning = !isRunning;
+      if (isRunning) {
+        toggleIcon.textContent = '⏸️';
+        toggleText.textContent = 'End Fast Early';
+        toggleBtn.className = 'f-btn f-btn-primary';
+      } else {
+        toggleIcon.textContent = '▶️';
+        toggleText.textContent = 'Resume Fast';
+        toggleBtn.className = 'f-btn f-btn-secondary';
+      }
+      updateFastingUI();
+    });
+  }
+
+  // Reset button
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      elapsedSeconds = 0;
+      isRunning = true;
+      if (toggleIcon && toggleText) {
+        toggleIcon.textContent = '⏸️';
+        toggleText.textContent = 'End Fast Early';
+        toggleBtn.className = 'f-btn f-btn-primary';
+      }
+      updateFastingUI();
+    });
+  }
+
+  // Protocol pills
+  protoButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      protoButtons.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-checked', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      targetHours = parseInt(btn.getAttribute('data-hours'), 10) || 16;
+      updateFastingUI();
+    });
+  });
+
+  // Simulation quick buttons
+  simButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      simButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const hours = parseFloat(btn.getAttribute('data-set-hours'));
+      elapsedSeconds = Math.round(hours * 3600);
+      updateFastingUI();
+    });
+  });
+
+  // Timer loop
+  setInterval(() => {
+    if (isRunning) {
+      elapsedSeconds += 1;
+      updateFastingUI();
+    }
+  }, 1000);
+
+  // Initial render
+  updateFastingUI();
+});
+/* ===== END Issue #293 ===== */

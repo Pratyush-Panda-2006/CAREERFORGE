@@ -997,6 +997,184 @@
     </div>
   </section>
 
+  <!-- ===== BEGIN Issue #293: Intermittent Fasting Tracker ===== -->
+  <section class="fasting-section" id="fasting-tracker-section" aria-labelledby="fasting-title">
+    <div class="fasting-card-container">
+      <div class="fasting-header">
+        <span class="fasting-badge">CHRONO-NUTRITION & AUTOPHAGY</span>
+        <h2 id="fasting-title">Intermittent Fasting Tracker</h2>
+        <p class="fasting-sub">Monitor metabolic transitions, glycogen depletion, and cellular autophagy stages with synchronized circular telemetry.</p>
+      </div>
+
+      <!-- Protocol Selection -->
+      <div class="fasting-protocol-group">
+        <span class="protocol-label">Select Fasting Protocol:</span>
+        <div class="fasting-protocol-pills" role="radiogroup" aria-label="Fasting Protocol Selection">
+          <button type="button" class="f-proto-btn active" data-hours="16" data-window="8" role="radio" aria-checked="true">
+            <span class="proto-name">16:8 LeanGains</span>
+            <span class="proto-sub">16h Fast / 8h Eat</span>
+          </button>
+          <button type="button" class="f-proto-btn" data-hours="18" data-window="6" role="radio" aria-checked="false">
+            <span class="proto-name">18:6 Warrior</span>
+            <span class="proto-sub">18h Fast / 6h Eat</span>
+          </button>
+          <button type="button" class="f-proto-btn" data-hours="20" data-window="4" role="radio" aria-checked="false">
+            <span class="proto-name">20:4 OMAD</span>
+            <span class="proto-sub">20h Fast / 4h Eat</span>
+          </button>
+          <button type="button" class="f-proto-btn" data-hours="13" data-window="11" role="radio" aria-checked="false">
+            <span class="proto-name">Circadian 13:11</span>
+            <span class="proto-sub">13h Fast / 11h Eat</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="fasting-main-grid">
+        <!-- Dual-Ring Circular SVG Progress Clock -->
+        <div class="fasting-clock-card">
+          <div class="clock-svg-wrap">
+            <svg class="fasting-clock-svg" viewBox="0 0 240 240" aria-hidden="true">
+              <defs>
+                <linearGradient id="fastOuterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#10b981" />
+                  <stop offset="50%" stop-color="#06b6d4" />
+                  <stop offset="100%" stop-color="#8b5cf6" />
+                </linearGradient>
+                <linearGradient id="fastInnerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#3b82f6" />
+                  <stop offset="100%" stop-color="#10b981" />
+                </linearGradient>
+              </defs>
+              <!-- Outer Ring (Total Fast Target) -->
+              <circle class="ring-bg" cx="120" cy="120" r="100" stroke-width="12" />
+              <circle class="ring-fg-outer" id="fastOuterRing" cx="120" cy="120" r="100" stroke-width="12" stroke="url(#fastOuterGrad)" />
+              <!-- Inner Ring (Active Metabolic Phase) -->
+              <circle class="ring-bg-inner" cx="120" cy="120" r="82" stroke-width="8" />
+              <circle class="ring-fg-inner" id="fastInnerRing" cx="120" cy="120" r="82" stroke-width="8" stroke="url(#fastInnerGrad)" />
+            </svg>
+            <div class="fasting-clock-center">
+              <span class="fasting-status-pill" id="fastingStatusPill">FASTING ACTIVE</span>
+              <div class="fasting-timer-digits" id="fastingTimerDigits">14:25:00</div>
+              <span class="fasting-elapsed-sub" id="fastingRemainingLabel">1h 35m remaining</span>
+              <div class="fasting-pct-badge" id="fastingPctBadge">90% of Goal</div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="fasting-actions-row">
+            <button type="button" class="f-btn f-btn-primary" id="fastingToggleBtn">
+              <span id="fastingToggleIcon">⏸️</span>
+              <span id="fastingToggleText">End Fast Early</span>
+            </button>
+            <button type="button" class="f-btn f-btn-secondary" id="fastingResetBtn">Reset Fast</button>
+          </div>
+
+          <div class="fasting-sim-tools">
+            <span class="sim-label">Simulate Elapsed Time:</span>
+            <div class="sim-btn-group">
+              <button type="button" class="sim-btn" data-set-hours="2">2h (Anabolic)</button>
+              <button type="button" class="sim-btn" data-set-hours="8">8h (Catabolic)</button>
+              <button type="button" class="sim-btn active" data-set-hours="14">14h (Fat Burning)</button>
+              <button type="button" class="sim-btn" data-set-hours="19">19h (Ketosis)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metabolic Stage Milestones Timeline -->
+        <div class="fasting-milestones-card">
+          <h3 class="milestones-heading">Metabolic Stage Milestones</h3>
+          <p class="milestones-sub">Your body transitions across distinct metabolic phases during a fast:</p>
+
+          <div class="milestones-list">
+            <!-- Stage 1 -->
+            <div class="milestone-item completed" id="stage-anabolic" data-min-hour="0" data-max-hour="4">
+              <div class="milestone-marker">
+                <span class="marker-dot"></span>
+                <span class="marker-line"></span>
+              </div>
+              <div class="milestone-info">
+                <div class="milestone-title-row">
+                  <span class="stage-tag">Stage 1 (0 - 4 hrs)</span>
+                  <strong class="stage-name">Anabolic State</strong>
+                  <span class="stage-status-badge">Completed</span>
+                </div>
+                <p class="stage-desc">Blood sugar & insulin levels elevate. Food absorption and cellular nourishment occurring.</p>
+              </div>
+            </div>
+
+            <!-- Stage 2 -->
+            <div class="milestone-item completed" id="stage-catabolic" data-min-hour="4" data-max-hour="12">
+              <div class="milestone-marker">
+                <span class="marker-dot"></span>
+                <span class="marker-line"></span>
+              </div>
+              <div class="milestone-info">
+                <div class="milestone-title-row">
+                  <span class="stage-tag">Stage 2 (4 - 12 hrs)</span>
+                  <strong class="stage-name">Catabolic Phase</strong>
+                  <span class="stage-status-badge">Completed</span>
+                </div>
+                <p class="stage-desc">Insulin drops, digestive tract rests. Liver converts stored glycogen into steady blood glucose.</p>
+              </div>
+            </div>
+
+            <!-- Stage 3 -->
+            <div class="milestone-item active" id="stage-fatburn" data-min-hour="12" data-max-hour="18">
+              <div class="milestone-marker">
+                <span class="marker-dot"></span>
+                <span class="marker-line"></span>
+              </div>
+              <div class="milestone-info">
+                <div class="milestone-title-row">
+                  <span class="stage-tag">Stage 3 (12 - 18 hrs)</span>
+                  <strong class="stage-name">Fat Burning (Lipolysis)</strong>
+                  <span class="stage-status-badge">Current Stage</span>
+                </div>
+                <p class="stage-desc">Glycogen stores depleted. Body oxidizes stored fatty acids for primary cellular fuel. Human Growth Hormone (HGH) surges.</p>
+              </div>
+            </div>
+
+            <!-- Stage 4 -->
+            <div class="milestone-item locked" id="stage-ketosis" data-min-hour="18" data-max-hour="99">
+              <div class="milestone-marker">
+                <span class="marker-dot"></span>
+              </div>
+              <div class="milestone-info">
+                <div class="milestone-title-row">
+                  <span class="stage-tag">Stage 4 (18+ hrs)</span>
+                  <strong class="stage-name">Ketosis & Autophagy</strong>
+                  <span class="stage-status-badge">Locked</span>
+                </div>
+                <p class="stage-desc">Liver generates ketone bodies (BHB). Deep cellular recycling (autophagy) breaks down damaged cellular proteins.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fasting Stats Telemetry Bar -->
+          <div class="fasting-stats-bar">
+            <div class="f-stat">
+              <span class="f-stat-lbl">Fast Started</span>
+              <strong class="f-stat-val" id="fastStartVal">8:00 PM Yesterday</strong>
+            </div>
+            <div class="f-stat">
+              <span class="f-stat-lbl">Target Break</span>
+              <strong class="f-stat-val" id="fastTargetVal">12:00 PM Today</strong>
+            </div>
+            <div class="f-stat">
+              <span class="f-stat-lbl">Blood Glucose</span>
+              <strong class="f-stat-val hl-green" id="fastGlucoseVal">78 mg/dL (Fasting)</strong>
+            </div>
+            <div class="f-stat">
+              <span class="f-stat-lbl">Ketone Est.</span>
+              <strong class="f-stat-val hl-purple" id="fastKetoneVal">0.8 mmol/L</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #293 ===== -->
+
   <main class="metrics">
     <div class="card">
       <div class="icon">❤️</div>

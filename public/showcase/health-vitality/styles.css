@@ -2618,3 +2618,508 @@ body {
     transition: none;
   }
 }
+
+/* ===== BEGIN Issue #293: Intermittent Fasting Tracker ===== */
+.fasting-section {
+  max-width: 1200px;
+  margin: 40px auto 60px;
+  padding: 0 24px;
+}
+
+.fasting-card-container {
+  background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.95) 70%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(16, 185, 129, 0.03);
+}
+
+@media (max-width: 640px) {
+  .fasting-card-container {
+    padding: 24px 16px;
+  }
+}
+
+.fasting-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.fasting-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #10b981;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.fasting-header h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.fasting-sub {
+  color: #94a3b8;
+  font-size: 1rem;
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.fasting-protocol-group {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.protocol-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.fasting-protocol-pills {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.f-proto-btn {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 12px 20px;
+  color: #cbd5e1;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.f-proto-btn:hover {
+  background: #334155;
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.f-proto-btn.active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+}
+
+.proto-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.proto-sub {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.f-proto-btn.active .proto-sub {
+  color: #6ee7b7;
+}
+
+.fasting-main-grid {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .fasting-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fasting-clock-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.clock-svg-wrap {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.fasting-clock-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: #1e293b;
+}
+
+.ring-fg-outer {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 628.32; /* 2 * PI * 100 */
+  stroke-dashoffset: 62.83;
+  transition: stroke-dashoffset 0.6s ease;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+}
+
+.ring-bg-inner {
+  fill: none;
+  stroke: #1e293b;
+  opacity: 0.5;
+}
+
+.ring-fg-inner {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 515.22; /* 2 * PI * 82 */
+  stroke-dashoffset: 154.56;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.fasting-clock-center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.fasting-status-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.fasting-status-pill.completed {
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.fasting-status-pill.idle {
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.15);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.fasting-timer-digits {
+  font-family: 'JetBrains Mono', monospace, sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+  letter-spacing: 1px;
+}
+
+.fasting-elapsed-sub {
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.fasting-pct-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #38bdf8;
+  margin-top: 4px;
+}
+
+.fasting-actions-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.f-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.f-btn-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.f-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.f-btn-secondary {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+.f-btn-secondary:hover {
+  background: #334155;
+}
+
+.fasting-sim-tools {
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 16px;
+  text-align: left;
+}
+
+.sim-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sim-btn-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.sim-btn {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sim-btn:hover {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+.sim-btn.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #34d399;
+}
+
+.fasting-milestones-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 28px;
+}
+
+.milestones-heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.milestones-sub {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+.milestones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.milestone-item {
+  display: flex;
+  gap: 16px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 16px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.milestone-item.active {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: #10b981;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+}
+
+.milestone-item.completed {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.milestone-item.locked {
+  opacity: 0.6;
+}
+
+.milestone-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 20px;
+}
+
+.marker-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #475569;
+  border: 3px solid #1e293b;
+  transition: all 0.3s ease;
+}
+
+.milestone-item.completed .marker-dot {
+  background: #3b82f6;
+  box-shadow: 0 0 8px #3b82f6;
+}
+
+.milestone-item.active .marker-dot {
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+}
+
+.milestone-info {
+  flex: 1;
+}
+
+.milestone-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.stage-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.milestone-item.active .stage-tag {
+  color: #34d399;
+}
+
+.stage-name {
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.stage-status-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.milestone-item.completed .stage-status-badge {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.milestone-item.active .stage-status-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.milestone-item.locked .stage-status-badge {
+  background: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+}
+
+.stage-desc {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.fasting-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  background: #111c2e;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 680px) {
+  .fasting-stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.f-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.f-stat-lbl {
+  font-size: 0.72rem;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.f-stat-val {
+  font-size: 0.88rem;
+  color: #e2e8f0;
+}
+
+.hl-green {
+  color: #34d399;
+}
+
+.hl-purple {
+  color: #a855f7;
+}
+/* ===== END Issue #293 ===== */
