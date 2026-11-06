@@ -2,6 +2,7 @@
 // Case Studies Modal Drawer & Project Scope Estimator
 
 document.addEventListener('DOMContentLoaded', () => {
+  initAwardsShowcase();
   initCaseStudyDrawer();
   initEstimator();
   initReviewModal();
@@ -1041,6 +1042,8 @@ function initReviewModal() {
 
   // Load existing reviews on page load
   renderSavedReviews();
+}
+
 /* =========================================
    CLIENT FAQ ACCORDION
    ======================================= */
@@ -1076,3 +1079,516 @@ function initFaqAccordion() {
     });
   });
 }
+
+// =========================================================================
+// Issue #106: Client Awards & Recognitions Showcase Ticker & Animated Counter
+// =========================================================================
+
+const AWARDS_DATA = [
+  {
+    id: 'awwwards-solana-pay',
+    org: 'awwwards',
+    orgName: 'Awwwards',
+    badgeClass: 'badge-awwwards',
+    icon: '🏆',
+    year: '2026',
+    title: 'Site of the Day & Developer Award',
+    client: 'Solana Pay Mobile Web3 App',
+    projectId: 'solana-pay',
+    category: 'Web3 Fintech Architecture',
+    citation: 'A benchmark in Web3 retail interaction. Flawless micro-interactions paired with sub-400ms cryptographic execution.',
+    scores: [
+      { label: 'Design', val: '8.9' },
+      { label: 'Usability', val: '8.8' },
+      { label: 'Creativity', val: '8.9' },
+      { label: 'Content', val: '8.7' }
+    ],
+    overallScore: '8.84 / 10',
+    honors: 'Site of the Day + Developer Award',
+    platform: 'Global Mobile Web Application'
+  },
+  {
+    id: 'fwa-vortex-ai',
+    org: 'fwa',
+    orgName: 'FWA',
+    badgeClass: 'badge-fwa',
+    icon: '⚡',
+    year: '2026',
+    title: 'FWA of the Month & 100pt Jury Score',
+    client: 'Vortex AI Neural Interface',
+    projectId: 'vortex-ai',
+    category: 'AI SaaS & WebGL 3D',
+    citation: 'Groundbreaking spatial node architecture running 60fps WebGL particle shaders directly in browser viewport.',
+    scores: [
+      { label: 'Originality', val: '98' },
+      { label: 'Design', val: '96' },
+      { label: 'Interaction', val: '97' },
+      { label: 'Technology', val: '99' }
+    ],
+    overallScore: '96 / 100',
+    honors: 'FWA of the Month',
+    platform: 'Interactive WebGL Canvas System'
+  },
+  {
+    id: 'reddot-krypton',
+    org: 'reddot',
+    orgName: 'Red Dot',
+    badgeClass: 'badge-reddot',
+    icon: '🔴',
+    year: '2025',
+    title: 'Red Dot: Best of the Best',
+    client: 'Krypton Hyper-Yield Protocol',
+    projectId: 'krypton-protocol',
+    category: 'Financial UI & Communication Design',
+    citation: 'Redefining institutional DeFi through high-density telemetry without cognitive overload. Masterclass in hierarchy.',
+    scores: [
+      { label: 'Innovation', val: '9.8' },
+      { label: 'Ergonomics', val: '9.5' },
+      { label: 'Form Quality', val: '9.9' },
+      { label: 'Clarity', val: '9.7' }
+    ],
+    overallScore: 'Best of the Best',
+    honors: 'Red Dot: Best of the Best',
+    platform: 'Institutional Liquidity Telemetry Platform'
+  },
+  {
+    id: 'webby-chronos',
+    org: 'webby',
+    orgName: 'Webby',
+    badgeClass: 'badge-webby',
+    icon: '👑',
+    year: '2025',
+    title: 'Webby Honoree: Best Visual Design',
+    client: 'Chronos Luxury Watch Atelier',
+    projectId: 'chronos-atelier',
+    category: 'Websites — Luxury E-Commerce',
+    citation: 'A tactile horology experience. The 3D complication customizer sets a new gold standard for online luxury retail.',
+    scores: [
+      { label: 'Aesthetics', val: '9.7' },
+      { label: 'Experience', val: '9.6' },
+      { label: 'Craft', val: '9.8' },
+      { label: 'Engagement', val: '9.5' }
+    ],
+    overallScore: 'Nominee / Honoree',
+    honors: 'Webby Honoree',
+    platform: 'Luxury 3D Product Customizer'
+  },
+  {
+    id: 'awwwards-studio',
+    org: 'awwwards',
+    orgName: 'Awwwards',
+    badgeClass: 'badge-awwwards',
+    icon: '⭐',
+    year: '2025',
+    title: 'Mobile Site of the Week Nominee',
+    client: 'Aetheria Studio Brand Space',
+    projectId: null,
+    category: 'Agency Portfolio & Visual Identity',
+    citation: 'Exceptional fluid typography and bespoke glassmorphic tokens that breathe life on both touch and desktop devices.',
+    scores: [
+      { label: 'Design', val: '9.1' },
+      { label: 'Usability', val: '8.9' },
+      { label: 'Creativity', val: '9.2' },
+      { label: 'Content', val: '8.8' }
+    ],
+    overallScore: '8.92 / 10',
+    honors: 'Site of the Week',
+    platform: 'Liquid Responsive Studio Experience'
+  },
+  {
+    id: 'fwa-helios',
+    org: 'fwa',
+    orgName: 'FWA',
+    badgeClass: 'badge-fwa',
+    icon: '🪐',
+    year: '2025',
+    title: 'FWA of the Day: WebGL Innovation',
+    client: 'Helios Spatial Computing Portal',
+    projectId: null,
+    category: 'Experimental Web & Spatial Shaders',
+    citation: 'Pioneering browser-native stereoscopic spatial shaders with dynamic physics and ambient illumination.',
+    scores: [
+      { label: 'Originality', val: '94' },
+      { label: 'Design', val: '90' },
+      { label: 'Interaction', val: '92' },
+      { label: 'Technology', val: '96' }
+    ],
+    overallScore: '91 / 100',
+    honors: 'FWA of the Day',
+    platform: 'Experimental Browser Experience'
+  },
+  {
+    id: 'reddot-aura',
+    org: 'reddot',
+    orgName: 'Red Dot',
+    badgeClass: 'badge-reddot',
+    icon: '🎖️',
+    year: '2024',
+    title: 'Red Dot Winner: Product Interface',
+    client: 'Aura Intelligent Sleep System',
+    projectId: null,
+    category: 'Healthtech UI & Sensory Ergonomics',
+    citation: 'Warm, restorative minimalism combined with predictive biometrics. Human-centered design at its finest.',
+    scores: [
+      { label: 'Functionality', val: '9.4' },
+      { label: 'Emotional Appeal', val: '9.6' },
+      { label: 'Design Quality', val: '9.5' },
+      { label: 'Usability', val: '9.3' }
+    ],
+    overallScore: 'Red Dot Winner',
+    honors: 'Red Dot Design Award',
+    platform: 'Cross-Platform Sensory Dashboard'
+  },
+  {
+    id: 'webby-nexus',
+    org: 'webby',
+    orgName: 'Webby',
+    badgeClass: 'badge-webby',
+    icon: '🌐',
+    year: '2024',
+    title: 'Webby Winner: Technical Achievement',
+    client: 'Nexus Global Liquidity Network',
+    projectId: null,
+    category: 'Technical Achievement & Distributed Web',
+    citation: 'Pioneering peer-to-peer visual execution telemetry, transforming obscure cross-chain routes into intuitive visual flow.',
+    scores: [
+      { label: 'Architecture', val: '9.9' },
+      { label: 'Execution', val: '9.7' },
+      { label: 'Clarity', val: '9.6' },
+      { label: 'Impact', val: '9.8' }
+    ],
+    overallScore: 'Webby Winner',
+    honors: 'Webby Award Winner',
+    platform: 'Distributed Ledger Network'
+  }
+];
+
+function initAwardsShowcase() {
+  const statsGrid = document.getElementById('awardsStatsGrid');
+  const marqueeTrack = document.getElementById('awardsMarqueeTrack');
+  const cardsGrid = document.getElementById('awardsCardsGrid');
+  const emptyState = document.getElementById('awardsEmptyState');
+  const filterPills = document.querySelectorAll('.award-filter-pill');
+  const searchInput = document.getElementById('awardSearchInput');
+  const tickerToggleBtn = document.getElementById('tickerToggleBtn');
+  const tickerSpeedBtn = document.getElementById('tickerSpeedBtn');
+  const speedLabel = document.getElementById('speedLabel');
+
+  const modalOverlay = document.getElementById('awardModalOverlay');
+  const modalCloseBtn = document.getElementById('awardModalCloseBtn');
+  const modalCloseFooter = document.getElementById('modalCloseBtnFooter');
+  const modalViewCaseStudyBtn = document.getElementById('modalViewCaseStudyBtn');
+
+  let activeFilter = 'all';
+  let searchQuery = '';
+  let tickerPaused = false;
+  let tickerFastSpeed = false;
+  let selectedAward = null;
+
+  // 1. Animated Key Statistics Counters
+  function animateCounters() {
+    const statNums = document.querySelectorAll('.stat-num');
+    statNums.forEach(numEl => {
+      const target = Number(numEl.getAttribute('data-target') || '0');
+      const duration = 1600;
+      const startTime = performance.now();
+
+      function updateNumber(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Easing: ease-out cubic
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentVal = Math.floor(easeOut * target);
+        numEl.textContent = String(currentVal);
+
+        if (progress < 1) {
+          requestAnimationFrame(updateNumber);
+        } else {
+          numEl.textContent = String(target);
+        }
+      }
+      requestAnimationFrame(updateNumber);
+    });
+  }
+
+  // Trigger counters with IntersectionObserver
+  if (statsGrid && 'IntersectionObserver' in window) {
+    let countersAnimated = false;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !countersAnimated) {
+          countersAnimated = true;
+          animateCounters();
+          observer.unobserve(statsGrid);
+        }
+      });
+    }, { threshold: 0.2 });
+    observer.observe(statsGrid);
+  } else {
+    animateCounters();
+  }
+
+  // 2. Continuous Marquee Ticker Setup
+  function buildMarqueeItem(award) {
+    const item = document.createElement('div');
+    item.className = 'marquee-award-pill';
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('aria-label', `${award.title} for ${award.client}`);
+
+    item.innerHTML = `
+      <span class="m-icon" aria-hidden="true">${award.icon}</span>
+      <span class="m-org ${award.badgeClass}">${award.orgName}</span>
+      <strong class="m-title">${award.title}</strong>
+      <span class="m-dot" aria-hidden="true">•</span>
+      <span class="m-client">${award.client}</span>
+      <span class="m-year">${award.year}</span>
+    `;
+
+    item.addEventListener('click', () => {
+      openAwardModal(award);
+    });
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openAwardModal(award);
+      }
+    });
+
+    return item;
+  }
+
+  function setupMarquee() {
+    if (!marqueeTrack) return;
+    marqueeTrack.innerHTML = '';
+
+    // Render items twice for infinite loop continuity
+    const itemsGroup1 = document.createElement('div');
+    itemsGroup1.className = 'marquee-group';
+    AWARDS_DATA.forEach(award => {
+      itemsGroup1.appendChild(buildMarqueeItem(award));
+    });
+
+    const itemsGroup2 = itemsGroup1.cloneNode(true);
+    itemsGroup2.setAttribute('aria-hidden', 'true');
+    // Reattach click events for cloned items
+    const clonedChildren = itemsGroup2.children;
+    for (let i = 0; i < clonedChildren.length; i++) {
+      const award = AWARDS_DATA[i];
+      clonedChildren[i].addEventListener('click', () => openAwardModal(award));
+    }
+
+    marqueeTrack.appendChild(itemsGroup1);
+    marqueeTrack.appendChild(itemsGroup2);
+  }
+
+  setupMarquee();
+
+  // Marquee Controls: Pause/Resume & Speed
+  if (tickerToggleBtn && marqueeTrack) {
+    tickerToggleBtn.addEventListener('click', () => {
+      tickerPaused = !tickerPaused;
+      marqueeTrack.classList.toggle('is-paused', tickerPaused);
+      tickerToggleBtn.classList.toggle('active', tickerPaused);
+      tickerToggleBtn.querySelector('.btn-icon').textContent = tickerPaused ? '▶' : '⏸';
+      tickerToggleBtn.querySelector('.btn-label').textContent = tickerPaused ? 'Resume' : 'Pause';
+    });
+  }
+
+  if (tickerSpeedBtn && marqueeTrack) {
+    tickerSpeedBtn.addEventListener('click', () => {
+      tickerFastSpeed = !tickerFastSpeed;
+      marqueeTrack.classList.toggle('is-fast', tickerFastSpeed);
+      tickerSpeedBtn.classList.toggle('active', tickerFastSpeed);
+      if (speedLabel) {
+        speedLabel.textContent = tickerFastSpeed ? '2x Fast' : '1x Speed';
+      }
+    });
+  }
+
+  // 3. Render Awards Showcase Cards Grid
+  function renderAwardCards() {
+    if (!cardsGrid) return;
+    cardsGrid.innerHTML = '';
+
+    const filtered = AWARDS_DATA.filter(award => {
+      const matchesFilter = activeFilter === 'all' || award.org === activeFilter;
+      const matchesSearch = !searchQuery ||
+        award.title.toLowerCase().includes(searchQuery) ||
+        award.client.toLowerCase().includes(searchQuery) ||
+        award.category.toLowerCase().includes(searchQuery) ||
+        award.orgName.toLowerCase().includes(searchQuery);
+      return matchesFilter && matchesSearch;
+    });
+
+    if (emptyState) {
+      emptyState.hidden = filtered.length > 0;
+    }
+
+    filtered.forEach(award => {
+      const card = document.createElement('article');
+      card.className = `award-card ${award.badgeClass}`;
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', `View details for ${award.title}`);
+
+      card.innerHTML = `
+        <div class="award-card-glow" aria-hidden="true"></div>
+        <div class="award-card-header">
+          <div class="award-org-badge ${award.badgeClass}">${award.orgName}</div>
+          <span class="award-year-tag">${award.year}</span>
+        </div>
+
+        <div class="award-card-hero">
+          <div class="award-trophy-symbol" aria-hidden="true">${award.icon}</div>
+          <div class="award-hero-meta">
+            <span class="award-category">${award.category}</span>
+            <h3 class="award-title">${award.title}</h3>
+          </div>
+        </div>
+
+        <div class="award-client-row">
+          <span class="client-label">Client System:</span>
+          <strong class="client-name">${award.client}</strong>
+        </div>
+
+        <p class="award-citation">"${award.citation}"</p>
+
+        <div class="award-card-footer">
+          <span class="award-score-pill">★ ${award.overallScore}</span>
+          <span class="award-inspect-action">Jury Details &amp; Case Study ↗</span>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        openAwardModal(award);
+      });
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openAwardModal(award);
+        }
+      });
+
+      cardsGrid.appendChild(card);
+    });
+  }
+
+  renderAwardCards();
+
+  // Filter Pills Event Listeners
+  filterPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      filterPills.forEach(p => {
+        p.classList.remove('active');
+        p.setAttribute('aria-selected', 'false');
+      });
+      pill.classList.add('active');
+      pill.setAttribute('aria-selected', 'true');
+      activeFilter = pill.getAttribute('data-filter') || 'all';
+      renderAwardCards();
+    });
+  });
+
+  // Search Input Event Listener
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = (e.target.value || '').trim().toLowerCase();
+      renderAwardCards();
+    });
+  }
+
+  // 4. Modal Deep Dive
+  function openAwardModal(award) {
+    if (!modalOverlay) return;
+    selectedAward = award;
+
+    const modalOrgBadge = document.getElementById('modalOrgBadge');
+    const modalIconWrap = document.getElementById('modalIconWrap');
+    const modalYear = document.getElementById('modalYear');
+    const modalTitle = document.getElementById('awardModalTitle');
+    const modalClient = document.getElementById('modalClient');
+    const modalCitation = document.getElementById('modalCitation');
+    const modalScoresGrid = document.getElementById('modalScoresGrid');
+    const modalCategory = document.getElementById('modalCategory');
+    const modalHonors = document.getElementById('modalHonors');
+    const modalPlatform = document.getElementById('modalPlatform');
+
+    if (modalOrgBadge) {
+      modalOrgBadge.textContent = award.orgName.toUpperCase();
+      modalOrgBadge.className = `award-modal-badge ${award.badgeClass}`;
+    }
+    if (modalIconWrap) modalIconWrap.textContent = award.icon;
+    if (modalYear) modalYear.textContent = `${award.year} Annual Distinction`;
+    if (modalTitle) modalTitle.textContent = award.title;
+    if (modalClient) modalClient.textContent = award.client;
+    if (modalCitation) modalCitation.textContent = `"${award.citation}"`;
+    if (modalCategory) modalCategory.textContent = award.category;
+    if (modalHonors) modalHonors.textContent = award.honors;
+    if (modalPlatform) modalPlatform.textContent = award.platform;
+
+    if (modalScoresGrid) {
+      modalScoresGrid.innerHTML = award.scores.map(s => `
+        <div class="score-box">
+          <span class="score-label">${s.label}</span>
+          <strong class="score-val">${s.val}</strong>
+        </div>
+      `).join('');
+    }
+
+    if (modalViewCaseStudyBtn) {
+      if (award.projectId && typeof CASE_STUDIES !== 'undefined' && CASE_STUDIES[award.projectId]) {
+        modalViewCaseStudyBtn.hidden = false;
+        modalViewCaseStudyBtn.textContent = `View ${award.client} Case Study ↗`;
+      } else {
+        modalViewCaseStudyBtn.hidden = true;
+      }
+    }
+
+    modalOverlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    const card = document.getElementById('awardModalCard');
+    if (card) card.focus();
+  }
+
+  function closeAwardModal() {
+    if (!modalOverlay) return;
+    modalOverlay.hidden = true;
+    document.body.style.overflow = '';
+    selectedAward = null;
+  }
+
+  if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeAwardModal);
+  if (modalCloseFooter) modalCloseFooter.addEventListener('click', closeAwardModal);
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeAwardModal();
+    });
+  }
+
+  if (modalViewCaseStudyBtn) {
+    modalViewCaseStudyBtn.addEventListener('click', () => {
+      if (selectedAward && selectedAward.projectId) {
+        closeAwardModal();
+        const drawerOverlay = document.getElementById('caseStudyDrawerOverlay');
+        if (typeof openCaseStudy === 'function') {
+          openCaseStudy(selectedAward.projectId);
+        } else if (drawerOverlay) {
+          // Trigger click on matching project card
+          const btn = document.querySelector(`[data-project="${selectedAward.projectId}"]`);
+          if (btn) btn.click();
+        }
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalOverlay && !modalOverlay.hidden) {
+      closeAwardModal();
+    }
+  });
+}
+
+window.AWARDS_DATA = AWARDS_DATA;
+window.initAwardsShowcase = initAwardsShowcase;
+window.CASE_STUDIES = CASE_STUDIES;
