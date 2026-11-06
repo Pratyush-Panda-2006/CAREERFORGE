@@ -1622,3 +1622,264 @@ window.handleReviewSubmit = handleReviewSubmit;
   render();
 })();
 /* ===== END issue #188 ===== */
+
+/* ===== BEGIN Issue #283: Product Comparison Matrix Drawer ===== */
+(function () {
+  'use strict';
+
+  const PRODUCT_SPECS = {
+    p1: {
+      id: 'p1',
+      name: 'CyberDeck Pro Mechanical',
+      img: '⌨️',
+      price: 249.00,
+      specs: {
+        'Processor': 'ARM Cortex-M4F 120MHz Microcontroller',
+        'Battery Life': '140 Hours (RGB Off) / 45 Hours (RGB On)',
+        'Connectivity': 'Tri-Mode: 2.4GHz + Bluetooth 5.3 + USB-C',
+        'Weight': '780g (Aircraft-grade Aluminum)',
+        'Price': '$249.00',
+        'Warranty': '2 Years Full Hardware Replacement'
+      }
+    },
+    p2: {
+      id: 'p2',
+      name: 'Acoustic Pulse ANC Headset',
+      img: '🎧',
+      price: 199.00,
+      specs: {
+        'Processor': 'Dual-Core 32-bit DSP + ANC Neural Engine',
+        'Battery Life': '60 Hours (ANC On) / 100 Hours (ANC Off)',
+        'Connectivity': 'Bluetooth 5.4 Low-Latency + 3.5mm Hi-Res',
+        'Weight': '245g (Memory Foam & Titanium)',
+        'Price': '$199.00',
+        'Warranty': '1 Year Global Manufacturer Coverage'
+      }
+    },
+    p3: {
+      id: 'p3',
+      name: 'Horizon 32" Curved OLED',
+      img: '🖥️',
+      price: 899.00,
+      specs: {
+        'Processor': 'Quantum QD Neo Display Engine (240Hz)',
+        'Battery Life': 'AC Powered (Internal 120W PSU, 0.5W Standby)',
+        'Connectivity': '2x HDMI 2.1 + 1x DP 2.1 + USB-C PD 90W',
+        'Weight': '6.8kg (Ergonomic Heavy-Duty Stand)',
+        'Price': '$899.00',
+        'Warranty': '3 Years Burn-In & Panel Protection'
+      }
+    }
+  };
+
+  const SPEC_KEYS = ['Processor', 'Battery Life', 'Connectivity', 'Weight', 'Price', 'Warranty'];
+
+  const selectedCompare = new Set();
+
+  function initComparisonMatrix() {
+    const compareBar = document.getElementById('compareBar');
+    const compareCount = document.getElementById('compareCount');
+    const compareBarThumbs = document.getElementById('compareBarThumbs');
+    const compareClearBtn = document.getElementById('compareClearBtn');
+    const compareOpenBtn = document.getElementById('compareOpenBtn');
+
+    const compareBackdrop = document.getElementById('compareBackdrop');
+    const compareDrawer = document.getElementById('compareDrawer');
+    const compareCloseBtn = document.getElementById('compareCloseBtn');
+    const compareCloseBottomBtn = document.getElementById('compareCloseBottomBtn');
+    const compareDiffToggle = document.getElementById('compareDiffToggle');
+    const compareTableWrapper = document.getElementById('compareTableWrapper');
+    const compareAddAllBtn = document.getElementById('compareAddAllBtn');
+
+    const checkboxes = document.querySelectorAll('.compare-checkbox');
+
+    function updateCompareBar() {
+      const count = selectedCompare.size;
+      if (compareCount) compareCount.textContent = count;
+
+      if (!compareBar) return;
+
+      if (count > 0) {
+        compareBar.hidden = false;
+        if (compareBarThumbs) {
+          compareBarThumbs.innerHTML = Array.from(selectedCompare)
+            .map(id => {
+              const p = PRODUCT_SPECS[id];
+              return `<span class="compare-thumb-pill" title="${p ? p.name : id}">${p ? p.img : '📦'}</span>`;
+            })
+            .join('');
+        }
+      } else {
+        compareBar.hidden = true;
+      }
+    }
+
+    function renderMatrixTable() {
+      if (!compareTableWrapper) return;
+      const ids = Array.from(selectedCompare);
+
+      if (ids.length === 0) {
+        compareTableWrapper.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #94a3b8;">
+            <p style="font-size: 1.1rem; margin-bottom: 12px;">No products selected for comparison.</p>
+            <p style="font-size: 0.85rem;">Check the "Compare" box on 2 or 3 items in the store to view their side-by-side spec matrix.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const products = ids.map(id => PRODUCT_SPECS[id]).filter(Boolean);
+
+      let html = `<table class="compare-matrix-table">`;
+
+      // Header row
+      html += `<thead><tr><th class="compare-spec-col">Feature / Specification</th>`;
+      products.forEach(p => {
+        html += `
+          <th class="compare-item-header">
+            <div class="comp-prod-visual">${p.img}</div>
+            <div class="comp-prod-name">${p.name}</div>
+            <div class="comp-prod-price">$${p.price.toFixed(2)}</div>
+            <button type="button" class="btn-remove-comp" data-remove-id="${p.id}" aria-label="Remove ${p.name} from comparison">Remove &times;</button>
+          </th>
+        `;
+      });
+      html += `</tr></thead><tbody>`;
+
+      // Spec rows
+      SPEC_KEYS.forEach(specKey => {
+        const values = products.map(p => p.specs[specKey] || 'N/A');
+        // Check if there is a difference across the products
+        const hasDiff = products.length > 1 && new Set(values).size > 1;
+        const diffClass = hasDiff ? 'is-diff' : '';
+
+        html += `<tr class="${diffClass}"><td class="compare-spec-col">${specKey}</td>`;
+        values.forEach(val => {
+          html += `<td>${val}</td>`;
+        });
+        html += `</tr>`;
+      });
+
+      html += `</tbody></table>`;
+      compareTableWrapper.innerHTML = html;
+
+      // Attach remove button listeners
+      compareTableWrapper.querySelectorAll('.btn-remove-comp').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-remove-id');
+          selectedCompare.delete(id);
+          const cb = document.querySelector(`.compare-checkbox[data-compare="${id}"]`);
+          if (cb) cb.checked = false;
+          updateCompareBar();
+          renderMatrixTable();
+          if (selectedCompare.size === 0) {
+            closeDrawer();
+          }
+        });
+      });
+    }
+
+    function openDrawer() {
+      if (!compareDrawer || !compareBackdrop) return;
+      if (selectedCompare.size === 0) {
+        if (typeof showToast === 'function') {
+          showToast('Select at least 1 product to compare!');
+        }
+        return;
+      }
+      renderMatrixTable();
+      compareDrawer.classList.add('open');
+      compareBackdrop.classList.add('open');
+      if (compareDiffToggle && compareDiffToggle.checked) {
+        compareDrawer.classList.add('show-diff');
+      }
+      compareDrawer.focus();
+    }
+
+    function closeDrawer() {
+      if (!compareDrawer || !compareBackdrop) return;
+      compareDrawer.classList.remove('open');
+      compareBackdrop.classList.remove('open');
+    }
+
+    // Checkbox changes
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        const id = cb.getAttribute('data-compare');
+        if (cb.checked) {
+          if (selectedCompare.size >= 3) {
+            cb.checked = false;
+            if (typeof showToast === 'function') {
+              showToast('Maximum 3 items can be compared at once.');
+            }
+            return;
+          }
+          selectedCompare.add(id);
+        } else {
+          selectedCompare.delete(id);
+        }
+        updateCompareBar();
+        if (compareDrawer && compareDrawer.classList.contains('open')) {
+          renderMatrixTable();
+        }
+      });
+    });
+
+    // Clear comparison
+    if (compareClearBtn) {
+      compareClearBtn.addEventListener('click', () => {
+        selectedCompare.clear();
+        checkboxes.forEach(cb => { cb.checked = false; });
+        updateCompareBar();
+        closeDrawer();
+      });
+    }
+
+    // Open & Close drawer
+    if (compareOpenBtn) compareOpenBtn.addEventListener('click', openDrawer);
+    if (compareCloseBtn) compareCloseBtn.addEventListener('click', closeDrawer);
+    if (compareCloseBottomBtn) compareCloseBottomBtn.addEventListener('click', closeDrawer);
+    if (compareBackdrop) compareBackdrop.addEventListener('click', closeDrawer);
+
+    // Difference toggle
+    if (compareDiffToggle && compareDrawer) {
+      compareDrawer.classList.add('show-diff');
+      compareDiffToggle.addEventListener('change', () => {
+        if (compareDiffToggle.checked) {
+          compareDrawer.classList.add('show-diff');
+        } else {
+          compareDrawer.classList.remove('show-diff');
+        }
+      });
+    }
+
+    // Add All to Cart
+    if (compareAddAllBtn) {
+      compareAddAllBtn.addEventListener('click', () => {
+        let addedCount = 0;
+        selectedCompare.forEach(id => {
+          const p = PRODUCT_SPECS[id];
+          if (p && typeof addToCart === 'function') {
+            addToCart(p.id, p.name, p.price, p.img);
+            addedCount++;
+          }
+        });
+        if (typeof showToast === 'function') {
+          showToast(`Added ${addedCount} compared item(s) to cart!`);
+        }
+      });
+    }
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && compareDrawer && compareDrawer.classList.contains('open')) {
+        closeDrawer();
+      }
+    });
+
+    updateCompareBar();
+  }
+
+  document.addEventListener('DOMContentLoaded', initComparisonMatrix);
+})();
+/* ===== END Issue #283 ===== */

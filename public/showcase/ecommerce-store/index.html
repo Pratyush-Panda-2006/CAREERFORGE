@@ -65,6 +65,10 @@
         <div class="card-footer">
           <span class="price">$249.00</span>
           <div class="card-actions-row">
+            <label class="compare-check-label" for="comp-p1">
+              <input type="checkbox" id="comp-p1" class="compare-checkbox" data-compare="p1" />
+              <span>Compare</span>
+            </label>
             <button type="button" class="quick-view-btn" onclick="openQuickView('p1')" aria-label="Quick view CyberDeck Pro Mechanical">Quick View 👁️</button>
             <div class="action-container" id="action-p1">
               <button class="add-btn" onclick="addToCart('p1', 'CyberDeck Pro Mechanical', 249.00, '⌨️')">Add to Cart</button>
@@ -90,6 +94,10 @@
         <div class="card-footer">
           <span class="price">$199.00</span>
           <div class="card-actions-row">
+            <label class="compare-check-label" for="comp-p2">
+              <input type="checkbox" id="comp-p2" class="compare-checkbox" data-compare="p2" />
+              <span>Compare</span>
+            </label>
             <button type="button" class="quick-view-btn" onclick="openQuickView('p2')" aria-label="Quick view Acoustic Pulse ANC Headset">Quick View 👁️</button>
             <div class="action-container" id="action-p2">
               <button class="add-btn" onclick="addToCart('p2', 'Acoustic Pulse ANC Headset', 199.00, '🎧')">Add to Cart</button>
@@ -115,6 +123,10 @@
         <div class="card-footer">
           <span class="price">$899.00</span>
           <div class="card-actions-row">
+            <label class="compare-check-label" for="comp-p3">
+              <input type="checkbox" id="comp-p3" class="compare-checkbox" data-compare="p3" />
+              <span>Compare</span>
+            </label>
             <button type="button" class="quick-view-btn" onclick="openQuickView('p3')" aria-label="Quick view Horizon 32 Curved OLED">Quick View 👁️</button>
             <div class="action-container" id="action-p3">
               <button class="add-btn" onclick="addToCart('p3', 'Horizon 32 Curved OLED', 899.00, '🖥️')">Add to Cart</button>
@@ -457,6 +469,54 @@
   </aside>
   <p class="wish-sr" id="wishStatus" role="status" aria-live="polite"></p>
   <!-- ===== END issue #188 ===== -->
+
+  <!-- ===== BEGIN Issue #283: Product Comparison Matrix Drawer ===== -->
+  <!-- Bottom Sticky Comparison Bar -->
+  <aside id="compareBar" class="compare-bar" role="region" aria-label="Product comparison quick bar" hidden>
+    <div class="compare-bar-content">
+      <div class="compare-bar-summary">
+        <span class="compare-bar-count"><strong id="compareCount">0</strong> / 3 selected</span>
+        <div class="compare-bar-thumbs" id="compareBarThumbs"></div>
+      </div>
+      <div class="compare-bar-actions">
+        <button type="button" class="btn-clear-compare" id="compareClearBtn">Clear</button>
+        <button type="button" class="btn-open-compare" id="compareOpenBtn">
+          <span>Compare Matrix</span> ⚖️
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Full Bottom Slide-up Comparison Matrix Drawer -->
+  <div id="compareBackdrop" class="compare-backdrop"></div>
+  <section id="compareDrawer" class="compare-drawer" role="dialog" aria-modal="true" aria-labelledby="compareDrawerTitle" tabindex="-1">
+    <div class="compare-drawer-header">
+      <div class="compare-header-left">
+        <h2 id="compareDrawerTitle">Product Specification Comparison</h2>
+        <span class="compare-header-sub">Side-by-side technical hardware specifications and performance metrics</span>
+      </div>
+      <div class="compare-header-controls">
+        <label class="diff-toggle-wrap">
+          <input type="checkbox" id="compareDiffToggle" checked />
+          <span class="diff-toggle-slider"></span>
+          <span class="diff-toggle-text">Highlight Differences</span>
+        </label>
+        <button type="button" class="close-btn" id="compareCloseBtn" aria-label="Close comparison matrix">&times;</button>
+      </div>
+    </div>
+
+    <div class="compare-drawer-body">
+      <div class="compare-table-wrapper" id="compareTableWrapper">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+    </div>
+
+    <div class="compare-drawer-footer">
+      <button type="button" class="btn-compare-add-all" id="compareAddAllBtn">Add All Compared to Cart 🛒</button>
+      <button type="button" class="btn-compare-close-bottom" id="compareCloseBottomBtn">Close Comparison</button>
+    </div>
+  </section>
+  <!-- ===== END Issue #283 ===== -->
 
   <div id="toast" class="toast">Item added to cart!</div>
   <script src="script.js"></script>
