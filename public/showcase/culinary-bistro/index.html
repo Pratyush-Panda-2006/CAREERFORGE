@@ -273,7 +273,8 @@
         </div>
         <div class="date-input-wrap">
           <label for="resDate" class="input-sublabel">Or select a calendar date:</label>
-          <input type="date" id="resDate" class="styled-date-input" required />
+          <input type="date" id="resDate" class="styled-date-input" required aria-describedby="errDate" />
+          <span class="field-error" id="errDate" hidden>Choose today or a future date, then select a time that has not passed.</span>
         </div>
       </fieldset>
 
@@ -327,6 +328,7 @@
       <div class="res-section-title">
         <h3>Step 2 &mdash; Select Seating Time Slot</h3>
         <p>Tasting seatings allow a relaxed 2-hour culinary journey.</p>
+        <p class="field-error" id="errTime" role="alert" hidden>Choose a future seating time, or go back and select a later date.</p>
       </div>
 
       <div class="res-recap-bar" id="recapBarStep2">
@@ -435,16 +437,17 @@
         <span class="recap-badge" id="recapAreaStep3">Main Dining Room</span>
       </div>
 
-      <form id="resGuestForm" novalidate onsubmit="return false;">
+      <form id="resGuestForm" novalidate>
+        <p id="reservationFeedback" class="reservation-feedback" role="alert" hidden>Check the highlighted guest details before continuing.</p>
         <div class="form-row-2">
           <div class="field">
             <label for="resName">Full Name *</label>
-            <input type="text" id="resName" placeholder="e.g. Geneviève Dubois" required autocomplete="name" />
+            <input type="text" id="resName" placeholder="e.g. Geneviève Dubois" required autocomplete="name" aria-describedby="errName" />
             <span class="field-error" id="errName" hidden>Please enter your full name</span>
           </div>
           <div class="field">
             <label for="resPhone">Mobile Phone *</label>
-            <input type="tel" id="resPhone" placeholder="e.g. +33 6 12 34 56 78" required autocomplete="tel" />
+            <input type="tel" id="resPhone" placeholder="e.g. +33 6 12 34 56 78" required autocomplete="tel" aria-describedby="errPhone" />
             <span class="field-error" id="errPhone" hidden>Please enter a contact phone number</span>
           </div>
         </div>
@@ -452,7 +455,7 @@
         <div class="form-row-2">
           <div class="field">
             <label for="resEmail">Email Address (for voucher confirmation) *</label>
-            <input type="email" id="resEmail" placeholder="genevieve@example.com" required autocomplete="email" />
+            <input type="email" id="resEmail" placeholder="genevieve@example.com" required autocomplete="email" aria-describedby="errEmail" />
             <span class="field-error" id="errEmail" hidden>Please enter a valid email address</span>
           </div>
           <div class="field">
@@ -506,13 +509,14 @@
 
         <div class="wizard-footer">
           <button type="button" class="order-btn" id="backToStep2">&larr; Back</button>
-          <button type="button" class="order-btn solid confirm-btn" id="confirmReservation">Confirm Table &amp; Generate Voucher ✨</button>
+          <button type="submit" class="order-btn solid confirm-btn" id="confirmReservation">Confirm Table &amp; Generate Voucher ✨</button>
         </div>
       </form>
     </div>
 
     <!-- Step 4: Booking Voucher & Confirmation -->
     <div class="wizard-step wizard-confirmation" id="wizardStepConfirm" hidden>
+      <p class="reservation-success" role="status" tabindex="-1" id="reservationSuccess">Sample voucher ready. This showcase has not sent a reservation to a restaurant.</p>
       <div class="voucher-card" id="voucherCard">
         <div class="voucher-top-banner">
           <div class="voucher-status">

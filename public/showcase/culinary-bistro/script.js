@@ -357,6 +357,14 @@ function formatDateIso(d) {
   return `${y}-${m}-${day}`;
 }
 
+function isFutureReservation(dateIso, time, now = new Date()) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso) || !/^\d{2}:\d{2}$/.test(time)) return false;
+  const seating = new Date(`${dateIso}T${time}`);
+  return Number.isFinite(seating.getTime()) && formatDateIso(seating) === dateIso
+    && `${String(seating.getHours()).padStart(2, '0')}:${String(seating.getMinutes()).padStart(2, '0')}` === time
+    && seating > now;
+}
+
 function formatDisplayDate(isoStr) {
   if (!isoStr) return '';
   const parts = isoStr.split('-').map(Number);
@@ -376,6 +384,7 @@ function openReservationModal(opener) {
       dateInput.min = reservationState.dateIso;
     }
   }
+  byId('resDate').min = formatDateIso(new Date());
   showDialog(modal, opener || byId('reserveBtn'));
   setWizardStep(reservationState.step || 1);
 }
@@ -536,6 +545,8 @@ function resetReservation() {
 
   const form = byId('resGuestForm');
   if (form) form.reset();
+  ['resName', 'resPhone', 'resEmail', 'resDate'].forEach(id => byId(id).removeAttribute('aria-invalid'));
+  ['errName', 'errPhone', 'errEmail', 'errDate', 'errTime', 'reservationFeedback'].forEach(id => { byId(id).hidden = true; });
 
   const slotBtns = document.querySelectorAll('.time-slot-btn');
   slotBtns.forEach(btn => btn.classList.remove('active'));
@@ -552,17 +563,24 @@ function initReservationWizard() {
   reservationState.dateFormatted = formatDisplayDate(reservationState.dateIso);
 
   const dateInput = byId('resDate');
+  function validateDate() {
+    dateInput.min = formatDateIso(new Date());
+    const valid = dateInput.value !== '' && dateInput.validity.valid;
+    dateInput.setAttribute('aria-invalid', String(!valid));
+    byId('errDate').hidden = valid;
+    return valid;
+  }
   if (dateInput) {
     dateInput.value = reservationState.dateIso;
     dateInput.min = reservationState.dateIso;
     dateInput.addEventListener('change', () => {
-      if (dateInput.value) {
-        reservationState.dateIso = dateInput.value;
-        reservationState.dateFormatted = formatDisplayDate(dateInput.value);
-        document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
-        updateRecapBars();
-      }
+      reservationState.dateIso = dateInput.value;
+      reservationState.dateFormatted = formatDisplayDate(dateInput.value);
+      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+      validateDate();
+      updateRecapBars();
     });
+    dateInput.addEventListener('blur', validateDate);
   }
 
   // Quick Dates
@@ -589,6 +607,7 @@ function initReservationWizard() {
       reservationState.dateIso = iso;
       reservationState.dateFormatted = formatDisplayDate(iso);
       if (dateInput) dateInput.value = iso;
+      validateDate();
       updateRecapBars();
     });
   });
@@ -625,10 +644,12 @@ function initReservationWizard() {
   const toStep2Btn = byId('toStep2');
   if (toStep2Btn) {
     toStep2Btn.addEventListener('click', () => {
-      if (!reservationState.dateIso) {
+      if (!validateDate()) {
         if (dateInput) dateInput.focus();
         return;
       }
+      reservationState.dateIso = dateInput.value;
+      reservationState.dateFormatted = formatDisplayDate(dateInput.value);
       setWizardStep(2);
     });
   }
@@ -641,6 +662,7 @@ function initReservationWizard() {
       slotBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       reservationState.time = btn.dataset.time;
+      byId('errTime').hidden = true;
       if (toStep3Btn) toStep3Btn.disabled = false;
       updateRecapBars();
     });
@@ -665,45 +687,48 @@ function initReservationWizard() {
   }
 
   // Step 3 Confirmation & Validation
-  const confirmBtn = byId('confirmReservation');
-  if (confirmBtn) {
-    confirmBtn.addEventListener('click', () => {
+  const guestForm = byId('resGuestForm');
+  const fieldChecks = [
+    ['resName', 'errName', value => value.trim().length >= 2],
+    ['resPhone', 'errPhone', value => value.trim().length >= 5],
+    ['resEmail', 'errEmail', value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())]
+  ];
+  function validateField([inputId, errorId, check]) {
+    const input = byId(inputId);
+    const valid = check(input.value);
+    input.setAttribute('aria-invalid', String(!valid));
+    byId(errorId).hidden = valid;
+    return valid;
+  }
+  fieldChecks.forEach(field => {
+    const input = byId(field[0]);
+    input.addEventListener('blur', () => validateField(field));
+    input.addEventListener('input', () => {
+      if (input.hasAttribute('aria-invalid')) validateField(field);
+      if (fieldChecks.every(([id]) => byId(id).getAttribute('aria-invalid') === 'false')) byId('reservationFeedback').hidden = true;
+    });
+  });
+  if (guestForm) {
+    guestForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!validateDate()) {
+        setWizardStep(1);
+        dateInput.focus();
+        return;
+      }
+      if (!isFutureReservation(dateInput.value, reservationState.time)) {
+        setWizardStep(2);
+        byId('errTime').hidden = false;
+        document.querySelector('.time-slot-btn').focus();
+        return;
+      }
       const nameInput = byId('resName');
       const phoneInput = byId('resPhone');
       const emailInput = byId('resEmail');
-      const errName = byId('errName');
-      const errPhone = byId('errPhone');
-      const errEmail = byId('errEmail');
-
-      let valid = true;
-
-      // Validate Name
-      if (!nameInput.value.trim() || nameInput.value.trim().length < 2) {
-        errName.hidden = false;
-        valid = false;
-      } else {
-        errName.hidden = true;
-      }
-
-      // Validate Phone
-      if (!phoneInput.value.trim() || phoneInput.value.trim().length < 5) {
-        errPhone.hidden = false;
-        valid = false;
-      } else {
-        errPhone.hidden = true;
-      }
-
-      // Validate Email
       const emailVal = emailInput.value.trim();
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailVal || !emailRegex.test(emailVal)) {
-        errEmail.hidden = false;
-        valid = false;
-      } else {
-        errEmail.hidden = true;
-      }
-
-      if (!valid) return;
+      const invalidFields = fieldChecks.filter(field => !validateField(field));
+      byId('reservationFeedback').hidden = invalidFields.length === 0;
+      if (invalidFields.length) { byId(invalidFields[0][0]).focus(); return; }
 
       // Collect guest details
       reservationState.guest.name = nameInput.value.trim();
@@ -719,6 +744,7 @@ function initReservationWizard() {
       // Generate voucher & show confirmation
       generateBookingVoucher();
       setWizardStep('confirm');
+      byId('reservationSuccess').focus();
     });
   }
 
