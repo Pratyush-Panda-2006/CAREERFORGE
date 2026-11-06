@@ -1360,3 +1360,141 @@ function initExpeditionTimeline() {
   handlePlannerConfigChange();
 })();
 /* ===== END Issue #211 ===== */
+
+/* ===== BEGIN Issue #305: Printable Expedition Itinerary Voucher Generator ===== */
+(function () {
+  'use strict';
+
+  const VOUCHER_DATA = {
+    reykjavik: {
+      title: 'Reykjavik Aurora Glaciers',
+      region: 'Nordic Arctic Outpost (Iceland)',
+      dates: '7 Days • Iceland Heli-Hiking',
+      satCoords: '64°08\'47"N, 21°56\'05"W (Vatnajökull Sector)',
+      elevation: '2,110m (Glacier Plateau)',
+      code: 'PASS #ODY-8942-IS',
+      gear: [
+        'Thermal Base Layer & Polartec Fleece',
+        'Satellite InReach SOS Transponder',
+        'Polar Micro-spikes & Steel Crampons',
+        'UV Category 4 Glacier Goggles',
+        'Emergency Hypothermia Bivvy Sled',
+        'Gore-Tex Pro Waterproof Mountain Shell'
+      ]
+    },
+    kyoto: {
+      title: 'Kyoto Bamboo Sanctuary',
+      region: 'Kansai Ancient Trails (Japan)',
+      dates: '10 Days • Private Tea Masters',
+      satCoords: '35°00\'42"N, 135°46\'05"E (Higashiyama Sector)',
+      elevation: '848m (Mount Hiei Ridge)',
+      code: 'PASS #ODY-4120-JP',
+      gear: [
+        'All-Weather Carbon Trail Walking Poles',
+        'Emergency Satellite GPS Tracker',
+        'Breathable Meridian Rain Cape',
+        'Filtered Water Purification Flask',
+        'Personal Wilderness First Aid Kit',
+        'Formal Monastery Temple Slippers'
+      ]
+    },
+    antarctic: {
+      title: 'Antarctic Glacier Crossing',
+      region: 'Union Glacier Polar Station (Antarctica)',
+      dates: '10 Days • High Plateau Ski Traverse',
+      satCoords: '79°45\'00"S, 82°30\'00"W (Patriot Hills Sector)',
+      elevation: '2,800m (Polar Ice Dome)',
+      code: 'PASS #ODY-9901-AQ',
+      gear: [
+        'Extreme Polar Down Parka (-40°C Certified)',
+        'Dual-Band Satellite Distress Beacon',
+        'Backcountry Cross-Country Skis & Skins',
+        'Windproof Neoprene Full-Face Balaclava',
+        'Arctic Thermal Pulk Sled & Harness',
+        'High-Calorie Freeze-Dried Alpine Rations'
+      ]
+    },
+    'silk-road': {
+      title: 'Silk Road Highland Caravan',
+      region: 'Tian Shan Mountain Pass (Central Asia)',
+      dates: '12 Days • Alpine Desert Trek',
+      satCoords: '42°02\'15"N, 80°07\'30"E (Khan Tengri Base)',
+      elevation: '4,010m (High Mountain Pass)',
+      code: 'PASS #ODY-6532-SR',
+      gear: [
+        'High Altitude Acclimatization Kit',
+        'Satellite Messenger & Solar Powerbank',
+        'Heavy-Duty Vibram Mountaineering Boots',
+        'Desert Dust & Sand Storm Protective Goggles',
+        'Sub-Zero Down Sleeping Bag (-20°C)',
+        'Carbon Fiber Trekking Poles & Gaiters'
+      ]
+    }
+  };
+
+  function openVoucherModal(target) {
+    const modal = document.getElementById('voucherModal');
+    const backdrop = document.getElementById('voucherBackdrop');
+    if (!modal || !backdrop) return;
+
+    let key = target;
+    if (key === 'active') {
+      const select = document.getElementById('planner-expedition-select') || document.getElementById('expedition-select');
+      key = select ? select.value : 'antarctic';
+    }
+
+    const data = VOUCHER_DATA[key] || VOUCHER_DATA.reykjavik;
+
+    const titleEl = document.getElementById('vExpeditionTitle');
+    const regionEl = document.getElementById('vExpeditionRegion');
+    const datesEl = document.getElementById('vExpeditionDates');
+    const satCoordsEl = document.getElementById('vSatCoords');
+    const elevationEl = document.getElementById('vElevation');
+    const codeCaptionEl = document.getElementById('voucherCodeCaption');
+    const gearGridEl = document.getElementById('vGearGrid');
+
+    if (titleEl) titleEl.textContent = data.title;
+    if (regionEl) regionEl.textContent = data.region;
+    if (datesEl) datesEl.textContent = data.dates;
+    if (satCoordsEl) satCoordsEl.textContent = data.satCoords;
+    if (elevationEl) elevationEl.textContent = data.elevation;
+    if (codeCaptionEl) codeCaptionEl.textContent = data.code;
+
+    if (gearGridEl) {
+      gearGridEl.innerHTML = data.gear
+        .map((item) => `
+          <div class="v-gear-item">
+            <span class="v-gear-check">✓</span>
+            <span>${item}</span>
+          </div>
+        `)
+        .join('');
+    }
+
+    modal.classList.add('open');
+    backdrop.classList.add('open');
+  }
+
+  function closeVoucherModal() {
+    const modal = document.getElementById('voucherModal');
+    const backdrop = document.getElementById('voucherBackdrop');
+    if (modal) modal.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+  }
+
+  function printVoucher() {
+    window.print();
+  }
+
+  // Keyboard Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeVoucherModal();
+    }
+  });
+
+  window.openVoucherModal = openVoucherModal;
+  window.closeVoucherModal = closeVoucherModal;
+  window.printVoucher = printVoucher;
+})();
+/* ===== END Issue #305 ===== */
