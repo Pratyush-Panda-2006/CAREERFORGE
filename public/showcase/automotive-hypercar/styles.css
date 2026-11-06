@@ -1574,3 +1574,464 @@ html { scroll-behavior: smooth; }
     margin: 5px auto 0;
   }
 }
+
+/* ===== EV Road Trip Range Estimator (Issue #271) START ===== */
+.range-sim-section {
+  padding: 80px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.range-sim-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.range-badge {
+  display: inline-block;
+  font-family: 'Orbitron', sans-serif;
+  color: #00f0ff;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.range-sim-header h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.range-sim-sub {
+  color: #9ca3af;
+  font-size: 1.05rem;
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.range-sim-container {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 900px) {
+  .range-sim-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.range-gauge-card {
+  background: radial-gradient(circle at top, #111827 0%, #0a0e17 100%);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 20px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 240, 255, 0.04);
+}
+
+.range-gauge-wrap {
+  position: relative;
+  width: 280px;
+  height: 190px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.range-gauge-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.range-gauge-bg {
+  stroke: #1f2937;
+  stroke-dasharray: 385;
+  stroke-dashoffset: 0;
+}
+
+.range-gauge-meter {
+  transition: stroke-dashoffset 0.5s ease-out, stroke 0.3s ease;
+}
+
+.range-gauge-content {
+  position: relative;
+  z-index: 2;
+  margin-top: 40px;
+}
+
+.range-gauge-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.range-gauge-number {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3.8rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #00f0ff;
+  text-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+  transition: color 0.3s ease;
+}
+
+.range-gauge-unit {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 2px;
+  color: #9ca3af;
+  display: block;
+  margin-top: 4px;
+}
+
+.range-gauge-secondary {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #00f0ff;
+  font-weight: 500;
+}
+
+.range-efficiency-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  color: #34d399;
+  font-weight: 600;
+  margin-top: 18px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+}
+
+.range-efficiency-pill.cold {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+}
+
+.range-efficiency-pill.hot {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.range-efficiency-pill.warn {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.efficiency-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.range-battery-meter {
+  width: 100%;
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.battery-meter-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 8px;
+}
+
+.battery-highlight {
+  color: #f3f4f6;
+  font-weight: 600;
+}
+
+.battery-bar-track {
+  height: 10px;
+  background: #1f2937;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.battery-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #00f0ff 100%);
+  border-radius: 6px;
+  transition: width 0.4s ease, background 0.3s ease;
+}
+
+.battery-status-sub {
+  font-size: 0.78rem;
+  color: #d1d5db;
+  text-align: right;
+}
+
+.range-controls-panel {
+  background: #0d121d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.range-ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ctrl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ctrl-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.92rem;
+  color: #e5e7eb;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+}
+
+.ctrl-val-readout {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #00f0ff;
+}
+
+.slider-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #1f2937;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #00f0ff;
+  border: 3px solid #0a0e17;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.range-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #00f0ff;
+  border: 3px solid #0a0e17;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
+  cursor: pointer;
+}
+
+.range-scale-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.ctrl-advice-text {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.drive-mode-pills, .terrain-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .drive-mode-pills, .terrain-pills {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mode-pill, .terrain-pill {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 12px;
+  color: #9ca3af;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.mode-pill:hover, .terrain-pill:hover {
+  border-color: rgba(0, 240, 255, 0.4);
+  color: #e5e7eb;
+  background: #162032;
+}
+
+.mode-pill.active, .terrain-pill.active {
+  background: rgba(0, 240, 255, 0.08);
+  border-color: #00f0ff;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.2);
+}
+
+.mode-pill-name, .terrain-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.mode-pill-sub, .terrain-sub {
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
+
+.mode-pill.active .mode-pill-sub, .terrain-pill.active .terrain-sub {
+  color: #00f0ff;
+}
+
+.terrain-icon {
+  font-size: 1.2rem;
+  margin-bottom: 2px;
+}
+
+.range-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .range-telemetry-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.range-tel-card {
+  background: #0d121d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.range-tel-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 240, 255, 0.3);
+}
+
+.tel-card-icon {
+  font-size: 1.4rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.tel-card-title {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.tel-card-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.tel-unit {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.tel-card-sub {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: #00f0ff;
+}
+
+.range-route-banner {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #34d399;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.range-route-banner.warning {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.route-banner-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+/* ===== EV Road Trip Range Estimator (Issue #271) END ===== */

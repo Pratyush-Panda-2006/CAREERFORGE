@@ -454,6 +454,175 @@
   </section>
   <!-- ===== Virtual Wind Tunnel (issue #99) END ===== -->
 
+  <!-- ===== EV Road Trip Range Estimator (Issue #271) START ===== -->
+  <section class="range-sim-section" id="ev-range-estimator" aria-labelledby="range-sim-heading">
+    <div class="range-sim-header">
+      <span class="range-badge">HYPERCAR TELEMETRY MATRIX</span>
+      <h2 id="range-sim-heading">EV Road Trip Range Estimator</h2>
+      <p class="range-sim-sub">Simulate real-world range, climate control draw, and regenerative brake recovery across dynamic ambient climates and mountainous terrains.</p>
+    </div>
+
+    <div class="range-sim-container">
+      <!-- Main Range Readout Gauge -->
+      <div class="range-gauge-card">
+        <div class="range-gauge-wrap">
+          <svg class="range-gauge-svg" viewBox="0 0 280 200" aria-hidden="true">
+            <defs>
+              <linearGradient id="rangeGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#00f0ff" />
+                <stop offset="60%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#ef4444" />
+              </linearGradient>
+            </defs>
+            <path class="range-gauge-bg" d="M 30 170 A 110 110 0 1 1 250 170" fill="none" stroke="#1f2937" stroke-width="14" stroke-linecap="round" />
+            <path class="range-gauge-meter" id="rangeGaugeMeter" d="M 30 170 A 110 110 0 1 1 250 170" fill="none" stroke="url(#rangeGaugeGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="385" stroke-dashoffset="50" />
+          </svg>
+          <div class="range-gauge-content">
+            <span class="range-gauge-label">ESTIMATED RANGE</span>
+            <div class="range-gauge-number" id="rangePrimaryValue">385</div>
+            <span class="range-gauge-unit" id="rangePrimaryUnit">MILES</span>
+            <div class="range-gauge-secondary" id="rangeKmValue">619 km (EPA Projected)</div>
+          </div>
+        </div>
+
+        <div class="range-efficiency-pill" id="rangeEfficiencyBadge">
+          <span class="efficiency-dot"></span>
+          <span id="rangeEfficiencyText">94% Thermal Efficiency</span>
+        </div>
+
+        <div class="range-battery-meter">
+          <div class="battery-meter-labels">
+            <span>Pack Architecture</span>
+            <span class="battery-highlight">130 kWh Solid-State Hyper-Cell</span>
+          </div>
+          <div class="battery-bar-track">
+            <div class="battery-bar-fill" id="rangeBatteryFill" style="width: 100%;"></div>
+          </div>
+          <div class="battery-status-sub" id="rangeTripSocStatus">Destination Arrival: 100% (Trip Ready)</div>
+        </div>
+      </div>
+
+      <!-- Controls & Parameters -->
+      <div class="range-controls-panel">
+        <!-- 1. Ambient Temperature -->
+        <div class="range-ctrl-group">
+          <div class="ctrl-header">
+            <label for="rangeTempSlider" class="ctrl-label">
+              <span class="ctrl-icon">🌡️</span> Ambient Temperature
+            </label>
+            <output class="ctrl-val-readout" id="rangeTempVal">21°C (70°F)</output>
+          </div>
+          <div class="slider-wrapper">
+            <input type="range" id="rangeTempSlider" min="-10" max="45" step="1" value="21" class="range-slider temp-slider" aria-describedby="rangeTempAdvice" />
+            <div class="range-scale-ticks">
+              <span>-10°C (Freezing)</span>
+              <span>21°C (Optimal)</span>
+              <span>45°C (Extreme Heat)</span>
+            </div>
+          </div>
+          <p class="ctrl-advice-text" id="rangeTempAdvice">Optimal battery operating window. Minimal thermal conditioning needed.</p>
+        </div>
+
+        <!-- 2. Driving Mode Selector -->
+        <div class="range-ctrl-group">
+          <span class="ctrl-label"><span class="ctrl-icon">⚡</span> Powertrain Drive Mode</span>
+          <div class="drive-mode-pills" role="radiogroup" aria-label="Drive Mode Selection">
+            <button type="button" class="mode-pill" data-mode="eco" role="radio" aria-checked="false">
+              <span class="mode-pill-name">Eco Cruiser</span>
+              <span class="mode-pill-sub">Low Aero Drag (+18% Range)</span>
+            </button>
+            <button type="button" class="mode-pill active" data-mode="cruise" role="radio" aria-checked="true">
+              <span class="mode-pill-name">Ludicrous Cruise</span>
+              <span class="mode-pill-sub">Balanced GT Touring (Baseline)</span>
+            </button>
+            <button type="button" class="mode-pill" data-mode="track" role="radio" aria-checked="false">
+              <span class="mode-pill-name">Track Attack</span>
+              <span class="mode-pill-sub">Max Aero Downforce (-32% Range)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Terrain Gradient -->
+        <div class="range-ctrl-group">
+          <span class="ctrl-label"><span class="ctrl-icon">⛰️</span> Highway Terrain Elevation Profile</span>
+          <div class="terrain-pills" role="radiogroup" aria-label="Terrain Selection">
+            <button type="button" class="terrain-pill active" data-terrain="flat" role="radio" aria-checked="true">
+              <span class="terrain-icon">🛣️</span>
+              <span class="terrain-name">Flat Highway</span>
+              <span class="terrain-sub">0% Incline</span>
+            </button>
+            <button type="button" class="terrain-pill" data-terrain="rolling" role="radio" aria-checked="false">
+              <span class="terrain-icon">🌄</span>
+              <span class="terrain-name">Rolling Hills</span>
+              <span class="terrain-sub">±3% Slope (+12% Regen)</span>
+            </button>
+            <button type="button" class="terrain-pill" data-terrain="mountain" role="radio" aria-checked="false">
+              <span class="terrain-icon">🏔️</span>
+              <span class="terrain-name">Alpine Pass</span>
+              <span class="terrain-sub">±8% Grade (Extreme Drain)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Road Trip Leg Distance Slider -->
+        <div class="range-ctrl-group">
+          <div class="ctrl-header">
+            <label for="rangeDistSlider" class="ctrl-label">
+              <span class="ctrl-icon">🗺️</span> Trip Leg Distance
+            </label>
+            <output class="ctrl-val-readout" id="rangeDistVal">150 miles (241 km)</output>
+          </div>
+          <div class="slider-wrapper">
+            <input type="range" id="rangeDistSlider" min="20" max="450" step="10" value="150" class="range-slider dist-slider" />
+            <div class="range-scale-ticks">
+              <span>20 mi</span>
+              <span>200 mi</span>
+              <span>450 mi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Telemetry Cards Grid -->
+    <div class="range-telemetry-grid">
+      <div class="range-tel-card">
+        <span class="tel-card-icon">⚡</span>
+        <div class="tel-card-title">Consumption Rate</div>
+        <div class="tel-card-value" id="rangeWhMiVal">312 <span class="tel-unit">Wh/mi</span></div>
+        <div class="tel-card-sub" id="rangeKwh100kmVal">19.4 kWh/100km</div>
+      </div>
+
+      <div class="range-tel-card">
+        <span class="tel-card-icon">❄️</span>
+        <div class="tel-card-title">HVAC & Thermal Draw</div>
+        <div class="tel-card-value" id="rangeHvacVal">1.2 <span class="tel-unit">kW</span></div>
+        <div class="tel-card-sub" id="rangeHvacStatus">Ambient Equilibrium</div>
+      </div>
+
+      <div class="range-tel-card">
+        <span class="tel-card-icon">💨</span>
+        <div class="tel-card-title">Aero Drag Penalty</div>
+        <div class="tel-card-value" id="rangeAeroVal">0.28 <span class="tel-unit">Cd</span></div>
+        <div class="tel-card-sub" id="rangeAeroStatus">Streamlined Active Aero</div>
+      </div>
+
+      <div class="range-tel-card">
+        <span class="tel-card-icon">🔄</span>
+        <div class="tel-card-title">Regenerative Harvest</div>
+        <div class="tel-card-value" id="rangeRegenVal">+8.4 <span class="tel-unit">kWh</span></div>
+        <div class="tel-card-sub" id="rangeRegenPct">+6.5% Net Recovered</div>
+      </div>
+    </div>
+
+    <!-- Supercharger Recommendation Alert Banner -->
+    <div class="range-route-banner" id="rangeRouteBanner" role="status">
+      <span class="route-banner-icon">✓</span>
+      <span class="route-banner-text" id="rangeRouteBannerText">Non-stop journey achievable! Projected arrival state of charge: 61% remaining.</span>
+    </div>
+  </section>
+  <!-- ===== EV Road Trip Range Estimator (Issue #271) END ===== -->
+
   <script src="script.js"></script>
 </body>
 </html>

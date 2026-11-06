@@ -1645,3 +1645,241 @@ window.reserveHypercar = function reserveHypercar() {
   document.addEventListener('DOMContentLoaded', initLaunchControl);
 })();
 /* ===== Launch Control 0-60 Acceleration Simulation & Live G-Meter (Issue #177) END ===== */
+
+/* ===== EV Road Trip Range Estimator (Issue #271) START ===== */
+(function () {
+  'use strict';
+
+  var PACK_CAPACITY_KWH = 130; // 130 kWh Solid-State Hyper-Cell Battery
+  var BASE_RANGE_MILES = 385;  // Baseline EPA range at 21°C in Ludicrous Cruise on Flat Terrain
+  var GAUGE_CIRCUMFERENCE = 385;
+
+  var MODES = {
+    eco: { name: 'Eco Cruiser', rangeMult: 1.18, whMiBase: 285, cd: 0.25, aeroStatus: 'Low-Drag Active Retraction' },
+    cruise: { name: 'Ludicrous Cruise', rangeMult: 1.00, whMiBase: 337, cd: 0.28, aeroStatus: 'Standard Streamlined Touring' },
+    track: { name: 'Track Attack', rangeMult: 0.68, whMiBase: 496, cd: 0.42, aeroStatus: 'High-Downforce Aero Wing Deployed' }
+  };
+
+  var TERRAINS = {
+    flat: { name: 'Flat Highway', rangeMult: 1.00, regenKwhBase: 0, regenPct: 0, desc: 'Zero incline, nominal rolling resistance' },
+    rolling: { name: 'Rolling Hills', rangeMult: 0.94, regenKwhBase: 8.4, regenPct: 6.5, desc: '±3% elevation changes, 12% kinetic recovery' },
+    mountain: { name: 'Alpine Pass', rangeMult: 0.81, regenKwhBase: 16.5, regenPct: 14.8, desc: '±8% steep mountain grade, heavy downhill regen' }
+  };
+
+  function computeRangePhysics(tempC, modeKey, terrainKey, tripDistanceMiles) {
+    var mode = MODES[modeKey] || MODES.cruise;
+    var terrain = TERRAINS[terrainKey] || TERRAINS.flat;
+
+    // Temperature efficiency curve (optimal 20°C - 24°C)
+    var tempEfficiency = 1.0;
+    var hvacKw = 1.2;
+    var tempAdvice = '';
+    var efficiencyClass = 'optimal';
+
+    if (tempC < 21) {
+      // Sub-zero / cold loss
+      var coldDelta = 21 - tempC;
+      tempEfficiency = Math.max(0.68, 1.0 - (coldDelta * 0.0103));
+      hvacKw = 1.2 + (coldDelta * 0.11); // Heat pump cabin warming + pack thermal heaters
+      if (tempC <= 0) {
+        tempAdvice = 'Freezing temperature. Battery pack heaters active to maintain cell chemistry.';
+        efficiencyClass = 'cold';
+      } else {
+        tempAdvice = 'Cool ambient climate. Mild thermal conditioning active.';
+        efficiencyClass = 'cold';
+      }
+    } else if (tempC > 24) {
+      // Heat loss due to active refrigeration
+      var heatDelta = tempC - 24;
+      tempEfficiency = Math.max(0.85, 1.0 - (heatDelta * 0.0071));
+      hvacKw = 1.2 + (heatDelta * 0.095); // High AC compressor + coolant radiator fan draw
+      if (tempC >= 35) {
+        tempAdvice = 'Extreme heat warning. Liquid chilling pumps operating at maximum output.';
+        efficiencyClass = 'warn';
+      } else {
+        tempAdvice = 'Warm conditions. Active cabin AC and battery heat dissipation engaged.';
+        efficiencyClass = 'hot';
+      }
+    } else {
+      tempAdvice = 'Optimal battery operating window. Minimal thermal conditioning needed.';
+      efficiencyClass = 'optimal';
+    }
+
+    // Projected total range
+    var totalRange = Math.round(BASE_RANGE_MILES * mode.rangeMult * terrain.rangeMult * tempEfficiency);
+    var totalKm = Math.round(totalRange * 1.60934);
+
+    // Consumption rate
+    var effectiveWhMi = Math.round((PACK_CAPACITY_KWH * 1000) / totalRange);
+    var effectiveKwh100km = ((effectiveWhMi * 62.1371) / 1000).toFixed(1);
+
+    // Regen calculation scaled by trip distance
+    var tripRatio = tripDistanceMiles / 150;
+    var regenHarvestKwh = (terrain.regenKwhBase * tripRatio).toFixed(1);
+    var regenHarvestPct = terrain.regenPct.toFixed(1);
+
+    // State of charge at arrival
+    var remainingPercent = Math.round(((totalRange - tripDistanceMiles) / totalRange) * 100);
+
+    return {
+      totalRange: totalRange,
+      totalKm: totalKm,
+      tempEfficiency: Math.round(tempEfficiency * 100),
+      hvacKw: hvacKw.toFixed(1),
+      tempAdvice: tempAdvice,
+      efficiencyClass: efficiencyClass,
+      effectiveWhMi: effectiveWhMi,
+      effectiveKwh100km: effectiveKwh100km,
+      aeroCd: mode.cd.toFixed(2),
+      aeroStatus: mode.aeroStatus,
+      regenHarvestKwh: regenHarvestKwh,
+      regenHarvestPct: regenHarvestPct,
+      remainingPercent: remainingPercent,
+      isPossible: totalRange >= tripDistanceMiles
+    };
+  }
+
+  // Export for testing
+  if (typeof window !== 'undefined') {
+    window.computeRangePhysics = computeRangePhysics;
+  }
+
+  function initRangeEstimator() {
+    var section = document.getElementById('ev-range-estimator');
+    if (!section) return;
+
+    // Elements
+    var tempSlider = document.getElementById('rangeTempSlider');
+    var tempValOut = document.getElementById('rangeTempVal');
+    var tempAdviceEl = document.getElementById('rangeTempAdvice');
+    var distSlider = document.getElementById('rangeDistSlider');
+    var distValOut = document.getElementById('rangeDistVal');
+    var modePills = section.querySelectorAll('.mode-pill');
+    var terrainPills = section.querySelectorAll('.terrain-pill');
+
+    var primaryValEl = document.getElementById('rangePrimaryValue');
+    var kmValEl = document.getElementById('rangeKmValue');
+    var gaugeMeter = document.getElementById('rangeGaugeMeter');
+    var efficiencyBadge = document.getElementById('rangeEfficiencyBadge');
+    var efficiencyText = document.getElementById('rangeEfficiencyText');
+    var batteryFill = document.getElementById('rangeBatteryFill');
+    var tripSocStatus = document.getElementById('rangeTripSocStatus');
+
+    var whMiEl = document.getElementById('rangeWhMiVal');
+    var kwh100kmEl = document.getElementById('rangeKwh100kmVal');
+    var hvacValEl = document.getElementById('rangeHvacVal');
+    var aeroValEl = document.getElementById('rangeAeroVal');
+    var aeroStatusEl = document.getElementById('rangeAeroStatus');
+    var regenValEl = document.getElementById('rangeRegenVal');
+    var regenPctEl = document.getElementById('rangeRegenPct');
+    var routeBanner = document.getElementById('rangeRouteBanner');
+    var routeBannerText = document.getElementById('rangeRouteBannerText');
+
+    var currentMode = 'cruise';
+    var currentTerrain = 'flat';
+
+    function updateUI() {
+      var tempC = parseInt(tempSlider.value, 10);
+      var tempF = Math.round((tempC * 9 / 5) + 32);
+      tempValOut.textContent = tempC + '°C (' + tempF + '°F)';
+
+      var distMiles = parseInt(distSlider.value, 10);
+      var distKm = Math.round(distMiles * 1.60934);
+      distValOut.textContent = distMiles + ' miles (' + distKm + ' km)';
+
+      var res = computeRangePhysics(tempC, currentMode, currentTerrain, distMiles);
+
+      // Gauge and Range Number
+      if (primaryValEl) primaryValEl.textContent = res.totalRange;
+      if (kmValEl) kmValEl.textContent = res.totalKm + ' km (EPA Projected)';
+
+      if (gaugeMeter) {
+        var ratio = Math.min(1.0, Math.max(0.1, res.totalRange / 480));
+        var offset = GAUGE_CIRCUMFERENCE - (ratio * GAUGE_CIRCUMFERENCE);
+        gaugeMeter.style.strokeDashoffset = offset;
+      }
+
+      // Efficiency Badge
+      if (efficiencyBadge && efficiencyText) {
+        efficiencyBadge.className = 'range-efficiency-pill ' + res.efficiencyClass;
+        efficiencyText.textContent = res.tempEfficiency + '% Thermal Efficiency';
+      }
+
+      if (tempAdviceEl) {
+        tempAdviceEl.textContent = res.tempAdvice;
+      }
+
+      // Battery & Destination SOC
+      if (batteryFill && tripSocStatus) {
+        if (res.isPossible) {
+          batteryFill.style.width = Math.max(5, res.remainingPercent) + '%';
+          batteryFill.style.background = 'linear-gradient(90deg, #10b981 0%, #00f0ff 100%)';
+          tripSocStatus.textContent = 'Destination Arrival: ' + res.remainingPercent + '% remaining';
+          tripSocStatus.style.color = '#34d399';
+        } else {
+          batteryFill.style.width = '0%';
+          batteryFill.style.background = '#ef4444';
+          tripSocStatus.textContent = 'Battery depleted before destination (-' + Math.abs(res.remainingPercent) + '%)';
+          tripSocStatus.style.color = '#f87171';
+        }
+      }
+
+      // Telemetry Metrics
+      if (whMiEl) whMiEl.innerHTML = res.effectiveWhMi + ' <span class="tel-unit">Wh/mi</span>';
+      if (kwh100kmEl) kwh100kmEl.textContent = res.effectiveKwh100km + ' kWh/100km';
+      if (hvacValEl) hvacValEl.innerHTML = res.hvacKw + ' <span class="tel-unit">kW</span>';
+      if (aeroValEl) aeroValEl.innerHTML = res.aeroCd + ' <span class="tel-unit">Cd</span>';
+      if (aeroStatusEl) aeroStatusEl.textContent = res.aeroStatus;
+      if (regenValEl) regenValEl.innerHTML = '+' + res.regenHarvestKwh + ' <span class="tel-unit">kWh</span>';
+      if (regenPctEl) regenPctEl.textContent = '+' + res.regenHarvestPct + '% Net Recovered';
+
+      // Route Banner
+      if (routeBanner && routeBannerText) {
+        if (res.isPossible) {
+          routeBanner.className = 'range-route-banner';
+          routeBannerText.textContent = 'Non-stop trip achievable! Projected arrival state of charge: ' + res.remainingPercent + '% remaining.';
+        } else {
+          routeBanner.className = 'range-route-banner warning';
+          var deficit = distMiles - res.totalRange;
+          routeBannerText.textContent = '⚠️ Insufficient single-charge range! 350kW DC Fast Charge stop required ' + deficit + ' miles before destination.';
+        }
+      }
+    }
+
+    // Attach listeners
+    if (tempSlider) tempSlider.addEventListener('input', updateUI);
+    if (distSlider) distSlider.addEventListener('input', updateUI);
+
+    modePills.forEach(function (pill) {
+      pill.addEventListener('click', function () {
+        modePills.forEach(function (p) {
+          p.classList.remove('active');
+          p.setAttribute('aria-checked', 'false');
+        });
+        pill.classList.add('active');
+        pill.setAttribute('aria-checked', 'true');
+        currentMode = pill.getAttribute('data-mode');
+        updateUI();
+      });
+    });
+
+    terrainPills.forEach(function (pill) {
+      pill.addEventListener('click', function () {
+        terrainPills.forEach(function (p) {
+          p.classList.remove('active');
+          p.setAttribute('aria-checked', 'false');
+        });
+        pill.classList.add('active');
+        pill.setAttribute('aria-checked', 'true');
+        currentTerrain = pill.getAttribute('data-terrain');
+        updateUI();
+      });
+    });
+
+    // Initial render
+    updateUI();
+  }
+
+  document.addEventListener('DOMContentLoaded', initRangeEstimator);
+})();
+/* ===== EV Road Trip Range Estimator (Issue #271) END ===== */
