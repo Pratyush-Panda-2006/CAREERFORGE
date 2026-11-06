@@ -205,7 +205,17 @@ function renderCart() {
 
   const items = Object.values(cart);
   if (items.length === 0) {
-    drawerBody.innerHTML = '<div class="empty-cart">Your cart is currently empty.</div>';
+    const template = document.getElementById('cart-empty-template');
+    drawerBody.replaceChildren(template.content.cloneNode(true));
+    drawerBody.querySelector('.empty-cart-browse').addEventListener('click', () => {
+      document.getElementById('cartDrawer').classList.remove('open');
+      document.getElementById('cartBackdrop').classList.remove('open');
+      const products = document.getElementById('productsGrid');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      products.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      const nextAction = Array.from(products.querySelectorAll('button, a')).find(el => el.getClientRects().length);
+      if (nextAction) nextAction.focus({ preventScroll: true });
+    });
     return;
   }
 
