@@ -2348,3 +2348,405 @@ body {
   }
 }
 /* ===== END issue #188 ===== */
+
+/* ===== BEGIN Issue #283: Product Comparison Matrix Drawer ===== */
+.compare-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.compare-check-label:hover {
+  color: var(--text);
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.compare-check-label input[type="checkbox"] {
+  accent-color: #38bdf8;
+  cursor: pointer;
+}
+
+/* Floating Bottom Sticky Bar */
+.compare-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(56, 189, 248, 0.2);
+  border-radius: 9999px;
+  padding: 10px 24px;
+  z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  animation: compareBarSlideUp 0.3s ease-out;
+}
+
+@keyframes compareBarSlideUp {
+  from { transform: translateX(-50%) translateY(40px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.compare-bar-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.compare-bar-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.compare-bar-count {
+  font-size: 0.88rem;
+  color: #f1f5f9;
+  white-space: nowrap;
+}
+
+.compare-bar-count strong {
+  color: #38bdf8;
+}
+
+.compare-bar-thumbs {
+  display: flex;
+  gap: 6px;
+}
+
+.compare-thumb-pill {
+  width: 28px;
+  height: 28px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.compare-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-clear-compare {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.btn-clear-compare:hover {
+  color: #f87171;
+}
+
+.btn-open-compare {
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  border: none;
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-open-compare:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+/* Comparison Backdrop & Slide-up Drawer */
+.compare-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.compare-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.compare-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 88vh;
+  background: #0f172a;
+  border-top: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+  border-radius: 20px 20px 0 0;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.compare-drawer.open {
+  transform: translateY(0);
+}
+
+.compare-drawer-header {
+  padding: 20px 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.compare-drawer-header h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.compare-header-sub {
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.compare-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Difference Toggle Switch */
+.diff-toggle-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  font-weight: 500;
+  user-select: none;
+}
+
+.diff-toggle-wrap input[type="checkbox"] {
+  display: none;
+}
+
+.diff-toggle-slider {
+  width: 36px;
+  height: 20px;
+  background: #334155;
+  border-radius: 9999px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.diff-toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.diff-toggle-wrap input[type="checkbox"]:checked + .diff-toggle-slider {
+  background: #38bdf8;
+}
+
+.diff-toggle-wrap input[type="checkbox"]:checked + .diff-toggle-slider::after {
+  transform: translateX(16px);
+}
+
+.compare-drawer-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  overflow-x: auto;
+  flex: 1;
+}
+
+/* Matrix Comparison Table */
+.compare-matrix-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 600px;
+}
+
+.compare-matrix-table th,
+.compare-matrix-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.compare-spec-col {
+  width: 200px;
+  background: #0b1120;
+  color: #94a3b8;
+  font-weight: 600;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.compare-item-header {
+  vertical-align: top;
+  text-align: center;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 12px 12px 0 0;
+  padding: 18px 14px;
+}
+
+.comp-prod-visual {
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+}
+
+.comp-prod-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.comp-prod-price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 10px;
+}
+
+.btn-remove-comp {
+  background: transparent;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #f87171;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-comp:hover {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: #f87171;
+}
+
+.compare-matrix-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Difference Highlighting */
+.compare-drawer.show-diff tr.is-diff td {
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.compare-drawer.show-diff tr.is-diff td.compare-spec-col {
+  background: #191b1f;
+  color: #fbbf24;
+  position: relative;
+}
+
+.compare-drawer.show-diff tr.is-diff td.compare-spec-col::before {
+  content: '⚡ ';
+}
+
+.compare-drawer-footer {
+  padding: 18px 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.9);
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.btn-compare-add-all {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 10px 24px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-compare-add-all:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-compare-close-bottom {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btn-compare-close-bottom:hover {
+  background: #334155;
+}
+
+@media (max-width: 600px) {
+  .compare-bar {
+    width: calc(100% - 32px);
+    border-radius: 14px;
+    padding: 10px 14px;
+  }
+  .compare-bar-content {
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .compare-drawer-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .compare-header-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+/* ===== END Issue #283 ===== */
