@@ -268,6 +268,117 @@
   </section>
   <!-- ===== END issue #183 ===== -->
 
+  <!-- ===== BEGIN issue #277: 2FA TOTP Authenticator Simulator ===== -->
+  <section class="auth2fa-section" id="auth2faSimulator" aria-labelledby="auth2faTitle">
+    <div class="ps-tag">// CRYPTOGRAPHIC IDENTITY ACCESS</div>
+    <h2 id="auth2faTitle">Two-Factor Authentication (2FA) Simulator</h2>
+    <p class="ps-note" role="note">Simulated Time-Based One-Time Password (TOTP, RFC 6238) authenticator engine. Generates rotating 6-digit cryptographic verification tokens synchronized with a 30-second epoch cycle.</p>
+
+    <div class="auth2fa-grid">
+      <!-- Left Column: Setup & Secret QR -->
+      <div class="auth2fa-setup-card">
+        <h3 class="auth2fa-card-title"><span class="terminal-prompt">$</span> Authenticator Enrollment</h3>
+        <p class="auth2fa-card-sub">Simulate registering a mobile authenticator app (Google Authenticator, Sentinel Guard) via security QR payload.</p>
+        
+        <div class="qr-container">
+          <!-- Procedural SVG QR Code mockup with realistic finder patterns -->
+          <svg class="qr-code-svg" viewBox="0 0 160 160" width="160" height="160" aria-label="Simulated 2FA Setup QR Code">
+            <rect width="160" height="160" fill="#030712" rx="8" />
+            <!-- Finder pattern top-left -->
+            <rect x="15" y="15" width="40" height="40" fill="none" stroke="#10b981" stroke-width="4" rx="3" />
+            <rect x="25" y="25" width="20" height="20" fill="#10b981" rx="2" />
+            <!-- Finder pattern top-right -->
+            <rect x="105" y="15" width="40" height="40" fill="none" stroke="#10b981" stroke-width="4" rx="3" />
+            <rect x="115" y="25" width="20" height="20" fill="#10b981" rx="2" />
+            <!-- Finder pattern bottom-left -->
+            <rect x="15" y="105" width="40" height="40" fill="none" stroke="#10b981" stroke-width="4" rx="3" />
+            <rect x="25" y="115" width="20" height="20" fill="#10b981" rx="2" />
+            <!-- Simulated Matrix Pixels -->
+            <g fill="#10b981" opacity="0.85">
+              <rect x="65" y="20" width="8" height="8" /><rect x="80" y="20" width="8" height="8" /><rect x="65" y="35" width="8" height="8" />
+              <rect x="75" y="50" width="8" height="8" /><rect x="90" y="50" width="8" height="8" /><rect x="20" y="65" width="8" height="8" />
+              <rect x="35" y="65" width="8" height="8" /><rect x="50" y="65" width="8" height="8" /><rect x="65" y="65" width="8" height="8" />
+              <rect x="80" y="65" width="8" height="8" /><rect x="95" y="65" width="8" height="8" /><rect x="110" y="65" width="8" height="8" />
+              <rect x="125" y="65" width="8" height="8" /><rect x="20" y="80" width="8" height="8" /><rect x="50" y="80" width="8" height="8" />
+              <rect x="70" y="80" width="8" height="8" /><rect x="110" y="80" width="8" height="8" /><rect x="135" y="80" width="8" height="8" />
+              <rect x="35" y="95" width="8" height="8" /><rect x="65" y="95" width="8" height="8" /><rect x="85" y="95" width="8" height="8" />
+              <rect x="120" y="95" width="8" height="8" /><rect x="65" y="110" width="8" height="8" /><rect x="80" y="110" width="8" height="8" />
+              <rect x="100" y="110" width="8" height="8" /><rect x="130" y="110" width="8" height="8" /><rect x="65" y="125" width="8" height="8" />
+              <rect x="95" y="125" width="8" height="8" /><rect x="115" y="125" width="8" height="8" /><rect x="135" y="125" width="8" height="8" />
+            </g>
+          </svg>
+        </div>
+
+        <div class="secret-box">
+          <div class="secret-header">
+            <span class="secret-label">Base32 Secret Seed</span>
+            <button type="button" class="secret-copy-btn" id="authCopySecretBtn">Copy Seed</button>
+          </div>
+          <code class="secret-code" id="authSecretKey">JBSWY3DPEHPK3PXP</code>
+          <div class="secret-meta">
+            <span>Account: <strong class="hl-text">admin@sentinel.sec</strong></span>
+            <span>Period: <strong class="hl-text">30s</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live TOTP Generator & Verification -->
+      <div class="auth2fa-device-card">
+        <div class="device-header">
+          <div class="device-badge">SENTINEL AUTHENTICATOR v2.4</div>
+          <span class="device-time" id="authClockUtc">00:00:00 UTC</span>
+        </div>
+
+        <div class="totp-display-wrap">
+          <div class="totp-timer-ring">
+            <svg class="ring-svg" viewBox="0 0 100 100" width="100" height="100" aria-hidden="true">
+              <circle class="ring-track" cx="50" cy="50" r="42" />
+              <circle class="ring-progress" id="authRingProgress" cx="50" cy="50" r="42" />
+            </svg>
+            <div class="ring-countdown" id="authRingSeconds">30s</div>
+          </div>
+
+          <div class="totp-code-box">
+            <div class="totp-label">SECURITY VERIFICATION CODE</div>
+            <div class="totp-digits" id="authTotpCode" aria-live="polite">--- ---</div>
+            <div class="totp-actions">
+              <button type="button" class="totp-quick-copy" id="authCopyCodeBtn">Copy 6-Digit Code</button>
+              <button type="button" class="totp-quick-fill" id="authQuickFillBtn">Auto-Fill Verification</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="totp-verify-section">
+          <form id="authVerifyForm" class="auth-verify-form" novalidate>
+            <label for="authInputCode" class="verify-label">Test Token Verification</label>
+            <div class="verify-input-group">
+              <input type="text" id="authInputCode" class="audit-input verify-input" placeholder="000 000" maxlength="7" autocomplete="one-time-code" inputmode="numeric" />
+              <button type="submit" class="audit-toggle verify-submit-btn" id="authVerifyBtn">Verify Token</button>
+            </div>
+            <div class="verify-feedback" id="authVerifyFeedback" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <div class="totp-audit-log">
+          <div class="audit-log-title">Cryptographic Token State</div>
+          <div class="audit-log-row">
+            <span>Epoch Time-Step (T0):</span>
+            <span id="authTimeStep" class="mono-cyan">1730937600</span>
+          </div>
+          <div class="audit-log-row">
+            <span>Algorithm Hash:</span>
+            <span class="mono-cyan">HMAC-SHA1 (RFC 6238)</span>
+          </div>
+          <div class="audit-log-row">
+            <span>Drift Tolerance:</span>
+            <span class="mono-cyan">±1 Step (±30 seconds)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END issue #277 ===== -->
+
   <script src="script.js"></script>
 </body>
 </html>
