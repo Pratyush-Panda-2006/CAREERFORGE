@@ -265,6 +265,64 @@
       <p class="project-empty" hidden>No projects in this category yet. Choose All to see every project.</p>
     </section>
 
+    <!-- Technical Articles Section (Issue #279) -->
+    <section class="articles-section" id="articles" aria-labelledby="articles-title">
+      <div class="articles-header">
+        <h2 id="articles-title">Technical Articles &amp; Deep-Dives</h2>
+        <p class="articles-sub">Engineering postmortems, kernel internals, and distributed architecture notes.</p>
+      </div>
+
+      <div class="articles-grid">
+        <!-- Article Card 1 -->
+        <article class="article-card" data-article-id="rust-zero-copy">
+          <div class="article-card-header">
+            <span class="article-tag">SYSTEMS ARCHITECTURE</span>
+            <span class="article-readtime">5 min read</span>
+          </div>
+          <h3 class="article-card-title">Zero-Copy Deserialization with Rust &amp; FlatBuffers</h3>
+          <p class="article-card-desc">How we eliminated 85% of memory allocations and GC pauses in high-throughput network gateways using mmap and buffer views.</p>
+          <div class="article-card-footer">
+            <span class="article-date">Oct 14, 2026</span>
+            <button type="button" class="btn-read-article" data-open-article="rust-zero-copy">
+              <span>Read Deep-Dive</span> &rarr;
+            </button>
+          </div>
+        </article>
+
+        <!-- Article Card 2 -->
+        <article class="article-card" data-article-id="ebpf-tracing">
+          <div class="article-card-header">
+            <span class="article-tag">LINUX KERNEL</span>
+            <span class="article-readtime">7 min read</span>
+          </div>
+          <h3 class="article-card-title">Navigating Linux eBPF Verifier Constraints at Scale</h3>
+          <p class="article-card-desc">Demystifying bounded loop unrolling, register spill limits, and BPF-to-BPF function calls without crashing the verifier.</p>
+          <div class="article-card-footer">
+            <span class="article-date">Nov 02, 2026</span>
+            <button type="button" class="btn-read-article" data-open-article="ebpf-tracing">
+              <span>Read Deep-Dive</span> &rarr;
+            </button>
+          </div>
+        </article>
+
+        <!-- Article Card 3 -->
+        <article class="article-card" data-article-id="raft-consensus">
+          <div class="article-card-header">
+            <span class="article-tag">DISTRIBUTED SYSTEMS</span>
+            <span class="article-readtime">6 min read</span>
+          </div>
+          <h3 class="article-card-title">Distributed Consensus: Surviving Split-Brain in Raft</h3>
+          <p class="article-card-desc">Analyzing network partition edge cases, leader lease expiration, and log compaction strategies in geo-distributed clusters.</p>
+          <div class="article-card-footer">
+            <span class="article-date">Nov 05, 2026</span>
+            <button type="button" class="btn-read-article" data-open-article="raft-consensus">
+              <span>Read Deep-Dive</span> &rarr;
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <section class="shell" aria-labelledby="shell-title">
       <h2 id="shell-title">Interactive Terminal</h2>
       <p class="shell-hint">Poke around my virtual file system. Type <code>help</code> to see the commands.</p>
@@ -438,6 +496,59 @@
           💡 <em>Tip: Single-letter shortcuts are automatically suppressed while actively typing inside the terminal prompt.</em>
         </div>
         <button type="button" class="shortcuts-dismiss-btn" id="shortcutsDismiss">Close Cheat-Sheet (Esc)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Article Reader Modal (Issue #279) -->
+  <div class="article-modal-overlay" id="articleModalOverlay" hidden></div>
+  <div class="article-modal" id="articleModal" role="dialog" aria-modal="true" aria-labelledby="modalArticleTitle" hidden>
+    <!-- Sticky Header with Reading Progress Bar -->
+    <div class="article-modal-header terminal-header">
+      <span class="dot red" id="articleModalCloseDot" style="cursor: pointer;" title="Close article"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span class="terminal-title" id="articleModalTerminalTitle">dev@kernel-box: /blog/zero-copy.md</span>
+
+      <div class="article-header-meta">
+        <span class="article-progress-pill" id="articleProgressPill">0% READ</span>
+      </div>
+
+      <button type="button" class="article-modal-close" id="articleModalCloseBtn" aria-label="Close article reader">&times;</button>
+    </div>
+
+    <!-- Reading Progress Bar -->
+    <div class="article-progress-track" aria-hidden="true">
+      <div class="article-progress-bar" id="articleProgressBar" style="width: 0%"></div>
+    </div>
+
+    <!-- Scrollable Article Reader Body -->
+    <div class="article-modal-body" id="articleModalBody" tabindex="0">
+      <div class="article-meta-banner">
+        <div class="article-meta-badges">
+          <span class="article-category-badge" id="modalArticleCategory">SYSTEMS ARCHITECTURE</span>
+          <span class="article-read-badge" id="modalArticleReadTime">5 min read</span>
+          <span class="article-date-badge" id="modalArticleDate">Oct 14, 2026</span>
+        </div>
+        <h1 class="modal-article-title" id="modalArticleTitle">Zero-Copy Deserialization with Rust &amp; FlatBuffers</h1>
+        <p class="modal-article-lead" id="modalArticleLead">A comprehensive architectural guide to eliminating garbage collection churn and memory duplication in high-throughput network pipelines.</p>
+      </div>
+
+      <div class="article-dynamic-content" id="articleDynamicContent">
+        <!-- Injected via JavaScript based on article id -->
+      </div>
+
+      <div class="article-modal-footer">
+        <div class="author-card">
+          <div class="author-avatar">AV</div>
+          <div class="author-info">
+            <strong>Alex Vance</strong>
+            <small>Senior Distributed Systems &amp; Rust Kernel Engineer</small>
+          </div>
+        </div>
+        <button type="button" class="btn-back-top" id="articleBackToTopBtn">
+          &uarr; Back to Top
+        </button>
       </div>
     </div>
   </div>
