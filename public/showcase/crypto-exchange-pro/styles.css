@@ -209,6 +209,25 @@ body {
 .ob-bid { background: linear-gradient(to left, rgba(16,185,129,0.18) var(--depth), transparent var(--depth)); }
 .ob-mid { margin: 8px 0; padding: 8px 4px; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.05rem; font-weight: 800; color: #fff; }
 
+/* Cumulative liquidity from the same simulated levels as the order book. */
+.depth-panel { margin-top: 16px; padding: 16px; min-width: 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; background: rgba(255,255,255,0.03); }
+.depth-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.depth-heading h3 { font-size: 0.95rem; }
+.depth-legend { display: flex; gap: 16px; font-size: 0.75rem; }
+.depth-buy { color: #34d399; }
+.depth-sell { color: #f87171; }
+.depth-buy::before, .depth-sell::before { content: ''; display: inline-block; width: 16px; margin-right: 6px; border-top: 3px solid currentColor; vertical-align: middle; }
+.depth-sell::before { border-top-style: dashed; }
+.depth-help { color: #94a3b8; font-family: Inter, sans-serif; font-size: 0.8rem; line-height: 1.5; margin: 10px 0; }
+#depth-chart { display: block; width: 100%; height: 260px; touch-action: pan-y; cursor: crosshair; }
+#depth-chart:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 4px; }
+.depth-curve { fill: none; stroke-width: 2; }
+.depth-bid { stroke: var(--up); }
+.depth-ask { stroke: var(--down); stroke-dasharray: 5 3; }
+.depth-marker { fill: #f3f4f6; stroke-width: 2; }
+.depth-tooltip { display: block; min-height: 2.5rem; padding: 10px 12px; border-radius: 6px; background: #0f172a; color: #e2e8f0; font-size: 0.75rem; line-height: 1.5; overflow-wrap: anywhere; }
+.depth-tooltip[hidden] { display: none; }
+
 /* ===============================================================
    Quick Swap Order Execution Panel (Issue #53)
    =============================================================== */
