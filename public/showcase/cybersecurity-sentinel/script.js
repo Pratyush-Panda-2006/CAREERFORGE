@@ -1250,3 +1250,173 @@ function renderAnalysis(pw) {
   });
 })();
 /* ===== END issue #183 ===== */
+
+/* ===== BEGIN issue #277: 2FA TOTP Authenticator Simulator ===== */
+(function () {
+  'use strict';
+
+  var SECRET_KEY = 'JBSWY3DPEHPK3PXP';
+  var PERIOD_SECONDS = 30;
+  var RING_CIRCUMFERENCE = 263.89; // 2 * Math.PI * 42
+
+  function generateTotpCode(secret, step) {
+    var hash = 0x811c9dc5;
+    var str = secret + ':' + step;
+    for (var i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193);
+    }
+    var code = (hash >>> 0) % 1000000;
+    return String(code).padStart(6, '0');
+  }
+
+  function init2faSimulator() {
+    var section = document.getElementById('auth2faSimulator');
+    if (!section) return;
+
+    var clockEl = document.getElementById('authClockUtc');
+    var ringEl = document.getElementById('authRingProgress');
+    var secondsEl = document.getElementById('authRingSeconds');
+    var codeEl = document.getElementById('authTotpCode');
+    var timeStepEl = document.getElementById('authTimeStep');
+
+    var copySecretBtn = document.getElementById('authCopySecretBtn');
+    var copyCodeBtn = document.getElementById('authCopyCodeBtn');
+    var quickFillBtn = document.getElementById('authQuickFillBtn');
+
+    var verifyForm = document.getElementById('authVerifyForm');
+    var inputCode = document.getElementById('authInputCode');
+    var feedbackEl = document.getElementById('authVerifyFeedback');
+
+    var lastRenderedStep = -1;
+
+    function getFormattedCode(rawCode) {
+      return rawCode.slice(0, 3) + ' ' + rawCode.slice(3);
+    }
+
+    function update() {
+      var now = Date.now();
+      var nowSec = Math.floor(now / 1000);
+      var currentStep = Math.floor(nowSec / PERIOD_SECONDS);
+      var remaining = PERIOD_SECONDS - (nowSec % PERIOD_SECONDS);
+
+      // UTC Clock
+      if (clockEl) {
+        var d = new Date(now);
+        clockEl.textContent = d.toISOString().substring(11, 19) + ' UTC';
+      }
+
+      // Step & Code
+      if (currentStep !== lastRenderedStep) {
+        lastRenderedStep = currentStep;
+        var code = generateTotpCode(SECRET_KEY, currentStep);
+        if (codeEl) {
+          codeEl.textContent = getFormattedCode(code);
+        }
+        if (timeStepEl) {
+          timeStepEl.textContent = currentStep;
+        }
+      }
+
+      // Countdown Ring
+      if (secondsEl) {
+        secondsEl.textContent = remaining + 's';
+      }
+
+      if (ringEl) {
+        var progressFraction = remaining / PERIOD_SECONDS;
+        var offset = RING_CIRCUMFERENCE * (1 - progressFraction);
+        ringEl.style.strokeDashoffset = offset;
+
+        if (remaining <= 5) {
+          ringEl.classList.add('expiring');
+        } else {
+          ringEl.classList.remove('expiring');
+        }
+      }
+    }
+
+    // Copy secret
+    if (copySecretBtn) {
+      copySecretBtn.addEventListener('click', function () {
+        var secretText = document.getElementById('authSecretKey')?.textContent || SECRET_KEY;
+        navigator.clipboard?.writeText(secretText).catch(function () {});
+        copySecretBtn.textContent = 'Copied!';
+        setTimeout(function () {
+          copySecretBtn.textContent = 'Copy Seed';
+        }, 2000);
+      });
+    }
+
+    // Copy current code
+    if (copyCodeBtn) {
+      copyCodeBtn.addEventListener('click', function () {
+        var currentStep = Math.floor(Math.floor(Date.now() / 1000) / PERIOD_SECONDS);
+        var currentCode = generateTotpCode(SECRET_KEY, currentStep);
+        navigator.clipboard?.writeText(currentCode).catch(function () {});
+        copyCodeBtn.textContent = 'Copied!';
+        setTimeout(function () {
+          copyCodeBtn.textContent = 'Copy 6-Digit Code';
+        }, 2000);
+      });
+    }
+
+    // Auto-fill into verification input
+    if (quickFillBtn && inputCode) {
+      quickFillBtn.addEventListener('click', function () {
+        var currentStep = Math.floor(Math.floor(Date.now() / 1000) / PERIOD_SECONDS);
+        var currentCode = generateTotpCode(SECRET_KEY, currentStep);
+        inputCode.value = getFormattedCode(currentCode);
+        inputCode.focus();
+      });
+    }
+
+    // Verification Form
+    if (verifyForm && inputCode && feedbackEl) {
+      inputCode.addEventListener('input', function () {
+        // Auto format 3 digits space 3 digits
+        var cleaned = inputCode.value.replace(/\D/g, '').slice(0, 6);
+        if (cleaned.length > 3) {
+          inputCode.value = cleaned.slice(0, 3) + ' ' + cleaned.slice(3);
+        } else {
+          inputCode.value = cleaned;
+        }
+        feedbackEl.className = 'verify-feedback';
+        feedbackEl.textContent = '';
+      });
+
+      verifyForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var rawInput = inputCode.value.replace(/\D/g, '');
+        if (rawInput.length !== 6) {
+          feedbackEl.className = 'verify-feedback active error';
+          feedbackEl.textContent = '❌ Please enter a complete 6-digit TOTP security code.';
+          inputCode.focus();
+          return;
+        }
+
+        var currentStep = Math.floor(Math.floor(Date.now() / 1000) / PERIOD_SECONDS);
+        var currentCode = generateTotpCode(SECRET_KEY, currentStep);
+        var prevCode = generateTotpCode(SECRET_KEY, currentStep - 1); // 30s grace window
+
+        if (rawInput === currentCode) {
+          feedbackEl.className = 'verify-feedback active success';
+          feedbackEl.textContent = '✓ TOKEN VERIFIED: Authentication succeeded for sentinel-ops. Access session granted.';
+        } else if (rawInput === prevCode) {
+          feedbackEl.className = 'verify-feedback active success';
+          feedbackEl.textContent = '✓ TOKEN ACCEPTED (Drift Window ±1): Authentication verified within allowable clock skew.';
+        } else {
+          feedbackEl.className = 'verify-feedback active error';
+          feedbackEl.textContent = '❌ INVALID OR EXPIRED CODE: Token mismatch. Check authenticator clock sync and try again.';
+        }
+      });
+    }
+
+    // Kick off interval
+    update();
+    setInterval(update, 500);
+  }
+
+  document.addEventListener('DOMContentLoaded', init2faSimulator);
+})();
+/* ===== END issue #277 ===== */
