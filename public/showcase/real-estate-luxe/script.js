@@ -1,3 +1,47 @@
+// Manual gallery: no autoplay, so visitors control reading and navigation pace.
+(() => {
+  const gallery = document.querySelector('.property-gallery');
+  if (!gallery) return;
+  const photos = [
+    { file: 'pool-residence.jpg', title: 'Poolside residence', alt: 'Modern residence beside a swimming pool with lounge chairs', credit: 'Salman Saqib', url: 'https://unsplash.com/photos/a-modern-house-with-a-pool-and-lounge-chairs-WaC-JFfF21M' },
+    { file: 'garden-residence.jpg', title: 'Garden residence', alt: 'Modern stone residence with large windows overlooking a lush garden', credit: 'Aalo Lens', url: 'https://unsplash.com/photos/modern-house-with-large-windows-and-lush-garden-eWOgoFHlE8g' },
+    { file: 'white-residence.jpg', title: 'White residence', alt: 'White residence with glass garage doors and landscaped plants', credit: 'GoodLifeConstruction', url: 'https://unsplash.com/photos/modern-white-house-with-glass-garage-doors-and-plants-MUiv6OcHoto' }
+  ];
+  const image = gallery.querySelector('#gallery-image');
+  const error = gallery.querySelector('#gallery-error');
+  const status = gallery.querySelector('#gallery-status');
+  const credit = gallery.querySelector('#gallery-credit');
+  const dots = Array.from(gallery.querySelectorAll('.gallery-dots button'));
+  let index = 0;
+  image.addEventListener('error', () => { image.hidden = true; error.hidden = false; });
+  image.addEventListener('load', () => { image.hidden = false; error.hidden = true; });
+  function showPhoto(next) {
+    index = (next + photos.length) % photos.length;
+    const photo = photos[index];
+    error.hidden = true;
+    image.hidden = false;
+    image.alt = photo.alt;
+    image.src = `images/${photo.file}`;
+    status.textContent = `Photo ${index + 1} of ${photos.length} — ${photo.title}`;
+    credit.textContent = `${photo.credit} / Unsplash`;
+    credit.href = photo.url;
+    dots.forEach((dot, position) => dot.setAttribute('aria-pressed', String(position === index)));
+  }
+  gallery.querySelector('.gallery-prev').addEventListener('click', () => showPhoto(index - 1));
+  gallery.querySelector('.gallery-next').addEventListener('click', () => showPhoto(index + 1));
+  dots.forEach((dot, position) => dot.addEventListener('click', () => showPhoto(position)));
+  gallery.addEventListener('keydown', (event) => {
+    // Do not intercept navigation keys on the attribution link.
+    if (!event.target.closest('button')) return;
+    const next = { ArrowLeft: index - 1, ArrowRight: index + 1, Home: 0, End: photos.length - 1 }[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    showPhoto(next);
+  });
+  // Handle an image that failed before the script attached its listeners.
+  if (image.complete && image.naturalWidth === 0) { image.hidden = true; error.hidden = false; }
+})();
+
 // Vanguard Real Estate Mortgage Calculator & Amortization Engine
 const CIRCUMFERENCE = 2 * Math.PI * 65; // ~408.407 for r=65
 

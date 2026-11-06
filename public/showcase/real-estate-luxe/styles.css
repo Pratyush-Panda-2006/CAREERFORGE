@@ -41,6 +41,31 @@ body {
   font-weight: 700;
 }
 
+.property-gallery { max-width: 900px; margin: 40px auto 0; text-align: left; }
+.gallery-stage { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: #18181b; }
+.gallery-stage img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gallery-stage [hidden] { display: none; }
+.gallery-stage #gallery-error { position: absolute; inset: 0; align-content: center; text-align: center; padding: 64px; margin: 0; }
+.gallery-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; background: rgba(9,9,11,.72); backdrop-filter: blur(10px); color: white; font-size: 24px; cursor: pointer; }
+.gallery-prev { left: 12px; }
+.gallery-next { right: 12px; }
+.gallery-arrow:hover { background: #09090b; border-color: var(--gold); }
+.property-gallery button:focus-visible, .property-gallery a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.property-gallery figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding-top: 12px; }
+#gallery-status { font-size: .9rem; }
+.gallery-dots { display: flex; }
+.gallery-dots button { width: 44px; height: 44px; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; border-radius: 50%; }
+.gallery-dots button::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+.gallery-dots button[aria-pressed="true"]::after { background: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow); }
+.property-gallery small { flex-basis: 100%; color: var(--text-muted); font-size: .75rem; }
+.property-gallery a { color: var(--gold); }
+@media (max-width: 600px) {
+  .gallery-stage { aspect-ratio: 4 / 3; }
+  .property-gallery figcaption { justify-content: center; text-align: center; }
+  #gallery-status { flex-basis: 100%; }
+  .gallery-stage #gallery-error { padding: 48px; font-size: .8rem; }
+}
+
 .hero h1 {
   font-family: 'Cinzel', serif;
   font-size: clamp(2.2rem, 5vw, 3.2rem);
