@@ -195,13 +195,16 @@ body {
 }
 
 .orderbook h3 { font-size: 0.85rem; margin-bottom: 8px; color: #fff; }
-.ob-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+.ob-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+.ob-price-col { width: 38%; }
+.ob-size-col, .ob-total-col { width: 31%; }
+.ob-table th, .ob-table td { white-space: nowrap; }
 .ob-table th { color: #94a3b8; font-weight: 500; text-align: right; padding: 2px 4px 6px; }
 .ob-table th:first-child { text-align: left; }
 .ob-table td { text-align: right; padding: 3px 4px; }
 .ob-table td.ob-price { text-align: left; font-weight: 700; }
-.ob-ask td.ob-price { color: var(--down); }
-.ob-bid td.ob-price { color: var(--up); }
+.ob-ask td.ob-price { color: #f87171; }
+.ob-bid td.ob-price { color: #34d399; }
 .ob-ask { background: linear-gradient(to left, rgba(239,68,68,0.18) var(--depth), transparent var(--depth)); }
 .ob-bid { background: linear-gradient(to left, rgba(16,185,129,0.18) var(--depth), transparent var(--depth)); }
 .ob-mid { margin: 8px 0; padding: 8px 4px; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.05rem; font-weight: 800; color: #fff; }
@@ -742,4 +745,6 @@ body {
 @media (max-width: 480px) {
   .market { padding: 0 12px; }
   .toggle { padding: 8px 9px; }
+  .ob-table { font-size: 0.7rem; }
+  .ob-table th, .ob-table td { padding-left: 2px; padding-right: 2px; }
 }
