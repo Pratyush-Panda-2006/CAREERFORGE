@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize
   calculateReadTime();
   updateReadingProgress();
+  initCopyCodeButtons();
 
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', () => {
@@ -149,13 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- Global Snippet Copy Helper ---
-function copySnippet(text) {
+window.copySnippet = function copySnippet(text) {
   navigator.clipboard.writeText(text).then(() => {
     alert(`Copied to clipboard:\n${text}`);
   }).catch(() => {
     prompt('Copy snippet:', text);
   });
-}
+};
 
 // Filter navigation topics without changing the article or its anchors.
 (() => {
@@ -339,3 +340,102 @@ function copySnippet(text) {
   render();
   setInterval(tick, 1000);
 })();
+
+// =========================================================================
+// Issue #22: Copy Code Snippet Button with Toast & Checkmark Feedback
+// =========================================================================
+function initCopyCodeButtons() {
+  const preBlocks = document.querySelectorAll('pre');
+  if (!preBlocks || preBlocks.length === 0) return;
+
+  // Retrieve or create toast feedback element
+  let toast = document.querySelector('.copy-link-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'copy-link-toast';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    document.body.appendChild(toast);
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('visible');
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => {
+      toast.classList.remove('visible');
+    }, 2000);
+  }
+
+  preBlocks.forEach((pre) => {
+    // Avoid double injection if already present
+    if (pre.querySelector('.copy-code-btn')) return;
+
+    pre.classList.add('has-copy-btn');
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-code-btn';
+    btn.setAttribute('aria-label', 'Copy code snippet to clipboard');
+    btn.setAttribute('title', 'Copy code snippet');
+
+    const icon = document.createElement('span');
+    icon.className = 'copy-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '📋';
+
+    const label = document.createElement('span');
+    label.className = 'copy-label';
+    label.textContent = 'Copy';
+
+    btn.appendChild(icon);
+    btn.appendChild(label);
+
+    let resetTimer = null;
+
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const codeEl = pre.querySelector('code');
+      const textToCopy = (codeEl ? codeEl.textContent : pre.textContent) || '';
+      const cleanedText = textToCopy.replace(/\r\n/g, '\n').trimEnd();
+
+      try {
+        if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(cleanedText);
+        } else {
+          // Fallback selection copy
+          const textarea = document.createElement('textarea');
+          textarea.value = cleanedText;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+        }
+
+        btn.classList.add('copied');
+        icon.textContent = '✓';
+        label.textContent = 'Copied!';
+        showToast('Code snippet copied to clipboard');
+
+        if (resetTimer) window.clearTimeout(resetTimer);
+        resetTimer = window.setTimeout(() => {
+          btn.classList.remove('copied');
+          icon.textContent = '📋';
+          label.textContent = 'Copy';
+        }, 2000);
+      } catch {
+        showToast('Failed to copy to clipboard');
+      }
+    });
+
+    pre.appendChild(btn);
+  });
+}
+
+window.initCopyCodeButtons = initCopyCodeButtons;
