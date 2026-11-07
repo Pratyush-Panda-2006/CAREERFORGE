@@ -353,6 +353,286 @@
     </div>
   </section>
   <!-- ===== END issue #76 ===== -->
+
+  <!-- ===== BEGIN Issue #351: Private Aviation Carbon Offset Certificate Calculator ===== -->
+  <section class="aviation-offset-section" id="aviation-offset-section" aria-labelledby="offset-title">
+    <div class="offset-container">
+      <div class="offset-header">
+        <span class="offset-kicker">✦ ECO-LUXURY &amp; CLIMATE INTEGRITY ✦</span>
+        <h2 id="offset-title">Private Aviation Carbon Offset &amp; Gold Standard Registry</h2>
+        <p class="offset-sub">
+          Quantify flight fuel burn emissions across bespoke private jet classes and flight routes, retire certified Gold Standard carbon credits, and issue verified high-altitude climate certificates.
+        </p>
+      </div>
+
+      <div class="offset-grid">
+        <!-- Configuration Card -->
+        <div class="offset-card offset-config-card">
+          <div class="offset-card-head">
+            <h3>Flight &amp; Fleet Parameters</h3>
+            <span class="offset-live-badge">REAL-TIME TELEMETRY</span>
+          </div>
+
+          <form id="offsetForm" class="offset-form" onsubmit="return false;">
+            <!-- Aircraft Class Grid -->
+            <div class="form-group">
+              <label class="form-label">Aircraft Class &amp; Model</label>
+              <div class="aircraft-grid" role="radiogroup" aria-label="Select Aircraft Class">
+                <button type="button" class="aircraft-btn active" data-class="light" data-burn="185" data-co2-per-hr="1.76" data-name="Phenom 300E / Light Jet">
+                  <span class="air-icon">🛩️</span>
+                  <strong class="air-name">Light Jet</strong>
+                  <span class="air-model">Phenom 300E</span>
+                  <span class="air-burn">185 gal/hr</span>
+                </button>
+                <button type="button" class="aircraft-btn" data-class="midsize" data-burn="265" data-co2-per-hr="2.52" data-name="Challenger 3500 / Midsize">
+                  <span class="air-icon">✈️</span>
+                  <strong class="air-name">Super Midsize</strong>
+                  <span class="air-model">Challenger 3500</span>
+                  <span class="air-burn">265 gal/hr</span>
+                </button>
+                <button type="button" class="aircraft-btn" data-class="heavy" data-burn="460" data-co2-per-hr="4.38" data-name="Global 7500 / Heavy Jet">
+                  <span class="air-icon">🚀</span>
+                  <strong class="air-name">Heavy Global</strong>
+                  <span class="air-model">Global 7500</span>
+                  <span class="air-burn">460 gal/hr</span>
+                </button>
+                <button type="button" class="aircraft-btn" data-class="vip" data-burn="760" data-co2-per-hr="7.24" data-name="BBJ 737 / VIP Airliner">
+                  <span class="air-icon">👑</span>
+                  <strong class="air-name">VIP Airliner</strong>
+                  <span class="air-model">Boeing BBJ 737</span>
+                  <span class="air-burn">760 gal/hr</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Route Selection -->
+            <div class="form-group">
+              <label for="routeSelect" class="form-label">Curated Route or Custom Flight</label>
+              <select id="routeSelect" class="offset-select">
+                <option value="custom">Custom Flight Time &amp; Distance</option>
+                <option value="lon-nice" selected data-hours="2.0" data-dist="680" data-from="London Luton (EGGW)" data-to="Nice Côte d'Azur (LFMN)">
+                  London (EGGW) → Nice (LFMN) · 2.0 hrs · 680 NM
+                </option>
+                <option value="teb-opf" data-hours="2.8" data-dist="950" data-from="Teterboro NYC (KTEB)" data-to="Miami Opa-locka (KOPF)">
+                  New York (KTEB) → Miami (KOPF) · 2.8 hrs · 950 NM
+                </option>
+                <option value="vny-ase" data-hours="2.0" data-dist="740" data-from="Van Nuys LA (KVNY)" data-to="Aspen Pitkin (KASE)">
+                  Los Angeles (KVNY) → Aspen (KASE) · 2.0 hrs · 740 NM
+                </option>
+                <option value="lfpb-omdw" data-hours="6.5" data-dist="2850" data-from="Paris Le Bourget (LFPB)" data-to="Dubai Al Maktoum (OMDW)">
+                  Paris (LFPB) → Dubai (OMDW) · 6.5 hrs · 2,850 NM
+                </option>
+                <option value="lsgg-tffj" data-hours="9.0" data-dist="4150" data-from="Geneva Cointrin (LSGG)" data-to="St. Barts (TFFJ)">
+                  Geneva (LSGG) → St. Barts (TFFJ) · 9.0 hrs · 4,150 NM
+                </option>
+              </select>
+            </div>
+
+            <!-- Flight Hours Slider -->
+            <div class="form-group">
+              <div class="offset-slider-row">
+                <label for="flightHoursRange" class="form-label">Flight Duration</label>
+                <span class="offset-val-pill" id="flightHoursVal">2.0 hrs</span>
+              </div>
+              <input type="range" class="offset-range" id="flightHoursRange" min="0.5" max="14.0" step="0.1" value="2.0">
+            </div>
+
+            <!-- Passenger Count & Radiative Forcing Row -->
+            <div class="offset-row-2col">
+              <div class="form-group">
+                <div class="offset-slider-row">
+                  <label for="passengerRange" class="form-label">Passengers</label>
+                  <span class="offset-val-pill" id="passengerVal">4 Guests</span>
+                </div>
+                <input type="range" class="offset-range" id="passengerRange" min="1" max="16" step="1" value="4">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">High-Altitude Forcing (RFI)</label>
+                <div class="rfi-toggle-wrap">
+                  <button type="button" class="rfi-btn active" id="rfiHighBtn" data-rfi="1.9" title="IPCC recommended 1.9x factor for high-altitude non-CO2 cirrus warming">
+                    1.9× Full Climate
+                  </button>
+                  <button type="button" class="rfi-btn" id="rfiStdBtn" data-rfi="1.0" title="Standard 1.0x baseline direct CO2 emissions only">
+                    1.0× Direct CO2
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gold Standard Project Portfolio -->
+            <div class="form-group">
+              <label class="form-label">Gold Standard Certified Offset Project</label>
+              <div class="project-cards-grid">
+                <div class="project-card active" data-project="rimba" data-price="48">
+                  <div class="proj-badge">GS VERIFIED · FORESTRY</div>
+                  <strong class="proj-title">Rimba Raya Peatland Reserve</strong>
+                  <span class="proj-loc">Borneo, Indonesia · CCB Triple Gold</span>
+                  <span class="proj-price">$48.00 / MT CO2e</span>
+                </div>
+                <div class="project-card" data-project="alto" data-price="42">
+                  <div class="proj-badge">GS VERIFIED · BIODIVERSITY</div>
+                  <strong class="proj-title">Alto Huayabamba Amazon</strong>
+                  <span class="proj-loc">San Martín, Peru · Cloud Canopy Protection</span>
+                  <span class="proj-price">$42.00 / MT CO2e</span>
+                </div>
+                <div class="project-card" data-project="patagonia" data-price="38">
+                  <div class="proj-badge">GS VERIFIED · CLEAN ENERGY</div>
+                  <strong class="proj-title">Patagonia Wind Corridor</strong>
+                  <span class="proj-loc">Southern Andes · Zero-Emission Grid</span>
+                  <span class="proj-price">$38.00 / MT CO2e</span>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Telemetry & Impact Summary Card -->
+        <div class="offset-card offset-results-card">
+          <div class="offset-card-head">
+            <h3>Environmental Ledger</h3>
+            <span class="verified-seal-pill">GOLD STANDARD REGISTERED</span>
+          </div>
+
+          <!-- Highlight Metric Dial -->
+          <div class="carbon-metric-dial">
+            <div class="dial-inner">
+              <span class="dial-kicker">TOTAL CARBON FOOTPRINT</span>
+              <div class="dial-num-row">
+                <span class="dial-num" id="totalEmissionsVal">6.69</span>
+                <span class="dial-unit">MT CO₂e</span>
+              </div>
+              <span class="dial-sub" id="emissionsPerPax">1.67 MT per passenger</span>
+            </div>
+          </div>
+
+          <!-- Environmental Breakdown Rows -->
+          <div class="impact-stats-list">
+            <div class="stat-row">
+              <span class="stat-lbl">Jet A-1 Fuel Consumption</span>
+              <strong class="stat-val" id="fuelBurnVal">370 gal (1,400 L)</strong>
+            </div>
+            <div class="stat-row">
+              <span class="stat-lbl">Direct Flight Exhaust</span>
+              <strong class="stat-val" id="directCo2Val">3.52 MT CO2</strong>
+            </div>
+            <div class="stat-row">
+              <span class="stat-lbl">Radiative Forcing Multiplier</span>
+              <strong class="stat-val text-amber" id="rfiMultiplierVal">1.9× (High-Altitude Cirrus)</strong>
+            </div>
+            <div class="stat-row">
+              <span class="stat-lbl">Credits Required to Neutralize</span>
+              <strong class="stat-val highlight-green" id="creditsRequiredVal">7 Verified Credits</strong>
+            </div>
+            <div class="stat-row">
+              <span class="stat-lbl">Offset Investment Total</span>
+              <strong class="stat-val highlight-gold" id="totalOffsetCost">$336.00 USD</strong>
+            </div>
+          </div>
+
+          <!-- Certificate Action Row -->
+          <div class="offset-action-block">
+            <div class="offset-cta-info">
+              <strong>Retire Credits &amp; Issue Official Certificate</strong>
+              <p>Generates an authenticated Gold Standard digital certificate with unique cryptographic registry hash.</p>
+            </div>
+            <button type="button" class="btn-issue-certificate" id="openCertModalBtn">
+              Generate Official Certificate ↗
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Certificate Modal Drawer -->
+  <div class="cert-modal-backdrop" id="certModalBackdrop" hidden aria-hidden="true">
+    <div class="cert-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="certMainTitle">
+      <div class="cert-modal-actions no-print">
+        <button type="button" class="cert-btn-print" id="certPrintBtn">🖨️ Print / Save PDF</button>
+        <button type="button" class="cert-modal-close" id="closeCertModalBtn" aria-label="Close certificate">&times;</button>
+      </div>
+
+      <!-- Printable Certificate Body -->
+      <div class="certificate-paper" id="printableCertPaper">
+        <div class="cert-border-outer">
+          <div class="cert-border-inner">
+            <div class="cert-top-branding">
+              <div class="cert-logo-mark">✦ AURA REALMS ✦</div>
+              <span class="cert-gold-standard">GOLD STANDARD CERTIFIED CLIMATE RETIREMENT</span>
+            </div>
+
+            <h1 class="cert-main-title" id="certMainTitle">CERTIFICATE OF CARBON OFFSET RETIREMENT</h1>
+            <p class="cert-statement">
+              This official document certifies that verified Gold Standard carbon offsets have been permanently retired from circulation to achieve absolute carbon neutrality for the private aviation mission detailed below.
+            </p>
+
+            <div class="cert-beneficiary-wrap">
+              <span class="cert-presented-to">PRESENTED IN RECOGNITION TO:</span>
+              <input type="text" class="cert-name-input" id="certBeneficiaryInput" value="H.E. Lord / Lady of Aura" aria-label="Beneficiary name">
+            </div>
+
+            <div class="cert-specs-grid">
+              <div class="cert-spec-item">
+                <span class="spec-k">AIRCRAFT CLASS</span>
+                <strong class="spec-v" id="certAircraftVal">Phenom 300E (Light Jet)</strong>
+              </div>
+              <div class="cert-spec-item">
+                <span class="spec-k">FLIGHT MISSION</span>
+                <strong class="spec-v" id="certRouteVal">London (EGGW) → Nice (LFMN)</strong>
+              </div>
+              <div class="cert-spec-item">
+                <span class="spec-k">FLIGHT DURATION</span>
+                <strong class="spec-v" id="certDurationVal">2.0 Flight Hours</strong>
+              </div>
+              <div class="cert-spec-item">
+                <span class="spec-k">PASSENGERS</span>
+                <strong class="spec-v" id="certPaxVal">4 Travelers</strong>
+              </div>
+              <div class="cert-spec-item">
+                <span class="spec-k">OFFSET TONNAGE</span>
+                <strong class="spec-v text-emerald" id="certTonnageVal">6.69 Metric Tons CO₂e</strong>
+              </div>
+              <div class="cert-spec-item">
+                <span class="spec-k">RETIRED PORTFOLIO</span>
+                <strong class="spec-v" id="certProjectVal">Rimba Raya Peatland Reserve</strong>
+              </div>
+            </div>
+
+            <div class="cert-footer-row">
+              <div class="cert-qr-wrap">
+                <div class="cert-qr-box">
+                  <div class="qr-mock-pattern"></div>
+                </div>
+                <div class="cert-qr-labels">
+                  <span class="qr-lbl">REGISTRY SERIAL HASH</span>
+                  <code class="qr-code-txt" id="certSerialHash">GS-AURA-2026-F48B-89A1</code>
+                  <span class="qr-status">STATUS: PERMANENTLY RETIRED</span>
+                </div>
+              </div>
+
+              <div class="cert-seal-wrap">
+                <div class="gold-embossed-seal">
+                  <div class="seal-inner-star">✦</div>
+                  <div class="seal-ring-text">GOLD STANDARD · VERIFIED 2026</div>
+                </div>
+              </div>
+
+              <div class="cert-signature-wrap">
+                <div class="cert-sig-line">
+                  <span class="sig-cursive">Julian de Aetheling</span>
+                  <div class="sig-bar"></div>
+                  <span class="sig-title">Global Climate Registrar · Aura Realms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===== END Issue #351 ===== -->
+
 <div
   class="concierge-overlay"
   id="conciergeModal"
