@@ -510,6 +510,243 @@
     </div>
   </section>
 
+  <!-- ===== BEGIN Issue #361: Interactive Altitude Sickness Risk Calculator & Acclimatization Scheduler ===== -->
+  <section class="altitude-safety-section" id="altitude-safety-section" aria-labelledby="altitude-safety-title">
+    <div class="altitude-container">
+      <div class="altitude-header">
+        <span class="section-tag">🏔️ HIGH-ALTITUDE WILDERNESS MEDICINE</span>
+        <h2 id="altitude-safety-title">Altitude Sickness Risk Calculator &amp; Acclimatization Scheduler</h2>
+        <p class="altitude-sub">
+          Evaluate Acute Mountain Sickness (AMS) risk factors under clinical Wilderness Medical Society guidelines, monitor daily sleep elevations, and generate scientifically staged acclimatization rest day itineraries.
+        </p>
+      </div>
+
+      <div class="altitude-grid">
+        <!-- Configuration Card -->
+        <div class="altitude-card altitude-controls-card">
+          <div class="alt-card-header">
+            <h3>Expedition Ascent Parameters</h3>
+            <span class="alt-pill-badge" id="trekDifficultyBadge">EXTREME ALTITUDE</span>
+          </div>
+
+          <form id="altitudeForm" class="altitude-form" onsubmit="return false;">
+            <!-- Trek Destination Selector -->
+            <div class="form-group">
+              <label for="trekSelect" class="alt-label">Select Mountain Expedition</label>
+              <select id="trekSelect" class="alt-select">
+                <option value="kilimanjaro" selected>Mount Kilimanjaro — Machame Route (5,895m / 19,341ft)</option>
+                <option value="everest-ebc">Everest Base Camp &amp; Kala Patthar (5,545m / 18,192ft)</option>
+                <option value="inca-salkantay">Inca Trail &amp; Salkantay Pass (4,630m / 15,190ft)</option>
+                <option value="mont-blanc">Mont Blanc Alpine Haute Route (4,810m / 15,781ft)</option>
+                <option value="custom">Custom High-Altitude Expedition</option>
+              </select>
+            </div>
+
+            <!-- Custom Ascent Inputs (Shown when custom selected) -->
+            <div class="custom-trek-inputs" id="customTrekInputs" style="display: none;">
+              <div class="alt-row-2col">
+                <div class="form-group">
+                  <label for="startAltInput" class="alt-label">Base Camp / Start Elevation (m)</label>
+                  <input type="number" id="startAltInput" class="alt-num-input" value="1800" min="500" max="4500" step="100">
+                </div>
+                <div class="form-group">
+                  <label for="targetAltInput" class="alt-label">Target Summit Elevation (m)</label>
+                  <input type="number" id="targetAltInput" class="alt-num-input" value="5200" min="2500" max="8848" step="100">
+                </div>
+              </div>
+            </div>
+
+            <!-- Trek Days Slider -->
+            <div class="form-group">
+              <div class="alt-slider-row">
+                <label for="trekDaysRange" class="alt-label">Planned Trek Duration</label>
+                <span class="alt-val-pill" id="trekDaysVal">7 Days</span>
+              </div>
+              <input type="range" class="alt-range" id="trekDaysRange" min="5" max="14" step="1" value="7">
+              <span class="alt-hint">Wilderness medicine recommends &ge; 7 days for peaks &gt; 5,000m.</span>
+            </div>
+
+            <!-- Trekker Experience & Diamox Toggle -->
+            <div class="alt-row-2col">
+              <div class="form-group">
+                <label class="alt-label">Prior Altitude Experience</label>
+                <select id="experienceSelect" class="alt-select">
+                  <option value="none">No Prior Altitude (&lt; 2,500m)</option>
+                  <option value="moderate" selected>Moderate (Hiked to 3,500m)</option>
+                  <option value="experienced">Seasoned (&gt; 4,500m Acclimatized)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="alt-label">Preventative Medication</label>
+                <div class="diamox-toggle-wrap">
+                  <label class="diamox-checkbox-label">
+                    <input type="checkbox" id="diamoxCheckbox">
+                    <span class="diamox-custom-box"></span>
+                    <span class="diamox-text">Acetazolamide (Diamox 125mg)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Auto-Optimize Safe Schedule Button -->
+            <div class="alt-action-box">
+              <button type="button" class="btn-optimize-ascent" id="btnOptimizeAscent">
+                ⚡ Auto-Inject Medical Rest Days (&le;500m/day)
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Telemetry & Risk Score Card -->
+        <div class="altitude-card altitude-results-card">
+          <div class="alt-card-header">
+            <h3>Clinical Altitude Sickness Assessment</h3>
+            <span class="risk-pill risk-moderate" id="amsRiskPill">MODERATE AMS RISK</span>
+          </div>
+
+          <!-- Risk Score Meter Gauge -->
+          <div class="risk-gauge-block">
+            <div class="risk-score-display">
+              <span class="risk-num" id="amsScoreVal">42</span>
+              <span class="risk-max">/ 100</span>
+            </div>
+            <div class="risk-bar-track">
+              <div class="risk-bar-fill" id="riskBarFill" style="width: 42%;"></div>
+            </div>
+            <div class="risk-scale-labels">
+              <span>0 (Low Risk)</span>
+              <span>30 (Threshold)</span>
+              <span>60 (Severe AMS)</span>
+              <span>100 (HAPE/HACE Hazard)</span>
+            </div>
+          </div>
+
+          <!-- Safety Vital Stats Grid -->
+          <div class="alt-stats-grid">
+            <div class="alt-stat-box">
+              <span class="astat-lbl">Summit Elevation</span>
+              <strong class="astat-val" id="summitElevationVal">5,895m</strong>
+              <span class="astat-sub" id="summitElevationFt">19,341 ft ASL</span>
+            </div>
+            <div class="alt-stat-box">
+              <span class="astat-lbl">Effective Oxygen</span>
+              <strong class="astat-val hl-amber" id="effectiveOxygenVal">48% of Sea Level</strong>
+              <span class="astat-sub">Partial pressure ~405 hPa</span>
+            </div>
+            <div class="alt-stat-box">
+              <span class="astat-lbl">Max Daily Gain</span>
+              <strong class="astat-val text-red" id="maxDailyGainVal">+950m / day</strong>
+              <span class="astat-sub" id="guidelineCompare">Exceeds 500m safe limit</span>
+            </div>
+            <div class="alt-stat-box">
+              <span class="astat-lbl">Acclimatization Rest</span>
+              <strong class="astat-val" id="restDaysCountVal">1 Rest Day</strong>
+              <span class="astat-sub" id="restDayStatus">Recommended: 2+ Days</span>
+            </div>
+          </div>
+
+          <!-- Lake Louise Clinical Advisory Box -->
+          <div class="ams-clinical-box" id="amsClinicalBox">
+            <div class="clinic-icon">🩺</div>
+            <div class="clinic-text">
+              <strong id="clinicalHeader">Medical Advisory: Staged Rest Day Required</strong>
+              <p id="clinicalAdvice">
+                Ascending more than 500m sleeping elevation per day above 3,000m substantially multiplies the incidence of Acute Mountain Sickness. Adopt the mountaineering adage: <em>"Climb high, sleep low."</em>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mountain Elevation Profile Chart Card -->
+      <div class="elevation-chart-card">
+        <div class="chart-header">
+          <div class="chart-titles">
+            <h3>Expedition Elevation Profile &amp; High-Altitude Danger Bands</h3>
+            <span class="chart-sub">Vertical ascent gradient across planned itinerary with clinical danger zone thresholds</span>
+          </div>
+          <div class="chart-legend">
+            <span class="c-leg leg-safe">0 - 3,000m (Standard)</span>
+            <span class="c-leg leg-warn">3,000m - 5,000m (High Altitude / AMS)</span>
+            <span class="c-leg leg-danger">5,000m+ (Extreme / Hypoxic Zone)</span>
+          </div>
+        </div>
+
+        <!-- SVG Elevation Profile Diagram -->
+        <div class="chart-svg-container">
+          <svg class="elevation-svg" id="elevationSvg" viewBox="0 0 960 320" aria-label="Mountain Expedition Elevation Profile Chart">
+            <!-- Danger Zone Colored Background Bands -->
+            <!-- Extreme Zone (>5,000m): top 0 to 100 -->
+            <rect x="60" y="20" width="880" height="90" fill="rgba(239, 68, 68, 0.12)" />
+            <line x1="60" y1="110" x2="940" y2="110" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,4" />
+            <text x="65" y="105" fill="#f87171" font-size="11" font-weight="700">5,000m — EXTREME HYPOXIA / HAPE HAZARD ZONE</text>
+
+            <!-- Warning Zone (3,000m - 5,000m): 110 to 210 -->
+            <rect x="60" y="110" width="880" height="100" fill="rgba(245, 158, 11, 0.1)" />
+            <line x1="60" y1="210" x2="940" y2="210" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,4" />
+            <text x="65" y="205" fill="#fbbf24" font-size="11" font-weight="700">3,000m — HIGH ALTITUDE / MANDATORY 500M/DAY ASCENT CEILING</text>
+
+            <!-- Safe Base Zone (<3,000m): 210 to 280 -->
+            <rect x="60" y="210" width="880" height="70" fill="rgba(16, 185, 129, 0.08)" />
+
+            <!-- Grid Lines & Altitude Labels -->
+            <g font-size="10" fill="#94a3b8" text-anchor="end">
+              <text x="50" y="25">6,000m</text>
+              <text x="50" y="115">5,000m</text>
+              <text x="50" y="215">3,000m</text>
+              <text x="50" y="280">1,000m</text>
+            </g>
+
+            <!-- Dynamic Mountain Gradient & Trail Path -->
+            <path id="elevationAreaPath" d="" fill="url(#elevationFillGrad)" opacity="0.3" />
+            <path id="elevationLinePath" d="" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- Dynamic Waypoint Circles & Labels Group -->
+            <g id="chartWaypointsGroup">
+              <!-- Populated dynamically via script.js -->
+            </g>
+
+            <defs>
+              <linearGradient id="elevationFillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" />
+                <stop offset="100%" stop-color="#0284c7" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Staged Day-by-Day Acclimatization Schedule Table -->
+      <div class="scheduler-table-card">
+        <div class="sched-table-header">
+          <h3>Staged Acclimatization Ascent Schedule</h3>
+          <span class="sched-sub">Daily waypoint itinerary, sleeping elevations, and climb-high sleep-low protocols</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="altitude-schedule-table">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Waypoint / Camp Name</th>
+                <th>Sleep Elevation</th>
+                <th>Daily Elevation Gain</th>
+                <th>Oxygen Level</th>
+                <th>Protocol Recommendation</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="altitudeScheduleBody">
+              <!-- Rendered dynamically via script.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #361 ===== -->
+
   <!-- ===== BEGIN Issue #211: Expedition Budget Planner with Currency Converter & Cost Breakdown ===== -->
   <section class="budget-planner-section" id="budget-planner" aria-labelledby="budget-planner-title">
     <div class="planner-container">

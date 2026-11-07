@@ -1788,3 +1788,468 @@ if (document.readyState === 'loading') {
   initVisaAdvisory();
 }
 /* ===== END Issue #304 ===== */
+
+
+/* ===== BEGIN Issue #361: Interactive Altitude Sickness Risk Calculator & Acclimatization Scheduler ===== */
+(function initAltitudeSafetyCalculator() {
+  const section = document.getElementById('altitude-safety-section');
+  if (!section) return;
+
+  // Preset Treks Itineraries
+  const TREKS_DATA = {
+    kilimanjaro: {
+      name: 'Mount Kilimanjaro — Machame Route',
+      summitAlt: 5895,
+      summitFt: '19,341 ft ASL',
+      difficulty: 'EXTREME ALTITUDE (UHURU PEAK)',
+      days: 7,
+      itinerary: [
+        { day: 1, name: 'Machame Gate → Machame Camp', alt: 3000, desc: 'Rainforest zone trek. Gradual steady ascent.', isRest: false },
+        { day: 2, name: 'Machame Camp → Shira Camp', alt: 3840, desc: 'Moorland plateau. Exceeds 3,000m threshold.', isRest: false },
+        { day: 3, name: 'Shira → Lava Tower (4630m) → Barranco', alt: 3950, desc: 'Climb high to 4,630m, sleep low at 3,950m (Optimal).', isRest: false },
+        { day: 4, name: 'Barranco Camp → Karanga Camp', alt: 4035, desc: 'Scramble Barranco Wall. Short acclimatization day.', isRest: true },
+        { day: 5, name: 'Karanga Camp → Barafu High Camp', alt: 4680, desc: 'Alpine desert. Rest and hydrate before midnight summit push.', isRest: false },
+        { day: 6, name: 'Barafu → Uhuru Peak (5895m) → Mweka', alt: 3100, desc: 'Summit sunrise! Rapid descent to oxygen-rich camp.', isRest: false },
+        { day: 7, name: 'Mweka Camp → Mweka Gate', alt: 1800, desc: 'Final descent through lush montane forest to park exit.', isRest: false }
+      ]
+    },
+    'everest-ebc': {
+      name: 'Everest Base Camp & Kala Patthar',
+      summitAlt: 5545,
+      summitFt: '18,192 ft ASL',
+      difficulty: 'HIGH HIMALAYAN EXPEDITION',
+      days: 10,
+      itinerary: [
+        { day: 1, name: 'Lukla Flight → Phakding', alt: 2610, desc: 'Scenic airstrip landing, gentle riverside trek.', isRest: false },
+        { day: 2, name: 'Phakding → Namche Bazaar', alt: 3440, desc: 'Hillary suspension bridges. Enter High Altitude zone.', isRest: false },
+        { day: 3, name: 'Namche Bazaar Acclimatization Day', alt: 3440, desc: 'Hike to Everest View Hotel (3,880m), sleep Namche.', isRest: true },
+        { day: 4, name: 'Namche Bazaar → Tengboche Monastery', alt: 3860, desc: 'Rhododendron forest & spiritual blessing.', isRest: false },
+        { day: 5, name: 'Tengboche → Dingboche', alt: 4410, desc: 'Imja Valley stone pastures. Tree line ends.', isRest: false },
+        { day: 6, name: 'Dingboche Acclimatization Day', alt: 4410, desc: 'Climb Nangkartshang Peak (5,080m), sleep Dingboche.', isRest: true },
+        { day: 7, name: 'Dingboche → Lobuche', alt: 4940, desc: 'Memorial moraine pass. Very thin air.', isRest: false },
+        { day: 8, name: 'Lobuche → Gorak Shep → Everest Base Camp', alt: 5164, desc: 'Walk on Khumbu Glacier ice edge. EBC milestone!', isRest: false },
+        { day: 9, name: 'Gorak Shep → Kala Patthar (5545m) → Pheriche', alt: 4240, desc: 'Dawn panoramic summit of Kala Patthar, descent to Pheriche.', isRest: false },
+        { day: 10, name: 'Pheriche → Namche Bazaar', alt: 3440, desc: 'Accelerated descent into thicker atmospheric pressure.', isRest: false }
+      ]
+    },
+    'inca-salkantay': {
+      name: 'Inca Trail & Salkantay Pass',
+      summitAlt: 4630,
+      summitFt: '15,190 ft ASL',
+      difficulty: 'ANDEAN CORDILLERA PASS',
+      days: 5,
+      itinerary: [
+        { day: 1, name: 'Mollepata → Soraypampa', alt: 3900, desc: 'Steep climb to Humantay glacial base lake.', isRest: false },
+        { day: 2, name: 'Soraypampa → Salkantay Pass (4630m) → Chaullay', alt: 2900, desc: 'High alpine pass crossing then descent to cloud forest.', isRest: false },
+        { day: 3, name: 'Chaullay → Lucmabamba', alt: 2000, desc: 'Warm subtropical coffee plantations and waterfalls.', isRest: false },
+        { day: 4, name: 'Lucmabamba → Llactapata → Aguas Calientes', alt: 2040, desc: 'Original Inca road hike with first distant view of citadel.', isRest: false },
+        { day: 5, name: 'Aguas Calientes → Machu Picchu Sanctuary', alt: 2430, desc: 'Sunrise exploration of the Lost City of the Incas.', isRest: false }
+      ]
+    },
+    'mont-blanc': {
+      name: 'Mont Blanc Alpine Haute Route',
+      summitAlt: 4810,
+      summitFt: '15,781 ft ASL',
+      difficulty: 'ALPINE GLACIAL TRAVERSE',
+      days: 6,
+      itinerary: [
+        { day: 1, name: 'Chamonix Valley → Les Contamines', alt: 1167, desc: 'Lower valley forest approach along Roman road.', isRest: false },
+        { day: 2, name: 'Les Contamines → Refuge de la Croix', alt: 2443, desc: 'Ascent over Col du Bonhomme pass.', isRest: false },
+        { day: 3, name: 'Refuge de la Croix → Rifugio Elisabetta', alt: 2195, desc: 'Crossing into Italian Val Veny moraines.', isRest: false },
+        { day: 4, name: 'Courmayeur Valley Rest & Acclimatization', alt: 1224, desc: 'Active recovery day. Carb loading and gear inspection.', isRest: true },
+        { day: 5, name: 'Val Ferret → Grand Col Ferret → La Fouly', alt: 2537, desc: 'Swiss alpine border crossing with grand glacier vistas.', isRest: false },
+        { day: 6, name: 'Aiguille du Midi Traverse Summit Point', alt: 3842, desc: 'Glacier rope team ascent to High Alpine ridge.', isRest: false }
+      ]
+    }
+  };
+
+  // State
+  let selectedTrekKey = 'kilimanjaro';
+  let activeItinerary = JSON.parse(JSON.stringify(TREKS_DATA.kilimanjaro.itinerary));
+  let trekDays = 7;
+  let experienceLevel = 'moderate';
+  let hasDiamox = false;
+
+  // DOM Elements
+  const trekSelect = document.getElementById('trekSelect');
+  const customTrekInputs = document.getElementById('customTrekInputs');
+  const startAltInput = document.getElementById('startAltInput');
+  const targetAltInput = document.getElementById('targetAltInput');
+  const trekDaysRange = document.getElementById('trekDaysRange');
+  const trekDaysVal = document.getElementById('trekDaysVal');
+  const experienceSelect = document.getElementById('experienceSelect');
+  const diamoxCheckbox = document.getElementById('diamoxCheckbox');
+  const btnOptimizeAscent = document.getElementById('btnOptimizeAscent');
+
+  // Results elements
+  const trekDifficultyBadge = document.getElementById('trekDifficultyBadge');
+  const amsRiskPill = document.getElementById('amsRiskPill');
+  const amsScoreVal = document.getElementById('amsScoreVal');
+  const riskBarFill = document.getElementById('riskBarFill');
+  const summitElevationVal = document.getElementById('summitElevationVal');
+  const summitElevationFt = document.getElementById('summitElevationFt');
+  const effectiveOxygenVal = document.getElementById('effectiveOxygenVal');
+  const maxDailyGainVal = document.getElementById('maxDailyGainVal');
+  const guidelineCompare = document.getElementById('guidelineCompare');
+  const restDaysCountVal = document.getElementById('restDaysCountVal');
+  const restDayStatus = document.getElementById('restDayStatus');
+  const clinicalHeader = document.getElementById('clinicalHeader');
+  const clinicalAdvice = document.getElementById('clinicalAdvice');
+
+  // Table & Chart Elements
+  const scheduleTableBody = document.getElementById('altitudeScheduleBody');
+  const elevationSvg = document.getElementById('elevationSvg');
+  const elevationAreaPath = document.getElementById('elevationAreaPath');
+  const elevationLinePath = document.getElementById('elevationLinePath');
+  const chartWaypointsGroup = document.getElementById('chartWaypointsGroup');
+
+  // Atmospheric Pressure & Effective Oxygen Equation
+  // Barometric formula approximation: O2% ~ 20.9% * exp(-alt / 7000) relative to sea level
+  function calculateEffectiveOxygen(altMeters) {
+    const seaLevelO2 = 100;
+    const factor = Math.exp(-altMeters / 7400);
+    return Math.round(seaLevelO2 * factor);
+  }
+
+  // Trek Selection Handler
+  trekSelect.addEventListener('change', () => {
+    selectedTrekKey = trekSelect.value;
+    if (selectedTrekKey === 'custom') {
+      customTrekInputs.style.display = 'block';
+      buildCustomItinerary();
+    } else {
+      customTrekInputs.style.display = 'none';
+      const trek = TREKS_DATA[selectedTrekKey];
+      activeItinerary = JSON.parse(JSON.stringify(trek.itinerary));
+      trekDays = trek.days;
+      trekDaysRange.value = trekDays;
+      trekDaysVal.textContent = trekDays + ' Days';
+      trekDifficultyBadge.textContent = trek.difficulty;
+      summitElevationVal.textContent = trek.summitAlt.toLocaleString() + 'm';
+      summitElevationFt.textContent = trek.summitFt;
+    }
+    evaluateAltitudeSafety();
+  });
+
+  // Custom Trek Generator
+  function buildCustomItinerary() {
+    const startAlt = parseInt(startAltInput.value, 10) || 1800;
+    const summitAlt = parseInt(targetAltInput.value, 10) || 5200;
+    const days = parseInt(trekDaysRange.value, 10) || 7;
+
+    activeItinerary = [];
+    const altDelta = summitAlt - startAlt;
+    const altStep = altDelta / Math.max(1, days - 1);
+
+    for (let d = 1; d <= days; d++) {
+      let curAlt = Math.round(startAlt + (d - 1) * altStep);
+      let isRest = false;
+      let name = `Camp ${d} Waypoint`;
+
+      if (d === days) {
+        curAlt = summitAlt;
+        name = 'Summit Ridge & Descent Camp';
+      } else if (d === 3 && days >= 6) {
+        isRest = true;
+        name = 'Camp 3 Acclimatization Staging Day';
+      }
+
+      activeItinerary.push({
+        day: d,
+        name: name,
+        alt: curAlt,
+        desc: isRest ? 'Active rest: hike high, sleep low.' : 'Steady daily elevation gain.',
+        isRest: isRest
+      });
+    }
+
+    summitElevationVal.textContent = summitAlt.toLocaleString() + 'm';
+    summitElevationFt.textContent = Math.round(summitAlt * 3.28084).toLocaleString() + ' ft ASL';
+    trekDifficultyBadge.textContent = summitAlt > 5000 ? 'EXTREME HAZARD ALTITUDE' : 'HIGH ALTITUDE';
+  }
+
+  // Days Slider
+  trekDaysRange.addEventListener('input', () => {
+    trekDays = parseInt(trekDaysRange.value, 10);
+    trekDaysVal.textContent = trekDays + ' Days';
+    if (selectedTrekKey === 'custom') {
+      buildCustomItinerary();
+    }
+    evaluateAltitudeSafety();
+  });
+
+  // Custom Input Listeners
+  [startAltInput, targetAltInput].forEach(inp => {
+    if (inp) inp.addEventListener('input', () => {
+      if (selectedTrekKey === 'custom') {
+        buildCustomItinerary();
+        evaluateAltitudeSafety();
+      }
+    });
+  });
+
+  // Experience Select
+  experienceSelect.addEventListener('change', () => {
+    experienceLevel = experienceSelect.value;
+    evaluateAltitudeSafety();
+  });
+
+  // Diamox Checkbox
+  diamoxCheckbox.addEventListener('change', () => {
+    hasDiamox = diamoxCheckbox.checked;
+    evaluateAltitudeSafety();
+  });
+
+  // Auto-Optimize Button (Wilderness Medicine 500m/day Rule)
+  btnOptimizeAscent.addEventListener('click', () => {
+    optimizeAscentItinerary();
+  });
+
+  function optimizeAscentItinerary() {
+    let prevAlt = activeItinerary[0].alt;
+    const optimized = [];
+
+    activeItinerary.forEach((wpt, idx) => {
+      if (idx === 0) {
+        optimized.push(wpt);
+        return;
+      }
+
+      const gain = wpt.alt - prevAlt;
+      // If above 3,000m and single day gain > 500m, clamp and insert rest
+      if (wpt.alt > 3000 && gain > 500 && !wpt.isRest) {
+        // Safe capped elevation
+        const safeAlt = prevAlt + 480;
+        optimized.push({
+          day: optimized.length + 1,
+          name: wpt.name + ' (Staged Acclimatization Camp)',
+          alt: safeAlt,
+          desc: 'Recalibrated to <= 500m daily gain per Wilderness Medical Society guidelines.',
+          isRest: true
+        });
+        prevAlt = safeAlt;
+      } else {
+        wpt.day = optimized.length + 1;
+        optimized.push(wpt);
+        prevAlt = wpt.alt;
+      }
+    });
+
+    activeItinerary = optimized;
+    evaluateAltitudeSafety();
+  }
+
+  // Clinical Evaluation Engine
+  function evaluateAltitudeSafety() {
+    let maxGain = 0;
+    let prevAlt = activeItinerary.length > 0 ? activeItinerary[0].alt : 1800;
+    let restDaysCount = 0;
+    let exceeds500mCount = 0;
+    let highestSleepingAlt = 0;
+
+    activeItinerary.forEach((wpt, idx) => {
+      if (wpt.alt > highestSleepingAlt) highestSleepingAlt = wpt.alt;
+      if (wpt.isRest) restDaysCount++;
+
+      if (idx > 0) {
+        const gain = wpt.alt - prevAlt;
+        if (gain > maxGain) maxGain = gain;
+        if (prevAlt >= 3000 && gain > 500) {
+          exceeds500mCount++;
+        }
+      }
+      prevAlt = wpt.alt;
+    });
+
+    // Effective Oxygen at highest camp
+    const effO2 = calculateEffectiveOxygen(highestSleepingAlt);
+    effectiveOxygenVal.textContent = effO2 + '% of Sea Level';
+
+    // Max Daily Gain display
+    maxDailyGainVal.textContent = (maxGain > 0 ? '+' : '') + maxGain + 'm / day';
+    if (maxGain > 500) {
+      maxDailyGainVal.className = 'astat-val text-red';
+      guidelineCompare.textContent = 'Exceeds 500m safe limit!';
+      guidelineCompare.className = 'astat-sub text-red';
+    } else {
+      maxDailyGainVal.className = 'astat-val hl-green';
+      guidelineCompare.textContent = 'Within medical guidelines (<=500m)';
+      guidelineCompare.className = 'astat-sub hl-green';
+    }
+
+    // Rest Days summary
+    restDaysCountVal.textContent = restDaysCount + (restDaysCount === 1 ? ' Rest Day' : ' Rest Days');
+    if (restDaysCount >= 2) {
+      restDayStatus.textContent = 'Well-staged protocol';
+      restDayStatus.className = 'astat-sub hl-green';
+    } else {
+      restDayStatus.textContent = 'Recommended: 2+ Days';
+      restDayStatus.className = 'astat-sub text-amber';
+    }
+
+    // Clinical Acute Mountain Sickness (AMS) Score (0 to 100)
+    let amsScore = 15; // baseline
+
+    // Altitude factor
+    if (highestSleepingAlt > 5000) amsScore += 35;
+    else if (highestSleepingAlt > 4000) amsScore += 24;
+    else if (highestSleepingAlt > 3000) amsScore += 12;
+
+    // Ascent rate factor (>500m/day penalty)
+    if (exceeds500mCount > 0) amsScore += (exceeds500mCount * 18);
+    if (maxGain > 800) amsScore += 15;
+
+    // Rest days mitigating bonus
+    amsScore -= (restDaysCount * 12);
+
+    // Experience discount
+    if (experienceLevel === 'experienced') amsScore -= 18;
+    else if (experienceLevel === 'moderate') amsScore -= 8;
+
+    // Diamox mitigating discount
+    if (hasDiamox) amsScore -= 20;
+
+    // Safety clamp
+    amsScore = Math.max(8, Math.min(96, amsScore));
+    amsScoreVal.textContent = amsScore;
+    riskBarFill.style.width = amsScore + '%';
+
+    // Risk Tiers
+    if (amsScore < 30) {
+      amsRiskPill.textContent = 'LOW AMS RISK (OPTIMAL)';
+      amsRiskPill.className = 'risk-pill risk-low';
+      riskBarFill.className = 'risk-bar-fill fill-low';
+      clinicalHeader.textContent = 'Wilderness Medicine: Optimal Staging';
+      clinicalAdvice.textContent = 'Your daily sleeping elevations adhere to conservative acclimatization guidelines. Continue abundant oral hydration (3-4 L/day) and watch for mild early morning headaches.';
+    } else if (amsScore < 60) {
+      amsRiskPill.textContent = 'MODERATE AMS RISK (CAUTION)';
+      amsRiskPill.className = 'risk-pill risk-moderate';
+      riskBarFill.className = 'risk-bar-fill fill-moderate';
+      clinicalHeader.textContent = 'Wilderness Medicine: Staged Rest Advisory';
+      clinicalAdvice.textContent = 'Sleeping elevation exceeds recommended thresholds on peak stages. Monitor team members with the Lake Louise Scoring system. Consider an additional acclimatization day before high camps.';
+    } else {
+      amsRiskPill.textContent = 'HIGH HAZARD AMS / HAPE RISK';
+      amsRiskPill.className = 'risk-pill risk-high';
+      riskBarFill.className = 'risk-bar-fill fill-high';
+      clinicalHeader.textContent = 'URGENT: Dangerous Ascent Gradient';
+      clinicalAdvice.textContent = 'Critical risk of Acute Mountain Sickness and High-Altitude Pulmonary Edema (HAPE). Click "Auto-Inject Medical Rest Days" or slow the schedule. Never ascend with persistent AMS symptoms.';
+    }
+
+    renderScheduleTable();
+    renderElevationChart();
+  }
+
+  // Render Table
+  function renderScheduleTable() {
+    scheduleTableBody.innerHTML = '';
+    let prevAlt = activeItinerary.length > 0 ? activeItinerary[0].alt : 1800;
+
+    activeItinerary.forEach((wpt, idx) => {
+      const gain = idx === 0 ? 0 : wpt.alt - prevAlt;
+      prevAlt = wpt.alt;
+
+      const effO2 = calculateEffectiveOxygen(wpt.alt);
+      const isExceeded = wpt.alt > 3000 && gain > 500;
+
+      const row = document.createElement('tr');
+      row.className = wpt.isRest ? 'table-rest-row' : (isExceeded ? 'table-warning-row' : '');
+
+      row.innerHTML = `
+        <td><strong class="day-num">Day ${wpt.day}</strong></td>
+        <td>
+          <div class="waypoint-meta">
+            <strong>${wpt.name}</strong>
+            <small>${wpt.desc}</small>
+          </div>
+        </td>
+        <td><strong class="alt-val-txt">${wpt.alt.toLocaleString()}m</strong></td>
+        <td>
+          <span class="gain-badge ${gain > 500 && wpt.alt > 3000 ? 'gain-excess' : ''}">
+            ${gain >= 0 ? '+' : ''}${gain}m
+          </span>
+        </td>
+        <td><span class="o2-pill">${effO2}%</span></td>
+        <td>
+          <span class="protocol-text">${wpt.isRest ? '🛌 Acclimatization Rest (Climb High, Sleep Low)' : (wpt.alt > 5000 ? '⚡ High-Altitude Hypoxia Zone' : 'Standard Ascent')}</span>
+        </td>
+        <td>
+          <span class="status-chip ${wpt.isRest ? 'chip-rest' : (isExceeded ? 'chip-danger' : 'chip-safe')}">
+            ${wpt.isRest ? 'REST DAY' : (isExceeded ? 'HAZARD GAIN' : 'SAFE PASS')}
+          </span>
+        </td>
+      `;
+
+      scheduleTableBody.appendChild(row);
+    });
+  }
+
+  // Render SVG Chart
+  function renderElevationChart() {
+    chartWaypointsGroup.innerHTML = '';
+    const pointsCount = activeItinerary.length;
+    if (pointsCount < 2) return;
+
+    // Chart Dimensions: x from 70 to 920, y from 30 (6000m) to 270 (1000m)
+    const minX = 80;
+    const maxX = 920;
+    const minY = 30;  // 6000m
+    const maxY = 270; // 1000m
+    const altRange = 6000 - 1000;
+
+    function getCoords(idx, alt) {
+      const x = minX + (idx / (pointsCount - 1)) * (maxX - minX);
+      const clampedAlt = Math.max(1000, Math.min(6000, alt));
+      const y = maxY - ((clampedAlt - 1000) / altRange) * (maxY - minY);
+      return { x, y };
+    }
+
+    let linePathD = '';
+    let areaPathD = '';
+
+    activeItinerary.forEach((wpt, idx) => {
+      const pt = getCoords(idx, wpt.alt);
+      if (idx === 0) {
+        linePathD += `M ${pt.x} ${pt.y}`;
+        areaPathD += `M ${pt.x} ${maxY} L ${pt.x} ${pt.y}`;
+      } else {
+        linePathD += ` L ${pt.x} ${pt.y}`;
+        areaPathD += ` L ${pt.x} ${pt.y}`;
+      }
+
+      // Add SVG waypoint dot and text
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('class', 'chart-waypoint-item');
+
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', pt.x);
+      circle.setAttribute('cy', pt.y);
+      circle.setAttribute('r', wpt.isRest ? '7' : '5');
+      circle.setAttribute('fill', wpt.isRest ? '#10b981' : (wpt.alt > 5000 ? '#ef4444' : '#38bdf8'));
+      circle.setAttribute('stroke', '#ffffff');
+      circle.setAttribute('stroke-width', '2');
+
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', pt.x);
+      label.setAttribute('y', pt.y - 12);
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('fill', '#f1f5f9');
+      label.setAttribute('font-size', '10.5');
+      label.setAttribute('font-weight', '700');
+      label.textContent = `D${wpt.day} (${wpt.alt}m)`;
+
+      g.appendChild(circle);
+      g.appendChild(label);
+      chartWaypointsGroup.appendChild(g);
+    });
+
+    const lastPt = getCoords(pointsCount - 1, activeItinerary[pointsCount - 1].alt);
+    areaPathD += ` L ${lastPt.x} ${maxY} Z`;
+
+    elevationLinePath.setAttribute('d', linePathD);
+    elevationAreaPath.setAttribute('d', areaPathD);
+  }
+
+  // Initial Run
+  evaluateAltitudeSafety();
+})();
+/* ===== END Issue #361 ===== */
