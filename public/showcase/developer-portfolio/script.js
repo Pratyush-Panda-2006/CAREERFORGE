@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initShortcuts();
   initProjectFilters();
   initResumeDownload();
+  initArticleReader();
 });
 
 // Virtual file system: objects are directories, strings are files.
@@ -18,7 +19,9 @@ const FS = {
     'wasm-container-daemon.md': '# wasm-container-daemon  (Go, 2.3k stars)\nUltra-lightweight OCI compliant container runtime running WASM binaries in under 5ms.'
   },
   blog: {
-    'ebpf-notes.md': '# Notes on eBPF verifier limits\nBounded loops, stack size and why your program gets rejected at load time.'
+    'ebpf-notes.md': '# Notes on eBPF verifier limits\nBounded loops, stack size and why your program gets rejected at load time.',
+    'zero-copy.md': '# Zero-Copy Deserialization with Rust & FlatBuffers\nHow we eliminated 85% of memory allocations and GC pauses in high-throughput network gateways.',
+    'raft-consensus.md': '# Distributed Consensus: Surviving Split-Brain in Raft\nAnalyzing network partition edge cases, leader lease expiration, and log compaction strategies.'
   },
   bin: {
     'hello.sh': 'Hello from the virtual file system. Nothing here touches your real machine.'
@@ -751,3 +754,323 @@ function initResumeDownload() {
     }
   });
 }
+
+// ===============================================================
+// Interactive Technical Article Reader Modal (Issue #279)
+// ===============================================================
+function initArticleReader() {
+  const modal = document.getElementById('articleModal');
+  const overlay = document.getElementById('articleModalOverlay');
+  const closeBtn = document.getElementById('articleModalCloseBtn');
+  const closeDot = document.getElementById('articleModalCloseDot');
+  const modalBody = document.getElementById('articleModalBody');
+  const progressBar = document.getElementById('articleProgressBar');
+  const progressPill = document.getElementById('articleProgressPill');
+  const terminalTitle = document.getElementById('articleModalTerminalTitle');
+  const categoryBadge = document.getElementById('modalArticleCategory');
+  const readTimeBadge = document.getElementById('modalArticleReadTime');
+  const dateBadge = document.getElementById('modalArticleDate');
+  const articleTitle = document.getElementById('modalArticleTitle');
+  const articleLead = document.getElementById('modalArticleLead');
+  const dynamicContent = document.getElementById('articleDynamicContent');
+  const backToTopBtn = document.getElementById('articleBackToTopBtn');
+
+  if (!modal || !overlay || !modalBody) return;
+
+  let lastActiveTrigger = null;
+
+  const ARTICLES_DB = {
+    'rust-zero-copy': {
+      title: 'Zero-Copy Deserialization with Rust & FlatBuffers',
+      lead: 'How we eliminated 85% of memory allocations and GC pauses in high-throughput network gateways using mmap and buffer views.',
+      category: 'SYSTEMS ARCHITECTURE',
+      readTime: '5 min read',
+      date: 'Oct 14, 2026',
+      path: 'dev@kernel-box: /blog/zero-copy.md',
+      content: `
+        <h2>1. The Problem: Heap Churn in High-Velocity Ingestion</h2>
+        <p>In high-throughput microservice architectures ingesting hundreds of thousands of messages per second, traditional JSON or Protobuf deserializers incur continuous heap allocations. Every nested string and struct requires allocation, parsing, and eventual deallocation.</p>
+
+        <div class="article-callout">
+          <strong>Key Insight:</strong> Standard Protobuf decoders instantiate objects on the heap. In contrast, FlatBuffers structures memory such that the serialized binary representation in the buffer matches its in-memory alignment, allowing zero-copy dereferencing directly from slice pointers.
+        </div>
+
+        <h2>2. Architecture: Direct Pointer Offsets</h2>
+        <p>Rather than unpacking bytes into heap variables, FlatBuffers encodes field offsets in a vtable table at the buffer header. A Rust reader can validate the buffer once and read values via static references.</p>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">
+            <span>router.rs (Rust)</span>
+            <button type="button" class="btn-copy-code" aria-label="Copy code snippet">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Code
+            </button>
+          </div>
+          <pre class="code-content"><code>// Zero-allocation packet accessor over raw network slice
+pub fn route_packet&lt;'a&gt;(raw_bytes: &amp;'a [u8]) -&gt; Result&lt;RoutingTarget&lt;'a&gt;, PacketError&gt; {
+    // Validate buffer boundaries in O(1) without heap allocation
+    let root = flatbuffers::root::&lt;PacketPayload&lt;'a&gt;&gt;(raw_bytes)
+        .map_err(|_| PacketError::CorruptedFrame)?;
+
+    let destination_host: &amp;'a str = root.destination_ip().unwrap_or("0.0.0.0");
+    let priority_level: u8 = root.priority();
+
+    Ok(RoutingTarget {
+        target: destination_host,
+        priority: priority_level,
+        payload_view: root.payload_bytes().unwrap_or(&amp;[]),
+    })
+}</code></pre>
+        </div>
+
+        <h2>3. Production Benchmarks &amp; Memory Savings</h2>
+        <p>We executed 10,000,000 synthetic JSON vs FlatBuffers queries across an 8-core AMD EPYC server. The outcome was stark:</p>
+        <ul>
+          <li><strong>Memory Allocations:</strong> Reduced from 420 MB/sec to &lt; 1.2 MB/sec (99.7% reduction).</li>
+          <li><strong>P99 Latency:</strong> Dropped from 3.8ms to 0.42ms due to the complete absence of GC stop-the-world cycles.</li>
+          <li><strong>Throughput:</strong> Increased from 145,000 req/s to 480,000 req/s on a single socket.</li>
+        </ul>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">
+            <span>benchmark.sh (Bash)</span>
+            <button type="button" class="btn-copy-code" aria-label="Copy code snippet">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Code
+            </button>
+          </div>
+          <pre class="code-content"><code># Run cargo criterion benchmark suite with heap profiling enabled
+cargo bench --bench zero_copy_throughput -- --verbose
+valgrind --tool=massif target/release/examples/gateway_worker</code></pre>
+        </div>
+
+        <h2>4. Key Takeaways</h2>
+        <p>When engineering for scale, your data interchange formats are just as critical as your concurrency primitives. Designing around zero-copy buffers lets Rust unleash its true zero-cost abstraction promise.</p>
+      `
+    },
+    'ebpf-tracing': {
+      title: 'Navigating Linux eBPF Verifier Constraints at Scale',
+      lead: 'Demystifying bounded loop unrolling, register spill limits, and BPF-to-BPF function calls without crashing the verifier.',
+      category: 'LINUX KERNEL',
+      readTime: '7 min read',
+      date: 'Nov 02, 2026',
+      path: 'dev@kernel-box: /blog/ebpf-tracing.md',
+      content: `
+        <h2>1. The Gatekeeper: Understanding the In-Kernel Verifier</h2>
+        <p>Linux eBPF provides unparalleled safe kernel observability and packet filtering. However, loading complex programs often yields the dreaded verifier rejection: <em>"program too large or cycle detected"</em>.</p>
+
+        <div class="article-callout">
+          <strong>Verifier Safety Rules:</strong> Every eBPF program must prove termination, avoid out-of-bounds pointer arithmetic, and maintain maximum stack depth under 512 bytes.
+        </div>
+
+        <h2>2. Bounded Loops with Compiler Pragmas</h2>
+        <p>Prior to Linux 5.3, all loops had to be unrolled via <code>#pragma unroll</code>. In modern kernels, bounded loops are permitted, but register state paths grow exponentially. Here is the canonical pattern to satisfy the DAG explorer:</p>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">
+            <span>packet_filter.c (C / eBPF)</span>
+            <button type="button" class="btn-copy-code" aria-label="Copy code snippet">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Code
+            </button>
+          </div>
+          <pre class="code-content"><code>#include &lt;linux/bpf.h&gt;
+#include &lt;bpf/bpf_helpers.h&gt;
+
+#define MAX_HEADERS 8
+
+SEC("xdp")
+int xdp_inspect_headers(struct xdp_md *ctx) {
+    void *data = (void *)(long)ctx-&gt;data;
+    void *data_end = (void *)(long)ctx-&gt;data_end;
+
+    // Strict pointer safety check against data_end
+    if (data + sizeof(struct ethhdr) &gt; data_end)
+        return XDP_PASS;
+
+    // Explicit upper bound to keep verifier complexity within 1M instructions
+    #pragma unroll
+    for (int i = 0; i &lt; MAX_HEADERS; i++) {
+        if (data + (i * 4) + 4 &gt; data_end) break;
+        // Process encapsulated tunnel headers safely
+    }
+
+    return XDP_PASS;
+}
+
+char _license[] SEC("license") = "GPL";</code></pre>
+        </div>
+
+        <h2>3. Inspecting Verifier Instruction Traces</h2>
+        <p>When the verifier rejects code, launch <code>bpftool</code> with debug level verifier logs to isolate the exact instruction where state tracking branch depth exploded.</p>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">
+            <span>cli.sh (Bash)</span>
+            <button type="button" class="btn-copy-code" aria-label="Copy code snippet">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Code
+            </button>
+          </div>
+          <pre class="code-content"><code># Inspect bytecode and verifier execution log
+sudo bpftool prog load xdp_filter.o /sys/fs/bpf/xdp_filter type xdp --verbose
+sudo bpftool prog dump xlated id 42</code></pre>
+        </div>
+      `
+    },
+    'raft-consensus': {
+      title: 'Distributed Consensus: Surviving Split-Brain in Raft',
+      lead: 'Analyzing network partition edge cases, leader lease expiration, and log compaction strategies in geo-distributed clusters.',
+      category: 'DISTRIBUTED SYSTEMS',
+      readTime: '6 min read',
+      date: 'Nov 05, 2026',
+      path: 'dev@kernel-box: /blog/raft-consensus.md',
+      content: `
+        <h2>1. The Anatomy of an Asymmetric Partition</h2>
+        <p>In real-world networks, partitions rarely slice nodes into clean binary islands. A node might successfully transmit TCP packets to peer B while dropping acknowledgments from peer C, resulting in partial state confusion.</p>
+
+        <h2>2. Pre-Vote Phase to Prevent Disruptive Term Bumps</h2>
+        <p>When an isolated follower loses contact with the leader, it increments its term and broadcasts RequestVote. If the partition heals, the leader is deposed simply because of the artificially inflated term. The Pre-Vote protocol eliminates this vulnerability:</p>
+
+        <div class="code-block-wrapper">
+          <div class="code-block-header">
+            <span>consensus.go (Go)</span>
+            <button type="button" class="btn-copy-code" aria-label="Copy code snippet">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Code
+            </button>
+          </div>
+          <pre class="code-content"><code>// PreVote verification step prior to incrementing currentTerm
+func (r *RaftNode) RunPreVote(ctx context.Context) bool {
+    r.mu.Lock()
+    targetTerm := r.currentTerm + 1
+    r.mu.Unlock()
+
+    votesGranted := 1 // self vote
+    for _, peer := range r.peers {
+        resp, err := peer.RequestPreVote(ctx, &amp;PreVoteArgs{
+            CandidateID:  r.id,
+            NextTerm:     targetTerm,
+            LastLogIndex: r.log.LastIndex(),
+            LastLogTerm:  r.log.LastTerm(),
+        })
+        if err == nil &amp;&amp; resp.VoteGranted {
+            votesGranted++
+        }
+    }
+
+    // Only transition to candidate if a quorum confirms our log is up to date
+    return votesGranted &gt; len(r.peers)/2
+}</code></pre>
+        </div>
+
+        <h2>3. Summary Checklist for Production Raft</h2>
+        <ul>
+          <li>Always enable Pre-Vote to insulate healthy clusters from stale node re-entries.</li>
+          <li>Enforce monotonic clock checks on leader lease durations to prevent stale reads during clock skew.</li>
+          <li>Decouple log snapshot serialization from state machine lock domains.</li>
+        </ul>
+      `
+    }
+  };
+
+  function bindCopyButtons() {
+    const copyBtns = dynamicContent.querySelectorAll('.btn-copy-code');
+    copyBtns.forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const wrapper = btn.closest('.code-block-wrapper');
+        const codeEl = wrapper ? wrapper.querySelector('.code-content code') : null;
+        if (!codeEl) return;
+
+        const textToCopy = codeEl.innerText || codeEl.textContent;
+        try {
+          await navigator.clipboard.writeText(textToCopy);
+          btn.classList.add('copied');
+          btn.innerHTML = '<span>✓ Copied!</span>';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Code`;
+          }, 2000);
+        } catch {
+          btn.innerText = 'Copy failed';
+        }
+      });
+    });
+  }
+
+  function updateReadingProgress() {
+    const scrollable = modalBody.scrollHeight - modalBody.clientHeight;
+    if (scrollable <= 0) {
+      progressBar.style.width = '100%';
+      progressPill.textContent = '100% READ';
+      return;
+    }
+    const scrolled = modalBody.scrollTop;
+    const pct = Math.min(100, Math.max(0, Math.round((scrolled / scrollable) * 100)));
+    progressBar.style.width = `${pct}%`;
+    progressPill.textContent = `${pct}% READ`;
+  }
+
+  function openArticle(articleId, triggerEl) {
+    const data = ARTICLES_DB[articleId];
+    if (!data) return;
+
+    lastActiveTrigger = triggerEl || null;
+
+    terminalTitle.textContent = data.path;
+    categoryBadge.textContent = data.category;
+    readTimeBadge.textContent = data.readTime;
+    dateBadge.textContent = data.date;
+    articleTitle.textContent = data.title;
+    articleLead.textContent = data.lead;
+    dynamicContent.innerHTML = data.content;
+
+    bindCopyButtons();
+
+    modal.hidden = false;
+    overlay.hidden = false;
+    modalBody.scrollTop = 0;
+    updateReadingProgress();
+
+    modalBody.focus();
+  }
+
+  function closeArticle() {
+    modal.hidden = true;
+    overlay.hidden = true;
+    if (lastActiveTrigger && typeof lastActiveTrigger.focus === 'function') {
+      lastActiveTrigger.focus();
+    }
+  }
+
+  // Reading progress scroll event
+  modalBody.addEventListener('scroll', updateReadingProgress, { passive: true });
+
+  // Open triggers
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-open-article]');
+    if (btn) {
+      const id = btn.getAttribute('data-open-article');
+      openArticle(id, btn);
+    }
+  });
+
+  // Close triggers
+  if (closeBtn) closeBtn.addEventListener('click', closeArticle);
+  if (closeDot) closeDot.addEventListener('click', closeArticle);
+  if (overlay) overlay.addEventListener('click', closeArticle);
+
+  if (backToTopBtn) {
+    backToTopBtn.addEventListener('click', () => {
+      modalBody.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) {
+      e.preventDefault();
+      closeArticle();
+    }
+  });
+}
+

@@ -299,6 +299,7 @@
           <span class="flight-badge flight-duration" data-flight-duration></span>
           <span class="flight-badge flight-time-difference" data-time-difference></span>
         </div>
+        <button type="button" class="btn-voucher-trigger" onclick="openVoucherModal('reykjavik')" aria-label="Print or download Reykjavik voucher">Print / Download Voucher 🖨️</button>
       </div>
 
       <div class="card" data-region="asia" data-destination="kyoto">
@@ -310,6 +311,7 @@
           <span class="flight-badge flight-duration" data-flight-duration></span>
           <span class="flight-badge flight-time-difference" data-time-difference></span>
         </div>
+        <button type="button" class="btn-voucher-trigger" onclick="openVoucherModal('kyoto')" aria-label="Print or download Kyoto voucher">Print / Download Voucher 🖨️</button>
       </div>
     </div>
   </main>
@@ -739,6 +741,9 @@
               <button type="button" class="btn-save-estimate" id="btn-save-estimate" onclick="saveExpeditionEstimate()">
                 <span>💾 Save Expedition Estimate</span>
               </button>
+              <button type="button" class="btn-voucher-planner" id="btn-open-voucher-planner" onclick="openVoucherModal('active')">
+                <span>🎫 Generate Printable Voucher</span>
+              </button>
               <button type="button" class="btn-reset-planner" id="btn-reset-planner" onclick="resetExpeditionBudget()">
                 <span>↺ Reset</span>
               </button>
@@ -754,6 +759,111 @@
     </div>
   </section>
   <!-- ===== END Issue #211 ===== -->
+
+  <!-- ===== BEGIN Issue #305: Printable Expedition Itinerary Voucher Generator ===== -->
+  <div id="voucherBackdrop" class="voucher-backdrop" onclick="closeVoucherModal()"></div>
+  <dialog id="voucherModal" class="voucher-modal" aria-labelledby="vExpeditionTitle">
+    <div class="voucher-dialog-controls no-print">
+      <button type="button" class="btn-print-action" onclick="printVoucher()">
+        <span>🖨️ Print / Save as PDF</span>
+      </button>
+      <button type="button" class="btn-voucher-close" onclick="closeVoucherModal()" aria-label="Close voucher">&times;</button>
+    </div>
+
+    <div class="voucher-document" id="printableVoucherDocument">
+      <header class="voucher-doc-header">
+        <div class="voucher-brand-row">
+          <div class="voucher-brand">
+            <span class="brand-compass">🧭</span>
+            <div>
+              <strong class="voucher-brand-name">ODYSSEY EXPEDITIONS</strong>
+              <small class="voucher-brand-sub">OFFICIAL EXPEDITION ITINERARY & SATELLITE EMERGENCY PASS</small>
+            </div>
+          </div>
+          <div class="voucher-qr-wrap">
+            <svg class="voucher-qr-svg" viewBox="0 0 100 100" width="85" height="85" aria-label="Voucher Verification QR Code">
+              <rect width="100" height="100" fill="#ffffff" stroke="#111827" stroke-width="2" />
+              <!-- Finder top-left -->
+              <rect x="8" y="8" width="24" height="24" fill="none" stroke="#111827" stroke-width="3" />
+              <rect x="14" y="14" width="12" height="12" fill="#111827" />
+              <!-- Finder top-right -->
+              <rect x="68" y="8" width="24" height="24" fill="none" stroke="#111827" stroke-width="3" />
+              <rect x="74" y="14" width="12" height="12" fill="#111827" />
+              <!-- Finder bottom-left -->
+              <rect x="8" y="68" width="24" height="24" fill="none" stroke="#111827" stroke-width="3" />
+              <rect x="14" y="74" width="12" height="12" fill="#111827" />
+              <!-- Data Dots -->
+              <g fill="#111827">
+                <rect x="40" y="10" width="5" height="5" /><rect x="50" y="10" width="5" height="5" /><rect x="45" y="20" width="5" height="5" />
+                <rect x="10" y="40" width="5" height="5" /><rect x="25" y="40" width="5" height="5" /><rect x="40" y="40" width="5" height="5" />
+                <rect x="55" y="40" width="5" height="5" /><rect x="70" y="40" width="5" height="5" /><rect x="85" y="40" width="5" height="5" />
+                <rect x="15" y="52" width="5" height="5" /><rect x="35" y="52" width="5" height="5" /><rect x="50" y="52" width="5" height="5" />
+                <rect x="75" y="52" width="5" height="5" /><rect x="40" y="65" width="5" height="5" /><rect x="55" y="65" width="5" height="5" />
+                <rect x="70" y="65" width="5" height="5" /><rect x="85" y="65" width="5" height="5" /><rect x="45" y="78" width="5" height="5" />
+                <rect x="60" y="78" width="5" height="5" /><rect x="80" y="78" width="5" height="5" />
+              </g>
+            </svg>
+            <span class="qr-caption" id="voucherCodeCaption">PASS #ODY-8942-X</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="voucher-status-ribbon">
+        <span>BOOKING STATUS: <strong class="voucher-confirmed">CONFIRMED & PERMITS VALIDATED</strong></span>
+        <span id="voucherTimestamp">ISSUED: 06 NOV 2026</span>
+      </div>
+
+      <div class="voucher-grid">
+        <div class="voucher-block">
+          <span class="v-label">EXPEDITION TITLE</span>
+          <strong class="v-value" id="vExpeditionTitle">Reykjavik Aurora Glaciers</strong>
+        </div>
+        <div class="voucher-block">
+          <span class="v-label">REGION / TERRITORY</span>
+          <strong class="v-value" id="vExpeditionRegion">Nordic Arctic Outpost</strong>
+        </div>
+        <div class="voucher-block">
+          <span class="v-label">DURATION & SCHEDULE</span>
+          <strong class="v-value" id="vExpeditionDates">7 Days • Iceland Heli-Hiking</strong>
+        </div>
+        <div class="voucher-block">
+          <span class="v-label">LEAD EXPLORER</span>
+          <strong class="v-value" id="vExplorerName">Aditya Narayan Padhi (Tier 1 Certified)</strong>
+        </div>
+      </div>
+
+      <!-- Emergency Satellite Coordinates & Telemetry -->
+      <div class="voucher-satellite-card">
+        <div class="sat-header">
+          <span class="sat-icon">📡</span>
+          <strong>EMERGENCY SATELLITE TELEMETRY & BEACON COORDINATES</strong>
+        </div>
+        <div class="sat-grid">
+          <div><span>Rendezvous Coordinates:</span> <strong id="vSatCoords">64°08'47"N, 21°56'05"W</strong></div>
+          <div><span>Satellite Frequency:</span> <strong>Iridium 1621.25 MHz (Global SBD)</strong></div>
+          <div><span>SOS Protocol:</span> <strong>Odyssey Base Camp Alpha (Direct Relay)</strong></div>
+          <div><span>Elevation Max:</span> <strong id="vElevation">2,110m (Glacier Plateau)</strong></div>
+        </div>
+      </div>
+
+      <!-- Required Gear Checklist -->
+      <div class="voucher-gear-section">
+        <div class="v-section-title">REQUIRED MANDATORY EXPEDITION GEAR</div>
+        <div class="v-gear-grid" id="vGearGrid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <footer class="voucher-doc-footer">
+        <p>This verified voucher constitutes your official pass for national park permits, chartered helicopter logistics, and certified expedition guide check-in. Carry a printed copy or offline cached PDF at all times during remote field transit.</p>
+        <div class="voucher-sig-row">
+          <span>Odyssey Expeditions Lead Master Guide · Verified Signature</span>
+          <span class="sig-seal">🛡️ OFFICIAL ADVENTURE SEAL</span>
+        </div>
+      </footer>
+    </div>
+  </dialog>
+  <!-- ===== END Issue #305 ===== -->
 
   <footer class="site-footer">
     <p>© Odyssey Expeditions · Travel thoughtfully. Explore boldly.</p>

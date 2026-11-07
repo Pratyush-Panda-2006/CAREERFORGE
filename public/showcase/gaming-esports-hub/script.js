@@ -1604,3 +1604,136 @@ if (document.readyState === 'loading') {
   updateViewerDisplays();
 })();
 /* ===== END Issue #196 ===== */
+
+/* ===== BEGIN Issue #291: Tournament Match Prediction Poll Widget ===== */
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'esports_prediction_votes';
+
+  var POLLS_DATA = {
+    m_finals: {
+      teamA: 'Sentinels',
+      teamB: 'Fnatic',
+      votesA: 8412,
+      votesB: 4732
+    },
+    m_lower: {
+      teamA: 'Paper Rex',
+      teamB: 'DRX Global',
+      votesA: 5890,
+      votesB: 5436
+    }
+  };
+
+  function readSavedVotes() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveVote(matchId, teamPick) {
+    try {
+      var saved = readSavedVotes();
+      saved[matchId] = teamPick;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    } catch (e) {
+      // Storage unavailable, in-memory vote still functions
+    }
+  }
+
+  function initPredictionPoll() {
+    var section = document.getElementById('match-prediction-poll');
+    if (!section) return;
+
+    var savedVotes = readSavedVotes();
+
+    function updateMatchUI(matchId) {
+      var poll = POLLS_DATA[matchId];
+      if (!poll) return;
+
+      var total = poll.votesA + poll.votesB;
+      var pctA = Math.round((poll.votesA / total) * 100);
+      var pctB = 100 - pctA;
+
+      var pctAEl = document.getElementById('pct-a-' + matchId);
+      var pctBEl = document.getElementById('pct-b-' + matchId);
+      var barAEl = document.getElementById('bar-a-' + matchId);
+      var barBEl = document.getElementById('bar-b-' + matchId);
+      var totalEl = document.getElementById('total-' + matchId);
+      var statusEl = document.getElementById('status-' + matchId);
+
+      if (pctAEl) pctAEl.textContent = pctA + '% (' + poll.votesA.toLocaleString() + ' votes)';
+      if (pctBEl) pctBEl.textContent = pctB + '% (' + poll.votesB.toLocaleString() + ' votes)';
+
+      if (barAEl) barAEl.style.width = pctA + '%';
+      if (barBEl) barBEl.style.width = pctB + '%';
+
+      if (totalEl) totalEl.textContent = total.toLocaleString() + ' Total Votes';
+
+      var userPick = savedVotes[matchId];
+      var btnA = section.querySelector('.btn-vote-a[data-match="' + matchId + '"]');
+      var btnB = section.querySelector('.btn-vote-b[data-match="' + matchId + '"]');
+
+      if (userPick) {
+        var teamName = userPick === 'a' ? poll.teamA : poll.teamB;
+        if (statusEl) {
+          statusEl.innerHTML = '<span class="poll-status-indicator" style="color: #10b981;">✓</span> Pick Locked: You voted for <strong>' + teamName + '</strong>';
+        }
+        if (btnA) {
+          btnA.classList.toggle('voted', userPick === 'a');
+          btnA.disabled = true;
+          if (userPick === 'a') btnA.innerHTML = '<span>✓</span> Picked';
+        }
+        if (btnB) {
+          btnB.classList.toggle('voted', userPick === 'b');
+          btnB.disabled = true;
+          if (userPick === 'b') btnB.innerHTML = '<span>✓</span> Picked';
+        }
+      }
+    }
+
+    // Attach click listeners to voting buttons
+    section.querySelectorAll('.btn-vote-team').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var matchId = btn.getAttribute('data-match');
+        var teamPick = btn.getAttribute('data-team');
+        if (!matchId || !teamPick) return;
+
+        // Prevent double voting
+        if (savedVotes[matchId]) return;
+
+        savedVotes[matchId] = teamPick;
+        saveVote(matchId, teamPick);
+
+        if (teamPick === 'a') {
+          POLLS_DATA[matchId].votesA += 1;
+        } else {
+          POLLS_DATA[matchId].votesB += 1;
+        }
+
+        updateMatchUI(matchId);
+      });
+    });
+
+    // Initial render
+    Object.keys(POLLS_DATA).forEach(function (matchId) {
+      // If user had already voted in previous visit, apply it to vote tallies
+      if (savedVotes[matchId]) {
+        if (savedVotes[matchId] === 'a') POLLS_DATA[matchId].votesA += 1;
+        else POLLS_DATA[matchId].votesB += 1;
+      }
+      updateMatchUI(matchId);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPredictionPoll);
+  } else {
+    initPredictionPoll();
+  }
+})();
+/* ===== END Issue #291 ===== */

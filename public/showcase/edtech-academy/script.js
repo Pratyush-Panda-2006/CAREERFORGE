@@ -1800,3 +1800,414 @@ function showCertificate(name) {
   recalculateSlider();
 })();
 /* ===== END Issue #190 ===== */
+
+// ===============================================================
+// Course Completion Certificate Generator (Issue #285)
+// ===============================================================
+(function initCertificateGenerator() {
+  'use strict';
+
+  const canvas = document.getElementById('certCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const nameInput = document.getElementById('certStudentName');
+  const trackSelect = document.getElementById('certCourseTrack');
+  const dateInput = document.getElementById('certDate');
+  const distinctionSelect = document.getElementById('certDistinction');
+  const verifyIdInput = document.getElementById('certVerifyId');
+  const regenIdBtn = document.getElementById('certRegenIdBtn');
+  const downloadBtn = document.getElementById('certDownloadBtn');
+  const copyLinkBtn = document.getElementById('certCopyLinkBtn');
+
+  function generateRandomId() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const num = Math.floor(1000 + Math.random() * 9000);
+    return `SYN-2026-${num}-${code}`;
+  }
+
+  function drawCornerFiligree(ctx, x, y, flipX, flipY) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+
+    ctx.strokeStyle = '#d4af37';
+    ctx.fillStyle = '#d4af37';
+    ctx.lineWidth = 2;
+
+    // Corner L-bracket
+    ctx.beginPath();
+    ctx.moveTo(0, 36);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(36, 0);
+    ctx.stroke();
+
+    // Corner decorative diamond
+    ctx.beginPath();
+    ctx.moveTo(12, 12);
+    ctx.lineTo(16, 8);
+    ctx.lineTo(20, 12);
+    ctx.lineTo(16, 16);
+    ctx.closePath();
+    ctx.fill();
+
+    // Secondary accent line
+    ctx.beginPath();
+    ctx.moveTo(8, 28);
+    ctx.lineTo(8, 8);
+    ctx.lineTo(28, 8);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawSeal(ctx, cx, cy, radius) {
+    ctx.save();
+
+    // Ribbon tails
+    ctx.fillStyle = '#991b1b';
+    ctx.beginPath();
+    ctx.moveTo(cx - 24, cy + radius - 5);
+    ctx.lineTo(cx - 36, cy + radius + 45);
+    ctx.lineTo(cx - 16, cy + radius + 35);
+    ctx.lineTo(cx, cy + radius + 45);
+    ctx.lineTo(cx - 6, cy + radius - 5);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#b91c1c';
+    ctx.beginPath();
+    ctx.moveTo(cx + 6, cy + radius - 5);
+    ctx.lineTo(cx, cy + radius + 45);
+    ctx.lineTo(cx + 16, cy + radius + 35);
+    ctx.lineTo(cx + 36, cy + radius + 45);
+    ctx.lineTo(cx + 24, cy + radius - 5);
+    ctx.closePath();
+    ctx.fill();
+
+    // Outer scalloped gold ring (24 points)
+    const points = 24;
+    ctx.beginPath();
+    for (let i = 0; i < points * 2; i++) {
+      const r = i % 2 === 0 ? radius : radius - 5;
+      const angle = (i * Math.PI) / points;
+      const px = cx + Math.cos(angle) * r;
+      const py = cy + Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+
+    const goldGrad = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
+    goldGrad.addColorStop(0, '#f9e29b');
+    goldGrad.addColorStop(0.5, '#d4af37');
+    goldGrad.addColorStop(1, '#aa7c11');
+    ctx.fillStyle = goldGrad;
+    ctx.fill();
+
+    // Inner dark circle
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius - 10, 0, Math.PI * 2);
+    ctx.fillStyle = '#0f172a';
+    ctx.fill();
+    ctx.strokeStyle = '#d4af37';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Inner gold 5-point star
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const outerA = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+      const px = cx + Math.cos(outerA) * (radius - 22);
+      const py = cy + Math.sin(outerA) * (radius - 22);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = '#d4af37';
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawSignature(ctx, startX, startY, width) {
+    ctx.save();
+    ctx.strokeStyle = '#60a5fa';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.bezierCurveTo(startX + 20, startY - 22, startX + 45, startY + 12, startX + 70, startY - 14);
+    ctx.bezierCurveTo(startX + 95, startY - 30, startX + 110, startY + 5, startX + 140, startY - 8);
+    ctx.bezierCurveTo(startX + 160, startY - 18, startX + 180, startY + 6, startX + width, startY);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawMockQrCode(ctx, x, y, size) {
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, y, size, size);
+
+    ctx.fillStyle = '#0f172a';
+    // Corner finder patterns (7x7 module equivalents)
+    const m = size / 14;
+
+    function drawFinder(fx, fy) {
+      ctx.fillRect(fx, fy, m * 4, m * 4);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(fx + m * 0.7, fy + m * 0.7, m * 2.6, m * 2.6);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(fx + m * 1.3, fy + m * 1.3, m * 1.4, m * 1.4);
+    }
+
+    drawFinder(x + m, y + m);
+    drawFinder(x + size - m * 5, y + m);
+    drawFinder(x + m, y + size - m * 5);
+
+    // Inner pseudo data points
+    for (let r = 0; r < 6; r++) {
+      for (let c = 0; c < 6; c++) {
+        if ((r * 3 + c * 7) % 5 < 3) {
+          ctx.fillRect(x + m * 5 + c * m * 0.8, y + m * 5 + r * m * 0.8, m * 0.7, m * 0.7);
+        }
+      }
+    }
+
+    ctx.restore();
+  }
+
+  function renderCertificate() {
+    const studentName = (nameInput.value || 'Graduate Name').trim();
+    const track = trackSelect ? trackSelect.value : 'LLM Inference Architecture & Distributed Systems';
+    const issueDate = (dateInput.value || 'November 7, 2026').trim();
+    const distinction = distinctionSelect ? distinctionSelect.value : 'Passed with Highest Distinction';
+    const verifyId = (verifyIdInput.value || 'SYN-2026-9842-XF').trim();
+
+    const w = 1200;
+    const h = 800;
+
+    // Clear
+    ctx.clearRect(0, 0, w, h);
+
+    // 1. Background radial gradient
+    const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 80, w / 2, h / 2, 700);
+    bgGrad.addColorStop(0, '#0f172a');
+    bgGrad.addColorStop(0.65, '#0b0f19');
+    bgGrad.addColorStop(1, '#05070d');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Subtle background mesh / tech dots
+    ctx.fillStyle = 'rgba(99, 102, 241, 0.03)';
+    for (let x = 60; x < w - 60; x += 32) {
+      for (let y = 60; y < h - 60; y += 32) {
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
+
+    // 2. Borders
+    const goldGrad = ctx.createLinearGradient(0, 0, w, h);
+    goldGrad.addColorStop(0, '#f9e29b');
+    goldGrad.addColorStop(0.25, '#d4af37');
+    goldGrad.addColorStop(0.5, '#aa7c11');
+    goldGrad.addColorStop(0.75, '#f9e29b');
+    goldGrad.addColorStop(1, '#d4af37');
+
+    // Outer border
+    ctx.strokeStyle = goldGrad;
+    ctx.lineWidth = 5;
+    ctx.strokeRect(20, 20, w - 40, h - 40);
+
+    // Inset line
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(30, 30, w - 60, h - 60);
+
+    // Corner Filigree Brackets
+    drawCornerFiligree(ctx, 36, 36, false, false);
+    drawCornerFiligree(ctx, w - 36, 36, true, false);
+    drawCornerFiligree(ctx, 36, h - 36, false, true);
+    drawCornerFiligree(ctx, w - 36, h - 36, true, true);
+
+    // 3. Top Emblem & Academy Title
+    ctx.textAlign = 'center';
+
+    // Crest emblem at (600, 85)
+    ctx.save();
+    ctx.fillStyle = '#d4af37';
+    ctx.beginPath();
+    ctx.moveTo(600, 70);
+    ctx.lineTo(614, 85);
+    ctx.lineTo(600, 100);
+    ctx.lineTo(586, 85);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    ctx.font = '700 13px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#d4af37';
+    ctx.letterSpacing = '6px';
+    ctx.fillText('SYNAPSE ACADEMY OF ADVANCED COMPUTING', 600, 126);
+    ctx.letterSpacing = 'normal';
+
+    ctx.font = '800 30px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.letterSpacing = '2px';
+    ctx.fillText('CERTIFICATE OF MASTERY & COMPLETION', 600, 172);
+    ctx.letterSpacing = 'normal';
+
+    // 4. Conferred Upon
+    ctx.font = '500 13px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.letterSpacing = '3px';
+    ctx.fillText('THIS RECOGNITION IS PROUDLY CONFERRED UPON', 600, 230);
+    ctx.letterSpacing = 'normal';
+
+    // Student Name
+    ctx.font = '800 48px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#f8fafc';
+    ctx.shadowColor = 'rgba(99, 102, 241, 0.5)';
+    ctx.shadowBlur = 12;
+    ctx.fillText(studentName, 600, 298);
+    ctx.shadowBlur = 0;
+
+    // Gold decorative underline under name
+    const nameWidth = Math.max(340, ctx.measureText(studentName).width + 60);
+    const lineX1 = 600 - nameWidth / 2;
+    const lineX2 = 600 + nameWidth / 2;
+    ctx.strokeStyle = goldGrad;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(lineX1, 318);
+    ctx.lineTo(lineX2, 318);
+    ctx.stroke();
+
+    // Center diamond on line
+    ctx.fillStyle = '#d4af37';
+    ctx.beginPath();
+    ctx.moveTo(600, 314);
+    ctx.lineTo(604, 318);
+    ctx.lineTo(600, 322);
+    ctx.lineTo(596, 318);
+    ctx.closePath();
+    ctx.fill();
+
+    // 5. Course Details
+    ctx.font = '400 15px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('for successfully demonstrating engineering mastery and defense of the advanced curriculum in', 600, 362);
+
+    ctx.font = '700 24px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillText(track, 600, 404);
+
+    // Distinction
+    ctx.font = 'italic 600 15px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillText(`“${distinction}”`, 600, 442);
+
+    // 6. Academy Gold Seal
+    drawSeal(ctx, 220, 580, 52);
+
+    // 7. Signatures
+    // Instructor Signature Block
+    drawSignature(ctx, 420, 570, 180);
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(410, 590);
+    ctx.lineTo(630, 590);
+    ctx.stroke();
+
+    ctx.font = '600 14px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#f1f5f9';
+    ctx.textAlign = 'center';
+    ctx.fillText('Dr. Aris Thorne', 520, 612);
+
+    ctx.font = '400 12px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('Lead Systems Architect & Chair', 520, 630);
+
+    // Dean Signature Block
+    drawSignature(ctx, 720, 570, 180);
+    ctx.strokeStyle = '#334155';
+    ctx.beginPath();
+    ctx.moveTo(710, 590);
+    ctx.lineTo(930, 590);
+    ctx.stroke();
+
+    ctx.font = '600 14px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillText('Elena Rostova, M.Sc.', 820, 612);
+
+    ctx.font = '400 12px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('Dean of Engineering Curriculum', 820, 630);
+
+    // 8. Bottom QR Code & Verification Line
+    drawMockQrCode(ctx, 1040, 640, 72);
+
+    ctx.textAlign = 'left';
+    ctx.font = '500 11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText(`VERIFICATION ID: ${verifyId}`, 80, 735);
+    ctx.fillText(`ISSUE DATE: ${issueDate.toUpperCase()}`, 400, 735);
+    ctx.fillText('DIGITALLY SIGNED & VERIFIED ON-CHAIN', 730, 735);
+  }
+
+  // Event Listeners
+  if (nameInput) nameInput.addEventListener('input', renderCertificate);
+  if (trackSelect) trackSelect.addEventListener('change', renderCertificate);
+  if (dateInput) dateInput.addEventListener('input', renderCertificate);
+  if (distinctionSelect) distinctionSelect.addEventListener('change', renderCertificate);
+
+  if (regenIdBtn && verifyIdInput) {
+    regenIdBtn.addEventListener('click', () => {
+      verifyIdInput.value = generateRandomId();
+      renderCertificate();
+    });
+  }
+
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+      const rawName = nameInput.value || 'Graduate';
+      const cleanName = rawName.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `${cleanName}_Synapse_Certificate.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  }
+
+  if (copyLinkBtn && verifyIdInput) {
+    copyLinkBtn.addEventListener('click', async () => {
+      const url = `https://synapse.academy/credentials/verify?id=${encodeURIComponent(verifyIdInput.value)}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        const originalText = copyLinkBtn.innerHTML;
+        copyLinkBtn.innerHTML = '<span style="color:#34d399">✓ Copied Link!</span>';
+        setTimeout(() => {
+          copyLinkBtn.innerHTML = originalText;
+        }, 2200);
+      } catch {
+        alert(`Verification Link: ${url}`);
+      }
+    });
+  }
+
+  // Initial draw
+  renderCertificate();
+})();
+

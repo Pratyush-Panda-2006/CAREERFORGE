@@ -717,3 +717,110 @@ function initOnboardingChecklist() {
     steps[0].querySelector('.onb-check').focus();
   });
 }
+
+/* ===== BEGIN Issue #303: Product Feature Tour Modal with Step-by-Step Navigation Carousel ===== */
+(function () {
+  'use strict';
+
+  let currentSlide = 0;
+  const TOTAL_SLIDES = 4;
+
+  function initTourModal() {
+    const openBtn = document.getElementById('openTourBtn');
+    const modal = document.getElementById('tourModal');
+    const backdrop = document.getElementById('tourBackdrop');
+    const closeBtn = document.getElementById('tourCloseBtn');
+    const prevBtn = document.getElementById('tourPrevBtn');
+    const nextBtn = document.getElementById('tourNextBtn');
+    const track = document.getElementById('tourSlidesTrack');
+    const dots = document.querySelectorAll('.step-dot');
+
+    if (!modal) return;
+
+    function goToSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= TOTAL_SLIDES) index = TOTAL_SLIDES - 1;
+      currentSlide = index;
+
+      if (track) {
+        track.style.transform = `translateX(-${currentSlide * 100}%)`;
+      }
+
+      // Update dots
+      dots.forEach((dot, idx) => {
+        const isActive = idx === currentSlide;
+        dot.classList.toggle('active', isActive);
+        dot.setAttribute('aria-selected', String(isActive));
+      });
+
+      // Update buttons
+      if (prevBtn) {
+        prevBtn.disabled = currentSlide === 0;
+      }
+      if (nextBtn) {
+        nextBtn.textContent = currentSlide === TOTAL_SLIDES - 1 ? 'Finish Tour ✓' : 'Next →';
+      }
+    }
+
+    function openModal() {
+      goToSlide(0);
+      modal.classList.add('open');
+      if (backdrop) backdrop.classList.add('open');
+      modal.focus();
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      if (backdrop) backdrop.classList.remove('open');
+    }
+
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        goToSlide(currentSlide - 1);
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (currentSlide === TOTAL_SLIDES - 1) {
+          closeModal();
+        } else {
+          goToSlide(currentSlide + 1);
+        }
+      });
+    }
+
+    dots.forEach((dot, idx) => {
+      dot.addEventListener('click', () => {
+        goToSlide(idx);
+      });
+    });
+
+    // Arrow keys & Escape
+    document.addEventListener('keydown', (e) => {
+      if (!modal.classList.contains('open')) return;
+
+      if (e.key === 'ArrowRight') {
+        goToSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft') {
+        goToSlide(currentSlide - 1);
+      } else if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    window.openTourModal = openModal;
+    window.closeTourModal = closeModal;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTourModal);
+  } else {
+    initTourModal();
+  }
+})();
+/* ===== END Issue #303 ===== */

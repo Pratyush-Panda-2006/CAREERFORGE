@@ -2795,3 +2795,282 @@ body {
   background: #772ce8;
 }
 /* ===== END Issue #196 ===== */
+
+/* ===== BEGIN Issue #291: Tournament Match Prediction Poll Widget ===== */
+.prediction-poll-section {
+  max-width: 1200px;
+  margin: 60px auto;
+  padding: 0 24px;
+}
+
+.poll-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.poll-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ff4655;
+  background: rgba(255, 70, 85, 0.12);
+  border: 1px solid rgba(255, 70, 85, 0.3);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.poll-header h2 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.poll-sub {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.prediction-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 840px) {
+  .prediction-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.poll-card {
+  background: radial-gradient(circle at top, #161226 0%, #0d0a17 100%);
+  border: 1px solid rgba(145, 70, 255, 0.25);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.poll-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(145, 70, 255, 0.5);
+}
+
+.poll-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+}
+
+.poll-stage-badge {
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.poll-countdown {
+  color: #38bdf8;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.poll-teams-matchup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.poll-team {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.poll-team-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #1f1a33;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.red-glow { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); border-color: #ef4444; }
+.orange-glow { box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); border-color: #f97316; }
+.purple-glow { box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); border-color: #a855f7; }
+.blue-glow { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); border-color: #3b82f6; }
+
+.poll-team-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.team-seed {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.team-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.team-record {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.btn-vote-team {
+  background: #241d3b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 120px;
+  justify-content: center;
+}
+
+.btn-vote-team:hover:not(:disabled) {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.btn-vote-a:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.btn-vote-b:hover:not(:disabled) {
+  background: rgba(249, 115, 22, 0.25);
+  border-color: #f97316;
+  color: #fdba74;
+}
+
+.btn-vote-team.voted {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+}
+
+.btn-vote-team:disabled:not(.voted) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.poll-vs-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vs-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #64748b;
+  background: #120e21;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.poll-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.poll-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pct-team-a {
+  color: #f87171;
+}
+
+.pct-team-b {
+  color: #fb923c;
+}
+
+.poll-bar-track {
+  height: 12px;
+  background: #1e1933;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+}
+
+.poll-bar-fill-a {
+  height: 100%;
+  background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+  transition: width 0.4s ease;
+}
+
+.poll-bar-fill-b {
+  height: 100%;
+  background: linear-gradient(90deg, #ea580c 0%, #f97316 100%);
+  transition: width 0.4s ease;
+}
+
+.poll-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+}
+
+.poll-user-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.poll-status-indicator {
+  color: #38bdf8;
+}
+
+.poll-total-votes {
+  font-family: 'JetBrains Mono', monospace;
+  color: #64748b;
+}
+/* ===== END Issue #291 ===== */

@@ -912,3 +912,429 @@ kbd.key-pressed {
     transition: none;
   }
 }
+
+/* ===============================================================
+   Technical Articles Section & Reader Modal (Issue #279)
+   =============================================================== */
+.articles-section {
+  margin-bottom: 40px;
+}
+
+.articles-header {
+  margin-bottom: 18px;
+}
+
+.articles-header h2 {
+  font-size: 1.25rem;
+  color: #58a6ff;
+  letter-spacing: -0.3px;
+}
+
+.articles-sub {
+  color: #8b949e;
+  font-size: 0.88rem;
+  margin-top: 4px;
+}
+
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.article-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.article-card:hover {
+  border-color: #58a6ff;
+  transform: translateY(-2px);
+}
+
+.article-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.article-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #58a6ff;
+  letter-spacing: 0.5px;
+}
+
+.article-readtime {
+  font-size: 0.74rem;
+  color: #8b949e;
+}
+
+.article-card-title {
+  font-size: 1.05rem;
+  color: #f0f6fc;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.article-card-desc {
+  font-size: 0.83rem;
+  color: #8b949e;
+  line-height: 1.45;
+  margin-bottom: 16px;
+  flex-grow: 1;
+}
+
+.article-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.article-date {
+  font-size: 0.75rem;
+  color: #6e7681;
+}
+
+.btn-read-article {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #58a6ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-read-article:hover {
+  background: rgba(88, 166, 255, 0.12);
+  border-color: #58a6ff;
+  color: #79c0ff;
+}
+
+/* Modal Overlay & Container */
+.article-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(1, 4, 9, 0.8);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+}
+
+.article-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(860px, 94vw);
+  height: min(86vh, 880px);
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+}
+
+.article-modal-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  flex-shrink: 0;
+}
+
+.article-header-meta {
+  margin-left: auto;
+  margin-right: 14px;
+}
+
+.article-progress-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.article-modal-close {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+  transition: color 0.2s;
+}
+
+.article-modal-close:hover {
+  color: #f85149;
+}
+
+/* Reading Progress Bar */
+.article-progress-track {
+  width: 100%;
+  height: 4px;
+  background: #21262d;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.article-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #3fb950);
+  width: 0%;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+  transition: width 0.08s linear;
+}
+
+/* Modal Body */
+.article-modal-body {
+  padding: 32px 40px;
+  overflow-y: auto;
+  flex-grow: 1;
+  line-height: 1.7;
+  color: #c9d1d9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  outline: none;
+}
+
+.article-meta-banner {
+  border-bottom: 1px solid #21262d;
+  padding-bottom: 22px;
+  margin-bottom: 28px;
+}
+
+.article-meta-badges {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  margin-bottom: 10px;
+}
+
+.article-category-badge {
+  color: #58a6ff;
+  font-weight: 700;
+  background: rgba(88, 166, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.article-read-badge,
+.article-date-badge {
+  color: #8b949e;
+}
+
+.modal-article-title {
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  font-weight: 800;
+  color: #f0f6fc;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.modal-article-lead {
+  color: #8b949e;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+/* Article Typography */
+.article-dynamic-content h2 {
+  font-size: 1.35rem;
+  color: #f0f6fc;
+  margin: 32px 0 14px;
+  font-weight: 700;
+}
+
+.article-dynamic-content h3 {
+  font-size: 1.15rem;
+  color: #e6edf3;
+  margin: 24px 0 10px;
+  font-weight: 600;
+}
+
+.article-dynamic-content p {
+  margin-bottom: 16px;
+  font-size: 0.98rem;
+  color: #c9d1d9;
+}
+
+.article-dynamic-content ul {
+  margin: 12px 0 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.article-callout {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-left: 4px solid #58a6ff;
+  background: rgba(88, 166, 255, 0.08);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.93rem;
+  color: #cbd5e1;
+}
+
+/* Code Snippet Blocks */
+.code-block-wrapper {
+  margin: 22px 0;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0d1117;
+  padding: 8px 14px;
+  border-bottom: 1px solid #30363d;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  color: #8b949e;
+}
+
+.btn-copy-code {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-copy-code:hover {
+  background: #21262d;
+  border-color: #8b949e;
+  color: #ffffff;
+}
+
+.btn-copy-code.copied {
+  border-color: #2ea043;
+  color: #3fb950;
+  background: rgba(46, 160, 67, 0.15);
+}
+
+.code-content {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #e6edf3;
+  background: transparent;
+}
+
+/* Article Modal Footer */
+.article-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid #21262d;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.author-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #238636, #2ea043);
+  color: #fff;
+  font-family: 'Fira Code', monospace;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.author-info strong {
+  font-size: 0.92rem;
+  color: #f0f6fc;
+}
+
+.author-info small {
+  font-size: 0.8rem;
+  color: #8b949e;
+}
+
+.btn-back-top {
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.btn-back-top:hover {
+  background: #21262d;
+  color: #58a6ff;
+  border-color: #58a6ff;
+}
+
+@media (max-width: 640px) {
+  .article-modal-body {
+    padding: 20px 16px;
+  }
+  .article-modal {
+    width: 96vw;
+    height: 92vh;
+  }
+}
+

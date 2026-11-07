@@ -378,6 +378,245 @@
   </section>
   <!-- END issue #193 -->
 
+  <!-- Festival Survival Packing Checklist (Issue #287) -->
+  <section class="packing-checklist-section" id="packing-checklist" aria-labelledby="packing-title">
+    <div class="packing-header">
+      <div class="packing-title-group">
+        <span class="packing-eyebrow">PULSE WAVE // EXPEDITION READINESS</span>
+        <h2 id="packing-title" class="packing-title">FESTIVAL SURVIVAL CHECKLIST</h2>
+        <p class="packing-sub">Track and verify your festival gear across Camping, Tech &amp; Gear, and Health essentials. Progress auto-saves to your device.</p>
+      </div>
+      <div class="packing-actions">
+        <button type="button" class="packing-btn reset-btn" id="packing-reset-btn" aria-label="Reset all packing items">
+          <svg class="packing-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Reset All
+        </button>
+        <button type="button" class="packing-btn checkall-btn" id="packing-checkall-btn" aria-label="Mark all items as packed">
+          <svg class="packing-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Pack All
+        </button>
+      </div>
+    </div>
+
+    <!-- Overall Readiness Card -->
+    <div class="packing-readiness-card" id="packing-overall-summary">
+      <div class="readiness-header">
+        <div class="readiness-label-group">
+          <span class="readiness-tag">MISSION READINESS</span>
+          <span class="readiness-status" id="packing-readiness-status">PREPARING GEAR</span>
+        </div>
+        <div class="readiness-stats">
+          <span class="readiness-count" id="packing-overall-count">0 / 15</span>
+          <span class="readiness-pct" id="packing-overall-pct">0%</span>
+        </div>
+      </div>
+      <div class="readiness-progress-track" role="progressbar" id="packing-overall-track" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Overall packing readiness">
+        <div class="readiness-progress-bar" id="packing-overall-bar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Category Columns Grid -->
+    <div class="packing-categories-grid">
+      <!-- Category 1: Camping -->
+      <div class="packing-cat-card" data-category="camping">
+        <div class="cat-card-header">
+          <div class="cat-title-wrap">
+            <span class="cat-badge camping-badge">CAMP</span>
+            <h3>Basecamp &amp; Shelter</h3>
+          </div>
+          <span class="cat-counter" id="count-camping">0 / 5</span>
+        </div>
+        <div class="cat-progress-track" aria-label="Camping category progress">
+          <div class="cat-progress-fill camping-fill" id="bar-camping" style="width: 0%"></div>
+        </div>
+        <ul class="packing-list" role="list">
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="camping" id="pack-tent" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Weatherproof Tent &amp; Stakes</strong>
+                <small>Heavy-duty pegs &amp; rainfly for sudden squalls</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="camping" id="pack-sleeping-bag" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Thermal Sleeping Bag &amp; Mat</strong>
+                <small>Night temperatures drop near the dome</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="camping" id="pack-lantern" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Solar / USB Camp Lantern</strong>
+                <small>Diffused ambient light for late tent returns</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="camping" id="pack-towel" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Microfiber Quick-Dry Towel</strong>
+                <small>Ultralight and dries in under 30 minutes</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="camping" id="pack-locks" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>TSA Luggage &amp; Tent Padlocks</strong>
+                <small>Keep essentials locked during stage sets</small>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Category 2: Gear -->
+      <div class="packing-cat-card" data-category="gear">
+        <div class="cat-card-header">
+          <div class="cat-title-wrap">
+            <span class="cat-badge gear-badge">GEAR</span>
+            <h3>Tech &amp; Rave Gear</h3>
+          </div>
+          <span class="cat-counter" id="count-gear">0 / 5</span>
+        </div>
+        <div class="cat-progress-track" aria-label="Gear category progress">
+          <div class="cat-progress-fill gear-fill" id="bar-gear" style="width: 0%"></div>
+        </div>
+        <ul class="packing-list" role="list">
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="gear" id="pack-hydration" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Hydration Pack (2L Bladder)</strong>
+                <small>Must be empty upon dome gate security check</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="gear" id="pack-earplugs" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>High-Fidelity Earplugs (-19dB)</strong>
+                <small>Hearing protection with clear acoustic fidelity</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="gear" id="pack-powerbank" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>20,000mAh Dual-Port Power Bank</strong>
+                <small>Keep phones &amp; LED flow gear charged all night</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="gear" id="pack-totem" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>LED Totem / Glow Flow Props</strong>
+                <small>Help your squad spot you in crowded pits</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="gear" id="pack-pouch" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Waterproof Phone Lanyard Pouch</strong>
+                <small>Touchscreen-friendly water &amp; dust barrier</small>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Category 3: Health & Essentials -->
+      <div class="packing-cat-card" data-category="health">
+        <div class="cat-card-header">
+          <div class="cat-title-wrap">
+            <span class="cat-badge health-badge">HEALTH</span>
+            <h3>Health &amp; Essentials</h3>
+          </div>
+          <span class="cat-counter" id="count-health">0 / 5</span>
+        </div>
+        <div class="cat-progress-track" aria-label="Health category progress">
+          <div class="cat-progress-fill health-fill" id="bar-health" style="width: 0%"></div>
+        </div>
+        <ul class="packing-list" role="list">
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="health" id="pack-electrolytes" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Electrolyte Tablets &amp; Packs</strong>
+                <small>Replenish salts during intense dancing hours</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="health" id="pack-firstaid" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>First Aid &amp; Blister Moleskin</strong>
+                <small>Bandages, antiseptic wipes, and pain relief</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="health" id="pack-sunscreen" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Sunscreen SPF 50+ &amp; Lip Balm</strong>
+                <small>UV protection for outdoor daytime stages</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="health" id="pack-poncho" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Emergency Rain Poncho</strong>
+                <small>Pocket-sized foldout waterproof shield</small>
+              </span>
+            </label>
+          </li>
+          <li class="packing-item-row">
+            <label class="packing-label">
+              <input type="checkbox" class="packing-checkbox" data-cat="health" id="pack-sanitizer" />
+              <span class="custom-chk"></span>
+              <span class="packing-text">
+                <strong>Hand Sanitizer &amp; Biodegradable Wipes</strong>
+                <small>Dome field sanitation &amp; festival hygiene</small>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <section class="tickets" id="tickets" aria-labelledby="tickets-title">
     <h2 id="tickets-title">GET YOUR PASS</h2>
     <p class="tickets-intro">Pick your tiers, add extras, and watch the total update. Groups of 5 or more tickets get 10% off.</p>
