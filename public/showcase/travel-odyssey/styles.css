@@ -1733,3 +1733,354 @@ body {
   margin-top: 14px;
 }
 /* ===== END Issue #211 ===== */
+
+/* ===== BEGIN Issue #305: Printable Expedition Itinerary Voucher Generator ===== */
+.btn-voucher-trigger {
+  width: 100%;
+  margin-top: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-voucher-trigger:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.btn-voucher-planner {
+  background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+  border: none;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 12px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
+}
+
+.btn-voucher-planner:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+/* Modal Dialog */
+.voucher-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: none;
+}
+
+.voucher-backdrop.open {
+  display: block;
+}
+
+.voucher-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 780px;
+  width: 92%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #ffffff;
+  color: #111827;
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  display: none;
+}
+
+.voucher-modal.open {
+  display: block;
+}
+
+.voucher-dialog-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: #0f172a;
+  border-radius: 16px 16px 0 0;
+}
+
+.btn-print-action {
+  background: #38bdf8;
+  color: #0f172a;
+  border: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-print-action:hover {
+  background: #7dd3fc;
+  transform: scale(1.02);
+}
+
+.btn-voucher-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btn-voucher-close:hover {
+  color: #ffffff;
+}
+
+/* Document Paper Styling */
+.voucher-document {
+  padding: 32px 36px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #ffffff;
+  color: #111827;
+}
+
+.voucher-doc-header {
+  border-bottom: 2px solid #111827;
+  padding-bottom: 20px;
+  margin-bottom: 18px;
+}
+
+.voucher-brand-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.voucher-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-compass {
+  font-size: 2.2rem;
+}
+
+.voucher-brand-name {
+  font-size: 1.4rem;
+  letter-spacing: 2px;
+  display: block;
+}
+
+.voucher-brand-sub {
+  font-size: 0.72rem;
+  color: #6b7280;
+  letter-spacing: 1px;
+  font-weight: 700;
+  display: block;
+}
+
+.voucher-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.voucher-qr-svg {
+  display: block;
+}
+
+.qr-caption {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 4px;
+  color: #374151;
+}
+
+.voucher-status-ribbon {
+  background: #f3f4f6;
+  border-left: 4px solid #10b981;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #374151;
+  margin-bottom: 20px;
+}
+
+.voucher-confirmed {
+  color: #059669;
+}
+
+.voucher-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.voucher-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.v-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 0.5px;
+}
+
+.v-value {
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.voucher-satellite-card {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  background: #fdfdfd;
+}
+
+.sat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #111827;
+  letter-spacing: 0.5px;
+  border-bottom: 1px dashed #d1d5db;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.sat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.sat-grid strong {
+  color: #111827;
+}
+
+.voucher-gear-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+.v-section-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #374151;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.v-gear-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.v-gear-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #1f2937;
+}
+
+.v-gear-check {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #059669;
+  border-radius: 3px;
+  color: #059669;
+  font-size: 10px;
+  text-align: center;
+  line-height: 12px;
+  font-weight: bold;
+}
+
+.voucher-doc-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+  font-size: 0.72rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.voucher-sig-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.sig-seal {
+  font-size: 0.82rem;
+  color: #059669;
+}
+
+/* Print CSS */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .voucher-modal,
+  .voucher-modal * {
+    visibility: visible;
+  }
+  .voucher-backdrop {
+    display: none !important;
+  }
+  .voucher-modal {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    display: block !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .voucher-document {
+    padding: 0 !important;
+  }
+}
+/* ===== END Issue #305 ===== */
