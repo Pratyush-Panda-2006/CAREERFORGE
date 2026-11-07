@@ -2018,3 +2018,526 @@ body {
   }
 }
 /* ===== END Issue #304 ===== */
+
+
+/* ===== BEGIN Issue #361: Altitude Sickness Risk Calculator & Acclimatization Scheduler ===== */
+.altitude-safety-section {
+  padding: 80px 24px;
+  background: radial-gradient(circle at 50% 10%, rgba(56, 189, 248, 0.08) 0%, rgba(11, 19, 43, 0.98) 75%);
+  border-top: 1px solid rgba(56, 189, 248, 0.2);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  color: #f1f5f9;
+}
+
+.altitude-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.altitude-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.altitude-sub {
+  font-size: 1rem;
+  color: #94a3b8;
+  max-width: 720px;
+  margin: 10px auto 0 auto;
+  line-height: 1.6;
+}
+
+.altitude-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: stretch;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 940px) {
+  .altitude-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.altitude-card {
+  background: #0d162a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+.alt-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.alt-card-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.alt-pill-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  letter-spacing: 0.06em;
+}
+
+/* Forms & Selectors */
+.alt-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
+
+.alt-select {
+  width: 100%;
+  background: #141f38;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: #f1f5f9;
+  font-size: 0.88rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.alt-num-input {
+  width: 100%;
+  background: #141f38;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.alt-slider-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.alt-val-pill {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+.alt-range {
+  width: 100%;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 6px;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.alt-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+  border: 2px solid #ffffff;
+  cursor: pointer;
+}
+
+.alt-hint {
+  display: block;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.alt-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .alt-row-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.diamox-toggle-wrap {
+  background: #141f38;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+}
+
+.diamox-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.diamox-checkbox-label input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #38bdf8;
+}
+
+.btn-optimize-ascent {
+  width: 100%;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+  margin-top: 14px;
+}
+
+.btn-optimize-ascent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+}
+
+/* Clinical Risk Meter */
+.risk-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+}
+
+.risk-low { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; }
+.risk-moderate { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid #f59e0b; }
+.risk-high { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+
+.risk-gauge-block {
+  background: #141f38;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.risk-score-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.risk-num {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.risk-max {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.risk-bar-track {
+  width: 100%;
+  height: 8px;
+  background: #0b1323;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.risk-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.fill-low { background: #10b981; }
+.fill-moderate { background: #f59e0b; }
+.fill-high { background: #ef4444; }
+
+.risk-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Vital Stats Grid */
+.alt-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.alt-stat-box {
+  background: #141f38;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.astat-lbl {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.astat-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 4px 0 2px 0;
+}
+
+.astat-sub {
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.hl-amber { color: #fbbf24 !important; }
+.hl-green { color: #34d399 !important; }
+.text-red { color: #f87171 !important; }
+
+/* Clinical Advisory Box */
+.ams-clinical-box {
+  margin-top: auto;
+  display: flex;
+  gap: 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 12px;
+  padding: 14px 16px;
+  align-items: flex-start;
+}
+
+.clinic-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.clinic-text strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #fbbf24;
+  margin-bottom: 4px;
+}
+
+.clinic-text p {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Elevation Chart Card */
+.elevation-chart-card {
+  background: #0d162a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  margin-bottom: 32px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.chart-titles h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.chart-sub {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.c-leg {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.leg-safe { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.leg-warn { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.leg-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+.chart-svg-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.elevation-svg {
+  width: 100%;
+  min-width: 700px;
+  height: auto;
+  display: block;
+}
+
+/* Staged Schedule Table */
+.scheduler-table-card {
+  background: #0d162a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.sched-table-header {
+  margin-bottom: 20px;
+}
+
+.sched-table-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.sched-sub {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.altitude-schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.altitude-schedule-table th {
+  background: #141f38;
+  color: #94a3b8;
+  padding: 12px 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.altitude-schedule-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+}
+
+.altitude-schedule-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.table-rest-row {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.table-warning-row {
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.day-num {
+  color: #38bdf8;
+  font-family: monospace;
+}
+
+.waypoint-meta strong {
+  display: block;
+  color: #f8fafc;
+}
+
+.waypoint-meta small {
+  color: #94a3b8;
+}
+
+.alt-val-txt {
+  font-family: monospace;
+  color: #ffffff;
+}
+
+.gain-badge {
+  font-family: monospace;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.gain-excess {
+  color: #f87171 !important;
+  font-weight: 900;
+}
+
+.o2-pill {
+  background: #141f38;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  color: #38bdf8;
+  font-family: monospace;
+}
+
+.status-chip {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  letter-spacing: 0.04em;
+}
+
+.chip-safe { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.chip-rest { background: rgba(56, 189, 248, 0.18); color: #38bdf8; }
+.chip-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+/* ===== END Issue #361 ===== */
