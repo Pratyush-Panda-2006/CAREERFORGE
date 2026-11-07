@@ -330,6 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDestinationFilters();
   initFlightCalculator();
   initExpeditionTimeline();
+  initVisaAdvisory();
 
   // Initialize ring circle stroke properties.
   const circleEl = document.getElementById('progress-circle');
@@ -1360,3 +1361,430 @@ function initExpeditionTimeline() {
   handlePlannerConfigChange();
 })();
 /* ===== END Issue #211 ===== */
+
+// ===== START Issue #304: Visa & Entry Requirements Checker =====
+
+const VISA_ADVISORY_DATA = {
+  iceland: {
+    destinationName: 'Iceland (Reykjavik Aurora Glaciers)',
+    requirements: {
+      US: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Schengen)',
+        category: 'Eco-Tourism & Glacier Expedition',
+        heading: 'Visa-Free Entry Permitted',
+        stayDuration: 'Maximum Stay: Up to 90 days within any 180-day period',
+        processing: 'Immediate',
+        fee: 'Free / €7.50 (ETIAS)',
+        passportRules: 'Passport must be valid for at least 3 months beyond intended departure date from the Schengen area and issued within the last 10 years. Must have at least 2 blank pages.',
+        healthRules: 'Routine immunizations recommended (MMR, DTaP). Comprehensive extreme-cold wilderness travel insurance with search & rescue evacuation coverage strongly advised.',
+        entryRules: 'Valid passport, return or onward airline ticket, and proof of sufficient funds (~€30/day). ETIAS authorization required prior to boarding starting 2025/2026.',
+        specialNote: 'Mandatory route registration with the Icelandic SafeTravel mountain rescue system before traversing Vatnajökull glacier.'
+      },
+      UK: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Schengen)',
+        category: 'Eco-Tourism & Glacier Expedition',
+        heading: 'Visa-Free Short Stay Permitted',
+        stayDuration: 'Maximum Stay: Up to 90 days in any 180-day rolling window',
+        processing: 'Immediate',
+        fee: 'Free (Post-Brexit ETIAS applies)',
+        passportRules: 'Must be issued less than 10 years before entry date and valid for at least 3 months after departure from Schengen zone. Minimum 2 blank pages.',
+        healthRules: 'GHIC or valid EHIC card accepted for emergency medical care; full arctic expedition health insurance is required for off-grid backcountry zones.',
+        entryRules: 'Passport must be stamped at border control. Return ticket and accommodation confirmation required at border entry.',
+        specialNote: 'Winter driving permits and safety beacon rental required when operating 4x4 vehicles across highland F-roads.'
+      },
+      EU: {
+        badgeType: 'visa-free',
+        badgeText: 'Freedom of Movement (EEA/Schengen)',
+        category: 'EEA Citizen Rights',
+        heading: 'Unrestricted Free Entry & Stay',
+        stayDuration: 'Maximum Stay: Unlimited for tourism and exploration',
+        processing: 'None / Immediate',
+        fee: 'Free',
+        passportRules: 'Valid EU National Identity Card or National Passport valid for the full duration of your intended stay.',
+        healthRules: 'European Health Insurance Card (EHIC) provides full reciprocal state healthcare access across Iceland.',
+        entryRules: 'No visa, ETIAS, or entry permits required. Simply show national ID or passport at border gates.',
+        specialNote: 'Geothermal nature reserve conservation rules apply to all travelers; stay on marked trail pathways.'
+      },
+      IN: {
+        badgeType: 'visa-required',
+        badgeText: 'Schengen Visa Required',
+        category: 'Uniform Schengen Tourist Visa (Type C)',
+        heading: 'Consular Visa Required Prior to Travel',
+        stayDuration: 'Maximum Stay: Up to 90 days as authorized on visa sticker',
+        processing: '15 – 20 Business Days',
+        fee: '€80 (~₹7,200 INR)',
+        passportRules: 'Passport must have at least 6 months validity from the date of return and at least 2 blank visa pages, issued within the last 10 years.',
+        healthRules: 'Mandatory Schengen travel medical insurance covering minimum €30,000 for emergency medical treatment and repatriation.',
+        entryRules: 'Confirmed return flight tickets, hotel vouchers, 3-month stamped bank statements, and pre-approved Icelandic/Schengen embassy visa sticker.',
+        specialNote: 'Submit biometrics and expedition tour itinerary via VFS Global Icelandic visa application center in advance.'
+      },
+      AU: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Schengen)',
+        category: 'Eco-Tourism & Wilderness Expedition',
+        heading: 'Visa-Free Entry Permitted',
+        stayDuration: 'Maximum Stay: Up to 90 days within any 180-day period',
+        processing: 'Immediate',
+        fee: 'Free (ETIAS ~$7.50)',
+        passportRules: 'Passport must be valid for at least 3 months beyond the intended date of departure from the Schengen territory with 2 blank pages.',
+        healthRules: 'No mandatory vaccines. Recommended: Tetanus booster and medical evacuation insurance for ice-climbing expeditions.',
+        entryRules: 'Onward or return ticket, proof of sufficient expedition funds, and ETIAS pre-travel authorization.',
+        specialNote: 'Severe sub-polar wind advisory alerts: check SafeTravel.is daily when outside Reykjavik urban zones.'
+      },
+      CA: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Schengen)',
+        category: 'Eco-Tourism & Heli-Hiking',
+        heading: 'Visa-Free Entry Permitted',
+        stayDuration: 'Maximum Stay: Up to 90 days within any 180-day period',
+        processing: 'Immediate',
+        fee: 'Free (ETIAS required)',
+        passportRules: 'Passport must have at least 3 months validity beyond intended departure date from Iceland. At least 2 blank pages.',
+        healthRules: 'Routine vaccines. Private Canadian travel health insurance covering winter extreme sports & glacier heli-hiking.',
+        entryRules: 'ETIAS pre-travel authorization, confirmed lodging, and return ticket ready for border inspection.',
+        specialNote: 'Certified mountain guide supervision is mandatory when hiking on Sólheimajökull glacier tongue.'
+      }
+    }
+  },
+
+  japan: {
+    destinationName: 'Japan (Kyoto Bamboo Sanctuary)',
+    requirements: {
+      US: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Temporary Visitor)',
+        category: 'Cultural & Leisure Exploration',
+        heading: 'Visa-Free Entry Permitted',
+        stayDuration: 'Maximum Stay: Up to 90 days for tourism purposes',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'Passport must be valid for the entire duration of your stay in Japan. Minimum 1 blank visa page required.',
+        healthRules: 'No mandatory vaccinations or quarantine required. Comprehensive travel medical insurance recommended.',
+        entryRules: 'Complete Visit Japan Web online for rapid immigration & customs clearance QR codes. Proof of onward/return flight required.',
+        specialNote: 'Strict local heritage etiquette in Kyoto Gion district: photography is prohibited in private preservation alleys.'
+      },
+      UK: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Temporary Visitor)',
+        category: 'Cultural & Leisure Tourism',
+        heading: 'Visa-Free Entry Permitted',
+        stayDuration: 'Maximum Stay: Up to 90 days (extendable up to 180 days)',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'British Citizen passport must be valid for the duration of stay in Japan. At least 1 blank visa page.',
+        healthRules: 'Routine immunizations. Travel insurance with coverage for Japanese emergency hospital visits.',
+        entryRules: 'Visit Japan Web registration prior to boarding; onward or return ticket inspection at Kansai/Narita airports.',
+        specialNote: 'Japan Rail Pass voucher exchange can be completed at Kyoto Station or Kansai International Airport.'
+      },
+      EU: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Temporary Visitor)',
+        category: 'Bilateral Visa Exemption',
+        heading: 'Visa-Free Entry Permitted',
+        stayDuration: 'Maximum Stay: Up to 90 days (Austrian, German & Swiss citizens may extend to 6 months)',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'Valid EU passport for the duration of your stay. Minimum 1 blank visa page.',
+        healthRules: 'Routine vaccines. Travel insurance covering private Japanese clinical services.',
+        entryRules: 'Visit Japan Web digital customs QR code, return ticket, and address of primary accommodation.',
+        specialNote: 'Kyoto municipal accommodation tax (¥200 to ¥1,000 per guest per night) paid directly upon check-in.'
+      },
+      IN: {
+        badgeType: 'evisa',
+        badgeText: 'Japan eVisa Available',
+        category: 'Short-Term Tourism eVisa',
+        heading: 'Electronic Tourist Visa (eVisa) Available',
+        stayDuration: 'Maximum Stay: Up to 30 or 90 days single-entry',
+        processing: '5 – 7 Business Days',
+        fee: '¥3,000 JPY (~₹1,700 INR)',
+        passportRules: 'Indian passport with minimum 6 months validity from travel date and at least 2 blank visa pages.',
+        healthRules: 'No mandatory health certificates. Travel insurance covering medical hospitalization strongly recommended.',
+        entryRules: 'Approved electronic visa issuance notice (displayable online via smartphone) plus Visit Japan Web declaration QR code.',
+        specialNote: 'Apply online through the official Japan eVISA portal or authorized VFS centers with confirmed flight bookings.'
+      },
+      AU: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Temporary Visitor)',
+        category: 'Tourism & Cultural Tour',
+        heading: 'Visa-Free Entry Permitted',
+        stayDuration: 'Maximum Stay: Up to 90 days for tourism and visiting',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'Australian passport must be valid for the duration of intended stay with at least 1 blank page.',
+        healthRules: 'Routine immunizations. Standard international travel medical insurance.',
+        entryRules: 'Return airfare, confirmed accommodation details, and digital clearance via Visit Japan Web.',
+        specialNote: 'Pre-book reservations for Arashiyama monkey park and imperial villas (Katsura & Shugakuin) 2 weeks ahead.'
+      },
+      CA: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Temporary Visitor)',
+        category: 'Tourism & Exploration',
+        heading: 'Visa-Free Entry Permitted',
+        stayDuration: 'Maximum Stay: Up to 90 days for leisure travel',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'Canadian passport must be valid for the full period of intended stay. At least 1 blank page.',
+        healthRules: 'Routine vaccines. Comprehensive travel insurance covering medical emergency and baggage protection.',
+        entryRules: 'Digital immigration declaration via Visit Japan Web, return or onward airline boarding pass.',
+        specialNote: 'Suica/ICOCA transit cards are recommended for all Kyoto municipal bus and subways.'
+      }
+    }
+  },
+
+  antarctica: {
+    destinationName: 'Antarctica (Polar Crossing via Argentina)',
+    requirements: {
+      US: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free Transit (Argentina)',
+        category: 'IAATO Antarctic Expedition Protocol',
+        heading: 'Visa-Free Argentine Gateway + IAATO Permit',
+        stayDuration: 'Transit Stay: Up to 90 days in Argentina + 10-day sea crossing',
+        processing: 'Immediate (Permit managed by ship operator)',
+        fee: 'Free (Included in expedition berth)',
+        passportRules: 'Passport must be valid for at least 6 months beyond the date of departure from Ushuaia, with at least 2 blank pages.',
+        healthRules: 'Mandatory Polar Expedition Medical Fitness Form signed by a physician within 60 days of sailing. Mandatory $100,000+ medical evacuation insurance.',
+        entryRules: 'Confirmed expedition vessel berth reservation, return flight from Ushuaia (USH), and signed IAATO environmental pledge.',
+        specialNote: 'Strict biosecurity check: all outer garments, backpacks, and boots are decontaminated prior to continental zodiac landings.'
+      },
+      UK: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free Transit (Argentina)',
+        category: 'Polar Maritime Expedition',
+        heading: 'Visa-Free Argentine Gateway + IAATO Clearance',
+        stayDuration: 'Transit Stay: Up to 90 days in Argentina for expedition transit',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'Valid for at least 6 months after the return date from the Antarctic Peninsula. Minimum 2 blank pages.',
+        healthRules: 'Physician polar fitness sign-off required by maritime law. Emergency search & rescue evacuation coverage minimum £100,000.',
+        entryRules: 'Return flight itinerary, expedition cruise booking confirmation, and IAATO wildlife distance code agreement.',
+        specialNote: 'Zero-waste policy: no organic or inorganic material may be left on the continent. Smoking prohibited ashore.'
+      },
+      EU: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free Transit (Argentina)',
+        category: 'Antarctic Treaty Scientific & Eco-Tour',
+        heading: 'Visa-Free Argentine Gateway Access',
+        stayDuration: 'Transit Stay: Up to 90 days in Argentina without visa',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'Passport must be valid for a minimum of 6 months beyond intended departure date from Argentina. 2 blank pages.',
+        healthRules: 'Completed polar medical questionnaire signed by licensed MD. Mandatory medical repatriation & evacuation insurance.',
+        entryRules: 'Confirmed expedition voyage manifest and onward airline boarding pass from Buenos Aires / Ushuaia.',
+        specialNote: 'Compliance with Protocol on Environmental Protection to the Antarctic Treaty is strictly monitored by expedition leaders.'
+      },
+      IN: {
+        badgeType: 'voa',
+        badgeText: 'Argentina ETA / Visa Required',
+        category: 'Electronic Travel Authorization (AVE / Consular)',
+        heading: 'Argentina ETA (with US/Schengen Visa) or Consular Visa',
+        stayDuration: 'Transit Stay: Up to 90 days authorized + Antarctic expedition berth',
+        processing: 'ETA: 3–5 Business Days | Consular: 20 Days',
+        fee: '$50 USD (ETA) / $200 USD (Consular Visa)',
+        passportRules: 'Must have at least 6 months validity from date of entry into Argentina and minimum 3 blank pages for transit stamps.',
+        healthRules: 'Mandatory doctor-certified polar medical clearance and $150,000 emergency medevac insurance policy.',
+        entryRules: 'Approved Argentine AVE (electronic authorization if holding valid US B1/B2 or Schengen visa) or stamped consular visa, plus ship contract.',
+        specialNote: 'Yellow fever vaccination card required only if transiting through specified endemic zones in South America prior to Ushuaia.'
+      },
+      AU: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free Transit (Argentina)',
+        category: 'Polar Maritime Expedition',
+        heading: 'Visa-Free Argentine Gateway Clearance',
+        stayDuration: 'Transit Stay: Up to 90 days in Argentina',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'Passport valid for at least 6 months beyond the conclusion of the Antarctic voyage. Minimum 2 blank pages.',
+        healthRules: 'Mandatory medical fitness sign-off by doctor within 30 days of boarding. Arctic/Antarctic evacuation insurance policy.',
+        entryRules: 'Return airfare from Ushuaia, ship expedition confirmation, and IAATO tourist safety compliance declaration.',
+        specialNote: 'Severe sea condition preparation: motion sickness medication strongly recommended for crossing Drake Passage.'
+      },
+      CA: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free Transit (Argentina)',
+        category: 'IAATO Polar Expedition',
+        heading: 'Visa-Free Argentine Transit Entry',
+        stayDuration: 'Transit Stay: Up to 90 days in Argentina',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'Passport must be valid for at least 6 months past arrival date in Argentina, with at least 2 blank pages.',
+        healthRules: 'Expedition physician health authorization certificate and $100,000 emergency medical evacuation insurance.',
+        entryRules: 'Expedition cruise contract, return flight confirmation, and IAATO biosecurity protocols acceptance.',
+        specialNote: 'Strict 5-meter minimum wildlife distance to penguin colonies and 100-meter distance to marine mammals enforced.'
+      }
+    }
+  },
+
+  'silk-road': {
+    destinationName: 'Silk Road (Central Asia & China)',
+    requirements: {
+      US: {
+        badgeType: 'evisa',
+        badgeText: 'eVisa / Visa Required',
+        category: 'Caravan Overland Expedition',
+        heading: 'Uzbekistan eVisa + China Visa / Transit Exemption',
+        stayDuration: 'Uzbekistan: 30 days (eVisa) | China: 144-hr transit or L-Visa',
+        processing: '3 – 5 Business Days',
+        fee: '~$20 (UZB) + $140 (China L-Visa)',
+        passportRules: 'Passport must be valid for at least 6 months beyond the scheduled departure date from Central Asia. 3 blank pages.',
+        healthRules: 'Recommended: Hepatitis A & B, Typhoid, Tetanus. High-altitude medication for high Tian Shan & Pamir mountain passes.',
+        entryRules: 'Approved Uzbekistan eVisa printout, confirmed caravan expedition itinerary, and hotel registration certificates (talon).',
+        specialNote: 'Retain all official hotel registration receipts in Uzbekistan; border officials verify them upon departure.'
+      },
+      UK: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Uzbekistan 30d)',
+        category: 'Overland Silk Road Exploration',
+        heading: 'Visa-Free for Uzbekistan; Visa Required for China',
+        stayDuration: 'Uzbekistan: Up to 30 days Visa-Free | China: Visa required',
+        processing: 'UZB: Immediate | China: 4–6 Business Days',
+        fee: 'UZB: Free | China Visa: £130',
+        passportRules: 'Valid for at least 6 months beyond stay in Central Asia. At least 2 blank visa pages.',
+        healthRules: 'Routine vaccines, Hepatitis A, Typhoid. Wilderness travel insurance with mountain rescue coverage.',
+        entryRules: 'Return or onward flight ticket, proof of lodging, and official registration slips from licensed guesthouses.',
+        specialNote: 'Registration within 72 hours of arrival in each regional province is legally required across Central Asian jurisdictions.'
+      },
+      EU: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Uzbekistan & China 15d)',
+        category: 'Bilateral Visa Waiver',
+        heading: 'Visa-Free Entry for Key Silk Road Corridors',
+        stayDuration: 'Uzbekistan: Up to 30 days Visa-Free | China: 15 days Visa-Free (for select EU citizens)',
+        processing: 'Immediate',
+        fee: 'Free',
+        passportRules: 'Passport must be valid for at least 6 months beyond departure date. Minimum 2 blank pages.',
+        healthRules: 'Routine immunizations, Hepatitis A. Comprehensive overland adventure travel insurance.',
+        entryRules: 'Proof of onward travel, confirmed tour itinerary with certified Silk Road guides, and hotel booking receipts.',
+        specialNote: 'Antiquities and historic rug purchases in Bukhara require export authorization certificates from the Ministry of Culture.'
+      },
+      IN: {
+        badgeType: 'evisa',
+        badgeText: 'eVisa Required (UZB & China)',
+        category: 'Electronic & Consular Tourist Visas',
+        heading: 'Uzbekistan eVisa & Chinese Tourist Visa Required',
+        stayDuration: 'Uzbekistan: Up to 30 days single entry | China: As issued',
+        processing: '3 – 7 Business Days',
+        fee: '$20 USD (UZB) + ~$65 USD (China)',
+        passportRules: 'Indian passport with minimum 6 months validity from planned departure date and at least 3 blank pages.',
+        healthRules: 'Hepatitis A, Typhoid, Tetanus recommended. Adequate medical travel insurance covering high-altitude trekking.',
+        entryRules: 'Approved Uzbekistan eVisa printout, hotel booking confirmations, return flight tickets, and local guide vouchers.',
+        specialNote: 'Registration slips issued by registered accommodations must be strictly retained until airport immigration check.'
+      },
+      AU: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Uzbekistan 30d)',
+        category: 'Cultural Caravan Expedition',
+        heading: 'Visa-Free for Uzbekistan; Visa Required for China',
+        stayDuration: 'Uzbekistan: Up to 30 days Visa-Free | China: Tourist Visa required',
+        processing: 'UZB: Immediate | China: 4–5 Business Days',
+        fee: 'UZB: Free | China Visa: ~$110 AUD',
+        passportRules: 'Passport valid for minimum 6 months from arrival date with at least 2 blank pages.',
+        healthRules: 'Routine immunizations, Hepatitis A, Typhoid. Desert hydration and high-altitude gear preparation.',
+        entryRules: 'Onward travel booking, hotel accommodation proof, and local migration registration slips.',
+        specialNote: 'Cash in clean US Dollars or local Som is essential for transactions in remote desert bazaars outside Samarkand.'
+      },
+      CA: {
+        badgeType: 'visa-free',
+        badgeText: 'Visa-Free (Uzbekistan 30d)',
+        category: 'Highland Caravan & Eco-Tour',
+        heading: 'Visa-Free for Uzbekistan; Visa Required for China',
+        stayDuration: 'Uzbekistan: Up to 30 days Visa-Free | China: Tourist Visa required',
+        processing: 'UZB: Immediate | China: 4–5 Business Days',
+        fee: 'UZB: Free | China Visa: ~$140 CAD',
+        passportRules: 'Canadian passport must be valid for at least 6 months after intended departure date. 2 blank pages.',
+        healthRules: 'Recommended travel vaccines: Hepatitis A, Typhoid, Tetanus. Travel medical insurance including medical evacuation.',
+        entryRules: 'Proof of onward flights, confirmed itinerary, and registered accommodation slips kept for border control.',
+        specialNote: 'Certified expedition guides are mandatory when traversing the Kyzylkum desert and high mountain passes.'
+      }
+    }
+  }
+};
+
+function initVisaAdvisory() {
+  const destSelect = document.getElementById('advisory-destination-select');
+  const natSelect = document.getElementById('advisory-nationality-select');
+  const resultCard = document.getElementById('advisory-result-card');
+
+  if (!destSelect || !natSelect || !resultCard) return;
+
+  function updateAdvisory() {
+    const destKey = destSelect.value;
+    const natKey = natSelect.value;
+
+    const destData = VISA_ADVISORY_DATA[destKey];
+    if (!destData) return;
+
+    const req = destData.requirements[natKey];
+    if (!req) return;
+
+    // Update Badge
+    const badgeEl = document.getElementById('advisory-status-badge');
+    if (badgeEl) {
+      badgeEl.className = `advisory-status-badge badge-${req.badgeType}`;
+      badgeEl.textContent = req.badgeText;
+    }
+
+    // Update Category
+    const catEl = document.getElementById('advisory-category-tag');
+    if (catEl) catEl.textContent = req.category;
+
+    // Update Heading & Duration
+    const headingEl = document.getElementById('advisory-status-heading');
+    if (headingEl) headingEl.textContent = req.heading;
+
+    const durationEl = document.getElementById('advisory-stay-duration');
+    if (durationEl) durationEl.textContent = req.stayDuration;
+
+    // Update Summary Stats
+    const procEl = document.getElementById('advisory-processing');
+    if (procEl) procEl.textContent = req.processing;
+
+    const feeEl = document.getElementById('advisory-fee');
+    if (feeEl) feeEl.textContent = req.fee;
+
+    // Update Detail Rules
+    const passportEl = document.getElementById('advisory-passport-rules');
+    if (passportEl) passportEl.textContent = req.passportRules;
+
+    const healthEl = document.getElementById('advisory-health-rules');
+    if (healthEl) healthEl.textContent = req.healthRules;
+
+    const entryEl = document.getElementById('advisory-entry-rules');
+    if (entryEl) entryEl.textContent = req.entryRules;
+
+    const noteEl = document.getElementById('advisory-special-note');
+    if (noteEl) noteEl.textContent = req.specialNote;
+  }
+
+  // Hook change listeners
+  destSelect.addEventListener('change', updateAdvisory);
+  natSelect.addEventListener('change', updateAdvisory);
+
+  // Hook into Featured Voyage cards so clicking a card updates the destination in the advisory
+  const cards = document.querySelectorAll('.destinations .card[data-destination]');
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const dest = card.dataset.destination;
+      if (dest === 'reykjavik' && destSelect.querySelector('option[value="iceland"]')) {
+        destSelect.value = 'iceland';
+        updateAdvisory();
+      } else if (dest === 'kyoto' && destSelect.querySelector('option[value="japan"]')) {
+        destSelect.value = 'japan';
+        updateAdvisory();
+      }
+    });
+  });
+
+  // Initial render
+  updateAdvisory();
+}
+
+// Ensure initVisaAdvisory runs even if DOMContentLoaded already fired
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initVisaAdvisory);
+} else {
+  initVisaAdvisory();
+}
+/* ===== END Issue #304 ===== */

@@ -1188,6 +1188,7 @@ body {
   margin-top: 6px;
   background: linear-gradient(135deg, #ffffff, #7dd3fc);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1733,3 +1734,287 @@ body {
   margin-top: 14px;
 }
 /* ===== END Issue #211 ===== */
+
+/* ===== START Issue #304: Visa & Entry Requirements Checker ===== */
+.visa-advisory-section {
+  max-width: 1040px;
+  margin: 0 auto 90px;
+  padding: 0 24px;
+}
+
+.visa-advisory-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.advisory-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.advisory-header h2 {
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  margin: 8px 0 12px;
+  color: #ffffff;
+}
+
+.advisory-header p {
+  color: #94a3b8;
+  max-width: 640px;
+  margin: 0 auto;
+  font-size: 1rem;
+}
+
+/* Controls Box */
+.advisory-controls-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  background: rgba(28, 37, 65, 0.55);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.advisory-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.advisory-control-group label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #7dd3fc;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.advisory-control-group .control-icon {
+  font-size: 1.1rem;
+}
+
+.advisory-select {
+  width: 100%;
+  padding: 12px 16px;
+  background: #0b132b;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.advisory-select:hover {
+  border-color: #38bdf8;
+}
+
+.advisory-select:focus-visible {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+/* Result Card */
+.advisory-result-card {
+  background: rgba(28, 37, 65, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+/* Status Banner */
+.advisory-status-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-bottom: 24px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-main {
+  flex: 1 1 340px;
+}
+
+.status-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+/* High-Contrast Status Badges */
+.advisory-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  transition: all 0.25s ease;
+}
+
+.badge-visa-free {
+  background: #10b981;
+  color: #022c22;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+}
+
+.badge-evisa {
+  background: #f59e0b;
+  color: #451a03;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+}
+
+.badge-voa {
+  background: #38bdf8;
+  color: #082f49;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+}
+
+.badge-visa-required {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.45);
+}
+
+.advisory-category-tag {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.advisory-status-heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.advisory-stay-duration {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+}
+
+/* Summary stats pills */
+.status-summary-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.summary-pill {
+  background: rgba(11, 19, 43, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+}
+
+.summary-pill .pill-label {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+}
+
+.summary-pill strong {
+  font-size: 0.92rem;
+  color: #38bdf8;
+  margin-top: 4px;
+}
+
+/* Detail Grid */
+.advisory-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.detail-block {
+  background: rgba(11, 19, 43, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 20px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.detail-block:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.detail-block-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.detail-block-header .detail-icon {
+  font-size: 1.25rem;
+}
+
+.detail-block-header h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.detail-text {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+@media (max-width: 768px) {
+  .advisory-result-card {
+    padding: 20px;
+  }
+
+  .advisory-status-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .status-summary-stats {
+    width: 100%;
+  }
+
+  .summary-pill {
+    flex: 1 1 calc(50% - 6px);
+  }
+}
+/* ===== END Issue #304 ===== */
