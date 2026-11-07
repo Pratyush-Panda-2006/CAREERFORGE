@@ -1112,3 +1112,118 @@ body.has-mini-player { padding-bottom: 150px; }
 @media (prefers-reduced-motion: reduce) {
   .eq-fill, .eq-knob, .eq-curve path { transition: none; }
 }
+
+
+/* ===== BEGIN Issue #355: Synchronized Karaoke Highlighting & Search Styling ===== */
+.transcript-sentence {
+  cursor: pointer;
+  padding: 1px 2px;
+  border-radius: 3px;
+  transition: color 0.15s ease, background 0.15s ease;
+  position: relative;
+  display: inline;
+}
+
+.transcript-sentence:hover {
+  background: rgba(56, 189, 248, 0.12);
+  text-decoration: underline;
+  text-decoration-color: #38bdf8;
+}
+
+.transcript-sentence.karaoke-active {
+  background: linear-gradient(to right, #38bdf8 var(--karaoke-pct, 0%), #ffffff var(--karaoke-pct, 0%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  text-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
+  border-bottom: 2px solid rgba(56, 189, 248, 0.5);
+}
+
+.transcript-sentence.karaoke-done {
+  color: #7dd3fc;
+  -webkit-text-fill-color: #7dd3fc;
+}
+
+/* Search Highlights */
+mark.transcript-search-highlight {
+  background: rgba(251, 191, 36, 0.35);
+  color: #fef08a;
+  border-radius: 3px;
+  padding: 1px 3px;
+  font-weight: 700;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+}
+
+.search-clear-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 6px;
+  transition: color 0.15s ease;
+}
+
+.search-clear-btn:hover {
+  color: #ffffff;
+}
+
+.search-count-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.search-count-badge.no-match {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Speaker Filter Buttons */
+.speaker-filter-group {
+  display: flex;
+  background: #18181b;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 4px;
+}
+
+.spk-btn {
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.spk-btn:hover {
+  color: #f4f4f5;
+}
+
+.spk-btn.active {
+  background: #27272a;
+  color: #38bdf8;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.dock-transcript-btn {
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+}
+
+.dock-transcript-btn:hover {
+  background: rgba(56, 189, 248, 0.25) !important;
+}
+/* ===== END Issue #355 ===== */
