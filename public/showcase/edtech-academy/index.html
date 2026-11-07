@@ -697,6 +697,85 @@
     <div class="fc-sr" id="fcLive" role="status" aria-live="polite"></div>
   </section>
 
+  <!-- Course Completion Certificate Generator (Issue #285) -->
+  <section class="cert-generator-section" id="certificateGenerator" aria-labelledby="certGenTitle">
+    <div class="cert-gen-header">
+      <div class="tag">ACCREDITATION &amp; CREDENTIALS</div>
+      <h2 id="certGenTitle">COURSE COMPLETION CERTIFICATE GENERATOR</h2>
+      <p class="cert-gen-lead">Design, preview, and download your official Synapse Academy graduate credential rendered dynamically using HTML5 Canvas.</p>
+    </div>
+
+    <div class="cert-gen-layout">
+      <!-- Configurator Form -->
+      <form class="cert-form" id="certForm" onsubmit="event.preventDefault();">
+        <div class="cert-field-group">
+          <label for="certStudentName" class="cert-label">Student / Graduate Full Name</label>
+          <input type="text" id="certStudentName" class="cert-input" value="Alex Vance" placeholder="Enter graduate name" required />
+        </div>
+
+        <div class="cert-field-group">
+          <label for="certCourseTrack" class="cert-label">Specialization Track</label>
+          <select id="certCourseTrack" class="cert-select">
+            <option value="LLM Inference Architecture &amp; Distributed Systems" selected>LLM Inference Architecture &amp; Distributed Systems</option>
+            <option value="Rust Kernel &amp; Systems Defense Engineering">Rust Kernel &amp; Systems Defense Engineering</option>
+            <option value="Autonomous AI Agents &amp; Multi-Modal Systems">Autonomous AI Agents &amp; Multi-Modal Systems</option>
+            <option value="Cloud Native Scalability &amp; Microservices">Cloud Native Scalability &amp; Microservices</option>
+          </select>
+        </div>
+
+        <div class="cert-row-2col">
+          <div class="cert-field-group">
+            <label for="certDate" class="cert-label">Issue Date</label>
+            <input type="text" id="certDate" class="cert-input" value="November 7, 2026" />
+          </div>
+
+          <div class="cert-field-group">
+            <label for="certDistinction" class="cert-label">Honors Distinction</label>
+            <select id="certDistinction" class="cert-select">
+              <option value="Passed with Highest Distinction (Top 1% Capstone)" selected>Passed with Highest Distinction</option>
+              <option value="Graduated with Honors (98.6% Mastery)">Graduated with Honors</option>
+              <option value="Official Mastery Certification">Official Mastery Certification</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cert-field-group">
+          <label for="certVerifyId" class="cert-label">Verification ID &amp; Credential Hash</label>
+          <div class="cert-input-with-btn">
+            <input type="text" id="certVerifyId" class="cert-input mono" value="SYN-2026-9842-XF" readonly />
+            <button type="button" class="btn-cert-mini" id="certRegenIdBtn" title="Generate New ID">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              New ID
+            </button>
+          </div>
+        </div>
+
+        <div class="cert-actions">
+          <button type="button" class="btn-cert-primary" id="certDownloadBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PNG Certificate
+          </button>
+          <button type="button" class="btn-cert-secondary" id="certCopyLinkBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Verification
+          </button>
+        </div>
+      </form>
+
+      <!-- Canvas Preview Container -->
+      <div class="cert-preview-wrapper">
+        <div class="cert-preview-meta">
+          <span class="cert-status-dot"></span>
+          <span>HTML5 Canvas 1200x800 High-Res Renderer</span>
+        </div>
+        <div class="canvas-shadow-box">
+          <canvas id="certCanvas" width="1200" height="800" aria-label="Course completion certificate preview"></canvas>
+        </div>
+        <p class="cert-hint">Rendered in real-time. Click &quot;Download PNG Certificate&quot; to save a crisp 1200x800 credential.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- Notification Toast Container -->
   <div class="edtech-toast-container" id="edtechToastContainer" aria-live="polite"></div>
 
