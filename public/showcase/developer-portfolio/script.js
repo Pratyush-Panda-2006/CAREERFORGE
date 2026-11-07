@@ -5,7 +5,55 @@ document.addEventListener('DOMContentLoaded', () => {
   initProjectFilters();
   initResumeDownload();
   initArticleReader();
+  initAvailabilityBadge();
 });
+
+// Availability badge: tooltip opens on hover, focus or click, and closes on
+// Escape, outside click, mouse leave or blur (unless it was pinned by a click).
+function initAvailabilityBadge() {
+  const wrapper = document.getElementById('availability');
+  const badge = document.getElementById('availabilityBadge');
+  const tooltip = document.getElementById('availabilityTooltip');
+  if (!wrapper || !badge || !tooltip) return;
+
+  let pinned = false;
+
+  function show() {
+    tooltip.hidden = false;
+    badge.setAttribute('aria-expanded', 'true');
+  }
+
+  function hide() {
+    tooltip.hidden = true;
+    badge.setAttribute('aria-expanded', 'false');
+    pinned = false;
+  }
+
+  wrapper.addEventListener('mouseenter', show);
+  wrapper.addEventListener('mouseleave', () => { if (!pinned) hide(); });
+  badge.addEventListener('focus', show);
+  badge.addEventListener('blur', () => { if (!pinned) hide(); });
+
+  badge.addEventListener('click', () => {
+    if (pinned) {
+      hide();
+    } else {
+      pinned = true;
+      show();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !tooltip.hidden) {
+      hide();
+      badge.focus();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) hide();
+  });
+}
 
 // Virtual file system: objects are directories, strings are files.
 // Files whose name is listed in EXECUTABLES are shown in green and can be run as ./name.
