@@ -1103,13 +1103,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let targetHours = 16;
   let elapsedSeconds = 14 * 3600 + 25 * 60; // Start with 14h 25m in fat burning
   let isRunning = true;
-  // Timer loop
-  setInterval(() => {
-    if (isRunning) {
-      elapsedSeconds += 1;
-      updateFastingUI();
-    }
-  }, 1000);
+
+  function formatTime(totalSecs) {
     const hrs = Math.floor(totalSecs / 3600);
     const mins = Math.floor((totalSecs % 3600) / 60);
     const secs = totalSecs % 60;
@@ -1290,3 +1285,344 @@ document.addEventListener('DOMContentLoaded', () => {
   updateFastingUI();
 });
 /* ===== END Issue #293 ===== */
+
+
+/* ===== BEGIN Issue #349: Interactive VO2 Max & Metabolic Age Assessment ===== */
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('vo2AssessmentForm');
+  if (!form) return;
+
+  // State variables
+  let currentUnit = 'metric'; // 'metric' or 'imperial'
+  let currentMethod = 'non-exercise'; // 'non-exercise' or 'rockport'
+  let sex = 'male';
+  let par = 5; // Physical activity rating (1 to 7)
+
+  // DOM Elements
+  const unitMetricBtn = document.getElementById('vo2UnitMetric');
+  const unitImperialBtn = document.getElementById('vo2UnitImperial');
+  const tabNonExercise = document.getElementById('tabNonExercise');
+  const tabRockport = document.getElementById('tabRockport');
+  const activityGroup = document.getElementById('activityLevelGroup');
+  const rockportWrap = document.getElementById('rockportFieldsWrap');
+
+  const sexButtons = form.querySelectorAll('.sex-pill');
+  const actChips = form.querySelectorAll('.act-chip');
+
+  const ageInput = document.getElementById('vo2AgeInput');
+  const ageVal = document.getElementById('vo2AgeVal');
+  const rhrInput = document.getElementById('vo2RhrInput');
+  const rhrVal = document.getElementById('vo2RhrVal');
+  const weightInput = document.getElementById('vo2WeightInput');
+  const weightVal = document.getElementById('vo2WeightVal');
+  const weightLabel = document.getElementById('vo2WeightLabel');
+  const heightInput = document.getElementById('vo2HeightInput');
+  const heightVal = document.getElementById('vo2HeightVal');
+  const heightLabel = document.getElementById('vo2HeightLabel');
+
+  const walkTimeInput = document.getElementById('vo2WalkTimeInput');
+  const walkTimeVal = document.getElementById('vo2WalkTimeVal');
+  const postWalkHrInput = document.getElementById('vo2PostWalkHrInput');
+  const postWalkHrVal = document.getElementById('vo2PostWalkHrVal');
+
+  // Result Elements
+  const vo2ScoreVal = document.getElementById('vo2ScoreVal');
+  const vo2TierBadge = document.getElementById('vo2TierBadge');
+  const vo2PercentileTag = document.getElementById('vo2PercentileTag');
+  const needleGroup = document.getElementById('vo2NeedleGroup');
+  const chronoAgeDisplay = document.getElementById('chronoAgeDisplay');
+  const metabolicAgeVal = document.getElementById('metabolicAgeVal');
+  const ageDiffBadge = document.getElementById('ageDiffBadge');
+  const ageDiffText = document.getElementById('ageDiffText');
+  const zone2Range = document.getElementById('zone2Range');
+  const zone5Range = document.getElementById('zone5Range');
+  const vo2BmiVal = document.getElementById('vo2BmiVal');
+  const vo2BmiClass = document.getElementById('vo2BmiClass');
+  const longevityBonus = document.getElementById('longevityBonus');
+  const protocolTitle = document.getElementById('protocolTitle');
+  const protocolDesc = document.getElementById('protocolDesc');
+
+  const legendSteps = {
+    poor: document.getElementById('legendPoor'),
+    fair: document.getElementById('legendFair'),
+    good: document.getElementById('legendGood'),
+    excellent: document.getElementById('legendExcellent'),
+    superior: document.getElementById('legendSuperior')
+  };
+
+  // Unit Toggle Handlers
+  function setUnits(unit) {
+    if (currentUnit === unit) return;
+    currentUnit = unit;
+    if (unit === 'metric') {
+      unitMetricBtn.classList.add('active');
+      unitImperialBtn.classList.remove('active');
+      weightLabel.textContent = 'Weight (kg)';
+      heightLabel.textContent = 'Height (cm)';
+      // Convert current imperial values to metric
+      const curLbs = parseFloat(weightInput.value);
+      const curIn = parseFloat(heightInput.value);
+      const newKg = Math.round((curLbs * 0.453592) * 10) / 10;
+      const newCm = Math.round(curIn * 2.54);
+      weightInput.min = '40';
+      weightInput.max = '150';
+      weightInput.step = '0.5';
+      weightInput.value = Math.max(40, Math.min(150, newKg));
+      heightInput.min = '140';
+      heightInput.max = '215';
+      heightInput.step = '1';
+      heightInput.value = Math.max(140, Math.min(215, newCm));
+    } else {
+      unitImperialBtn.classList.add('active');
+      unitMetricBtn.classList.remove('active');
+      weightLabel.textContent = 'Weight (lbs)';
+      heightLabel.textContent = 'Height (in)';
+      // Convert current metric values to imperial
+      const curKg = parseFloat(weightInput.value);
+      const curCm = parseFloat(heightInput.value);
+      const newLbs = Math.round((curKg * 2.20462) * 10) / 10;
+      const newIn = Math.round(curCm / 2.54);
+      weightInput.min = '88';
+      weightInput.max = '330';
+      weightInput.step = '1';
+      weightInput.value = Math.max(88, Math.min(330, newLbs));
+      heightInput.min = '55';
+      heightInput.max = '85';
+      heightInput.step = '0.5';
+      heightInput.value = Math.max(55, Math.min(85, newIn));
+    }
+    updateAllValues();
+  }
+
+  unitMetricBtn.addEventListener('click', () => setUnits('metric'));
+  unitImperialBtn.addEventListener('click', () => setUnits('imperial'));
+
+  // Method Tab Switchers
+  tabNonExercise.addEventListener('click', () => {
+    currentMethod = 'non-exercise';
+    tabNonExercise.classList.add('active');
+    tabNonExercise.setAttribute('aria-selected', 'true');
+    tabRockport.classList.remove('active');
+    tabRockport.setAttribute('aria-selected', 'false');
+    activityGroup.style.display = 'block';
+    rockportWrap.style.display = 'none';
+    calculateVO2();
+  });
+
+  tabRockport.addEventListener('click', () => {
+    currentMethod = 'rockport';
+    tabRockport.classList.add('active');
+    tabRockport.setAttribute('aria-selected', 'true');
+    tabNonExercise.classList.remove('active');
+    tabNonExercise.setAttribute('aria-selected', 'false');
+    activityGroup.style.display = 'none';
+    rockportWrap.style.display = 'block';
+    calculateVO2();
+  });
+
+  // Sex Selector
+  sexButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sexButtons.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-checked', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      sex = btn.getAttribute('data-sex');
+      calculateVO2();
+    });
+  });
+
+  // Physical Activity Level (PAR) Chips
+  actChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      actChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      par = parseInt(chip.getAttribute('data-par'), 10) || 5;
+      calculateVO2();
+    });
+  });
+
+  // Input Event Listeners
+  function updateAllValues() {
+    ageVal.textContent = ageInput.value + ' yrs';
+    rhrVal.textContent = rhrInput.value + ' bpm';
+
+    if (currentUnit === 'metric') {
+      weightVal.textContent = weightInput.value + ' kg';
+      heightVal.textContent = heightInput.value + ' cm';
+    } else {
+      weightVal.textContent = weightInput.value + ' lbs';
+      heightVal.textContent = heightInput.value + ' in';
+    }
+
+    const sec = parseInt(walkTimeInput.value, 10);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    walkTimeVal.textContent = m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+    postWalkHrVal.textContent = postWalkHrInput.value + ' bpm';
+
+    calculateVO2();
+  }
+
+  [ageInput, rhrInput, weightInput, heightInput, walkTimeInput, postWalkHrInput].forEach(inp => {
+    if (inp) inp.addEventListener('input', updateAllValues);
+  });
+
+  // Core Calculation Engine
+  function calculateVO2() {
+    const age = parseInt(ageInput.value, 10);
+    const rhr = parseInt(rhrInput.value, 10);
+    let weightKg, heightCm;
+
+    if (currentUnit === 'metric') {
+      weightKg = parseFloat(weightInput.value);
+      heightCm = parseFloat(heightInput.value);
+    } else {
+      weightKg = parseFloat(weightInput.value) * 0.453592;
+      heightCm = parseFloat(heightInput.value) * 2.54;
+    }
+
+    const heightM = heightCm / 100;
+    const bmi = weightKg / (heightM * heightM);
+
+    let vo2 = 0;
+
+    if (currentMethod === 'non-exercise') {
+      // Jackson et al. Regression non-exercise model
+      const baseConstant = sex === 'male' ? 56.363 : 44.604;
+      const parFactor = 1.921 * par;
+      const ageFactor = 0.381 * age;
+      const bmiFactor = 0.754 * bmi;
+      const hrReserveProxy = 0.109 * Math.max(0, 220 - age - rhr);
+      vo2 = baseConstant + parFactor - ageFactor - bmiFactor + hrReserveProxy;
+    } else {
+      // Rockport Fitness Walking Test Formula
+      const weightLbs = weightKg * 2.20462;
+      const walkMinutes = parseInt(walkTimeInput.value, 10) / 60;
+      const postWalkHr = parseInt(postWalkHrInput.value, 10);
+      const genderTerm = sex === 'male' ? 6.315 : 0;
+      vo2 = 132.853 - (0.0769 * weightLbs) - (0.3877 * age) + genderTerm - (3.2649 * walkMinutes) - (0.1565 * postWalkHr);
+    }
+
+    // Safety clamp
+    vo2 = Math.max(16, Math.min(82, vo2));
+    const roundedVo2 = Math.round(vo2 * 10) / 10;
+    vo2ScoreVal.textContent = roundedVo2.toFixed(1);
+
+    // Speedometer Needle Rotation (-90deg at 20 ml/kg/min to +90deg at 65 ml/kg/min)
+    const minScale = 20;
+    const maxScale = 65;
+    const clampedForGauge = Math.max(minScale, Math.min(maxScale, vo2));
+    const angle = -90 + ((clampedForGauge - minScale) / (maxScale - minScale)) * 180;
+    needleGroup.style.transform = `rotate(${angle}deg)`;
+
+    // Normative Cardio Fitness Tiers (Sex and Age matched)
+    let tier = 'good';
+    let percentileText = '';
+    let tierLabel = 'GOOD';
+
+    // Age-adjusted thresholds
+    const baseCutoffs = sex === 'male'
+      ? { poor: 34 - (age - 20) * 0.25, fair: 40 - (age - 20) * 0.25, good: 46 - (age - 20) * 0.25, excellent: 53 - (age - 20) * 0.25 }
+      : { poor: 28 - (age - 20) * 0.22, fair: 34 - (age - 20) * 0.22, good: 40 - (age - 20) * 0.22, excellent: 47 - (age - 20) * 0.22 };
+
+    if (vo2 < baseCutoffs.poor) {
+      tier = 'poor';
+      tierLabel = 'NEEDS FOCUS';
+      percentileText = 'Bottom 20% for age group';
+    } else if (vo2 < baseCutoffs.fair) {
+      tier = 'fair';
+      tierLabel = 'FAIR';
+      percentileText = '35th Percentile for age group';
+    } else if (vo2 < baseCutoffs.good) {
+      tier = 'good';
+      tierLabel = 'GOOD';
+      percentileText = '60th Percentile (Above Average)';
+    } else if (vo2 < baseCutoffs.excellent) {
+      tier = 'excellent';
+      tierLabel = 'EXCELLENT';
+      percentileText = 'Top 15% for age group';
+    } else {
+      tier = 'superior';
+      tierLabel = 'SUPERIOR / ELITE';
+      percentileText = 'Top 5% (Athletic Peak)';
+    }
+
+    vo2TierBadge.textContent = tierLabel;
+    vo2TierBadge.className = 'tier-pill tier-' + tier;
+    vo2PercentileTag.textContent = percentileText;
+
+    // Highlight legend scale
+    Object.keys(legendSteps).forEach(k => {
+      if (legendSteps[k]) {
+        if (k === tier) legendSteps[k].classList.add('active');
+        else legendSteps[k].classList.remove('active');
+      }
+    });
+
+    // Metabolic Heart Age Projection
+    // Population median VO2max declining ~0.5 ml/kg/min per year for males, ~0.4 for females from age 20
+    const peakVo2 = sex === 'male' ? 50.0 : 42.0;
+    const declineRate = sex === 'male' ? 0.45 : 0.38;
+    let metabolicAge = Math.round(20 + ((peakVo2 - vo2) / declineRate));
+    metabolicAge = Math.max(18, Math.min(80, metabolicAge));
+
+    chronoAgeDisplay.textContent = age + ' yrs';
+    metabolicAgeVal.textContent = metabolicAge + ' yrs';
+
+    const diff = metabolicAge - age;
+    if (diff < 0) {
+      const yrsYounger = Math.abs(diff);
+      ageDiffBadge.className = 'age-differential-badge badge-younger';
+      ageDiffText.textContent = yrsYounger + ' Yrs Younger';
+      longevityBonus.textContent = '+' + (yrsYounger * 0.85).toFixed(1) + ' yrs';
+      longevityBonus.className = 'zone-val hl-green';
+    } else if (diff > 0) {
+      ageDiffBadge.className = 'age-differential-badge badge-older';
+      ageDiffText.textContent = diff + ' Yrs Older';
+      longevityBonus.textContent = '-' + (diff * 0.6).toFixed(1) + ' yrs';
+      longevityBonus.className = 'zone-val hl-red';
+    } else {
+      ageDiffBadge.className = 'age-differential-badge badge-neutral';
+      ageDiffText.textContent = 'Matches Calendar Age';
+      longevityBonus.textContent = 'Baseline';
+      longevityBonus.className = 'zone-val';
+    }
+
+    // Cardiovascular Training Zones based on Tanaka formula (208 - 0.7 * age)
+    const maxHr = Math.round(208 - (0.7 * age));
+    const z2Min = Math.round(maxHr * 0.60);
+    const z2Max = Math.round(maxHr * 0.72);
+    const z5Min = Math.round(maxHr * 0.90);
+    const z5Max = Math.round(maxHr * 0.98);
+
+    zone2Range.textContent = `${z2Min} - ${z2Max} bpm`;
+    zone5Range.textContent = `${z5Min} - ${z5Max} bpm`;
+
+    // BMI Calculation & Classification
+    vo2BmiVal.textContent = bmi.toFixed(1) + ' kg/m²';
+    let bmiTxt = 'Normal Weight';
+    if (bmi < 18.5) bmiTxt = 'Underweight';
+    else if (bmi >= 25 && bmi < 30) bmiTxt = 'Overweight';
+    else if (bmi >= 30) bmiTxt = 'Class I Obesity';
+    vo2BmiClass.textContent = bmiTxt;
+
+    // Prescriptive Exercise Guidance
+    if (tier === 'superior' || tier === 'excellent') {
+      protocolTitle.textContent = 'Cardio Protocol: VO2 Peak & Lactate Clearance';
+      protocolDesc.textContent = 'Maintain high stroke volume with 2 weekly Zone 2 aerobic sessions (60 min) and 1 weekly Norwegian 4x4 interval session (4 mins at 90-95% HRmax, 3 mins active recovery).';
+    } else if (tier === 'good') {
+      protocolTitle.textContent = 'Cardio Protocol: Aerobic Base Expansion';
+      protocolDesc.textContent = 'Increase aerobic foundation with 150–180 minutes of low-intensity Zone 2 cardio (cycling, jogging, incline walking) plus 1 threshold interval session weekly to expand capillary density.';
+    } else {
+      protocolTitle.textContent = 'Cardio Protocol: Cardiovascular Priming & Zone 2 Entry';
+      protocolDesc.textContent = 'Build mitochondrial health safely: aim for 30–40 minutes of brisk conversational walking 4 times weekly keeping heart rate in Zone 2 (${z2Min}–${z2Max} bpm). Gradual consistency accelerates heart age reduction.';
+    }
+  }
+
+  // Initial Calculation
+  updateAllValues();
+});
+/* ===== END Issue #349 ===== */
