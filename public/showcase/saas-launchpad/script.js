@@ -824,3 +824,352 @@ function initOnboardingChecklist() {
   }
 })();
 /* ===== END Issue #303 ===== */
+
+
+/* ===== BEGIN Issue #359: Live System Observability Log Stream Simulator ===== */
+(function initLiveLogStreamSimulator() {
+  const section = document.getElementById('live-log-stream-section');
+  if (!section) return;
+
+  // Stream Configuration & State
+  let isStreaming = true;
+  let streamIntervalMs = 500; // 2 logs/sec default
+  let timerId = null;
+  let totalLogsCount = 0;
+  const MAX_BUFFER_LINES = 200;
+  const logsBuffer = []; // stores { id, timestamp, level, service, message, rawText }
+
+  let activeLevelFilter = 'ALL';
+  let activeRegex = null;
+  let regexInputStr = '';
+
+  // DOM Elements
+  const linesContainer = document.getElementById('terminalLinesContainer');
+  const viewport = document.getElementById('terminalViewport');
+  const toggleBtn = document.getElementById('toggleStreamBtn');
+  const toggleIcon = document.getElementById('toggleStreamIcon');
+  const toggleText = document.getElementById('toggleStreamText');
+  const speedButtons = section.querySelectorAll('.speed-btn');
+  const clearBtn = document.getElementById('clearTerminalBtn');
+  const sevPills = section.querySelectorAll('.sev-pill');
+  const regexInput = document.getElementById('regexSearchInput');
+  const regexStatusPill = document.getElementById('regexStatusPill');
+  const autoScrollCheckbox = document.getElementById('autoScrollLockCheckbox');
+
+  // Telemetry Elements
+  const streamStatusVal = document.getElementById('streamStatusVal');
+  const totalLogsCounter = document.getElementById('totalLogsCounter');
+  const errorRateVal = document.getElementById('errorRateVal');
+  const bufferCapacityVal = document.getElementById('bufferCapacityVal');
+  const anomalySpikeAlert = document.getElementById('anomalySpikeAlert');
+  const anomalySpikeText = document.getElementById('anomalySpikeText');
+  const dismissAlertBtn = document.getElementById('dismissAlertBtn');
+  const footerMatchesCount = document.getElementById('footerMatchesCount');
+
+  // Microservices & Log Templates
+  const SERVICES = [
+    'api-gateway',
+    'auth-service',
+    'payment-processor',
+    'model-orchestrator',
+    'vector-indexer',
+    'cache-cluster'
+  ];
+
+  const LOG_TEMPLATES = [
+    // INFO
+    { level: 'INFO', service: 'api-gateway', template: (trace) => `GET /v2/models HTTP/1.1 200 OK latency=14ms client_ip=198.51.100.44 trace_id=${trace}` },
+    { level: 'INFO', service: 'auth-service', template: (trace) => `JWT token signature verified for user_id=usr_8f1a2 exp=3600s trace_id=${trace}` },
+    { level: 'INFO', service: 'model-orchestrator', template: (trace) => `Inference stream initialized: model=gemini-3.8-flash tokens_prompt=512 batch_size=1 trace_id=${trace}` },
+    { level: 'INFO', service: 'vector-indexer', template: (trace) => `Cosine similarity search completed: chunks=256 time_ms=38.4 index=hnsw_v3 trace_id=${trace}` },
+    { level: 'INFO', service: 'cache-cluster', template: (trace) => `Semantic cache HIT: key=sha256:7b91d latency=1.8ms ttl=7200s trace_id=${trace}` },
+
+    // WARN
+    { level: 'WARN', service: 'model-orchestrator', template: (trace) => `TPM rate-limit soft ceiling reached (88% quota). Queueing request 40ms trace_id=${trace}` },
+    { level: 'WARN', service: 'payment-processor', template: (trace) => `Idempotency key replayed: key=idemp_a94f retry_count=1 trace_id=${trace}` },
+    { level: 'WARN', service: 'api-gateway', template: (trace) => `High latency detected: endpoint=/v1/embeddings duration=842ms threshold=500ms trace_id=${trace}` },
+    { level: 'WARN', service: 'cache-cluster', template: (trace) => `Redis connection pool saturated: active=96 idle=4 max=100 trace_id=${trace}` },
+
+    // ERROR
+    { level: 'ERROR', service: 'payment-processor', template: (trace) => `StripeWebhookTimeout: request_id=req_9a8f2 latency=1420ms code=504 upstream=api.stripe.com trace_id=${trace}` },
+    { level: 'ERROR', service: 'auth-service', template: (trace) => `OIDCProviderUnreachable: token validation failed for auth0.corp connection reset by peer trace_id=${trace}` },
+    { level: 'ERROR', service: 'vector-indexer', template: (trace) => `PgVectorConnectionPoolExhausted: error=pool_size_exceeded workers=32 trace_id=${trace}` },
+    { level: 'ERROR', service: 'model-orchestrator', template: (trace) => `ProviderUpstream503: Model overloaded on region us-east-1a, initiating auto-failover trace_id=${trace}` },
+
+    // FATAL
+    { level: 'FATAL', service: 'api-gateway', template: (trace) => `PANIC: ingress controller segfault memory_allocated=8.4GB error=out_of_memory trace_id=${trace}` },
+    { level: 'FATAL', service: 'payment-processor', template: (trace) => `CRITICAL: settlement ledger balance verification mismatch during atomic commit tx_id=tx_9982 trace_id=${trace}` }
+  ];
+
+  function generateTraceId() {
+    const chars = '0123456789abcdef';
+    let s = '';
+    for (let i = 0; i < 12; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+    return '0x' + s;
+  }
+
+  // Generate Log Event
+  function generateLogEvent() {
+    // Weighted random selection for level:
+    // INFO 65%, WARN 20%, ERROR 12%, FATAL 3%
+    const rand = Math.random();
+    let targetLevel = 'INFO';
+    if (rand < 0.65) targetLevel = 'INFO';
+    else if (rand < 0.85) targetLevel = 'WARN';
+    else if (rand < 0.97) targetLevel = 'ERROR';
+    else targetLevel = 'FATAL';
+
+    const pool = LOG_TEMPLATES.filter(t => t.level === targetLevel);
+    const item = pool[Math.floor(Math.random() * pool.length)];
+
+    const now = new Date();
+    const isoTime = now.toISOString().replace('T', ' ').replace('Z', '');
+    const traceId = generateTraceId();
+    const message = item.template(traceId);
+    const rawText = `[${isoTime}] [${item.level}] [${item.service}] ${message}`;
+
+    return {
+      id: ++totalLogsCount,
+      timestamp: isoTime,
+      level: item.level,
+      service: item.service,
+      message: message,
+      rawText: rawText
+    };
+  }
+
+  // Append Log to State and DOM
+  function pushLog(logObj) {
+    logsBuffer.push(logObj);
+    if (logsBuffer.length > MAX_BUFFER_LINES) {
+      logsBuffer.shift();
+      if (linesContainer.firstElementChild) {
+        linesContainer.removeChild(linesContainer.firstElementChild);
+      }
+    }
+
+    renderSingleLog(logObj);
+    updateTelemetry();
+  }
+
+  // Render a Single Log Row
+  function renderSingleLog(logObj) {
+    const isVisible = checkVisibility(logObj);
+    const rowEl = document.createElement('div');
+    rowEl.className = 'terminal-log-row';
+    rowEl.id = 'log-line-' + logObj.id;
+    rowEl.dataset.level = logObj.level;
+    rowEl.dataset.service = logObj.service;
+
+    if (!isVisible) {
+      rowEl.style.display = 'none';
+    }
+
+    let formattedMessage = escapeHtml(logObj.message);
+
+    // Apply Regex Match Highlight
+    if (activeRegex && isVisible) {
+      formattedMessage = highlightRegex(formattedMessage, activeRegex);
+    }
+
+    rowEl.innerHTML = `
+      <span class="log-time">${logObj.timestamp.split(' ')[1]}</span>
+      <span class="log-level-badge sev-${logObj.level.toLowerCase()}">${logObj.level}</span>
+      <span class="log-service">[${logObj.service}]</span>
+      <span class="log-msg">${formattedMessage}</span>
+    `;
+
+    linesContainer.appendChild(rowEl);
+
+    // Auto-scroll if enabled
+    if (autoScrollCheckbox.checked && isVisible) {
+      viewport.scrollTop = viewport.scrollHeight;
+    }
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function highlightRegex(text, regex) {
+    try {
+      return text.replace(regex, (match) => `<mark class="regex-match">${match}</mark>`);
+    } catch {
+      return text;
+    }
+  }
+
+  function checkVisibility(logObj) {
+    // 1. Level filter
+    if (activeLevelFilter !== 'ALL' && logObj.level !== activeLevelFilter) {
+      return false;
+    }
+
+    // 2. Regex filter
+    if (activeRegex) {
+      return activeRegex.test(logObj.rawText);
+    }
+
+    return true;
+  }
+
+  // Re-filter all rendered rows when filter or regex changes
+  function applyAllFilters() {
+    let visibleCount = 0;
+    const rows = linesContainer.children;
+
+    for (let i = 0; i < logsBuffer.length; i++) {
+      const logObj = logsBuffer[i];
+      const rowEl = rows[i];
+      if (!rowEl) continue;
+
+      const isVisible = checkVisibility(logObj);
+      if (isVisible) {
+        rowEl.style.display = 'flex';
+        visibleCount++;
+        // Re-highlight message
+        const msgEl = rowEl.querySelector('.log-msg');
+        if (msgEl) {
+          let msg = escapeHtml(logObj.message);
+          if (activeRegex) msg = highlightRegex(msg, activeRegex);
+          msgEl.innerHTML = msg;
+        }
+      } else {
+        rowEl.style.display = 'none';
+      }
+    }
+
+    footerMatchesCount.textContent = `Showing ${visibleCount} of ${logsBuffer.length} buffered logs`;
+
+    if (autoScrollCheckbox.checked) {
+      viewport.scrollTop = viewport.scrollHeight;
+    }
+  }
+
+  // Telemetry & Error Rate Spike Alert
+  function updateTelemetry() {
+    totalLogsCounter.textContent = totalLogsCount.toLocaleString();
+    bufferCapacityVal.textContent = `${logsBuffer.length} / ${MAX_BUFFER_LINES} Lines`;
+
+    // Calculate error rate over the last 30 logs in buffer
+    const sampleWindow = logsBuffer.slice(-30);
+    const errorCount = sampleWindow.filter(l => l.level === 'ERROR' || l.level === 'FATAL').length;
+    const errorRate = sampleWindow.length > 0 ? (errorCount / sampleWindow.length) * 100 : 0;
+
+    errorRateVal.textContent = errorRate.toFixed(1) + '%';
+    if (errorRate >= 20) {
+      errorRateVal.className = 'telemetry-value text-red';
+    } else if (errorRate >= 10) {
+      errorRateVal.className = 'telemetry-value text-amber';
+    } else {
+      errorRateVal.className = 'telemetry-value text-emerald';
+    }
+
+    // Trigger Anomaly Spike Banner if error rate > 30% with at least 15 logs
+    if (errorRate >= 30 && sampleWindow.length >= 15) {
+      anomalySpikeText.textContent = `High error rate (${errorRate.toFixed(1)}%) in recent stream window! Detected ${errorCount} service failure codes.`;
+      anomalySpikeAlert.style.display = 'flex';
+    }
+  }
+
+  // Dismiss Alert
+  dismissAlertBtn.addEventListener('click', () => {
+    anomalySpikeAlert.style.display = 'none';
+  });
+
+  // Severity Level Filter Buttons
+  sevPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      sevPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeLevelFilter = pill.getAttribute('data-level');
+      applyAllFilters();
+    });
+  });
+
+  // Regex Search Query Handler
+  regexInput.addEventListener('input', (e) => {
+    regexInputStr = e.target.value.trim();
+    if (!regexInputStr) {
+      activeRegex = null;
+      regexStatusPill.textContent = 'Valid';
+      regexStatusPill.className = 'regex-valid-pill valid';
+      applyAllFilters();
+      return;
+    }
+
+    try {
+      activeRegex = new RegExp(regexInputStr, 'gi');
+      regexStatusPill.textContent = 'Valid';
+      regexStatusPill.className = 'regex-valid-pill valid';
+    } catch {
+      activeRegex = null;
+      regexStatusPill.textContent = 'Invalid';
+      regexStatusPill.className = 'regex-valid-pill invalid';
+    }
+
+    applyAllFilters();
+  });
+
+  // Clear Terminal Buffer
+  clearBtn.addEventListener('click', () => {
+    logsBuffer.length = 0;
+    linesContainer.innerHTML = '';
+    updateTelemetry();
+    footerMatchesCount.textContent = 'Buffer cleared';
+  });
+
+  // Stream Toggle
+  function setStreaming(play) {
+    isStreaming = play;
+    if (isStreaming) {
+      toggleIcon.textContent = '⏸';
+      toggleText.textContent = 'Pause Stream';
+      toggleBtn.className = 'term-btn term-btn-primary';
+      streamStatusVal.innerHTML = '<span class="status-live-dot"></span> STREAMING (' + (1000 / streamIntervalMs).toFixed(1) + '/s)';
+      streamStatusVal.className = 'telemetry-value text-emerald';
+      startLoop();
+    } else {
+      toggleIcon.textContent = '▶';
+      toggleText.textContent = 'Resume Stream';
+      toggleBtn.className = 'term-btn term-btn-secondary';
+      streamStatusVal.textContent = 'PAUSED';
+      streamStatusVal.className = 'telemetry-value text-amber';
+      clearInterval(timerId);
+    }
+  }
+
+  toggleBtn.addEventListener('click', () => setStreaming(!isStreaming));
+
+  // Speed Selector Buttons
+  speedButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      speedButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      streamIntervalMs = parseInt(btn.getAttribute('data-speed'), 10) || 500;
+      if (isStreaming) {
+        streamStatusVal.innerHTML = '<span class="status-live-dot"></span> STREAMING (' + (1000 / streamIntervalMs).toFixed(1) + '/s)';
+        startLoop();
+      }
+    });
+  });
+
+  function startLoop() {
+    clearInterval(timerId);
+    timerId = setInterval(() => {
+      if (isStreaming) {
+        pushLog(generateLogEvent());
+      }
+    }, streamIntervalMs);
+  }
+
+  // Seed initial 12 logs for immediate visual feedback
+  for (let i = 0; i < 12; i++) {
+    pushLog(generateLogEvent());
+  }
+
+  startLoop();
+})();
+/* ===== END Issue #359 ===== */

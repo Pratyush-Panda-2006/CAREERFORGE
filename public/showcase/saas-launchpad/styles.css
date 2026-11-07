@@ -2387,3 +2387,426 @@ body {
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
 }
 /* ===== END Issue #303 ===== */
+
+
+/* ===== BEGIN Issue #359: Live System Observability Log Stream Simulator ===== */
+.log-stream-section {
+  padding: 80px 24px;
+  background: radial-gradient(circle at 50% 10%, rgba(99, 102, 241, 0.08) 0%, rgba(10, 15, 29, 0.98) 75%);
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  color: #f8fafc;
+}
+
+.log-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.log-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.log-eyebrow {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 9999px;
+  color: #818cf8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+
+.log-header h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.log-subtitle {
+  font-size: 1rem;
+  color: #94a3b8;
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Telemetry Status Bar */
+.log-telemetry-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.telemetry-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telemetry-label {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.telemetry-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.text-emerald { color: #34d399 !important; }
+.text-amber { color: #fbbf24 !important; }
+.text-red { color: #f87171 !important; }
+.text-cyan { color: #38bdf8 !important; }
+
+.status-live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  margin-right: 6px;
+  animation: pulseDot 1.5s infinite;
+}
+
+/* Anomaly Spike Alert */
+.anomaly-spike-alert {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  animation: alertPulse 2s infinite ease-in-out;
+}
+
+@keyframes alertPulse {
+  0%, 100% { border-color: #ef4444; }
+  50% { border-color: #fca5a5; }
+}
+
+.alert-icon {
+  font-size: 1.4rem;
+}
+
+.alert-text {
+  font-size: 0.85rem;
+  color: #fecaca;
+  flex: 1;
+}
+
+.alert-text strong {
+  color: #ffffff;
+}
+
+.alert-dismiss-btn {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+/* Terminal Console Card */
+.log-terminal-card {
+  background: #090d16;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Terminal Controls Bar */
+.terminal-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  background: #0f1624;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+}
+
+.stream-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.term-btn {
+  border: none;
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.term-btn-primary {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.term-btn-primary:hover {
+  background: #2563eb;
+}
+
+.term-btn-secondary {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+.term-btn-secondary:hover {
+  background: #334155;
+}
+
+.speed-selector {
+  display: flex;
+  background: #090d16;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.speed-btn {
+  background: transparent;
+  border: none;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.speed-btn.active {
+  background: #1e293b;
+  color: #38bdf8;
+}
+
+/* Severity Pills */
+.severity-pills-group {
+  display: flex;
+  gap: 6px;
+}
+
+.sev-pill {
+  background: #131c2d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  padding: 6px 12px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: monospace;
+}
+
+.sev-pill.active {
+  color: #ffffff;
+}
+
+.sev-pill[data-level="ALL"].active { background: #334155; border-color: #64748b; }
+.sev-pill.sev-info.active { background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; color: #38bdf8; }
+.sev-pill.sev-warn.active { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fbbf24; }
+.sev-pill.sev-error.active { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #f87171; }
+.sev-pill.sev-fatal.active { background: rgba(236, 72, 153, 0.25); border-color: #ec4899; color: #f472b6; }
+
+/* Regex Input */
+.regex-input-wrap {
+  flex: 1;
+  min-width: 240px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.regex-icon {
+  position: absolute;
+  left: 12px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.regex-field {
+  width: 100%;
+  background: #090d16;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 60px 8px 34px;
+  font-family: monospace;
+  font-size: 0.82rem;
+  color: #f1f5f9;
+  outline: none;
+}
+
+.regex-field:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.regex-valid-pill {
+  position: absolute;
+  right: 8px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.regex-valid-pill.valid { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.regex-valid-pill.invalid { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+/* Autoscroll Lock */
+.autoscroll-lock-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Terminal Viewport & Log Rows */
+.terminal-viewport {
+  height: 420px;
+  overflow-y: auto;
+  background: #050811;
+  padding: 16px 20px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.terminal-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-viewport::-webkit-scrollbar-track {
+  background: #090d16;
+}
+
+.terminal-viewport::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+.terminal-lines-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.terminal-log-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+  word-break: break-all;
+}
+
+.terminal-log-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.log-time {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.log-level-badge {
+  font-weight: 800;
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  min-width: 44px;
+  text-align: center;
+}
+
+.log-level-badge.sev-info { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.log-level-badge.sev-warn { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+.log-level-badge.sev-error { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+.log-level-badge.sev-fatal { background: rgba(236, 72, 153, 0.25); color: #f472b6; font-weight: 900; }
+
+.log-service {
+  color: #a78bfa;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.log-msg {
+  color: #e2e8f0;
+  flex: 1;
+}
+
+/* Regex Highlight */
+mark.regex-match {
+  background: rgba(245, 158, 11, 0.35);
+  color: #fef08a;
+  border-radius: 2px;
+  padding: 1px 2px;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+}
+
+/* Terminal Footer */
+.terminal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: #0f1624;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.74rem;
+  color: #94a3b8;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-hint code {
+  background: #090d16;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #38bdf8;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-matches {
+  font-weight: 600;
+  color: #cbd5e1;
+}
+/* ===== END Issue #359 ===== */
