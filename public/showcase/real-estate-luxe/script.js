@@ -588,3 +588,348 @@ document.addEventListener('DOMContentLoaded', () => {
     update();
   });
 })();
+
+/* ===== BEGIN Issue #357: Interactive 2D Architectural Floor Plan & Sunlight Simulator ===== */
+(function initFloorplanSunlightSimulator() {
+  const section = document.getElementById('estate-floorplan-section');
+  if (!section) return;
+
+  // Rooms Architectural Specs Catalog
+  const ROOMS_DATA = {
+    foyer: {
+      tag: 'GROUND LEVEL · ZONE 01',
+      name: 'Grand Foyer',
+      dim: "18' 4\" × 22' 0\" · 403 SQ FT",
+      ceiling: "14' Coffered with Bronze Reveal",
+      exposure: 'Southern Ambient Light',
+      orientation: 'south',
+      flooring: 'Honed Noir St. Laurent Marble',
+      glazing: 'Low-E Acoustic Solar Guard 70',
+      note: 'The Grand Foyer was engineered to welcome guests with double-height volume, capturing luminous reflection from the exterior water courtyard while maintaining acoustic tranquility.'
+    },
+    salon: {
+      tag: 'GROUND LEVEL · ZONE 02',
+      name: 'Great Salon & Living Atrium',
+      dim: "35' 0\" × 24' 6\" · 857 SQ FT",
+      ceiling: "16' Architectural Exposed Timber Beams",
+      exposure: 'Dual North-South Cross Illumination',
+      orientation: 'south-north',
+      flooring: 'White Oak Chevron Parquet (Bleached Finish)',
+      glazing: 'Motorized Triple-Pane Structural Glass Curtains',
+      note: 'Conceived as the social core of the estate, the Great Salon features 12-foot motorized pocket doors seamlessly blending indoor sanctuary with coastal Pacific horizon.'
+    },
+    kitchen: {
+      tag: 'GROUND LEVEL · ZONE 03',
+      name: "Gourmet Chef's Kitchen & Pantry",
+      dim: "22' 0\" × 18' 6\" · 407 SQ FT",
+      ceiling: "12' Flush Drywall with Integrated Linear LED",
+      exposure: 'Eastern Morning Solar Light',
+      orientation: 'east',
+      flooring: 'Large-Format Terrazzo Slabs',
+      glazing: 'Clerestory Transom Daylight Monitors',
+      note: 'Custom Boffi cabinetry with bookmatched Calacatta Borghini marble monolithic island, equipped with dual Sub-Zero refrigeration columns and La Cornue artisan range.'
+    },
+    wine: {
+      tag: 'GROUND LEVEL · ZONE 04',
+      name: 'Sommelier Wine Vault',
+      dim: "16' 0\" × 14' 0\" · 224 SQ FT",
+      ceiling: "10' Vaulted Tuscan Brick Arch",
+      exposure: 'Protected Sub-Level (Zero Direct UV Solar)',
+      orientation: 'protected',
+      flooring: 'Reclaimed Antiqued French Bluestone',
+      glazing: 'Argon-Filled Thermal Double Glazing with UV Shield',
+      note: 'Engineered with triple-redundant WhisperKOOL environmental climate modules preserving 1,800 reserve bottles at a constant 55°F and 65% relative humidity.'
+    },
+    library: {
+      tag: 'GROUND LEVEL · ZONE 05',
+      name: 'Executive Library & Study',
+      dim: "24' 0\" × 16' 8\" · 400 SQ FT",
+      ceiling: "13' Custom Fluted Walnut Millwork",
+      exposure: 'Western Sunset & Golden Hour Light',
+      orientation: 'west',
+      flooring: 'Fumed European Oak Herringbone',
+      glazing: 'Floor-to-Ceiling Steel-Framed Casement Windows',
+      note: 'Designed for quiet reflection and global executive operations, insulated with hidden acoustic batt walls and concealed humidor cabinet.'
+    },
+    terrace: {
+      tag: 'GROUND LEVEL · ZONE 06 (EXTERIOR)',
+      name: 'Infinity Ocean Terrace & Resort Pool',
+      dim: "68' 0\" × 26' 0\" · 1,768 SQ FT",
+      ceiling: 'Open Sky / Cantilevered Bronze Canopy',
+      exposure: 'Full Panoramic 180° Solar Arch (Dawn to Dusk)',
+      orientation: 'all',
+      flooring: 'Flamed Non-Slip Travertine Pavers',
+      glazing: 'Frameless Laminated Structural Glass Balustrade',
+      note: 'Suspended 180 feet above the ocean with zero-edge heated saline lap pool, submerged baja shelf sunbeds, and architectural linear fire trough.'
+    },
+    master: {
+      tag: 'UPPER LEVEL · ZONE 07',
+      name: 'Master Penthouse Sanctuary Suite',
+      dim: "38' 0\" × 22' 0\" · 836 SQ FT",
+      ceiling: "14' Raised Tray with Hidden Perimeter Cove Light",
+      exposure: 'Direct Western Sunset & Golden Hour Glow',
+      orientation: 'west',
+      flooring: 'Quarter-Sawn White Oak Planks (8" Width)',
+      glazing: 'Acoustic Laminated Hurricane Impact Glass',
+      note: 'Spans the entire western wing of the upper level with private ocean-facing cantilevered lanai, dual-sided linear gas fireplace, and motorized automated blackout shades.'
+    },
+    dressing: {
+      tag: 'UPPER LEVEL · ZONE 08',
+      name: 'Dual Designer Dressing Salons',
+      dim: "22' 0\" × 15' 0\" · 330 SQ FT",
+      ceiling: "11' Flush Ceiling with 98 CRI Vanity Spotlights",
+      exposure: 'Filtered Northern Diffused Light (Color Neutral)',
+      orientation: 'north',
+      flooring: 'Silk-Wool Blend Low-Pile Luxury Carpet',
+      glazing: 'Frosted Privacy Clerestory Bands',
+      note: 'Equipped with bespoke smoked-glass wardrobe display cases, leather-lined jewelry island drawers, and dedicated climate-controlled handbag gallery.'
+    },
+    spa: {
+      tag: 'UPPER LEVEL · ZONE 09',
+      name: 'Spa Wellness Bath & Cedar Sauna',
+      dim: "22' 0\" × 15' 0\" · 330 SQ FT",
+      ceiling: "12' Water-Resistant Tadelakt Plaster Ceiling",
+      exposure: 'Eastern Morning Awakening Sun',
+      orientation: 'east',
+      flooring: 'Bookmatched Statuario Marble Heated Slabs',
+      glazing: 'Privacy Smart Glass (Opaque/Clear Electrochromic)',
+      note: 'Features an oversized carved marble freestanding soaking tub overlooking the canyon, steam shower with chroma-therapy, and custom Scandinavian red cedar dry sauna.'
+    }
+  };
+
+  // State
+  let currentLevel = 'ground';
+  let currentRoomId = 'foyer';
+  let currentHour = 13; // 1:00 PM
+
+  // DOM Elements
+  const tabGround = document.getElementById('tabGroundLevel');
+  const tabUpper = document.getElementById('tabUpperLevel');
+  const roomsGroundGroup = document.getElementById('roomsGroundLevel');
+  const roomsUpperGroup = document.getElementById('roomsUpperLevel');
+
+  const sunTimeRange = document.getElementById('sunTimeRange');
+  const sunTimeDisplay = document.getElementById('sunTimeDisplay');
+  const sunPhaseIcon = document.getElementById('sunPhaseIcon');
+  const sunAzimuthDisplay = document.getElementById('sunAzimuthDisplay');
+  const sunElevationDisplay = document.getElementById('sunElevationDisplay');
+  const solarLightOverlay = document.getElementById('solarLightOverlay');
+
+  const sunVectorLine = document.getElementById('sunVectorLine');
+  const sunVectorHead = document.getElementById('sunVectorHead');
+
+  // Sidebar Elements
+  const specRoomTag = document.getElementById('specRoomTag');
+  const specRoomName = document.getElementById('specRoomName');
+  const specRoomDim = document.getElementById('specRoomDim');
+  const specCeiling = document.getElementById('specCeiling');
+  const specExposure = document.getElementById('specExposure');
+  const specFlooring = document.getElementById('specFlooring');
+  const specGlazing = document.getElementById('specGlazing');
+  const solarAnalysisDesc = document.getElementById('solarAnalysisDesc');
+  const daylightFactorVal = document.getElementById('daylightFactorVal');
+  const daylightMeterFill = document.getElementById('daylightMeterFill');
+  const specArchitectNote = document.getElementById('specArchitectNote');
+
+  // Level Switcher
+  tabGround.addEventListener('click', () => {
+    currentLevel = 'ground';
+    tabGround.classList.add('active');
+    tabGround.setAttribute('aria-selected', 'true');
+    tabUpper.classList.remove('active');
+    tabUpper.setAttribute('aria-selected', 'false');
+    roomsGroundGroup.style.display = 'block';
+    roomsUpperGroup.style.display = 'none';
+    selectRoom('foyer');
+  });
+
+  tabUpper.addEventListener('click', () => {
+    currentLevel = 'upper';
+    tabUpper.classList.add('active');
+    tabUpper.setAttribute('aria-selected', 'true');
+    tabGround.classList.remove('active');
+    tabGround.setAttribute('aria-selected', 'false');
+    roomsUpperGroup.style.display = 'block';
+    roomsGroundGroup.style.display = 'none';
+    selectRoom('master');
+  });
+
+  // Room Selection Handler
+  function selectRoom(roomId) {
+    if (!ROOMS_DATA[roomId]) return;
+    currentRoomId = roomId;
+
+    // Remove active state from all room SVG groups
+    document.querySelectorAll('.room-group').forEach(rg => {
+      rg.classList.remove('active');
+    });
+
+    const activeEl = document.querySelector(`.room-group[data-room="${roomId}"]`);
+    if (activeEl) activeEl.classList.add('active');
+
+    // Update Sidebar Specs
+    const d = ROOMS_DATA[roomId];
+    specRoomTag.textContent = d.tag;
+    specRoomName.textContent = d.name;
+    specRoomDim.textContent = d.dim;
+    specCeiling.textContent = d.ceiling;
+    specExposure.textContent = d.exposure;
+    specFlooring.textContent = d.flooring;
+    specGlazing.textContent = d.glazing;
+    specArchitectNote.textContent = `"${d.note}"`;
+
+    updateSolarAnalysis();
+  }
+
+  // Attach Click Listeners to all Room SVG groups
+  document.querySelectorAll('.room-group').forEach(rg => {
+    rg.addEventListener('click', () => {
+      const rid = rg.getAttribute('data-room');
+      selectRoom(rid);
+    });
+    rg.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const rid = rg.getAttribute('data-room');
+        selectRoom(rid);
+      }
+    });
+  });
+
+  // Time-of-Day Sunlight Simulation Engine
+  function updateSolarSimulation(hour) {
+    currentHour = hour;
+
+    // Format Hour Display (e.g. 13.5 -> 1:30 PM)
+    const intHour = Math.floor(hour);
+    const mins = (hour % 1) * 60;
+    const isPm = intHour >= 12;
+    const displayHour12 = intHour > 12 ? intHour - 12 : (intHour === 0 ? 12 : intHour);
+    const minStr = mins === 0 ? '00' : Math.round(mins);
+    const ampm = isPm ? 'PM' : 'AM';
+
+    let phaseTitle = '';
+    let icon = '☀️';
+
+    if (hour <= 7.0) {
+      phaseTitle = 'Sunrise Luminescence';
+      icon = '🌅';
+    } else if (hour < 11.5) {
+      phaseTitle = 'Morning Direct Light';
+      icon = '🌤️';
+    } else if (hour <= 14.0) {
+      phaseTitle = 'Zenith High Noon';
+      icon = '☀️';
+    } else if (hour < 17.5) {
+      phaseTitle = 'Afternoon Angled Sun';
+      icon = '☀️';
+    } else if (hour <= 19.0) {
+      phaseTitle = 'Golden Hour Luminescence';
+      icon = '🌇';
+    } else {
+      phaseTitle = 'Twilight Ambient Dusk';
+      icon = '🌙';
+    }
+
+    sunTimeDisplay.textContent = `${displayHour12}:${minStr} ${ampm} — ${phaseTitle}`;
+    sunPhaseIcon.textContent = icon;
+
+    // Sun Path Calculations (Azimuth: 90° East at 6 AM, 180° South at 1 PM, 270° West at 8 PM)
+    // Elevation: 0° at 6 AM and 8 PM, peak 68° at 1 PM (13:00)
+    const norm = (hour - 6) / (20 - 6); // 0.0 at 6 AM to 1.0 at 8 PM
+    const azimuth = Math.round(90 + norm * 180);
+    const elevation = Math.round(Math.sin(norm * Math.PI) * 68);
+
+    sunAzimuthDisplay.textContent = `Azimuth: ${azimuth}° ${azimuth < 135 ? 'E' : (azimuth > 225 ? 'W' : 'S')}`;
+    sunElevationDisplay.textContent = `Elevation: ${elevation}°`;
+
+    // Position of Sun Vector around Blueprint SVG (Center is 450, 300; Radius is 270)
+    // At East (6 AM, azimuth 90°): Sun is on right (800, 300)
+    // At South (1 PM, azimuth 180°): Sun is on bottom (450, 560)
+    // At West (8 PM, azimuth 270°): Sun is on left (100, 300)
+    const rad = (azimuth - 90) * (Math.PI / 180); // angle from East downwards
+    const sunX = Math.round(450 + 340 * Math.cos(rad));
+    const sunY = Math.round(300 + 240 * Math.sin(rad));
+
+    sunVectorHead.setAttribute('cx', sunX);
+    sunVectorHead.setAttribute('cy', sunY);
+    sunVectorLine.setAttribute('x1', 450);
+    sunVectorLine.setAttribute('y1', 300);
+    sunVectorLine.setAttribute('x2', sunX);
+    sunVectorLine.setAttribute('y2', sunY);
+
+    // Color Temperature Overlay
+    let overlayBg = 'transparent';
+    if (hour <= 7.0) {
+      overlayBg = 'radial-gradient(circle at 80% 50%, rgba(251, 146, 60, 0.22) 0%, rgba(59, 130, 246, 0.12) 80%)';
+    } else if (hour <= 11.0) {
+      overlayBg = 'radial-gradient(circle at 75% 65%, rgba(253, 224, 71, 0.18) 0%, transparent 70%)';
+    } else if (hour <= 14.5) {
+      overlayBg = 'radial-gradient(circle at 50% 80%, rgba(254, 240, 138, 0.20) 0%, transparent 60%)';
+    } else if (hour <= 17.5) {
+      overlayBg = 'radial-gradient(circle at 25% 65%, rgba(245, 158, 11, 0.22) 0%, transparent 70%)';
+    } else if (hour <= 19.0) {
+      overlayBg = 'radial-gradient(circle at 15% 50%, rgba(239, 68, 68, 0.25) 0%, rgba(245, 158, 11, 0.2) 50%, transparent 80%)';
+    } else {
+      overlayBg = 'radial-gradient(circle at 10% 50%, rgba(99, 102, 241, 0.20) 0%, rgba(15, 23, 42, 0.35) 80%)';
+    }
+    solarLightOverlay.style.background = overlayBg;
+
+    updateSolarAnalysis();
+  }
+
+  // Room Solar Exposure Evaluation
+  function updateSolarAnalysis() {
+    const d = ROOMS_DATA[currentRoomId];
+    if (!d) return;
+
+    const hour = currentHour;
+    let factor = 75;
+    let desc = '';
+
+    if (d.orientation === 'protected') {
+      factor = 2;
+      desc = "Sub-level thermal wine vault: 100% shielded from solar ultraviolet exposure and infrared heat spikes. Ambient light is 0% natural, maintained under museum-grade cold LED.";
+    } else if (d.orientation === 'east') {
+      if (hour <= 11) {
+        factor = Math.round(85 + (11 - hour) * 3);
+        desc = `At ${sunTimeDisplay.textContent.split('—')[0].trim()}, direct eastern morning sun casts invigorating high-lumen natural illumination directly across ${d.name}, elevating wakefulness.`;
+      } else {
+        factor = Math.max(35, Math.round(75 - (hour - 11) * 6));
+        desc = `As the sun transitions past zenith to the southwest, ${d.name} shifts into soft, diffused indirect daylighting with zero unwanted afternoon solar thermal gain.`;
+      }
+    } else if (d.orientation === 'west') {
+      if (hour >= 15) {
+        factor = Math.round(88 + (hour - 15) * 2.5);
+        desc = `In the afternoon and golden hour, ${d.name} receives prime western solar exposure. Low-angle amber light streams through the glass curtains, framing dramatic sunset panoramas.`;
+      } else {
+        factor = Math.max(30, Math.round(50 + hour * 2));
+        desc = `During morning hours, ${d.name} enjoys gentle ambient indirect illumination, maintaining comfortable ambient cooling before afternoon sunset alignment.`;
+      }
+    } else if (d.orientation === 'all') {
+      factor = Math.round(Math.sin(((hour - 6) / 14) * Math.PI) * 98);
+      factor = Math.max(25, factor);
+      desc = `The Infinity Terrace boasts 180° uninterrupted coastal exposure. At ${sunTimeDisplay.textContent.split('—')[0].trim()}, solar elevation (${sunElevationDisplay.textContent.replace('Elevation: ', '')}) provides optimal natural tanning and ambient pool warmth.`;
+    } else {
+      // South / South-North
+      factor = Math.round(Math.sin(((hour - 6) / 14) * Math.PI) * 95);
+      factor = Math.max(35, factor);
+      desc = "Southern architectural orientation delivers balanced, high-efficiency illumination throughout the entire day. Deep overhangs prevent summer glare while capturing full winter sun.";
+    }
+
+    factor = Math.max(5, Math.min(100, factor));
+    daylightFactorVal.textContent = `${factor}% (${factor > 75 ? 'Optimal Lumens' : (factor > 40 ? 'Moderate Diffused' : 'Low / Ambient')})`;
+    daylightMeterFill.style.width = `${factor}%`;
+    solarAnalysisDesc.textContent = desc;
+  }
+
+  // Slider Event Listener
+  sunTimeRange.addEventListener('input', (e) => {
+    updateSolarSimulation(parseFloat(e.target.value));
+  });
+
+  // Initial State
+  updateSolarSimulation(13.0);
+  selectRoom('foyer');
+})();
+/* ===== END Issue #357 ===== */

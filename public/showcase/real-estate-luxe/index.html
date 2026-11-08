@@ -314,6 +314,238 @@
     </div>
   </section>
 
+  <!-- ===== BEGIN Issue #357: Interactive 2D Architectural Estate Floor Plan & Sunlight Simulator ===== -->
+  <section class="floorplan-section" id="estate-floorplan-section" aria-labelledby="floorplan-title">
+    <div class="floorplan-container">
+      <div class="floorplan-header">
+        <div class="gold-tag">ARCHITECTURAL BLUEPRINT &amp; SPATIAL SOLAR DYNAMICS</div>
+        <h2 id="floorplan-title">Interactive Estate Blueprint &amp; Sunlight Angle Simulator</h2>
+        <p>Explore high-resolution 2D architectural room layouts, inspect exact dimensions, and simulate solar illumination across the diurnal daylight cycle.</p>
+      </div>
+
+      <!-- Simulator Control Bar -->
+      <div class="floorplan-controls-bar">
+        <!-- Floor Level Tabs -->
+        <div class="level-tabs" role="tablist" aria-label="Floor Level">
+          <button type="button" class="level-tab active" id="tabGroundLevel" role="tab" aria-selected="true" data-level="ground">
+            🏛️ Ground Level (Main Hall &amp; Terrace)
+          </button>
+          <button type="button" class="level-tab" id="tabUpperLevel" role="tab" aria-selected="false" data-level="upper">
+            👑 Upper Level (Master Penthouse Suite)
+          </button>
+        </div>
+
+        <!-- Sunlight Time-of-Day Slider -->
+        <div class="sunlight-slider-card">
+          <div class="sun-slider-header">
+            <div class="sun-icon-wrap" id="sunPhaseIcon">☀️</div>
+            <div class="sun-time-info">
+              <span class="sun-time-kicker">SOLAR SIMULATION TIME</span>
+              <strong class="sun-time-display" id="sunTimeDisplay">1:00 PM — Zenith High Noon</strong>
+            </div>
+            <div class="sun-metrics-pill">
+              <span id="sunAzimuthDisplay">Azimuth: 180° S</span> · <span id="sunElevationDisplay">Elevation: 68°</span>
+            </div>
+          </div>
+          <input type="range" class="sun-range" id="sunTimeRange" min="6" max="20" step="0.5" value="13" aria-label="Time of day sun angle slider">
+          <div class="sun-time-ticks">
+            <span>6 AM (Sunrise)</span>
+            <span>9 AM</span>
+            <span>12 PM (Noon)</span>
+            <span>3 PM</span>
+            <span>6 PM (Golden Hour)</span>
+            <span>8 PM (Dusk)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="floorplan-viewer-grid">
+        <!-- SVG Blueprint Canvas Card -->
+        <div class="blueprint-canvas-card">
+          <div class="canvas-topbar">
+            <span class="blueprint-spec-tag">SPEC: THE MALIBU CLIFFTOP SANCTUARY · 8,450 TOTAL SQ FT</span>
+            <span class="blueprint-scale-tag">SCALE: 1/4" = 1'-0"</span>
+          </div>
+
+          <div class="blueprint-svg-wrap" id="blueprintSvgWrap">
+            <!-- Ambient Sunlight Tint Layer Overlay -->
+            <div class="solar-light-overlay" id="solarLightOverlay"></div>
+
+            <svg class="blueprint-svg" id="blueprintSvg" viewBox="0 0 900 600" aria-label="2D Architectural Estate Floor Plan">
+              <defs>
+                <pattern id="blueprintGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(212, 175, 55, 0.08)" stroke-width="1"/>
+                </pattern>
+                <!-- Sun Light Cone Gradient -->
+                <radialGradient id="sunGlowGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="#d97706" stop-opacity="0" />
+                </radialGradient>
+              </defs>
+
+              <!-- Grid Background -->
+              <rect width="900" height="600" fill="#0b111e" />
+              <rect width="900" height="600" fill="url(#blueprintGrid)" />
+
+              <!-- Ground Level Rooms Group -->
+              <g id="roomsGroundLevel">
+                <!-- Grand Foyer -->
+                <g class="room-group active" id="roomFoyer" data-room="foyer" tabindex="0" role="button" aria-label="Grand Foyer Room">
+                  <rect class="room-rect" x="340" y="380" width="220" height="170" rx="4" />
+                  <text class="room-name" x="450" y="450">GRAND FOYER</text>
+                  <text class="room-dim" x="450" y="475">18' 4" × 22' 0" · 403 SQ FT</text>
+                  <text class="room-badge" x="450" y="500">14' Coffered Ceilings</text>
+                </g>
+
+                <!-- Great Salon & Living Hall -->
+                <g class="room-group" id="roomSalon" data-room="salon" tabindex="0" role="button" aria-label="Great Salon Room">
+                  <rect class="room-rect" x="240" y="160" width="420" height="210" rx="4" />
+                  <text class="room-name" x="450" y="250">GREAT SALON &amp; LIVING ATRIUM</text>
+                  <text class="room-dim" x="450" y="275">35' 0" × 24' 6" · 857 SQ FT</text>
+                  <text class="room-badge" x="450" y="300">Double-Height Glazing</text>
+                </g>
+
+                <!-- Gourmet Chef's Kitchen & Butler Pantry -->
+                <g class="room-group" id="roomKitchen" data-room="kitchen" tabindex="0" role="button" aria-label="Chef's Kitchen">
+                  <rect class="room-rect" x="670" y="160" width="190" height="240" rx="4" />
+                  <text class="room-name" x="765" y="260">GOURMET KITCHEN</text>
+                  <text class="room-dim" x="765" y="285">22' 0" × 18' 6" · 407 SQ FT</text>
+                  <text class="room-badge" x="765" y="310">Calacatta Island</text>
+                </g>
+
+                <!-- Sommelier Wine Cellar -->
+                <g class="room-group" id="roomWine" data-room="wine" tabindex="0" role="button" aria-label="Wine Cellar">
+                  <rect class="room-rect" x="670" y="410" width="190" height="140" rx="4" />
+                  <text class="room-name" x="765" y="470">WINE VAULT</text>
+                  <text class="room-dim" x="765" y="495">16' 0" × 14' 0" · 224 SQ FT</text>
+                  <text class="room-badge" x="765" y="515">Climate-Controlled</text>
+                </g>
+
+                <!-- Private Library & Executive Study -->
+                <g class="room-group" id="roomLibrary" data-room="library" tabindex="0" role="button" aria-label="Executive Library">
+                  <rect class="room-rect" x="40" y="340" width="280" height="210" rx="4" />
+                  <text class="room-name" x="180" y="430">EXECUTIVE STUDY</text>
+                  <text class="room-dim" x="180" y="455">24' 0" × 16' 8" · 400 SQ FT</text>
+                  <text class="room-badge" x="180" y="480">French Oak Paneling</text>
+                </g>
+
+                <!-- Infinity Ocean Terrace & Pool Deck -->
+                <g class="room-group" id="roomTerrace" data-room="terrace" tabindex="0" role="button" aria-label="Infinity Terrace">
+                  <rect class="room-rect terrace-rect" x="40" y="30" width="820" height="120" rx="8" />
+                  <text class="room-name" x="450" y="80">INFINITY OCEAN TERRACE &amp; RESORT POOL</text>
+                  <text class="room-dim" x="450" y="105">68' 0" × 26' 0" · 1,768 SQ FT (OUTDOOR)</text>
+                  <text class="room-badge" x="450" y="125">Unobstructed Pacific Views</text>
+                </g>
+              </g>
+
+              <!-- Upper Level Rooms Group (Initially Hidden) -->
+              <g id="roomsUpperLevel" style="display: none;">
+                <!-- Master Penthouse Sanctuary Suite -->
+                <g class="room-group" id="roomMaster" data-room="master" tabindex="0" role="button" aria-label="Master Suite">
+                  <rect class="room-rect" x="180" y="100" width="540" height="240" rx="6" />
+                  <text class="room-name" x="450" y="200">MASTER PENTHOUSE SANCTUARY</text>
+                  <text class="room-dim" x="450" y="225">38' 0" × 22' 0" · 836 SQ FT</text>
+                  <text class="room-badge" x="450" y="250">Private Horizon Balcony &amp; Fireplace</text>
+                </g>
+
+                <!-- Dual Designer Dressing Wings -->
+                <g class="room-group" id="roomDressing" data-room="dressing" tabindex="0" role="button" aria-label="Dressing Wing">
+                  <rect class="room-rect" x="80" y="360" width="340" height="190" rx="4" />
+                  <text class="room-name" x="250" y="440">DUAL DRESSING SALONS</text>
+                  <text class="room-dim" x="250" y="465">22' 0" × 15' 0" · 330 SQ FT</text>
+                  <text class="room-badge" x="250" y="490">Integrated Backlit Wardrobes</text>
+                </g>
+
+                <!-- Spa Wellness Bath & Sauna -->
+                <g class="room-group" id="roomSpa" data-room="spa" tabindex="0" role="button" aria-label="Spa Wellness Bath">
+                  <rect class="room-rect" x="480" y="360" width="340" height="190" rx="4" />
+                  <text class="room-name" x="650" y="440">SPA BATH &amp; CEDAR SAUNA</text>
+                  <text class="room-dim" x="650" y="465">22' 0" × 15' 0" · 330 SQ FT</text>
+                  <text class="room-badge" x="650" y="490">Freestanding Soaking Tub</text>
+                </g>
+              </g>
+
+              <!-- Sun Position Beam Vector -->
+              <g id="sunBeamGroup" pointer-events="none">
+                <line id="sunVectorLine" x1="450" y1="300" x2="450" y2="50" stroke="#f59e0b" stroke-width="3" stroke-dasharray="6,4" opacity="0.8" />
+                <circle id="sunVectorHead" cx="450" cy="50" r="14" fill="#fbbf24" stroke="#ffffff" stroke-width="2" />
+              </g>
+            </svg>
+          </div>
+
+          <!-- Compass & Blueprint Footer -->
+          <div class="blueprint-canvas-footer">
+            <div class="blueprint-compass">
+              <span class="compass-arrow">🧭</span>
+              <span class="compass-text">NORTH: 0° (Top Facing Ocean)</span>
+            </div>
+            <div class="blueprint-hint">
+              <span>💡 Click any room to inspect architectural specifications &amp; solar orientation</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Room Inspection & Solar Telemetry Card -->
+        <div class="blueprint-sidebar-card">
+          <div class="sidebar-head">
+            <span class="sidebar-room-tag" id="specRoomTag">GROUND LEVEL ZONE 01</span>
+            <h3 class="sidebar-room-name" id="specRoomName">Grand Foyer</h3>
+            <span class="sidebar-room-dim" id="specRoomDim">18' 4" × 22' 0" · 403 SQ FT</span>
+          </div>
+
+          <!-- Room Architectural Specs List -->
+          <div class="room-specs-list">
+            <div class="spec-row">
+              <span class="spec-label">Ceiling Height</span>
+              <strong class="spec-value" id="specCeiling">14' Coffered with Bronze Reveal</strong>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Solar Exposure</span>
+              <strong class="spec-value highlight-gold" id="specExposure">Southern Ambient Light</strong>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Flooring Finish</span>
+              <strong class="spec-value" id="specFlooring">Honed Noir St. Laurent Marble</strong>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Glazing Spec</span>
+              <strong class="spec-value" id="specGlazing">Low-E Acoustic Solar Guard 70</strong>
+            </div>
+          </div>
+
+          <!-- Live Solar Analysis Card -->
+          <div class="solar-analysis-box">
+            <div class="solar-analysis-head">
+              <span class="analysis-icon">☀️</span>
+              <strong>Active Sunlight Analysis</strong>
+            </div>
+            <p class="solar-analysis-desc" id="solarAnalysisDesc">
+              At 1:00 PM (Zenith Sun), solar rays strike the Southern elevation directly at a 68° vertical angle. Deep ambient illumination reaches through the Grand Foyer atrium with zero harsh thermal glare.
+            </p>
+            <div class="solar-exposure-meter">
+              <div class="meter-label-row">
+                <span>Natural Daylight Factor</span>
+                <strong id="daylightFactorVal">92% (Optimal)</strong>
+              </div>
+              <div class="meter-track">
+                <div class="meter-fill" id="daylightMeterFill" style="width: 92%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Curated Architectural Note -->
+          <div class="architect-quote-card">
+            <p class="quote-text" id="specArchitectNote">
+              "The Grand Foyer was engineered to welcome guests with double-height volume, capturing luminous reflection from the exterior water courtyard while maintaining acoustic tranquility."
+            </p>
+            <span class="quote-author">— Studio Aetheria Architecture</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #357 ===== -->
+
   <!-- Property comparison: selection tray and side-by-side drawer (cards get their checkboxes from script.js) -->
   <div class="cmp-tray" id="cmp-tray" role="region" aria-label="Estate comparison" hidden>
     <div class="cmp-tray-inner">
