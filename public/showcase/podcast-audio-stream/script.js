@@ -354,17 +354,52 @@ function updateTimeUI(forceScroll = false) {
   }
 }
 
+// ===== BEGIN Issue #355: Synchronized Karaoke Highlighting & Search =====
+let currentSearchQuery = '';
+let currentSpeakerFilter = 'all';
+
+// Pre-calculate sentences for each segment with proportional time allocations
+const SEGMENT_SENTENCES = {};
+TRANSCRIPT_EP142.forEach(seg => {
+  const rawSentences = seg.text.match(/[^.!?]+[.!?]+(?:s|$)|[^.!?]+$/g) || [seg.text];
+  const totalChars = seg.text.length;
+  const segDuration = seg.end - seg.start;
+  let runningTime = seg.start;
+
+  SEGMENT_SENTENCES[seg.id] = rawSentences.map((sent, idx) => {
+    const trimmed = sent.trim();
+    const proportion = Math.max(0.1, trimmed.length / totalChars);
+    const sentDuration = proportion * segDuration;
+    const start = runningTime;
+    const end = idx === rawSentences.length - 1 ? seg.end : runningTime + sentDuration;
+    runningTime = end;
+    return {
+      id: `${seg.id}-s${idx}`,
+      text: trimmed,
+      start: start,
+      end: end
+    };
+  });
+});
+
 function highlightSegment(segId, forceScroll = false) {
   activeSegmentId = segId;
 
   document.querySelectorAll('.transcript-block').forEach(block => {
-    block.classList.remove('active');
+    if (block.id === segId) {
+      block.classList.add('active');
+    } else {
+      block.classList.remove('active');
+      // Reset sentence karaoke in inactive blocks
+      block.querySelectorAll('.transcript-sentence').forEach(span => {
+        span.classList.remove('karaoke-active', 'karaoke-done');
+        span.style.removeProperty('--karaoke-pct');
+      });
+    }
   });
 
   const activeEl = document.getElementById(segId);
   if (activeEl) {
-    activeEl.classList.add('active');
-
     const autoScrollCheckbox = document.getElementById('autoscroll-checkbox');
     const autoScrollEnabled = autoScrollCheckbox ? autoScrollCheckbox.checked : true;
 
@@ -372,6 +407,36 @@ function highlightSegment(segId, forceScroll = false) {
       activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
+}
+
+// Update karaoke progression for sentences within active segment
+function updateKaraokeProgress() {
+  if (!activeSegmentId) return;
+  const sentences = SEGMENT_SENTENCES[activeSegmentId];
+  if (!sentences) return;
+
+  const activeBlock = document.getElementById(activeSegmentId);
+  if (!activeBlock) return;
+
+  sentences.forEach(s => {
+    const el = document.getElementById(s.id);
+    if (!el) return;
+
+    if (currentTime < s.start) {
+      el.classList.remove('karaoke-active', 'karaoke-done');
+      el.style.removeProperty('--karaoke-pct');
+    } else if (currentTime >= s.end) {
+      el.classList.remove('karaoke-active');
+      el.classList.add('karaoke-done');
+      el.style.setProperty('--karaoke-pct', '100%');
+    } else {
+      // Actively speaking sentence
+      el.classList.remove('karaoke-done');
+      el.classList.add('karaoke-active');
+      const progress = Math.max(0, Math.min(1.0, (currentTime - s.start) / Math.max(0.1, s.end - s.start)));
+      el.style.setProperty('--karaoke-pct', `${(progress * 100).toFixed(1)}%`);
+    }
+  });
 }
 
 function renderTranscript() {
@@ -385,6 +450,17 @@ function renderTranscript() {
     block.className = 'transcript-block';
     block.id = seg.id;
     block.dataset.start = seg.start;
+    block.dataset.speaker = seg.speaker;
+
+    const sentences = SEGMENT_SENTENCES[seg.id] || [];
+    const sentenceSpansHtml = sentences.map(s => {
+      let displayText = escapeHtml(s.text);
+      if (currentSearchQuery) {
+        const regex = new RegExp(`(${escapeRegex(currentSearchQuery)})`, 'gi');
+        displayText = displayText.replace(regex, '<mark class="transcript-search-highlight">$1</mark>');
+      }
+      return `<span class="transcript-sentence" id="${s.id}" data-sentence-start="${s.start}" title="Click to seek here (${formatTime(s.start)})">${displayText} </span>`;
+    }).join('');
 
     block.innerHTML = `
       <div class="block-speaker-row">
@@ -396,32 +472,60 @@ function renderTranscript() {
         <span class="speaker-role">${seg.role}</span>
         <span class="pulse-indicator"></span>
       </div>
-      <p class="transcript-paragraph">${escapeHtml(seg.text)}</p>
+      <p class="transcript-paragraph">${sentenceSpansHtml}</p>
     `;
 
     container.appendChild(block);
   });
+
+  applyFilters();
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+function escapeRegex(str) {
+  return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
-function filterTranscript(keyword) {
-  const term = keyword.trim().toLowerCase();
+function applyFilters() {
   const blocks = document.querySelectorAll('.transcript-block');
+  let matchCount = 0;
+  const term = currentSearchQuery.trim().toLowerCase();
 
   blocks.forEach(block => {
+    const speaker = block.dataset.speaker;
     const text = block.textContent.toLowerCase();
-    if (!term || text.includes(term)) {
+
+    const speakerMatches = (currentSpeakerFilter === 'all' || speaker === currentSpeakerFilter);
+    const searchMatches = (!term || text.includes(term));
+
+    if (speakerMatches && searchMatches) {
       block.style.display = 'block';
+      if (term) {
+        const count = (text.match(new RegExp(escapeRegex(term), 'gi')) || []).length;
+        matchCount += count;
+      }
     } else {
       block.style.display = 'none';
     }
   });
+
+  const countBadge = document.getElementById('search-count-badge');
+  const clearBtn = document.getElementById('search-clear-btn');
+  if (countBadge) {
+    if (term) {
+      countBadge.hidden = false;
+      countBadge.textContent = `${matchCount} match${matchCount === 1 ? '' : 'es'}`;
+      countBadge.className = matchCount > 0 ? 'search-count-badge' : 'search-count-badge no-match';
+    } else {
+      countBadge.hidden = true;
+    }
+  }
+
+  if (clearBtn) {
+    clearBtn.hidden = !term;
+  }
 }
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
   renderTranscript();
