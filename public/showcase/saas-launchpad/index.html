@@ -813,6 +813,110 @@
     </div>
   </section>
 
+  <!-- ===== BEGIN Issue #359: Live System Observability Log Stream Simulator ===== -->
+  <section class="log-stream-section" id="live-log-stream-section" aria-labelledby="log-stream-title">
+    <div class="log-container">
+      <div class="log-header">
+        <span class="log-eyebrow">// REAL-TIME OBSERVABILITY &amp; TELEMETRY STREAM</span>
+        <h2 id="log-stream-title">Live System Observability Log Stream Simulator</h2>
+        <p class="log-subtitle">
+          Monitor high-throughput microservice log events across distributed edge clusters with live regex search, severity level filters, auto-scroll lock, and automated anomaly spike detection.
+        </p>
+      </div>
+
+      <!-- Telemetry Status Bar -->
+      <div class="log-telemetry-bar">
+        <div class="telemetry-item">
+          <span class="telemetry-label">STREAM STATUS</span>
+          <span class="telemetry-value text-emerald" id="streamStatusVal"><span class="status-live-dot"></span> STREAMING (2.0/s)</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">TOTAL LOGS</span>
+          <strong class="telemetry-value" id="totalLogsCounter">0</strong>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">ERROR RATE</span>
+          <strong class="telemetry-value text-amber" id="errorRateVal">0.0%</strong>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">BUFFER CAPACITY</span>
+          <span class="telemetry-value" id="bufferCapacityVal">0 / 200 Lines</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">ACTIVE REGION</span>
+          <span class="telemetry-value text-cyan">us-east-1 (Kubernetes Pods)</span>
+        </div>
+      </div>
+
+      <!-- Anomaly Alert Banner (Appears on Error Spikes) -->
+      <div class="anomaly-spike-alert" id="anomalySpikeAlert" role="alert" style="display: none;">
+        <div class="alert-icon">🚨</div>
+        <div class="alert-text">
+          <strong>CRITICAL ERROR SPIKE DETECTED: </strong>
+          <span id="anomalySpikeText">Error rate exceeded 35% in recent sample window! Upstream payment gateway timeout circuit breaker primed.</span>
+        </div>
+        <button type="button" class="alert-dismiss-btn" id="dismissAlertBtn" aria-label="Dismiss alert">&times;</button>
+      </div>
+
+      <!-- Terminal Console Card -->
+      <div class="log-terminal-card">
+        <!-- Terminal Controls Bar -->
+        <div class="terminal-controls-bar">
+          <!-- Play/Pause & Speed -->
+          <div class="stream-actions">
+            <button type="button" class="term-btn term-btn-primary" id="toggleStreamBtn">
+              <span id="toggleStreamIcon">⏸</span>
+              <span id="toggleStreamText">Pause Stream</span>
+            </button>
+            <div class="speed-selector" role="group" aria-label="Stream Speed">
+              <button type="button" class="speed-btn active" data-speed="500">1×</button>
+              <button type="button" class="speed-btn" data-speed="250">2×</button>
+              <button type="button" class="speed-btn" data-speed="100">5× Turbo</button>
+            </div>
+            <button type="button" class="term-btn term-btn-secondary" id="clearTerminalBtn">Clear Buffer</button>
+          </div>
+
+          <!-- Severity Level Filter Pills -->
+          <div class="severity-pills-group" role="group" aria-label="Filter by log severity">
+            <button type="button" class="sev-pill active" data-level="ALL">ALL</button>
+            <button type="button" class="sev-pill sev-info" data-level="INFO">INFO</button>
+            <button type="button" class="sev-pill sev-warn" data-level="WARN">WARN</button>
+            <button type="button" class="sev-pill sev-error" data-level="ERROR">ERROR</button>
+            <button type="button" class="sev-pill sev-fatal" data-level="FATAL">FATAL</button>
+          </div>
+
+          <!-- Regex Query Input -->
+          <div class="regex-input-wrap">
+            <span class="regex-icon">.*</span>
+            <input type="text" class="regex-field" id="regexSearchInput" placeholder="Filter by regex (e.g. status: 50d|timeout|auth)..." aria-label="Filter logs using regular expression">
+            <span class="regex-valid-pill valid" id="regexStatusPill" title="Regex validation status">Valid</span>
+          </div>
+
+          <!-- Auto Scroll Lock Toggle -->
+          <label class="autoscroll-lock-label">
+            <input type="checkbox" id="autoScrollLockCheckbox" checked>
+            <span class="lock-indicator"></span>
+            <span>Auto-Scroll</span>
+          </label>
+        </div>
+
+        <!-- Terminal Window Viewport -->
+        <div class="terminal-viewport" id="terminalViewport" role="region" aria-label="Live Server Log Stream Console" tabindex="0">
+          <div class="terminal-lines-container" id="terminalLinesContainer">
+            <!-- Dynamic Log Lines appended via script.js -->
+          </div>
+        </div>
+
+        <!-- Terminal Footer Status -->
+        <div class="terminal-footer">
+          <span class="footer-hint">⌨️ Regex tip: try <code>[45]dd</code> for HTTP client/server errors or <code>latency=[789]d{2}ms</code> for slow spans</span>
+          <span class="footer-matches" id="footerMatchesCount">Showing all streamed logs</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #359 ===== -->
+
   <!-- ===== BEGIN Issue #303: Product Feature Tour Modal with Step-by-Step Navigation Carousel ===== -->
   <div id="tourBackdrop" class="tour-backdrop" onclick="closeTourModal()"></div>
   <dialog id="tourModal" class="tour-modal" aria-labelledby="tourTitle">
