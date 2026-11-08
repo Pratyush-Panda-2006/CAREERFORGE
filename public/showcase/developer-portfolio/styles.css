@@ -1338,3 +1338,110 @@ kbd.key-pressed {
   }
 }
 
+/* ---------- Availability status badge ---------- */
+.availability {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.availability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(63, 185, 80, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(63, 185, 80, 0.4);
+  border-radius: 999px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(63, 185, 80, 0.25);
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.availability-badge:hover,
+.availability-badge[aria-expanded="true"] {
+  background: rgba(63, 185, 80, 0.18);
+  box-shadow: 0 0 18px rgba(63, 185, 80, 0.45);
+}
+
+.availability-badge:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.availability-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.7);
+  animation: availability-pulse 1.8s infinite;
+}
+
+@keyframes availability-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.7); }
+  70%  { box-shadow: 0 0 0 8px rgba(63, 185, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
+}
+
+.availability-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  width: min(280px, 80vw);
+  padding: 14px 16px;
+  background: #21262d;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  font-size: 0.78rem;
+}
+
+.availability-tooltip[hidden] { display: none; }
+
+.availability-heading {
+  color: #b1bac4;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.68rem;
+  margin-bottom: 6px;
+}
+
+.availability-list,
+.availability-calendar {
+  list-style: none;
+  margin-bottom: 12px;
+}
+
+.availability-list li {
+  color: var(--text);
+  padding: 2px 0;
+}
+
+.availability-list li::before {
+  content: "> ";
+  color: var(--accent);
+}
+
+.availability-calendar li {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.availability-calendar li:last-child { border-bottom: 0; }
+
+.slot { font-weight: 600; }
+.slot-open { color: var(--accent); }
+.slot-limited { color: #e3b341; }
+
+@media (prefers-reduced-motion: reduce) {
+  .availability-dot { animation: none; }
+  .availability-badge { transition: none; }
+}
+
