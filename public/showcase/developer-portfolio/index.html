@@ -361,6 +361,18 @@
           <span class="terminal-title">dev@kernel-box: interactive shell</span>
         </div>
         <div class="vterm-screen" id="vterm-screen" role="log" aria-live="polite" aria-label="Terminal output"></div>
+        <section id="terminal-game" data-terminal-game hidden aria-labelledby="game-title">
+          <h3 id="game-title">[ CIPHER SPRINT ]</h3>
+          <p>Optional 30-second typing challenge. Type each lowercase target exactly, then Enter. Inserted wrong characters count against accuracy, even after correction. Score = completed letters × 10 × overall accuracy. No network or real hacking.</p>
+          <dl class="game-metrics"><div><dt>Time left</dt><dd id="game-clock">30.0s</dd></div><div><dt>Score</dt><dd id="game-score">0</dd></div><div><dt>Accuracy</dt><dd id="game-accuracy">0%</dd></div></dl>
+          <p class="game-target">Target: <strong id="game-target"></strong></p>
+          <p id="game-word-count">0 words completed</p>
+          <form autocomplete="off"><label for="game-input">Decipher word</label><input id="game-input" type="text" maxlength="32" spellcheck="false" autocapitalize="off" autocorrect="off" aria-describedby="game-feedback"><button type="submit">Submit word</button></form>
+          <p id="game-feedback" role="status"></p>
+          <button type="button" id="game-quit">Cancel round (Esc)</button><button type="button" id="game-replay" hidden>Play again</button>
+          <h4>Top five completed rounds · this browser only</h4><ol></ol>
+          <p>Local scores can be edited or cleared in browser storage; they are not a verified online leaderboard. Maximum 100 words per round.</p>
+        </section>
         <form class="vterm-form" id="vterm-form" autocomplete="off">
           <label class="vterm-prompt" for="vterm-input" id="vterm-prompt">dev@kernel-box:/$</label>
           <input class="vterm-input" id="vterm-input" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Terminal command" aria-describedby="vterm-shortcuts-hint" />
@@ -372,6 +384,7 @@
           <button type="button" data-terminal-command="projects">projects</button>
           <button type="button" data-terminal-command="contact">contact</button>
           <button type="button" data-terminal-command="clear">clear</button>
+            <button type="button" data-terminal-command="play">play</button>
         </div>
       </div>
     </section>
@@ -584,5 +597,6 @@
   <div class="shortcut-toast" id="shortcutToast" aria-live="polite" hidden></div>
 
   <script src="script.js"></script>
+  <script type="module" src="typing-game.js"></script>
 </body>
 </html>
