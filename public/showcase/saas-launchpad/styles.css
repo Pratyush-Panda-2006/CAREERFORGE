@@ -2810,3 +2810,166 @@ mark.regex-match {
   color: #cbd5e1;
 }
 /* ===== END Issue #359 ===== */
+
+/* ==========================================================
+   System Status Indicator
+   ========================================================== */
+
+.system-status {
+  position: relative;
+}
+
+.system-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.system-status-chip:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.13);
+  transform: translateY(-1px);
+}
+
+.system-status-chip:focus-visible {
+  outline: 2px solid var(--emerald);
+  outline-offset: 3px;
+}
+
+.status-indicator,
+.service-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--emerald);
+}
+
+.status-indicator {
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+}
+
+.status-divider {
+  color: var(--text-muted);
+}
+
+.system-status-popover {
+  position: absolute;
+  z-index: 50;
+  bottom: calc(100% + 14px);
+  left: 50%;
+  width: min(340px, calc(100vw - 32px));
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.98);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  transform: translateX(-50%);
+  text-align: left;
+}
+
+.system-status-popover[hidden] {
+  display: none;
+}
+
+.system-status-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.status-title,
+.status-subtitle {
+  display: block;
+}
+
+.status-title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.status-subtitle {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.overall-status {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--emerald);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.service-status-list {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.service-status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 6px;
+}
+
+.service-name {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+}
+
+.service-metric {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 480px) {
+  .system-status-chip {
+    padding: 9px 12px;
+    font-size: 0.78rem;
+  }
+
+  .system-status-popover {
+    left: 0;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-indicator {
+    animation: none;
+  }
+
+  .system-status-chip {
+    transition: none;
+  }
+}

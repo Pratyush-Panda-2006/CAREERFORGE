@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFaqAccordion();
   initBillingToggle();
   initIntegrationFilters();
+  initSystemStatus();
 });
 
 function initFaqAccordion() {
@@ -1173,3 +1174,51 @@ function initOnboardingChecklist() {
   startLoop();
 })();
 /* ===== END Issue #359 ===== */
+
+/*System Status Indicator*/
+function initSystemStatus() {
+  const toggle = document.getElementById('systemStatusToggle');
+  const popover = document.getElementById('systemStatusPopover');
+  const status = document.querySelector('.system-status');
+
+  if (!toggle || !popover || !status) return;
+
+  const closePopover = () => {
+    popover.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+  };
+
+  const openPopover = () => {
+    popover.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+  };
+
+  toggle.addEventListener('click', event => {
+    event.stopPropagation();
+
+    if (popover.hidden) {
+      openPopover();
+    } else {
+      closePopover();
+    }
+  });
+
+  status.addEventListener('mouseenter', openPopover);
+
+  status.addEventListener('mouseleave', () => {
+    closePopover();
+  });
+
+  document.addEventListener('click', event => {
+    if (!status.contains(event.target)) {
+      closePopover();
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      closePopover();
+      toggle.focus();
+    }
+  });
+}
