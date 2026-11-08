@@ -342,6 +342,171 @@
     </div>
     <p class="sources">Estimates only. Factors: car 0.17 kg CO2e/km and transit 0.07 kg/passenger-km (UK DEFRA conversion factors, rounded); flights about 100 kg per hour (approximate economy average, DEFRA); diet from Scarborough et al. 2014 (Climatic Change); electricity 0.44 kg/kWh (IEA world average grid) and gas 0.18 kg/kWh (DEFRA); benchmarks from Global Carbon Project; the $20/t offset price and 22 kg per tree per year are assumptions.</p>
   </section>
+
+  <!-- ===== BEGIN Issue #353: Satellite Reforestation Progress Visualizer ===== -->
+  <section class="satellite-progress-section" id="satellite-reforestation-section" aria-labelledby="satellite-section-title">
+    <div class="sat-container">
+      <div class="sat-header">
+        <span class="sat-eyebrow">🛰️ EARTH OBSERVATION &amp; REMOTE SENSING</span>
+        <h2 id="satellite-section-title">Interactive Satellite Reforestation &amp; Foliage Explorer</h2>
+        <p class="sat-subtitle">
+          Track year-over-year canopy restoration through simulated high-resolution multi-spectral satellite imagery, Normalized Difference Vegetation Index (NDVI) spectral bands, and returning wildlife biodiversity.
+        </p>
+      </div>
+
+      <!-- Biome & Reserve Selector -->
+      <div class="sat-biome-pills" role="tablist" aria-label="Select Reforestation Biome">
+        <button type="button" class="sat-biome-btn active" data-biome="amazon" role="tab" aria-selected="true">
+          🌳 Amazon Basin (Peru)
+        </button>
+        <button type="button" class="sat-biome-btn" data-biome="borneo" role="tab" aria-selected="false">
+          🦧 Borneo Peatland (Indonesia)
+        </button>
+        <button type="button" class="sat-biome-btn" data-biome="scotland" role="tab" aria-selected="false">
+          🌲 Caledonian Highlands (Scotland)
+        </button>
+        <button type="button" class="sat-biome-btn" data-biome="sahel" role="tab" aria-selected="false">
+          🌍 Great Green Wall (Senegal)
+        </button>
+      </div>
+
+      <div class="sat-main-layout">
+        <!-- Interactive Satellite Viewer Screen -->
+        <div class="sat-viewport-card">
+          <div class="sat-viewport-topbar">
+            <div class="sat-coords-block">
+              <span class="live-sensor-dot" aria-hidden="true"></span>
+              <span class="sensor-title">SENTINEL-2 / LANDSAT-9 MULTISPECTRAL FEED</span>
+              <span class="sensor-coords" id="satCoordsDisplay">12°35'14"S 69°11'05"W · ELEV 260M</span>
+            </div>
+            <!-- Year Quick Selector -->
+            <div class="sat-year-toggle" role="group" aria-label="Timeline Year Selection">
+              <button type="button" class="year-btn" data-year="2020">2020 (Baseline)</button>
+              <button type="button" class="year-btn" data-year="2022">2022</button>
+              <button type="button" class="year-btn" data-year="2024">2024</button>
+              <button type="button" class="year-btn active" data-year="2026">2026 (Present)</button>
+            </div>
+          </div>
+
+          <!-- Split Satellite Canvas Viewport -->
+          <div class="sat-split-viewer" id="satSplitViewer" role="region" aria-label="Interactive Satellite Split Slider">
+            <!-- Background Layer: Present (Lush Regenerated Foliage) -->
+            <div class="sat-layer sat-layer-present" id="satLayerPresent">
+              <div class="sat-foliage-canvas biome-amazon" id="satFoliagePresent"></div>
+              <div class="sat-layer-label label-present">
+                <span class="lbl-year" id="presentYearBadge">2026</span>
+                <span class="lbl-status">Regenerated Canopy</span>
+              </div>
+            </div>
+
+            <!-- Foreground Layer: Historical Baseline (Clipped by Split Slider) -->
+            <div class="sat-layer sat-layer-baseline" id="satLayerBaseline" style="width: 50%;">
+              <div class="sat-foliage-canvas biome-amazon-degraded" id="satFoliageBaseline"></div>
+              <div class="sat-layer-label label-baseline">
+                <span class="lbl-year">2020</span>
+                <span class="lbl-status">Degraded Baseline</span>
+              </div>
+            </div>
+
+            <!-- Draggable Divider Line & Handle -->
+            <div class="sat-slider-handle-wrap" id="satSliderDivider" style="left: 50%;">
+              <div class="sat-divider-line"></div>
+              <div class="sat-handle-knob" aria-label="Drag to compare before and after foliage">
+                <span class="arrow-sym">◀ ▶</span>
+              </div>
+            </div>
+
+            <!-- Range Input for Keyboard & Touch Accessibility -->
+            <input type="range" class="sat-invisible-range" id="satRangeControl" min="0" max="100" value="50" aria-label="Slide to compare 2020 baseline with 2026 regenerated canopy">
+
+            <!-- Wildlife Camera Trap Hotspots -->
+            <div class="wildlife-hotspots-layer" id="wildlifeHotspotsLayer">
+              <button type="button" class="hotspot-pin pin-1" data-spot="0" style="top: 35%; left: 65%;" aria-label="Camera Trap 01: Apex Predator Sighting">
+                <span class="pin-pulsar"></span>
+                <span class="pin-icon">🐆</span>
+              </button>
+              <button type="button" class="hotspot-pin pin-2" data-spot="1" style="top: 60%; left: 75%;" aria-label="Camera Trap 02: Canopy Avian Species">
+                <span class="pin-pulsar"></span>
+                <span class="pin-icon">🦅</span>
+              </button>
+              <button type="button" class="hotspot-pin pin-3" data-spot="2" style="top: 48%; left: 40%;" aria-label="Camera Trap 03: Riverine Rehydration">
+                <span class="pin-pulsar"></span>
+                <span class="pin-icon">💧</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Control Bar -->
+          <div class="sat-bottom-controlbar">
+            <span class="slider-hint">💡 Drag horizontal slider to reveal vegetation regrowth · Click camera pins for wildlife detections</span>
+            <div class="ndvi-spectral-legend">
+              <span class="legend-lbl">NDVI Spectrum:</span>
+              <div class="ndvi-bar"></div>
+              <span class="legend-scale">0.0 (Barren) → 0.9 (Lush Climax)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry & Ecological Metrics Dashboard -->
+        <div class="sat-metrics-card">
+          <div class="metrics-head">
+            <h3 class="metrics-title" id="biomeTitleDisplay">Madre de Dios Reserve</h3>
+            <span class="biome-tag" id="biomeTypeDisplay">Tropical Moist Broadleaf</span>
+          </div>
+
+          <!-- NDVI Dial Score -->
+          <div class="ndvi-stat-box">
+            <div class="ndvi-val-row">
+              <span class="ndvi-number" id="ndviScoreVal">0.82</span>
+              <span class="ndvi-delta" id="ndviDeltaVal">+0.58 (+240%)</span>
+            </div>
+            <div class="ndvi-progress-track">
+              <div class="ndvi-progress-fill" id="ndviProgressFill" style="width: 82%;"></div>
+            </div>
+            <span class="ndvi-desc">Normalized Difference Vegetation Index (Near-Infrared / Red Reflectance)</span>
+          </div>
+
+          <!-- Key Quantitative Metrics Grid -->
+          <div class="eco-metrics-grid">
+            <div class="eco-metric-box">
+              <span class="eco-lbl">Canopy Cover Density</span>
+              <strong class="eco-val hl-emerald" id="canopyDensityVal">84.6%</strong>
+              <span class="eco-sub" id="canopySubVal">Up from 22.1% in 2020</span>
+            </div>
+            <div class="eco-metric-box">
+              <span class="eco-lbl">Biomass Carbon Density</span>
+              <strong class="eco-val" id="carbonDensityVal">198 MT / ha</strong>
+              <span class="eco-sub" id="carbonSubVal">14,200 MT total reserve pool</span>
+            </div>
+            <div class="eco-metric-box">
+              <span class="eco-lbl">Bio-Acoustic Activity</span>
+              <strong class="eco-val" id="bioAcousticVal">94.2 Index</strong>
+              <span class="eco-sub" id="bioAcousticSub">Songbird &amp; primate audio density</span>
+            </div>
+            <div class="eco-metric-box">
+              <span class="eco-lbl">Native Flora Count</span>
+              <strong class="eco-val" id="treesPlantedVal">328,000</strong>
+              <span class="eco-sub" id="treesSubVal">42 endemic seedling species</span>
+            </div>
+          </div>
+
+          <!-- Active Wildlife Callout Box -->
+          <div class="wildlife-sighting-box" id="wildlifeCalloutBox">
+            <div class="sighting-icon" id="sightingIcon">🐆</div>
+            <div class="sighting-info">
+              <span class="sighting-tag" id="sightingTag">CAMERA TRAP #04 · APEX RETURN</span>
+              <strong class="sighting-name" id="sightingName">Panthera onca (Jaguar)</strong>
+              <p class="sighting-text" id="sightingDesc">
+                Breeding pair detected traversing the newly closed canopy corridor. Confirms healthy trophic cascade and prey biomass recovery.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #353 ===== -->
+
   <dialog class="volunteer-modal" id="volunteer-modal"
         aria-labelledby="volunteer-title">
     <div class="modal-content">

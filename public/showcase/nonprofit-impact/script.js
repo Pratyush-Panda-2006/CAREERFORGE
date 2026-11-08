@@ -1938,3 +1938,248 @@ if (typeof window !== 'undefined') {
   updateCounts();
   render();
 })();
+
+/* ===== BEGIN Issue #353: Satellite Reforestation Progress Visualizer ===== */
+(function initSatelliteReforestation() {
+  const section = document.getElementById('satellite-reforestation-section');
+  if (!section) return;
+
+  // Biome Dataset
+  const BIOME_DATA = {
+    amazon: {
+      name: "Madre de Dios Canopy Reserve",
+      type: "Tropical Moist Broadleaf (Peru)",
+      coords: "12°35'14\"S 69°11'05\"W · ELEV 260M",
+      baselineDegradedClass: "biome-amazon-degraded",
+      presentClass: "biome-amazon",
+      years: {
+        '2020': { ndvi: 0.24, delta: "Baseline (Illegal Mining Scar)", canopy: "22.1%", carbon: "45 MT/ha", bioAcoustic: "18.4 Index", trees: "12,000" },
+        '2022': { ndvi: 0.46, delta: "+0.22 (+91% recovery)", canopy: "41.5%", carbon: "88 MT/ha", bioAcoustic: "45.1 Index", trees: "98,000" },
+        '2024': { ndvi: 0.69, delta: "+0.45 (+187% recovery)", canopy: "68.0%", carbon: "142 MT/ha", bioAcoustic: "76.8 Index", trees: "215,000" },
+        '2026': { ndvi: 0.84, delta: "+0.60 (+250% recovery)", canopy: "85.4%", carbon: "198 MT/ha", bioAcoustic: "94.2 Index", trees: "328,000" }
+      },
+      sightings: [
+        { icon: "🐆", tag: "CAMERA TRAP #04 · APEX RETURN", name: "Panthera onca (Jaguar)", desc: "Breeding pair detected traversing the newly closed canopy corridor. Confirms healthy trophic cascade and prey biomass recovery." },
+        { icon: "🦅", tag: "CANOPY SENSOR #12 · AVIAN RECOVERY", name: "Harpia harpyja (Harpy Eagle)", desc: "Active nesting site documented in emergent Brazil nut tree canopy. First regional breeding recorded in 14 years." },
+        { icon: "💧", tag: "HYDROLOGIC STATION · WATERSHED", name: "Riverine Stream Flow Rejuvenated", desc: "Siltation reduced by 78%, restoring natural oxbow lake fisheries and seasonal clean drinking water for indigenous communities." }
+      ]
+    },
+    borneo: {
+      name: "Sebangau Peatland Sanctuary",
+      type: "Tropical Peat Swamp Forest (Indonesia)",
+      coords: "2°19'40\"S 113°54'28\"E · ELEV 18M",
+      baselineDegradedClass: "biome-borneo-degraded",
+      presentClass: "biome-borneo",
+      years: {
+        '2020': { ndvi: 0.18, delta: "Baseline (Drainage Canal Drainage)", canopy: "14.8%", carbon: "65 MT/ha", bioAcoustic: "14.2 Index", trees: "8,500" },
+        '2022': { ndvi: 0.39, delta: "+0.21 (+116% recovery)", canopy: "34.2%", carbon: "110 MT/ha", bioAcoustic: "39.8 Index", trees: "75,000" },
+        '2024': { ndvi: 0.62, delta: "+0.44 (+244% recovery)", canopy: "61.7%", carbon: "178 MT/ha", bioAcoustic: "71.5 Index", trees: "185,000" },
+        '2026': { ndvi: 0.81, delta: "+0.63 (+350% recovery)", canopy: "81.2%", carbon: "245 MT/ha", bioAcoustic: "91.0 Index", trees: "290,000" }
+      },
+      sightings: [
+        { icon: "🦧", tag: "CAMERA TRAP #09 · CRITICALLY ENDANGERED", name: "Pongo pygmaeus (Bornean Orangutan)", desc: "Mother and infant infant observed feeding on re-established ficus fruit trees along restored peat re-wetting dams." },
+        { icon: "🐅", tag: "ACOUSTIC ARRAYS · CARNIVORE POOL", name: "Neofelis diardi (Sunda Clouded Leopard)", desc: "Night vision telemetry recorded multiple territory scent markings on mature Shorea balangeran trunks." },
+        { icon: "🌱", tag: "PEAT MOISTURE DEPTH SENSORS", name: "Peat Hydration Level Restored", desc: "Canal damming elevated water table to within 20cm of ground surface, permanently extinguishing catastrophic subsurface fire risks." }
+      ]
+    },
+    scotland: {
+      name: "Glen Affric Caledonian Wildwood",
+      type: "Temperate Rain Forest (Scottish Highlands)",
+      coords: "57°16'08\"N 4°58'22\"W · ELEV 380M",
+      baselineDegradedClass: "biome-scotland-degraded",
+      presentClass: "biome-scotland",
+      years: {
+        '2020': { ndvi: 0.28, delta: "Baseline (Overgrazed Moorland)", canopy: "11.5%", carbon: "32 MT/ha", bioAcoustic: "22.0 Index", trees: "5,000" },
+        '2022': { ndvi: 0.42, delta: "+0.14 (+50% recovery)", canopy: "28.0%", carbon: "64 MT/ha", bioAcoustic: "48.2 Index", trees: "62,000" },
+        '2024': { ndvi: 0.58, delta: "+0.30 (+107% recovery)", canopy: "52.4%", carbon: "105 MT/ha", bioAcoustic: "73.4 Index", trees: "145,000" },
+        '2026': { ndvi: 0.74, delta: "+0.46 (+164% recovery)", canopy: "74.8%", carbon: "152 MT/ha", bioAcoustic: "88.5 Index", trees: "230,000" }
+      },
+      sightings: [
+        { icon: "🐿️", tag: "FOREST POLE CAMERA #02 · MAMMAL RECOVERY", name: "Sciurus vulgaris (Eurasian Red Squirrel)", desc: "Reintroduced population established 16 active dreys in maturing Scots pine canopy. Zero invasive grey squirrel sightings." },
+        { icon: "🦉", tag: "NOCTURNAL AUDIO TRAP · AVIAN", name: "Strix aluco (Tawny Owl)", desc: "Repeated mating calls and territorial vocalizations confirmed in old-growth birch-pine transition zone." },
+        { icon: "🌿", tag: "SOIL MYCORRHIZAL SAMPLE ARRAYS", name: "Native Fungal Web Regeneration", desc: "Fungal mycelium networks have re-colonized topsoil, boosting nutrient exchange and natural self-seeding by 400%." }
+      ]
+    },
+    sahel: {
+      name: "Senegal Sahel Silvopastoral Buffer",
+      type: "Sub-Saharan Acacia Agroforest (Senegal)",
+      coords: "15°42'36\"N 15°18'44\"W · ELEV 42M",
+      baselineDegradedClass: "biome-sahel-degraded",
+      presentClass: "biome-sahel",
+      years: {
+        '2020': { ndvi: 0.12, delta: "Baseline (Severe Desertification)", canopy: "6.4%", carbon: "14 MT/ha", bioAcoustic: "9.5 Index", trees: "18,000" },
+        '2022': { ndvi: 0.29, delta: "+0.17 (+141% recovery)", canopy: "19.5%", carbon: "38 MT/ha", bioAcoustic: "29.0 Index", trees: "110,000" },
+        '2024': { ndvi: 0.48, delta: "+0.36 (+300% recovery)", canopy: "42.0%", carbon: "72 MT/ha", bioAcoustic: "56.4 Index", trees: "260,000" },
+        '2026': { ndvi: 0.65, delta: "+0.53 (+441% recovery)", canopy: "63.5%", carbon: "114 MT/ha", bioAcoustic: "79.2 Index", trees: "420,000" }
+      },
+      sightings: [
+        { icon: "🦌", tag: "WATER POINT CAM #06 · UNGULATES", name: "Nanger dama (Dama Gazelle)", desc: "Small herd sighted browsing deep within protected Acacia senegal micro-climate sanctuary." },
+        { icon: "🐦", tag: "MIGRATORY TRACKING · TRANS-SAHEL", name: "Pterocles senegallus (Spotted Sandgrouse)", desc: "Year-round flock residency documented around regenerated groundwater watering pans." },
+        { icon: "🌾", tag: "LOCAL COMMUNITY HARVEST STATION", name: "Regenerative Gum Arabic Harvest", desc: "Sustainable gum arabic harvesting generating direct livelihood revenue for 18 local women-led cooperatives." }
+      ]
+    }
+  };
+
+  // State
+  let currentBiomeKey = 'amazon';
+  let selectedYear = '2026';
+  let splitPercentage = 50;
+
+  // DOM Elements
+  const biomeButtons = section.querySelectorAll('.sat-biome-btn');
+  const yearButtons = section.querySelectorAll('.year-btn');
+  const coordsDisplay = document.getElementById('satCoordsDisplay');
+  const satLayerBaseline = document.getElementById('satLayerBaseline');
+  const satSliderDivider = document.getElementById('satSliderDivider');
+  const satRangeControl = document.getElementById('satRangeControl');
+  const satFoliageBaseline = document.getElementById('satFoliageBaseline');
+  const satFoliagePresent = document.getElementById('satFoliagePresent');
+  const presentYearBadge = document.getElementById('presentYearBadge');
+  const hotspotPins = section.querySelectorAll('.hotspot-pin');
+
+  // Metrics elements
+  const biomeTitleDisplay = document.getElementById('biomeTitleDisplay');
+  const biomeTypeDisplay = document.getElementById('biomeTypeDisplay');
+  const ndviScoreVal = document.getElementById('ndviScoreVal');
+  const ndviDeltaVal = document.getElementById('ndviDeltaVal');
+  const ndviProgressFill = document.getElementById('ndviProgressFill');
+  const canopyDensityVal = document.getElementById('canopyDensityVal');
+  const carbonDensityVal = document.getElementById('carbonDensityVal');
+  const bioAcousticVal = document.getElementById('bioAcousticVal');
+  const treesPlantedVal = document.getElementById('treesPlantedVal');
+
+  // Wildlife Callout elements
+  const sightingIcon = document.getElementById('sightingIcon');
+  const sightingTag = document.getElementById('sightingTag');
+  const sightingName = document.getElementById('sightingName');
+  const sightingDesc = document.getElementById('sightingDesc');
+
+  // Set Split Position
+  function setSplit(pct) {
+    splitPercentage = Math.max(0, Math.min(100, pct));
+    satLayerBaseline.style.width = splitPercentage + '%';
+    satSliderDivider.style.left = splitPercentage + '%';
+    satRangeControl.value = splitPercentage;
+  }
+
+  // Range Slider Handler
+  satRangeControl.addEventListener('input', function (e) {
+    setSplit(parseFloat(e.target.value));
+  });
+
+  // Pointer drag on viewer
+  const viewer = document.getElementById('satSplitViewer');
+  let isDragging = false;
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    const rect = viewer.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const pct = ((clientX - rect.left) / rect.width) * 100;
+    setSplit(pct);
+  }
+
+  viewer.addEventListener('mousedown', function (e) {
+    if (e.target.closest('.hotspot-pin')) return;
+    isDragging = true;
+    onPointerMove(e);
+  });
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', function () { isDragging = false; });
+
+  viewer.addEventListener('touchstart', function (e) {
+    if (e.target.closest('.hotspot-pin')) return;
+    isDragging = true;
+    onPointerMove(e);
+  }, { passive: true });
+  window.addEventListener('touchmove', onPointerMove, { passive: true });
+  window.addEventListener('touchend', function () { isDragging = false; });
+
+  // Biome Switcher
+  biomeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      biomeButtons.forEach(function (b) {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      currentBiomeKey = btn.getAttribute('data-biome');
+      updateBiomeUI();
+    });
+  });
+
+  // Year Switcher
+  yearButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      yearButtons.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      selectedYear = btn.getAttribute('data-year');
+      presentYearBadge.textContent = selectedYear;
+      updateYearMetrics();
+    });
+  });
+
+  // Hotspot Pins Click Handlers
+  hotspotPins.forEach(function (pin) {
+    pin.addEventListener('click', function () {
+      hotspotPins.forEach(function (p) { p.classList.remove('active'); });
+      pin.classList.add('active');
+      const spotIdx = parseInt(pin.getAttribute('data-spot'), 10) || 0;
+      const b = BIOME_DATA[currentBiomeKey];
+      if (b && b.sightings && b.sightings[spotIdx]) {
+        showSighting(b.sightings[spotIdx]);
+      }
+    });
+  });
+
+  function showSighting(sighting) {
+    sightingIcon.textContent = sighting.icon;
+    sightingTag.textContent = sighting.tag;
+    sightingName.textContent = sighting.name;
+    sightingDesc.textContent = sighting.desc;
+  }
+
+  function updateBiomeUI() {
+    const b = BIOME_DATA[currentBiomeKey];
+    if (!b) return;
+
+    biomeTitleDisplay.textContent = b.name;
+    biomeTypeDisplay.textContent = b.type;
+    coordsDisplay.textContent = b.coords;
+
+    // Update foliage visual classes
+    satFoliageBaseline.className = 'sat-foliage-canvas ' + b.baselineDegradedClass;
+    satFoliagePresent.className = 'sat-foliage-canvas ' + b.presentClass;
+
+    // Reset default sighting
+    if (b.sightings && b.sightings[0]) {
+      showSighting(b.sightings[0]);
+    }
+    hotspotPins.forEach(function (p, idx) {
+      if (idx === 0) p.classList.add('active');
+      else p.classList.remove('active');
+    });
+
+    updateYearMetrics();
+  }
+
+  function updateYearMetrics() {
+    const b = BIOME_DATA[currentBiomeKey];
+    if (!b || !b.years) return;
+    const yData = b.years[selectedYear] || b.years['2026'];
+
+    ndviScoreVal.textContent = yData.ndvi.toFixed(2);
+    ndviDeltaVal.textContent = yData.delta;
+    ndviProgressFill.style.width = Math.round(yData.ndvi * 100) + '%';
+    canopyDensityVal.textContent = yData.canopy;
+    carbonDensityVal.textContent = yData.carbon;
+    bioAcousticVal.textContent = yData.bioAcoustic;
+    treesPlantedVal.textContent = yData.trees;
+  }
+
+  // Initial render
+  updateBiomeUI();
+  setSplit(50);
+})();
+/* ===== END Issue #353 ===== */

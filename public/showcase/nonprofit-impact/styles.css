@@ -2730,3 +2730,583 @@ body {
 .donation-feedback { margin-top: 14px; padding: 12px; border-radius: 10px; background: rgba(34, 197, 94, .12); color: #bbf7d0; font-size: .85rem; }
 .donation-modal button:focus-visible, .donation-modal input:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 3px; }
 @media (max-width: 480px) { .donation-content { padding: 28px 20px; } .donation-amounts { grid-template-columns: repeat(2, 1fr); } }
+
+
+/* ===== BEGIN Issue #353: Satellite Reforestation Progress Visualizer ===== */
+.satellite-progress-section {
+  padding: 80px 24px;
+  background: radial-gradient(circle at 50% 15%, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.98) 75%);
+  border-top: 1px solid rgba(16, 185, 129, 0.2);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+  color: #f8fafc;
+}
+
+.sat-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.sat-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.sat-eyebrow {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 9999px;
+  color: #34d399;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+
+.sat-header h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.sat-subtitle {
+  font-size: 1rem;
+  color: #94a3b8;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Biome Pills */
+.sat-biome-pills {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.sat-biome-btn {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sat-biome-btn:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+.sat-biome-btn.active {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: #10b981;
+  color: #34d399;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+}
+
+/* Main Layout Grid */
+.sat-main-layout {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 28px;
+  align-items: stretch;
+}
+
+@media (max-width: 980px) {
+  .sat-main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Viewport Card */
+.sat-viewport-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+.sat-viewport-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: #131c31;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sat-coords-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.live-sensor-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.sensor-title {
+  color: #e2e8f0;
+}
+
+.sensor-coords {
+  font-family: monospace;
+  color: #38bdf8;
+}
+
+/* Year Toggle Buttons */
+.sat-year-toggle {
+  display: flex;
+  background: #0b1120;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.year-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.year-btn.active {
+  background: #10b981;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+}
+
+/* Split Viewer Frame */
+.sat-split-viewer {
+  position: relative;
+  height: 440px;
+  background: #020617;
+  overflow: hidden;
+  user-select: none;
+  cursor: ew-resize;
+}
+
+.sat-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.sat-layer-baseline {
+  z-index: 2;
+  border-right: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.sat-foliage-canvas {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: background 0.4s ease;
+}
+
+/* Biome Foliage Textures / Visual Representations */
+.biome-amazon {
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(5, 150, 105, 0.8) 0%, transparent 60%),
+    radial-gradient(ellipse at 75% 60%, rgba(16, 185, 129, 0.7) 0%, transparent 60%),
+    repeating-linear-gradient(45deg, #064e3b, #064e3b 8px, #065f46 8px, #065f46 16px);
+}
+
+.biome-amazon-degraded {
+  background:
+    radial-gradient(circle at 40% 50%, rgba(217, 119, 6, 0.4) 0%, transparent 70%),
+    repeating-linear-gradient(45deg, #78350f, #78350f 12px, #92400e 12px, #92400e 24px);
+}
+
+.biome-borneo {
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(4, 120, 87, 0.85) 0%, transparent 70%),
+    radial-gradient(ellipse at 20% 80%, rgba(6, 95, 70, 0.7) 0%, transparent 50%),
+    repeating-radial-gradient(circle at 60% 40%, #064e3b, #064e3b 10px, #047857 10px, #047857 20px);
+}
+
+.biome-borneo-degraded {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(180, 83, 9, 0.5) 0%, transparent 60%),
+    repeating-linear-gradient(90deg, #451a03, #451a03 14px, #78350f 14px, #78350f 28px);
+}
+
+.biome-scotland {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(16, 185, 129, 0.75) 0%, transparent 65%),
+    radial-gradient(circle at 70% 70%, rgba(13, 148, 136, 0.6) 0%, transparent 60%),
+    repeating-linear-gradient(135deg, #134e4a, #134e4a 10px, #047857 10px, #047857 20px);
+}
+
+.biome-scotland-degraded {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(161, 98, 7, 0.4) 0%, transparent 70%),
+    repeating-linear-gradient(135deg, #713f12, #713f12 12px, #854d0e 12px, #854d0e 24px);
+}
+
+.biome-sahel {
+  background:
+    radial-gradient(circle at 40% 60%, rgba(16, 185, 129, 0.6) 0%, transparent 60%),
+    repeating-linear-gradient(60deg, #15803d, #15803d 8px, #166534 8px, #166534 16px);
+}
+
+.biome-sahel-degraded {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(202, 138, 4, 0.6) 0%, transparent 70%),
+    repeating-linear-gradient(60deg, #a16207, #a16207 14px, #ca8a04 14px, #ca8a04 28px);
+}
+
+/* Layer Badges */
+.sat-layer-label {
+  position: absolute;
+  top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 3;
+}
+
+.label-baseline {
+  left: 18px;
+  color: #f59e0b;
+}
+
+.label-present {
+  right: 18px;
+  color: #34d399;
+}
+
+.lbl-year {
+  background: rgba(255, 255, 255, 0.12);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Draggable Divider Handle */
+.sat-slider-handle-wrap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  z-index: 5;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.sat-divider-line {
+  width: 3px;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  margin: 0 auto;
+}
+
+.sat-handle-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 15px rgba(16, 185, 129, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.arrow-sym {
+  letter-spacing: -1px;
+}
+
+.sat-invisible-range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: ew-resize;
+  z-index: 6;
+}
+
+/* Wildlife Camera Trap Hotspots */
+.wildlife-hotspots-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.hotspot-pin {
+  position: absolute;
+  pointer-events: auto;
+  background: #1e293b;
+  border: 2px solid #38bdf8;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.hotspot-pin:hover,
+.hotspot-pin.active {
+  transform: scale(1.2);
+  border-color: #34d399;
+  box-shadow: 0 0 15px rgba(52, 211, 153, 0.6);
+}
+
+.pin-pulsar {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid #38bdf8;
+  animation: pulseRing 2s infinite ease-out;
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Bottom Controlbar */
+.sat-bottom-controlbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: #131c31;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.slider-hint {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.ndvi-spectral-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+}
+
+.ndvi-bar {
+  width: 90px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #ef4444, #f59e0b, #10b981, #065f46);
+}
+
+.legend-scale {
+  color: #64748b;
+}
+
+/* Metrics Dashboard Card */
+.sat-metrics-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+.metrics-head {
+  margin-bottom: 24px;
+}
+
+.metrics-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.biome-tag {
+  font-size: 0.78rem;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+/* NDVI Stat Box */
+.ndvi-stat-box {
+  background: #162032;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 24px;
+}
+
+.ndvi-val-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.ndvi-number {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #34d399;
+  line-height: 1;
+}
+
+.ndvi-delta {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.ndvi-progress-track {
+  width: 100%;
+  height: 8px;
+  background: #1e293b;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.ndvi-progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #f59e0b, #10b981);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.ndvi-desc {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+/* Quantitative Eco Metrics */
+.eco-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.eco-metric-box {
+  background: #162032;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.eco-lbl {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.eco-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 4px 0 2px 0;
+}
+
+.hl-emerald { color: #34d399 !important; }
+
+.eco-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+/* Wildlife Callout Box */
+.wildlife-sighting-box {
+  margin-top: auto;
+  display: flex;
+  gap: 14px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 14px;
+  padding: 16px;
+  align-items: flex-start;
+}
+
+.sighting-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.sighting-tag {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #34d399;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.sighting-name {
+  display: block;
+  font-size: 0.95rem;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.sighting-text {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+}
+/* ===== END Issue #353 ===== */
