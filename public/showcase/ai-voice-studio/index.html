@@ -447,6 +447,23 @@
     </form>
   </main>
 
+  <section class="mic-recorder" id="voice-recorder" aria-labelledby="mic-title">
+    <p class="mic-kicker">LOCAL VOICE SAMPLE</p>
+    <h2 id="mic-title">Record your voice</h2>
+    <p>Capture up to 30 seconds for playback. Audio stays in this tab: no upload, storage or voice cloning is performed. Leaving the page or hiding this tab discards an active recording.</p>
+    <label for="mic-mode">Visualization</label>
+    <select id="mic-mode"><option value="waveform">Oscilloscope waveform</option><option value="spectrum">Frequency spectrum</option></select>
+    <canvas height="160" aria-hidden="true"></canvas>
+    <p>Input level: <output aria-label="Microphone input level">0%</output> <span class="mic-indicator" aria-hidden="true">● REC</span></p>
+    <div class="mic-controls">
+      <button type="button" id="mic-record">Record sample</button>
+      <button type="button" id="mic-stop" disabled>Stop recording</button>
+      <button type="button" id="mic-clear" disabled>Discard / cancel</button>
+    </div>
+    <audio controls hidden aria-label="Recorded sample playback"></audio>
+    <p role="status" aria-live="polite"></p>
+  </section>
+  <script type="module" src="voice-recorder.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

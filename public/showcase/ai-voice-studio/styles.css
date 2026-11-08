@@ -1290,3 +1290,21 @@ body {
     align-items: flex-start;
   }
 }
+
+/* Local microphone recorder */
+.mic-recorder { box-sizing: border-box; max-width: 960px; margin: 64px auto; padding: 28px; border: 1px solid #155e75; border-radius: 20px; background: #071524; color: #e2e8f0; }
+.mic-recorder h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); margin: 12px 0; }
+.mic-recorder p { line-height: 1.65; }
+.mic-kicker { color: #67e8f9; letter-spacing: .12em; font-size: .8rem; }
+.mic-recorder canvas { display: block; width: 100%; height: 160px; background: #020617; border: 1px solid #155e75; box-sizing: border-box; margin-top: 20px; border-radius: 12px; }
+.mic-controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.mic-recorder button, .mic-recorder select { font: inherit; border: 1px solid #22d3ee; border-radius: 8px; padding: 10px 14px; background: #083344; color: #ecfeff; }
+.mic-recorder select { max-width: 100%; }
+.mic-recorder button:disabled { opacity: .45; cursor: not-allowed; }
+.mic-recorder :focus-visible { outline: 3px solid #fbbf24; outline-offset: 4px; }
+.mic-recorder audio { width: 100%; margin: 12px 0; }
+.mic-recorder [hidden], .mic-indicator { display: none; }
+.mic-recorder[data-state="recording"] .mic-indicator { display: inline-block; color: #fda4af; margin-left: 16px; animation: mic-pulse 1s ease-in-out infinite alternate; }
+@keyframes mic-pulse { to { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .mic-recorder[data-state="recording"] .mic-indicator { animation: none; } }
+@media (max-width: 600px) { .mic-recorder { margin: 32px 12px; padding: 20px; } .mic-controls button { flex: 1 1 100%; } }
