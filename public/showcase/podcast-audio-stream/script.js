@@ -5,7 +5,7 @@ let currentSpeedIndex = 0;
 let isPlaying = false;
 let selectedEpisode = '142';
 let currentTime = 0;
-const DURATION = 2880; // 48:00 in seconds
+let DURATION = 2880; // Current episode duration in seconds
 let playInterval = null;
 let activeSegmentId = null;
 let volume = 1;
@@ -198,6 +198,8 @@ function playEpisode(epName) {
     updateTimeUI(true);
   }
   selectedEpisode = next;
+  DURATION = next === '141' ? 3240 : 2880;
+  updateTimeUI();
   setEpisodeHeader(selectedEpisode);
   showDock();
 
@@ -246,10 +248,11 @@ function saveState() {
 function restoreState() {
   let raw = null;
   try { raw = localStorage.getItem(PlayerLogic.STORAGE_KEY); } catch (e) { return; }
-  const saved = PlayerLogic.parseState(raw, DURATION);
+  const saved = PlayerLogic.parseState(raw, 3240);
   if (!saved || saved.time <= 0) return;
   selectedEpisode = saved.episode;
-  currentTime = saved.time;
+  DURATION = selectedEpisode === '141' ? 3240 : 2880;
+  currentTime = Math.min(saved.time, DURATION);
   currentSpeedIndex = saved.speedIndex;
   volume = saved.volume;
   if (volume > 0) volumeBeforeMute = volume;
@@ -272,6 +275,7 @@ function startPlayback() {
     if (currentTime >= DURATION) {
       currentTime = DURATION;
       pausePlayback();
+      window.PodcastQueue?.complete();
     }
     updateTimeUI();
     if (Math.floor(currentTime) % 5 === 0) saveState();
@@ -329,11 +333,14 @@ function seekTo(seconds) {
 }
 
 function updateTimeUI(forceScroll = false) {
+  const durationLabel = document.getElementById('duration-label');
+  if (durationLabel) durationLabel.textContent = formatTime(DURATION);
   const curLabel = document.getElementById('current-time-label');
   if (curLabel) curLabel.textContent = formatTime(currentTime);
 
   const scrubber = document.getElementById('dock-scrubber');
   if (scrubber) {
+    scrubber.max = DURATION;
     scrubber.value = Math.floor(currentTime);
     scrubber.setAttribute('aria-valuetext', `${formatTime(currentTime)} of ${formatTime(DURATION)}`);
   }
@@ -479,6 +486,11 @@ function renderTranscript() {
   });
 
   applyFilters();
+}
+
+// Transcript initialization must complete before the dock's seek/play handlers bind.
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 }
 
 function escapeRegex(str) {
