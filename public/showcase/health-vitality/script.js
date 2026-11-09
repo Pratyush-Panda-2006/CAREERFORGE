@@ -1110,6 +1110,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateFastingUI();
     }
   }, 1000);
+    function formatTime(totalSecs) {
     const hrs = Math.floor(totalSecs / 3600);
     const mins = Math.floor((totalSecs % 3600) / 60);
     const secs = totalSecs % 60;
@@ -1290,3 +1291,143 @@ document.addEventListener('DOMContentLoaded', () => {
   updateFastingUI();
 });
 /* ===== END Issue #293 ===== */
+
+/* Sleep Debt Calculator — Issue #348 */
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Get HTML elements
+  const weekdaySleep = document.getElementById("weekday-sleep");
+  const weekendSleep = document.getElementById("weekend-sleep");
+  const sleepTarget = document.getElementById("sleep-target");
+
+  const calculateBtn = document.getElementById("calculate-sleep-debt");
+  const resultBox = document.getElementById("sleep-debt-result");
+
+  const debtHours = document.getElementById("sleep-debt-hours");
+  const progressFill = document.getElementById("sleep-debt-progress-fill");
+  const statusText = document.getElementById("sleep-debt-status");
+
+  const weeklyTotal = document.getElementById("weekly-sleep-total");
+  const weeklyTarget = document.getElementById("weekly-sleep-target");
+
+  // Calculate weekly sleep debt
+  if (calculateBtn) {
+    calculateBtn.addEventListener("click", () => {
+      const weekday = Number(weekdaySleep.value);
+      const weekend = Number(weekendSleep.value);
+      const target = Number(sleepTarget.value);
+
+      // Validate inputs
+      if (
+        !Number.isFinite(weekday) ||
+        !Number.isFinite(weekend) ||
+        !Number.isFinite(target) ||
+        weekday <= 0 ||
+        weekend <= 0 ||
+        target <= 0 ||
+        weekday > 24 ||
+        weekend > 24 ||
+        target > 24
+      ) {
+        alert("Please enter valid sleep hours between 0 and 24.");
+        return;
+      }
+
+      // Calculate weekly sleep
+      const totalSleep = weekday * 5 + weekend * 2;
+      const requiredSleep = target * 7;
+
+      const debt = Math.max(0, requiredSleep - totalSleep);
+      const progress = Math.min((totalSleep / requiredSleep) * 100, 100);
+
+      // Display results
+      debtHours.textContent = `${debt.toFixed(1)} hours`;
+      weeklyTotal.textContent = `${totalSleep.toFixed(1)} hours`;
+      weeklyTarget.textContent = `${requiredSleep.toFixed(1)} hours`;
+
+      progressFill.style.width = `${progress}%`;
+
+      // Status message
+      if (debt === 0) {
+        statusText.textContent =
+          "You're meeting your weekly sleep target!";
+      } else if (debt <= 5) {
+        statusText.textContent =
+          "You're slightly below your weekly sleep target.";
+      } else {
+        statusText.textContent =
+          "Your sleep is below your weekly target. A consistent sleep schedule may help.";
+      }
+
+      resultBox.hidden = false;
+    });
+  }
+
+  // Sleep Cycle Planner
+  const wakeTimeInput = document.getElementById("target-wake-time");
+  const cycleBtn = document.getElementById("calculate-rem-cycles");
+  const cycleResults = document.getElementById("rem-results");
+  const cycleOptions = document.getElementById("rem-cycle-options");
+
+  if (cycleBtn) {
+    cycleBtn.addEventListener("click", () => {
+      const wakeTime = wakeTimeInput.value;
+
+      if (!wakeTime) {
+        alert("Please select your wake-up time.");
+        return;
+      }
+
+      // Convert wake-up time into minutes
+      const [hours, minutes] = wakeTime.split(":").map(Number);
+      const wakeMinutes = hours * 60 + minutes;
+
+      // Estimated sleep durations (90-minute cycle approximation)
+      const cycles = [6, 5, 4, 3];
+
+      cycleOptions.innerHTML = "";
+
+      cycles.forEach((cycle) => {
+        const sleepMinutes = cycle * 90;
+
+        // Allow approximately 15 minutes to fall asleep
+        let bedtime = wakeMinutes - sleepMinutes - 15;
+
+        // Handle previous-day bedtime
+        bedtime = (bedtime + 1440) % 1440;
+
+        const bedHours = Math.floor(bedtime / 60);
+        const bedMinutes = bedtime % 60;
+
+        const formattedTime = new Date(2000, 0, 1, bedHours, bedMinutes)
+          .toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+
+        // Create recommendation card
+        const option = document.createElement("div");
+        option.className = "rem-cycle-option";
+
+        const heading = document.createElement("h4");
+        heading.textContent = `${cycle} cycles`;
+
+        const time = document.createElement("p");
+        time.textContent = formattedTime;
+
+        const duration = document.createElement("p");
+        duration.textContent = `${(sleepMinutes / 60).toFixed(1)} hours of sleep`;
+
+        option.appendChild(heading);
+        option.appendChild(time);
+        option.appendChild(duration);
+
+        cycleOptions.appendChild(option);
+      });
+
+      cycleResults.hidden = false;
+    });
+  }
+});
+
+/* ===== END Issue #348 ===== */
