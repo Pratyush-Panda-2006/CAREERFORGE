@@ -30,6 +30,7 @@
         <a href="#agents" class="nav-link">Agent Dispatcher API</a>
         <a href="#streaming" class="nav-link">SSE Event Stream</a>
         <a href="#rate-limits" class="nav-link">Rate Limits</a>
+        <a href="#http-status-codes" class="nav-link">HTTP Status Codes</a>
         <div class="section-title">ADVANCED & SDks</div>
         <a href="#sdk-quickstart" class="nav-link">Client SDKs</a>
         <a href="#error-codes" class="nav-link">Error Handling</a>
@@ -242,6 +243,321 @@ data: {"total_tokens": 42, "latency_ms": 114, "finish_reason": "stop"}</code></p
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- HTTP Status Codes Reference -->
+      <section id="http-status-codes" class="doc-section">
+        <div class="status-section-heading">
+          <div>
+            <h2>HTTP Status Codes Reference</h2>
+            <p>
+              Quickly identify common API responses and get troubleshooting guidance
+              for errors.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="status-drawer-toggle"
+            id="status-drawer-toggle"
+            aria-expanded="true"
+            aria-controls="status-reference-drawer"
+          >
+            <span>Hide reference</span>
+            <span aria-hidden="true">⌃</span>
+          </button>
+        </div>
+
+        <div
+          class="status-reference-drawer"
+          id="status-reference-drawer"
+        >
+          <div class="status-search-wrapper">
+            <label for="status-search">Search HTTP status codes</label>
+
+            <input
+              type="search"
+              id="status-search"
+              class="status-search"
+              placeholder="Search 401, unauthorized, rate limit..."
+              autocomplete="off"
+            />
+
+            <p
+              class="status-search-result"
+              id="status-search-result"
+              role="status"
+              aria-live="polite"
+            ></p>
+          </div>
+
+          <div class="status-code-list" id="status-code-list">
+
+            <!-- 200 -->
+            <article class="status-card status-success" data-status="200 ok success request completed">
+              <div class="status-card-main">
+                <span class="status-badge status-2xx">200</span>
+
+                <div>
+                  <div class="status-title-row">
+                    <h3>OK</h3>
+
+                    <button
+                      type="button"
+                      class="status-info"
+                      aria-label="Explanation for HTTP 200 OK"
+                      aria-describedby="tip-200"
+                    >
+                      ?
+                    </button>
+
+                    <span
+                      class="status-tooltip"
+                      id="tip-200"
+                      role="tooltip"
+                    >
+                      The request completed successfully.
+                    </span>
+                  </div>
+
+                  <p>The server successfully processed your request.</p>
+                </div>
+              </div>
+
+              <div class="status-actions">
+                <code class="status-payload">{"status":200,"message":"Request completed successfully"}</code>
+
+                <button
+                  type="button"
+                  class="copy-status-btn"
+                  data-copy='{"status":200,"message":"Request completed successfully"}'
+                >
+                  Copy payload
+                </button>
+              </div>
+            </article>
+
+            <!-- 201 -->
+            <article class="status-card status-success" data-status="201 created resource success">
+              <div class="status-card-main">
+                <span class="status-badge status-2xx">201</span>
+
+                <div>
+                  <div class="status-title-row">
+                    <h3>Created</h3>
+
+                    <button
+                      type="button"
+                      class="status-info"
+                      aria-label="Explanation for HTTP 201 Created"
+                      aria-describedby="tip-201"
+                    >
+                      ?
+                    </button>
+
+                    <span class="status-tooltip" id="tip-201" role="tooltip">
+                      A new resource was created successfully.
+                    </span>
+                  </div>
+
+                  <p>Your request created a new resource successfully.</p>
+                </div>
+              </div>
+
+              <div class="status-actions">
+                <code class="status-payload">{"status":201,"message":"Resource created successfully"}</code>
+
+                <button
+                  type="button"
+                  class="copy-status-btn"
+                  data-copy='{"status":201,"message":"Resource created successfully"}'
+                >
+                  Copy payload
+                </button>
+              </div>
+            </article>
+
+            <!-- 400 -->
+            <article class="status-card status-client-error" data-status="400 bad request invalid validation payload">
+              <div class="status-card-main">
+                <span class="status-badge status-4xx">400</span>
+
+                <div>
+                  <div class="status-title-row">
+                    <h3>Bad Request</h3>
+
+                    <button
+                      type="button"
+                      class="status-info"
+                      aria-label="Explanation for HTTP 400 Bad Request"
+                      aria-describedby="tip-400"
+                    >
+                      ?
+                    </button>
+
+                    <span class="status-tooltip" id="tip-400" role="tooltip">
+                      The request contains invalid or missing data.
+                    </span>
+                  </div>
+
+                  <p>
+                    Check required fields, JSON formatting, parameter names, and
+                    request validation errors.
+                  </p>
+                </div>
+              </div>
+
+              <div class="status-actions">
+                <code class="status-payload">{"status":400,"error":"Bad Request","detail":"Check request data and required fields."}</code>
+
+                <button
+                  type="button"
+                  class="copy-status-btn"
+                  data-copy='{"status":400,"error":"Bad Request","detail":"Check request data and required fields."}'
+                >
+                  Copy payload
+                </button>
+              </div>
+            </article>
+
+            <!-- 401 -->
+            <article class="status-card status-client-error" data-status="401 unauthorized authentication token bearer">
+              <div class="status-card-main">
+                <span class="status-badge status-4xx">401</span>
+
+                <div>
+                  <div class="status-title-row">
+                    <h3>Unauthorized</h3>
+
+                    <button
+                      type="button"
+                      class="status-info"
+                      aria-label="Explanation for HTTP 401 Unauthorized"
+                      aria-describedby="tip-401"
+                    >
+                      ?
+                    </button>
+
+                    <span class="status-tooltip" id="tip-401" role="tooltip">
+                      Authentication credentials are missing, invalid, or expired.
+                    </span>
+                  </div>
+
+                  <p>
+                    Verify your Bearer token and confirm that it has not expired.
+                  </p>
+                </div>
+              </div>
+
+              <div class="status-actions">
+                <code class="status-payload">{"status":401,"error":"Unauthorized","detail":"Provide a valid Bearer token."}</code>
+
+                <button
+                  type="button"
+                  class="copy-status-btn"
+                  data-copy='{"status":401,"error":"Unauthorized","detail":"Provide a valid Bearer token."}'
+                >
+                  Copy payload
+                </button>
+              </div>
+            </article>
+
+            <!-- 429 -->
+            <article class="status-card status-client-error" data-status="429 too many requests rate limit retry">
+              <div class="status-card-main">
+                <span class="status-badge status-4xx">429</span>
+
+                <div>
+                  <div class="status-title-row">
+                    <h3>Too Many Requests</h3>
+
+                    <button
+                      type="button"
+                      class="status-info"
+                      aria-label="Explanation for HTTP 429 Too Many Requests"
+                      aria-describedby="tip-429"
+                    >
+                      ?
+                    </button>
+
+                    <span class="status-tooltip" id="tip-429" role="tooltip">
+                      Too many requests were sent within the allowed time window.
+                    </span>
+                  </div>
+
+                  <p>
+                    Slow down requests and retry using the recommended backoff
+                    interval.
+                  </p>
+                </div>
+              </div>
+
+              <div class="status-actions">
+                <code class="status-payload">{"status":429,"error":"Too Many Requests","retry_after_seconds":3}</code>
+
+                <button
+                  type="button"
+                  class="copy-status-btn"
+                  data-copy='{"status":429,"error":"Too Many Requests","retry_after_seconds":3}'
+                >
+                  Copy payload
+                </button>
+              </div>
+            </article>
+
+            <!-- 500 -->
+            <article class="status-card status-server-error" data-status="500 internal server error server">
+              <div class="status-card-main">
+                <span class="status-badge status-5xx">500</span>
+
+                <div>
+                  <div class="status-title-row">
+                    <h3>Internal Server Error</h3>
+
+                    <button
+                      type="button"
+                      class="status-info"
+                      aria-label="Explanation for HTTP 500 Internal Server Error"
+                      aria-describedby="tip-500"
+                    >
+                      ?
+                    </button>
+
+                    <span class="status-tooltip" id="tip-500" role="tooltip">
+                      The server encountered an unexpected problem.
+                    </span>
+                  </div>
+
+                  <p>
+                    Retry later. If the problem continues, inspect diagnostics or
+                    contact API support.
+                  </p>
+                </div>
+              </div>
+
+              <div class="status-actions">
+                <code class="status-payload">{"status":500,"error":"Internal Server Error","detail":"An unexpected server error occurred."}</code>
+
+                <button
+                  type="button"
+                  class="copy-status-btn"
+                  data-copy='{"status":500,"error":"Internal Server Error","detail":"An unexpected server error occurred."}'
+                >
+                  Copy payload
+                </button>
+              </div>
+            </article>
+
+          </div>
+
+          <p
+            class="status-empty"
+            id="status-empty"
+            hidden
+          >
+            No HTTP status codes match your search.
+          </p>
         </div>
       </section>
 
