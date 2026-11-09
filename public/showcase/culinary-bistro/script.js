@@ -339,6 +339,9 @@ const reservationState = {
   dateFormatted: '',
   area: 'main',
   time: '',
+  tableId: null,
+  tableLabel: '',
+  tableHoldId: null,
   guest: {
     name: '',
     phone: '',
@@ -349,6 +352,34 @@ const reservationState = {
   },
   code: ''
 };
+
+function tableContext() {
+  return { date: reservationState.dateIso, time: reservationState.time, party: reservationState.party, area: reservationState.area };
+}
+
+function checkSelectedTable(commit = false) {
+  const detail = { context: tableContext(), tableId: reservationState.tableId, holdId: reservationState.tableHoldId, commit, valid: false };
+  document.dispatchEvent(new CustomEvent('bistro:check-table', { detail }));
+  return detail.valid;
+}
+
+document.addEventListener('bistro:table-selection', event => {
+  const selection = event.detail;
+  if (selection && (selection.context.date !== reservationState.dateIso || selection.context.time !== reservationState.time || selection.context.party !== reservationState.party)) return;
+  reservationState.tableId = selection?.id || null;
+  reservationState.tableLabel = selection?.label || '';
+  reservationState.tableHoldId = selection?.holdId || null;
+  if (selection) {
+    reservationState.area = selection.area;
+    document.querySelectorAll('input[name="seatingArea"]').forEach(radio => {
+      radio.checked = radio.value === selection.area;
+      radio.closest('.seating-card').classList.toggle('active', radio.checked);
+    });
+  }
+  byId('toStep3').disabled = !reservationState.time || !reservationState.tableId;
+  updateRecapBars();
+});
+document.addEventListener('bistro:floorplan-ready', () => updateRecapBars());
 
 function formatDateIso(d) {
   const y = d.getFullYear();
@@ -460,7 +491,8 @@ function updateRecapBars() {
   }
 
   const recapArea3 = byId('recapAreaStep3');
-  if (recapArea3) recapArea3.textContent = areaStr;
+  if (recapArea3) recapArea3.textContent = `${areaStr}${reservationState.tableLabel ? ` · ${reservationState.tableLabel}` : ''}`;
+  document.dispatchEvent(new CustomEvent('bistro:reservation-change', { detail: tableContext() }));
 }
 
 function generateBookingVoucher() {
@@ -473,7 +505,7 @@ function generateBookingVoucher() {
   byId('vDate').textContent = reservationState.dateFormatted;
   byId('vTime').textContent = reservationState.time;
   byId('vParty').textContent = `${reservationState.partyLabel || `${reservationState.party} Guests`}`;
-  byId('vArea').textContent = SEATING_NAMES[reservationState.area] || 'Main Dining Room';
+  byId('vArea').textContent = `${SEATING_NAMES[reservationState.area] || 'Main Dining Room'} · ${reservationState.tableLabel}`;
   byId('vOccasion').textContent = reservationState.guest.occasion;
 
   const dietaryWrap = byId('vDietaryWrap');
@@ -498,7 +530,7 @@ function downloadCalendarEvent() {
   const code = reservationState.code || 'LUM-RESERVATION';
   const name = reservationState.guest.name || 'Valued Guest';
   const party = reservationState.partyLabel || `${reservationState.party} Guests`;
-  const area = SEATING_NAMES[reservationState.area] || 'Main Dining Room';
+  const area = `${SEATING_NAMES[reservationState.area] || 'Main Dining Room'} · ${reservationState.tableLabel}`;
   const dateClean = (reservationState.dateIso || '').replace(/-/g, '');
   const timeClean = (reservationState.time || '19:30').replace(':', '') + '00';
 
@@ -532,6 +564,10 @@ function downloadCalendarEvent() {
 }
 
 function resetReservation() {
+  document.dispatchEvent(new CustomEvent('bistro:table-reset'));
+  reservationState.tableId = null;
+  reservationState.tableLabel = '';
+  reservationState.tableHoldId = null;
   reservationState.step = 1;
   reservationState.time = '';
   reservationState.guest = {
@@ -663,7 +699,7 @@ function initReservationWizard() {
       btn.classList.add('active');
       reservationState.time = btn.dataset.time;
       byId('errTime').hidden = true;
-      if (toStep3Btn) toStep3Btn.disabled = false;
+      if (toStep3Btn) toStep3Btn.disabled = !reservationState.tableId;
       updateRecapBars();
     });
   });
@@ -676,6 +712,11 @@ function initReservationWizard() {
   if (toStep3Btn) {
     toStep3Btn.addEventListener('click', () => {
       if (!reservationState.time) return;
+      if (!checkSelectedTable()) {
+        byId('floor-status').textContent = 'Select an available table before continuing. Expired holds must be selected again.';
+        byId('floor-table').focus();
+        return;
+      }
       setWizardStep(3);
     });
   }
@@ -729,6 +770,13 @@ function initReservationWizard() {
       const invalidFields = fieldChecks.filter(field => !validateField(field));
       byId('reservationFeedback').hidden = invalidFields.length === 0;
       if (invalidFields.length) { byId(invalidFields[0][0]).focus(); return; }
+
+      if (!checkSelectedTable(true)) {
+        setWizardStep(2);
+        byId('floor-status').textContent = 'Your table is no longer held. Choose an available table again.';
+        byId('floor-table').focus();
+        return;
+      }
 
       // Collect guest details
       reservationState.guest.name = nameInput.value.trim();
