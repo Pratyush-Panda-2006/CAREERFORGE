@@ -1904,3 +1904,756 @@ html.vt-lock { overflow: hidden; }
     padding: 24px 18px;
   }
 }
+
+/* ===== BEGIN Issue #351: Private Aviation Carbon Offset Certificate Calculator ===== */
+.aviation-offset-section {
+  padding: 100px 24px;
+  background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.05) 0%, rgba(11, 15, 25, 0.98) 75%);
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  color: #f1f5f9;
+}
+
+.offset-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.offset-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.offset-kicker {
+  display: inline-block;
+  padding: 6px 18px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 9999px;
+  color: #34d399;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.offset-header h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+  margin-bottom: 14px;
+}
+
+.offset-sub {
+  font-size: 1.05rem;
+  color: #94a3b8;
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+.offset-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 32px;
+  align-items: stretch;
+}
+
+@media (max-width: 960px) {
+  .offset-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.offset-card {
+  background: #0d131f;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+.offset-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.offset-card-head h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.offset-live-badge,
+.verified-seal-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+
+.offset-live-badge {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.verified-seal-pill {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Aircraft Grid */
+.aircraft-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .aircraft-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.aircraft-btn {
+  background: #131b2c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: #cbd5e1;
+  text-align: center;
+}
+
+.aircraft-btn:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  transform: translateY(-2px);
+}
+
+.aircraft-btn.active {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: #10b981;
+  color: #f8fafc;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+.air-icon {
+  font-size: 1.5rem;
+  margin-bottom: 6px;
+}
+
+.air-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.air-model {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.air-burn {
+  font-size: 0.7rem;
+  color: #34d399;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Select & Range Inputs */
+.offset-select {
+  width: 100%;
+  background: #131b2c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.offset-slider-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.offset-val-pill {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.offset-range {
+  width: 100%;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 6px;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.offset-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+  border: 2px solid #ffffff;
+  cursor: pointer;
+}
+
+.offset-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* RFI Toggle Buttons */
+.rfi-toggle-wrap {
+  display: flex;
+  gap: 8px;
+}
+
+.rfi-btn {
+  flex: 1;
+  background: #131b2c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rfi-btn.active {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+/* Project Cards Grid */
+.project-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.project-card {
+  background: #131b2c;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card:hover {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.project-card.active {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: #10b981;
+}
+
+.proj-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #34d399;
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.proj-title {
+  font-size: 0.95rem;
+  color: #f8fafc;
+}
+
+.proj-loc {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.proj-price {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-top: 6px;
+}
+
+/* Carbon Dial & Results */
+.carbon-metric-dial {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(13, 19, 31, 0.9) 70%);
+  border: 2px solid rgba(16, 185, 129, 0.25);
+  border-radius: 18px;
+  padding: 28px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.dial-kicker {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #34d399;
+  letter-spacing: 0.1em;
+}
+
+.dial-num-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.dial-num {
+  font-size: 3.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+  text-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+}
+
+.dial-unit {
+  font-size: 1.1rem;
+  color: #34d399;
+  font-weight: 700;
+}
+
+.dial-sub {
+  font-size: 0.84rem;
+  color: #cbd5e1;
+}
+
+/* Impact Stats List */
+.impact-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #131b2c;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.stat-lbl {
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.stat-val {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.text-amber { color: #fbbf24 !important; }
+.highlight-green { color: #34d399 !important; }
+.highlight-gold { color: #f59e0b !important; font-size: 1.05rem !important; }
+
+/* Certificate Action CTA */
+.offset-action-block {
+  margin-top: auto;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.offset-cta-info strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #34d399;
+}
+
+.offset-cta-info p {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+.btn-issue-certificate {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+  text-align: center;
+}
+
+.btn-issue-certificate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+/* Certificate Modal & High-End Printable Styling */
+.cert-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.cert-modal-dialog {
+  max-width: 860px;
+  width: 100%;
+  position: relative;
+  margin: auto;
+}
+
+.cert-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cert-btn-print {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cert-btn-print:hover {
+  background: #334155;
+}
+
+.cert-modal-close {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Parchment / Fine Paper Certificate Layout */
+.certificate-paper {
+  background: #fdfbf7;
+  color: #1a202c;
+  padding: 28px;
+  border-radius: 6px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.cert-border-outer {
+  border: 4px double #064e3b;
+  padding: 10px;
+}
+
+.cert-border-inner {
+  border: 1px solid #d97706;
+  padding: 30px;
+  text-align: center;
+  position: relative;
+}
+
+.cert-top-branding {
+  margin-bottom: 16px;
+}
+
+.cert-logo-mark {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: #064e3b;
+}
+
+.cert-gold-standard {
+  display: block;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #b45309;
+  margin-top: 4px;
+}
+
+.cert-main-title {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #064e3b;
+  margin: 12px 0 10px 0;
+}
+
+.cert-statement {
+  font-family: system-ui, sans-serif;
+  font-size: 0.85rem;
+  color: #4b5563;
+  max-width: 620px;
+  margin: 0 auto 24px auto;
+  line-height: 1.6;
+}
+
+.cert-beneficiary-wrap {
+  margin-bottom: 28px;
+}
+
+.cert-presented-to {
+  display: block;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.cert-name-input {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  border: none;
+  border-bottom: 2px solid #d97706;
+  background: transparent;
+  width: 80%;
+  max-width: 480px;
+  outline: none;
+}
+
+.cert-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  background: #f8f6f0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  .cert-specs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cert-spec-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.spec-k {
+  font-family: system-ui, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.spec-v {
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-top: 2px;
+}
+
+.text-emerald { color: #059669 !important; }
+
+/* Certificate Footer & Seal */
+.cert-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 10px;
+}
+
+@media (max-width: 700px) {
+  .cert-footer-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+.cert-qr-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.cert-qr-box {
+  width: 52px;
+  height: 52px;
+  background: #000000;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.qr-mock-pattern {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(45deg, #ffffff, #ffffff 4px, #000000 4px, #000000 8px);
+}
+
+.cert-qr-labels {
+  display: flex;
+  flex-direction: column;
+}
+
+.qr-lbl {
+  font-family: system-ui, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+}
+
+.qr-code-txt {
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #064e3b;
+  margin: 2px 0;
+}
+
+.qr-status {
+  font-family: system-ui, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+/* Embossed Gold Seal */
+.gold-embossed-seal {
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle, #fde047 0%, #ca8a04 70%, #854d0e 100%);
+  border: 3px dashed #713f12;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  color: #451a03;
+  text-align: center;
+}
+
+.seal-inner-star {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.seal-ring-text {
+  font-family: system-ui, sans-serif;
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+.cert-signature-wrap {
+  text-align: right;
+}
+
+.sig-cursive {
+  font-family: 'Brush Script MT', 'Dancing Script', cursive;
+  font-size: 1.6rem;
+  color: #064e3b;
+  display: block;
+}
+
+.sig-bar {
+  width: 180px;
+  height: 1px;
+  background: #9ca3af;
+  margin: 4px 0;
+}
+
+.sig-title {
+  font-family: system-ui, sans-serif;
+  font-size: 0.65rem;
+  color: #6b7280;
+}
+
+/* Print CSS */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #certModalBackdrop,
+  #certModalBackdrop * {
+    visibility: visible;
+  }
+  .cert-modal-backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .certificate-paper {
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+/* ===== END Issue #351 ===== */

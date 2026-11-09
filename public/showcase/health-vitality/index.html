@@ -1343,6 +1343,252 @@
     </div>
   </section>
   <!-- ===== END Issue #348 ===== -->
+  <!-- ===== BEGIN Issue #349: Interactive VO2 Max & Metabolic Age Assessment ===== -->
+  <section class="vo2max-section" id="vo2max-assessment-section" aria-labelledby="vo2max-section-title">
+    <div class="vo2max-container">
+      <div class="vo2max-header">
+        <span class="vo2max-badge">CARDIOVASCULAR LONGEVITY &amp; AEROBIC POWER</span>
+        <h2 id="vo2max-section-title">VO2 Max &amp; Metabolic Age Assessment</h2>
+        <p class="vo2max-sub">Clinical-grade aerobic capacity calculator predicting cardiorespiratory fitness tiers, metabolic heart age differential, and athletic endurance benchmarks.</p>
+      </div>
+
+      <div class="vo2max-grid">
+        <!-- Input Configuration Card -->
+        <div class="vo2max-card vo2max-controls-card">
+          <div class="card-head-row">
+            <h3 class="card-title">Cardio Fitness Profile</h3>
+            <!-- Metric/Imperial Unit Switcher -->
+            <div class="vo2-unit-toggle" role="group" aria-label="Measurement Units">
+              <button type="button" class="unit-btn active" id="vo2UnitMetric" data-unit="metric">Metric (kg/cm)</button>
+              <button type="button" class="unit-btn" id="vo2UnitImperial" data-unit="imperial">Imperial (lbs/in)</button>
+            </div>
+          </div>
+
+          <!-- Assessment Method Tabs -->
+          <div class="vo2-method-tabs" role="tablist">
+            <button type="button" class="method-tab active" id="tabNonExercise" role="tab" aria-selected="true">
+              🏃 Non-Exercise Model (Fast)
+            </button>
+            <button type="button" class="method-tab" id="tabRockport" role="tab" aria-selected="false">
+              ⏱️ 1-Mile Walk/Run Test
+            </button>
+          </div>
+
+          <!-- Inputs Form -->
+          <form class="vo2-form" id="vo2AssessmentForm" onsubmit="return false;">
+            <!-- Gender Selector -->
+            <div class="form-group">
+              <label class="form-label">Biological Sex</label>
+              <div class="sex-pill-group" role="radiogroup" aria-label="Biological Sex">
+                <button type="button" class="sex-pill active" data-sex="male" role="radio" aria-checked="true">👨 Male</button>
+                <button type="button" class="sex-pill" data-sex="female" role="radio" aria-checked="false">👩 Female</button>
+              </div>
+            </div>
+
+            <!-- Age Slider -->
+            <div class="form-group">
+              <div class="slider-label-row">
+                <label for="vo2AgeInput" class="form-label">Chronological Age</label>
+                <span class="slider-val" id="vo2AgeVal">32 yrs</span>
+              </div>
+              <input type="range" class="vo2-range" id="vo2AgeInput" min="18" max="80" value="32" step="1" aria-valuemin="18" aria-valuemax="80" aria-valuenow="32">
+            </div>
+
+            <!-- Resting Heart Rate Slider -->
+            <div class="form-group">
+              <div class="slider-label-row">
+                <label for="vo2RhrInput" class="form-label">Resting Heart Rate (RHR)</label>
+                <span class="slider-val" id="vo2RhrVal">60 bpm</span>
+              </div>
+              <input type="range" class="vo2-range" id="vo2RhrInput" min="40" max="100" value="60" step="1" aria-valuemin="40" aria-valuemax="100" aria-valuenow="60">
+              <div class="range-subtext">Measured upon waking or resting quietly for 5 minutes.</div>
+            </div>
+
+            <!-- Weight and Height 2-Column Row -->
+            <div class="form-row-2col">
+              <div class="form-group">
+                <div class="slider-label-row">
+                  <label for="vo2WeightInput" class="form-label" id="vo2WeightLabel">Weight (kg)</label>
+                  <span class="slider-val" id="vo2WeightVal">72 kg</span>
+                </div>
+                <input type="range" class="vo2-range" id="vo2WeightInput" min="40" max="150" value="72" step="0.5">
+              </div>
+
+              <div class="form-group">
+                <div class="slider-label-row">
+                  <label for="vo2HeightInput" class="form-label" id="vo2HeightLabel">Height (cm)</label>
+                  <span class="slider-val" id="vo2HeightVal">175 cm</span>
+                </div>
+                <input type="range" class="vo2-range" id="vo2HeightInput" min="140" max="215" value="175" step="1">
+              </div>
+            </div>
+
+            <!-- Physical Activity Level (PAR) for Non-Exercise Model -->
+            <div class="form-group" id="activityLevelGroup">
+              <label class="form-label">Weekly Activity Level (PAR)</label>
+              <div class="activity-chips-grid">
+                <button type="button" class="act-chip" data-par="1" title="Sedentary, minimal structured exercise">
+                  <span class="chip-title">Sedentary</span>
+                  <span class="chip-desc">&lt; 30 min/wk</span>
+                </button>
+                <button type="button" class="act-chip" data-par="3" title="Light-moderate cardio 1-2 times weekly">
+                  <span class="chip-title">Moderate</span>
+                  <span class="chip-desc">1-2 hrs/wk</span>
+                </button>
+                <button type="button" class="act-chip active" data-par="5" title="Regular aerobic exercise 3-4 times weekly">
+                  <span class="chip-title">Active</span>
+                  <span class="chip-desc">3-5 hrs/wk</span>
+                </button>
+                <button type="button" class="act-chip" data-par="7" title="High-intensity athletic training 5+ times weekly">
+                  <span class="chip-title">Athlete</span>
+                  <span class="chip-desc">6+ hrs/wk</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 1-Mile Walk/Run Inputs (Visible only when Rockport tab active) -->
+            <div class="rockport-fields-wrap" id="rockportFieldsWrap" style="display: none;">
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <div class="slider-label-row">
+                    <label for="vo2WalkTimeInput" class="form-label">1-Mile Walk Time</label>
+                    <span class="slider-val" id="vo2WalkTimeVal">13m 30s</span>
+                  </div>
+                  <input type="range" class="vo2-range" id="vo2WalkTimeInput" min="480" max="1440" value="810" step="10">
+                  <div class="range-subtext">8:00 min (fast) to 24:00 min (slow).</div>
+                </div>
+
+                <div class="form-group">
+                  <div class="slider-label-row">
+                    <label for="vo2PostWalkHrInput" class="form-label">End-Test Heart Rate</label>
+                    <span class="slider-val" id="vo2PostWalkHrVal">128 bpm</span>
+                  </div>
+                  <input type="range" class="vo2-range" id="vo2PostWalkHrInput" min="80" max="190" value="128" step="1">
+                  <div class="range-subtext">Heart rate immediately at mile finish.</div>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Telemetry & Gauge Visualizer Card -->
+        <div class="vo2max-card vo2max-results-card">
+          <div class="card-head-row">
+            <h3 class="card-title">Cardiorespiratory Telemetry</h3>
+            <span class="tier-pill tier-excellent" id="vo2TierBadge">EXCELLENT</span>
+          </div>
+
+          <!-- Speedometer Semi-Circular Gauge -->
+          <div class="gauge-container" role="region" aria-label="VO2 Max Speedometer Gauge">
+            <svg class="vo2-gauge-svg" viewBox="0 0 300 170" aria-hidden="true">
+              <defs>
+                <linearGradient id="gaugeArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#ef4444" />
+                  <stop offset="25%" stop-color="#f59e0b" />
+                  <stop offset="50%" stop-color="#10b981" />
+                  <stop offset="75%" stop-color="#06b6d4" />
+                  <stop offset="100%" stop-color="#8b5cf6" />
+                </linearGradient>
+                <filter id="needleGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              <!-- Outer Gauge Arc Track -->
+              <path class="gauge-track-bg" d="M 30 150 A 120 120 0 0 1 270 150" fill="none" stroke="#1e293b" stroke-width="18" stroke-linecap="round" />
+              <!-- Colored Gauge Gradient Arc -->
+              <path class="gauge-track-fg" d="M 30 150 A 120 120 0 0 1 270 150" fill="none" stroke="url(#gaugeArcGrad)" stroke-width="16" stroke-linecap="round" />
+
+              <!-- Gauge Scale Ticks -->
+              <line x1="30" y1="150" x2="42" y2="150" stroke="#64748b" stroke-width="2" />
+              <line x1="72" y1="80" x2="80" y2="88" stroke="#64748b" stroke-width="2" />
+              <line x1="150" y1="30" x2="150" y2="42" stroke="#64748b" stroke-width="2" />
+              <line x1="228" y1="80" x2="220" y2="88" stroke="#64748b" stroke-width="2" />
+              <line x1="270" y1="150" x2="258" y2="150" stroke="#64748b" stroke-width="2" />
+
+              <!-- Speedometer Needle -->
+              <g class="gauge-needle-group" id="vo2NeedleGroup" transform="rotate(0, 150, 150)" style="transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                <line x1="150" y1="150" x2="150" y2="46" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" filter="url(#needleGlow)" />
+                <circle cx="150" cy="150" r="10" fill="#0f172a" stroke="#38bdf8" stroke-width="3" />
+                <circle cx="150" cy="150" r="4" fill="#38bdf8" />
+              </g>
+            </svg>
+
+            <!-- Numeric Center Display -->
+            <div class="gauge-center-stats">
+              <div class="vo2-number-wrap">
+                <span class="vo2-score-val" id="vo2ScoreVal">49.4</span>
+                <span class="vo2-score-unit">ml/kg/min</span>
+              </div>
+              <div class="vo2-percentile-tag" id="vo2PercentileTag">Top 15% of your age group</div>
+            </div>
+          </div>
+
+          <!-- Cardio Category Scale Strip -->
+          <div class="gauge-tier-legend" aria-label="Cardio Fitness Tier Scale">
+            <span class="legend-step step-poor" id="legendPoor">Poor (&lt;32)</span>
+            <span class="legend-step step-fair" id="legendFair">Fair (32-38)</span>
+            <span class="legend-step step-good" id="legendGood">Good (38-45)</span>
+            <span class="legend-step step-excellent active" id="legendExcellent">Excellent (45-52)</span>
+            <span class="legend-step step-superior" id="legendSuperior">Superior (52+)</span>
+          </div>
+
+          <!-- Metabolic Age Differential Box -->
+          <div class="metabolic-age-card">
+            <div class="age-stat-column">
+              <span class="age-label">Chronological Age</span>
+              <strong class="age-val" id="chronoAgeDisplay">32 yrs</strong>
+            </div>
+            <div class="age-differential-badge badge-younger" id="ageDiffBadge">
+              <span class="diff-icon">⚡</span>
+              <span class="diff-text" id="ageDiffText">5 Yrs Younger</span>
+            </div>
+            <div class="age-stat-column">
+              <span class="age-label">Metabolic Heart Age</span>
+              <strong class="age-val highlight-age" id="metabolicAgeVal">27 yrs</strong>
+            </div>
+          </div>
+
+          <!-- Biomarker & Training Zones Grid -->
+          <div class="cardio-zones-grid">
+            <div class="zone-box">
+              <span class="zone-lbl">Zone 2 Aerobic Base</span>
+              <strong class="zone-val" id="zone2Range">118 - 134 bpm</strong>
+              <span class="zone-sub">Fat oxidation &amp; mitochondrial density</span>
+            </div>
+            <div class="zone-box">
+              <span class="zone-lbl">VO2 Max Lactate Peak</span>
+              <strong class="zone-val" id="zone5Range">168 - 182 bpm</strong>
+              <span class="zone-sub">Anaerobic ceiling &amp; stroke volume</span>
+            </div>
+            <div class="zone-box">
+              <span class="zone-lbl">Body Mass Index (BMI)</span>
+              <strong class="zone-val" id="vo2BmiVal">23.5 kg/m²</strong>
+              <span class="zone-sub" id="vo2BmiClass">Normal Weight Range</span>
+            </div>
+            <div class="zone-box">
+              <span class="zone-lbl">Cardio Longevity Bonus</span>
+              <strong class="zone-val hl-green" id="longevityBonus">+4.6 yrs</strong>
+              <span class="zone-sub">Reduced all-cause mortality</span>
+            </div>
+          </div>
+
+          <!-- Optimization Protocol Recommendation Box -->
+          <div class="vo2-protocol-box">
+            <div class="protocol-icon">💡</div>
+            <div class="protocol-text">
+              <strong id="protocolTitle">Cardio Prescription: Aerobic Base Expansion</strong>
+              <p id="protocolDesc">Perform 150–180 minutes of low-intensity Zone 2 cardio weekly plus 1 high-intensity 4x4 interval session to boost mitochondrial enzymes and stroke volume.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #349 ===== -->
+
 
   <main class="metrics">
     <div class="card">

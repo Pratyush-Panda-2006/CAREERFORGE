@@ -1,5 +1,28 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+.paper-panel { border-top: 1px solid #334155; padding: 24px 0; margin-top: 24px; }
+.paper-panel h3 span { color: #38bdf8; font-size: .8rem; }
+.paper-panel p { color: #94a3b8; font: .85rem/1.6 Inter, sans-serif; margin: 12px 0; }
+.paper-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.paper-form label { display: grid; gap: 8px; font-size: .8rem; }
+.paper-form input, .paper-form select, .paper-panel button { min-height: 44px; min-width: 0; width: 100%; padding: 10px; border: 1px solid #475569; border-radius: 6px; background: #0f172a; color: #f3f4f6; font: inherit; }
+.paper-form :disabled { opacity: .5; }
+.paper-panel button { cursor: pointer; border-color: #38bdf8; }
+#paper-submit { align-self: end; background: #075985; }
+.paper-panel :focus-visible { outline: 2px solid #38bdf8; outline-offset: 3px; }
+.paper-panel #paper-result { padding: 12px; background: #0f172a; color: #e2e8f0; border-left: 3px solid #38bdf8; }
+.paper-history { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.paper-history h4 { margin: 12px 0; font-size: .85rem; }
+.paper-history ul { list-style: none; max-height: 220px; overflow: auto; font-size: .75rem; line-height: 1.6; color: #cbd5e1; }
+.paper-history li { padding: 8px 0; border-bottom: 1px solid #1e293b; overflow-wrap: anywhere; }
+.paper-history button { width: auto; margin: 8px 0; display: block; }
+.ob-ask.ob-executed { animation: ask-fill .8s ease-out; }
+.ob-bid.ob-executed { animation: bid-fill .8s ease-out; }
+@keyframes ask-fill { from { background-color: #7f1d1d; } to { background-color: transparent; } }
+@keyframes bid-fill { from { background-color: #065f46; } to { background-color: transparent; } }
+@media (max-width: 600px) { .paper-form, .paper-history { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .ob-executed { animation: none !important; outline: 1px solid currentColor; } }
+
 body {
   font-family: 'JetBrains Mono', monospace;
   background-color: #060913;

@@ -1071,9 +1071,80 @@
   </dialog>
   <!-- ===== END Issue #303 ===== -->
 
+  <section class="tco-calculator" id="tco-calculator" aria-labelledby="tco-title">
+    <p class="tco-kicker">INFRASTRUCTURE PLANNING SANDBOX</p>
+    <h2 id="tco-title">Compare three years of cloud costs</h2>
+    <p>Illustrative USD scenarios, not current AWS prices or a vendor quote. Replace every sample assumption with your own comparable workload estimates. Flat usage/prices; taxes, discounts, financing, inflation, storage, redundancy and migration differences are excluded.</p>
+    <form>
+      <div class="tco-inputs">
+        <div><label for="tco-clusters">Compute clusters (0–1000)</label><input id="tco-clusters" name="clusters" type="number" min="0" max="1000" step="1" value="4" required></div>
+        <div><label for="tco-egress">Monthly data egress (GB)</label><input id="tco-egress" name="egress" type="number" min="0" max="10000000" step="0.1" value="1000" required></div>
+        <div><label for="tco-hourly">Engineering cost (USD/hour)</label><input id="tco-hourly" name="hourly" type="number" min="0" max="1000" step="0.01" value="75" required></div>
+      </div>
+      <details><summary>Edit scenario assumptions (invented demo defaults)</summary><div id="tco-assumptions"></div></details>
+      <p>Engineering hours are total monthly hours, not per cluster. Setup is charged once per cluster. Usage, infrastructure, egress and engineering costs repeat for 36 months; displayed annual differences spread setup costs over three years.</p>
+      <button type="submit">Calculate comparison</button>
+    </form>
+    <p role="status" aria-live="polite"></p>
+    <div id="tco-result"></div>
+    <button type="button" id="tco-download" disabled>Download illustrative estimate</button>
+  </section>
+  <script type="module" src="tco-calculator.js"></script>
   <footer class="footer">
     <div class="footer-content">
       <div class="logo">☁️ CloudPulse</div>
+      <div class="system-status">
+        <button
+          type="button"
+          class="system-status-chip"
+          id="systemStatusToggle"
+          aria-expanded="false"
+          aria-controls="systemStatusPopover"
+        >
+          <span class="status-indicator" aria-hidden="true"></span>
+          <span>All Systems Operational</span>
+          <span class="status-divider">•</span>
+          <span>99.99% Uptime</span>
+        </button>
+        <div
+          class="system-status-popover"
+          id="systemStatusPopover"
+          role="dialog"
+          aria-label="System status details"
+          hidden
+        >
+          <div class="system-status-header">
+            <div>
+              <span class="status-title">System Status</span>
+              <span class="status-subtitle">Updated just now</span>
+            </div>
+            <span class="overall-status">Operational</span>
+          </div>
+          <div class="service-status-list">
+            <div class="service-status-item">
+              <div class="service-name">
+                <span class="service-dot" aria-hidden="true"></span>
+                <span>API</span>
+              </div>
+              <span class="service-metric">42 ms</span>
+            </div>
+            <div class="service-status-item">
+              <div class="service-name">
+                <span class="service-dot" aria-hidden="true"></span>
+                <span>Dashboard</span>
+              </div>
+              <span class="service-metric">28 ms</span>
+            </div>
+            <div class="service-status-item">
+              <div class="service-name">
+                <span class="service-dot" aria-hidden="true"></span>
+                <span>Webhook Engine</span>
+              </div>
+              <span class="service-metric">35 ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
       <p>© 2026 CloudPulse Technologies Inc. All rights reserved.</p>
     </div>
   </footer>

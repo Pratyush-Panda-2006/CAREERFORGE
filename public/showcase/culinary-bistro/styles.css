@@ -8,6 +8,33 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+.floor-plan { margin: 28px 0; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: #100d0a; }
+.floor-plan h4 { color: var(--accent); font-family: 'Playfair Display', serif; font-size: 1.3rem; }
+.floor-plan p { margin: 12px 0; color: #d6d3d1; font-size: .8rem; line-height: 1.6; }
+.floor-plan svg { width: 100%; height: auto; margin: 16px 0; display: block; }
+.floor-zones rect { fill: #1c1917; stroke: #57534e; }
+.floor-zones text { fill: #a8a29e; font-size: 13px; letter-spacing: 1px; }
+.floor-plan [role="button"] { cursor: pointer; outline: none; }
+.floor-plan [role="button"] rect { fill: #17352c; stroke: #6ee7b7; stroke-width: 2; }
+.floor-plan [role="button"] text { fill: #f5f5f4; text-anchor: middle; font-size: 14px; pointer-events: none; }
+.floor-plan .floor-caption { font-size: 11px !important; }
+.floor-plan [data-state="selected"] rect { fill: #713f12; stroke: #fcd34d; stroke-width: 4; }
+.floor-plan [data-state="reserved"] rect, .floor-plan [data-state="occupied"] rect, .floor-plan [data-state="held"] rect { fill: #48252b; stroke: #fda4af; stroke-dasharray: 5 3; }
+.floor-plan [data-state="too-small"] rect, .floor-plan [data-state="unavailable"] rect { fill: #292524; stroke: #78716c; }
+.floor-plan [role="button"][aria-disabled="true"] { cursor: not-allowed; }
+.floor-plan [role="button"][aria-disabled="false"]:hover rect { stroke-width: 4; filter: drop-shadow(0 0 5px #34d399); }
+.floor-plan [role="button"]:focus-visible rect { stroke: white; stroke-width: 5; }
+.floor-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; list-style: none; margin-top: 16px; font-size: .75rem; color: #d6d3d1; }
+.floor-legend li::before { content: ''; display: inline-block; width: 8px; height: 8px; background: #6ee7b7; margin-right: 6px; border-radius: 50%; }
+.floor-legend li:nth-child(2)::before { background: #fcd34d; }
+.floor-legend li:nth-child(3)::before { background: #fda4af; }
+.floor-legend li:nth-child(4)::before { background: #78716c; }
+.floor-plan label { display: block; margin-bottom: 8px; font-size: .8rem; }
+.floor-plan select { width: 100%; min-width: 0; min-height: 44px; padding: 10px; background: #1c1917; color: white; border: 1px solid #78716c; border-radius: 6px; }
+.floor-plan select:focus-visible, .floor-plan button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.floor-plan #floor-status { border-left: 3px solid var(--accent); padding: 10px; background: #292524; }
+@media (max-width: 480px) { .floor-plan { padding: 12px; } }
+
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   background-color: var(--bg);

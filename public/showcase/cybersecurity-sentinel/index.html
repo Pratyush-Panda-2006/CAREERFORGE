@@ -16,6 +16,7 @@
     <h1>Autonomous Threat Prevention &amp; Incident Response</h1>
     <p>AI threat detection engine mitigating 99.98% of zero-day exploits before execution.</p>
     <button class="scan-btn" id="heroScanBtn" onclick="runSecurityScan()">Initiate Full Vulnerability Scan ↗</button>
+    <button type="button" class="scan-btn" id="audit-open">Generate Audit Report</button>
   </header>
 
   <section class="status-box">
@@ -380,5 +381,16 @@
   <!-- ===== END issue #277 ===== -->
 
   <script src="script.js"></script>
+  <dialog id="audit-dialog" aria-labelledby="audit-title">
+    <h2 id="audit-title">Generate simulated audit report</h2>
+    <p>Choose the scope for a frozen local snapshot of the existing demo catalogue and incident feed. No real target is scanned.</p>
+    <form><label>Data source<select id="audit-source"><option value="all">All demo sources</option><option value="catalogue">Vulnerability catalogue</option><option value="incident">Incident feed</option></select></label>
+      <label>Minimum severity<select id="audit-minimum"><option value="info">Informational and above</option><option value="low">Low and above</option><option value="medium">Medium and above</option><option value="high">High and above</option><option value="critical">Critical only</option></select></label>
+      <label>Asset/product contains<input id="audit-asset" type="search" maxlength="100" placeholder="Any asset"></label>
+      <label class="audit-check"><input id="audit-mitigated" type="checkbox" checked>Include events reported auto-mitigated</label>
+      <p id="audit-feedback" role="status"></p><button type="submit">Generate snapshot</button><button type="button" id="audit-close">Cancel</button></form>
+  </dialog>
+  <section id="audit-report" hidden tabindex="-1" aria-label="Generated simulated audit report"><div class="audit-print-controls"><button type="button" id="audit-print">Print / Save as PDF</button><button type="button" id="audit-back">Back to dashboard</button></div><div id="audit-content"></div></section>
+  <script type="module" src="audit-report.js"></script>
 </body>
 </html>

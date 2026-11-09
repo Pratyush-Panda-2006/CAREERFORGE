@@ -623,6 +623,32 @@
   </section>
   <!-- ===== EV Road Trip Range Estimator (Issue #271) END ===== -->
 
+  <section id="lap-simulator" class="lap-panel" aria-labelledby="lap-title">
+    <div class="lap-eyebrow">APEX / SIMULATION LAB</div>
+    <h2 id="lap-title">Circuit lap simulator</h2>
+    <p>Explore acceleration, braking and tire grip with a standing-start point-mass model. These synthetic circuit profiles and schematic map are illustrative, not surveyed layouts, measured telemetry or real lap predictions.</p>
+    <form class="lap-controls">
+      <label>Circuit<select id="lap-track"><option value="nordschleife">Nürburgring Nordschleife profile</option><option value="silverstone">Silverstone profile</option><option value="laguna">Laguna Seca profile</option></select></label>
+      <label>Tire compound<select id="lap-compound"><option value="soft">Soft Slick</option><option value="medium">Medium</option><option value="wet">Wet</option></select></label>
+      <label>Surface<select id="lap-condition"><option value="dry">Dry</option><option value="wet">Wet</option></select></label>
+      <label>Tire age (km)<input type="number" id="lap-age" min="0" max="50" step="1" value="0" required></label>
+      <label>Playback speed<select id="lap-pace"><option value="10">10×</option><option value="30">30×</option><option value="60" selected>60×</option></select></label>
+      <button type="submit" id="lap-start">Run simulated lap</button>
+    </form>
+    <div class="lap-actions"><button type="button" id="lap-pause" disabled>Pause lap</button><button type="button" id="lap-skip" disabled>Skip animation</button><button type="button" id="lap-stop" disabled>Cancel lap</button></div>
+    <div class="lap-dashboard">
+      <div class="lap-map"><svg viewBox="0 0 460 250" role="img" aria-label="Schematic lap progress, not the actual circuit layout"><path id="lap-path" d="M 80 180 C 20 140 40 40 130 40 L 310 40 C 410 30 440 140 370 185 L 280 155 L 200 210 Z"/><circle id="lap-marker" cx="80" cy="180" r="8"/></svg><progress id="lap-progress" max="100" value="0" aria-label="Lap distance progress"></progress><p id="lap-distance">0.00 km</p></div>
+      <dl class="lap-telemetry"><div><dt>Model lap time</dt><dd id="lap-clock">0:00.000</dd></div><div><dt>Speed</dt><dd id="lap-speed">0 km/h</dd></div><div><dt>Lateral load</dt><dd id="lap-g">0.00 g</dd></div><div><dt>Tire degradation</dt><dd id="lap-wear">0.0% grip loss</dd></div><div><dt>Track PB this session</dt><dd id="lap-best">No completed lap</dd></div></dl>
+    </div>
+    <div class="lap-sectors" aria-label="Sector splits">
+      <div data-lap-sector="0"><h3>S1</h3><output aria-label="Sector 1 time">—</output><span class="lap-delta">Pending</span></div>
+      <div data-lap-sector="1"><h3>S2</h3><output aria-label="Sector 2 time">—</output><span class="lap-delta">Pending</span></div>
+      <div data-lap-sector="2"><h3>S3</h3><output aria-label="Sector 3 time">—</output><span class="lap-delta">Pending</span></div>
+    </div>
+    <p id="lap-status" role="status">Choose a profile and compound to begin. Reduced-motion mode shows the completed result immediately.</p>
+    <details><summary>Model assumptions and timing</summary><p>1,800 kg point mass, 700 kW available power, 115 m/s speed cap; no elevation, downforce, traffic or temperature model. A backward braking pass and forward traction/power pass solve 25 m or shorter segments. Corner limits use v² = μgr; compound grip decreases with tire age and distance. Soft slicks have more dry grip and faster wear, while wet tires have more wet grip. Playback uses elapsed timestamps and pauses when the tab is hidden. Personal bests last only for this page session; track PB and sector fastest records compare completed runs across compounds and tire ages on the same surface and profile.</p></details>
+  </section>
   <script src="script.js"></script>
+  <script type="module" src="lap-simulator.js"></script>
 </body>
 </html>

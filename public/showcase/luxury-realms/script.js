@@ -2028,3 +2028,199 @@
   setPlayIcon();
 })();
 /* ===== END issue #201 ===== */
+
+
+/* ===== BEGIN Issue #351: Private Aviation Carbon Offset Certificate Calculator ===== */
+(function initAviationCarbonOffset() {
+  const section = document.getElementById('aviation-offset-section');
+  if (!section) return;
+
+  // State
+  let currentAircraft = {
+    class: 'light',
+    burnGalPerHr: 185,
+    co2PerHr: 1.76,
+    name: 'Phenom 300E (Light Jet)'
+  };
+  let flightHours = 2.0;
+  let passengers = 4;
+  let rfiMultiplier = 1.9;
+  let selectedProject = {
+    id: 'rimba',
+    title: 'Rimba Raya Peatland Reserve',
+    pricePerMt: 48
+  };
+  let routeName = 'London (EGGW) → Nice (LFMN)';
+
+  // DOM Elements
+  const aircraftButtons = section.querySelectorAll('.aircraft-btn');
+  const routeSelect = document.getElementById('routeSelect');
+  const flightHoursRange = document.getElementById('flightHoursRange');
+  const flightHoursVal = document.getElementById('flightHoursVal');
+  const passengerRange = document.getElementById('passengerRange');
+  const passengerVal = document.getElementById('passengerVal');
+  const rfiHighBtn = document.getElementById('rfiHighBtn');
+  const rfiStdBtn = document.getElementById('rfiStdBtn');
+  const projectCards = section.querySelectorAll('.project-card');
+
+  // Results elements
+  const totalEmissionsVal = document.getElementById('totalEmissionsVal');
+  const emissionsPerPax = document.getElementById('emissionsPerPax');
+  const fuelBurnVal = document.getElementById('fuelBurnVal');
+  const directCo2Val = document.getElementById('directCo2Val');
+  const rfiMultiplierVal = document.getElementById('rfiMultiplierVal');
+  const creditsRequiredVal = document.getElementById('creditsRequiredVal');
+  const totalOffsetCost = document.getElementById('totalOffsetCost');
+
+  // Modal elements
+  const certModalBackdrop = document.getElementById('certModalBackdrop');
+  const openCertModalBtn = document.getElementById('openCertModalBtn');
+  const closeCertModalBtn = document.getElementById('closeCertModalBtn');
+  const certPrintBtn = document.getElementById('certPrintBtn');
+
+  // Certificate fields
+  const certAircraftVal = document.getElementById('certAircraftVal');
+  const certRouteVal = document.getElementById('certRouteVal');
+  const certDurationVal = document.getElementById('certDurationVal');
+  const certPaxVal = document.getElementById('certPaxVal');
+  const certTonnageVal = document.getElementById('certTonnageVal');
+  const certProjectVal = document.getElementById('certProjectVal');
+  const certSerialHash = document.getElementById('certSerialHash');
+
+  // Random Hash Generator
+  function generateSerialHash() {
+    const chars = '0123456789ABCDEF';
+    let p1 = '', p2 = '';
+    for (let i = 0; i < 4; i++) p1 += chars.charAt(Math.floor(Math.random() * chars.length));
+    for (let i = 0; i < 4; i++) p2 += chars.charAt(Math.floor(Math.random() * chars.length));
+    return 'GS-AURA-2026-' + p1 + '-' + p2;
+  }
+
+  // Aircraft Selection
+  aircraftButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      aircraftButtons.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentAircraft.class = btn.getAttribute('data-class');
+      currentAircraft.burnGalPerHr = parseFloat(btn.getAttribute('data-burn')) || 185;
+      currentAircraft.co2PerHr = parseFloat(btn.getAttribute('data-co2-per-hr')) || 1.76;
+      currentAircraft.name = btn.getAttribute('data-name');
+      calculateImpact();
+    });
+  });
+
+  // Route Selection
+  routeSelect.addEventListener('change', function () {
+    const opt = routeSelect.selectedOptions[0];
+    if (opt.value !== 'custom') {
+      const h = parseFloat(opt.getAttribute('data-hours'));
+      flightHours = h;
+      flightHoursRange.value = h;
+      routeName = (opt.getAttribute('data-from') || '') + ' → ' + (opt.getAttribute('data-to') || '');
+    } else {
+      routeName = 'Bespoke Private Itinerary (' + flightHours.toFixed(1) + ' hrs)';
+    }
+    flightHoursVal.textContent = flightHours.toFixed(1) + ' hrs';
+    calculateImpact();
+  });
+
+  // Flight Hours Slider
+  flightHoursRange.addEventListener('input', function () {
+    flightHours = parseFloat(flightHoursRange.value);
+    flightHoursVal.textContent = flightHours.toFixed(1) + ' hrs';
+    if (routeSelect.value !== 'custom') {
+      routeSelect.value = 'custom';
+      routeName = 'Bespoke Private Itinerary (' + flightHours.toFixed(1) + ' hrs)';
+    }
+    calculateImpact();
+  });
+
+  // Passenger Slider
+  passengerRange.addEventListener('input', function () {
+    passengers = parseInt(passengerRange.value, 10);
+    passengerVal.textContent = passengers + (passengers === 1 ? ' Guest' : ' Guests');
+    calculateImpact();
+  });
+
+  // RFI Toggle
+  rfiHighBtn.addEventListener('click', function () {
+    rfiHighBtn.classList.add('active');
+    rfiStdBtn.classList.remove('active');
+    rfiMultiplier = 1.9;
+    calculateImpact();
+  });
+
+  rfiStdBtn.addEventListener('click', function () {
+    rfiStdBtn.classList.add('active');
+    rfiHighBtn.classList.remove('active');
+    rfiMultiplier = 1.0;
+    calculateImpact();
+  });
+
+  // Project Selection
+  projectCards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      projectCards.forEach(function (c) { c.classList.remove('active'); });
+      card.classList.add('active');
+      selectedProject.id = card.getAttribute('data-project');
+      selectedProject.title = card.querySelector('.proj-title').textContent;
+      selectedProject.pricePerMt = parseFloat(card.getAttribute('data-price')) || 48;
+      calculateImpact();
+    });
+  });
+
+  // Core Math
+  function calculateImpact() {
+    const totalGalBurn = Math.round(currentAircraft.burnGalPerHr * flightHours);
+    const totalLiters = Math.round(totalGalBurn * 3.78541);
+    const directCo2 = currentAircraft.co2PerHr * flightHours;
+    const grossEmissions = directCo2 * rfiMultiplier;
+    const perPax = grossEmissions / Math.max(1, passengers);
+    const creditsNeeded = Math.ceil(grossEmissions);
+    const totalCost = creditsNeeded * selectedProject.pricePerMt;
+
+    // Update UI elements
+    totalEmissionsVal.textContent = grossEmissions.toFixed(2);
+    emissionsPerPax.textContent = perPax.toFixed(2) + ' MT per passenger';
+    fuelBurnVal.textContent = totalGalBurn.toLocaleString() + ' gal (' + totalLiters.toLocaleString() + ' L)';
+    directCo2Val.textContent = directCo2.toFixed(2) + ' MT CO2';
+    rfiMultiplierVal.textContent = rfiMultiplier.toFixed(1) + '× (' + (rfiMultiplier > 1.0 ? 'High-Altitude Cirrus Warming' : 'Baseline Direct Exhaust') + ')';
+    creditsRequiredVal.textContent = creditsNeeded + ' Verified Gold Standard Credits';
+    totalOffsetCost.textContent = '$' + totalCost.toFixed(2) + ' USD';
+  }
+
+  // Modal Dialog Handlers
+  openCertModalBtn.addEventListener('click', function () {
+    const grossEmissions = (currentAircraft.co2PerHr * flightHours * rfiMultiplier).toFixed(2);
+    certAircraftVal.textContent = currentAircraft.name;
+    certRouteVal.textContent = routeName;
+    certDurationVal.textContent = flightHours.toFixed(1) + ' Flight Hours';
+    certPaxVal.textContent = passengers + (passengers === 1 ? ' Traveler' : ' Travelers');
+    certTonnageVal.textContent = grossEmissions + ' Metric Tons CO₂e';
+    certProjectVal.textContent = selectedProject.title;
+    certSerialHash.textContent = generateSerialHash();
+
+    certModalBackdrop.hidden = false;
+    certModalBackdrop.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  });
+
+  function closeCertModal() {
+    certModalBackdrop.hidden = true;
+    certModalBackdrop.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  closeCertModalBtn.addEventListener('click', closeCertModal);
+  certModalBackdrop.addEventListener('click', function (e) {
+    if (e.target === certModalBackdrop) closeCertModal();
+  });
+
+  certPrintBtn.addEventListener('click', function () {
+    window.print();
+  });
+
+  // Initial Calculation
+  calculateImpact();
+})();
+/* ===== END Issue #351 ===== */

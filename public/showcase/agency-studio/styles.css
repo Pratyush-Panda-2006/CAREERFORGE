@@ -54,9 +54,20 @@ body {
 }
 
 .hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding: 80px 48px 40px;
   max-width: 900px;
 }
+
+#heroMeshCanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+#heroMeshCanvas[hidden], #mesh-motion[hidden] { display: none; }
+#mesh-motion { position: relative; min-height: 44px; margin-top: 16px; padding: 10px 16px; border: 1px solid #6b7280; border-radius: 999px; background: #111827; color: #e9d5ff; font: inherit; cursor: pointer; }
+#mesh-motion:focus-visible { outline: 3px solid #c084fc; outline-offset: 3px; }
+#mesh-motion:disabled { cursor: default; }
+.hero h1 { overflow-wrap: anywhere; }
+@media (max-width: 480px) { .hero { padding: 48px 24px 32px; } }
 
 .badge {
   font-family: 'Space Grotesk', sans-serif;

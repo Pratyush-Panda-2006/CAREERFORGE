@@ -89,6 +89,7 @@ const HELP_LINES = [
   ['echo <text>', 'print text'],
   ['theme dark|light', 'switch the terminal theme'],
   ['history', 'show previous commands'],
+  ['play | game', 'start a 30-second typing challenge with local high scores'],
   ['clear', 'clear the screen']
 ];
 
@@ -212,7 +213,9 @@ function initTerminal() {
       if (!history.length) return line('(no history yet)');
       history.forEach((h, i) => line(String(i + 1).padStart(3, ' ') + '  ' + h));
     },
-    clear() { screen.textContent = ''; }
+    clear() { screen.textContent = ''; },
+    play() { document.dispatchEvent(new CustomEvent('portfolio:play')); },
+    game() { document.dispatchEvent(new CustomEvent('portfolio:play')); }
   };
 
   function run(raw) {
@@ -275,7 +278,8 @@ function initTerminal() {
   });
 
   // Clicking the screen focuses the prompt, unless the visitor is selecting text.
-  term.addEventListener('click', () => {
+  term.addEventListener('click', (event) => {
+    if (event.target.closest('[data-terminal-game]')) return;
     if (!window.getSelection().toString()) input.focus();
   });
 
