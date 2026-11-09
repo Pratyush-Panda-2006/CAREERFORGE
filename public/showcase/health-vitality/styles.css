@@ -3123,3 +3123,518 @@ body {
   color: #a855f7;
 }
 /* ===== END Issue #293 ===== */
+
+
+/* ===== BEGIN Issue #349: Interactive VO2 Max & Metabolic Age Assessment ===== */
+.vo2max-section {
+  padding: 80px 20px;
+  background: radial-gradient(circle at 50% 10%, rgba(14, 165, 233, 0.08) 0%, rgba(10, 15, 30, 0.95) 70%);
+  border-top: 1px solid rgba(56, 189, 248, 0.12);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.12);
+  color: #f8fafc;
+}
+
+.vo2max-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.vo2max-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.vo2max-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: rgba(14, 165, 233, 0.12);
+  color: #38bdf8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  margin-bottom: 12px;
+}
+
+.vo2max-header h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.vo2max-sub {
+  font-size: 1rem;
+  color: #94a3b8;
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.vo2max-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .vo2max-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vo2max-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+/* Unit Switcher */
+.vo2-unit-toggle {
+  display: flex;
+  background: #1e293b;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.unit-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.unit-btn.active {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4);
+}
+
+/* Method Tabs */
+.vo2-method-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  background: #162032;
+  padding: 5px;
+  border-radius: 12px;
+}
+
+.method-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.method-tab.active {
+  background: #1e293b;
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+/* Forms & Sliders */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.slider-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.slider-val {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.vo2-range {
+  width: 100%;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 6px;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.vo2-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  transition: transform 0.1s ease;
+}
+
+.vo2-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.range-subtext {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Sex Pill Buttons */
+.sex-pill-group {
+  display: flex;
+  gap: 12px;
+}
+
+.sex-pill {
+  flex: 1;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sex-pill.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+/* Physical Activity Chips */
+.activity-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .activity-chips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.act-chip {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.act-chip .chip-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.act-chip .chip-desc {
+  font-size: 0.68rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.act-chip.active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+}
+
+.act-chip.active .chip-title {
+  color: #10b981;
+}
+
+/* Tier Badges */
+.tier-pill {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tier-poor { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+.tier-fair { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+.tier-good { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+.tier-excellent { background: rgba(6, 182, 212, 0.2); color: #38bdf8; border: 1px solid #06b6d4; }
+.tier-superior { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border: 1px solid #8b5cf6; }
+
+/* Speedometer Gauge Visualizer */
+.gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.vo2-gauge-svg {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  overflow: visible;
+}
+
+.gauge-center-stats {
+  text-align: center;
+  margin-top: -24px;
+}
+
+.vo2-number-wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+
+.vo2-score-val {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+}
+
+.vo2-score-unit {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.vo2-percentile-tag {
+  font-size: 0.82rem;
+  color: #38bdf8;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Tier Legend Scale Strip */
+.gauge-tier-legend {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.legend-step {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 6px 2px;
+  border-radius: 6px;
+  background: #1e293b;
+  color: #64748b;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.legend-step.active {
+  border-color: currentColor;
+  font-weight: 700;
+}
+
+.step-poor.active { color: #f87171; background: rgba(239, 68, 68, 0.15); }
+.step-fair.active { color: #fbbf24; background: rgba(245, 158, 11, 0.15); }
+.step-good.active { color: #34d399; background: rgba(16, 185, 129, 0.15); }
+.step-excellent.active { color: #38bdf8; background: rgba(6, 182, 212, 0.15); }
+.step-superior.active { color: #a78bfa; background: rgba(139, 92, 246, 0.15); }
+
+/* Metabolic Age Card */
+.metabolic-age-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #162032;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.age-stat-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.age-label {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.age-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 4px;
+}
+
+.age-val.highlight-age {
+  color: #38bdf8;
+}
+
+.age-differential-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.badge-younger {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid #10b981;
+}
+
+.badge-older {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border: 1px solid #ef4444;
+}
+
+.badge-neutral {
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #475569;
+}
+
+/* Zones Grid */
+.cardio-zones-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+  .cardio-zones-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.zone-box {
+  background: #162032;
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.zone-lbl {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.zone-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 4px 0 2px 0;
+}
+
+.zone-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.hl-red {
+  color: #f87171 !important;
+}
+
+/* Optimization Protocol Box */
+.vo2-protocol-box {
+  display: flex;
+  gap: 14px;
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  align-items: flex-start;
+}
+
+.protocol-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.protocol-text strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #38bdf8;
+  margin-bottom: 4px;
+}
+
+.protocol-text p {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+}
+/* ===== END Issue #349 ===== */

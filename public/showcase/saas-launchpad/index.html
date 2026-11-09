@@ -1071,6 +1071,25 @@
   </dialog>
   <!-- ===== END Issue #303 ===== -->
 
+  <section class="tco-calculator" id="tco-calculator" aria-labelledby="tco-title">
+    <p class="tco-kicker">INFRASTRUCTURE PLANNING SANDBOX</p>
+    <h2 id="tco-title">Compare three years of cloud costs</h2>
+    <p>Illustrative USD scenarios, not current AWS prices or a vendor quote. Replace every sample assumption with your own comparable workload estimates. Flat usage/prices; taxes, discounts, financing, inflation, storage, redundancy and migration differences are excluded.</p>
+    <form>
+      <div class="tco-inputs">
+        <div><label for="tco-clusters">Compute clusters (0–1000)</label><input id="tco-clusters" name="clusters" type="number" min="0" max="1000" step="1" value="4" required></div>
+        <div><label for="tco-egress">Monthly data egress (GB)</label><input id="tco-egress" name="egress" type="number" min="0" max="10000000" step="0.1" value="1000" required></div>
+        <div><label for="tco-hourly">Engineering cost (USD/hour)</label><input id="tco-hourly" name="hourly" type="number" min="0" max="1000" step="0.01" value="75" required></div>
+      </div>
+      <details><summary>Edit scenario assumptions (invented demo defaults)</summary><div id="tco-assumptions"></div></details>
+      <p>Engineering hours are total monthly hours, not per cluster. Setup is charged once per cluster. Usage, infrastructure, egress and engineering costs repeat for 36 months; displayed annual differences spread setup costs over three years.</p>
+      <button type="submit">Calculate comparison</button>
+    </form>
+    <p role="status" aria-live="polite"></p>
+    <div id="tco-result"></div>
+    <button type="button" id="tco-download" disabled>Download illustrative estimate</button>
+  </section>
+  <script type="module" src="tco-calculator.js"></script>
   <footer class="footer">
     <div class="footer-content">
       <div class="logo">☁️ CloudPulse</div>

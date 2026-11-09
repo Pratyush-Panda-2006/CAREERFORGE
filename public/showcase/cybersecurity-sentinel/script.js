@@ -284,6 +284,9 @@ function runSecurityScan() {
   ];
 
   var state = { min: 0, max: 100, ex: 'any' };
+  window.sentinelAuditData = window.sentinelAuditData || {};
+  window.sentinelAuditData.catalogue = () => CVES.map(item => ({ id: item.id, title: item.title, asset: item.product,
+    cvss: item.score / 10, source: 'catalogue', status: 'Unverified sample', reference: item.id }));
 
   function bandOf(score) {
     if (score >= 90) return 'critical';
@@ -756,6 +759,9 @@ function renderAnalysis(pw) {
   ];
 
   let incidents = [...INITIAL_INCIDENTS];
+  window.sentinelAuditData = window.sentinelAuditData || {};
+  window.sentinelAuditData.incidents = () => incidents.map(item => ({ id: item.id, title: item.title, asset: item.host,
+    cvss: null, severity: item.severity, source: 'incident', status: item.status, reference: item.cve }));
   let currentFilter = 'all';
   let searchQuery = '';
   let isPaused = false;

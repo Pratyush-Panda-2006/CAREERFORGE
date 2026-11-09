@@ -1,3 +1,5 @@
+import { MatchingEngine } from './matching-engine.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('VortexDEX Exchange Pro engine ready');
   initMarket();
@@ -183,6 +185,16 @@ function initMarket() {
   let asks = [];
   let bids = [];
   let obRng = makeRng(4242);
+  const matching = Object.fromEntries(Object.keys(PAIRS).map(key => [key, new MatchingEngine()]));
+  let lastResult = 'Submit a paper order to try matching against the displayed liquidity.';
+  let fills = [];
+  let quotesPaused = false;
+  document.getElementById('paper-pause')?.addEventListener('click', event => {
+    quotesPaused = !quotesPaused;
+    event.currentTarget.setAttribute('aria-pressed', String(quotesPaused));
+    event.currentTarget.textContent = quotesPaused ? 'Resume simulated quotes' : 'Pause simulated quotes';
+  });
+  const orderForm = document.getElementById('paper-order-form');
   const depthSvg = document.getElementById('depth-chart');
   const depthTip = document.getElementById('depth-tooltip');
   const depthReadout = document.getElementById('depth-readout');
@@ -284,19 +296,109 @@ function initMarket() {
     candles = generateCandles(state.pair, state.interval, engines[state.pair].price, Date.now());
   }
 
-  function buildBook() {
-    const mid = engines[state.pair].price;
+  function buildBook(pair = state.pair) {
+    const mid = engines[pair].price;
     const tickSize = mid * 0.00012;
-    asks = [];
-    bids = [];
+    const nextAsks = [];
+    const nextBids = [];
     for (let i = 0; i < 8; i++) {
-      asks.push({ price: mid + tickSize * (i + 1), size: 0.2 + obRng() * 3 });
-      bids.push({ price: mid - tickSize * (i + 1), size: 0.2 + obRng() * 3 });
+      nextAsks.push({ price: Math.round((mid + tickSize * (i + 1)) * 100) / 100, size: Math.round((0.2 + obRng() * 3) * 1e6) / 1e6 });
+      nextBids.push({ price: Math.round((mid - tickSize * (i + 1)) * 100) / 100, size: Math.round((0.2 + obRng() * 3) * 1e6) / 1e6 });
     }
+    const engine = matching[pair];
+    const previous = engine.trades[0];
+    engine.refresh({ bids: nextBids, asks: nextAsks });
+    if (pair !== state.pair) return;
+    fills = engine.trades.slice(0, previous ? engine.trades.indexOf(previous) < 0 ? 30 : engine.trades.indexOf(previous) : engine.trades.length);
+    syncBook();
+  }
+
+  function syncBook() {
+    bids = matching[state.pair].levels('buy');
+    asks = matching[state.pair].levels('sell');
+  }
+
+  function renderOrders() {
+    if (!orderForm) return;
+    const engine = matching[state.pair];
+    document.getElementById('paper-pair').textContent = PAIRS[state.pair].label;
+    const result = document.getElementById('paper-result');
+    if (result.textContent !== lastResult) result.textContent = lastResult;
+    const open = document.getElementById('paper-open-orders');
+    const openOrders = engine.orders.filter(order => order.status === 'open');
+    const signature = state.pair + openOrders.map(order => `${order.id}:${order.remaining}:${order.filled}`).join(',');
+    if (open.dataset.signature !== signature) {
+    const hadFocus = open.contains(document.activeElement);
+    open.dataset.signature = signature;
+    open.textContent = '';
+    openOrders.forEach(order => {
+      const info = engine.summary(order);
+      const row = document.createElement('li');
+      const text = document.createElement('span');
+      text.textContent = `${info.id} · ${info.side} ${info.remaining.toFixed(6)} remaining @ $${formatPrice(info.price, 2)} · ${info.filled.toFixed(6)} filled`;
+      const cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.textContent = 'Cancel';
+      cancel.setAttribute('aria-label', `Cancel paper order ${info.id}`);
+      cancel.addEventListener('click', () => {
+        engine.cancel(info.id);
+        lastResult = `${info.id} cancelled. Previously executed fills are retained.`;
+        fills = [];
+        syncBook(); renderAll();
+        document.getElementById('paper-submit').focus();
+      });
+      row.append(text, cancel); open.append(row);
+    });
+    if (!open.children.length) open.textContent = 'No open orders for this pair.';
+    if (hadFocus) document.getElementById('paper-submit').focus({ preventScroll: true });
+    }
+    const trades = document.getElementById('paper-trades');
+    const latest = state.pair + (engine.trades[0]?.id || 'empty');
+    if (trades.dataset.latest === latest) return;
+    trades.dataset.latest = latest;
+    trades.textContent = '';
+    engine.trades.forEach(trade => {
+      const row = document.createElement('li');
+      row.textContent = `${new Date(trade.time).toLocaleTimeString()} · ${trade.side.toUpperCase()} ${trade.quantity.toFixed(6)} @ $${formatPrice(trade.price, 2)} · ${trade.maker} / ${trade.taker}`;
+      trades.append(row);
+    });
+    if (!trades.children.length) trades.textContent = 'No simulated trades yet.';
+  }
+
+  if (orderForm) {
+    const orderType = document.getElementById('paper-type');
+    const limit = document.getElementById('paper-price');
+    const tolerance = document.getElementById('paper-tolerance');
+    function updateOrderType() {
+      limit.disabled = orderType.value !== 'limit';
+      limit.required = !limit.disabled;
+      tolerance.disabled = orderType.value !== 'market';
+    }
+    orderType.addEventListener('change', updateOrderType);
+    updateOrderType();
+    orderForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!orderForm.reportValidity()) return;
+      try {
+        const engine = matching[state.pair];
+        const previous = engine.trades[0];
+        const result = engine.submit({ side: document.getElementById('paper-side').value, type: orderType.value,
+          quantity: Number(document.getElementById('paper-quantity').value), price: Number(limit.value), tolerance: Number(tolerance.value) });
+        fills = engine.trades.slice(0, previous ? engine.trades.indexOf(previous) < 0 ? 30 : engine.trades.indexOf(previous) : engine.trades.length);
+        lastResult = `${PAIRS[state.pair].label} ${result.id}: ${result.status}. Filled ${result.filled.toFixed(6)} of ${result.quantity.toFixed(6)}.`
+          + (result.average === null ? '' : ` Average $${formatPrice(result.average, 2)}; adverse slippage ${result.slippage.toFixed(4)}% from the best opposing quote.`)
+          + (result.stopReason ? ` ${result.stopReason}; unfilled ${result.remaining.toFixed(6)} cancelled.` : result.remaining ? ` ${result.remaining.toFixed(6)} rests at the limit price.` : '');
+        syncBook(); renderAll();
+      } catch (error) {
+        lastResult = error.message;
+        renderOrders();
+      }
+    });
   }
 
   // ---- live tick: runs once per second -------------------------------
   function tickEngines() {
+    if (quotesPaused) return;
     state.tick++;
     Object.keys(PAIRS).forEach((key) => {
       const e = engines[key];
@@ -316,7 +418,7 @@ function initMarket() {
       last.high = Math.max(last.high, price);
       last.low = Math.min(last.low, price);
     }
-    buildBook();
+    Object.keys(PAIRS).forEach(key => buildBook(key));
     renderAll();
   }
 
@@ -357,7 +459,8 @@ function initMarket() {
     withTotals.forEach((r) => {
       const tr = document.createElement('tr');
       tr.className = cls;
-      tr.style.setProperty('--depth', Math.round((r.total / maxTotal) * 100) + '%');
+      if (fills.some(fill => fill.price === r.price)) tr.classList.add('ob-executed');
+      tr.style.setProperty('--depth', Math.round((r.total / (maxTotal || 1)) * 100) + '%');
       [formatPrice(r.price, decimals), r.size.toFixed(3), r.total.toFixed(3)].forEach((txt, i) => {
         const td = document.createElement('td');
         td.textContent = txt;
@@ -372,10 +475,14 @@ function initMarket() {
     const p = PAIRS[state.pair];
     const maxTotal = Math.max(asks.reduce((a, r) => a + r.size, 0), bids.reduce((a, r) => a + r.size, 0));
     // asks are shown with the highest price on top so the best ask sits next to the mid price
-    fillBookBody(document.querySelector('#ob-asks tbody'), asks, 'ob-ask', maxTotal, p.decimals);
+    const executedRows = (rows, side) => [...rows, ...fills.filter(fill => fill.side === side && !rows.some(row => row.price === fill.price))
+      .filter((fill, index, all) => all.findIndex(item => item.price === fill.price) === index)
+      .map(fill => ({ price: fill.price, size: 0 }))]
+      .sort((a, b) => side === 'buy' ? a.price - b.price : b.price - a.price);
+    fillBookBody(document.querySelector('#ob-asks tbody'), executedRows(asks, 'buy'), 'ob-ask', maxTotal, p.decimals);
     const askRows = document.querySelector('#ob-asks tbody');
     Array.from(askRows.children).reverse().forEach((tr) => askRows.appendChild(tr));
-    fillBookBody(document.querySelector('#ob-bids tbody'), bids, 'ob-bid', maxTotal, p.decimals);
+    fillBookBody(document.querySelector('#ob-bids tbody'), executedRows(bids, 'sell'), 'ob-bid', maxTotal, p.decimals);
     const mid = document.getElementById('ob-mid');
     mid.textContent = '$' + formatPrice(engines[state.pair].price, p.decimals);
     const first = candles[0].open;
@@ -493,6 +600,7 @@ function initMarket() {
     renderBook();
     renderChart();
     renderDepth();
+    renderOrders();
   }
 
   // ---- interaction ---------------------------------------------------
@@ -522,6 +630,7 @@ function initMarket() {
     const btn = e.target.closest('[data-pair]');
     if (!btn || btn.dataset.pair === state.pair) return;
     state.pair = btn.dataset.pair;
+    lastResult = `${PAIRS[state.pair].label} selected. Orders and trade history are separate for each pair.`;
     depthSelection = null;
     state.hover = null;
     state.tick = 0;
