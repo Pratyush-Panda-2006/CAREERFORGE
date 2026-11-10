@@ -2211,3 +2211,271 @@ function showCertificate(name) {
   renderCertificate();
 })();
 
+// ==========================================================
+// Study Schedule Planner
+// ==========================================================
+
+const studyPlanner = {
+  selectedSubject: 'Computer Science',
+  selectedColor: 'indigo',
+  focusGoal: 2,
+  schedule: []
+};
+
+const subjectChips = document.querySelectorAll('.subject-chip');
+const studySlots = document.querySelectorAll('.study-slot');
+
+const weeklyStudyHours = document.getElementById('weeklyStudyHours');
+const totalStudySessions = document.getElementById('totalStudySessions');
+const dailyFocusGoal = document.getElementById('dailyFocusGoal');
+
+const focusGoalDecrease = document.getElementById('focusGoalDecrease');
+const focusGoalIncrease = document.getElementById('focusGoalIncrease');
+
+const clearScheduleBtn = document.getElementById('clearScheduleBtn');
+const exportCalendarBtn = document.getElementById('exportCalendarBtn');
+const enableRemindersBtn = document.getElementById('enableRemindersBtn');
+
+// Select a subject
+subjectChips.forEach((chip) => {
+  chip.addEventListener('click', () => {
+    subjectChips.forEach((item) => item.classList.remove('active'));
+
+    chip.classList.add('active');
+
+    studyPlanner.selectedSubject = chip.dataset.subject;
+    studyPlanner.selectedColor = chip.dataset.color;
+  });
+});
+
+// Add or remove a study session
+studySlots.forEach((slot) => {
+  slot.addEventListener('click', () => {
+    const day = slot.dataset.day;
+    const time = slot.dataset.time;
+    const existingIndex = studyPlanner.schedule.findIndex(
+      (session) => session.day === day && session.time === time
+    );
+
+    // Clicking an occupied slot removes it
+    if (existingIndex !== -1) {
+      studyPlanner.schedule.splice(existingIndex, 1);
+
+      slot.classList.remove(
+        'filled',
+        'subject-cyan',
+        'subject-purple',
+        'subject-amber'
+      );
+
+      slot.removeAttribute('data-subject');
+
+      updatePlannerSummary();
+      showPlannerMessage('Study session removed.');
+      return;
+    }
+
+    // Add a new session
+    const session = {
+      day,
+      time,
+      subject: studyPlanner.selectedSubject,
+      color: studyPlanner.selectedColor,
+      duration: 2
+    };
+
+    studyPlanner.schedule.push(session);
+
+    slot.classList.add('filled');
+
+    if (studyPlanner.selectedColor !== 'indigo') {
+      slot.classList.add(`subject-${studyPlanner.selectedColor}`);
+    }
+
+    slot.dataset.subject = studyPlanner.selectedSubject;
+
+    updatePlannerSummary();
+    showPlannerMessage(`${studyPlanner.selectedSubject} added to your schedule.`);
+  });
+});
+
+// Update weekly totals
+function updatePlannerSummary() {
+  const totalHours = studyPlanner.schedule.reduce(
+    (total, session) => total + session.duration,
+    0
+  );
+
+  weeklyStudyHours.textContent = `${totalHours}h`;
+  totalStudySessions.textContent = studyPlanner.schedule.length;
+}
+
+// Daily focus goal controls
+focusGoalDecrease.addEventListener('click', () => {
+  if (studyPlanner.focusGoal > 1) {
+    studyPlanner.focusGoal -= 1;
+    dailyFocusGoal.textContent = `${studyPlanner.focusGoal}h`;
+  }
+});
+
+focusGoalIncrease.addEventListener('click', () => {
+  if (studyPlanner.focusGoal < 12) {
+    studyPlanner.focusGoal += 1;
+    dailyFocusGoal.textContent = `${studyPlanner.focusGoal}h`;
+  }
+});
+
+// Clear schedule
+clearScheduleBtn.addEventListener('click', () => {
+  if (studyPlanner.schedule.length === 0) {
+    showPlannerMessage('Your study schedule is already empty.');
+    return;
+  }
+
+  studyPlanner.schedule = [];
+
+  studySlots.forEach((slot) => {
+    slot.classList.remove(
+      'filled',
+      'subject-cyan',
+      'subject-purple',
+      'subject-amber'
+    );
+
+    slot.removeAttribute('data-subject');
+  });
+
+  updatePlannerSummary();
+  showPlannerMessage('Study schedule cleared.');
+});
+
+// Browser notification permission
+enableRemindersBtn.addEventListener('click', async () => {
+  if (!('Notification' in window)) {
+    showPlannerMessage('Browser notifications are not supported.');
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    showPlannerMessage('Study reminders are already enabled.');
+    return;
+  }
+
+  if (Notification.permission === 'denied') {
+    showPlannerMessage('Notifications are blocked in your browser settings.');
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+
+  if (permission === 'granted') {
+    new Notification('Study reminders enabled!', {
+      body: 'You will be reminded about your study schedule.'
+    });
+
+    showPlannerMessage('Study reminders enabled!');
+  } else {
+    showPlannerMessage('Notification permission was not granted.');
+  }
+});
+
+// Helper: show planner feedback
+function showPlannerMessage(message) {
+  // Reuse the project's toast system if available
+  if (typeof showToast === 'function') {
+    showToast(message);
+    return;
+  }
+
+  // Fallback if the existing toast function uses a different name
+  console.log(message);
+}
+
+// Convert day name into the next matching date
+function getNextDate(dayName) {
+  const days = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday'
+  ];
+
+  const today = new Date();
+  const targetDay = days.indexOf(dayName);
+
+  const date = new Date(today);
+  const difference = (targetDay - today.getDay() + 7) % 7;
+
+  date.setDate(today.getDate() + difference);
+
+  return date;
+}
+
+// Format date for ICS files
+function formatICSDate(date) {
+  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+// Export schedule as ICS calendar
+exportCalendarBtn.addEventListener('click', () => {
+  if (studyPlanner.schedule.length === 0) {
+    showPlannerMessage('Add at least one study session before exporting.');
+    return;
+  }
+
+  const events = studyPlanner.schedule
+    .map((session, index) => {
+      const date = getNextDate(session.day);
+      const [hours, minutes] = session.time.split(':').map(Number);
+
+      const start = new Date(date);
+      start.setHours(hours, minutes, 0, 0);
+
+      const end = new Date(start);
+      end.setHours(start.getHours() + session.duration);
+
+      const timestamp = formatICSDate(new Date());
+
+      return [
+        'BEGIN:VEVENT',
+        `UID:study-session-${Date.now()}-${index}@synapse-academy`,
+        `DTSTAMP:${timestamp}`,
+        `DTSTART:${formatICSDate(start)}`,
+        `DTEND:${formatICSDate(end)}`,
+        `SUMMARY:Study - ${session.subject}`,
+        'DESCRIPTION:Scheduled study session created in Synapse Academy.',
+        'END:VEVENT'
+      ].join('\r\n');
+    })
+    .join('\r\n');
+
+  const calendarContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Synapse Academy//Study Planner//EN',
+    'CALSCALE:GREGORIAN',
+    events,
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([calendarContent], {
+    type: 'text/calendar;charset=utf-8'
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'study-schedule.ics';
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+
+  showPlannerMessage('Calendar exported successfully!');
+});
