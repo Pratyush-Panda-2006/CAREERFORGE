@@ -2980,8 +2980,7 @@ body {
 
 /* ===============================================================
    Course Prerequisite Checklist (Issue #284)
-=============================================================== */
-
+*/
 .prerequisite-section {
   max-width: 1180px;
   margin: 0 auto 100px;
@@ -3201,5 +3200,323 @@ body {
 
   .prerequisite-list {
     grid-template-columns: 1fr;
+/* ==========================================================
+   Study Schedule Planner
+   ========================================================== */
+
+.study-planner-section {
+  margin: 48px auto;
+  padding: 32px;
+  max-width: 1200px;
+  border: 1px solid rgba(129, 140, 248, 0.2);
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.planner-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.planner-eyebrow,
+.summary-label,
+.planner-section-label span {
+  display: block;
+  color: #818cf8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.planner-header h2 {
+  margin: 8px 0;
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+}
+
+.planner-header p {
+  max-width: 650px;
+  margin: 0;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.planner-export-btn,
+.planner-reminder-btn,
+.planner-clear-btn {
+  padding: 11px 16px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.planner-export-btn {
+  flex-shrink: 0;
+  border: 1px solid #818cf8;
+  background: #6366f1;
+  color: #ffffff;
+}
+
+.planner-subjects {
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.planner-section-label {
+  margin-bottom: 14px;
+}
+
+.planner-section-label small {
+  display: block;
+  margin-top: 5px;
+  color: #94a3b8;
+}
+
+.subject-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.subject-chip {
+  padding: 9px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  background: transparent;
+  color: #cbd5e1;
+  font: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.subject-chip:hover,
+.subject-chip.active {
+  border-color: #818cf8;
+  background: rgba(99, 102, 241, 0.15);
+  color: #ffffff;
+}
+
+.planner-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.planner-summary-card {
+  min-height: 130px;
+  padding: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.planner-summary-card > strong {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 2rem;
+  color: #f8fafc;
+}
+
+.planner-summary-card small {
+  color: #94a3b8;
+}
+
+.focus-goal-control {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.focus-goal-control strong {
+  min-width: 42px;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.focus-goal-control button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #c7d2fe;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.planner-calendar-wrapper {
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 14px;
+}
+
+.planner-calendar-header,
+.planner-calendar {
+  min-width: 850px;
+  display: grid;
+  grid-template-columns: 90px repeat(7, 1fr);
+}
+
+.planner-calendar-header {
+  background: rgba(99, 102, 241, 0.08);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.planner-calendar-header span {
+  padding: 14px 10px;
+  color: #a5b4fc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.planner-calendar-header span:first-child {
+  color: #64748b;
+}
+
+.planner-calendar {
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.time-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70px;
+  border-right: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.study-slot {
+  position: relative;
+  min-height: 70px;
+  border: 0;
+  border-right: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  background: transparent;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.study-slot:hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.study-slot.filled {
+  padding: 8px;
+  background: rgba(99, 102, 241, 0.16);
+}
+
+.study-slot.filled::after {
+  content: attr(data-subject);
+  display: block;
+  padding: 7px;
+  border-radius: 7px;
+  background: rgba(99, 102, 241, 0.3);
+  color: #e0e7ff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.study-slot.subject-cyan {
+  background: rgba(34, 211, 238, 0.1);
+}
+
+.study-slot.subject-cyan::after {
+  background: rgba(34, 211, 238, 0.2);
+  color: #a5f3fc;
+}
+
+.study-slot.subject-purple {
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.study-slot.subject-purple::after {
+  background: rgba(168, 85, 247, 0.2);
+  color: #e9d5ff;
+}
+
+.study-slot.subject-amber {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.study-slot.subject-amber::after {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+}
+
+.planner-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.planner-reminder-btn {
+  border: 1px solid rgba(129, 140, 248, 0.5);
+  background: rgba(99, 102, 241, 0.15);
+  color: #c7d2fe;
+}
+
+.planner-clear-btn {
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.08);
+  color: #fca5a5;
+}
+
+.planner-export-btn:hover,
+.planner-reminder-btn:hover,
+.planner-clear-btn:hover {
+  transform: translateY(-1px);
+}
+
+.planner-export-btn:focus-visible,
+.planner-reminder-btn:focus-visible,
+.planner-clear-btn:focus-visible,
+.subject-chip:focus-visible,
+.study-slot:focus-visible,
+.focus-goal-control button:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 3px;
+}
+
+@media (max-width: 800px) {
+  .study-planner-section {
+    margin: 32px 16px;
+    padding: 22px;
+  }
+
+  .planner-header {
+    flex-direction: column;
+  }
+
+  .planner-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-actions {
+    flex-direction: column;
+  }
+
+  .planner-export-btn,
+  .planner-reminder-btn,
+  .planner-clear-btn {
+    width: 100%;
   }
 }

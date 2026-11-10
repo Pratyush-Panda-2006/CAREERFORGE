@@ -137,6 +137,89 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // HTTP Status Codes Reference
+  const statusSearch = document.getElementById('status-search');
+  const statusCards = document.querySelectorAll('.status-card');
+  const statusResult = document.getElementById('status-search-result');
+  const statusEmpty = document.getElementById('status-empty');
+  const statusDrawer = document.getElementById('status-reference-drawer');
+  const statusDrawerToggle = document.getElementById('status-drawer-toggle');
+
+  if (statusSearch && statusCards.length) {
+    statusSearch.addEventListener('input', () => {
+      const query = statusSearch.value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      statusCards.forEach((card) => {
+        const searchableText = card.dataset.status.toLowerCase();
+        const matches = searchableText.includes(query);
+
+        card.hidden = !matches;
+
+        if (matches) {
+          visibleCount += 1;
+        }
+      });
+
+      if (statusResult) {
+        if (query) {
+          statusResult.textContent =
+            `${visibleCount} status code${visibleCount === 1 ? '' : 's'} found`;
+        } else {
+          statusResult.textContent = '';
+        }
+      }
+
+      if (statusEmpty) {
+        statusEmpty.hidden = visibleCount !== 0;
+      }
+    });
+  }
+
+  if (statusDrawerToggle && statusDrawer) {
+    statusDrawerToggle.addEventListener('click', () => {
+      const isExpanded =
+        statusDrawerToggle.getAttribute('aria-expanded') === 'true';
+
+      statusDrawerToggle.setAttribute(
+        'aria-expanded',
+        String(!isExpanded)
+      );
+
+      statusDrawer.hidden = isExpanded;
+
+      const label = statusDrawerToggle.querySelector('span');
+
+      if (label) {
+        label.textContent = isExpanded
+          ? 'Show reference'
+          : 'Hide reference';
+      }
+
+      statusDrawerToggle.lastElementChild.textContent =
+        isExpanded ? '⌄' : '⌃';
+    });
+  }
+
+  document.querySelectorAll('.copy-status-btn').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const payload = button.dataset.copy;
+      const originalText = button.textContent;
+
+      try {
+        await navigator.clipboard.writeText(payload);
+        button.textContent = 'Copied!';
+      } catch {
+        window.copySnippet(payload);
+        button.textContent = 'Copied!';
+      }
+
+      window.setTimeout(() => {
+        button.textContent = originalText;
+      }, 1600);
+    });
+  });
+
   // Initialize
   calculateReadTime();
   updateReadingProgress();
