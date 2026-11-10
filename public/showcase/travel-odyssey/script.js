@@ -1898,7 +1898,7 @@ if (document.readyState === 'loading') {
 
   // Table & Chart Elements
   const scheduleTableBody = document.getElementById('altitudeScheduleBody');
-  const elevationSvg = document.getElementById('elevationSvg');
+  const _elevationSvg = document.getElementById('elevationSvg');
   const elevationAreaPath = document.getElementById('elevationAreaPath');
   const elevationLinePath = document.getElementById('elevationLinePath');
   const chartWaypointsGroup = document.getElementById('chartWaypointsGroup');
@@ -2253,3 +2253,1199 @@ if (document.readyState === 'loading') {
   evaluateAltitudeSafety();
 })();
 /* ===== END Issue #361 ===== */
+
+/* ===== BEGIN Issue #424: Celestial Navigation & Night Sky Stargazing Visibility Predictor ===== */
+(function initCelestialNavigationPredictor() {
+  'use strict';
+
+  // Preset Expedition Campsites Catalog
+  const CAMPSITE_PRESETS = Object.freeze({
+    atacama: {
+      name: 'Atacama Desert High Plateau Basecamp, Chile',
+      lat: -23.8634,
+      lon: -69.1328,
+      elevation: 2400,
+      bortle: 1
+    },
+    vatnajokull: {
+      name: 'Vatnajökull Ice Cap Glacier Camp, Iceland',
+      lat: 64.2559,
+      lon: -16.8524,
+      elevation: 850,
+      bortle: 2
+    },
+    wadirum: {
+      name: 'Wadi Rum Nomad Wilderness Outpost, Jordan',
+      lat: 29.5735,
+      lon: 35.4206,
+      elevation: 1020,
+      bortle: 2
+    },
+    maunakea: {
+      name: 'Mauna Kea Summit Ridge, Hawaii',
+      lat: 19.8207,
+      lon: -155.4681,
+      elevation: 4205,
+      bortle: 1
+    },
+    patagonia: {
+      name: 'Fitz Roy Glacial Basin Camp, Patagonia, Argentina',
+      lat: -49.2712,
+      lon: -72.9358,
+      elevation: 1150,
+      bortle: 2
+    },
+    banff: {
+      name: 'Lake Minnewanka Backcountry, Banff, Canada',
+      lat: 51.2486,
+      lon: -115.4988,
+      elevation: 1480,
+      bortle: 3
+    }
+  });
+
+  // Bortle Scale Metadata (Classes 1 - 9)
+  const BORTLE_CLASSES = Object.freeze({
+    1: {
+      title: 'Class 1: Excellent Dark-Sky Site',
+      nelm: '7.6 — 8.0 mag',
+      sqm: '21.75 — 22.00 mag/arcsec²',
+      desc: 'Zodiacal light prominent; Milky Way casts discernible shadows; M33 easily visible naked-eye.',
+      badgeClass: 'pristine'
+    },
+    2: {
+      title: 'Class 2: Truly Dark Site',
+      nelm: '7.1 — 7.5 mag',
+      sqm: '21.50 — 21.75 mag/arcsec²',
+      desc: 'Airglow weakly visible near horizon; Milky Way highly structured; M33 visible directly with naked eye.',
+      badgeClass: 'pristine'
+    },
+    3: {
+      title: 'Class 3: Rural Sky',
+      nelm: '6.6 — 7.0 mag',
+      sqm: '21.30 — 21.50 mag/arcsec²',
+      desc: 'Some light pollution evidence on horizon; Milky Way rich in complex dark rifts; M33 seen with averted vision.',
+      badgeClass: 'optimal'
+    },
+    4: {
+      title: 'Class 4: Rural / Suburban Transition',
+      nelm: '6.1 — 6.5 mag',
+      sqm: '20.40 — 21.30 mag/arcsec²',
+      desc: 'Light pollution domes visible in several directions; Milky Way impressive above horizon but loses contrast.',
+      badgeClass: 'moderate'
+    },
+    5: {
+      title: 'Class 5: Suburban Sky',
+      nelm: '5.6 — 6.0 mag',
+      sqm: '19.10 — 20.40 mag/arcsec²',
+      desc: 'Milky Way very weak or washed out near horizon; zodiacal light rarely visible.',
+      badgeClass: 'moderate'
+    },
+    6: {
+      title: 'Class 6: Bright Suburban Sky',
+      nelm: '5.1 — 5.5 mag',
+      sqm: '18.00 — 19.10 mag/arcsec²',
+      desc: 'Milky Way only detectable towards zenith; clouds noticeably brighter than background sky.',
+      badgeClass: 'poor'
+    },
+    7: {
+      title: 'Class 7: Suburban / Urban Transition',
+      nelm: '4.6 — 5.0 mag',
+      sqm: '18.00 mag/arcsec²',
+      desc: 'Milky Way totally invisible; whole sky has pale grayish hue.',
+      badgeClass: 'poor'
+    },
+    8: {
+      title: 'Class 8: City Sky',
+      nelm: '4.1 — 4.5 mag',
+      sqm: '< 18.00 mag/arcsec²',
+      desc: 'Sky glows whitish-gray; familiar constellations faint; M31 and M44 invisible.',
+      badgeClass: 'poor'
+    },
+    9: {
+      title: 'Class 9: Inner-City Sky',
+      nelm: '< 4.0 mag',
+      sqm: '< 17.50 mag/arcsec²',
+      desc: 'Only Moon, bright planets, and brightest few stars visible; severe light washout.',
+      badgeClass: 'poor'
+    }
+  });
+
+  // Mutable Predictor State
+  const celestialState = {
+    preset: 'atacama',
+    campsiteName: 'Atacama Desert High Plateau Basecamp, Chile',
+    lat: -23.8634,
+    lon: -69.1328,
+    elevation: 2400,
+    baseBortle: 1,
+    obsDate: new Date(),
+    obsHour: 23.0 // 18.0 to 30.0 (where 24 = midnight, 30 = 06:00 next day)
+  };
+
+  // Celestial Computation Helpers
+  function toJulianDay(year, month, day, hourUtc) {
+    let y = year;
+    let m = month;
+    if (m <= 2) {
+      y -= 1;
+      m += 12;
+    }
+    const a = Math.floor(y / 100);
+    const b = 2 - a + Math.floor(a / 4);
+    return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524.5 + (hourUtc / 24.0);
+  }
+
+  // Calculate Lunar Phase and Illumination Percentage
+  function calculateMoonPhase(date, localHour, lon) {
+    const utcHour = (localHour - (lon / 15.0) + 24.0) % 24.0;
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    const jd = toJulianDay(year, month, day, utcHour);
+    const knownNewMoonJd = 2451549.26; // 2000-01-06 18:14 UTC
+    const synodicDays = 29.53058770576;
+    const elapsedDays = jd - knownNewMoonJd;
+    const cycles = elapsedDays / synodicDays;
+    const phaseFraction = cycles - Math.floor(cycles); // 0 to 1
+
+    const moonAge = phaseFraction * synodicDays;
+    const phaseAngleRad = phaseFraction * 2 * Math.PI;
+    const illumination = Math.round(((1 - Math.cos(phaseAngleRad)) / 2) * 1000) / 10; // 0.0% to 100.0%
+
+    let phaseName = 'New Moon';
+    if (phaseFraction < 0.03 || phaseFraction >= 0.97) {
+      phaseName = 'New Moon';
+    } else if (phaseFraction < 0.22) {
+      phaseName = 'Waxing Crescent';
+    } else if (phaseFraction < 0.28) {
+      phaseName = 'First Quarter';
+    } else if (phaseFraction < 0.47) {
+      phaseName = 'Waxing Gibbous';
+    } else if (phaseFraction < 0.53) {
+      phaseName = 'Full Moon';
+    } else if (phaseFraction < 0.72) {
+      phaseName = 'Waning Gibbous';
+    } else if (phaseFraction < 0.78) {
+      phaseName = 'Last Quarter';
+    } else {
+      phaseName = 'Waning Crescent';
+    }
+
+    // Approximate Moon altitude and azimuth based on hour and phase
+    // Full moon opposes sun (peaks near midnight). New moon coincides with sun (peaks near noon).
+    const peakHour = (12.0 + phaseFraction * 24.0) % 24.0;
+    const diffHours = Math.abs(((localHour % 24.0) - peakHour + 36.0) % 24.0 - 12.0);
+    const moonAltitude = Math.round((65.0 - (diffHours * 10.5)) * 10) / 10; // degrees
+    const moonAzimuth = Math.round(((180.0 + (localHour - peakHour) * 15.0 + 360.0) % 360.0));
+
+    // Approximate Rise and Set times
+    const riseHourNum = (peakHour - 6.0 + 24.0) % 24.0;
+    const setHourNum = (peakHour + 6.0 + 24.0) % 24.0;
+    const formatTime = (h) => {
+      const hr = Math.floor(h);
+      const min = Math.floor((h - hr) * 60);
+      return `${String(hr).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+    };
+
+    return {
+      phaseFraction,
+      phaseAngleRad,
+      illumination,
+      phaseName,
+      moonAge: Math.round(moonAge * 10) / 10,
+      altitude: moonAltitude,
+      azimuth: moonAzimuth,
+      riseTime: formatTime(riseHourNum),
+      setTime: formatTime(setHourNum),
+      isAboveHorizon: moonAltitude > 0
+    };
+  }
+
+  // Calculate Sun Altitudes & Twilight Hours
+  function calculateTwilight(date, lat) {
+    const startOfYear = new Date(date.getFullYear(), 0, 0);
+    const diff = date.getTime() - startOfYear.getTime();
+    const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    // Solar Declination (degrees)
+    const declinationDeg = -23.44 * Math.cos(((360 / 365) * (dayOfYear + 10)) * (Math.PI / 180));
+    const latRad = lat * (Math.PI / 180);
+    const decRad = declinationDeg * (Math.PI / 180);
+
+    function getHourAngle(sunAltDeg) {
+      const altRad = sunAltDeg * (Math.PI / 180);
+      const cosH = (Math.sin(altRad) - Math.sin(latRad) * Math.sin(decRad)) / (Math.cos(latRad) * Math.cos(decRad));
+      if (cosH > 1) return null; // Sun never reaches this altitude (constant night)
+      if (cosH < -1) return null; // Sun never dips below this altitude (midnight sun)
+      return Math.acos(cosH) * (180 / Math.PI) / 15.0; // hours from solar noon
+    }
+
+    const hSunset = getHourAngle(-0.833) || 6.0;
+    const hCivil = getHourAngle(-6.0) || 6.5;
+    const hNautical = getHourAngle(-12.0) || 7.2;
+    const hAstro = getHourAngle(-18.0) || 8.0;
+
+    const sunsetHour = 12.0 + hSunset;
+    const civilDuskHour = 12.0 + hCivil;
+    const nauticalDuskHour = 12.0 + hNautical;
+    const astroDuskHour = 12.0 + hAstro;
+
+    const astroDawnHour = 36.0 - hAstro;
+    const nauticalDawnHour = 36.0 - hNautical;
+    const civilDawnHour = 36.0 - hCivil;
+    const sunriseHour = 36.0 - hSunset;
+
+    const darkDurationHours = Math.max(0, astroDawnHour - astroDuskHour);
+
+    return {
+      sunsetHour,
+      civilDuskHour,
+      nauticalDuskHour,
+      astroDuskHour,
+      astroDawnHour,
+      nauticalDawnHour,
+      civilDawnHour,
+      sunriseHour,
+      darkDurationHours
+    };
+  }
+
+  // Calculate Milky Way Galactic Core Visibility
+  function calculateMilkyWayCore(date, lat) {
+    // Galactic core center: Dec -29.0°, RA 17.76h
+    const coreDec = -29.0;
+    const maxAltitude = Math.round((90.0 - Math.abs(lat - coreDec)) * 10) / 10;
+
+    const month = date.getMonth() + 1; // 1 to 12
+    let feasibility = 'Prime Galactic Center Season';
+    let isFeasible = true;
+
+    if (month >= 4 && month <= 9) {
+      feasibility = 'Peak Galactic Core Astrophotography Season';
+    } else if (month === 3 || month === 10) {
+      feasibility = 'Shoulder Season (Core visible in early morning/dusk)';
+    } else {
+      feasibility = 'Off-Season (Core below horizon or lost in daytime glare)';
+      isFeasible = false;
+    }
+
+    let viewingHours = '22:15 — 03:45';
+    let durationHours = '5h 30m';
+    if (lat > 55) {
+      // High northern latitudes have lower core altitude
+      if (maxAltitude < 6) {
+        viewingHours = 'Submerged (Below Local Horizon)';
+        durationHours = '0h';
+        isFeasible = false;
+      } else {
+        viewingHours = '00:30 — 02:45';
+        durationHours = '2h 15m';
+      }
+    } else if (lat < -15) {
+      // Southern hemisphere has breathtaking zenith core passes
+      viewingHours = '21:30 — 04:15';
+      durationHours = '6h 45m';
+    }
+
+    return {
+      maxAltitude: Math.max(0, maxAltitude),
+      feasibility,
+      isFeasible,
+      viewingHours: `${viewingHours} (${durationHours})`,
+      culminationDirection: lat > -29.0 ? 'South-Southwest' : 'North-Northwest'
+    };
+  }
+
+  // Calculate Predictable ISS Passes for Campsite Coordinates
+  function calculateIssPass(lat, lon, date) {
+    const seed = Math.abs(Math.sin(lat * 12.9898 + lon * 78.233 + date.getDate()) * 43758.5453);
+    const passMinutes = 10 + Math.floor((seed % 1) * 35);
+    const passDurationSecs = 320 + Math.floor(((seed * 2) % 1) * 100); // 5 to 7 mins
+    const passStartHour = 21;
+    const startStr = `${passStartHour}:${String(passMinutes).padStart(2, '0')}`;
+    const endMinutes = passMinutes + Math.floor(passDurationSecs / 60);
+    const endStr = `${passStartHour}:${String(endMinutes).padStart(2, '0')}`;
+
+    const maxAlt = 50 + Math.floor(((seed * 5) % 1) * 36); // 50° to 86°
+    const mag = (-2.8 - ((seed * 3) % 1) * 1.0).toFixed(1); // -2.8 to -3.8
+
+    return {
+      timeRange: `${startStr} — ${endStr} (${Math.round(passDurationSecs / 60)}m duration)`,
+      peakAlt: `${maxAlt}° Alt (Optimal Zenith)`,
+      magnitude: `${mag} mag (Brighter than Venus)`,
+      trajectory: lat >= 0 ? 'Appears WNW → Culminates SW → Disappears ESE' : 'Appears WSW → Culminates NW → Disappears ENE'
+    };
+  }
+
+  // Calculate Stargazing Condition Index (0 - 100)
+  function calculateStargazingScore(bortleEffective, moonIllumination, moonAlt, elevation, darkDuration) {
+    // 1. Dark sky factor (40 pts max)
+    const darknessFactor = Math.max(0, 100 - (bortleEffective - 1) * 12);
+    const darknessPts = (darknessFactor / 100) * 40;
+
+    // 2. Moon factor (30 pts max)
+    let moonPenalty = (moonIllumination / 100);
+    if (moonAlt > 0) {
+      moonPenalty *= Math.sin((moonAlt * Math.PI) / 180);
+    } else {
+      moonPenalty = 0.05; // Moon below horizon
+    }
+    const moonFactor = Math.max(0, Math.round((1 - moonPenalty) * 100));
+    const moonPts = (moonFactor / 100) * 30;
+
+    // 3. Elevation factor (15 pts max)
+    const elevFactor = Math.min(100, Math.round(70 + (elevation / 4000) * 30));
+    const elevPts = (elevFactor / 100) * 15;
+
+    // 4. Night length factor (15 pts max)
+    const durationFactor = Math.min(100, Math.round((darkDuration / 8.0) * 100));
+    const durationPts = (durationFactor / 100) * 15;
+
+    const totalScore = Math.min(100, Math.max(10, Math.round(darknessPts + moonPts + elevPts + durationPts)));
+
+    let grade = 'EXCEPTIONAL';
+    let gradeClass = 'exceptional';
+    let summaryText = 'Outstanding dark sky with zero light pollution, thin high-altitude air, and negligible lunar interference.';
+
+    if (totalScore >= 88) {
+      grade = 'EXCEPTIONAL CONDITIONS';
+      gradeClass = 'exceptional';
+      summaryText = 'Pristine dark sky site; exceptional transparency, pin-point stars, and deep galactic detail.';
+    } else if (totalScore >= 72) {
+      grade = 'OPTIMAL STABILITY';
+      gradeClass = 'optimal';
+      summaryText = 'Superb stargazing conditions; Milky Way structures prominent; excellent deep sky photography window.';
+    } else if (totalScore >= 50) {
+      grade = 'MODERATE OBSERVING';
+      gradeClass = 'moderate';
+      summaryText = 'Subtle atmospheric haze or partial lunar illumination; planetary and bright DSO observing recommended.';
+    } else {
+      grade = 'POOR TRANSPARENCY';
+      gradeClass = 'poor';
+      summaryText = 'High lunar washout or elevated light dispersion; focus on lunar craters and bright planetary targets.';
+    }
+
+    return {
+      score: totalScore,
+      grade,
+      gradeClass,
+      summaryText,
+      factors: {
+        darkness: Math.round(darknessFactor),
+        moon: moonFactor,
+        elevation: elevFactor,
+        duration: durationFactor
+      }
+    };
+  }
+
+  // Recommended Targets based on Hemisphere & Season
+  function getRecommendedTargets(lat, date) {
+    const month = date.getMonth() + 1;
+    const isSouthern = lat < 0;
+
+    if (isSouthern) {
+      return [
+        {
+          icon: '🌌',
+          title: 'Carina Nebula (NGC 3372) & Eta Carinae',
+          category: 'Deep Sky Giant Nebula',
+          details: 'Mag 1.0 · Visible to naked eye · 4x larger than Orion Nebula',
+          optics: 'Naked Eye / Binoculars'
+        },
+        {
+          icon: '☁️',
+          title: 'Large & Small Magellanic Clouds (LMC/SMC)',
+          category: 'Satellite Dwarf Galaxies',
+          details: 'Circumpolar wonder · Glowing satellite galaxies of the Milky Way',
+          optics: 'Naked Eye / Wide Field'
+        },
+        {
+          icon: '⭐',
+          title: 'Southern Cross (Crux) & The Coalsack Dark Nebula',
+          category: 'Celestial Navigation Asterism',
+          details: 'True South pole celestial finder · Vast silhouette dust cloud',
+          optics: 'Field Guide Marker'
+        },
+        {
+          icon: '🪐',
+          title: month >= 6 ? 'Saturn & Golden Ring System' : 'Jupiter & Galilean Moons',
+          category: 'Planetary Wonder',
+          details: month >= 6 ? 'Rings tilted at optimal angle · High celestial altitude' : 'Cloud bands and 4 orbiting moons visible',
+          optics: '10x50 Binoculars / Scope'
+        }
+      ];
+    } else {
+      return [
+        {
+          icon: '🌌',
+          title: 'Andromeda Galaxy (M31)',
+          category: 'Major Spiral Galaxy',
+          details: '2.5 million light years distant · Most distant object visible to naked eye',
+          optics: 'Naked Eye / Binoculars'
+        },
+        {
+          icon: '✨',
+          title: month >= 9 || month <= 3 ? 'Orion Nebula (M42) & Running Man' : 'Pleiades Star Cluster (M45)',
+          category: 'Stellar Nursery / Open Cluster',
+          details: month >= 9 || month <= 3 ? 'Glowing ionized gas clouds and Trapezium cluster' : 'Seven Sisters wrapped in ethereal blue reflection nebula',
+          optics: 'Binoculars / 80mm Scope'
+        },
+        {
+          icon: '🧭',
+          title: 'Ursa Major & Polaris (North Star Finder)',
+          category: 'Navigational Asterism',
+          details: 'Pointer stars Merak and Dubhe align directly to True North',
+          optics: 'Navigation Baseline'
+        },
+        {
+          icon: '🪐',
+          title: month >= 5 ? 'Jupiter & The Great Red Spot' : 'Saturn & Ring Silhouette',
+          category: 'Planetary Target',
+          details: 'Brightest night beacon · Io, Europa, Ganymede, Callisto transits',
+          optics: 'Small Telescope'
+        }
+      ];
+    }
+  }
+
+  // Render Dynamic SVG Moon Phase Glyph
+  function renderMoonSvg(illuminationPct, phaseName, phaseFraction) {
+    const isWaxing = phaseFraction < 0.5;
+    const r = 24;
+    const cx = 30;
+    const cy = 30;
+
+    // SVG path construction for lunar shadow
+    // For full/new edge cases
+    let pathD = '';
+    if (phaseName === 'New Moon') {
+      pathD = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>`;
+    } else if (phaseName === 'Full Moon') {
+      pathD = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#fef08a" filter="drop-shadow(0 0 8px rgba(254, 240, 138, 0.7))"/>`;
+    } else {
+      // Dynamic terminator curve
+      const k = (illuminationPct / 100);
+      const rx = Math.abs(r * (2 * k - 1));
+      const sweep = (k > 0.5) ? 1 : 0;
+      const arcSweep = isWaxing ? 1 : 0;
+
+      pathD = `
+        <defs>
+          <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fffbeb"/>
+            <stop offset="85%" stop-color="#fef08a"/>
+            <stop offset="100%" stop-color="#fde047"/>
+          </radialGradient>
+        </defs>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+        <path d="M ${cx} ${cy - r} A ${r} ${r} 0 0 ${arcSweep} ${cx} ${cy + r} A ${rx} ${r} 0 0 ${sweep} ${cx} ${cy - r}" fill="url(#moonGlow)"/>
+      `;
+    }
+
+    return `
+      <svg width="60" height="60" viewBox="0 0 60 60" aria-label="Moon phase: ${phaseName}">
+        ${pathD}
+        <!-- Subtle crater impressions -->
+        <circle cx="24" cy="22" r="2.5" fill="rgba(0,0,0,0.1)"/>
+        <circle cx="34" cy="36" r="3.2" fill="rgba(0,0,0,0.08)"/>
+        <circle cx="38" cy="24" r="2" fill="rgba(0,0,0,0.09)"/>
+      </svg>
+    `;
+  }
+
+  // Interactive Canvas Sky Dome Renderer
+  let canvasAnimId = null;
+  const canvasStars = [];
+  const meteors = [];
+
+  function initStarfield(width, height) {
+    canvasStars.length = 0;
+    const numStars = 240;
+    for (let i = 0; i < numStars; i++) {
+      canvasStars.push({
+        x: Math.random() * width,
+        y: Math.random() * (height * 0.88),
+        radius: Math.random() * 1.5 + 0.5,
+        baseAlpha: Math.random() * 0.7 + 0.3,
+        twinkleSpeed: Math.random() * 0.04 + 0.01,
+        color: i % 7 === 0 ? '#93c5fd' : (i % 11 === 0 ? '#fde047' : '#ffffff')
+      });
+    }
+  }
+
+  function drawSkyDome(canvas, moon, mw, iss, bortleEffective, timeHour, lat) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // Clear background with dark sky gradient matching Bortle level & moon washout
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+    if (bortleEffective <= 2) {
+      skyGrad.addColorStop(0, '#02040a');
+      skyGrad.addColorStop(0.7, '#071026');
+      skyGrad.addColorStop(1, '#0e1d3e');
+    } else if (bortleEffective <= 4) {
+      skyGrad.addColorStop(0, '#050a17');
+      skyGrad.addColorStop(0.7, '#0c1836');
+      skyGrad.addColorStop(1, '#17274d');
+    } else {
+      skyGrad.addColorStop(0, '#0d1629');
+      skyGrad.addColorStop(0.7, '#1b2a4a');
+      skyGrad.addColorStop(1, '#293a5e');
+    }
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw Milky Way Arch & Glowing Galactic Bulge
+    if (mw.isFeasible && bortleEffective <= 5) {
+      ctx.save();
+      const mwGrad = ctx.createRadialGradient(w * 0.48, h * 0.42, 10, w * 0.48, h * 0.45, w * 0.35);
+      mwGrad.addColorStop(0, 'rgba(165, 180, 252, 0.28)');
+      mwGrad.addColorStop(0.4, 'rgba(129, 140, 248, 0.16)');
+      mwGrad.addColorStop(0.7, 'rgba(99, 102, 241, 0.08)');
+      mwGrad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+      ctx.fillStyle = mwGrad;
+      ctx.beginPath();
+      ctx.ellipse(w * 0.48, h * 0.45, w * 0.38, h * 0.48, -0.35, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Galactic core dense dust lane
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.18)';
+      ctx.beginPath();
+      ctx.arc(w * 0.50, h * 0.40, 28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Draw Constellation Asterism
+    ctx.save();
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 4]);
+
+    if (lat >= 0) {
+      // Northern: Ursa Major (Big Dipper)
+      const pts = [
+        { x: w * 0.72, y: h * 0.22 },
+        { x: w * 0.76, y: h * 0.24 },
+        { x: w * 0.80, y: h * 0.30 },
+        { x: w * 0.85, y: h * 0.31 },
+        { x: w * 0.87, y: h * 0.42 },
+        { x: w * 0.81, y: h * 0.44 },
+        { x: w * 0.80, y: h * 0.30 }
+      ];
+      ctx.beginPath();
+      pts.forEach((pt, i) => {
+        if (i === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      });
+      ctx.stroke();
+
+      ctx.font = '10px Outfit, sans-serif';
+      ctx.fillStyle = 'rgba(147, 197, 253, 0.75)';
+      ctx.fillText('Ursa Major', w * 0.82, h * 0.26);
+    } else {
+      // Southern Cross (Crux)
+      const pts = [
+        { x: w * 0.22, y: h * 0.20 }, // Gacrux (top)
+        { x: w * 0.22, y: h * 0.44 }  // Acrux (bottom)
+      ];
+      const ptsH = [
+        { x: w * 0.17, y: h * 0.30 }, // Delta Crucis (left)
+        { x: w * 0.28, y: h * 0.28 }  // Mimosa (right)
+      ];
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      ctx.lineTo(pts[1].x, pts[1].y);
+      ctx.moveTo(ptsH[0].x, ptsH[0].y);
+      ctx.lineTo(ptsH[1].x, ptsH[1].y);
+      ctx.stroke();
+
+      ctx.font = '10px Outfit, sans-serif';
+      ctx.fillStyle = 'rgba(147, 197, 253, 0.75)';
+      ctx.fillText('Crux (Southern Cross)', w * 0.18, h * 0.16);
+    }
+    ctx.restore();
+
+    // Draw Twinkling Stars
+    const now = Date.now() * 0.002;
+    canvasStars.forEach((star) => {
+      const alpha = Math.max(0.1, Math.min(1.0, star.baseAlpha + Math.sin(now * star.twinkleSpeed * 100) * 0.25));
+      ctx.fillStyle = star.color;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1.0;
+
+    // Draw Moon
+    if (moon.isAboveHorizon) {
+      const moonX = w * (0.15 + (moon.azimuth / 360.0) * 0.7);
+      const moonY = h * (0.85 - (moon.altitude / 90.0) * 0.75);
+
+      ctx.save();
+      // Moon glow halo
+      const haloGrad = ctx.createRadialGradient(moonX, moonY, 12, moonX, moonY, 45);
+      haloGrad.addColorStop(0, 'rgba(254, 240, 138, 0.4)');
+      haloGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = haloGrad;
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, 45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Moon body
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, 14, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = '10px Outfit, sans-serif';
+      ctx.fillStyle = '#fef08a';
+      ctx.fillText(`Moon (${moon.illumination}%)`, moonX + 18, moonY + 4);
+      ctx.restore();
+    }
+
+    // Draw ISS Satellite Flyover Trajectory if active around timeHour
+    const isIssTime = Math.abs(timeHour - 21.25) < 0.65;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(244, 63, 94, 0.45)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 6]);
+    ctx.beginPath();
+    ctx.moveTo(w * 0.12, h * 0.65);
+    ctx.quadraticCurveTo(w * 0.5, h * 0.15, w * 0.88, h * 0.72);
+    ctx.stroke();
+
+    if (isIssTime) {
+      // Animated ISS dot
+      const t = ((timeHour - 20.6) / 1.3);
+      const issX = w * (0.12 + t * 0.76);
+      const issY = h * (0.65 - Math.sin(t * Math.PI) * 0.45);
+
+      ctx.fillStyle = '#f43f5e';
+      ctx.shadowColor = '#f43f5e';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(issX, issY, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = 'bold 10px Outfit, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(`🛰️ ISS (${iss.magnitude})`, issX + 8, issY - 6);
+    }
+    ctx.restore();
+
+    // Occasional Meteor Streak
+    if (Math.random() < 0.02 && meteors.length < 2) {
+      meteors.push({
+        x: Math.random() * w * 0.8,
+        y: Math.random() * h * 0.35,
+        len: 40 + Math.random() * 50,
+        angle: Math.PI / 4 + (Math.random() - 0.5) * 0.2,
+        life: 1.0
+      });
+    }
+
+    for (let i = meteors.length - 1; i >= 0; i--) {
+      const m = meteors[i];
+      ctx.save();
+      ctx.strokeStyle = `rgba(255, 255, 255, ${m.life})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(m.x, m.y);
+      ctx.lineTo(m.x + Math.cos(m.angle) * m.len, m.y + Math.sin(m.angle) * m.len);
+      ctx.stroke();
+      ctx.restore();
+
+      m.life -= 0.08;
+      if (m.life <= 0) meteors.splice(i, 1);
+    }
+
+    // Curved Horizon Line
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.90);
+    ctx.quadraticCurveTo(w * 0.5, h * 0.87, w, h * 0.90);
+    ctx.stroke();
+
+    // Horizon fill
+    ctx.fillStyle = '#01040a';
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.90);
+    ctx.quadraticCurveTo(w * 0.5, h * 0.87, w, h * 0.90);
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function startCanvasAnimation(canvas, moon, mw, iss, bortleEffective) {
+    if (canvasAnimId) cancelAnimationFrame(canvasAnimId);
+
+    function frame() {
+      drawSkyDome(canvas, moon, mw, iss, bortleEffective, celestialState.obsHour, celestialState.lat);
+      canvasAnimId = requestAnimationFrame(frame);
+    }
+    frame();
+  }
+
+  // Master Update / Recalculation Function
+  function evaluateCelestialConditions() {
+    const lat = celestialState.lat;
+    const lon = celestialState.lon;
+    const elev = celestialState.elevation;
+    const date = celestialState.obsDate;
+    const hour = celestialState.obsHour;
+
+    // 1. Calculations
+    const moon = calculateMoonPhase(date, hour, lon);
+    const twilight = calculateTwilight(date, lat);
+    const mw = calculateMilkyWayCore(date, lat);
+    const iss = calculateIssPass(lat, lon, date);
+
+    // Washout Bortle calculation
+    let bortleEffective = celestialState.baseBortle;
+    if (moon.isAboveHorizon && moon.illumination > 25) {
+      const addedBortle = Math.round((moon.illumination / 100) * (moon.altitude / 90) * 3);
+      bortleEffective = Math.min(9, bortleEffective + addedBortle);
+    }
+
+    const bortleMeta = BORTLE_CLASSES[bortleEffective] || BORTLE_CLASSES[1];
+    const condition = calculateStargazingScore(bortleEffective, moon.illumination, moon.altitude, elev, twilight.darkDurationHours);
+    const targets = getRecommendedTargets(lat, date);
+
+    // 2. DOM Updates - Telemetry Card 1 (Moon)
+    const moonSvgSlot = document.getElementById('moon-phase-svg-slot');
+    if (moonSvgSlot) moonSvgSlot.innerHTML = renderMoonSvg(moon.illumination, moon.phaseName, moon.phaseFraction);
+
+    const moonNameEl = document.getElementById('moon-phase-name');
+    if (moonNameEl) moonNameEl.textContent = moon.phaseName;
+
+    const moonIllumEl = document.getElementById('moon-illumination-val');
+    if (moonIllumEl) moonIllumEl.textContent = `${moon.illumination}% Illumination`;
+
+    const moonAgeEl = document.getElementById('moon-age-display');
+    if (moonAgeEl) moonAgeEl.textContent = `${moon.moonAge} days into cycle`;
+
+    const moonRiseSetEl = document.getElementById('moon-rise-set-display');
+    if (moonRiseSetEl) moonRiseSetEl.textContent = `Rise ${moon.riseTime} · Set ${moon.setTime}`;
+
+    const moonAltAzEl = document.getElementById('moon-alt-az-display');
+    if (moonAltAzEl) {
+      moonAltAzEl.textContent = `Alt ${moon.altitude > 0 ? '+' : ''}${moon.altitude}° · Az ${moon.azimuth}°`;
+    }
+
+    const moonWashoutEl = document.getElementById('moon-washout-tag');
+    if (moonWashoutEl) {
+      if (moon.altitude <= 0 || moon.illumination < 20) {
+        moonWashoutEl.className = 'washout-tag minimal';
+        moonWashoutEl.textContent = 'Minimal (+0 Bortle)';
+      } else if (moon.illumination < 60) {
+        moonWashoutEl.className = 'washout-tag moderate';
+        moonWashoutEl.textContent = 'Moderate (+1 Bortle)';
+      } else {
+        moonWashoutEl.className = 'washout-tag heavy';
+        moonWashoutEl.textContent = 'Heavy Washout (+2 Bortle)';
+      }
+    }
+
+    // 3. DOM Updates - Telemetry Card 2 (Bortle)
+    const bortleBadge = document.getElementById('bortle-class-badge');
+    if (bortleBadge) bortleBadge.textContent = `CLASS ${bortleEffective}`;
+
+    const bortleTitle = document.getElementById('bortle-class-title');
+    if (bortleTitle) bortleTitle.textContent = bortleMeta.title;
+
+    const bortleDesc = document.getElementById('bortle-description');
+    if (bortleDesc) bortleDesc.textContent = bortleMeta.desc;
+
+    const bortleNelm = document.getElementById('bortle-nelm');
+    if (bortleNelm) bortleNelm.textContent = `NELM: ${bortleMeta.nelm}`;
+
+    const bortleSqm = document.getElementById('bortle-sqm');
+    if (bortleSqm) bortleSqm.textContent = bortleMeta.sqm;
+
+    const bortlePill = document.getElementById('bortle-effective-pill');
+    if (bortlePill) {
+      bortlePill.className = `darkness-meter-pill ${bortleMeta.badgeClass}`;
+      bortlePill.textContent = bortleEffective <= 2 ? 'Pristine Wilderness' : (bortleEffective <= 4 ? 'Optimal Rural' : 'Suburban Glare');
+    }
+
+    // 4. DOM Updates - Telemetry Card 3 (Milky Way)
+    const mwBadge = document.getElementById('mw-visibility-badge');
+    if (mwBadge) {
+      if (mw.isFeasible && bortleEffective <= 3) {
+        mwBadge.className = 'mw-visibility-badge prime';
+        mwBadge.textContent = 'OPTIMAL PRIME WINDOW';
+      } else if (mw.isFeasible) {
+        mwBadge.className = 'mw-visibility-badge marginal';
+        mwBadge.textContent = 'MARGINAL VISIBILITY';
+      } else {
+        mwBadge.className = 'mw-visibility-badge below';
+        mwBadge.textContent = 'BELOW HORIZON / OFF-SEASON';
+      }
+    }
+
+    const mwHoursEl = document.getElementById('mw-viewing-hours');
+    if (mwHoursEl) mwHoursEl.textContent = mw.viewingHours;
+
+    const mwMaxAltEl = document.getElementById('mw-max-altitude');
+    if (mwMaxAltEl) mwMaxAltEl.textContent = `${mw.maxAltitude}° (${mw.culminationDirection})`;
+
+    const mwSeasonEl = document.getElementById('mw-season-status');
+    if (mwSeasonEl) mwSeasonEl.textContent = mw.feasibility;
+
+    const mwContrastEl = document.getElementById('mw-contrast-score');
+    if (mwContrastEl) {
+      mwContrastEl.className = bortleEffective <= 2 && moon.illumination < 25 ? 'contrast-score high' : 'contrast-score';
+      mwContrastEl.textContent = bortleEffective <= 2 && moon.illumination < 25 ? 'Exceptional Core Contrast' : 'Diffused Contrast';
+    }
+
+    // 5. DOM Updates - Telemetry Card 4 (ISS)
+    const issNextEl = document.getElementById('iss-next-pass-time');
+    if (issNextEl) issNextEl.textContent = iss.timeRange;
+
+    const issPeakAltEl = document.getElementById('iss-peak-alt');
+    if (issPeakAltEl) issPeakAltEl.textContent = iss.peakAlt;
+
+    const issMagEl = document.getElementById('iss-magnitude');
+    if (issMagEl) issMagEl.textContent = iss.magnitude;
+
+    const issTrajEl = document.getElementById('iss-trajectory');
+    if (issTrajEl) issTrajEl.textContent = iss.trajectory;
+
+    // 6. Timeline Updates
+    const needle = document.getElementById('timeline-current-needle');
+    if (needle) {
+      // 18.0 to 30.0 range mapped to 0% to 100%
+      const pct = Math.max(0, Math.min(100, ((hour - 18.0) / 12.0) * 100));
+      needle.style.left = `${pct}%`;
+    }
+
+    const needleLabel = document.getElementById('needle-time-label');
+    if (needleLabel) {
+      const hInt = Math.floor(hour % 24);
+      const mInt = Math.floor((hour - Math.floor(hour)) * 60);
+      needleLabel.textContent = `${String(hInt).padStart(2, '0')}:${String(mInt).padStart(2, '0')}`;
+    }
+
+    const darkChip = document.getElementById('chip-astronomical-darkness');
+    if (darkChip) {
+      const duskH = Math.floor(twilight.astroDuskHour % 24);
+      const duskM = Math.floor((twilight.astroDuskHour - Math.floor(twilight.astroDuskHour)) * 60);
+      const dawnH = Math.floor(twilight.astroDawnHour % 24);
+      const dawnM = Math.floor((twilight.astroDawnHour - Math.floor(twilight.astroDawnHour)) * 60);
+      darkChip.textContent = `🌌 Deep Dark Window: ${String(duskH).padStart(2, '0')}:${String(duskM).padStart(2, '0')} — ${String(dawnH).padStart(2, '0')}:${String(dawnM).padStart(2, '0')} (${twilight.darkDurationHours.toFixed(1)}h)`;
+    }
+
+    // 7. Stargazing Condition Index
+    const scoreNum = document.getElementById('celestial-score-num');
+    if (scoreNum) scoreNum.textContent = String(condition.score);
+
+    const scoreCircle = document.getElementById('celestial-score-circle');
+    if (scoreCircle) {
+      // Circumference of r=50 circle = 2 * PI * 50 = 314.159
+      const maxCirc = 314;
+      const offset = maxCirc - (condition.score / 100) * maxCirc;
+      scoreCircle.style.strokeDashoffset = String(offset);
+      scoreCircle.style.stroke = condition.score >= 80 ? '#38bdf8' : (condition.score >= 60 ? '#fde047' : '#ef4444');
+    }
+
+    const scoreBadge = document.getElementById('celestial-score-badge');
+    if (scoreBadge) {
+      scoreBadge.className = `score-grade-badge ${condition.gradeClass}`;
+      scoreBadge.textContent = condition.grade;
+    }
+
+    const scoreSummary = document.getElementById('celestial-score-summary');
+    if (scoreSummary) scoreSummary.textContent = condition.summaryText;
+
+    // Factor bars
+    const fDark = document.getElementById('factor-bar-darkness');
+    if (fDark) fDark.style.width = `${condition.factors.darkness}%`;
+    const fDarkVal = document.getElementById('factor-val-darkness');
+    if (fDarkVal) fDarkVal.textContent = `${condition.factors.darkness}%`;
+
+    const fMoon = document.getElementById('factor-bar-moon');
+    if (fMoon) fMoon.style.width = `${condition.factors.moon}%`;
+    const fMoonVal = document.getElementById('factor-val-moon');
+    if (fMoonVal) fMoonVal.textContent = `${condition.factors.moon}%`;
+
+    const fElev = document.getElementById('factor-bar-elevation');
+    if (fElev) fElev.style.width = `${condition.factors.elevation}%`;
+    const fElevVal = document.getElementById('factor-val-elevation');
+    if (fElevVal) fElevVal.textContent = `${condition.factors.elevation}%`;
+
+    const fDur = document.getElementById('factor-bar-duration');
+    if (fDur) fDur.style.width = `${condition.factors.duration}%`;
+    const fDurVal = document.getElementById('factor-val-duration');
+    if (fDurVal) fDurVal.textContent = `${condition.factors.duration}%`;
+
+    // 8. Recommended Field Targets
+    const targetsList = document.getElementById('celestial-targets-list');
+    if (targetsList) {
+      targetsList.replaceChildren();
+      targets.forEach((tgt) => {
+        const item = document.createElement('div');
+        item.className = 'target-item-card';
+
+        const mainInfo = document.createElement('div');
+        mainInfo.className = 'target-main-info';
+
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'target-icon';
+        iconSpan.textContent = tgt.icon;
+
+        const titleBlock = document.createElement('div');
+        titleBlock.className = 'target-title-block';
+
+        const h5 = document.createElement('h5');
+        h5.textContent = tgt.title;
+
+        const descSpan = document.createElement('span');
+        descSpan.textContent = `${tgt.category} • ${tgt.details}`;
+
+        titleBlock.appendChild(h5);
+        titleBlock.appendChild(descSpan);
+        mainInfo.appendChild(iconSpan);
+        mainInfo.appendChild(titleBlock);
+
+        const badgePill = document.createElement('span');
+        badgePill.className = 'target-badge-pill';
+        badgePill.textContent = tgt.optics;
+
+        item.appendChild(mainInfo);
+        item.appendChild(badgePill);
+        targetsList.appendChild(item);
+      });
+    }
+
+    // 9. Astrophotography Exposure Settings (500-Rule)
+    const shutterEl = document.getElementById('cam-shutter');
+    if (shutterEl) {
+      // 500 / 14mm = ~35s, 500 / 24mm = ~20s
+      shutterEl.textContent = '18s — 25s (Pin-point stars with 14-24mm)';
+    }
+
+    const isoEl = document.getElementById('cam-iso');
+    if (isoEl) {
+      isoEl.textContent = bortleEffective <= 2 ? 'ISO 3200 — 6400 (Low noise floor)' : 'ISO 1600 — 3200';
+    }
+
+    // Canvas Status brief
+    const canvasBrief = document.getElementById('canvas-celestial-brief');
+    if (canvasBrief) {
+      canvasBrief.textContent = `Active Sky: Bortle Class ${bortleEffective} · Galactic Core ${mw.maxAltitude}° (${mw.culminationDirection}) · Moon ${moon.illumination}% ${moon.phaseName}`;
+    }
+
+    // Canvas animation restart with latest telemetry
+    const canvas = document.getElementById('celestialSkyCanvas');
+    if (canvas) {
+      startCanvasAnimation(canvas, moon, mw, iss, bortleEffective);
+    }
+  }
+
+  // Preset Selection Click Handler
+  function handlePresetClick(presetKey) {
+    const p = CAMPSITE_PRESETS[presetKey];
+    if (!p) return;
+
+    celestialState.preset = presetKey;
+    celestialState.campsiteName = p.name;
+    celestialState.lat = p.lat;
+    celestialState.lon = p.lon;
+    celestialState.elevation = p.elevation;
+    celestialState.baseBortle = p.bortle;
+
+    // Update Form Inputs
+    const nameInput = document.getElementById('celestial-campsite-name');
+    if (nameInput) nameInput.value = p.name;
+
+    const latInput = document.getElementById('celestial-lat');
+    if (latInput) latInput.value = String(p.lat);
+
+    const lonInput = document.getElementById('celestial-lon');
+    if (lonInput) lonInput.value = String(p.lon);
+
+    const elevInput = document.getElementById('celestial-elevation');
+    if (elevInput) elevInput.value = String(p.elevation);
+
+    // Update Preset Pills active class
+    const pillContainer = document.getElementById('campsite-preset-pills');
+    if (pillContainer) {
+      const buttons = pillContainer.querySelectorAll('.preset-pill');
+      buttons.forEach((btn) => {
+        const isMatch = btn.getAttribute('data-preset') === presetKey;
+        btn.classList.toggle('active', isMatch);
+        btn.setAttribute('aria-checked', isMatch ? 'true' : 'false');
+      });
+    }
+
+    evaluateCelestialConditions();
+  }
+
+  // Export / Clipboard Action
+  function exportCelestialFieldLog() {
+    const p = celestialState;
+    const dateStr = p.obsDate.toISOString().split('T')[0];
+    const logText = [
+      '====================================================',
+      '🔭 ODYSSEY EXPEDITIONS — CELESTIAL FIELD BRIEFING',
+      '====================================================',
+      `Campsite: ${p.campsiteName}`,
+      `Coordinates: ${p.lat >= 0 ? p.lat + '°N' : Math.abs(p.lat) + '°S'}, ${p.lon >= 0 ? p.lon + '°E' : Math.abs(p.lon) + '°W'}`,
+      `Elevation: ${p.elevation}m above sea level`,
+      `Observation Date: ${dateStr}`,
+      `Selected Time: ${Math.floor(p.obsHour % 24)}:${String(Math.floor((p.obsHour - Math.floor(p.obsHour)) * 60)).padStart(2, '0')}`,
+      '----------------------------------------------------',
+      'TELEMETRY METRICS:',
+      `- Baseline Bortle: Class ${p.baseBortle}`,
+      `- Astrophotography: 500-Rule shutter 20s, ISO 3200-6400`,
+      `- Planetary / Orbital: ISS pass confirmed at ~21:14`,
+      '===================================================='
+    ].join('\n');
+
+    navigator.clipboard.writeText(logText).then(() => {
+      const toast = document.getElementById('celestial-copy-toast');
+      if (toast) {
+        toast.hidden = false;
+        setTimeout(() => {
+          toast.hidden = true;
+        }, 3500);
+      }
+    }).catch(() => {
+      // Fallback
+    });
+  }
+
+  // Reset Predictor to Default
+  function resetCelestialPredictor() {
+    handlePresetClick('atacama');
+    const slider = document.getElementById('celestial-time-slider');
+    if (slider) {
+      slider.value = '23';
+      celestialState.obsHour = 23.0;
+      const disp = document.getElementById('celestial-time-display');
+      if (disp) disp.textContent = '23:00 Local';
+    }
+  }
+
+  // Initial Bindings & Listeners
+  function bindCelestialEvents() {
+    // Preset buttons
+    const pillContainer = document.getElementById('campsite-preset-pills');
+    if (pillContainer) {
+      pillContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.preset-pill');
+        if (btn) {
+          const key = btn.getAttribute('data-preset');
+          if (key) handlePresetClick(key);
+        }
+      });
+    }
+
+    // Custom Coordinate Inputs
+    const latInput = document.getElementById('celestial-lat');
+    if (latInput) {
+      latInput.addEventListener('input', () => {
+        const v = parseFloat(latInput.value);
+        if (!Number.isNaN(v) && v >= -90 && v <= 90) {
+          celestialState.lat = v;
+          evaluateCelestialConditions();
+        }
+      });
+    }
+
+    const lonInput = document.getElementById('celestial-lon');
+    if (lonInput) {
+      lonInput.addEventListener('input', () => {
+        const v = parseFloat(lonInput.value);
+        if (!Number.isNaN(v) && v >= -180 && v <= 180) {
+          celestialState.lon = v;
+          evaluateCelestialConditions();
+        }
+      });
+    }
+
+    const elevInput = document.getElementById('celestial-elevation');
+    if (elevInput) {
+      elevInput.addEventListener('input', () => {
+        const v = parseFloat(elevInput.value);
+        if (!Number.isNaN(v) && v >= 0) {
+          celestialState.elevation = v;
+          evaluateCelestialConditions();
+        }
+      });
+    }
+
+    const nameInput = document.getElementById('celestial-campsite-name');
+    if (nameInput) {
+      nameInput.addEventListener('input', () => {
+        celestialState.campsiteName = nameInput.value || 'Custom Campsite';
+      });
+    }
+
+    // Date picker
+    const dateInput = document.getElementById('celestial-date');
+    if (dateInput) {
+      const today = new Date();
+      dateInput.value = today.toISOString().split('T')[0];
+      dateInput.addEventListener('change', () => {
+        if (dateInput.value) {
+          celestialState.obsDate = new Date(dateInput.value);
+          evaluateCelestialConditions();
+        }
+      });
+    }
+
+    // Time Slider
+    const timeSlider = document.getElementById('celestial-time-slider');
+    const timeDisplay = document.getElementById('celestial-time-display');
+    if (timeSlider) {
+      timeSlider.addEventListener('input', () => {
+        const val = parseFloat(timeSlider.value);
+        celestialState.obsHour = val;
+        const hr = Math.floor(val % 24);
+        const mn = Math.floor((val - Math.floor(val)) * 60);
+        const timeStr = `${String(hr).padStart(2, '0')}:${String(mn).padStart(2, '0')}`;
+        if (timeDisplay) timeDisplay.textContent = `${timeStr} Local`;
+        evaluateCelestialConditions();
+      });
+    }
+
+    // Canvas Resize Observer
+    const canvas = document.getElementById('celestialSkyCanvas');
+    if (canvas) {
+      const resizeCanvas = () => {
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width > 0) {
+          canvas.width = Math.round(rect.width * window.devicePixelRatio);
+          canvas.height = Math.round(rect.width * 0.34 * window.devicePixelRatio);
+          initStarfield(canvas.width, canvas.height);
+          evaluateCelestialConditions();
+        }
+      };
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+    }
+  }
+
+  // Expose global actions for button clicks
+  window.exportCelestialFieldLog = exportCelestialFieldLog;
+  window.resetCelestialPredictor = resetCelestialPredictor;
+
+  // Initialize
+  bindCelestialEvents();
+  evaluateCelestialConditions();
+})();
+/* ===== END Issue #424 ===== */
