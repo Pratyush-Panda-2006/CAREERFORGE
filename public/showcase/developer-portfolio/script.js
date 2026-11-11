@@ -80,6 +80,7 @@ const EXECUTABLES = ['hello.sh'];
 
 const HELP_LINES = [
   ['help', 'show this list'],
+  ['neofetch', 'display hardware stats & live ASCII telemetry gauges'],
   ['skills', 'show technical skills'],
   ['projects', 'list portfolio project files'],
   ['contact', 'show demo contact details'],
@@ -93,6 +94,8 @@ const HELP_LINES = [
   ['play | game', 'start a 30-second typing challenge with local high scores'],
   ['clear', 'clear the screen']
 ];
+
+window.HELP_LINES = HELP_LINES;
 
 // Turn a path (relative to cwd parts) into a normalised array of segments.
 function resolvePath(cwdParts, input) {
@@ -175,6 +178,25 @@ function initTerminal() {
         screen.appendChild(row);
       });
     },
+    neofetch() {
+      const art = [
+        '       /\\          alex@kernel-box',
+        '      /  \\         ---------------',
+        '     /\\   \\        OS: Arch Linux x86_64',
+        '    /      \\       Host: Precision 7780 Kernel Rig',
+        '   /   ,,   \\      Kernel: 6.8.9-zen1-1-zen',
+        '  /   |  |  -\\     Uptime: 3 days, 14 hours, 28 mins',
+        ' /_-\'\'    \'\'-_\\    Shell: zsh 5.9 (x86_64-pc-linux-gnu)',
+        '                   WM: Hyprland (Wayland)',
+        '                   CPU: AMD Ryzen 9 7950X (32) @ 5.700GHz',
+        '                   GPU: NVIDIA GeForce RTX 4090 24GB',
+        '                   Memory: 18.4 GiB / 64.0 GiB (28%)',
+        '                   CPU Load: [=======>------------] 34%'
+      ];
+      art.forEach(l => line(l, 'vterm-neofetch-line'));
+    },
+    fetch() { commands.neofetch(); },
+    sysinfo() { commands.neofetch(); },
     skills() { lines(FS['skills.txt']); },
     projects() { lines(FS.projects['README.md']); printLs(FS.projects); },
     contact() { lines(FS['contact.txt']); },
@@ -788,7 +810,7 @@ function initResumeDownload() {
     try {
       await navigator.clipboard.writeText(jsonString);
       copyBtn.textContent = 'Copied!';
-    } catch (error) {
+    } catch {
       copyBtn.textContent = 'Copy unavailable';
     }
 
@@ -1542,3 +1564,120 @@ Cherry-picked onto ${head.branch}!`);
 }
 
 window.initGitGraph = initGitGraph;
+
+// ==========================================================================
+// Terminal Neofetch Hardware Stats & Live Gauges Widget Engine (Issue #441)
+// ==========================================================================
+
+function formatAsciiBar(percent, width = 20) {
+  const clamped = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+  const fillLen = Math.round((clamped / 100) * width);
+  if (fillLen <= 0) return `[${'-'.repeat(width)}]`;
+  if (fillLen >= width) return `[${'='.repeat(width)}]`;
+  return `[${'='.repeat(fillLen - 1)}>${'-'.repeat(width - fillLen)}]`;
+}
+
+function initNeofetchTelemetryWidget() {
+  const section = document.getElementById('neofetch-section');
+  if (!section) return null;
+
+  const uptimeEl = document.getElementById('neofetchUptime');
+  const stressBtn = document.getElementById('neofetchStressBtn');
+  const stressLabel = document.getElementById('stressBtnLabel');
+
+  const cpuVal = document.getElementById('cpuLoadVal');
+  const cpuAscii = document.getElementById('cpuAsciiBar');
+  const cpuFill = document.getElementById('cpuMeterFill');
+
+  const memVal = document.getElementById('memUsageVal');
+  const memAscii = document.getElementById('memAsciiBar');
+  const memFill = document.getElementById('memMeterFill');
+
+  const swapVal = document.getElementById('swapUsageVal');
+  const swapAscii = document.getElementById('swapAsciiBar');
+  const swapFill = document.getElementById('swapMeterFill');
+
+  const netVal = document.getElementById('netIoVal');
+  const netAscii = document.getElementById('netAsciiBar');
+  const netFill = document.getElementById('netMeterFill');
+
+  let stressActive = false;
+  const startTimestamp = Date.now() - (3 * 86400 + 14 * 3600 + 28 * 60 + 12) * 1000;
+
+  function update() {
+    const elapsedSeconds = Math.floor((Date.now() - startTimestamp) / 1000);
+    const days = Math.floor(elapsedSeconds / 86400);
+    const hours = Math.floor((elapsedSeconds % 86400) / 3600);
+    const mins = Math.floor((elapsedSeconds % 3600) / 60);
+    const secs = elapsedSeconds % 60;
+    if (uptimeEl) {
+      uptimeEl.textContent = `${days} days, ${hours} hours, ${mins} mins, ${secs}s`;
+    }
+
+    // Telemetry simulation
+    let cpuPercent;
+    let memPercent;
+    let swapPercent;
+    let netRx;
+    let netTx;
+    let netPercent;
+
+    if (stressActive) {
+      cpuPercent = Math.min(99, Math.floor(84 + Math.random() * 15));
+      memPercent = Math.min(95, Math.floor(78 + Math.random() * 10));
+      swapPercent = Math.min(45, Math.floor(18 + Math.random() * 8));
+      netRx = 38.5 + Math.random() * 14.0;
+      netTx = 22.0 + Math.random() * 8.5;
+      netPercent = Math.min(95, Math.floor((netRx / 60) * 100));
+    } else {
+      cpuPercent = Math.floor(24 + Math.random() * 18);
+      memPercent = Math.floor(27 + Math.random() * 3);
+      swapPercent = Math.floor(5 + Math.random() * 2);
+      netRx = 6.2 + Math.random() * 4.1;
+      netTx = 1.8 + Math.random() * 1.5;
+      netPercent = Math.min(60, Math.floor((netRx / 30) * 100));
+    }
+
+    if (cpuVal) cpuVal.textContent = `${cpuPercent}%`;
+    if (cpuAscii) cpuAscii.textContent = formatAsciiBar(cpuPercent, 20);
+    if (cpuFill) cpuFill.style.width = `${cpuPercent}%`;
+
+    const memGib = ((memPercent / 100) * 64).toFixed(1);
+    if (memVal) memVal.textContent = `${memGib} GiB / 64.0 GiB (${memPercent}%)`;
+    if (memAscii) memAscii.textContent = formatAsciiBar(memPercent, 20);
+    if (memFill) memFill.style.width = `${memPercent}%`;
+
+    const swapGib = ((swapPercent / 100) * 32).toFixed(1);
+    if (swapVal) swapVal.textContent = `${swapGib} GiB / 32.0 GiB (${swapPercent}%)`;
+    if (swapAscii) swapAscii.textContent = formatAsciiBar(swapPercent, 20);
+    if (swapFill) swapFill.style.width = `${swapPercent}%`;
+
+    if (netVal) netVal.textContent = `↓ ${netRx.toFixed(1)} MB/s  ↑ ${netTx.toFixed(1)} MB/s`;
+    if (netAscii) netAscii.textContent = formatAsciiBar(netPercent, 20);
+    if (netFill) netFill.style.width = `${netPercent}%`;
+  }
+
+  if (stressBtn) {
+    stressBtn.addEventListener('click', () => {
+      stressActive = !stressActive;
+      section.classList.toggle('stress-mode', stressActive);
+      if (stressLabel) stressLabel.textContent = stressActive ? 'Stop Stress' : 'Stress Test';
+      stressBtn.classList.toggle('active', stressActive);
+      update();
+    });
+  }
+
+  const ticker = setInterval(update, 1000);
+  update();
+
+  return { update, toggleStress: () => stressBtn && stressBtn.click(), ticker };
+}
+
+window.formatAsciiBar = formatAsciiBar;
+window.initNeofetchTelemetryWidget = initNeofetchTelemetryWidget;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNeofetchTelemetryWidget);
+} else {
+  initNeofetchTelemetryWidget();
+}
