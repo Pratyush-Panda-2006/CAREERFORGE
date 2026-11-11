@@ -31,6 +31,7 @@
         <a href="#streaming" class="nav-link">SSE Event Stream</a>
         <a href="#rate-limits" class="nav-link">Rate Limits</a>
         <a href="#http-status-codes" class="nav-link">HTTP Status Codes</a>
+        <a href="#openapi-explorer" class="nav-link">OpenAPI 3.0 Explorer</a>
         <div class="section-title">ADVANCED & SDks</div>
         <a href="#sdk-quickstart" class="nav-link">Client SDKs</a>
         <a href="#error-codes" class="nav-link">Error Handling</a>
@@ -558,6 +559,68 @@ data: {"total_tokens": 42, "latency_ms": 114, "finish_reason": "stop"}</code></p
           >
             No HTTP status codes match your search.
           </p>
+        </div>
+      </section>
+
+      <!-- OpenAPI 3.0 Schema Parser & Explorer Section (Issue #400) -->
+      <section id="openapi-explorer" class="doc-section">
+        <div class="meta-row">
+          <span class="badge">OPENAPI 3.0</span>
+          <span class="badge category-badge">DYNAMIC SPEC PARSER</span>
+        </div>
+        <h2>OpenAPI 3.0 Schema Explorer &amp; Interactive Builder</h2>
+        <p>Ingest and dynamically parse raw OpenAPI 3.0 / Swagger JSON specifications. Inspect endpoints, parameters, JSON request body schemas, and response status models, or test simulated API calls with live request payload preview.</p>
+
+        <div class="openapi-spec-card">
+          <!-- Spec Selector & Upload Toolbar -->
+          <div class="openapi-toolbar">
+            <div class="openapi-sample-group">
+              <label for="openapiPresetSelect">Sample Spec:</label>
+              <select id="openapiPresetSelect" class="openapi-select">
+                <option value="prisma-core" selected>Prisma Core Agent Orchestration API</option>
+                <option value="auth-users">Identity &amp; Key Management API</option>
+                <option value="webhooks">Webhook Events &amp; Subscriptions API</option>
+              </select>
+            </div>
+
+            <div class="openapi-search-group">
+              <input type="text" id="openapiSearchInput" class="openapi-search-input" placeholder="Filter endpoints (e.g. /agents, GET)..." aria-label="Filter OpenAPI endpoints" />
+            </div>
+
+            <div class="openapi-custom-toggle-wrap">
+              <button type="button" class="openapi-tool-btn" id="openapiCustomToggleBtn">
+                <span>📝 Custom JSON</span>
+              </button>
+              <label class="openapi-upload-btn" title="Upload local openapi.json">
+                <span>📁 Upload</span>
+                <input type="file" id="openapiFileInput" accept=".json,application/json" hidden />
+              </label>
+            </div>
+          </div>
+
+          <!-- Custom JSON Editor Drawer (Collapsible) -->
+          <div class="openapi-custom-drawer" id="openapiCustomDrawer" hidden>
+            <div class="custom-drawer-header">
+              <span>Paste OpenAPI 3.0 JSON Specification</span>
+              <button type="button" class="openapi-tool-btn primary" id="openapiParseCustomBtn">Parse &amp; Render</button>
+            </div>
+            <textarea id="openapiCustomJsonText" class="openapi-json-textarea" rows="8" placeholder="Paste valid OpenAPI 3.0 JSON here..."></textarea>
+            <div class="openapi-parse-error" id="openapiParseError" role="alert" hidden></div>
+          </div>
+
+          <!-- Spec Info Header -->
+          <div class="openapi-spec-meta" id="openapiSpecMeta">
+            <div class="spec-info-title-row">
+              <h3 id="specTitle">Prisma Core Agent API</h3>
+              <span class="spec-version-badge" id="specVersion">v3.0.0</span>
+            </div>
+            <p class="spec-desc" id="specDescription">High-throughput agentic execution endpoints, streaming dispatchers, and stateful sessions.</p>
+          </div>
+
+          <!-- Endpoints List Accordion Container -->
+          <div class="openapi-endpoints-container" id="openapiEndpointsContainer">
+            <!-- Dynamically populated endpoint cards -->
+          </div>
         </div>
       </section>
 
