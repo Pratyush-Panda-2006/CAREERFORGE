@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScheduleTabs();
   initTicketCalculator();
   initPackingChecklist();
+  initCyberSoundboard();
 });
 
 // ---------------------------------------------------------------
@@ -794,4 +795,415 @@ function initPackingChecklist() {
   // Initial calculation
   updateUI();
 }
+
+// ---------------------------------------------------------------
+// Cyber DJ Synthesizer Launchpad & Soundboard (Issue #343)
+// ---------------------------------------------------------------
+function initCyberSoundboard() {
+  const launchpad = document.getElementById('cyber-launchpad');
+  if (!launchpad) return;
+
+  let audioCtx = null;
+  let masterGain = null;
+  let sequencerInterval = null;
+  let currentStep = 0;
+
+  const bpmSlider = document.getElementById('djBpmSlider');
+  const bpmDisplay = document.getElementById('djBpmDisplay');
+  const bpmPresets = launchpad.querySelectorAll('.btn-bpm-chip');
+  const volSlider = document.getElementById('djMasterVol');
+  const volDisplay = document.getElementById('djVolDisplay');
+  const beatDot = document.getElementById('beatPulseDot');
+  const beatStatus = document.getElementById('beatStatusText');
+  const seqToggleBtn = document.getElementById('btnSeqToggle');
+  const seqBtnText = document.getElementById('seqBtnText');
+  const pads = Array.from(launchpad.querySelectorAll('.dj-pad'));
+
+  function getAudioContext() {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContextClass();
+      masterGain = audioCtx.createGain();
+      const vol = volSlider ? parseInt(volSlider.value, 10) / 100 : 0.8;
+      masterGain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      masterGain.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  // Create White Noise buffer helper
+  function createNoiseBuffer(ctx, duration) {
+    const bufferSize = Math.floor(ctx.sampleRate * duration);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    return buffer;
+  }
+
+  // 1. Sub Kick 808
+  function playKick() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.exponentialRampToValueAtTime(35, t + 0.35);
+
+    gain.gain.setValueAtTime(1.0, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.4);
+  }
+
+  // 2. Cyber Snare
+  function playSnare() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+
+    // Body
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(220, t);
+    osc.frequency.exponentialRampToValueAtTime(90, t + 0.1);
+    oscGain.gain.setValueAtTime(0.7, t);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    osc.connect(oscGain);
+    oscGain.connect(masterGain);
+    osc.start(t);
+    osc.stop(t + 0.15);
+
+    // Snap noise
+    const noise = ctx.createBufferSource();
+    noise.buffer = createNoiseBuffer(ctx, 0.2);
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(1000, t);
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.8, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+    noise.start(t);
+    noise.stop(t + 0.22);
+  }
+
+  // 3. Neon Hi-Hat
+  function playHiHat() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const noise = ctx.createBufferSource();
+    noise.buffer = createNoiseBuffer(ctx, 0.08);
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(8000, t);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.6, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    noise.start(t);
+    noise.stop(t + 0.06);
+  }
+
+  // 4. Glitch Clap
+  function playClap() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const noise = ctx.createBufferSource();
+    noise.buffer = createNoiseBuffer(ctx, 0.25);
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1200, t);
+    filter.Q.setValueAtTime(2, t);
+
+    const gain = ctx.createGain();
+    // Multi-burst envelope
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.setValueAtTime(0.7, t + 0.01);
+    gain.gain.setValueAtTime(0.1, t + 0.02);
+    gain.gain.setValueAtTime(0.7, t + 0.03);
+    gain.gain.setValueAtTime(0.1, t + 0.04);
+    gain.gain.setValueAtTime(0.9, t + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    noise.start(t);
+    noise.stop(t + 0.25);
+  }
+
+  // 5. Sub Bass Drop
+  function playBassDrop() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(85, t);
+    osc.frequency.exponentialRampToValueAtTime(32, t + 0.7);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(300, t);
+    filter.Q.setValueAtTime(4, t);
+
+    gain.gain.setValueAtTime(0.9, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.75);
+  }
+
+  // 6. Synth Stab (C5 chord)
+  function playSynthStab() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+
+    [523.25, 659.25, 783.99].forEach((freq) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0.25, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+
+      osc.start(t);
+      osc.stop(t + 0.35);
+    });
+  }
+
+  // 7. Laser Chirp FX
+  function playLaser() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1800, t);
+    osc.frequency.exponentialRampToValueAtTime(200, t + 0.18);
+
+    gain.gain.setValueAtTime(0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.2);
+  }
+
+  // 8. Dome Crash
+  function playCrash() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const noise = ctx.createBufferSource();
+    noise.buffer = createNoiseBuffer(ctx, 1.2);
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(3000, t);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    noise.start(t);
+    noise.stop(t + 1.2);
+  }
+
+  const SOUND_HANDLERS = [
+    playKick,      // 1
+    playSnare,     // 2
+    playHiHat,     // 3
+    playClap,      // 4
+    playBassDrop,  // 5
+    playSynthStab, // 6
+    playLaser,     // 7
+    playCrash      // 8
+  ];
+
+  function triggerPad(index) {
+    if (index >= 0 && index < SOUND_HANDLERS.length) {
+      SOUND_HANDLERS[index]();
+      const padEl = pads[index];
+      if (padEl) {
+        padEl.classList.add('active-press');
+        setTimeout(() => padEl.classList.remove('active-press'), 140);
+      }
+    }
+  }
+
+  // Bind Pads click
+  pads.forEach((pad, idx) => {
+    pad.addEventListener('click', () => {
+      triggerPad(idx);
+    });
+  });
+
+  // Global Keyboard listener for keys 1 through 8
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+    const num = parseInt(e.key, 10);
+    if (!isNaN(num) && num >= 1 && num <= 8) {
+      triggerPad(num - 1);
+    }
+  });
+
+  // BPM Slider & Presets
+  function setBpm(bpm) {
+    if (bpmSlider) bpmSlider.value = bpm;
+    if (bpmDisplay) bpmDisplay.textContent = `${bpm} BPM`;
+    if (sequencerInterval) {
+      stopSequencer();
+      startSequencer();
+    }
+  }
+
+  if (bpmSlider) {
+    bpmSlider.addEventListener('input', (e) => {
+      setBpm(e.target.value);
+    });
+  }
+
+  bpmPresets.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      bpmPresets.forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const targetBpm = chip.getAttribute('data-bpm');
+      setBpm(targetBpm);
+    });
+  });
+
+  // Master Volume
+  if (volSlider) {
+    volSlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (volDisplay) volDisplay.textContent = `${val}%`;
+      if (masterGain && audioCtx) {
+        masterGain.gain.setValueAtTime(val / 100, audioCtx.currentTime);
+      }
+    });
+  }
+
+  // 4/4 Beat Sequencer Loop
+  function flashMetronome() {
+    if (beatDot) {
+      beatDot.classList.add('flash');
+      setTimeout(() => beatDot.classList.remove('flash'), 120);
+    }
+  }
+
+  function startSequencer() {
+    const bpm = bpmSlider ? parseInt(bpmSlider.value, 10) : 128;
+    const intervalMs = (60000 / bpm) / 2; // 8th note resolution
+
+    currentStep = 0;
+    if (beatStatus) beatStatus.textContent = 'LOOP ACTIVE';
+    if (seqToggleBtn) seqToggleBtn.classList.add('playing');
+    if (seqBtnText) seqBtnText.textContent = 'Stop Beat Loop';
+
+    sequencerInterval = setInterval(() => {
+      // 8 steps in a 4/4 bar (0 to 7)
+      // Metronome flash on quarter beats
+      if (currentStep % 2 === 0) {
+        flashMetronome();
+      }
+
+      // Step 0: Kick (beat 1)
+      if (currentStep === 0) {
+        playKick();
+      }
+      // Step 1: Hat
+      else if (currentStep === 1) {
+        playHiHat();
+      }
+      // Step 2: Clap + Snare (beat 2)
+      else if (currentStep === 2) {
+        playSnare();
+        playClap();
+      }
+      // Step 3: Hat
+      else if (currentStep === 3) {
+        playHiHat();
+      }
+      // Step 4: Kick (beat 3)
+      else if (currentStep === 4) {
+        playKick();
+      }
+      // Step 5: Hat
+      else if (currentStep === 5) {
+        playHiHat();
+      }
+      // Step 6: Clap + Snare (beat 4)
+      else if (currentStep === 6) {
+        playSnare();
+        playClap();
+      }
+      // Step 7: Offbeat Hat + Synth stab accent
+      else if (currentStep === 7) {
+        playHiHat();
+      }
+
+      currentStep = (currentStep + 1) % 8;
+    }, intervalMs);
+  }
+
+  function stopSequencer() {
+    if (sequencerInterval) {
+      clearInterval(sequencerInterval);
+      sequencerInterval = null;
+    }
+    if (beatStatus) beatStatus.textContent = 'PULSE READY';
+    if (seqToggleBtn) seqToggleBtn.classList.remove('playing');
+    if (seqBtnText) seqBtnText.textContent = 'Start 4/4 Beat Loop';
+  }
+
+  if (seqToggleBtn) {
+    seqToggleBtn.addEventListener('click', () => {
+      if (sequencerInterval) {
+        stopSequencer();
+      } else {
+        startSequencer();
+      }
+    });
+  }
+}
+
 
