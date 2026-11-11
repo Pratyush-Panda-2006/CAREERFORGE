@@ -1276,3 +1276,346 @@ window.confirmDeposit = function confirmDeposit() {
   }
 })();
 
+/* ==========================================================
+   Savings Goals Stash & Compound Wealth Projector (Issue #449)
+   ========================================================== */
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'apexvault_savings_stashes_v1';
+
+  const DEFAULT_STASHES = [
+    {
+      id: 'stash-1',
+      name: 'Emergency Safety Stash',
+      category: 'Security',
+      icon: '🛡️',
+      target: 25000,
+      current: 14500,
+      weekly: 250,
+      apy: 5.2
+    },
+    {
+      id: 'stash-2',
+      name: 'Prime Real Estate Down Payment',
+      category: 'Real Estate',
+      icon: '🏙️',
+      target: 120000,
+      current: 42000,
+      weekly: 500,
+      apy: 7.8
+    },
+    {
+      id: 'stash-3',
+      name: 'Tech Angel Investment Seed',
+      category: 'Growth',
+      icon: '🚀',
+      target: 50000,
+      current: 18000,
+      weekly: 350,
+      apy: 9.4
+    }
+  ];
+
+  let stashes = [];
+  let selectedYears = 5;
+
+  function loadStashes() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          stashes = parsed;
+          return;
+        }
+      }
+    } catch {
+      // Fallback to default
+    }
+    stashes = JSON.parse(JSON.stringify(DEFAULT_STASHES));
+  }
+
+  function saveStashes() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stashes));
+    } catch {
+      // Storage unavailable
+    }
+  }
+
+  function formatCurrency(num) {
+    return '$' + Math.round(num).toLocaleString('en-US');
+  }
+
+  function calculateCompoundGrowth(initialPrincipal, weeklyDeposit, annualRatePercent, years) {
+    const rMonthly = (annualRatePercent / 100) / 12;
+    const monthlyDeposit = (weeklyDeposit * 52) / 12;
+    const months = years * 12;
+
+    const fvInitial = initialPrincipal * Math.pow(1 + rMonthly, months);
+    const fvDeposits = rMonthly > 0
+      ? monthlyDeposit * ((Math.pow(1 + rMonthly, months) - 1) / rMonthly)
+      : monthlyDeposit * months;
+
+    const totalWealth = fvInitial + fvDeposits;
+    const totalPrincipal = initialPrincipal + (monthlyDeposit * months);
+    const compoundInterest = Math.max(0, totalWealth - totalPrincipal);
+    const multiplier = totalPrincipal > 0 ? (totalWealth / totalPrincipal).toFixed(2) : '1.00';
+
+    return {
+      totalWealth,
+      totalPrincipal,
+      compoundInterest,
+      multiplier
+    };
+  }
+
+  function renderStashCards() {
+    const grid = document.getElementById('stashCardsGrid');
+    if (!grid) return;
+
+    grid.innerHTML = stashes.map(stash => {
+      const pct = Math.min(100, Math.round((stash.current / stash.target) * 100));
+      const milestone = pct >= 100 ? 'Funded' : `${pct}% Complete`;
+
+      return `
+        <div class="stash-card" data-id="${stash.id}">
+          <div class="stash-card-header">
+            <div class="stash-card-title-wrap">
+              <span class="stash-icon">${stash.icon}</span>
+              <div>
+                <div class="stash-name">${stash.name}</div>
+                <span class="stash-cat-badge">${stash.category}</span>
+              </div>
+            </div>
+            <span class="stash-milestone">${milestone}</span>
+          </div>
+
+          <div class="stash-progress-wrap">
+            <div class="stash-progress-labels">
+              <span class="stash-curr-val">${formatCurrency(stash.current)}</span>
+              <span class="stash-target-val">Target: ${formatCurrency(stash.target)}</span>
+            </div>
+            <div class="stash-progress-track">
+              <div class="stash-progress-fill" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+
+          <div class="stash-card-metrics">
+            <div class="stash-metric-col">
+              <span>Auto-Deploy</span>
+              <strong>${formatCurrency(stash.weekly)} / wk</strong>
+            </div>
+            <div class="stash-metric-col">
+              <span>Expected APY</span>
+              <strong style="color: #34d399;">${stash.apy}%</strong>
+            </div>
+          </div>
+
+          <div class="stash-card-actions">
+            <button type="button" class="btn-quick-deposit" data-action="deposit" data-id="${stash.id}">+ Quick Deposit $250</button>
+            <button type="button" class="btn-delete-stash" data-action="delete" data-id="${stash.id}" aria-label="Delete stash">&times;</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach card event listeners
+    grid.querySelectorAll('button[data-action="deposit"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const stash = stashes.find(s => s.id === id);
+        if (stash) {
+          stash.current += 250;
+          saveStashes();
+          updateAll();
+        }
+      });
+    });
+
+    grid.querySelectorAll('button[data-action="delete"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        stashes = stashes.filter(s => s.id !== id);
+        saveStashes();
+        updateAll();
+      });
+    });
+  }
+
+  function updateToolbarSummary() {
+    let totalAssets = 0;
+    let totalWeekly = 0;
+    stashes.forEach(s => {
+      totalAssets += s.current;
+      totalWeekly += s.weekly;
+    });
+
+    const assetsEl = document.getElementById('totalVaultAssets');
+    const weeklyEl = document.getElementById('totalWeeklyAuto');
+    const countEl = document.getElementById('activeStashCount');
+
+    if (assetsEl) assetsEl.textContent = formatCurrency(totalAssets);
+    if (weeklyEl) weeklyEl.textContent = `${formatCurrency(totalWeekly)} / wk`;
+    if (countEl) countEl.textContent = `${stashes.length} Goal${stashes.length !== 1 ? 's' : ''}`;
+  }
+
+  function updateProjector() {
+    const sliderPrincipal = document.getElementById('projectorInitialBalance');
+    const sliderWeekly = document.getElementById('projectorWeeklyDeposit');
+    const sliderApy = document.getElementById('projectorApy');
+
+    if (!sliderPrincipal || !sliderWeekly || !sliderApy) return;
+
+    const initial = parseFloat(sliderPrincipal.value) || 0;
+    const weekly = parseFloat(sliderWeekly.value) || 0;
+    const apy = parseFloat(sliderApy.value) || 0;
+
+    const valPrincipal = document.getElementById('valInitialBalance');
+    const valWeekly = document.getElementById('valWeeklyDeposit');
+    const valApy = document.getElementById('valApy');
+
+    if (valPrincipal) valPrincipal.textContent = formatCurrency(initial);
+    if (valWeekly) valWeekly.textContent = `${formatCurrency(weekly)} / wk`;
+    if (valApy) valApy.textContent = `${apy.toFixed(1)}%`;
+
+    const results = calculateCompoundGrowth(initial, weekly, apy, selectedYears);
+
+    const totalWealthEl = document.getElementById('projectedTotalWealth');
+    const totalPrincipalEl = document.getElementById('projectedTotalPrincipal');
+    const totalInterestEl = document.getElementById('projectedTotalInterest');
+    const chipEl = document.getElementById('yieldMultiplierChip');
+
+    if (totalWealthEl) totalWealthEl.textContent = formatCurrency(results.totalWealth);
+    if (totalPrincipalEl) totalPrincipalEl.textContent = formatCurrency(results.totalPrincipal);
+    if (totalInterestEl) totalInterestEl.textContent = `+${formatCurrency(results.compoundInterest)}`;
+    if (chipEl) chipEl.innerHTML = `<span>⚡ ${results.multiplier}x Wealth Multiplier over ${selectedYears} Year${selectedYears > 1 ? 's' : ''}</span>`;
+  }
+
+  function syncProjectorSlidersToVault() {
+    let totalAssets = 0;
+    let totalWeekly = 0;
+    let totalWeightedApy = 0;
+
+    stashes.forEach(s => {
+      totalAssets += s.current;
+      totalWeekly += s.weekly;
+      totalWeightedApy += (s.apy * s.current);
+    });
+
+    const avgApy = totalAssets > 0 ? (totalWeightedApy / totalAssets) : 7.5;
+
+    const sliderPrincipal = document.getElementById('projectorInitialBalance');
+    const sliderWeekly = document.getElementById('projectorWeeklyDeposit');
+    const sliderApy = document.getElementById('projectorApy');
+
+    if (sliderPrincipal) sliderPrincipal.value = Math.min(250000, totalAssets);
+    if (sliderWeekly) sliderWeekly.value = Math.min(3000, Math.max(25, totalWeekly));
+    if (sliderApy) sliderApy.value = Math.min(15, Math.max(1, avgApy.toFixed(1)));
+  }
+
+  function updateAll() {
+    renderStashCards();
+    updateToolbarSummary();
+    updateProjector();
+  }
+
+  function initSavingsVault() {
+    loadStashes();
+    syncProjectorSlidersToVault();
+    updateAll();
+
+    // Slider inputs
+    const sliderPrincipal = document.getElementById('projectorInitialBalance');
+    const sliderWeekly = document.getElementById('projectorWeeklyDeposit');
+    const sliderApy = document.getElementById('projectorApy');
+
+    if (sliderPrincipal) sliderPrincipal.addEventListener('input', updateProjector);
+    if (sliderWeekly) sliderWeekly.addEventListener('input', updateProjector);
+    if (sliderApy) sliderApy.addEventListener('input', updateProjector);
+
+    // Timeline chips
+    const timelineChips = document.querySelectorAll('.timeline-chip');
+    timelineChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        timelineChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        selectedYears = parseInt(chip.getAttribute('data-years'), 10) || 5;
+        updateProjector();
+      });
+    });
+
+    // Modal wiring
+    const modalBackdrop = document.getElementById('stashModalBackdrop');
+    const btnOpenModal = document.getElementById('btnOpenNewStashModal');
+    const btnCloseModal = document.getElementById('btnCloseStashModal');
+    const btnCancel = document.getElementById('btnCancelStash');
+    const stashForm = document.getElementById('newStashForm');
+
+    function openModal() {
+      if (modalBackdrop) modalBackdrop.hidden = false;
+      const nameInput = document.getElementById('stashName');
+      if (nameInput) nameInput.focus();
+    }
+
+    function closeModal() {
+      if (modalBackdrop) modalBackdrop.hidden = true;
+      if (stashForm) stashForm.reset();
+    }
+
+    if (btnOpenModal) btnOpenModal.addEventListener('click', openModal);
+    if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+    if (btnCancel) btnCancel.addEventListener('click', closeModal);
+
+    if (modalBackdrop) {
+      modalBackdrop.addEventListener('click', (e) => {
+        if (e.target === modalBackdrop) closeModal();
+      });
+    }
+
+    if (stashForm) {
+      stashForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('stashName').value.trim();
+        const category = document.getElementById('stashCategory').value;
+        const apy = parseFloat(document.getElementById('stashApy').value) || 6.5;
+        const target = parseFloat(document.getElementById('stashTarget').value) || 10000;
+        const initial = parseFloat(document.getElementById('stashInitial').value) || 0;
+        const weekly = parseFloat(document.getElementById('stashWeekly').value) || 100;
+
+        const iconMap = {
+          'Real Estate': '🏙️',
+          'Security': '🛡️',
+          'Growth': '🚀',
+          'Vehicle': '🏎️',
+          'Travel': '✈️'
+        };
+
+        const newStash = {
+          id: 'stash-' + Date.now(),
+          name: name || 'Custom Goal',
+          category,
+          icon: iconMap[category] || '💰',
+          target,
+          current: initial,
+          weekly,
+          apy
+        };
+
+        stashes.push(newStash);
+        saveStashes();
+        syncProjectorSlidersToVault();
+        updateAll();
+        closeModal();
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSavingsVault);
+  } else {
+    initSavingsVault();
+  }
+})();
+
