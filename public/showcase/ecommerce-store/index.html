@@ -487,6 +487,200 @@
         </div>
       </div>
     </div>
+    <!-- ===== BEGIN issue #434: Tiered Promo Code Engine & Canvas Invoice Generator ===== -->
+    <section class="promo-invoice-section" id="promoInvoiceSection" aria-labelledby="promoSectionTitle">
+      <div class="promo-section-header">
+        <div>
+          <div class="hero-tag">// ENGINE #04 · PROMO MATRIX &amp; INVOICE CANVAS</div>
+          <h2 id="promoSectionTitle" class="promo-main-title">Tiered Promo Engine &amp; High-DPI Canvas Invoice</h2>
+          <p class="promo-subtitle">Evaluate conditional volume tiers, category-specific promo codes, BOGO 2+1 rules, regional taxes, and export crisp Retina PNG receipts.</p>
+        </div>
+        <div class="promo-preset-actions" role="group" aria-label="Order simulation presets">
+          <button type="button" class="promo-preset-btn active" data-preset="bundle3" id="presetBundle3Btn">🎛️ BUNDLE3 Trio (2+1)</button>
+          <button type="button" class="promo-preset-btn" data-preset="cyber20" id="presetCyber20Btn">⚡ CYBER20 Rig</button>
+          <button type="button" class="promo-preset-btn" data-preset="freeship" id="presetFreeshipBtn">🚚 FREESHIP ($100+)</button>
+          <button type="button" class="promo-preset-btn" data-preset="live" id="presetLiveCartBtn">🛒 Sync Live Cart</button>
+        </div>
+      </div>
+
+      <div class="promo-studio-grid">
+        <!-- Left Panel: Cart Builder, Tier Engine, Rule Matrix & Address Estimator -->
+        <div class="promo-engine-panel">
+          <!-- Tier Progress Strip -->
+          <div class="tier-progress-card">
+            <div class="tier-progress-top">
+              <div>
+                <span class="tier-eyebrow">AUTOMATIC SPEND TIER</span>
+                <div class="tier-active-row">
+                  <span class="tier-badge" id="activeTierBadge">Standard · 0%</span>
+                  <span class="tier-hint" id="tierNextHint">Add $200.00 to unlock Builder Tier (5% off)</span>
+                </div>
+              </div>
+              <div class="tier-savings-stat">
+                <span>Tier Savings</span>
+                <strong id="tierSavingsValue">-$0.00</strong>
+              </div>
+            </div>
+            <div class="tier-meter-track" aria-hidden="true">
+              <div class="tier-meter-fill" id="tierMeterFill" style="width: 0%;"></div>
+            </div>
+            <div class="tier-milestones">
+              <span class="tier-milestone" data-tier="builder">$200 · Builder (5%)</span>
+              <span class="tier-milestone" data-tier="studio">$500 · Studio (10%)</span>
+              <span class="tier-milestone" data-tier="enterprise">$1,000 · Enterprise (15%)</span>
+            </div>
+          </div>
+
+          <!-- Active Order Line Items -->
+          <div class="promo-card-block">
+            <div class="promo-block-head">
+              <h3>Order Items <span class="order-source-pill" id="orderSourcePill">Preset: BUNDLE3 Trio</span></h3>
+              <div class="promo-quick-add-wrap">
+                <label for="studioProductSelect" class="sr-only">Add gear to promo calculator</label>
+                <select id="studioProductSelect" class="studio-select">
+                  <option value="p1">⌨️ CyberDeck Pro ($249)</option>
+                  <option value="p4">⌨️ Nexus Neo 65% ($149)</option>
+                  <option value="p8">⌨️ Keychronix Alice ($289)</option>
+                  <option value="p2">🎧 Acoustic Pulse ($199)</option>
+                  <option value="p5">🔊 Vortex Monitors ($349)</option>
+                  <option value="p7">🎙️ HyperStream Mic ($179)</option>
+                  <option value="p3">🖥️ Horizon 32" OLED ($899)</option>
+                  <option value="p6">🖥️ Apex UltraWide 49" ($1,199)</option>
+                </select>
+                <button type="button" class="studio-add-btn" id="studioAddItemBtn">+ Add Item</button>
+              </div>
+            </div>
+            <div class="studio-items-list" id="studioItemsList">
+              <!-- Populated dynamically by script.js -->
+            </div>
+          </div>
+
+          <!-- Promo Code Applicator & Quick Pills -->
+          <div class="promo-card-block">
+            <div class="promo-block-head">
+              <h3>Promotional Code Engine</h3>
+              <span class="promo-live-badge" id="activePromoStatusBadge">No Code Applied</span>
+            </div>
+            <div class="studio-coupon-bar">
+              <input type="text" id="studioCouponInput" class="coupon-input" placeholder="Enter CYBER20, FREESHIP, BUNDLE3, KEYB15..." autocomplete="off" autocapitalize="characters" spellcheck="false" />
+              <button type="button" class="studio-apply-btn" id="studioCouponApplyBtn">Apply Code</button>
+              <button type="button" class="studio-clear-btn" id="studioCouponClearBtn">Clear</button>
+            </div>
+            <div class="coupon-pills-row" id="studioCouponPills">
+              <button type="button" class="coupon-quick-pill" data-code="CYBER20">CYBER20 <span>20% OFF</span></button>
+              <button type="button" class="coupon-quick-pill" data-code="BUNDLE3">BUNDLE3 <span>BOGO 2+1</span></button>
+              <button type="button" class="coupon-quick-pill" data-code="FREESHIP">FREESHIP <span>$100+ FREE</span></button>
+              <button type="button" class="coupon-quick-pill" data-code="KEYB15">KEYB15 <span>15% KEYBOARDS</span></button>
+              <button type="button" class="coupon-quick-pill" data-code="AUDIO25">AUDIO25 <span>-$25 AUDIO</span></button>
+            </div>
+            <p class="studio-coupon-feedback" id="studioCouponFeedback" role="status" aria-live="polite"></p>
+          </div>
+
+          <!-- Rule-Based Cart Discount Matrix -->
+          <div class="promo-card-block">
+            <div class="promo-block-head">
+              <h3>Rule-Based Cart Discount Matrix</h3>
+              <span class="matrix-meta">Live Conditional Evaluator</span>
+            </div>
+            <div class="discount-matrix-wrap">
+              <table class="discount-matrix-table">
+                <thead>
+                  <tr>
+                    <th>Rule / Code</th>
+                    <th>Condition</th>
+                    <th>Status</th>
+                    <th>Impact</th>
+                  </tr>
+                </thead>
+                <tbody id="discountMatrixBody">
+                  <!-- Populated by script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Address, Tax & Shipping Estimator -->
+          <div class="promo-card-block">
+            <div class="promo-block-head">
+              <h3>Regional Tax &amp; Shipping Estimator</h3>
+              <span class="matrix-meta" id="taxRatePill">CA · 8.25%</span>
+            </div>
+            <div class="address-estimator-grid">
+              <div class="est-field">
+                <label for="estCustomerName">Recipient / Company</label>
+                <input type="text" id="estCustomerName" value="Alex Rivera · Nexus Labs" />
+              </div>
+              <div class="est-field">
+                <label for="estStateSelect">Tax Jurisdiction</label>
+                <select id="estStateSelect">
+                  <option value="CA" selected>California (CA · 8.25%)</option>
+                  <option value="NY">New York (NY · 8.875%)</option>
+                  <option value="TX">Texas (TX · 6.25%)</option>
+                  <option value="WA">Washington (WA · 6.50%)</option>
+                  <option value="OR">Oregon (OR · 0.00% Tax-Free)</option>
+                  <option value="DE">Delaware (DE · 0.00% Tax-Free)</option>
+                  <option value="EU-DE">Germany / EU (19.0% VAT)</option>
+                  <option value="UK">United Kingdom (20.0% VAT)</option>
+                </select>
+              </div>
+              <div class="est-field">
+                <label for="estZipInput">Postal / ZIP Code</label>
+                <input type="text" id="estZipInput" value="94107" maxlength="12" />
+              </div>
+              <div class="est-field">
+                <label for="estShippingSpeed">Shipping Method</label>
+                <select id="estShippingSpeed">
+                  <option value="standard" selected>Standard Ground ($12.00)</option>
+                  <option value="express">Priority Express (+$18.00)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: High-DPI HTML5 Canvas Invoice Generator -->
+        <div class="invoice-canvas-panel">
+          <div class="invoice-panel-topbar">
+            <div>
+              <span class="invoice-eyebrow">EXPORTABLE RECEIPT STUDIO</span>
+              <h3 id="invoiceHeaderId">Invoice #NX-2026-4340</h3>
+            </div>
+            <span class="hidpi-pill">2x HiDPI Canvas · PNG</span>
+          </div>
+
+          <div class="invoice-summary-strip" id="invoiceSummaryStrip">
+            <div class="inv-kpi">
+              <span>Gross</span>
+              <strong id="studioGrossTotal">$0.00</strong>
+            </div>
+            <div class="inv-kpi savings">
+              <span>Discounts</span>
+              <strong id="studioTotalSavings">-$0.00</strong>
+            </div>
+            <div class="inv-kpi">
+              <span>Tax &amp; Ship</span>
+              <strong id="studioTaxShipTotal">$0.00</strong>
+            </div>
+            <div class="inv-kpi grand">
+              <span>Net Total</span>
+              <strong id="studioGrandTotal">$0.00</strong>
+            </div>
+          </div>
+
+          <div class="canvas-stage">
+            <canvas id="invoiceReceiptCanvas" width="920" height="1380" aria-label="Generated high-DPI Nexus Store invoice receipt with itemized table, discounts, and barcode"></canvas>
+          </div>
+
+          <div class="invoice-export-actions">
+            <button type="button" class="btn-download-invoice" id="downloadInvoiceBtn">📥 Download Invoice PNG</button>
+            <button type="button" class="btn-regen-invoice" id="regenInvoiceBtn" title="Generate new invoice serial & barcode">🔄 New Invoice ID</button>
+            <button type="button" class="btn-push-cart" id="pushOrderToCartBtn" title="Copy current simulated items into live shopping cart">🛒 Load Into Cart</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ===== END issue #434 ===== -->
+
     <!-- ===== BEGIN issue #189: Customer Reviews & Rating Breakdown Analytics Widget ===== -->
     <section class="reviews-analytics-section" id="reviewsSection">
       <div class="reviews-section-header">
@@ -640,7 +834,7 @@
       <form class="coupon-form" id="couponForm" novalidate>
         <label class="coupon-label" for="couponInput">Promo code</label>
         <div class="coupon-row">
-          <input type="text" id="couponInput" class="coupon-input" placeholder="e.g. CAREER20" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="couponMessage" />
+          <input type="text" id="couponInput" class="coupon-input" placeholder="CYBER20, BUNDLE3, FREESHIP..." autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="couponMessage" />
           <button type="submit" class="coupon-apply" id="couponApply">Apply</button>
         </div>
         <p class="coupon-message" id="couponMessage" role="status" aria-live="polite"></p>
@@ -652,9 +846,10 @@
       </form>
       <dl class="summary" id="cartSummary" aria-live="polite">
         <div class="summary-row"><dt>Subtotal</dt><dd id="cartSubtotal">$0.00</dd></div>
+        <div class="summary-row discount-row" id="tierDiscountRow" hidden><dt id="tierDiscountLabel">Tier Discount</dt><dd id="cartTierDiscount">-$0.00</dd></div>
         <div class="summary-row discount-row" id="discountRow" hidden><dt id="discountLabel">Discount</dt><dd id="cartDiscount">-$0.00</dd></div>
         <div class="summary-row"><dt>Shipping</dt><dd id="cartShipping">$0.00</dd></div>
-        <div class="summary-row"><dt>Est. tax (8%)</dt><dd id="cartTax">$0.00</dd></div>
+        <div class="summary-row"><dt id="cartTaxLabel">Est. tax (8%)</dt><dd id="cartTax">$0.00</dd></div>
       </dl>
       <div class="total-row">
         <span>Total:</span>
