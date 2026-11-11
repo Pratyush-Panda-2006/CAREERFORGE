@@ -298,3 +298,80 @@ test('Reject invalid item parameters gracefully', () => {
   assert.throws(() => cart.addItem('bad_price_nan', 'Item', NaN), TypeError);
   assert.throws(() => cart.addItem('bad_qty', 'Item', 10, '📦', 0), TypeError);
 });
+
+// Multi-Currency Pricing Engine Tests
+const CURRENCIES = {
+  USD: { code: 'USD', symbol: '$', rate: 1.0, locale: 'en-US', digits: 2 },
+  EUR: { code: 'EUR', symbol: '€', rate: 0.92, locale: 'de-DE', digits: 2 },
+  GBP: { code: 'GBP', symbol: '£', rate: 0.78, locale: 'en-GB', digits: 2 },
+  JPY: { code: 'JPY', symbol: '¥', rate: 152.0, locale: 'ja-JP', digits: 0 },
+  CAD: { code: 'CAD', symbol: 'CA$', rate: 1.38, locale: 'en-CA', digits: 2 },
+  INR: { code: 'INR', symbol: '₹', rate: 83.5, locale: 'en-IN', digits: 2 },
+  AUD: { code: 'AUD', symbol: 'A$', rate: 1.52, locale: 'en-AU', digits: 2 }
+};
+
+function convertCurrency(amountUSD, targetCode = 'USD') {
+  const cur = CURRENCIES[targetCode] || CURRENCIES.USD;
+  return Math.round(amountUSD * cur.rate * 100) / 100;
+}
+
+function formatMoney(amount, currencyCode = 'USD') {
+  const cur = CURRENCIES[currencyCode] || CURRENCIES.USD;
+  const converted = amount * cur.rate;
+  const digits = cur.digits !== undefined ? cur.digits : 2;
+  try {
+    return new Intl.NumberFormat(cur.locale, {
+      style: 'currency',
+      currency: cur.code,
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits
+    }).format(converted);
+  } catch {
+    return `${cur.symbol}${converted.toFixed(digits)}`;
+  }
+}
+
+test('Multi-currency conversion rates calculate correctly for major currencies', () => {
+  const baseUSD = 100.00;
+  assert.equal(convertCurrency(baseUSD, 'USD'), 100.00);
+  assert.equal(convertCurrency(baseUSD, 'EUR'), 92.00);
+  assert.equal(convertCurrency(baseUSD, 'GBP'), 78.00);
+  assert.equal(convertCurrency(baseUSD, 'JPY'), 15200.00);
+  assert.equal(convertCurrency(baseUSD, 'CAD'), 138.00);
+  assert.equal(convertCurrency(baseUSD, 'INR'), 8350.00);
+  assert.equal(convertCurrency(baseUSD, 'AUD'), 152.00);
+});
+
+test('Multi-currency formatter renders correct currency symbols and fraction digits', () => {
+  const formattedUSD = formatMoney(249.00, 'USD');
+  assert.ok(formattedUSD.includes('249.00'));
+  assert.ok(formattedUSD.includes('$'));
+
+  const formattedEUR = formatMoney(100.00, 'EUR');
+  assert.ok(formattedEUR.includes('92'));
+
+  const formattedJPY = formatMoney(100.00, 'JPY');
+  assert.ok(formattedJPY.includes('15,200') || formattedJPY.includes('15200'));
+  // JPY should not have fractional decimals .00
+  assert.ok(!formattedJPY.includes('.00'));
+
+  // Unknown currency code should fallback safely to USD
+  const fallback = formatMoney(50.00, 'XYZ');
+  assert.ok(fallback.includes('$50.00'));
+});
+
+test('Cart totals converted across multiple currencies retain consistent proportions', () => {
+  const cart = new ShoppingCart();
+  cart.addItem('p1', 'CyberDeck Pro', 249.00);
+  cart.applyCoupon('CAREER20'); // 20% off -> discount = 49.80, discounted = 199.20
+
+  const totals = cart.calculateTotals();
+  assert.equal(totals.subtotal, 249.00);
+  assert.equal(totals.discount, 49.80);
+
+  // Convert subtotal and discount to EUR
+  const eurSubtotal = convertCurrency(totals.subtotal, 'EUR');
+  const eurDiscount = convertCurrency(totals.discount, 'EUR');
+  assert.equal(eurSubtotal, 229.08); // 249 * 0.92
+  assert.equal(eurDiscount, 45.82); // 49.80 * 0.92 = 45.816 -> 45.82
+});
