@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initIntegrationFilters();
   initSystemStatus();
   initTelemetryAnomalyDetector();
+  initDistributedTracingVisualizer();
 });
 
 function initFaqAccordion() {
@@ -1957,6 +1958,604 @@ function initTelemetryAnomalyDetector() {
   startStreamLoops();
 }
 /* ===== END Issue #440 ===== */
+
+/* ===== BEGIN Issue #422: Interactive Distributed Tracing Flamegraph Waterfall Visualizer ===== */
+function initDistributedTracingVisualizer() {
+  'use strict';
+
+  const container = document.getElementById('waterfallRowsContainer');
+  if (!container) return;
+
+  // Trace Catalog (OpenTelemetry-style spans)
+  const TRACE_CATALOG = Object.freeze({
+    'trace-8f4a21c9': {
+      id: 'trace-8f4a21c9',
+      title: 'Checkout Payment Authorization Flow',
+      totalMs: 418.4,
+      bottleneckText: 'postgres-db (57.8%)',
+      healthText: '⚠️ 1 Cache Miss / Bottleneck',
+      spans: [
+        {
+          id: 'sp_001_gw',
+          parentId: null,
+          service: 'api-gateway',
+          operation: 'POST /v2/checkout/authorize',
+          startMs: 0.0,
+          durationMs: 418.4,
+          status: '200 OK',
+          isError: false,
+          isCritical: true,
+          tags: { 'http.method': 'POST', 'http.status_code': '200', 'net.host.name': 'edge-us-east-1', 'tls.protocol': 'TLSv1.3' },
+          logs: [{ ts: '0.0ms', msg: 'Request received at Edge Ingress Proxy' }, { ts: '418.4ms', msg: 'Response flushed to client' }]
+        },
+        {
+          id: 'sp_002_auth',
+          parentId: 'sp_001_gw',
+          service: 'auth-service',
+          operation: 'verify_jwt_session',
+          startMs: 4.2,
+          durationMs: 38.6,
+          status: '200 OK',
+          isError: false,
+          isCritical: false,
+          tags: { 'auth.provider': 'oauth2-oidc', 'user.tier': 'enterprise', 'key.alg': 'RS256' },
+          logs: [{ ts: '4.2ms', msg: 'Extracting Bearer token signature' }, { ts: '42.8ms', msg: 'Session claims verified' }]
+        },
+        {
+          id: 'sp_003_redis_auth',
+          parentId: 'sp_002_auth',
+          service: 'redis-cache',
+          operation: 'GET session:usr_9012f',
+          startMs: 10.5,
+          durationMs: 6.4,
+          status: 'CACHE HIT',
+          isError: false,
+          isCritical: false,
+          tags: { 'db.system': 'redis', 'cache.hit': 'true', 'net.peer.port': '6379' },
+          logs: [{ ts: '16.9ms', msg: 'Session payload hydrated from Redis node-02' }]
+        },
+        {
+          id: 'sp_004_bill',
+          parentId: 'sp_001_gw',
+          service: 'billing-engine',
+          operation: 'calculate_ledger_settlement',
+          startMs: 44.0,
+          durationMs: 362.0,
+          status: '200 OK',
+          isError: false,
+          isCritical: true,
+          tags: { 'rpc.system': 'grpc', 'currency': 'USD', 'idempotency_key': 'idem_78391a' },
+          logs: [{ ts: '44.0ms', msg: 'Acquiring distributed settlement lock' }]
+        },
+        {
+          id: 'sp_005_redis_miss',
+          parentId: 'sp_004_bill',
+          service: 'redis-cache',
+          operation: 'GET promo_matrix:global',
+          startMs: 48.0,
+          durationMs: 14.2,
+          status: 'CACHE MISS',
+          isError: false,
+          isCritical: false,
+          tags: { 'db.system': 'redis', 'cache.hit': 'false', 'fallback': 'postgres-primary' },
+          logs: [{ ts: '62.2ms', msg: 'Key expired (TTL 0s) — falling back to primary DB' }]
+        },
+        {
+          id: 'sp_006_pg_select',
+          parentId: 'sp_004_bill',
+          service: 'postgres-db',
+          operation: 'SELECT * FROM ledger_entries WHERE org_id = $1',
+          startMs: 64.0,
+          durationMs: 242.0,
+          status: 'SLOW QUERY',
+          isError: false,
+          isCritical: true,
+          tags: { 'db.system': 'postgresql', 'db.name': 'cloudpulse_prod', 'db.rows_scanned': '184,210', 'index.used': 'false (Seq Scan)' },
+          logs: [{ ts: '64.0ms', msg: 'Query queued waiting for connection pool slot' }, { ts: '306.0ms', msg: 'Sequential scan completed in 242.0ms (BOTTLENECK)' }]
+        },
+        {
+          id: 'sp_007_pg_commit',
+          parentId: 'sp_004_bill',
+          service: 'postgres-db',
+          operation: 'INSERT INTO transactions_audit COMMIT',
+          startMs: 312.0,
+          durationMs: 88.5,
+          status: '200 OK',
+          isError: false,
+          isCritical: true,
+          tags: { 'db.system': 'postgresql', 'isolation': 'SERIALIZABLE', 'wal.sync': 'true' },
+          logs: [{ ts: '400.5ms', msg: 'Transaction committed to WAL replica' }]
+        }
+      ]
+    },
+    'trace-3d91b7e4': {
+      id: 'trace-3d91b7e4',
+      title: 'Vector RAG Inference Pipeline',
+      totalMs: 245.0,
+      bottleneckText: 'postgres-db (48.2%)',
+      healthText: '✅ Healthy (All 200 OK)',
+      spans: [
+        {
+          id: 'sp_r01_gw',
+          parentId: null,
+          service: 'api-gateway',
+          operation: 'POST /v2/rag/query-stream',
+          startMs: 0.0,
+          durationMs: 245.0,
+          status: '200 OK',
+          isError: false,
+          isCritical: true,
+          tags: { 'http.method': 'POST', 'model': 'gemini-3.8-flash', 'stream': 'sse' },
+          logs: [{ ts: '0.0ms', msg: 'Streaming inference initiated' }]
+        },
+        {
+          id: 'sp_r02_auth',
+          parentId: 'sp_r01_gw',
+          service: 'auth-service',
+          operation: 'validate_api_key_quota',
+          startMs: 3.0,
+          durationMs: 18.0,
+          status: '200 OK',
+          isError: false,
+          isCritical: false,
+          tags: { 'rate_limit.remaining': '9842' },
+          logs: [{ ts: '21.0ms', msg: 'Token quota validated' }]
+        },
+        {
+          id: 'sp_r03_redis',
+          parentId: 'sp_r01_gw',
+          service: 'redis-cache',
+          operation: 'HGET embedding_cache:q_77a',
+          startMs: 24.0,
+          durationMs: 9.5,
+          status: 'CACHE HIT',
+          isError: false,
+          isCritical: false,
+          tags: { 'cache.hit': 'true', 'vector.dims': '1536' },
+          logs: [{ ts: '33.5ms', msg: 'Embedding vector loaded from cache' }]
+        },
+        {
+          id: 'sp_r04_pg',
+          parentId: 'sp_r01_gw',
+          service: 'postgres-db',
+          operation: 'SELECT id, content FROM docs ORDER BY embedding <=> $1 LIMIT 8',
+          startMs: 36.0,
+          durationMs: 118.0,
+          status: '200 OK',
+          isError: false,
+          isCritical: true,
+          tags: { 'db.system': 'pgvector', 'index.type': 'hnsw', 'ef_search': '64' },
+          logs: [{ ts: '154.0ms', msg: 'Top-8 semantic chunks retrieved' }]
+        },
+        {
+          id: 'sp_r05_bill',
+          parentId: 'sp_r01_gw',
+          service: 'billing-engine',
+          operation: 'record_token_usage_async',
+          startMs: 158.0,
+          durationMs: 82.0,
+          status: '200 OK',
+          isError: false,
+          isCritical: true,
+          tags: { 'tokens.prompt': '1420', 'tokens.completion': '380' },
+          logs: [{ ts: '240.0ms', msg: 'Usage ledger incremented' }]
+        }
+      ]
+    },
+    'trace-9c02f1a8': {
+      id: 'trace-9c02f1a8',
+      title: 'Order Inventory Sync Timeout',
+      totalMs: 682.0,
+      bottleneckText: 'postgres-db (Deadlock 504)',
+      healthText: '🚨 2 Error Spans (504 Timeout)',
+      spans: [
+        {
+          id: 'sp_e01_gw',
+          parentId: null,
+          service: 'api-gateway',
+          operation: 'PUT /v2/inventory/reserve',
+          startMs: 0.0,
+          durationMs: 682.0,
+          status: '504 GATEWAY TIMEOUT',
+          isError: true,
+          isCritical: true,
+          tags: { 'http.status_code': '504', 'error': 'true', 'retry_count': '2' },
+          logs: [{ ts: '682.0ms', msg: 'Upstream microservice exceeded 650ms SLA deadline' }]
+        },
+        {
+          id: 'sp_e02_auth',
+          parentId: 'sp_e01_gw',
+          service: 'auth-service',
+          operation: 'verify_service_mtls',
+          startMs: 5.0,
+          durationMs: 22.0,
+          status: '200 OK',
+          isError: false,
+          isCritical: false,
+          tags: { 'mtls.spiffe_id': 'spiffe://cloudpulse/inventory' },
+          logs: [{ ts: '27.0ms', msg: 'mTLS certificate verified' }]
+        },
+        {
+          id: 'sp_e03_redis',
+          parentId: 'sp_e01_gw',
+          service: 'redis-cache',
+          operation: 'SETNX lock:sku_4092 EX 5',
+          startMs: 30.0,
+          durationMs: 12.0,
+          status: 'LOCK ACQUIRED',
+          isError: false,
+          isCritical: false,
+          tags: { 'lock.ttl_ms': '5000' },
+          logs: [{ ts: '42.0ms', msg: 'Distributed lock acquired' }]
+        },
+        {
+          id: 'sp_e04_pg',
+          parentId: 'sp_e01_gw',
+          service: 'postgres-db',
+          operation: 'UPDATE warehouse_stock SET qty = qty - 1 WHERE sku = $1',
+          startMs: 46.0,
+          durationMs: 615.0,
+          status: 'DEADLOCK TIMEOUT',
+          isError: true,
+          isCritical: true,
+          tags: { 'db.system': 'postgresql', 'error.code': '40P01', 'lock_wait_ms': '602.4' },
+          logs: [
+            { ts: '46.0ms', msg: 'Waiting for row-level exclusive lock on sku_4092' },
+            { ts: '661.0ms', msg: 'ERROR 40P01: deadlock detected; statement aborted', isErr: true }
+          ]
+        }
+      ]
+    }
+  });
+
+  // State
+  let activeTraceId = 'trace-8f4a21c9';
+  let selectedSpanId = 'sp_006_pg_select';
+  let searchQuery = '';
+  let serviceFilter = 'all';
+  let showCriticalPath = true;
+  const collapsedIds = new Set();
+
+  // Compute self-time for a span (total minus direct children span duration)
+  function calculateSelfTime(span, allSpans) {
+    const children = allSpans.filter((s) => s.parentId === span.id);
+    const childSum = children.reduce((acc, c) => acc + c.durationMs, 0);
+    return Math.max(0.1, Math.round((span.durationMs - childSum) * 10) / 10);
+  }
+
+  // Build hierarchical display list respecting collapse states
+  function buildTreeRows(spans) {
+    const rows = [];
+    const byParent = new Map();
+    spans.forEach((sp) => {
+      const pid = sp.parentId || '__root__';
+      if (!byParent.has(pid)) byParent.set(pid, []);
+      byParent.get(pid).push(sp);
+    });
+
+    function traverse(parentId, depth) {
+      const children = byParent.get(parentId) || [];
+      children.forEach((sp) => {
+        const hasChildren = (byParent.get(sp.id) || []).length > 0;
+        rows.push({ span: sp, depth, hasChildren });
+        if (hasChildren && !collapsedIds.has(sp.id)) {
+          traverse(sp.id, depth + 1);
+        }
+      });
+    }
+
+    traverse('__root__', 0);
+    return rows;
+  }
+
+  // Render Waterfall Rows
+  function renderWaterfall() {
+    const trace = TRACE_CATALOG[activeTraceId];
+    if (!trace) return;
+
+    // Update Summary KPIs
+    const totalEl = document.getElementById('traceTotalLatency');
+    if (totalEl) totalEl.textContent = `${trace.totalMs.toFixed(1)} ms`;
+
+    const statsEl = document.getElementById('traceSpanStats');
+    if (statsEl) statsEl.textContent = `${trace.spans.length} spans · ${trace.title}`;
+
+    const bottleneckEl = document.getElementById('traceBottleneckVal');
+    if (bottleneckEl) bottleneckEl.textContent = trace.bottleneckText;
+
+    const healthEl = document.getElementById('traceHealthStatus');
+    if (healthEl) healthEl.textContent = trace.healthText;
+
+    // Update Axis Ticks
+    const axisEl = document.getElementById('waterfallTimeAxis');
+    if (axisEl) {
+      axisEl.replaceChildren();
+      for (let i = 0; i <= 4; i++) {
+        const tickSpan = document.createElement('span');
+        tickSpan.textContent = `${Math.round((trace.totalMs / 4) * i)} ms`;
+        axisEl.appendChild(tickSpan);
+      }
+    }
+
+    // Build filtered rows
+    const treeRows = buildTreeRows(trace.spans).filter(({ span }) => {
+      const matchesService = serviceFilter === 'all' || span.service === serviceFilter;
+      const matchesSearch =
+        !searchQuery ||
+        span.operation.toLowerCase().includes(searchQuery) ||
+        span.service.toLowerCase().includes(searchQuery) ||
+        span.id.toLowerCase().includes(searchQuery);
+      return matchesService && matchesSearch;
+    });
+
+    container.replaceChildren();
+
+    treeRows.forEach(({ span, depth, hasChildren }) => {
+      const row = document.createElement('div');
+      row.className = `wf-span-row ${span.id === selectedSpanId ? 'selected' : ''}`;
+      row.setAttribute('role', 'treeitem');
+      row.setAttribute('tabindex', '0');
+
+      // Left cell: hierarchical tree
+      const treeCell = document.createElement('div');
+      treeCell.className = 'wf-tree-cell';
+      treeCell.style.paddingLeft = `${12 + depth * 18}px`;
+
+      if (hasChildren) {
+        const expBtn = document.createElement('button');
+        expBtn.type = 'button';
+        expBtn.className = 'wf-expand-btn';
+        expBtn.textContent = collapsedIds.has(span.id) ? '▶' : '▼';
+        expBtn.setAttribute('aria-label', collapsedIds.has(span.id) ? 'Expand span children' : 'Collapse span children');
+        expBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (collapsedIds.has(span.id)) collapsedIds.delete(span.id);
+          else collapsedIds.add(span.id);
+          renderWaterfall();
+        });
+        treeCell.appendChild(expBtn);
+      } else {
+        const spacer = document.createElement('span');
+        spacer.style.width = '16px';
+        spacer.style.display = 'inline-block';
+        spacer.style.flexShrink = '0';
+        treeCell.appendChild(spacer);
+      }
+
+      const dot = document.createElement('span');
+      dot.className = `wf-service-dot svc-bg-${span.service}`;
+      if (span.isError) dot.style.background = '#ef4444';
+      treeCell.appendChild(dot);
+
+      const opLbl = document.createElement('span');
+      opLbl.className = `wf-op-label ${span.isError ? 'is-error' : ''}`;
+      opLbl.textContent = span.operation;
+      opLbl.title = `${span.service}: ${span.operation}`;
+      treeCell.appendChild(opLbl);
+
+      // Right cell: duration bar
+      const timeCell = document.createElement('div');
+      timeCell.className = 'wf-timeline-cell';
+
+      const barWrapper = document.createElement('div');
+      barWrapper.className = 'wf-bar-wrapper';
+
+      const leftPct = (span.startMs / trace.totalMs) * 100;
+      const widthPct = Math.max(1.5, (span.durationMs / trace.totalMs) * 100);
+
+      const bar = document.createElement('div');
+      bar.className = `wf-duration-bar svc-bg-${span.service}`;
+      if (span.isError) bar.classList.add('is-error');
+      if (showCriticalPath && span.isCritical) bar.classList.add('critical-path');
+      bar.style.left = `${leftPct}%`;
+      bar.style.width = `${widthPct}%`;
+
+      if (widthPct > 18) {
+        bar.textContent = `${span.durationMs.toFixed(1)} ms`;
+      } else {
+        const durTag = document.createElement('span');
+        durTag.className = 'wf-bar-duration-text';
+        durTag.textContent = `${span.durationMs.toFixed(1)} ms`;
+        bar.appendChild(durTag);
+      }
+
+      barWrapper.appendChild(bar);
+      timeCell.appendChild(barWrapper);
+
+      row.appendChild(treeCell);
+      row.appendChild(timeCell);
+
+      row.addEventListener('click', () => {
+        selectedSpanId = span.id;
+        renderWaterfall();
+        renderInspector(span, trace.spans);
+      });
+
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectedSpanId = span.id;
+          renderWaterfall();
+          renderInspector(span, trace.spans);
+        }
+      });
+
+      container.appendChild(row);
+    });
+  }
+
+  // Render Span Inspection Drawer
+  function renderInspector(span, allSpans) {
+    if (!span) return;
+
+    const svcTag = document.getElementById('inspectorServiceTag');
+    if (svcTag) svcTag.textContent = span.service;
+
+    const opName = document.getElementById('inspectorOpName');
+    if (opName) opName.textContent = span.operation;
+
+    const startEl = document.getElementById('inspectorStartMs');
+    if (startEl) startEl.textContent = `${span.startMs.toFixed(1)} ms`;
+
+    const durEl = document.getElementById('inspectorDurationMs');
+    if (durEl) durEl.textContent = `${span.durationMs.toFixed(1)} ms`;
+
+    const selfEl = document.getElementById('inspectorSelfMs');
+    if (selfEl) selfEl.textContent = `${calculateSelfTime(span, allSpans).toFixed(1)} ms`;
+
+    const statusEl = document.getElementById('inspectorStatus');
+    if (statusEl) {
+      statusEl.textContent = span.status;
+      statusEl.style.color = span.isError ? '#f87171' : '#34d399';
+    }
+
+    const spIdEl = document.getElementById('inspectorSpanId');
+    if (spIdEl) spIdEl.textContent = span.id;
+
+    const parentEl = document.getElementById('inspectorParentId');
+    if (parentEl) parentEl.textContent = span.parentId || 'root';
+
+    // Attributes / Tags
+    const tagsList = document.getElementById('inspectorTagsList');
+    if (tagsList) {
+      tagsList.replaceChildren();
+      Object.entries(span.tags || {}).forEach(([k, v]) => {
+        const tagRow = document.createElement('div');
+        tagRow.className = 'span-tag-row';
+
+        const keySpan = document.createElement('span');
+        keySpan.className = 'span-tag-key';
+        keySpan.textContent = k;
+
+        const valSpan = document.createElement('span');
+        valSpan.className = 'span-tag-val';
+        valSpan.textContent = String(v);
+
+        tagRow.appendChild(keySpan);
+        tagRow.appendChild(valSpan);
+        tagsList.appendChild(tagRow);
+      });
+    }
+
+    // Logs
+    const logsList = document.getElementById('inspectorLogsList');
+    if (logsList) {
+      logsList.replaceChildren();
+      (span.logs || []).forEach((log) => {
+        const logItem = document.createElement('div');
+        logItem.className = `span-log-item ${log.isErr ? 'err' : ''}`;
+
+        const tsSpan = document.createElement('span');
+        tsSpan.className = 'log-ts';
+        tsSpan.textContent = `[+${log.ts}]`;
+
+        const msgSpan = document.createElement('span');
+        msgSpan.textContent = log.msg;
+
+        logItem.appendChild(tsSpan);
+        logItem.appendChild(msgSpan);
+        logsList.appendChild(logItem);
+      });
+    }
+  }
+
+  // Bind UI Controls
+  function bindEvents() {
+    const pills = document.getElementById('tracePresetPills');
+    if (pills) {
+      pills.addEventListener('click', (e) => {
+        const pill = e.target.closest('.trace-pill');
+        if (!pill) return;
+
+        const tid = pill.getAttribute('data-trace');
+        if (!tid || !TRACE_CATALOG[tid]) return;
+
+        activeTraceId = tid;
+        collapsedIds.clear();
+        const firstSpan = TRACE_CATALOG[tid].spans[0];
+        selectedSpanId = firstSpan ? firstSpan.id : '';
+
+        pills.querySelectorAll('.trace-pill').forEach((p) => {
+          const isMatch = p === pill;
+          p.classList.toggle('active', isMatch);
+          p.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+        });
+
+        renderWaterfall();
+        renderInspector(firstSpan, TRACE_CATALOG[tid].spans);
+      });
+    }
+
+    const searchInput = document.getElementById('traceSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        searchQuery = searchInput.value.trim().toLowerCase();
+        renderWaterfall();
+      });
+    }
+
+    const svcFilter = document.getElementById('traceServiceFilter');
+    if (svcFilter) {
+      svcFilter.addEventListener('change', () => {
+        serviceFilter = svcFilter.value;
+        renderWaterfall();
+      });
+    }
+
+    const btnExpand = document.getElementById('btnTraceExpandAll');
+    if (btnExpand) {
+      btnExpand.addEventListener('click', () => {
+        collapsedIds.clear();
+        renderWaterfall();
+      });
+    }
+
+    const btnCollapse = document.getElementById('btnTraceCollapseAll');
+    if (btnCollapse) {
+      btnCollapse.addEventListener('click', () => {
+        const trace = TRACE_CATALOG[activeTraceId];
+        if (trace) {
+          trace.spans.forEach((s) => {
+            if (trace.spans.some((c) => c.parentId === s.id)) {
+              collapsedIds.add(s.id);
+            }
+          });
+          renderWaterfall();
+        }
+      });
+    }
+
+    const critToggle = document.getElementById('criticalPathToggle');
+    if (critToggle) {
+      critToggle.addEventListener('change', () => {
+        showCriticalPath = critToggle.checked;
+        renderWaterfall();
+      });
+    }
+
+    const btnCopy = document.getElementById('btnCopySpanJson');
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => {
+        const trace = TRACE_CATALOG[activeTraceId];
+        const span = trace?.spans.find((s) => s.id === selectedSpanId);
+        if (span) {
+          navigator.clipboard.writeText(JSON.stringify(span, null, 2)).then(() => {
+            btnCopy.textContent = 'Copied!';
+            setTimeout(() => { btnCopy.textContent = 'Copy JSON'; }, 2000);
+          }).catch(() => {});
+        }
+      });
+    }
+  }
+
+  // Initial Render
+  bindEvents();
+  const initialTrace = TRACE_CATALOG[activeTraceId];
+  const initialSpan = initialTrace.spans.find((s) => s.id === selectedSpanId) || initialTrace.spans[0];
+  renderWaterfall();
+  renderInspector(initialSpan, initialTrace.spans);
+}
+/* ===== END Issue #422 ===== */
 
 /*System Status Indicator*/
 function initSystemStatus() {

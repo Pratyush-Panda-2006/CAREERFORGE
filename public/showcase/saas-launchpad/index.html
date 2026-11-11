@@ -1320,6 +1320,166 @@
   </section>
   <!-- ===== END Issue #440 ===== -->
 
+  <!-- ===== BEGIN Issue #422: Interactive Distributed Tracing Flamegraph Waterfall Visualizer ===== -->
+  <section class="distributed-tracing-section" id="distributed-tracing-section" aria-labelledby="tracing-title">
+    <div class="tracing-container">
+      <div class="tracing-header">
+        <div class="tracing-badge">🔍 OPENTELEMETRY DISTRIBUTED TRACING</div>
+        <h2 id="tracing-title">Interactive Microservice Flamegraph Waterfall Visualizer</h2>
+        <p class="tracing-subtitle">
+          Trace hierarchical request execution across Auth, API Gateway, PostgreSQL, and Redis clusters.
+          Identify critical path latency bottlenecks, inspect span attributes, and isolate cascading errors.
+        </p>
+      </div>
+
+      <!-- Trace Control Bar -->
+      <div class="tracing-controls-card">
+        <div class="trace-presets-row">
+          <span class="control-label">🧵 Select Sample Distributed Trace:</span>
+          <div class="trace-preset-pills" id="tracePresetPills" role="tablist" aria-label="Distributed Trace Presets">
+            <button type="button" class="trace-pill active" data-trace="trace-8f4a21c9" role="tab" aria-selected="true">
+              <span class="pill-id">trace-8f4a21c9</span>
+              <span class="pill-desc">Checkout Payment Flow (418ms)</span>
+            </button>
+            <button type="button" class="trace-pill" data-trace="trace-3d91b7e4" role="tab" aria-selected="false">
+              <span class="pill-id">trace-3d91b7e4</span>
+              <span class="pill-desc">Vector RAG Inference (245ms)</span>
+            </button>
+            <button type="button" class="trace-pill" data-trace="trace-9c02f1a8" role="tab" aria-selected="false">
+              <span class="pill-id">trace-9c02f1a8</span>
+              <span class="pill-desc">Inventory Sync Timeout (682ms · Err)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="trace-toolbar-row">
+          <div class="trace-search-wrap">
+            <span class="search-icon" aria-hidden="true">🔎</span>
+            <input type="text" id="traceSearchInput" placeholder="Filter spans by Trace ID, service, or operation (e.g. SELECT, Redis)..." aria-label="Search spans or trace ID" />
+          </div>
+
+          <div class="trace-filter-group">
+            <select id="traceServiceFilter" class="trace-select" aria-label="Filter by microservice">
+              <option value="all">All Microservices</option>
+              <option value="api-gateway">api-gateway</option>
+              <option value="auth-service">auth-service</option>
+              <option value="postgres-db">postgres-db</option>
+              <option value="redis-cache">redis-cache</option>
+              <option value="billing-engine">billing-engine</option>
+            </select>
+
+            <button type="button" class="btn-trace-action" id="btnTraceExpandAll">⊞ Expand All</button>
+            <button type="button" class="btn-trace-action" id="btnTraceCollapseAll">⊟ Collapse All</button>
+            <label class="critical-path-toggle" for="criticalPathToggle">
+              <input type="checkbox" id="criticalPathToggle" checked />
+              <span>🔥 Critical Path</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trace Summary KPI Strip -->
+      <div class="trace-summary-strip">
+        <div class="trace-kpi-box">
+          <span class="tkpi-label">TOTAL TRACE LATENCY</span>
+          <strong class="tkpi-val" id="traceTotalLatency">418.4 ms</strong>
+        </div>
+        <div class="trace-kpi-box">
+          <span class="tkpi-label">EXECUTED SPANS &amp; DEPTH</span>
+          <strong class="tkpi-val" id="traceSpanStats">12 spans · 4 levels</strong>
+        </div>
+        <div class="trace-kpi-box">
+          <span class="tkpi-label">CRITICAL BOTTLENECK</span>
+          <strong class="tkpi-val bottleneck-highlight" id="traceBottleneckVal">postgres-db (57.8%)</strong>
+        </div>
+        <div class="trace-kpi-box">
+          <span class="tkpi-label">TRACE HEALTH STATUS</span>
+          <strong class="tkpi-val" id="traceHealthStatus">⚠️ 1 Cache Miss / Warn</strong>
+        </div>
+      </div>
+
+      <!-- Waterfall Flamegraph & Span Inspector Split Layout -->
+      <div class="tracing-workspace-grid">
+        <!-- Left/Main: Waterfall Flamegraph -->
+        <div class="waterfall-panel">
+          <div class="waterfall-axis-header">
+            <div class="wf-col-tree">SERVICE / OPERATION SPAN TREE</div>
+            <div class="wf-col-timeline" id="waterfallTimeAxis">
+              <span>0 ms</span>
+              <span>105 ms</span>
+              <span>210 ms</span>
+              <span>315 ms</span>
+              <span>420 ms</span>
+            </div>
+          </div>
+
+          <div class="waterfall-rows-container" id="waterfallRowsContainer" role="tree" aria-label="Distributed trace span waterfall">
+            <!-- Dynamically populated by script.js -->
+          </div>
+
+          <div class="waterfall-service-legend">
+            <span class="svc-legend"><span class="svc-dot dot-gw"></span> api-gateway</span>
+            <span class="svc-legend"><span class="svc-dot dot-auth"></span> auth-service</span>
+            <span class="svc-legend"><span class="svc-dot dot-db"></span> postgres-db</span>
+            <span class="svc-legend"><span class="svc-dot dot-redis"></span> redis-cache</span>
+            <span class="svc-legend"><span class="svc-dot dot-bill"></span> billing-engine</span>
+            <span class="svc-legend"><span class="svc-dot dot-err"></span> Error Span</span>
+          </div>
+        </div>
+
+        <!-- Right: Span Inspection Drawer -->
+        <aside class="span-inspector-drawer" id="spanInspectorDrawer" aria-label="Span inspection details">
+          <div class="inspector-header">
+            <div class="inspector-title-wrap">
+              <span class="inspector-tag" id="inspectorServiceTag">api-gateway</span>
+              <h3 id="inspectorOpName">POST /v2/checkout/authorize</h3>
+            </div>
+            <button type="button" class="btn-copy-span" id="btnCopySpanJson" title="Copy span metadata as JSON">Copy JSON</button>
+          </div>
+
+          <div class="inspector-timing-grid">
+            <div class="timing-cell">
+              <span class="tcell-lbl">START OFFSET</span>
+              <strong class="tcell-val" id="inspectorStartMs">0.0 ms</strong>
+            </div>
+            <div class="timing-cell">
+              <span class="tcell-lbl">TOTAL DURATION</span>
+              <strong class="tcell-val" id="inspectorDurationMs">418.4 ms</strong>
+            </div>
+            <div class="timing-cell">
+              <span class="tcell-lbl">SELF TIME</span>
+              <strong class="tcell-val" id="inspectorSelfMs">22.4 ms</strong>
+            </div>
+            <div class="timing-cell">
+              <span class="tcell-lbl">STATUS</span>
+              <strong class="tcell-val" id="inspectorStatus">200 OK</strong>
+            </div>
+          </div>
+
+          <div class="inspector-ids-row">
+            <div><span>Span ID:</span> <code id="inspectorSpanId">sp_001_gw</code></div>
+            <div><span>Parent ID:</span> <code id="inspectorParentId">root</code></div>
+          </div>
+
+          <div class="inspector-section">
+            <h4>🏷️ OpenTelemetry Span Attributes</h4>
+            <div class="span-tags-table" id="inspectorTagsList">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h4>📜 Span Execution Logs &amp; Events</h4>
+            <div class="span-logs-list" id="inspectorLogsList">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #422 ===== -->
+
   <section class="tco-calculator" id="tco-calculator" aria-labelledby="tco-title">
     <p class="tco-kicker">INFRASTRUCTURE PLANNING SANDBOX</p>
     <h2 id="tco-title">Compare three years of cloud costs</h2>
