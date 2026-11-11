@@ -736,17 +736,23 @@ function initReservationWizard() {
   ];
   function validateField([inputId, errorId, check]) {
     const input = byId(inputId);
+    if (!input) return true;
     const valid = check(input.value);
     input.setAttribute('aria-invalid', String(!valid));
-    byId(errorId).hidden = valid;
+    const errEl = byId(errorId);
+    if (errEl) errEl.hidden = valid;
     return valid;
   }
   fieldChecks.forEach(field => {
     const input = byId(field[0]);
+    if (!input) return;
     input.addEventListener('blur', () => validateField(field));
     input.addEventListener('input', () => {
       if (input.hasAttribute('aria-invalid')) validateField(field);
-      if (fieldChecks.every(([id]) => byId(id).getAttribute('aria-invalid') === 'false')) byId('reservationFeedback').hidden = true;
+      if (fieldChecks.every(([id]) => byId(id) && byId(id).getAttribute('aria-invalid') === 'false')) {
+        const feedback = byId('reservationFeedback');
+        if (feedback) feedback.hidden = true;
+      }
     });
   });
   if (guestForm) {
@@ -842,7 +848,10 @@ const TASTING_COURSES = [
       wine: 'NV Delamotte Blanc de Blancs Brut Champagne',
       region: 'Le Mesnil-sur-Oger, Champagne',
       notes: 'Chalky minerality, white flowers, brioche and razor-sharp acidity that electrifies the oyster brine.',
-      temp: '6°C'
+      temp: '6°C',
+      varietal: '100% Grand Cru Chardonnay',
+      terroir: 'Côte des Blancs Chalk & Limestone',
+      flavorProfile: { tannin: 12, acidity: 94, body: 42, sweetness: 15, fruit: 62 }
     },
     provenance: 'Cancale, Brittany & Reims',
     allergens: ['Molluscs', 'Sulfites'],
@@ -862,7 +871,10 @@ const TASTING_COURSES = [
       wine: '2021 Domaine Huet Vouvray Le Haut-Lieu Demi-Sec',
       region: 'Vouvray, Loire Valley',
       notes: 'Quince, baked orchard pears, acacia honey, and limestone tension balancing the deep earthiness of the truffles.',
-      temp: '10°C'
+      temp: '10°C',
+      varietal: '100% Chenin Blanc',
+      terroir: 'Première Côte Deep Clay & Tuffeau',
+      flavorProfile: { tannin: 22, acidity: 78, body: 68, sweetness: 56, fruit: 84 }
     },
     provenance: 'Fontainebleau & Périgord',
     allergens: ['Dairy', 'Gluten', 'Nuts'],
@@ -882,7 +894,10 @@ const TASTING_COURSES = [
       wine: '2020 Domaine Leflaive Puligny-Montrachet',
       region: 'Côte de Beaune, Burgundy',
       notes: 'Toasted almond, crushed limestone, lemon curd, and a long saline finish harmonizing with the brown butter.',
-      temp: '12°C'
+      temp: '12°C',
+      varietal: '100% Chardonnay',
+      terroir: 'Kimmeridgian Clay-Limestone',
+      flavorProfile: { tannin: 25, acidity: 82, body: 76, sweetness: 16, fruit: 72 }
     },
     provenance: 'Atlantic Coast & Brittany',
     allergens: ['Fish', 'Dairy'],
@@ -902,7 +917,10 @@ const TASTING_COURSES = [
       wine: '2018 Domaine Georges Roumier Chambolle-Musigny',
       region: 'Côte de Nuits, Burgundy',
       notes: 'Wild strawberries, violets, velvety forest floor tannins, and exotic baking spice matching the spiced duck.',
-      temp: '16°C'
+      temp: '16°C',
+      varietal: '100% Pinot Noir',
+      terroir: 'Stony Bajocian Limestone',
+      flavorProfile: { tannin: 68, acidity: 74, body: 72, sweetness: 20, fruit: 88 }
     },
     provenance: 'Vendée & Landes',
     allergens: ['Dairy', 'Sulfites'],
@@ -922,7 +940,10 @@ const TASTING_COURSES = [
       wine: '2015 Château Margaux Premier Grand Cru Classé',
       region: 'Margaux, Bordeaux',
       notes: 'Cassis, graphite, dried cedar, black truffles, and majestic aristocratic tannins built for prime red meat.',
-      temp: '17°C'
+      temp: '17°C',
+      varietal: '90% Cabernet Sauvignon, 7% Merlot, 2% Cabernet Franc, 1% Petit Verdot',
+      terroir: 'Deep Günzian Gravel & Silica',
+      flavorProfile: { tannin: 92, acidity: 64, body: 95, sweetness: 18, fruit: 82 }
     },
     provenance: 'Périgord & Bordeaux',
     allergens: ['Dairy', 'Gluten', 'Sulfites'],
@@ -942,7 +963,10 @@ const TASTING_COURSES = [
       wine: '2016 Domaine Macle Château-Chalon Vin Jaune',
       region: 'Château-Chalon, Jura',
       notes: 'Walnut skin, curry leaf, dried apple, fenugreek, and piercing oxidative vitality that elevates aged Comté.',
-      temp: '14°C'
+      temp: '14°C',
+      varietal: '100% Savagnin',
+      terroir: 'Blue Lias Marl Scree Slopes',
+      flavorProfile: { tannin: 42, acidity: 88, body: 80, sweetness: 14, fruit: 65 }
     },
     provenance: 'Fort Saint-Antoine, Jura',
     allergens: ['Dairy', 'Nuts', 'Gluten'],
@@ -962,7 +986,10 @@ const TASTING_COURSES = [
       wine: "2017 Château d'Yquem Premier Cru Supérieur",
       region: 'Sauternes, Bordeaux',
       notes: 'Candied apricots, saffron, beeswax, orange marmalade, and infinite honeyed botrytis length.',
-      temp: '11°C'
+      temp: '11°C',
+      varietal: '75% Sémillon, 25% Sauvignon Blanc',
+      terroir: 'Gravel & Clay with Ciron Morning Botrytis Mists',
+      flavorProfile: { tannin: 18, acidity: 85, body: 92, sweetness: 96, fruit: 94 }
     },
     provenance: 'Lyon & Guérande',
     allergens: ['Dairy', 'Gluten', 'Soy'],
@@ -1086,6 +1113,9 @@ function initTastingMenuTimeline() {
                 <div class="wine-serving-temp">
                   <span>Optimal Cellar Temperature: <strong>${c.winePairing.temp}</strong></span>
                 </div>
+                <button type="button" class="btn-wine-radar-trigger" onclick="openWineRadarModal(${c.id})">
+                  <span>🍷 Sommelier Flavor Radar &amp; Terroir Notes ↗</span>
+                </button>
               </div>
             </div>
 
@@ -1260,6 +1290,174 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initTastingMenuTimeline);
 } else {
   initTastingMenuTimeline();
+}
+
+// ==========================================================================
+// Sommelier Wine Pairing Guide & Flavor Radar Polygon Wheel (Issue #445)
+// ==========================================================================
+
+const RADAR_AXES = [
+  { key: 'tannin', label: 'Tannins' },
+  { key: 'acidity', label: 'Acidity' },
+  { key: 'body', label: 'Body' },
+  { key: 'sweetness', label: 'Sweetness' },
+  { key: 'fruit', label: 'Fruit' }
+];
+
+function calculateRadarPoints(flavorProfile = {}, cx = 170, cy = 155, radius = 100) {
+  return RADAR_AXES.map((axis, i) => {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / RADAR_AXES.length;
+    const val = Math.max(0, Math.min(100, Number(flavorProfile[axis.key]) || 0));
+    const r = (val / 100) * radius;
+    return {
+      x: cx + r * Math.cos(angle),
+      y: cy + r * Math.sin(angle),
+      val,
+      label: axis.label
+    };
+  });
+}
+
+function renderWineRadarSvg(flavorProfile = {}) {
+  const cx = 170;
+  const cy = 155;
+  const radius = 100;
+  const numAxes = RADAR_AXES.length;
+
+  const gridEl = byId('wineRadarGrid');
+  const polyEl = byId('wineRadarPolygon');
+  const pointsEl = byId('wineRadarPoints');
+  const labelsEl = byId('wineRadarLabels');
+
+  if (!polyEl) return;
+
+  // Grid concentric webs
+  if (gridEl) {
+    const levels = [0.25, 0.5, 0.75, 1.0];
+    const webs = levels.map(level => {
+      const ringPts = RADAR_AXES.map((_, i) => {
+        const angle = -Math.PI / 2 + (i * 2 * Math.PI) / numAxes;
+        const r = radius * level;
+        return `${(cx + r * Math.cos(angle)).toFixed(1)},${(cy + r * Math.sin(angle)).toFixed(1)}`;
+      }).join(' ');
+      return `<polygon points="${ringPts}" class="radar-grid-web" />`;
+    });
+
+    const axisSpokes = RADAR_AXES.map((_, i) => {
+      const angle = -Math.PI / 2 + (i * 2 * Math.PI) / numAxes;
+      const x2 = cx + radius * Math.cos(angle);
+      const y2 = cy + radius * Math.sin(angle);
+      return `<line x1="${cx}" y1="${cy}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" class="radar-grid-spoke" />`;
+    });
+
+    gridEl.innerHTML = webs.join('') + axisSpokes.join('');
+  }
+
+  // Calculate points
+  const points = calculateRadarPoints(flavorProfile, cx, cy, radius);
+  const pointsStr = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  polyEl.setAttribute('points', pointsStr);
+
+  if (pointsEl) {
+    pointsEl.innerHTML = points.map(p => 
+      `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" class="radar-data-dot" />`
+    ).join('');
+  }
+
+  if (labelsEl) {
+    labelsEl.innerHTML = RADAR_AXES.map((axis, i) => {
+      const angle = -Math.PI / 2 + (i * 2 * Math.PI) / numAxes;
+      const labelRadius = radius + 22;
+      const lx = cx + labelRadius * Math.cos(angle);
+      const ly = cy + labelRadius * Math.sin(angle) + 4;
+      const anchor = Math.abs(Math.cos(angle)) < 0.2 ? 'middle' : (Math.cos(angle) > 0 ? 'start' : 'end');
+      return `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" class="radar-axis-label">${axis.label}</text>`;
+    }).join('');
+  }
+}
+
+function openWineRadarModal(courseId = 1) {
+  const course = TASTING_COURSES.find(c => c.id === Number(courseId)) || TASTING_COURSES[0];
+  const backdrop = byId('sommelierModalBackdrop');
+  if (!backdrop) return;
+
+  // Render tabs
+  const tabsContainer = byId('sommelierCourseTabs');
+  if (tabsContainer) {
+    tabsContainer.innerHTML = TASTING_COURSES.map(c => `
+      <button type="button" role="tab" class="sommelier-tab-btn ${c.id === course.id ? 'active' : ''}" 
+        aria-selected="${c.id === course.id}" onclick="openWineRadarModal(${c.id})">
+        <span class="tab-roman">${c.roman}</span>
+        <span class="tab-course-name">${c.stage}</span>
+      </button>
+    `).join('');
+  }
+
+  // Populate Wine Card Details
+  if (byId('wineTitle')) byId('wineTitle').textContent = course.winePairing.wine;
+  if (byId('wineRegionTag')) byId('wineRegionTag').textContent = `AOC ${course.winePairing.region}`;
+  if (byId('wineMatchedCourse')) byId('wineMatchedCourse').textContent = `Course ${course.roman}: ${course.titleEn}`;
+  if (byId('wineSommelierNotes')) byId('wineSommelierNotes').textContent = course.winePairing.notes;
+  if (byId('wineServingTemp')) byId('wineServingTemp').textContent = course.winePairing.temp;
+  if (byId('wineVarietal')) byId('wineVarietal').textContent = course.winePairing.varietal || 'N/A';
+  if (byId('wineTerroir')) byId('wineTerroir').textContent = course.winePairing.terroir || 'Terroir Privé';
+
+  // Render Radar
+  renderWineRadarSvg(course.winePairing.flavorProfile);
+
+  // Render Metrics Chips
+  const chipsContainer = byId('radarMetricsChips');
+  if (chipsContainer) {
+    chipsContainer.innerHTML = RADAR_AXES.map(a => {
+      const val = course.winePairing.flavorProfile[a.key] || 0;
+      return `
+        <div class="radar-metric-chip">
+          <span class="chip-label">${a.label}</span>
+          <div class="chip-bar-bg"><div class="chip-bar-fill" style="width: ${val}%"></div></div>
+          <span class="chip-val">${val}%</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  backdrop.hidden = false;
+  document.body.classList.add('sommelier-modal-open');
+}
+
+function closeWineRadarModal() {
+  const backdrop = byId('sommelierModalBackdrop');
+  if (backdrop) backdrop.hidden = true;
+  document.body.classList.remove('sommelier-modal-open');
+}
+
+function initSommelierModalListeners() {
+  const closeBtn = byId('closeSommelierDrawer');
+  const backdrop = byId('sommelierModalBackdrop');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeWineRadarModal);
+  }
+  if (backdrop) {
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) closeWineRadarModal();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && backdrop && !backdrop.hidden) {
+      closeWineRadarModal();
+    }
+  });
+}
+
+window.RADAR_AXES = RADAR_AXES;
+window.calculateRadarPoints = calculateRadarPoints;
+window.renderWineRadarSvg = renderWineRadarSvg;
+window.openWineRadarModal = openWineRadarModal;
+window.closeWineRadarModal = closeWineRadarModal;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSommelierModalListeners);
+} else {
+  initSommelierModalListeners();
 }
 
 
