@@ -522,3 +522,450 @@ function initCopyCodeButtons() {
 }
 
 window.initCopyCodeButtons = initCopyCodeButtons;
+
+
+// ==========================================================================
+// OpenAPI 3.0 / Swagger JSON Specification Parser Engine (Issue #400)
+// Ingests schema JSON, builds endpoint models, parameter tables & simulators
+// ==========================================================================
+function initOpenApiExplorer() {
+  const container = document.getElementById('openapiEndpointsContainer');
+  const presetSelect = document.getElementById('openapiPresetSelect');
+  const searchInput = document.getElementById('openapiSearchInput');
+  const customToggleBtn = document.getElementById('openapiCustomToggleBtn');
+  const customDrawer = document.getElementById('openapiCustomDrawer');
+  const customTextarea = document.getElementById('openapiCustomJsonText');
+  const parseCustomBtn = document.getElementById('openapiParseCustomBtn');
+  const fileInput = document.getElementById('openapiFileInput');
+  const parseError = document.getElementById('openapiParseError');
+  const specTitle = document.getElementById('specTitle');
+  const specVersion = document.getElementById('specVersion');
+  const specDescription = document.getElementById('specDescription');
+
+  if (!container || !presetSelect) return;
+
+  const SAMPLE_SPECS = {
+    'prisma-core': {
+      openapi: '3.0.3',
+      info: {
+        title: 'Prisma Core Agent Orchestration API',
+        version: 'v3.0.0',
+        description: 'High-throughput agentic execution endpoints, streaming dispatchers, and stateful sessions.'
+      },
+      paths: {
+        '/v1/agents/dispatch': {
+          post: {
+            summary: 'Dispatch an autonomous agent execution',
+            description: 'Initiates a stateful multi-step agent workload across isolated worker sandbox containers.',
+            parameters: [
+              { name: 'X-Workspace-ID', in: 'header', required: true, schema: { type: 'string' }, description: 'Target workspace GUID' }
+            ],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      agent_id: { type: 'string', description: 'Registered agent worker identifier' },
+                      prompt: { type: 'string', description: 'Execution instruction prompt' },
+                      max_depth: { type: 'integer', description: 'Recursion execution step boundary' }
+                    }
+                  }
+                }
+              }
+            },
+            responses: {
+              '200': { description: 'Agent dispatch job queued successfully' },
+              '400': { description: 'Malformed prompt payload or invalid parameters' },
+              '429': { description: 'Workspace concurrency ceiling exceeded' }
+            }
+          }
+        },
+        '/v1/agents/{agent_id}/status': {
+          get: {
+            summary: 'Retrieve live agent status and metrics',
+            description: 'Returns real-time execution telemetry, token consumption counters, and memory heap logs.',
+            parameters: [
+              { name: 'agent_id', in: 'path', required: true, schema: { type: 'string' }, description: 'Target agent UUID' },
+              { name: 'verbose', in: 'query', required: false, schema: { type: 'boolean' }, description: 'Include stack traces' }
+            ],
+            responses: {
+              '200': { description: 'Live agent telemetry payload returned' },
+              '404': { description: 'Agent worker ID not found' }
+            }
+          }
+        },
+        '/v1/agents/{agent_id}': {
+          delete: {
+            summary: 'Terminate running agent process',
+            description: 'Gracefully halts the container execution and revokes ephemeral sandbox tokens.',
+            parameters: [
+              { name: 'agent_id', in: 'path', required: true, schema: { type: 'string' }, description: 'Target agent UUID' }
+            ],
+            responses: {
+              '200': { description: 'Agent container successfully terminated' },
+              '404': { description: 'Target agent not found' }
+            }
+          }
+        }
+      }
+    },
+    'auth-users': {
+      openapi: '3.0.3',
+      info: {
+        title: 'Identity & Key Management API',
+        version: 'v1.4.2',
+        description: 'Generate scoped API tokens, revoke keys, and manage machine-to-machine service credentials.'
+      },
+      paths: {
+        '/v1/auth/tokens': {
+          post: {
+            summary: 'Generate scoped JWT bearer token',
+            description: 'Exchanges client secret credentials for an ephemeral cryptographic JWT token.',
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      client_id: { type: 'string', description: 'OAuth2 client ID' },
+                      scope: { type: 'string', description: 'Requested permissions' }
+                    }
+                  }
+                }
+              }
+            },
+            responses: {
+              '200': { description: 'JWT bearer token successfully issued' },
+              '401': { description: 'Invalid client credentials' }
+            }
+          }
+        },
+        '/v1/auth/keys': {
+          get: {
+            summary: 'List active API keys',
+            description: 'Retrieves metadata for all active developer keys in the current workspace.',
+            parameters: [
+              { name: 'limit', in: 'query', required: false, schema: { type: 'integer' }, description: 'Max keys returned' }
+            ],
+            responses: {
+              '200': { description: 'List of active API key records' }
+            }
+          }
+        }
+      }
+    },
+    'webhooks': {
+      openapi: '3.0.3',
+      info: {
+        title: 'Webhook Events & Subscriptions API',
+        version: 'v2.1.0',
+        description: 'Configure real-time event webhooks with HMAC-SHA256 payload signatures.'
+      },
+      paths: {
+        '/v1/webhooks/subscriptions': {
+          get: {
+            summary: 'List event webhook subscriptions',
+            description: 'Returns active webhook destinations, status codes, and retry configurations.',
+            responses: {
+              '200': { description: 'Active webhook subscriptions' }
+            }
+          },
+          post: {
+            summary: 'Register webhook endpoint',
+            description: 'Registers a new HTTPS endpoint to receive asynchronous system notifications.',
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      target_url: { type: 'string', description: 'HTTPS callback URL' },
+                      events: { type: 'string', description: 'Comma-separated event topics' }
+                    }
+                  }
+                }
+              }
+            },
+            responses: {
+              '200': { description: 'Webhook registered successfully' },
+              '400': { description: 'Insecure URL or missing parameters' }
+            }
+          }
+        }
+      }
+    }
+  };
+
+  let currentSpec = SAMPLE_SPECS['prisma-core'];
+  let currentSearch = '';
+
+  function renderSpec(spec) {
+    if (!spec || !spec.paths) {
+      container.innerHTML = '<div style="color:#ef4444; padding:20px;">Invalid OpenAPI 3.0 specification: missing paths definition.</div>';
+      return;
+    }
+
+    if (specTitle) specTitle.textContent = spec.info?.title || 'OpenAPI Specification';
+    if (specVersion) specVersion.textContent = spec.info?.version || 'v3.0.0';
+    if (specDescription) specDescription.textContent = spec.info?.description || 'Parsed schema documentation.';
+
+    container.innerHTML = '';
+    const query = currentSearch.trim().toLowerCase();
+
+    const paths = Object.keys(spec.paths);
+    let renderedCount = 0;
+
+    paths.forEach(pathKey => {
+      const pathObj = spec.paths[pathKey];
+      const methods = Object.keys(pathObj).filter(m => ['get', 'post', 'put', 'delete', 'patch'].includes(m.toLowerCase()));
+
+      methods.forEach(method => {
+        const op = pathObj[method];
+        const methodUpper = method.toUpperCase();
+
+        // Search filtering
+        if (query) {
+          const matchPath = pathKey.toLowerCase().includes(query);
+          const matchMethod = methodUpper.toLowerCase().includes(query);
+          const matchSummary = (op.summary || '').toLowerCase().includes(query);
+          if (!matchPath && !matchMethod && !matchSummary) return;
+        }
+
+        renderedCount++;
+        const card = document.createElement('div');
+        card.className = 'endpoint-card';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'endpoint-card-header';
+        header.innerHTML = `
+          <div class="endpoint-header-left">
+            <span class="method-badge ${method.toLowerCase()}">${methodUpper}</span>
+            <span class="endpoint-path">${pathKey}</span>
+            <span class="endpoint-summary">${op.summary || ''}</span>
+          </div>
+          <span class="endpoint-expand-icon">▼</span>
+        `;
+
+        // Body
+        const body = document.createElement('div');
+        body.className = 'endpoint-card-body';
+        body.hidden = true;
+
+        let bodyHtml = `<p style="margin:0 0 12px; font-size:0.84rem; color:#94a3b8;">${op.description || ''}</p>`;
+
+        // Parameters Table
+        if (op.parameters && op.parameters.length > 0) {
+          bodyHtml += `
+            <div class="endpoint-detail-section">
+              <h4>Parameters</h4>
+              <table class="openapi-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>In</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${op.parameters.map(p => `
+                    <tr>
+                      <td><span class="param-name">${p.name}</span><span class="param-badge ${p.required ? 'required' : 'optional'}">${p.required ? 'required' : 'optional'}</span></td>
+                      <td><code>${p.in}</code></td>
+                      <td><span class="param-type">${p.schema?.type || 'string'}</span></td>
+                      <td>${p.description || '-'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+
+        // Request Body Schema
+        if (op.requestBody) {
+          const schemaObj = op.requestBody.content?.['application/json']?.schema;
+          const props = schemaObj?.properties || {};
+          bodyHtml += `
+            <div class="endpoint-detail-section">
+              <h4>Request Body (application/json)</h4>
+              <div style="background:#090e1a; border:1px solid #1e293b; border-radius:6px; padding:10px; font-family:'JetBrains Mono', monospace; font-size:0.75rem; color:#38bdf8;">
+                ${Object.keys(props).map(k => `<div><span style="color:#f1f5f9;">"${k}"</span>: <span style="color:#a855f7;">${props[k].type}</span> <span style="color:#64748b;">// ${props[k].description || ''}</span></div>`).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        // Responses Table
+        if (op.responses) {
+          bodyHtml += `
+            <div class="endpoint-detail-section">
+              <h4>Responses</h4>
+              <table class="openapi-table">
+                <thead>
+                  <tr><th>Status</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                  ${Object.keys(op.responses).map(code => {
+                    const cls = code.startsWith('2') ? 's2xx' : code.startsWith('4') ? 's4xx' : 's5xx';
+                    return `<tr><td><span class="status-code-pill ${cls}">${code}</span></td><td>${op.responses[code].description || ''}</td></tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+
+        // Interactive Simulator
+        bodyHtml += `
+          <div class="endpoint-detail-section">
+            <h4>Live Request Simulator</h4>
+            <div class="openapi-simulator-box">
+              <div class="simulator-actions">
+                <button type="button" class="openapi-tool-btn primary sim-send-btn">▶ Send Simulated Request</button>
+                <span class="sim-url" style="font-family:'JetBrains Mono', monospace; font-size:0.75rem; color:#64748b;">${methodUpper} https://api.prisma.io${pathKey}</span>
+              </div>
+              <div class="simulator-result-box" style="display:none;"></div>
+            </div>
+          </div>
+        `;
+
+        body.innerHTML = bodyHtml;
+
+        // Toggle Expand
+        header.addEventListener('click', () => {
+          const isExpanded = !body.hidden;
+          body.hidden = isExpanded;
+          card.classList.toggle('expanded', !isExpanded);
+        });
+
+        // Wire simulator send button
+        const simSendBtn = body.querySelector('.sim-send-btn');
+        const simResultBox = body.querySelector('.simulator-result-box');
+        if (simSendBtn && simResultBox) {
+          simSendBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            simResultBox.style.display = 'block';
+            simResultBox.textContent = 'Simulating HTTP roundtrip...';
+            setTimeout(() => {
+              const mockData = {
+                status: 200,
+                statusText: 'OK',
+                latency_ms: Math.floor(Math.random() * 40) + 15,
+                timestamp: new Date().toISOString(),
+                endpoint: pathKey,
+                method: methodUpper,
+                data: {
+                  job_id: 'job_' + Math.random().toString(36).substring(2, 9),
+                  status: 'COMPLETED',
+                  tokens_processed: 842,
+                  worker_node: 'worker-us-east-04'
+                }
+              };
+              simResultBox.textContent = JSON.stringify(mockData, null, 2);
+            }, 300);
+          });
+        }
+
+        card.appendChild(header);
+        card.appendChild(body);
+        container.appendChild(card);
+      });
+    });
+
+    if (renderedCount === 0) {
+      container.innerHTML = '<div style="color:#94a3b8; font-size:0.85rem; padding:30px; text-align:center;">No endpoints match the filter criteria.</div>';
+    }
+  }
+
+  // Preset selector
+  presetSelect.addEventListener('change', (e) => {
+    const val = e.target.value;
+    if (SAMPLE_SPECS[val]) {
+      currentSpec = SAMPLE_SPECS[val];
+      renderSpec(currentSpec);
+      if (parseError) parseError.hidden = true;
+    }
+  });
+
+  // Filter input
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value;
+      renderSpec(currentSpec);
+    });
+  }
+
+  // Custom drawer toggle
+  if (customToggleBtn && customDrawer) {
+    customToggleBtn.addEventListener('click', () => {
+      customDrawer.hidden = !customDrawer.hidden;
+      if (!customDrawer.hidden) {
+        customTextarea.value = JSON.stringify(currentSpec, null, 2);
+      }
+    });
+  }
+
+  // Parse custom JSON button
+  if (parseCustomBtn) {
+    parseCustomBtn.addEventListener('click', () => {
+      try {
+        const parsed = JSON.parse(customTextarea.value);
+        if (!parsed.paths) {
+          throw new Error("Invalid OpenAPI schema: Root object must include a 'paths' dictionary.");
+        }
+        currentSpec = parsed;
+        renderSpec(currentSpec);
+        if (parseError) parseError.hidden = true;
+        customDrawer.hidden = true;
+      } catch (err) {
+        if (parseError) {
+          parseError.textContent = `Parse Error: ${err.message}`;
+          parseError.hidden = false;
+        }
+      }
+    });
+  }
+
+  // File upload input
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (!parsed.paths) {
+            throw new Error("Uploaded file is not a valid OpenAPI spec (missing 'paths').");
+          }
+          currentSpec = parsed;
+          renderSpec(currentSpec);
+          if (parseError) parseError.hidden = true;
+        } catch (err) {
+          if (parseError) {
+            parseError.textContent = `File Error: ${err.message}`;
+            parseError.hidden = false;
+          }
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  // Initial render
+  renderSpec(currentSpec);
+}
+
+window.initOpenApiExplorer = initOpenApiExplorer;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initOpenApiExplorer);
+} else {
+  initOpenApiExplorer();
+}
