@@ -1320,6 +1320,119 @@
   </section>
   <!-- ===== END Issue #440 ===== -->
 
+  <!-- ===== BEGIN Issue #421: Interactive API Rate-Limiting Tier Customizer & Token Bucket Simulator ===== -->
+  <section class="rate-limiter-section" id="rate-limiter-section" aria-labelledby="rate-limiter-title">
+    <div class="rl-header-row">
+      <div>
+        <span class="rl-kicker">// EDGE QUOTA ENGINE · TOKEN BUCKET ALGORITHM</span>
+        <h2 id="rate-limiter-title">API Rate-Limiting Tier Customizer &amp; Token Bucket Simulator</h2>
+        <p class="rl-subtitle">Tune burst capacity and steady refill rates, fire synthetic request spikes, and observe real-time token depletion and HTTP 429 throttle enforcement.</p>
+      </div>
+      <div class="rl-tier-presets" role="group" aria-label="API Rate Limit Tier Presets">
+        <button type="button" class="rl-preset-btn" data-cap="10" data-rate="2" data-burst="12">Hobby (10 · 2/s)</button>
+        <button type="button" class="rl-preset-btn active" data-cap="25" data-rate="6" data-burst="20">Pro (25 · 6/s)</button>
+        <button type="button" class="rl-preset-btn" data-cap="60" data-rate="15" data-burst="45">Enterprise (60 · 15/s)</button>
+      </div>
+    </div>
+
+    <div class="rl-main-grid">
+      <!-- Left: Liquid Token Fill Gauge & Capacity Markers -->
+      <div class="rl-gauge-card">
+        <div class="rl-gauge-head">
+          <span class="rl-card-label">LIVE TOKEN BUCKET</span>
+          <span class="rl-status-pill ok" id="rlBucketStatusPill">200 OK · HEALTHY</span>
+        </div>
+
+        <div class="rl-bucket-stage">
+          <div class="rl-capacity-markers" aria-hidden="true">
+            <span id="rlMarkMax">25 MAX</span>
+            <span id="rlMark75">75%</span>
+            <span id="rlMark50">50%</span>
+            <span id="rlMark25">25%</span>
+            <span>0 EMPTY</span>
+          </div>
+          <div class="rl-bucket-vessel" id="rlBucketVessel" role="progressbar" aria-valuemin="0" aria-valuemax="25" aria-valuenow="25" aria-label="Available API tokens">
+            <div class="rl-liquid-fill" id="rlLiquidFill" style="height: 100%;">
+              <div class="rl-liquid-wave"></div>
+            </div>
+            <div class="rl-bucket-overlay-readout">
+              <strong id="rlTokenCount">25.0</strong>
+              <span id="rlTokenCapLabel">/ 25 tokens</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rl-throttle-alert" id="rlThrottleAlert" role="alert" hidden>
+          <strong>⚠ HTTP 429 TOO MANY REQUESTS</strong>
+          <span id="rlRetryHint">Bucket depleted — next token available in 0.2s</span>
+        </div>
+      </div>
+
+      <!-- Middle & Right: Controls, Burst Actions & Request Stream Log -->
+      <div class="rl-controls-col">
+        <div class="rl-config-card">
+          <div class="rl-slider-group">
+            <div class="rl-slider-label">
+              <label for="rlCapacitySlider">Burst Capacity (Bucket Size)</label>
+              <strong id="rlCapacityValue">25 tokens</strong>
+            </div>
+            <input type="range" id="rlCapacitySlider" min="5" max="80" step="1" value="25" />
+          </div>
+
+          <div class="rl-slider-group">
+            <div class="rl-slider-label">
+              <label for="rlRefillSlider">Steady Refill Rate</label>
+              <strong id="rlRefillValue">6 tokens/sec</strong>
+            </div>
+            <input type="range" id="rlRefillSlider" min="1" max="25" step="1" value="6" />
+          </div>
+
+          <div class="rl-slider-group">
+            <div class="rl-slider-label">
+              <label for="rlBurstSlider">Burst Spike Payload</label>
+              <strong id="rlBurstValue">20 requests</strong>
+            </div>
+            <input type="range" id="rlBurstSlider" min="5" max="50" step="1" value="20" />
+          </div>
+
+          <div class="rl-action-buttons">
+            <button type="button" class="rl-btn-secondary" id="rlSingleReqBtn">Send 1 Request</button>
+            <button type="button" class="rl-btn-primary" id="rlBurstBtn">⚡ Send Burst Requests</button>
+            <button type="button" class="rl-btn-secondary" id="rlStreamToggleBtn" aria-pressed="false">🔥 Auto Load: OFF</button>
+            <button type="button" class="rl-btn-ghost" id="rlResetBtn">↺ Refill</button>
+          </div>
+        </div>
+
+        <!-- Telemetry Counters & Pass/Drop Log -->
+        <div class="rl-telemetry-card">
+          <div class="rl-kpi-strip">
+            <div class="rl-kpi pass">
+              <span>HTTP 200 Passed</span>
+              <strong id="rlPassCount">0</strong>
+            </div>
+            <div class="rl-kpi drop">
+              <span>HTTP 429 Dropped</span>
+              <strong id="rlDropCount">0</strong>
+            </div>
+            <div class="rl-kpi rate">
+              <span>Admission Rate</span>
+              <strong id="rlAdmissionPct">100%</strong>
+            </div>
+          </div>
+
+          <div class="rl-log-header">
+            <span>REAL-TIME REQUEST STREAM</span>
+            <span class="rl-log-sub">Token bucket FIFO audit</span>
+          </div>
+          <ul class="rl-request-log" id="rlRequestLog" aria-live="polite">
+            <li class="rl-log-empty">Dispatch requests or click "Send Burst Requests" to inspect pass/429 verdicts.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #421 ===== -->
+
   <section class="tco-calculator" id="tco-calculator" aria-labelledby="tco-title">
     <p class="tco-kicker">INFRASTRUCTURE PLANNING SANDBOX</p>
     <h2 id="tco-title">Compare three years of cloud costs</h2>

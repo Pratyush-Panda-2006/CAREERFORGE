@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initIntegrationFilters();
   initSystemStatus();
   initTelemetryAnomalyDetector();
+  initRateLimiterSimulator();
 });
 
 function initFaqAccordion() {
@@ -1957,6 +1958,219 @@ function initTelemetryAnomalyDetector() {
   startStreamLoops();
 }
 /* ===== END Issue #440 ===== */
+
+/* ===== BEGIN Issue #421: Interactive API Rate-Limiting Tier Customizer & Token Bucket Simulator ===== */
+function initRateLimiterSimulator() {
+  const section = document.getElementById('rate-limiter-section');
+  if (!section) return;
+
+  const state = {
+    capacity: 25,
+    refillRate: 6,
+    burstSize: 20,
+    tokens: 25,
+    passed: 0,
+    dropped: 0,
+    autoLoad: false,
+    logEntries: [],
+    lastTickMs: performance.now(),
+    throttledUntilMs: 0
+  };
+
+  const capSlider = document.getElementById('rlCapacitySlider');
+  const refillSlider = document.getElementById('rlRefillSlider');
+  const burstSlider = document.getElementById('rlBurstSlider');
+  const vessel = document.getElementById('rlBucketVessel');
+  const liquid = document.getElementById('rlLiquidFill');
+  const tokenCountEl = document.getElementById('rlTokenCount');
+  const tokenCapLabel = document.getElementById('rlTokenCapLabel');
+  const statusPill = document.getElementById('rlBucketStatusPill');
+  const throttleAlert = document.getElementById('rlThrottleAlert');
+  const retryHint = document.getElementById('rlRetryHint');
+  const logEl = document.getElementById('rlRequestLog');
+
+  let reqSeq = 1;
+
+  function renderUI() {
+    const pct = Math.max(0, Math.min(100, (state.tokens / state.capacity) * 100));
+    const isDepleted = state.tokens < 1;
+    const now = performance.now();
+    const inThrottleWindow = isDepleted || now < state.throttledUntilMs;
+
+    if (liquid) liquid.style.height = `${pct.toFixed(1)}%`;
+    if (tokenCountEl) tokenCountEl.textContent = state.tokens.toFixed(1);
+    if (tokenCapLabel) tokenCapLabel.textContent = `/ ${state.capacity} tokens`;
+
+    const markMax = document.getElementById('rlMarkMax');
+    if (markMax) markMax.textContent = `${state.capacity} MAX`;
+
+    if (vessel) {
+      vessel.setAttribute('aria-valuemax', String(state.capacity));
+      vessel.setAttribute('aria-valuenow', String(Math.floor(state.tokens)));
+      vessel.classList.toggle('is-throttled', isDepleted);
+      vessel.classList.toggle('is-low', !isDepleted && pct < 35);
+    }
+
+    if (statusPill) {
+      if (isDepleted) {
+        statusPill.className = 'rl-status-pill throttled';
+        statusPill.textContent = '429 · THROTTLED';
+      } else if (pct < 35) {
+        statusPill.className = 'rl-status-pill warn';
+        statusPill.textContent = '200 OK · LOW QUOTA';
+      } else {
+        statusPill.className = 'rl-status-pill ok';
+        statusPill.textContent = '200 OK · HEALTHY';
+      }
+    }
+
+    if (throttleAlert && retryHint) {
+      throttleAlert.hidden = !inThrottleWindow;
+      const waitSec = Math.max(0.05, (1 - state.tokens) / Math.max(1, state.refillRate));
+      retryHint.textContent = `Bucket depleted — Retry-After: ${waitSec.toFixed(2)}s (${state.refillRate} tok/s refill)`;
+    }
+
+    const capVal = document.getElementById('rlCapacityValue');
+    const refVal = document.getElementById('rlRefillValue');
+    const burstVal = document.getElementById('rlBurstValue');
+    if (capVal) capVal.textContent = `${state.capacity} tokens`;
+    if (refVal) refVal.textContent = `${state.refillRate} tokens/sec`;
+    if (burstVal) burstVal.textContent = `${state.burstSize} requests`;
+
+    const passEl = document.getElementById('rlPassCount');
+    const dropEl = document.getElementById('rlDropCount');
+    const admEl = document.getElementById('rlAdmissionPct');
+    const totalReq = state.passed + state.dropped;
+    if (passEl) passEl.textContent = String(state.passed);
+    if (dropEl) dropEl.textContent = String(state.dropped);
+    if (admEl) admEl.textContent = totalReq > 0 ? `${Math.round((state.passed / totalReq) * 100)}%` : '100%';
+  }
+
+  function renderLogs() {
+    if (!logEl) return;
+    if (state.logEntries.length === 0) {
+      logEl.innerHTML = '<li class="rl-log-empty">Dispatch requests or click "Send Burst Requests" to inspect pass/429 verdicts.</li>';
+      return;
+    }
+    logEl.innerHTML = state.logEntries
+      .map(
+        (entry) => `
+        <li class="rl-log-row ${entry.ok ? 'pass' : 'drop'}">
+          <span>#${entry.seq} POST /v1/events</span>
+          <span>${entry.ok ? `${entry.rem.toFixed(1)} tok left` : 'Bucket Empty'}</span>
+          <span class="rl-code-badge ${entry.ok ? 'pass' : 'drop'}">${entry.ok ? '200 OK' : '429 DROP'}</span>
+        </li>
+      `
+      )
+      .join('');
+  }
+
+  function dispatchRequest(count = 1) {
+    for (let i = 0; i < count; i += 1) {
+      const seq = reqSeq;
+      reqSeq += 1;
+      if (state.tokens >= 1) {
+        state.tokens -= 1;
+        state.passed += 1;
+        state.logEntries.unshift({ seq, ok: true, rem: state.tokens });
+      } else {
+        state.dropped += 1;
+        state.throttledUntilMs = performance.now() + 1800;
+        state.logEntries.unshift({ seq, ok: false, rem: 0 });
+      }
+    }
+    if (state.logEntries.length > 24) {
+      state.logEntries.length = 24;
+    }
+    renderLogs();
+    renderUI();
+  }
+
+  // Steady refill interval (50ms smooth tick)
+  setInterval(() => {
+    const now = performance.now();
+    const dtSec = Math.max(0, (now - state.lastTickMs) / 1000);
+    state.lastTickMs = now;
+    if (state.tokens < state.capacity) {
+      state.tokens = Math.min(state.capacity, state.tokens + state.refillRate * dtSec);
+    }
+    renderUI();
+  }, 50);
+
+  // Optional steady continuous incoming load simulator (10 req/s)
+  setInterval(() => {
+    if (state.autoLoad) {
+      dispatchRequest(1);
+    }
+  }, 100);
+
+  if (capSlider) {
+    capSlider.addEventListener('input', () => {
+      state.capacity = Number(capSlider.value);
+      state.tokens = Math.min(state.capacity, state.tokens);
+      renderUI();
+    });
+  }
+
+  if (refillSlider) {
+    refillSlider.addEventListener('input', () => {
+      state.refillRate = Number(refillSlider.value);
+      renderUI();
+    });
+  }
+
+  if (burstSlider) {
+    burstSlider.addEventListener('input', () => {
+      state.burstSize = Number(burstSlider.value);
+      renderUI();
+    });
+  }
+
+  document.querySelectorAll('.rl-preset-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.capacity = Number(btn.getAttribute('data-cap'));
+      state.refillRate = Number(btn.getAttribute('data-rate'));
+      state.burstSize = Number(btn.getAttribute('data-burst'));
+      state.tokens = state.capacity;
+      if (capSlider) capSlider.value = String(state.capacity);
+      if (refillSlider) refillSlider.value = String(state.refillRate);
+      if (burstSlider) burstSlider.value = String(state.burstSize);
+      document.querySelectorAll('.rl-preset-btn').forEach((b) => b.classList.toggle('active', b === btn));
+      renderUI();
+    });
+  });
+
+  const singleBtn = document.getElementById('rlSingleReqBtn');
+  if (singleBtn) singleBtn.addEventListener('click', () => dispatchRequest(1));
+
+  const burstBtn = document.getElementById('rlBurstBtn');
+  if (burstBtn) burstBtn.addEventListener('click', () => dispatchRequest(state.burstSize));
+
+  const streamBtn = document.getElementById('rlStreamToggleBtn');
+  if (streamBtn) {
+    streamBtn.addEventListener('click', () => {
+      state.autoLoad = !state.autoLoad;
+      streamBtn.setAttribute('aria-pressed', String(state.autoLoad));
+      streamBtn.textContent = state.autoLoad ? '🔥 Auto Load: ON (10 req/s)' : '🔥 Auto Load: OFF';
+    });
+  }
+
+  const resetBtn = document.getElementById('rlResetBtn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      state.tokens = state.capacity;
+      state.passed = 0;
+      state.dropped = 0;
+      state.throttledUntilMs = 0;
+      state.logEntries = [];
+      renderLogs();
+      renderUI();
+    });
+  }
+
+  renderUI();
+}
+/* ===== END Issue #421 ===== */
 
 /*System Status Indicator*/
 function initSystemStatus() {
