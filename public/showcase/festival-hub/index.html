@@ -617,6 +617,138 @@
     </div>
   </section>
 
+  <!-- ===== Cyber DJ Synthesizer Launchpad (Issue #343) START ===== -->
+  <section class="dj-soundboard-section" id="cyber-launchpad" aria-labelledby="soundboard-title">
+    <div class="soundboard-header">
+      <span class="dj-pill-badge">PULSE WAVE // LIVE AUDIO SYNTHESIZER</span>
+      <h2 id="soundboard-title" class="soundboard-title">CYBER DJ LAUNCHPAD &amp; SOUNDBOARD</h2>
+      <p class="soundboard-sub">
+        Produce live festival beats with real-time Web Audio API synthesized analog waveforms. Tap the pads or press keys <strong>[1 - 8]</strong> on your keyboard. Adjust the master BPM tempo and toggle the live metronome loop!
+      </p>
+    </div>
+
+    <!-- Master DJ Controls Console -->
+    <div class="dj-console-bar">
+      <!-- BPM Tempo Slider -->
+      <div class="console-group bpm-control-group">
+        <div class="console-label-row">
+          <label for="djBpmSlider" class="console-label">MASTER BPM TEMPO</label>
+          <span class="bpm-display-badge" id="djBpmDisplay">128 BPM</span>
+        </div>
+        <div class="bpm-slider-row">
+          <span class="bpm-bound">80</span>
+          <input type="range" id="djBpmSlider" class="dj-slider" min="80" max="180" value="128" step="1" aria-label="BPM Tempo Slider" />
+          <span class="bpm-bound">180</span>
+        </div>
+        <div class="bpm-presets">
+          <button type="button" class="btn-bpm-chip" data-bpm="100">100 (Trap)</button>
+          <button type="button" class="btn-bpm-chip active" data-bpm="128">128 (House)</button>
+          <button type="button" class="btn-bpm-chip" data-bpm="140">140 (Dubstep)</button>
+          <button type="button" class="btn-bpm-chip" data-bpm="174">174 (DnB)</button>
+        </div>
+      </div>
+
+      <!-- Beat Metronome Indicator & Sequencer -->
+      <div class="console-group beat-sync-group">
+        <span class="console-label">BEAT PULSE &amp; LOOP</span>
+        <div class="beat-pulse-display">
+          <div class="beat-dot" id="beatPulseDot" aria-hidden="true"></div>
+          <span class="beat-status-text" id="beatStatusText">PULSE READY</span>
+        </div>
+        <button type="button" class="btn-seq-toggle" id="btnSeqToggle">
+          <span class="seq-icon" aria-hidden="true">▶</span>
+          <span id="seqBtnText">Start 4/4 Beat Loop</span>
+        </button>
+      </div>
+
+      <!-- Volume & Output -->
+      <div class="console-group volume-group">
+        <div class="console-label-row">
+          <label for="djMasterVol" class="console-label">MASTER VOLUME</label>
+          <span class="vol-display-badge" id="djVolDisplay">80%</span>
+        </div>
+        <input type="range" id="djMasterVol" class="dj-slider" min="0" max="100" value="80" step="1" aria-label="Master volume slider" />
+        <span class="engine-badge">WEB AUDIO API • 48kHz</span>
+      </div>
+    </div>
+
+    <!-- 8 Drum & Synth Pads Grid -->
+    <div class="dj-pads-grid" id="djPadsGrid" role="group" aria-label="Synthesizer Pads">
+      <!-- Pad 1: Kick -->
+      <button type="button" class="dj-pad pad-kick" data-pad-id="0" data-key="1" aria-label="Play Sub Kick (Key 1)">
+        <span class="pad-key-badge"><kbd>1</kbd></span>
+        <div class="pad-icon-wrap">🥁</div>
+        <strong class="pad-title">Sub Kick 808</strong>
+        <span class="pad-meta">Sine • 150-35Hz</span>
+        <span class="pad-ripple"></span>
+      </button>
+
+      <!-- Pad 2: Snare -->
+      <button type="button" class="dj-pad pad-snare" data-pad-id="1" data-key="2" aria-label="Play Cyber Snare (Key 2)">
+        <span class="pad-key-badge"><kbd>2</kbd></span>
+        <div class="pad-icon-wrap">💥</div>
+        <strong class="pad-title">Cyber Snare</strong>
+        <span class="pad-meta">Noise • 220Hz Pop</span>
+        <span class="pad-ripple"></span>
+      </button>
+
+      <!-- Pad 3: Hi-Hat -->
+      <button type="button" class="dj-pad pad-hihat" data-pad-id="2" data-key="3" aria-label="Play Neon Hi-Hat (Key 3)">
+        <span class="pad-key-badge"><kbd>3</kbd></span>
+        <div class="pad-icon-wrap">⚡</div>
+        <strong class="pad-title">Neon Hi-Hat</strong>
+        <span class="pad-meta">HP Noise • 8kHz</span>
+        <span class="pad-ripple"></span>
+      </button>
+
+      <!-- Pad 4: Clap -->
+      <button type="button" class="dj-pad pad-clap" data-pad-id="3" data-key="4" aria-label="Play Glitch Clap (Key 4)">
+        <span class="pad-key-badge"><kbd>4</kbd></span>
+        <div class="pad-icon-wrap">👏</div>
+        <strong class="pad-title">Glitch Clap</strong>
+        <span class="pad-meta">Multi-Burst Filter</span>
+        <span class="pad-ripple"></span>
+      </button>
+
+      <!-- Pad 5: Bass Drop -->
+      <button type="button" class="dj-pad pad-bass" data-pad-id="4" data-key="5" aria-label="Play Sub Bass Drop (Key 5)">
+        <span class="pad-key-badge"><kbd>5</kbd></span>
+        <div class="pad-icon-wrap">🔊</div>
+        <strong class="pad-title">Sub Bass Drop</strong>
+        <span class="pad-meta">Sawtooth • 85-30Hz</span>
+        <span class="pad-ripple"></span>
+      </button>
+
+      <!-- Pad 6: Synth Lead -->
+      <button type="button" class="dj-pad pad-synth" data-pad-id="5" data-key="6" aria-label="Play Synth Stab (Key 6)">
+        <span class="pad-key-badge"><kbd>6</kbd></span>
+        <div class="pad-icon-wrap">🎹</div>
+        <strong class="pad-title">Synth Stab</strong>
+        <span class="pad-meta">Square • 523Hz (C5)</span>
+        <span class="pad-ripple"></span>
+      </button>
+
+      <!-- Pad 7: Laser FX -->
+      <button type="button" class="dj-pad pad-laser" data-pad-id="6" data-key="7" aria-label="Play Laser Chirp FX (Key 7)">
+        <span class="pad-key-badge"><kbd>7</kbd></span>
+        <div class="pad-icon-wrap">🔫</div>
+        <strong class="pad-title">Laser Chirp</strong>
+        <span class="pad-meta">FM Sweep • 1800Hz</span>
+        <span class="pad-ripple"></span>
+      </button>
+
+      <!-- Pad 8: Dome Crash -->
+      <button type="button" class="dj-pad pad-crash" data-pad-id="7" data-key="8" aria-label="Play Dome Crash (Key 8)">
+        <span class="pad-key-badge"><kbd>8</kbd></span>
+        <div class="pad-icon-wrap">✨</div>
+        <strong class="pad-title">Dome Crash</strong>
+        <span class="pad-meta">Decay Noise Tail</span>
+        <span class="pad-ripple"></span>
+      </button>
+    </div>
+  </section>
+  <!-- ===== Cyber DJ Synthesizer Launchpad END ===== -->
+
   <section class="tickets" id="tickets" aria-labelledby="tickets-title">
     <h2 id="tickets-title">GET YOUR PASS</h2>
     <p class="tickets-intro">Pick your tiers, add extras, and watch the total update. Groups of 5 or more tickets get 10% off.</p>
