@@ -274,33 +274,22 @@ document.addEventListener('keydown', (event) => {
 loadSavedCoupon();
 renderCart();
 
-// Category Tabs Navigation Listener
-document.querySelectorAll('.tab').forEach((tab) => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
-    tab.classList.add('active');
-
-    const cat = tab.getAttribute('data-cat');
-    const cards = document.querySelectorAll('.card');
-
-    cards.forEach((card) => {
-      if (cat === 'all' || card.getAttribute('data-category') === cat) {
-        card.style.display = 'block';
-      } else {
-        card.style.display = 'none';
-      }
-    });
-  });
-});
-
-/* ===== BEGIN issue #63: Product Quick-View Modal Logic ===== */
+/* ===== BEGIN issue #63 & #402: Product Catalog & Faceted Search Engine ===== */
 const PRODUCT_CATALOG = {
   p1: {
     id: 'p1',
     name: 'CyberDeck Pro Mechanical',
     category: 'keyboards',
     categoryLabel: 'KEYBOARDS',
+    brand: 'nexus-lab',
+    brandLabel: 'Nexus Lab',
     price: 249.00,
+    rating: 4.9,
+    ratingCount: 72,
+    connectivity: 'tri-mode',
+    connectivityLabel: 'Tri-Mode Wireless',
+    colorKeys: ['black', 'violet', 'silver'],
+    inStock: true,
     badge: 'HOT',
     stockText: 'In Stock',
     stockClass: 'in-stock',
@@ -312,9 +301,9 @@ const PRODUCT_CATALOG = {
       { icon: '📦', label: 'Unboxing', title: 'Braided Cable & Case' }
     ],
     colors: [
-      { id: 'stealth', name: 'Stealth Matte Black', hex: '#18181b' },
-      { id: 'synthwave', name: 'Synthwave Violet', hex: '#7c3aed' },
-      { id: 'glacier', name: 'Glacier Aluminum', hex: '#e2e8f0' }
+      { id: 'black', name: 'Stealth Matte Black', hex: '#18181b' },
+      { id: 'violet', name: 'Synthwave Violet', hex: '#7c3aed' },
+      { id: 'silver', name: 'Glacier Aluminum', hex: '#e2e8f0' }
     ],
     options: {
       label: 'Switch Mechanism',
@@ -336,7 +325,15 @@ const PRODUCT_CATALOG = {
     name: 'Acoustic Pulse ANC Headset',
     category: 'audio',
     categoryLabel: 'AUDIO & MONITORING',
+    brand: 'vortex-audio',
+    brandLabel: 'Vortex Audio',
     price: 199.00,
+    rating: 4.8,
+    ratingCount: 46,
+    connectivity: 'wireless',
+    connectivityLabel: 'Wireless 2.4GHz',
+    colorKeys: ['black', 'silver', 'cyan'],
+    inStock: true,
     badge: 'NEW',
     stockText: 'Only 3 Left',
     stockClass: 'low-stock',
@@ -348,7 +345,7 @@ const PRODUCT_CATALOG = {
       { icon: '🎙️', label: 'Broadcast', title: 'Detachable Boom Mic' }
     ],
     colors: [
-      { id: 'onyx', name: 'Midnight Onyx Black', hex: '#0f172a' },
+      { id: 'black', name: 'Midnight Onyx Black', hex: '#0f172a' },
       { id: 'silver', name: 'Gunmetal Silver', hex: '#64748b' },
       { id: 'cyan', name: 'Pulse Kinetic Cyan', hex: '#06b6d4' }
     ],
@@ -372,7 +369,15 @@ const PRODUCT_CATALOG = {
     name: 'Horizon 32" Curved OLED',
     category: 'displays',
     categoryLabel: 'DISPLAYS & MONITORS',
+    brand: 'apex-vision',
+    brandLabel: 'Apex Vision',
     price: 899.00,
+    rating: 4.9,
+    ratingCount: 30,
+    connectivity: 'usbc',
+    connectivityLabel: 'USB-C / Wired',
+    colorKeys: ['silver', 'black'],
+    inStock: true,
     badge: 'PRO',
     stockText: 'In Stock',
     stockClass: 'in-stock',
@@ -384,8 +389,8 @@ const PRODUCT_CATALOG = {
       { icon: '⚡', label: '90W Hub', title: 'Single-Cable USB-C Hub' }
     ],
     colors: [
-      { id: 'titanium', name: 'Space Gray Titanium', hex: '#94a3b8' },
-      { id: 'obsidian', name: 'Matte Obsidian Black', hex: '#020617' }
+      { id: 'silver', name: 'Space Gray Titanium', hex: '#94a3b8' },
+      { id: 'black', name: 'Matte Obsidian Black', hex: '#020617' }
     ],
     options: {
       label: 'Mounting Stand Architecture',
@@ -400,8 +405,713 @@ const PRODUCT_CATALOG = {
       { icon: '🎨', text: '99% DCI-P3 & Delta E < 1' },
       { icon: '🔌', text: '90W USB-C + Dual HDMI 2.1' }
     ]
+  },
+  p4: {
+    id: 'p4',
+    name: 'Nexus Neo 65% Low-Profile',
+    category: 'keyboards',
+    categoryLabel: 'KEYBOARDS',
+    brand: 'nexus-lab',
+    brandLabel: 'Nexus Lab',
+    price: 149.00,
+    rating: 4.7,
+    ratingCount: 54,
+    connectivity: 'bluetooth',
+    connectivityLabel: 'Bluetooth 5.3',
+    colorKeys: ['black', 'white'],
+    inStock: true,
+    badge: 'POPULAR',
+    stockText: 'In Stock',
+    stockClass: 'in-stock',
+    desc: 'Ultra-thin mechanical keyboard with low-profile optical switches, PBT shine-through keycaps, and CNC aluminum chassis.',
+    thumbs: [
+      { icon: '⌨️', label: 'Top View', title: '65% Compact Layout' },
+      { icon: '📐', label: 'Side Profile', title: '12mm Thin Chassis' },
+      { icon: '🔋', label: 'Battery', title: '120h Bluetooth Endurance' },
+      { icon: '📦', label: 'Travel Case', title: 'Magnetic Travel Sleeve' }
+    ],
+    colors: [
+      { id: 'black', name: 'Stealth Black', hex: '#18181b' },
+      { id: 'white', name: 'Frost White', hex: '#f8fafc' }
+    ],
+    options: {
+      label: 'Switch Variant',
+      choices: [
+        { id: 'red', name: 'Low-Profile Red (Linear 45g)', priceDelta: 0 },
+        { id: 'brown', name: 'Low-Profile Brown (Tactile 50g)', priceDelta: 10.00 }
+      ]
+    },
+    specs: [
+      { icon: '⚡', text: 'Bluetooth 5.3 Low-Latency' },
+      { icon: '🔋', text: '120h Operating Time' },
+      { icon: '🪶', text: 'Ultra-slim 12mm Profile' },
+      { icon: '🛡️', text: 'CNC Anodized Aluminum Top' }
+    ]
+  },
+  p5: {
+    id: 'p5',
+    name: 'Vortex Reference Studio Monitors',
+    category: 'audio',
+    categoryLabel: 'AUDIO & MONITORING',
+    brand: 'vortex-audio',
+    brandLabel: 'Vortex Audio',
+    price: 349.00,
+    rating: 4.6,
+    ratingCount: 28,
+    connectivity: 'wired',
+    connectivityLabel: 'USB-C / Wired',
+    colorKeys: ['black', 'silver'],
+    inStock: true,
+    badge: 'STUDIO',
+    stockText: 'In Stock',
+    stockClass: 'in-stock',
+    desc: 'Active bi-amplified studio reference speakers with DSP room correction and balanced TRS inputs.',
+    thumbs: [
+      { icon: '🔊', label: 'Pair Front', title: 'Dual Bi-Amp Monoliths' },
+      { icon: '🎛️', label: 'Back DSP', title: 'Room Acoustics Equalizer' },
+      { icon: '🔌', label: 'Balanced I/O', title: 'XLR & TRS Balanced In' },
+      { icon: '📦', label: 'Isolation', title: 'Acoustic Foam Decouplers' }
+    ],
+    colors: [
+      { id: 'black', name: 'Matte Studio Charcoal', hex: '#18181b' },
+      { id: 'silver', name: 'Raw Brushed Silver', hex: '#94a3b8' }
+    ],
+    options: {
+      label: 'Woofer Size',
+      choices: [
+        { id: '5inch', name: '5-Inch Carbon Fiber Drivers', priceDelta: 0 },
+        { id: '7inch', name: '7-Inch Deep Bass Carbon Drivers', priceDelta: 80.00 }
+      ]
+    },
+    specs: [
+      { icon: '🔊', text: '100W Class-D Bi-Amplified' },
+      { icon: '📈', text: '38Hz – 24kHz Flat Response' },
+      { icon: '🎛️', text: 'Integrated 32-bit DSP Room EQ' },
+      { icon: '🔌', text: 'XLR, 1/4" TRS & USB-C DAC' }
+    ]
+  },
+  p6: {
+    id: 'p6',
+    name: 'Apex UltraWide 49" 240Hz',
+    category: 'displays',
+    categoryLabel: 'DISPLAYS & MONITORS',
+    brand: 'apex-vision',
+    brandLabel: 'Apex Vision',
+    price: 1199.00,
+    rating: 4.9,
+    ratingCount: 19,
+    connectivity: 'usbc',
+    connectivityLabel: 'USB-C / Wired',
+    colorKeys: ['black', 'silver'],
+    inStock: false,
+    badge: 'FLAGSHIP',
+    stockText: 'Backorder',
+    stockClass: 'low-stock',
+    desc: 'Super ultrawide 32:9 dual QHD curved monitor with 1000R curvature and built-in KVM switch.',
+    thumbs: [
+      { icon: '🖥️', label: 'Panoramic 32:9', title: 'Dual 1440p Workspace' },
+      { icon: '🔄', label: 'KVM Hub', title: 'Dual PC Control Matrix' },
+      { icon: '🌈', label: 'Mini-LED HDR', title: 'HDR 1000 Zone Dimming' },
+      { icon: '📦', label: 'Heavy Arm', title: 'Integrated Heavy-Duty Stand' }
+    ],
+    colors: [
+      { id: 'black', name: 'Cosmic Black', hex: '#020617' },
+      { id: 'silver', name: 'Anodized Silver', hex: '#94a3b8' }
+    ],
+    options: {
+      label: 'Panel Surface',
+      choices: [
+        { id: 'matte', name: 'Anti-Glare Matte (AGR)', priceDelta: 0 },
+        { id: 'glossy', name: 'Glossy Pure Contrast Coat', priceDelta: 50.00 }
+      ]
+    },
+    specs: [
+      { icon: '🎯', text: '5120 x 1440 Dual QHD @ 240Hz' },
+      { icon: '⚡', text: '0.03ms GtG Response Time' },
+      { icon: '🔄', text: 'Integrated USB-C KVM Switch' },
+      { icon: '✨', text: 'Quantum Dot Mini-LED 1000 nits' }
+    ]
+  },
+  p7: {
+    id: 'p7',
+    name: 'HyperStream Studio Mic & Arm',
+    category: 'audio',
+    categoryLabel: 'AUDIO & MONITORING',
+    brand: 'nexus-lab',
+    brandLabel: 'Nexus Lab',
+    price: 179.00,
+    rating: 4.5,
+    ratingCount: 39,
+    connectivity: 'usbc',
+    connectivityLabel: 'USB-C / Wired',
+    colorKeys: ['black', 'silver'],
+    inStock: true,
+    badge: 'NEW',
+    stockText: 'In Stock',
+    stockClass: 'in-stock',
+    desc: '24-bit 192kHz broadcast condenser microphone with dual polar patterns and metal boom arm.',
+    thumbs: [
+      { icon: '🎙️', label: 'Capsule Front', title: '25mm Gold-Sputtered Capsule' },
+      { icon: '🦾', label: 'Boom Arm', title: 'Gas-Spring Low Profile Arm' },
+      { icon: '🔇', label: 'Tap Mute', title: 'Capacitive Tap-to-Mute' },
+      { icon: '📦', label: 'Full Kit', title: 'Shockmount & Pop Filter' }
+    ],
+    colors: [
+      { id: 'black', name: 'Matte Cast Black', hex: '#18181b' },
+      { id: 'silver', name: 'Silver Nickel', hex: '#94a3b8' }
+    ],
+    options: {
+      label: 'Mount Type',
+      choices: [
+        { id: 'arm', name: 'Desk-Clamp Boom Arm', priceDelta: 0 },
+        { id: 'stand', name: 'Cast-Iron Heavy Desktop Stand', priceDelta: 15.00 }
+      ]
+    },
+    specs: [
+      { icon: '🎙️', text: '24-bit / 192kHz Studio Recording' },
+      { icon: '🎯', text: 'Cardioid & Omnidirectional Modes' },
+      { icon: '🎧', text: 'Zero-Latency 3.5mm Headphone Jack' },
+      { icon: '🔌', text: 'Plug & Play USB-C Bus Powered' }
+    ]
+  },
+  p8: {
+    id: 'p8',
+    name: 'Keychronix Ergo Alice Custom',
+    category: 'keyboards',
+    categoryLabel: 'KEYBOARDS',
+    brand: 'keychronix',
+    brandLabel: 'Keychronix',
+    price: 289.00,
+    rating: 4.8,
+    ratingCount: 33,
+    connectivity: 'tri-mode',
+    connectivityLabel: 'Tri-Mode Wireless',
+    colorKeys: ['violet', 'white', 'black'],
+    inStock: true,
+    badge: 'LIMITED',
+    stockText: 'In Stock',
+    stockClass: 'in-stock',
+    desc: 'Ergonomic Alice layout keyboard with rotary media knob, brass counterweight, and gasket mount.',
+    thumbs: [
+      { icon: '⌨️', label: 'Split Angle', title: 'Natural Wrist Ergonomics' },
+      { icon: '🎛️', label: 'Rotary Knob', title: 'CNC Aluminum Volume Dial' },
+      { icon: '🪙', label: 'Brass Weight', title: '2.4kg Solid Brass Base' },
+      { icon: '📦', label: 'Carrying Case', title: 'Custom Hard EVA Case' }
+    ],
+    colors: [
+      { id: 'violet', name: 'Nebula Violet', hex: '#7c3aed' },
+      { id: 'white', name: 'Pure Chalk White', hex: '#f8fafc' },
+      { id: 'black', name: 'Carbon Black', hex: '#18181b' }
+    ],
+    options: {
+      label: 'Plate Material',
+      choices: [
+        { id: 'fr4', name: 'FR4 Acoustic Plate (Thocky)', priceDelta: 0 },
+        { id: 'pom', name: 'POM Flexible Plate (Clacky)', priceDelta: 12.00 },
+        { id: 'brass', name: 'Brass Heavy Plate (Firm)', priceDelta: 25.00 }
+      ]
+    },
+    specs: [
+      { icon: '⚡', text: 'Tri-Mode: 2.4GHz / BT 5.1 / USB-C' },
+      { icon: '🪙', text: '2.4kg CNC Brass Weighted Case' },
+      { icon: '🎛️', text: 'Programmable Rotary Media Dial' },
+      { icon: '⚙️', text: 'VIA / QMK Full Key Remapping' }
+    ]
   }
 };
+
+/* ===== BEGIN issue #402: Faceted Filter State & Engine ===== */
+const facetState = {
+  searchQuery: '',
+  maxPrice: 1200,
+  category: 'all',
+  brands: new Set(),
+  connectivity: new Set(),
+  colors: new Set(),
+  minRating: 0,
+  inStockOnly: false,
+  sortBy: 'featured'
+};
+
+const BRAND_LABELS = {
+  'nexus-lab': 'Nexus Lab',
+  'vortex-audio': 'Vortex Audio',
+  'apex-vision': 'Apex Vision',
+  'keychronix': 'Keychronix'
+};
+
+const CONN_LABELS = {
+  'tri-mode': 'Tri-Mode Wireless',
+  'wireless': 'Wireless 2.4GHz',
+  'bluetooth': 'Bluetooth 5.3',
+  'usbc': 'USB-C / Wired'
+};
+
+const COLOR_LABELS = {
+  black: 'Black',
+  silver: 'Silver',
+  violet: 'Violet',
+  cyan: 'Cyan',
+  white: 'White'
+};
+
+function productMatchesPredicate(product, overrides = {}) {
+  const query = overrides.searchQuery !== undefined ? overrides.searchQuery : facetState.searchQuery;
+  const maxPrice = overrides.maxPrice !== undefined ? overrides.maxPrice : facetState.maxPrice;
+  const category = overrides.category !== undefined ? overrides.category : facetState.category;
+  const brands = overrides.brands !== undefined ? overrides.brands : facetState.brands;
+  const connectivity = overrides.connectivity !== undefined ? overrides.connectivity : facetState.connectivity;
+  const colors = overrides.colors !== undefined ? overrides.colors : facetState.colors;
+  const minRating = overrides.minRating !== undefined ? overrides.minRating : facetState.minRating;
+  const inStockOnly = overrides.inStockOnly !== undefined ? overrides.inStockOnly : facetState.inStockOnly;
+
+  // Search keyword query
+  if (query) {
+    const q = query.toLowerCase();
+    const matchesTitle = product.name.toLowerCase().includes(q);
+    const matchesDesc = product.desc.toLowerCase().includes(q);
+    const matchesBrand = (product.brandLabel || '').toLowerCase().includes(q);
+    if (!matchesTitle && !matchesDesc && !matchesBrand) return false;
+  }
+
+  // Price
+  if (product.price > maxPrice) return false;
+
+  // Category
+  if (category !== 'all' && product.category !== category) return false;
+
+  // Brands
+  if (brands.size > 0 && !brands.has(product.brand)) return false;
+
+  // Connectivity
+  if (connectivity.size > 0) {
+    // If product connectivity is wired, match 'usbc' option
+    const pConn = product.connectivity === 'wired' ? 'usbc' : product.connectivity;
+    if (!connectivity.has(pConn) && !connectivity.has(product.connectivity)) return false;
+  }
+
+  // Colors
+  if (colors.size > 0) {
+    const pColors = product.colorKeys || [];
+    const hasColorMatch = pColors.some(c => colors.has(c));
+    if (!hasColorMatch) return false;
+  }
+
+  // Rating
+  if (minRating > 0 && product.rating < minRating) return false;
+
+  // In Stock
+  if (inStockOnly && !product.inStock) return false;
+
+  return true;
+}
+
+function updateFacetCounts() {
+  const allProducts = Object.values(PRODUCT_CATALOG);
+
+  // 1. Brands counts: compute matches when varying brand facet
+  const brandKeys = ['nexus-lab', 'vortex-audio', 'apex-vision', 'keychronix'];
+  brandKeys.forEach(brandKey => {
+    const cnt = allProducts.filter(p => productMatchesPredicate(p, { brands: new Set([brandKey]) })).length;
+    const el = document.getElementById(`count-brand-${brandKey}`);
+    if (el) el.textContent = cnt;
+    const parentLabel = el ? el.closest('.facet-checkbox-label') : null;
+    if (parentLabel) parentLabel.classList.toggle('facet-zero-count', cnt === 0);
+  });
+
+  // 2. Connectivity counts
+  const connKeys = ['tri-mode', 'wireless', 'bluetooth', 'usbc'];
+  connKeys.forEach(connKey => {
+    const cnt = allProducts.filter(p => productMatchesPredicate(p, { connectivity: new Set([connKey]) })).length;
+    const el = document.getElementById(`count-conn-${connKey}`);
+    if (el) el.textContent = cnt;
+    const parentLabel = el ? el.closest('.facet-checkbox-label') : null;
+    if (parentLabel) parentLabel.classList.toggle('facet-zero-count', cnt === 0);
+  });
+
+  // 3. Color counts
+  const colorKeys = ['black', 'silver', 'violet', 'cyan', 'white'];
+  colorKeys.forEach(colorKey => {
+    const cnt = allProducts.filter(p => productMatchesPredicate(p, { colors: new Set([colorKey]) })).length;
+    const el = document.getElementById(`count-color-${colorKey}`);
+    if (el) el.textContent = cnt;
+    const swatchBtn = document.querySelector(`.swatch-btn[data-color="${colorKey}"]`);
+    if (swatchBtn) swatchBtn.classList.toggle('facet-zero-count', cnt === 0);
+  });
+
+  // 4. Rating counts
+  const rAll = allProducts.filter(p => productMatchesPredicate(p, { minRating: 0 })).length;
+  const r48 = allProducts.filter(p => productMatchesPredicate(p, { minRating: 4.8 })).length;
+  const r46 = allProducts.filter(p => productMatchesPredicate(p, { minRating: 4.6 })).length;
+  const r40 = allProducts.filter(p => productMatchesPredicate(p, { minRating: 4.0 })).length;
+
+  const setBadge = (id, count) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = count;
+  };
+  setBadge('count-rating-all', rAll);
+  setBadge('count-rating-48', r48);
+  setBadge('count-rating-46', r46);
+  setBadge('count-rating-40', r40);
+
+  // 5. In-stock count
+  const stockCount = allProducts.filter(p => productMatchesPredicate(p, { inStockOnly: true })).length;
+  setBadge('count-instock', stockCount);
+}
+
+function renderActiveChips() {
+  const container = document.getElementById('chipsList');
+  const bar = document.getElementById('activeChipsBar');
+  if (!container || !bar) return;
+
+  const chips = [];
+
+  if (facetState.searchQuery) {
+    chips.push({
+      label: `"${facetState.searchQuery}"`,
+      type: 'search',
+      action: () => {
+        facetState.searchQuery = '';
+        const input = document.getElementById('productSearchInput');
+        if (input) input.value = '';
+        applyFacetedFilters();
+      }
+    });
+  }
+
+  if (facetState.category !== 'all') {
+    chips.push({
+      label: `Category: ${facetState.category.toUpperCase()}`,
+      type: 'category',
+      action: () => {
+        setCategoryFilter('all');
+      }
+    });
+  }
+
+  if (facetState.maxPrice < 1200) {
+    chips.push({
+      label: `Under $${facetState.maxPrice}`,
+      type: 'price',
+      action: () => {
+        facetState.maxPrice = 1200;
+        const slider = document.getElementById('priceRange');
+        if (slider) slider.value = 1200;
+        const disp = document.getElementById('priceDisplay');
+        if (disp) disp.textContent = 'Up to $1,200';
+        applyFacetedFilters();
+      }
+    });
+  }
+
+  facetState.brands.forEach(b => {
+    chips.push({
+      label: `Brand: ${BRAND_LABELS[b] || b}`,
+      type: 'brand',
+      action: () => {
+        facetState.brands.delete(b);
+        const chk = document.querySelector(`.brand-filter[value="${b}"]`);
+        if (chk) chk.checked = false;
+        applyFacetedFilters();
+      }
+    });
+  });
+
+  facetState.connectivity.forEach(c => {
+    chips.push({
+      label: `Connectivity: ${CONN_LABELS[c] || c}`,
+      type: 'connectivity',
+      action: () => {
+        facetState.connectivity.delete(c);
+        const chk = document.querySelector(`.conn-filter[value="${c}"]`);
+        if (chk) chk.checked = false;
+        applyFacetedFilters();
+      }
+    });
+  });
+
+  facetState.colors.forEach(col => {
+    chips.push({
+      label: `Color: ${COLOR_LABELS[col] || col}`,
+      type: 'color',
+      action: () => {
+        facetState.colors.delete(col);
+        const btn = document.querySelector(`.swatch-btn[data-color="${col}"]`);
+        if (btn) btn.classList.remove('active');
+        applyFacetedFilters();
+      }
+    });
+  });
+
+  if (facetState.minRating > 0) {
+    chips.push({
+      label: `★ ${facetState.minRating}+ Rating`,
+      type: 'rating',
+      action: () => {
+        facetState.minRating = 0;
+        const rad = document.querySelector('.rating-filter[value="0"]');
+        if (rad) rad.checked = true;
+        applyFacetedFilters();
+      }
+    });
+  }
+
+  if (facetState.inStockOnly) {
+    chips.push({
+      label: 'In Stock Only',
+      type: 'stock',
+      action: () => {
+        facetState.inStockOnly = false;
+        const chk = document.getElementById('inStockCheckbox');
+        if (chk) chk.checked = false;
+        applyFacetedFilters();
+      }
+    });
+  }
+
+  if (chips.length === 0) {
+    bar.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  bar.style.display = 'flex';
+  container.innerHTML = '';
+
+  chips.forEach(chip => {
+    const chipEl = document.createElement('div');
+    chipEl.className = 'filter-chip';
+    chipEl.innerHTML = `<span>${chip.label}</span><button type="button" class="chip-remove" aria-label="Remove filter ${chip.label}">✕</button>`;
+    chipEl.querySelector('.chip-remove').addEventListener('click', chip.action);
+    container.appendChild(chipEl);
+  });
+}
+
+function applyFacetedFilters() {
+  const cards = Array.from(document.querySelectorAll('#productsGrid .card'));
+  let visibleCount = 0;
+
+  // 1. Determine matches
+  cards.forEach(card => {
+    const id = card.getAttribute('data-id');
+    const product = PRODUCT_CATALOG[id];
+    if (!product) return;
+
+    const matches = productMatchesPredicate(product);
+    if (matches) {
+      card.style.display = 'block';
+      card.classList.remove('card-hidden');
+      card.setAttribute('aria-hidden', 'false');
+      visibleCount += 1;
+    } else {
+      card.style.display = 'none';
+      card.classList.add('card-hidden');
+      card.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // 2. Sort visible cards
+  const grid = document.getElementById('productsGrid');
+  if (grid) {
+    const sortedCards = cards.filter(card => card.style.display !== 'none');
+    sortedCards.sort((a, b) => {
+      const idA = a.getAttribute('data-id');
+      const idB = b.getAttribute('data-id');
+      const prodA = PRODUCT_CATALOG[idA];
+      const prodB = PRODUCT_CATALOG[idB];
+      if (!prodA || !prodB) return 0;
+
+      switch (facetState.sortBy) {
+        case 'price-asc':
+          return prodA.price - prodB.price;
+        case 'price-desc':
+          return prodB.price - prodA.price;
+        case 'rating-desc':
+          return prodB.rating - prodA.rating;
+        default:
+          return idA.localeCompare(idB);
+      }
+    });
+
+    sortedCards.forEach(card => grid.appendChild(card));
+  }
+
+  // 3. Update count tallies
+  const visibleEl = document.getElementById('visibleProductsCount');
+  const totalEl = document.getElementById('totalProductsCount');
+  if (visibleEl) visibleEl.textContent = visibleCount;
+  if (totalEl) totalEl.textContent = Object.keys(PRODUCT_CATALOG).length;
+
+  // 4. Empty state
+  const noResCard = document.getElementById('noResultsCard');
+  if (noResCard) {
+    noResCard.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  // 5. Update facet live count badges
+  updateFacetCounts();
+
+  // 6. Active filter chips
+  renderActiveChips();
+}
+
+function setCategoryFilter(cat) {
+  facetState.category = cat;
+  document.querySelectorAll('.category-tabs .tab').forEach(tab => {
+    tab.classList.toggle('active', tab.getAttribute('data-cat') === cat);
+  });
+  applyFacetedFilters();
+}
+
+function handleCatalogSort(sortValue) {
+  facetState.sortBy = sortValue;
+  applyFacetedFilters();
+}
+
+function resetFacetedFilters() {
+  facetState.searchQuery = '';
+  facetState.maxPrice = 1200;
+  facetState.category = 'all';
+  facetState.brands.clear();
+  facetState.connectivity.clear();
+  facetState.colors.clear();
+  facetState.minRating = 0;
+  facetState.inStockOnly = false;
+  facetState.sortBy = 'featured';
+
+  const searchInput = document.getElementById('productSearchInput');
+  if (searchInput) searchInput.value = '';
+
+  const priceSlider = document.getElementById('priceRange');
+  if (priceSlider) priceSlider.value = 1200;
+  const priceDisplay = document.getElementById('priceDisplay');
+  if (priceDisplay) priceDisplay.textContent = 'Up to $1,200';
+
+  document.querySelectorAll('.brand-filter').forEach(chk => { chk.checked = false; });
+  document.querySelectorAll('.conn-filter').forEach(chk => { chk.checked = false; });
+  document.querySelectorAll('.swatch-btn').forEach(btn => { btn.classList.remove('active'); });
+
+  const radAll = document.querySelector('.rating-filter[value="0"]');
+  if (radAll) radAll.checked = true;
+
+  const stockChk = document.getElementById('inStockCheckbox');
+  if (stockChk) stockChk.checked = false;
+
+  const sortSelect = document.getElementById('catalogSortSelect');
+  if (sortSelect) sortSelect.value = 'featured';
+
+  document.querySelectorAll('.category-tabs .tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-cat') === 'all');
+  });
+
+  applyFacetedFilters();
+}
+
+// Expose handlers globally for HTML attributes
+window.resetFacetedFilters = resetFacetedFilters;
+window.handleCatalogSort = handleCatalogSort;
+window.setCategoryFilter = setCategoryFilter;
+
+function initFacetedFilterListeners() {
+  // Category tabs
+  document.querySelectorAll('.category-tabs .tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const cat = tab.getAttribute('data-cat') || 'all';
+      setCategoryFilter(cat);
+    });
+  });
+
+  // Search input
+  const searchInput = document.getElementById('productSearchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      facetState.searchQuery = e.target.value.trim();
+      applyFacetedFilters();
+    });
+  }
+
+  // Price slider
+  const priceSlider = document.getElementById('priceRange');
+  const priceDisplay = document.getElementById('priceDisplay');
+  if (priceSlider) {
+    priceSlider.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      facetState.maxPrice = val;
+      if (priceDisplay) priceDisplay.textContent = `Up to $${val.toLocaleString()}`;
+      applyFacetedFilters();
+    });
+  }
+
+  // Brand checkboxes
+  document.querySelectorAll('.brand-filter').forEach(chk => {
+    chk.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (e.target.checked) facetState.brands.add(val);
+      else facetState.brands.delete(val);
+      applyFacetedFilters();
+    });
+  });
+
+  // Connectivity checkboxes
+  document.querySelectorAll('.conn-filter').forEach(chk => {
+    chk.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (e.target.checked) facetState.connectivity.add(val);
+      else facetState.connectivity.delete(val);
+      applyFacetedFilters();
+    });
+  });
+
+  // Color swatches
+  document.querySelectorAll('.swatch-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const color = btn.getAttribute('data-color');
+      if (!color) return;
+      if (facetState.colors.has(color)) {
+        facetState.colors.delete(color);
+        btn.classList.remove('active');
+      } else {
+        facetState.colors.add(color);
+        btn.classList.add('active');
+      }
+      applyFacetedFilters();
+    });
+  });
+
+  // Rating radio filters
+  document.querySelectorAll('.rating-filter').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      facetState.minRating = Number(e.target.value);
+      applyFacetedFilters();
+    });
+  });
+
+  // In Stock checkbox
+  const inStockCheckbox = document.getElementById('inStockCheckbox');
+  if (inStockCheckbox) {
+    inStockCheckbox.addEventListener('change', (e) => {
+      facetState.inStockOnly = e.target.checked;
+      applyFacetedFilters();
+    });
+  }
+
+  // Sort select
+  const sortSelect = document.getElementById('catalogSortSelect');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      handleCatalogSort(e.target.value);
+    });
+  }
+
+  // Initial calculation and counts
+  applyFacetedFilters();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initFacetedFilterListeners);
+} else {
+  initFacetedFilterListeners();
+}
 
 const qvState = {
   productId: 'p1',
