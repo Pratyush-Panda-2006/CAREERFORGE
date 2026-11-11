@@ -641,19 +641,57 @@
   <!-- ===== END issue #197 ===== -->
 
   <section class="compare" id="compare" aria-labelledby="compare-title">
-    <h2 id="compare-title">PLAYER COMPARATOR</h2>
-    <p class="compare-intro">Pick two pros and see how they stack up head to head.</p>
+    <div class="compare-header-row">
+      <div class="fr-tag">VORTEX ANALYTICS // COMBAT LAB</div>
+      <h2 id="compare-title">PRO PLAYER HEAD-TO-HEAD RADAR &amp; WIN ESTIMATOR</h2>
+      <p class="compare-intro">Compare elite esports athletes across 5 core tactical dimensions with real-time Elo-weighted matchup win probability estimation.</p>
+    </div>
 
     <div class="compare-pickers">
       <div class="picker picker-a">
-        <label for="player-a">Player A</label>
-        <select id="player-a"></select>
+        <label for="player-a">Player A (Cyan)</label>
+        <select id="player-a" aria-label="Select Player A"></select>
         <span class="picker-team" id="team-a"></span>
       </div>
+      <div class="compare-vs-badge" aria-hidden="true">VS</div>
       <div class="picker picker-b">
-        <label for="player-b">Player B</label>
-        <select id="player-b"></select>
+        <label for="player-b">Player B (Magenta)</label>
+        <select id="player-b" aria-label="Select Player B"></select>
         <span class="picker-team" id="team-b"></span>
+      </div>
+    </div>
+
+    <!-- Win Probability Estimator HUD (Issue #451) -->
+    <div class="win-estimator-card" id="winEstimatorCard">
+      <div class="estimator-header">
+        <span class="estimator-label">⚡ MATCH WIN PROBABILITY ESTIMATOR</span>
+        <span class="estimator-model-tag">ELO-WEIGHTED COMBAT ALGORITHM</span>
+      </div>
+      <div class="estimator-meter-container">
+        <div class="estimator-bar-wrap">
+          <div class="estimator-bar-a" id="estimatorBarA" style="width: 50%;">
+            <span class="bar-percent-text" id="percentTextA">50%</span>
+          </div>
+          <div class="estimator-bar-b" id="estimatorBarB" style="width: 50%;">
+            <span class="bar-percent-text" id="percentTextB">50%</span>
+          </div>
+        </div>
+      </div>
+      <div class="estimator-footer">
+        <div class="estimator-player-stat a-side">
+          <span class="player-pill cyan" id="hudNameA">Player A</span>
+          <span class="win-chance-big cyan-text" id="hudChanceA">50%</span>
+          <span class="stat-role-chip" id="hudRoleA">Duelist</span>
+        </div>
+        <div class="estimator-verdict" id="hudVerdict">
+          <span class="verdict-badge even" id="verdictBadge">EVEN MATCHUP</span>
+          <span class="verdict-sub" id="verdictSub">Equal projected performance</span>
+        </div>
+        <div class="estimator-player-stat b-side">
+          <span class="player-pill magenta" id="hudNameB">Player B</span>
+          <span class="win-chance-big magenta-text" id="hudChanceB">50%</span>
+          <span class="stat-role-chip" id="hudRoleB">Duelist</span>
+        </div>
       </div>
     </div>
 
@@ -664,8 +702,8 @@
           <desc id="radar-desc"></desc>
         </svg>
         <figcaption class="radar-legend">
-          <span class="lg lg-a" id="legend-a">Player A</span>
-          <span class="lg lg-b" id="legend-b">Player B</span>
+          <span class="lg lg-a" id="legend-a">Player A (Cyan)</span>
+          <span class="lg lg-b" id="legend-b">Player B (Magenta)</span>
         </figcaption>
       </figure>
 
@@ -673,12 +711,12 @@
         <table class="compare-table" id="compare-table">
           <caption class="sr-only">Stat comparison. The better value in each row is marked.</caption>
           <thead>
-            <tr><th scope="col">Stat</th><th scope="col" id="th-a">Player A</th><th scope="col" id="th-b">Player B</th></tr>
+            <tr><th scope="col">Tactical Dimension</th><th scope="col" id="th-a">Player A</th><th scope="col" id="th-b">Player B</th></tr>
           </thead>
           <tbody id="compare-body"></tbody>
         </table>
         <p class="compare-summary" id="compare-summary" role="status" aria-live="polite"></p>
-        <p class="compare-note">Reaction time is inverted on the chart because lower is better. Stats are made-up demo data.</p>
+        <p class="compare-note">Metrics normalized across 5 competitive axes: KDA, CS/min, Damage Share %, First Blood %, and Champion Pool Mastery.</p>
       </div>
     </div>
   </section>

@@ -912,36 +912,38 @@ window.watchStream = function watchStream() {
 
 document.addEventListener('DOMContentLoaded', initComparator);
 
-// Demo roster (made-up numbers).
+// Pro Player Roster with Elo ratings and 5 core tactical performance dimensions
 const PLAYERS = [
-  { id: 'nova',   name: 'NOVA',   team: 'Team Cyber',     aim: 94, reaction: 148, kd: 1.92, clutch: 58, win: 71 },
-  { id: 'specter', name: 'SPECTER', team: 'Phantom Squad', aim: 89, reaction: 136, kd: 1.64, clutch: 49, win: 66 },
-  { id: 'blaze',  name: 'BLAZE',  team: 'Neon Riders',    aim: 91, reaction: 162, kd: 1.78, clutch: 41, win: 62 },
-  { id: 'titan',  name: 'TITAN',  team: 'Apex Titans',    aim: 82, reaction: 171, kd: 1.31, clutch: 63, win: 74 },
-  { id: 'hex',    name: 'HEX',    team: 'Team Cyber',     aim: 86, reaction: 154, kd: 1.47, clutch: 37, win: 58 },
-  { id: 'ryo',    name: 'RYO',    team: 'Phantom Squad',  aim: 97, reaction: 142, kd: 2.05, clutch: 44, win: 69 },
-  { id: 'vex',    name: 'VEX',    team: 'Neon Riders',    aim: 78, reaction: 189, kd: 1.12, clutch: 52, win: 55 },
-  { id: 'echo',   name: 'ECHO',   team: 'Apex Titans',    aim: 84, reaction: 158, kd: 1.38, clutch: 66, win: 72 }
+  { id: 'zenith',  name: 'ZENITH',  team: 'Phantom Squad', role: 'Duelist',    elo: 1940, kda: 4.85, csMin: 10.4, dmgShare: 32.5, firstBlood: 34, champPool: 12 },
+  { id: 'kairo',   name: 'KAIRO',   team: 'Team Cyber',    role: 'Duelist',    elo: 1890, kda: 4.40, csMin: 9.8,  dmgShare: 29.8, firstBlood: 28, champPool: 10 },
+  { id: 'drift',   name: 'DRIFT',   team: 'Neon Riders',   role: 'Duelist',    elo: 1780, kda: 3.75, csMin: 9.1,  dmgShare: 27.2, firstBlood: 24, champPool: 9  },
+  { id: 'striker', name: 'STRIKER', team: 'Vortex Prime',  role: 'Duelist',    elo: 1720, kda: 3.45, csMin: 8.6,  dmgShare: 25.4, firstBlood: 21, champPool: 8  },
+  { id: 'pulse',   name: 'PULSE',   team: 'Team Cyber',    role: 'Initiator',  elo: 1860, kda: 4.20, csMin: 8.2,  dmgShare: 23.5, firstBlood: 22, champPool: 14 },
+  { id: 'sable',   name: 'SABLE',   team: 'Neon Riders',   role: 'Initiator',  elo: 1810, kda: 3.90, csMin: 8.0,  dmgShare: 22.0, firstBlood: 19, champPool: 11 },
+  { id: 'nimbus',  name: 'NIMBUS',  team: 'Apex Titans',   role: 'Controller', elo: 1840, kda: 3.80, csMin: 7.8,  dmgShare: 20.5, firstBlood: 16, champPool: 13 },
+  { id: 'haze',    name: 'HAZE',    team: 'Phantom Squad', role: 'Controller', elo: 1790, kda: 3.50, csMin: 7.5,  dmgShare: 19.8, firstBlood: 14, champPool: 11 },
+  { id: 'warden',  name: 'WARDEN',  team: 'Neon Riders',   role: 'Sentinel',   elo: 1820, kda: 4.10, csMin: 7.4,  dmgShare: 18.9, firstBlood: 15, champPool: 12 },
+  { id: 'anvil',   name: 'ANVIL',   team: 'Apex Titans',   role: 'Sentinel',   elo: 1760, kda: 3.60, csMin: 7.1,  dmgShare: 18.0, firstBlood: 13, champPool: 9  },
+  { id: 'oracle',  name: 'ORACLE',  team: 'Team Cyber',    role: 'IGL',        elo: 1850, kda: 3.70, csMin: 7.6,  dmgShare: 21.0, firstBlood: 18, champPool: 15 },
+  { id: 'maestro', name: 'MAESTRO', team: 'Phantom Squad', role: 'IGL',        elo: 1800, kda: 3.40, csMin: 7.3,  dmgShare: 19.5, firstBlood: 16, champPool: 13 }
 ];
 
-// One entry per radar axis. `min`/`max` map the raw value onto 0..1 for the chart.
-// Reaction time is inverted (lower ms is better), so its range runs from the slow end to the fast end.
+// One entry per radar axis: KDA, CS/min, Damage Share %, First Blood %, Champion Pool
 const STATS = [
-  { key: 'aim',      label: 'Aim Accuracy',  unit: '%',  decimals: 0, higherIsBetter: true,  min: 50,  max: 100 },
-  { key: 'reaction', label: 'Reaction Time', unit: ' ms', decimals: 0, higherIsBetter: false, min: 220, max: 120 },
-  { key: 'kd',       label: 'K/D Ratio',     unit: '',   decimals: 2, higherIsBetter: true,  min: 0.5, max: 2.5 },
-  { key: 'clutch',   label: 'Clutch Rate',   unit: '%',  decimals: 0, higherIsBetter: true,  min: 0,   max: 80 },
-  { key: 'win',      label: 'Win %',         unit: '%',  decimals: 0, higherIsBetter: true,  min: 30,  max: 90 }
+  { key: 'kda',        label: 'KDA Ratio',             unit: '',    decimals: 2, higherIsBetter: true, min: 1.5, max: 6.0 },
+  { key: 'csMin',      label: 'CS / Min',              unit: '',    decimals: 1, higherIsBetter: true, min: 5.0, max: 12.0 },
+  { key: 'dmgShare',   label: 'Damage Share',          unit: '%',   decimals: 1, higherIsBetter: true, min: 12,  max: 38 },
+  { key: 'firstBlood', label: 'First Blood %',         unit: '%',   decimals: 0, higherIsBetter: true, min: 8,   max: 42 },
+  { key: 'champPool',  label: 'Champion Pool Mastery', unit: ' Ch', decimals: 0, higherIsBetter: true, min: 4,   max: 18 }
 ];
 
-// Raw value -> 0..1 (clamped). Works for inverted stats because min > max there.
+// Raw value -> 0..1 (clamped)
 function normalize(stat, value) {
   const t = (value - stat.min) / (stat.max - stat.min);
   return Math.min(Math.max(t, 0), 1);
 }
 
 // Vertex of the radar polygon for axis `i` of `n` at fraction `t` of the radius.
-// Axis 0 points straight up, the rest go clockwise.
 function radarPoint(i, n, t, cx, cy, radius) {
   const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
   return { x: cx + radius * t * Math.cos(angle), y: cy + radius * t * Math.sin(angle) };
@@ -956,6 +958,42 @@ function betterSide(stat, a, b) {
 
 function formatStat(stat, value) {
   return value.toFixed(stat.decimals) + stat.unit;
+}
+
+function computeWinProbability(playerA, playerB) {
+  if (playerA.id === playerB.id) {
+    return { probA: 50, probB: 50, advantage: 'Even Matchup', delta: 0 };
+  }
+
+  // Calculate stat advantage differential across all 5 axes
+  let statScoreA = 0;
+  let statScoreB = 0;
+  STATS.forEach((stat) => {
+    statScoreA += normalize(stat, playerA[stat.key]);
+    statScoreB += normalize(stat, playerB[stat.key]);
+  });
+  const statDiff = (statScoreA - statScoreB) / STATS.length;
+
+  // Elo rating differential combined with stat performance
+  const eloDiff = (playerA.elo - playerB.elo) + (statDiff * 300);
+
+  // Logistic win probability formula
+  const probA = 1 / (1 + Math.pow(10, -eloDiff / 400));
+  const roundedA = Math.max(5, Math.min(95, Math.round(probA * 100)));
+  const roundedB = 100 - roundedA;
+
+  let advantage = 'Even Matchup';
+  if (roundedA >= 60) advantage = `${playerA.name} Heavily Favored`;
+  else if (roundedA > 52) advantage = `${playerA.name} Slight Edge`;
+  else if (roundedB >= 60) advantage = `${playerB.name} Heavily Favored`;
+  else if (roundedB > 52) advantage = `${playerB.name} Slight Edge`;
+
+  return {
+    probA: roundedA,
+    probB: roundedB,
+    advantage,
+    delta: Math.abs(roundedA - roundedB)
+  };
 }
 
 function svgNode(name, attrs, text) {
@@ -984,8 +1022,8 @@ function initComparator() {
       sel.appendChild(opt);
     });
   });
-  selA.value = 'nova';
-  selB.value = 'titan';
+  selA.value = 'zenith';
+  selB.value = 'kairo';
 
   const byId = (id) => PLAYERS.find((p) => p.id === id);
 
@@ -1080,6 +1118,46 @@ function initComparator() {
     else if (winsA === winsB) summary = a.name + ' and ' + b.name + ' are level: ' + winsA + ' stat wins each.';
     else summary = (winsA > winsB ? a.name : b.name) + ' leads, winning ' + Math.max(winsA, winsB) + ' of ' + STATS.length + ' stats.';
     setText('compare-summary', summary);
+
+    // Update Win Probability Estimator HUD
+    const winData = computeWinProbability(a, b);
+    const barA = document.getElementById('estimatorBarA');
+    const barB = document.getElementById('estimatorBarB');
+    if (barA && barB) {
+      barA.style.width = winData.probA + '%';
+      barB.style.width = winData.probB + '%';
+      setText('percentTextA', winData.probA + '%');
+      setText('percentTextB', winData.probB + '%');
+    }
+    setText('hudNameA', a.name);
+    setText('hudChanceA', winData.probA + '%');
+    setText('hudRoleA', a.role + ' • ' + a.team);
+
+    setText('hudNameB', b.name);
+    setText('hudChanceB', winData.probB + '%');
+    setText('hudRoleB', b.role + ' • ' + b.team);
+
+    const vBadge = document.getElementById('verdictBadge');
+    const vSub = document.getElementById('verdictSub');
+    if (vBadge && vSub) {
+      if (a.id === b.id) {
+        vBadge.className = 'verdict-badge even';
+        vBadge.textContent = 'EVEN MATCHUP';
+        vSub.textContent = 'Identical athlete selected';
+      } else if (winData.delta <= 4) {
+        vBadge.className = 'verdict-badge even';
+        vBadge.textContent = 'EVEN MATCHUP';
+        vSub.textContent = 'Tight tactical duel predicted';
+      } else if (winData.probA > winData.probB) {
+        vBadge.className = 'verdict-badge favored-a';
+        vBadge.textContent = `${a.name} FAVORED (+${winData.delta}%)`;
+        vSub.textContent = `${a.name} holds projected combat advantage`;
+      } else {
+        vBadge.className = 'verdict-badge favored-b';
+        vBadge.textContent = `${b.name} FAVORED (+${winData.delta}%)`;
+        vSub.textContent = `${b.name} holds projected combat advantage`;
+      }
+    }
 
     setText('radar-desc', a.name + ' versus ' + b.name + ' across ' + STATS.map((s) => s.label).join(', ') + '. ' + summary);
   }
@@ -1630,7 +1708,7 @@ if (document.readyState === 'loading') {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : {};
-    } catch (e) {
+    } catch {
       return {};
     }
   }
@@ -1640,7 +1718,7 @@ if (document.readyState === 'loading') {
       var saved = readSavedVotes();
       saved[matchId] = teamPick;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-    } catch (e) {
+    } catch {
       // Storage unavailable, in-memory vote still functions
     }
   }
