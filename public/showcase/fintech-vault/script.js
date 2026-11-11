@@ -1082,3 +1082,197 @@ window.confirmDeposit = function confirmDeposit() {
     }
   };
 })();
+
+// ==========================================================
+// Issue #345: Automated Budget Allocation Engine (50/30/20 Rule)
+// ==========================================================
+(() => {
+  'use strict';
+
+  function initBudgetAllocation() {
+    const incomeInput = document.getElementById('budgetIncomeInput');
+    const incomeDisplay = document.getElementById('budgetIncomeDisplay');
+    const donutCenterAmount = document.getElementById('donutCenterAmount');
+
+    const sliderNeeds = document.getElementById('sliderNeeds');
+    const sliderWants = document.getElementById('sliderWants');
+    const sliderSavings = document.getElementById('sliderSavings');
+
+    const pctNeedsDisplay = document.getElementById('pctNeedsDisplay');
+    const pctWantsDisplay = document.getElementById('pctWantsDisplay');
+    const pctSavingsDisplay = document.getElementById('pctSavingsDisplay');
+
+    const amountNeedsDisplay = document.getElementById('amountNeedsDisplay');
+    const amountWantsDisplay = document.getElementById('amountWantsDisplay');
+    const amountSavingsDisplay = document.getElementById('amountSavingsDisplay');
+
+    const cardNeedsAmount = document.getElementById('cardNeedsAmount');
+    const cardWantsAmount = document.getElementById('cardWantsAmount');
+    const cardSavingsAmount = document.getElementById('cardSavingsAmount');
+
+    const cardNeedsPct = document.getElementById('cardNeedsPct');
+    const cardWantsPct = document.getElementById('cardWantsPct');
+    const cardSavingsPct = document.getElementById('cardSavingsPct');
+
+    const balanceTag = document.getElementById('allocationBalanceTag');
+    const balanceDot = document.getElementById('balanceStatusDot');
+    const btnReset = document.getElementById('btnResetRule');
+    const advisoryText = document.getElementById('budgetAdvisoryText');
+    const donutGroup = document.getElementById('donutSegmentsGroup');
+    const presetButtons = document.querySelectorAll('.budget-presets .preset-chip');
+
+    if (!incomeInput || !donutGroup) return;
+
+    const usdFmt = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    });
+
+    const usdDetailed = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    function getDonutArcPath(cx, cy, rOuter, rInner, startAngle, endAngle) {
+      if (endAngle - startAngle >= 2 * Math.PI - 0.0001) {
+        endAngle = startAngle + 2 * Math.PI - 0.0001;
+      }
+      const x1 = cx + rOuter * Math.cos(startAngle);
+      const y1 = cy + rOuter * Math.sin(startAngle);
+      const x2 = cx + rOuter * Math.cos(endAngle);
+      const y2 = cy + rOuter * Math.sin(endAngle);
+      const x3 = cx + rInner * Math.cos(endAngle);
+      const y3 = cy + rInner * Math.sin(endAngle);
+      const x4 = cx + rInner * Math.cos(startAngle);
+      const y4 = cy + rInner * Math.sin(startAngle);
+
+      const largeArc = (endAngle - startAngle) > Math.PI ? 1 : 0;
+
+      return `M ${x1} ${y1} A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${rInner} ${rInner} 0 ${largeArc} 0 ${x4} ${y4} Z`;
+    }
+
+    function renderBudget() {
+      const income = Math.max(100, parseFloat(incomeInput.value) || 0);
+      const pNeeds = parseInt(sliderNeeds.value, 10);
+      const pWants = parseInt(sliderWants.value, 10);
+      const pSavings = parseInt(sliderSavings.value, 10);
+      const totalPct = pNeeds + pWants + pSavings;
+
+      // Dollar allocations
+      const amtNeeds = (income * pNeeds) / 100;
+      const amtWants = (income * pWants) / 100;
+      const amtSavings = (income * pSavings) / 100;
+
+      // Update text displays
+      incomeDisplay.textContent = usdFmt.format(income);
+      donutCenterAmount.textContent = usdFmt.format(income);
+
+      pctNeedsDisplay.textContent = `${pNeeds}%`;
+      pctWantsDisplay.textContent = `${pWants}%`;
+      pctSavingsDisplay.textContent = `${pSavings}%`;
+
+      amountNeedsDisplay.textContent = `${usdDetailed.format(amtNeeds)} / mo`;
+      amountWantsDisplay.textContent = `${usdDetailed.format(amtWants)} / mo`;
+      amountSavingsDisplay.textContent = `${usdDetailed.format(amtSavings)} / mo`;
+
+      cardNeedsAmount.textContent = usdFmt.format(amtNeeds);
+      cardWantsAmount.textContent = usdFmt.format(amtWants);
+      cardSavingsAmount.textContent = usdFmt.format(amtSavings);
+
+      cardNeedsPct.textContent = `${pNeeds}% of budget`;
+      cardWantsPct.textContent = `${pWants}% of budget`;
+      cardSavingsPct.textContent = `${pSavings}% of budget`;
+
+      // Status indicator
+      if (totalPct === 100) {
+        balanceTag.textContent = 'TOTAL ALLOCATED: 100% (BALANCED)';
+        balanceTag.className = 'balance-tag';
+        balanceDot.className = 'balance-status-dot balanced';
+      } else if (totalPct > 100) {
+        balanceTag.textContent = `TOTAL ALLOCATED: ${totalPct}% (+${totalPct - 100}% OVER-BUDGET)`;
+        balanceTag.className = 'balance-tag danger';
+        balanceDot.className = 'balance-status-dot';
+      } else {
+        balanceTag.textContent = `TOTAL ALLOCATED: ${totalPct}% (${100 - totalPct}% UNALLOCATED)`;
+        balanceTag.className = 'balance-tag warning';
+        balanceDot.className = 'balance-status-dot';
+      }
+
+      // Dynamic Strategic Advisory Advice
+      if (pNeeds <= 50 && pSavings >= 20) {
+        const tenYrWealth = (amtSavings * 12 * 14.78); // Compound interest factor for 7% over 10y
+        advisoryText.textContent = `Optimal wealth allocation! By directing ${pSavings}% ($${Math.round(amtSavings)}/mo) into savings and high-yield vault investments, your projected wealth reaches approximately ${usdFmt.format(tenYrWealth)} over 10 years at a 7% average net yield.`;
+      } else if (pNeeds > 50) {
+        advisoryText.textContent = `Essential needs currently absorb ${pNeeds}% of your income. Look into optimizing fixed housing, recurring utility commitments, or transportation to bring fixed costs back toward the 50% target.`;
+      } else if (pWants > 35) {
+        advisoryText.textContent = `Discretionary lifestyle spending is at ${pWants}%. Transferring 5-10% into automated high-yield custody or debt reduction will drastically compound your capital reserves.`;
+      } else {
+        advisoryText.textContent = `Your allocation is close to the 50/30/20 target. Keep your emergency reserves funded while channeling surplus into institutional compound growth engines.`;
+      }
+
+      // Render SVG Donut Chart Arcs
+      donutGroup.innerHTML = '';
+      const cx = 160;
+      const cy = 160;
+      const rOuter = 138;
+      const rInner = 94;
+
+      const normTotal = totalPct > 0 ? totalPct : 100;
+      let currentAngle = -Math.PI / 2;
+
+      const slices = [
+        { label: 'Needs', pct: pNeeds, grad: 'url(#gradNeeds)' },
+        { label: 'Wants', pct: pWants, grad: 'url(#gradWants)' },
+        { label: 'Savings', pct: pSavings, grad: 'url(#gradSavings)' }
+      ];
+
+      slices.forEach((slice) => {
+        if (slice.pct <= 0) return;
+        const sliceAngle = (slice.pct / normTotal) * (2 * Math.PI);
+        const endAngle = currentAngle + sliceAngle;
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', getDonutArcPath(cx, cy, rOuter, rInner, currentAngle, endAngle));
+        path.setAttribute('fill', slice.grad);
+        path.setAttribute('class', 'donut-slice');
+        path.setAttribute('data-label', slice.label);
+
+        donutGroup.appendChild(path);
+        currentAngle = endAngle;
+      });
+    }
+
+    incomeInput.addEventListener('input', renderBudget);
+    sliderNeeds.addEventListener('input', renderBudget);
+    sliderWants.addEventListener('input', renderBudget);
+    sliderSavings.addEventListener('input', renderBudget);
+
+    btnReset.addEventListener('click', () => {
+      sliderNeeds.value = '50';
+      sliderWants.value = '30';
+      sliderSavings.value = '20';
+      renderBudget();
+    });
+
+    presetButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        presetButtons.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        incomeInput.value = btn.getAttribute('data-income');
+        renderBudget();
+      });
+    });
+
+    renderBudget();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBudgetAllocation);
+  } else {
+    initBudgetAllocation();
+  }
+})();
+
