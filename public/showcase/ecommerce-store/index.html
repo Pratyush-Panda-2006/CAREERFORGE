@@ -39,7 +39,7 @@
     </section>
 
     <section class="controls">
-      <div class="category-tabs">
+      <div class="category-tabs" id="categoryTabs">
         <button class="tab active" data-cat="all">All Gear</button>
         <button class="tab" data-cat="keyboards">Keyboards</button>
         <button class="tab" data-cat="audio">Audio</button>
@@ -47,94 +47,446 @@
       </div>
     </section>
 
-    <section class="products-grid" id="productsGrid">
-      <div class="card" data-id="p1" data-category="keyboards">
-        <div class="card-badge">HOT</div>
-        <button type="button" class="wish-btn" data-wish="p1" aria-pressed="false" aria-label="Save CyberDeck Pro Mechanical to wishlist">
-          <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        </button>
-        <span class="stock-badge in-stock">In Stock</span>
-        <div class="card-img">⌨️</div>
-        <div class="card-rating-preview" onclick="filterReviewsForProduct('p1')" role="button" tabindex="0" aria-label="View CyberDeck Pro Mechanical 4.9 star reviews">
-          <span class="rating-stars-small">★★★★★</span>
-          <span class="rating-val">4.9</span>
-          <span class="rating-count">(72)</span>
-        </div>
-        <h3>CyberDeck Pro Mechanical</h3>
-        <p class="desc">Wireless split ergonomic keyboard with hot-swappable switches &amp; RGB OLED matrix.</p>
-        <div class="card-footer">
-          <span class="price">$249.00</span>
-          <div class="card-actions-row">
-            <label class="compare-check-label" for="comp-p1">
-              <input type="checkbox" id="comp-p1" class="compare-checkbox" data-compare="p1" />
-              <span>Compare</span>
-            </label>
-            <button type="button" class="quick-view-btn" onclick="openQuickView('p1')" aria-label="Quick view CyberDeck Pro Mechanical">Quick View 👁️</button>
-            <div class="action-container" id="action-p1">
-              <button class="add-btn" onclick="addToCart('p1', 'CyberDeck Pro Mechanical', 249.00, '⌨️')">Add to Cart</button>
-            </div>
+    <div class="store-layout">
+      <!-- Faceted Filter Sidebar -->
+      <aside class="facet-sidebar" id="facetSidebar" aria-label="Product Faceted Filters">
+        <div class="facet-sidebar-header">
+          <div class="facet-header-title">
+            <span class="facet-icon">⚡</span>
+            <h3>Faceted Search</h3>
           </div>
+          <button type="button" class="facet-reset-btn" id="facetResetBtn" onclick="resetFacetedFilters()" title="Reset all filters">Reset</button>
         </div>
-      </div>
 
-      <div class="card" data-id="p2" data-category="audio">
-        <div class="card-badge">NEW</div>
-        <button type="button" class="wish-btn" data-wish="p2" aria-pressed="false" aria-label="Save Acoustic Pulse ANC Headset to wishlist">
-          <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        </button>
-        <span class="stock-badge low-stock">Only 3 Left</span>
-        <div class="card-img">🎧</div>
-        <div class="card-rating-preview" onclick="filterReviewsForProduct('p2')" role="button" tabindex="0" aria-label="View Acoustic Pulse ANC Headset 4.8 star reviews">
-          <span class="rating-stars-small">★★★★★</span>
-          <span class="rating-val">4.8</span>
-          <span class="rating-count">(46)</span>
-        </div>
-        <h3>Acoustic Pulse ANC Headset</h3>
-        <p class="desc">Active noise-canceling studio monitors with ultra-low latency lossy spatial audio.</p>
-        <div class="card-footer">
-          <span class="price">$199.00</span>
-          <div class="card-actions-row">
-            <label class="compare-check-label" for="comp-p2">
-              <input type="checkbox" id="comp-p2" class="compare-checkbox" data-compare="p2" />
-              <span>Compare</span>
-            </label>
-            <button type="button" class="quick-view-btn" onclick="openQuickView('p2')" aria-label="Quick view Acoustic Pulse ANC Headset">Quick View 👁️</button>
-            <div class="action-container" id="action-p2">
-              <button class="add-btn" onclick="addToCart('p2', 'Acoustic Pulse ANC Headset', 199.00, '🎧')">Add to Cart</button>
-            </div>
+        <!-- Keyword Search -->
+        <div class="facet-group">
+          <label class="facet-group-title" for="productSearchInput">Keyword Search</label>
+          <div class="facet-search-box">
+            <span class="search-box-icon">🔍</span>
+            <input type="text" id="productSearchInput" class="facet-input-text" placeholder="Search gear, specs, tags..." autocomplete="off" />
           </div>
         </div>
-      </div>
 
-      <div class="card" data-id="p3" data-category="displays">
-        <div class="card-badge">PRO</div>
-        <button type="button" class="wish-btn" data-wish="p3" aria-pressed="false" aria-label="Save Horizon 32 Curved OLED to wishlist">
-          <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        </button>
-        <span class="stock-badge in-stock">In Stock</span>
-        <div class="card-img">🖥️</div>
-        <div class="card-rating-preview" onclick="filterReviewsForProduct('p3')" role="button" tabindex="0" aria-label="View Horizon 32 Curved OLED 4.9 star reviews">
-          <span class="rating-stars-small">★★★★★</span>
-          <span class="rating-val">4.9</span>
-          <span class="rating-count">(30)</span>
-        </div>
-        <h3>Horizon 32" Curved OLED</h3>
-        <p class="desc">240Hz 4K UHD QD-OLED display engineered for color accuracy and seamless coding.</p>
-        <div class="card-footer">
-          <span class="price">$899.00</span>
-          <div class="card-actions-row">
-            <label class="compare-check-label" for="comp-p3">
-              <input type="checkbox" id="comp-p3" class="compare-checkbox" data-compare="p3" />
-              <span>Compare</span>
-            </label>
-            <button type="button" class="quick-view-btn" onclick="openQuickView('p3')" aria-label="Quick view Horizon 32 Curved OLED">Quick View 👁️</button>
-            <div class="action-container" id="action-p3">
-              <button class="add-btn" onclick="addToCart('p3', 'Horizon 32 Curved OLED', 899.00, '🖥️')">Add to Cart</button>
+        <!-- Facet: Price Range Slider -->
+        <div class="facet-group">
+          <div class="facet-group-header">
+            <span class="facet-group-title">Max Price</span>
+            <span class="facet-price-val" id="priceDisplay">Up to $1,200</span>
+          </div>
+          <div class="price-slider-wrap">
+            <input type="range" id="priceRange" min="100" max="1200" step="25" value="1200" class="facet-slider" aria-label="Filter by maximum price" />
+            <div class="slider-ticks">
+              <span>$100</span>
+              <span>$650</span>
+              <span>$1,200</span>
             </div>
           </div>
         </div>
+
+        <!-- Facet: Brand -->
+        <details class="facet-group" open>
+          <summary class="facet-group-summary">
+            <span class="facet-group-title">Brand</span>
+            <span class="facet-chevron">▾</span>
+          </summary>
+          <div class="facet-options-list" id="brandOptions">
+            <label class="facet-checkbox-label">
+              <input type="checkbox" class="facet-checkbox brand-filter" value="nexus-lab" />
+              <span class="facet-label-text">Nexus Lab</span>
+              <span class="facet-count-badge" id="count-brand-nexus-lab">0</span>
+            </label>
+            <label class="facet-checkbox-label">
+              <input type="checkbox" class="facet-checkbox brand-filter" value="vortex-audio" />
+              <span class="facet-label-text">Vortex Audio</span>
+              <span class="facet-count-badge" id="count-brand-vortex-audio">0</span>
+            </label>
+            <label class="facet-checkbox-label">
+              <input type="checkbox" class="facet-checkbox brand-filter" value="apex-vision" />
+              <span class="facet-label-text">Apex Vision</span>
+              <span class="facet-count-badge" id="count-brand-apex-vision">0</span>
+            </label>
+            <label class="facet-checkbox-label">
+              <input type="checkbox" class="facet-checkbox brand-filter" value="keychronix" />
+              <span class="facet-label-text">Keychronix</span>
+              <span class="facet-count-badge" id="count-brand-keychronix">0</span>
+            </label>
+          </div>
+        </details>
+
+        <!-- Facet: Connectivity -->
+        <details class="facet-group" open>
+          <summary class="facet-group-summary">
+            <span class="facet-group-title">Connectivity</span>
+            <span class="facet-chevron">▾</span>
+          </summary>
+          <div class="facet-options-list" id="connectivityOptions">
+            <label class="facet-checkbox-label">
+              <input type="checkbox" class="facet-checkbox conn-filter" value="tri-mode" />
+              <span class="facet-label-text">Tri-Mode Wireless</span>
+              <span class="facet-count-badge" id="count-conn-tri-mode">0</span>
+            </label>
+            <label class="facet-checkbox-label">
+              <input type="checkbox" class="facet-checkbox conn-filter" value="wireless" />
+              <span class="facet-label-text">Wireless 2.4GHz</span>
+              <span class="facet-count-badge" id="count-conn-wireless">0</span>
+            </label>
+            <label class="facet-checkbox-label">
+              <input type="checkbox" class="facet-checkbox conn-filter" value="bluetooth" />
+              <span class="facet-label-text">Bluetooth 5.3</span>
+              <span class="facet-count-badge" id="count-conn-bluetooth">0</span>
+            </label>
+            <label class="facet-checkbox-label">
+              <input type="checkbox" class="facet-checkbox conn-filter" value="usbc" />
+              <span class="facet-label-text">USB-C / Wired</span>
+              <span class="facet-count-badge" id="count-conn-usbc">0</span>
+            </label>
+          </div>
+        </details>
+
+        <!-- Facet: Color Swatches -->
+        <details class="facet-group" open>
+          <summary class="facet-group-summary">
+            <span class="facet-group-title">Color Palette</span>
+            <span class="facet-chevron">▾</span>
+          </summary>
+          <div class="facet-color-swatches" id="colorSwatches">
+            <button type="button" class="swatch-btn color-filter" data-color="black" title="Black">
+              <span class="swatch-circle" style="background-color: #18181b; border: 1px solid #3f3f46;"></span>
+              <span class="swatch-name">Black</span>
+              <span class="facet-count-badge" id="count-color-black">0</span>
+            </button>
+            <button type="button" class="swatch-btn color-filter" data-color="silver" title="Silver">
+              <span class="swatch-circle" style="background-color: #94a3b8;"></span>
+              <span class="swatch-name">Silver</span>
+              <span class="facet-count-badge" id="count-color-silver">0</span>
+            </button>
+            <button type="button" class="swatch-btn color-filter" data-color="violet" title="Violet">
+              <span class="swatch-circle" style="background-color: #7c3aed;"></span>
+              <span class="swatch-name">Violet</span>
+              <span class="facet-count-badge" id="count-color-violet">0</span>
+            </button>
+            <button type="button" class="swatch-btn color-filter" data-color="cyan" title="Cyan">
+              <span class="swatch-circle" style="background-color: #06b6d4;"></span>
+              <span class="swatch-name">Cyan</span>
+              <span class="facet-count-badge" id="count-color-cyan">0</span>
+            </button>
+            <button type="button" class="swatch-btn color-filter" data-color="white" title="White">
+              <span class="swatch-circle" style="background-color: #f8fafc; border: 1px solid #cbd5e1;"></span>
+              <span class="swatch-name">White</span>
+              <span class="facet-count-badge" id="count-color-white">0</span>
+            </button>
+          </div>
+        </details>
+
+        <!-- Facet: Customer Rating -->
+        <details class="facet-group" open>
+          <summary class="facet-group-summary">
+            <span class="facet-group-title">Customer Rating</span>
+            <span class="facet-chevron">▾</span>
+          </summary>
+          <div class="facet-options-list" id="ratingOptions">
+            <label class="facet-checkbox-label">
+              <input type="radio" name="rating-filter" class="facet-radio rating-filter" value="0" checked />
+              <span class="facet-label-text">All Ratings</span>
+              <span class="facet-count-badge" id="count-rating-all">0</span>
+            </label>
+            <label class="facet-checkbox-label">
+              <input type="radio" name="rating-filter" class="facet-radio rating-filter" value="4.8" />
+              <span class="facet-label-text">★ 4.8 &amp; Up</span>
+              <span class="facet-count-badge" id="count-rating-48">0</span>
+            </label>
+            <label class="facet-checkbox-label">
+              <input type="radio" name="rating-filter" class="facet-radio rating-filter" value="4.6" />
+              <span class="facet-label-text">★ 4.6 &amp; Up</span>
+              <span class="facet-count-badge" id="count-rating-46">0</span>
+            </label>
+            <label class="facet-checkbox-label">
+              <input type="radio" name="rating-filter" class="facet-radio rating-filter" value="4.0" />
+              <span class="facet-label-text">★ 4.0 &amp; Up</span>
+              <span class="facet-count-badge" id="count-rating-40">0</span>
+            </label>
+          </div>
+        </details>
+
+        <!-- Facet: Availability -->
+        <div class="facet-group">
+          <label class="facet-checkbox-label">
+            <input type="checkbox" id="inStockCheckbox" class="facet-checkbox" />
+            <span class="facet-label-text">In Stock Only</span>
+            <span class="facet-count-badge" id="count-instock">0</span>
+          </label>
+        </div>
+      </aside>
+
+      <!-- Main Store Catalog Area -->
+      <div class="store-catalog-main">
+        <!-- Catalog Status Bar -->
+        <div class="catalog-status-bar">
+          <div class="results-tally">
+            Showing <strong id="visibleProductsCount">8</strong> of <span id="totalProductsCount">8</span> items
+          </div>
+          <div class="catalog-sort-wrap">
+            <label for="catalogSortSelect" class="sort-label">Sort By:</label>
+            <select id="catalogSortSelect" class="catalog-sort-select" onchange="handleCatalogSort(this.value)">
+              <option value="featured">Featured / Best Match</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating-desc">Highest Customer Rating</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Active Filter Chips -->
+        <div class="active-chips-bar" id="activeChipsBar" style="display: none;">
+          <span class="chips-label">Active Filters:</span>
+          <div class="chips-list" id="chipsList"></div>
+          <button type="button" class="chips-clear-all" onclick="resetFacetedFilters()">Clear All ✕</button>
+        </div>
+
+        <!-- Products Grid -->
+        <section class="products-grid" id="productsGrid">
+          <div class="card" data-id="p1" data-category="keyboards" data-brand="nexus-lab" data-price="249.00" data-connectivity="tri-mode" data-colors="black,violet,silver" data-rating="4.9" data-instock="true">
+            <div class="card-badge">HOT</div>
+            <button type="button" class="wish-btn" data-wish="p1" aria-pressed="false" aria-label="Save CyberDeck Pro Mechanical to wishlist">
+              <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+            <span class="stock-badge in-stock">In Stock</span>
+            <div class="card-img">⌨️</div>
+            <div class="card-rating-preview" onclick="filterReviewsForProduct('p1')" role="button" tabindex="0" aria-label="View CyberDeck Pro Mechanical 4.9 star reviews">
+              <span class="rating-stars-small">★★★★★</span>
+              <span class="rating-val">4.9</span>
+              <span class="rating-count">(72)</span>
+            </div>
+            <h3>CyberDeck Pro Mechanical</h3>
+            <p class="desc">Wireless split ergonomic keyboard with hot-swappable switches &amp; RGB OLED matrix.</p>
+            <div class="card-footer">
+              <span class="price">$249.00</span>
+              <div class="card-actions-row">
+                <label class="compare-check-label" for="comp-p1">
+                  <input type="checkbox" id="comp-p1" class="compare-checkbox" data-compare="p1" />
+                  <span>Compare</span>
+                </label>
+                <button type="button" class="quick-view-btn" onclick="openQuickView('p1')" aria-label="Quick view CyberDeck Pro Mechanical">Quick View 👁️</button>
+                <div class="action-container" id="action-p1">
+                  <button class="add-btn" onclick="addToCart('p1', 'CyberDeck Pro Mechanical', 249.00, '⌨️')">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" data-id="p2" data-category="audio" data-brand="vortex-audio" data-price="199.00" data-connectivity="wireless" data-colors="black,silver,cyan" data-rating="4.8" data-instock="true">
+            <div class="card-badge">NEW</div>
+            <button type="button" class="wish-btn" data-wish="p2" aria-pressed="false" aria-label="Save Acoustic Pulse ANC Headset to wishlist">
+              <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+            <span class="stock-badge low-stock">Only 3 Left</span>
+            <div class="card-img">🎧</div>
+            <div class="card-rating-preview" onclick="filterReviewsForProduct('p2')" role="button" tabindex="0" aria-label="View Acoustic Pulse ANC Headset 4.8 star reviews">
+              <span class="rating-stars-small">★★★★★</span>
+              <span class="rating-val">4.8</span>
+              <span class="rating-count">(46)</span>
+            </div>
+            <h3>Acoustic Pulse ANC Headset</h3>
+            <p class="desc">Active noise-canceling studio monitors with ultra-low latency lossy spatial audio.</p>
+            <div class="card-footer">
+              <span class="price">$199.00</span>
+              <div class="card-actions-row">
+                <label class="compare-check-label" for="comp-p2">
+                  <input type="checkbox" id="comp-p2" class="compare-checkbox" data-compare="p2" />
+                  <span>Compare</span>
+                </label>
+                <button type="button" class="quick-view-btn" onclick="openQuickView('p2')" aria-label="Quick view Acoustic Pulse ANC Headset">Quick View 👁️</button>
+                <div class="action-container" id="action-p2">
+                  <button class="add-btn" onclick="addToCart('p2', 'Acoustic Pulse ANC Headset', 199.00, '🎧')">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" data-id="p3" data-category="displays" data-brand="apex-vision" data-price="899.00" data-connectivity="usbc" data-colors="silver,black" data-rating="4.9" data-instock="true">
+            <div class="card-badge">PRO</div>
+            <button type="button" class="wish-btn" data-wish="p3" aria-pressed="false" aria-label="Save Horizon 32 Curved OLED to wishlist">
+              <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+            <span class="stock-badge in-stock">In Stock</span>
+            <div class="card-img">🖥️</div>
+            <div class="card-rating-preview" onclick="filterReviewsForProduct('p3')" role="button" tabindex="0" aria-label="View Horizon 32 Curved OLED 4.9 star reviews">
+              <span class="rating-stars-small">★★★★★</span>
+              <span class="rating-val">4.9</span>
+              <span class="rating-count">(30)</span>
+            </div>
+            <h3>Horizon 32" Curved OLED</h3>
+            <p class="desc">240Hz 4K UHD QD-OLED display engineered for color accuracy and seamless coding.</p>
+            <div class="card-footer">
+              <span class="price">$899.00</span>
+              <div class="card-actions-row">
+                <label class="compare-check-label" for="comp-p3">
+                  <input type="checkbox" id="comp-p3" class="compare-checkbox" data-compare="p3" />
+                  <span>Compare</span>
+                </label>
+                <button type="button" class="quick-view-btn" onclick="openQuickView('p3')" aria-label="Quick view Horizon 32 Curved OLED">Quick View 👁️</button>
+                <div class="action-container" id="action-p3">
+                  <button class="add-btn" onclick="addToCart('p3', 'Horizon 32 Curved OLED', 899.00, '🖥️')">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" data-id="p4" data-category="keyboards" data-brand="nexus-lab" data-price="149.00" data-connectivity="bluetooth" data-colors="black,white" data-rating="4.7" data-instock="true">
+            <div class="card-badge">POPULAR</div>
+            <button type="button" class="wish-btn" data-wish="p4" aria-pressed="false" aria-label="Save Nexus Neo 65% Low-Profile to wishlist">
+              <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+            <span class="stock-badge in-stock">In Stock</span>
+            <div class="card-img">⌨️</div>
+            <div class="card-rating-preview" onclick="filterReviewsForProduct('p4')" role="button" tabindex="0" aria-label="View Nexus Neo 65% Low-Profile 4.7 star reviews">
+              <span class="rating-stars-small">★★★★★</span>
+              <span class="rating-val">4.7</span>
+              <span class="rating-count">(54)</span>
+            </div>
+            <h3>Nexus Neo 65% Low-Profile</h3>
+            <p class="desc">Ultra-thin mechanical keyboard with low-profile optical switches and CNC aluminum chassis.</p>
+            <div class="card-footer">
+              <span class="price">$149.00</span>
+              <div class="card-actions-row">
+                <label class="compare-check-label" for="comp-p4">
+                  <input type="checkbox" id="comp-p4" class="compare-checkbox" data-compare="p4" />
+                  <span>Compare</span>
+                </label>
+                <button type="button" class="quick-view-btn" onclick="openQuickView('p4')" aria-label="Quick view Nexus Neo 65% Low-Profile">Quick View 👁️</button>
+                <div class="action-container" id="action-p4">
+                  <button class="add-btn" onclick="addToCart('p4', 'Nexus Neo 65% Low-Profile', 149.00, '⌨️')">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" data-id="p5" data-category="audio" data-brand="vortex-audio" data-price="349.00" data-connectivity="wired" data-colors="black,silver" data-rating="4.6" data-instock="true">
+            <div class="card-badge">STUDIO</div>
+            <button type="button" class="wish-btn" data-wish="p5" aria-pressed="false" aria-label="Save Vortex Reference Studio Monitors to wishlist">
+              <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+            <span class="stock-badge in-stock">In Stock</span>
+            <div class="card-img">🔊</div>
+            <div class="card-rating-preview" onclick="filterReviewsForProduct('p5')" role="button" tabindex="0" aria-label="View Vortex Reference Studio Monitors 4.6 star reviews">
+              <span class="rating-stars-small">★★★★★</span>
+              <span class="rating-val">4.6</span>
+              <span class="rating-count">(28)</span>
+            </div>
+            <h3>Vortex Reference Studio Monitors</h3>
+            <p class="desc">Active bi-amplified studio reference speakers with DSP room correction and balanced TRS inputs.</p>
+            <div class="card-footer">
+              <span class="price">$349.00</span>
+              <div class="card-actions-row">
+                <label class="compare-check-label" for="comp-p5">
+                  <input type="checkbox" id="comp-p5" class="compare-checkbox" data-compare="p5" />
+                  <span>Compare</span>
+                </label>
+                <button type="button" class="quick-view-btn" onclick="openQuickView('p5')" aria-label="Quick view Vortex Reference Studio Monitors">Quick View 👁️</button>
+                <div class="action-container" id="action-p5">
+                  <button class="add-btn" onclick="addToCart('p5', 'Vortex Reference Studio Monitors', 349.00, '🔊')">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" data-id="p6" data-category="displays" data-brand="apex-vision" data-price="1199.00" data-connectivity="usbc" data-colors="black,silver" data-rating="4.9" data-instock="false">
+            <div class="card-badge">FLAGSHIP</div>
+            <button type="button" class="wish-btn" data-wish="p6" aria-pressed="false" aria-label="Save Apex UltraWide 49&quot; 240Hz to wishlist">
+              <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+            <span class="stock-badge low-stock">Backorder</span>
+            <div class="card-img">🖥️</div>
+            <div class="card-rating-preview" onclick="filterReviewsForProduct('p6')" role="button" tabindex="0" aria-label="View Apex UltraWide 49&quot; 240Hz 4.9 star reviews">
+              <span class="rating-stars-small">★★★★★</span>
+              <span class="rating-val">4.9</span>
+              <span class="rating-count">(19)</span>
+            </div>
+            <h3>Apex UltraWide 49" 240Hz</h3>
+            <p class="desc">Super ultrawide 32:9 dual QHD curved monitor with 1000R curvature and built-in KVM switch.</p>
+            <div class="card-footer">
+              <span class="price">$1,199.00</span>
+              <div class="card-actions-row">
+                <label class="compare-check-label" for="comp-p6">
+                  <input type="checkbox" id="comp-p6" class="compare-checkbox" data-compare="p6" />
+                  <span>Compare</span>
+                </label>
+                <button type="button" class="quick-view-btn" onclick="openQuickView('p6')" aria-label="Quick view Apex UltraWide 49&quot; 240Hz">Quick View 👁️</button>
+                <div class="action-container" id="action-p6">
+                  <button class="add-btn" onclick="addToCart('p6', 'Apex UltraWide 49&quot; 240Hz', 1199.00, '🖥️')">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" data-id="p7" data-category="audio" data-brand="nexus-lab" data-price="179.00" data-connectivity="usbc" data-colors="black,silver" data-rating="4.5" data-instock="true">
+            <div class="card-badge">NEW</div>
+            <button type="button" class="wish-btn" data-wish="p7" aria-pressed="false" aria-label="Save HyperStream Studio Mic &amp; Arm to wishlist">
+              <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+            <span class="stock-badge in-stock">In Stock</span>
+            <div class="card-img">🎙️</div>
+            <div class="card-rating-preview" onclick="filterReviewsForProduct('p7')" role="button" tabindex="0" aria-label="View HyperStream Studio Mic &amp; Arm 4.5 star reviews">
+              <span class="rating-stars-small">★★★★★</span>
+              <span class="rating-val">4.5</span>
+              <span class="rating-count">(39)</span>
+            </div>
+            <h3>HyperStream Studio Mic &amp; Arm</h3>
+            <p class="desc">24-bit 192kHz broadcast condenser microphone with dual polar patterns and metal boom arm.</p>
+            <div class="card-footer">
+              <span class="price">$179.00</span>
+              <div class="card-actions-row">
+                <label class="compare-check-label" for="comp-p7">
+                  <input type="checkbox" id="comp-p7" class="compare-checkbox" data-compare="p7" />
+                  <span>Compare</span>
+                </label>
+                <button type="button" class="quick-view-btn" onclick="openQuickView('p7')" aria-label="Quick view HyperStream Studio Mic &amp; Arm">Quick View 👁️</button>
+                <div class="action-container" id="action-p7">
+                  <button class="add-btn" onclick="addToCart('p7', 'HyperStream Studio Mic &amp; Arm', 179.00, '🎙️')">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" data-id="p8" data-category="keyboards" data-brand="keychronix" data-price="289.00" data-connectivity="tri-mode" data-colors="violet,white,black" data-rating="4.8" data-instock="true">
+            <div class="card-badge">LIMITED</div>
+            <button type="button" class="wish-btn" data-wish="p8" aria-pressed="false" aria-label="Save Keychronix Ergo Alice Custom to wishlist">
+              <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+            <span class="stock-badge in-stock">In Stock</span>
+            <div class="card-img">⌨️</div>
+            <div class="card-rating-preview" onclick="filterReviewsForProduct('p8')" role="button" tabindex="0" aria-label="View Keychronix Ergo Alice Custom 4.8 star reviews">
+              <span class="rating-stars-small">★★★★★</span>
+              <span class="rating-val">4.8</span>
+              <span class="rating-count">(33)</span>
+            </div>
+            <h3>Keychronix Ergo Alice Custom</h3>
+            <p class="desc">Ergonomic Alice layout keyboard with rotary media knob, brass counterweight, and gasket mount.</p>
+            <div class="card-footer">
+              <span class="price">$289.00</span>
+              <div class="card-actions-row">
+                <label class="compare-check-label" for="comp-p8">
+                  <input type="checkbox" id="comp-p8" class="compare-checkbox" data-compare="p8" />
+                  <span>Compare</span>
+                </label>
+                <button type="button" class="quick-view-btn" onclick="openQuickView('p8')" aria-label="Quick view Keychronix Ergo Alice Custom">Quick View 👁️</button>
+                <div class="action-container" id="action-p8">
+                  <button class="add-btn" onclick="addToCart('p8', 'Keychronix Ergo Alice Custom', 289.00, '⌨️')">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- No Results Empty State -->
+        <div class="no-results-card" id="noResultsCard" style="display: none;">
+          <div class="no-results-icon">🔎</div>
+          <h3>No matching gear found</h3>
+          <p>We couldn't find any products matching your active filter criteria. Try adjusting your price slider or clearing facet selections.</p>
+          <button type="button" class="btn-reset-filters" onclick="resetFacetedFilters()">Reset All Filters</button>
+        </div>
       </div>
-    </section>
+    </div>
     <!-- ===== BEGIN issue #189: Customer Reviews & Rating Breakdown Analytics Widget ===== -->
     <section class="reviews-analytics-section" id="reviewsSection">
       <div class="reviews-section-header">
@@ -151,6 +503,11 @@
               <option value="p1">⌨️ CyberDeck Pro Mechanical</option>
               <option value="p2">🎧 Acoustic Pulse ANC Headset</option>
               <option value="p3">🖥️ Horizon 32" Curved OLED</option>
+              <option value="p4">⌨️ Nexus Neo 65% Low-Profile</option>
+              <option value="p5">🔊 Vortex Reference Studio Monitors</option>
+              <option value="p6">🖥️ Apex UltraWide 49" 240Hz</option>
+              <option value="p7">🎙️ HyperStream Studio Mic &amp; Arm</option>
+              <option value="p8">⌨️ Keychronix Ergo Alice Custom</option>
             </select>
           </div>
           <button type="button" class="write-review-btn" onclick="openWriteReviewModal()">
