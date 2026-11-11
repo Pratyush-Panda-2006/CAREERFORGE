@@ -463,6 +463,148 @@
     <audio controls hidden aria-label="Recorded sample playback"></audio>
     <p role="status" aria-live="polite"></p>
   </section>
+
+  <!-- Multi-Track Audio Timeline Editor (DAW) -->
+  <section class="daw-section" id="daw-timeline" aria-labelledby="daw-title">
+    <div class="daw-header">
+      <div class="badge">🎛️ MULTI-TRACK DAW STUDIO</div>
+      <h2 id="daw-title">Multi-Track Audio Timeline &amp; Mixer</h2>
+      <p>Layer voiceover takes against ambient soundscapes, trim clip boundaries with interactive drag handles, shape gain envelopes, and export broadcast-ready WAV audio.</p>
+    </div>
+
+    <div class="daw-container">
+      <!-- DAW Master Transport Bar -->
+      <div class="daw-transport-bar">
+        <div class="daw-transport-controls">
+          <button type="button" class="daw-btn daw-btn-primary" id="dawPlayBtn" aria-label="Play DAW Timeline">
+            <span class="daw-btn-icon" id="dawPlayIcon">▶</span>
+            <span id="dawPlayText">Play Timeline</span>
+          </button>
+          <button type="button" class="daw-btn" id="dawStopBtn" aria-label="Stop and Rewind DAW Timeline">
+            <span>⏹ Rewind</span>
+          </button>
+          <button type="button" class="daw-btn" id="dawLoopBtn" aria-pressed="false" aria-label="Toggle Timeline Loop">
+            <span>🔁 Loop</span>
+          </button>
+        </div>
+
+        <div class="daw-timecode-display" id="dawTimecode" aria-label="Current Playhead Timecode">
+          00:00.00 / 00:16.00
+        </div>
+
+        <div class="daw-transport-actions">
+          <div class="daw-snap-toggle">
+            <label for="dawSnapSelect">Grid Snap:</label>
+            <select id="dawSnapSelect" class="daw-select">
+              <option value="0.25">1/4 sec</option>
+              <option value="0.5" selected>1/2 sec</option>
+              <option value="1">1 sec</option>
+              <option value="0">Off (Free)</option>
+            </select>
+          </div>
+          <button type="button" class="daw-btn daw-btn-export" id="dawExportBtn" aria-label="Export Mixed WAV Audio">
+            <span>⬇ Export Mix (WAV)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Master Volume & Status Notification -->
+      <div class="daw-status-bar" id="dawStatusBar" role="status" aria-live="polite">
+        Ready to edit. Drag clip bodies to reposition, or drag edges to trim start/end boundaries.
+      </div>
+
+      <!-- Timeline Main Viewport -->
+      <div class="daw-timeline-workspace">
+        <!-- Track Control Headers Column -->
+        <div class="daw-track-headers">
+          <div class="daw-header-spacer">TRACKS</div>
+
+          <!-- Track 1 Header: Voice -->
+          <div class="daw-track-header-card" data-track="voice">
+            <div class="daw-track-title-row">
+              <span class="daw-track-icon">🎙️</span>
+              <span class="daw-track-name">Track 1: Voiceover</span>
+            </div>
+            <div class="daw-track-controls-row">
+              <button type="button" class="daw-mini-btn mute-btn" id="dawMuteVoice" aria-pressed="false">M</button>
+              <button type="button" class="daw-mini-btn solo-btn" id="dawSoloVoice" aria-pressed="false">S</button>
+              <div class="daw-fader-wrap">
+                <label for="dawVolVoice">Vol</label>
+                <input type="range" id="dawVolVoice" min="0" max="1.5" step="0.05" value="1.0" aria-label="Voice Track Volume" />
+                <span class="daw-fader-val" id="dawVolVoiceVal">100%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Track 2 Header: Ambience -->
+          <div class="daw-track-header-card" data-track="ambience">
+            <div class="daw-track-title-row">
+              <span class="daw-track-icon">🌊</span>
+              <span class="daw-track-name">Track 2: Ambience</span>
+            </div>
+            <div class="daw-track-sound-select">
+              <label for="dawAmbiencePreset">Soundscape:</label>
+              <select id="dawAmbiencePreset" class="daw-select">
+                <option value="rain">Cyberpunk Rain</option>
+                <option value="drone">Deep Analog Drone</option>
+                <option value="cafe">Studio Room Tone</option>
+              </select>
+            </div>
+            <div class="daw-track-controls-row">
+              <button type="button" class="daw-mini-btn mute-btn" id="dawMuteAmbience" aria-pressed="false">M</button>
+              <button type="button" class="daw-mini-btn solo-btn" id="dawSoloAmbience" aria-pressed="false">S</button>
+              <div class="daw-fader-wrap">
+                <label for="dawVolAmbience">Vol</label>
+                <input type="range" id="dawVolAmbience" min="0" max="1.5" step="0.05" value="0.6" aria-label="Ambience Track Volume" />
+                <span class="daw-fader-val" id="dawVolAmbienceVal">60%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline Lanes & Ruler Viewport -->
+        <div class="daw-timeline-scrollable" id="dawTimelineScrollable">
+          <!-- Time Ruler -->
+          <div class="daw-ruler" id="dawRuler" aria-hidden="true"></div>
+
+          <!-- Tracks Container with Playhead -->
+          <div class="daw-lanes-container" id="dawLanesContainer">
+            <!-- Playhead scrubber line -->
+            <div class="daw-playhead" id="dawPlayhead" style="left: 0px;" aria-hidden="true">
+              <div class="daw-playhead-handle"></div>
+            </div>
+
+            <!-- Lane 1: Voice Track Lane -->
+            <div class="daw-lane" id="dawLaneVoice" data-track="voice">
+              <div class="daw-clip voice-clip" id="dawClipVoice" style="left: 0px; width: 360px;" tabindex="0" role="slider" aria-label="Voiceover Audio Clip" aria-valuemin="0" aria-valuemax="16" aria-valuenow="0">
+                <div class="daw-trim-handle daw-trim-left" title="Drag to trim start"></div>
+                <div class="daw-clip-header">
+                  <span class="daw-clip-title">🎙️ Sonora Neural Voice Take 01</span>
+                  <span class="daw-clip-duration" id="dawVoiceDuration">6.0s</span>
+                </div>
+                <canvas class="daw-clip-waveform" id="dawWaveformVoice" width="360" height="60"></canvas>
+                <div class="daw-trim-handle daw-trim-right" title="Drag to trim end"></div>
+              </div>
+            </div>
+
+            <!-- Lane 2: Ambience Track Lane -->
+            <div class="daw-lane" id="dawLaneAmbience" data-track="ambience">
+              <div class="daw-clip ambience-clip" id="dawClipAmbience" style="left: 0px; width: 600px;" tabindex="0" role="slider" aria-label="Ambience Background Audio Clip" aria-valuemin="0" aria-valuemax="16" aria-valuenow="0">
+                <div class="daw-trim-handle daw-trim-left" title="Drag to trim start"></div>
+                <div class="daw-clip-header">
+                  <span class="daw-clip-title">🌊 Ambient Layer (Cyberpunk Rain)</span>
+                  <span class="daw-clip-duration" id="dawAmbienceDuration">10.0s</span>
+                </div>
+                <canvas class="daw-clip-waveform" id="dawWaveformAmbience" width="600" height="60"></canvas>
+                <div class="daw-trim-handle daw-trim-right" title="Drag to trim end"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script type="module" src="voice-recorder.js"></script>
   <script src="script.js"></script>
 </body>
