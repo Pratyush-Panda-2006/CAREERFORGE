@@ -1261,3 +1261,511 @@ if (document.readyState === 'loading') {
 } else {
   initTastingMenuTimeline();
 }
+
+
+// ==========================================================================
+// Kitchen Display System (KDS) & Rush Order Queue Manager Engine
+// Calculates course prep lead times, station routing, and fire dispatching
+// ==========================================================================
+function initKitchenDisplaySystem() {
+  const modal = byId('kdsModal');
+  const openBtn = byId('openKdsBtn');
+  const closeBtn = byId('kdsCloseBtn');
+  const backdrop = byId('kdsBackdrop');
+  if (!modal || !openBtn) return;
+
+  const ticketsContainer = byId('kdsTicketsContainer');
+  const activeCountEl = byId('kdsActiveCount');
+  const avgTimeEl = byId('kdsAvgTime');
+  const clockEl = byId('kdsClock');
+  const soundToggle = byId('kdsSoundToggle');
+  const soundIcon = byId('kdsSoundIcon');
+  const soundText = byId('kdsSoundText');
+  const addRushBtn = byId('kdsAddRushBtn');
+  const courseSelect = byId('kdsCourseSelect');
+  const statusNote = byId('kdsStatusNote');
+  const stationTabs = document.querySelectorAll('.kds-station-tab');
+
+  let soundEnabled = true;
+  let activeStation = 'all';
+  let activeCourseFilter = 'all';
+  let ticketSequence = 105;
+
+  // Realistic sample dining tickets
+  let tickets = [
+    {
+      id: 'T-101',
+      table: 'TABLE 04',
+      guests: 2,
+      server: 'Julien',
+      rush: false,
+      elapsedSeconds: 180, // 3m (Green)
+      courses: [
+        {
+          name: 'Appetizer',
+          status: 'ready', // ready, cooking, held
+          items: [
+            { name: 'Hamachi Crudo', station: 'garde-manger', mod: 'Extra citrus gel' },
+            { name: 'Brittany Lobster Bisque', station: 'garde-manger', mod: '' }
+          ]
+        },
+        {
+          name: 'Entrée',
+          status: 'cooking',
+          items: [
+            { name: 'Seared Wagyu Ribeye', station: 'grill', mod: 'Medium-Rare, Truffle sauce' },
+            { name: 'Canard de Challans', station: 'grill', mod: 'Cherry reduction' }
+          ]
+        },
+        {
+          name: 'Dessert',
+          status: 'held',
+          items: [
+            { name: 'Soufflé Grand Marnier', station: 'pastry', mod: 'Hot chocolate pitcher' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'T-102',
+      table: 'TABLE 12 (VIP)',
+      guests: 4,
+      server: 'Camille',
+      rush: true,
+      elapsedSeconds: 680, // 11m (Red flash)
+      courses: [
+        {
+          name: 'Appetizer',
+          status: 'ready',
+          items: [
+            { name: 'Perigord Black Truffle Tartare', station: 'garde-manger', mod: 'Gluten-Free tuile' },
+            { name: 'Hamachi Crudo', station: 'garde-manger', mod: '' }
+          ]
+        },
+        {
+          name: 'Entrée',
+          status: 'cooking',
+          items: [
+            { name: 'A5 Miyazaki Wagyu', station: 'grill', mod: 'Rare • Rush expedite' },
+            { name: 'Rack of Pyrenees Lamb', station: 'grill', mod: 'Herb crust' }
+          ]
+        },
+        {
+          name: 'Dessert',
+          status: 'held',
+          items: [
+            { name: 'Mille-Feuille Croustillant', station: 'pastry', mod: 'Tahitian vanilla' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'T-103',
+      table: 'TABLE 07',
+      guests: 2,
+      server: 'Marc',
+      rush: false,
+      elapsedSeconds: 420, // 7m (Amber)
+      courses: [
+        {
+          name: 'Appetizer',
+          status: 'cooking',
+          items: [
+            { name: 'Lobster Bisque', station: 'garde-manger', mod: 'Extra saffron' }
+          ]
+        },
+        {
+          name: 'Entrée',
+          status: 'held',
+          items: [
+            { name: 'Wild Turbot Meunière', station: 'grill', mod: 'Caper butter' }
+          ]
+        },
+        {
+          name: 'Dessert',
+          status: 'held',
+          items: [
+            { name: 'Tarte Tatin Caramélisée', station: 'pastry', mod: 'Crème fraîche' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'T-104',
+      table: 'TABLE 02',
+      guests: 1,
+      server: 'Sophie',
+      rush: false,
+      elapsedSeconds: 95, // 1.5m (Green)
+      courses: [
+        {
+          name: 'Appetizer',
+          status: 'cooking',
+          items: [
+            { name: 'Hamachi Crudo', station: 'garde-manger', mod: '' }
+          ]
+        },
+        {
+          name: 'Entrée',
+          status: 'held',
+          items: [
+            { name: 'Seared Wagyu Ribeye', station: 'grill', mod: 'Medium' }
+          ]
+        }
+      ]
+    }
+  ];
+
+  // Play realistic kitchen order bell chime using Web Audio API
+  function playKitchenChime(isRush) {
+    if (!soundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = isRush ? 'triangle' : 'sine';
+      osc.frequency.setValueAtTime(isRush ? 880 : 660, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(isRush ? 1320 : 990, ctx.currentTime + 0.12);
+
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.6);
+    } catch {
+      // AudioContext unavailable or blocked
+    }
+  }
+
+  // Update clock every second
+  function updateClock() {
+    if (!clockEl) return;
+    const now = new Date();
+    clockEl.textContent = now.toTimeString().split(' ')[0];
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Elapsed cooking timer progression loop (every 1 second)
+  setInterval(() => {
+    tickets.forEach(t => { t.elapsedSeconds += 1; });
+    renderTickets();
+    updateStationCounts();
+  }, 1000);
+
+  function formatTime(totalSec) {
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function getTimerClass(sec, isRush) {
+    if (isRush || sec >= 600) return 'red'; // >= 10m
+    if (sec >= 300) return 'amber';        // 5-10m
+    return 'green';                         // < 5m
+  }
+
+  function updateStationCounts() {
+    let countAll = 0;
+    let countGrill = 0;
+    let countGarde = 0;
+    let countPastry = 0;
+
+    tickets.forEach(ticket => {
+      countAll++;
+      ticket.courses.forEach(c => {
+        if (c.status === 'cooking' || c.status === 'held') {
+          c.items.forEach(it => {
+            if (it.station === 'grill') countGrill++;
+            if (it.station === 'garde-manger') countGarde++;
+            if (it.station === 'pastry') countPastry++;
+          });
+        }
+      });
+    });
+
+    const elAll = byId('countAll');
+    const elGrill = byId('countGrill');
+    const elGarde = byId('countGarde');
+    const elPastry = byId('countPastry');
+    if (elAll) elAll.textContent = String(countAll);
+    if (elGrill) elGrill.textContent = String(countGrill);
+    if (elGarde) elGarde.textContent = String(countGarde);
+    if (elPastry) elPastry.textContent = String(countPastry);
+
+    if (activeCountEl) activeCountEl.textContent = String(tickets.length);
+    if (avgTimeEl) {
+      if (tickets.length === 0) {
+        avgTimeEl.textContent = '0 min';
+      } else {
+        const total = tickets.reduce((acc, t) => acc + t.elapsedSeconds, 0);
+        avgTimeEl.textContent = `${(total / tickets.length / 60).toFixed(1)} min`;
+      }
+    }
+  }
+
+  function renderTickets() {
+    if (!ticketsContainer) return;
+
+    // Filter tickets based on activeStation and activeCourseFilter
+    const filtered = tickets.filter(ticket => {
+      if (activeCourseFilter !== 'all') {
+        const hasCourse = ticket.courses.some(c => c.name.toLowerCase() === activeCourseFilter.toLowerCase());
+        if (!hasCourse) return false;
+      }
+      if (activeStation !== 'all') {
+        const hasStation = ticket.courses.some(c =>
+          c.items.some(it => it.station === activeStation)
+        );
+        if (!hasStation) return false;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      ticketsContainer.innerHTML = '<div style="color:#94a3b8; font-size:0.95rem; padding:40px; text-align:center; width:100%;">✨ All tickets bumped! Kitchen queue clear. Click "Add Rush Ticket" to simulate incoming dining orders.</div>';
+      return;
+    }
+
+    ticketsContainer.innerHTML = '';
+
+    filtered.forEach(ticket => {
+      const timerCls = getTimerClass(ticket.elapsedSeconds, ticket.rush);
+      const ticketEl = document.createElement('div');
+      ticketEl.className = `kds-ticket ${ticket.rush ? 'rush' : ''}`;
+      ticketEl.setAttribute('data-id', ticket.id);
+
+      // Clip + Head
+      const clip = document.createElement('div');
+      clip.className = 'kds-ticket-clip';
+
+      const head = document.createElement('div');
+      head.className = 'kds-ticket-head';
+      head.innerHTML = `
+        <div class="kds-table-row">
+          <span class="kds-table-no">${ticket.table}</span>
+          <span class="kds-timer-badge ${timerCls}">
+            ⏱ ${formatTime(ticket.elapsedSeconds)}
+          </span>
+        </div>
+        <div class="kds-meta-row">
+          <span>${ticket.id} • ${ticket.guests} Guests</span>
+          <span>Server: ${ticket.server}</span>
+        </div>
+      `;
+
+      // Body (Courses)
+      const body = document.createElement('div');
+      body.className = 'kds-ticket-body';
+
+      ticket.courses.forEach((course) => {
+        const courseBlock = document.createElement('div');
+        courseBlock.className = 'kds-course-block';
+
+        const cHead = document.createElement('div');
+        cHead.className = 'kds-course-header';
+        cHead.innerHTML = `
+          <span>${course.name.toUpperCase()}</span>
+          <span class="kds-course-state ${course.status}">${course.status.toUpperCase()}</span>
+        `;
+        courseBlock.appendChild(cHead);
+
+        const itemsUl = document.createElement('ul');
+        itemsUl.className = 'kds-items-list';
+
+        course.items.forEach(item => {
+          // If station filter active, optionally highlight
+          const isCurrentStation = activeStation === 'all' || item.station === activeStation;
+          const li = document.createElement('li');
+          li.className = 'kds-item-row';
+          li.style.opacity = isCurrentStation ? '1' : '0.4';
+          li.innerHTML = `
+            <div>
+              <span class="kds-item-name">${item.name}</span>
+              ${item.mod ? `<div class="kds-item-mod">★ ${item.mod}</div>` : ''}
+            </div>
+            <span class="kds-station-tag ${item.station}">${item.station.toUpperCase()}</span>
+          `;
+          itemsUl.appendChild(li);
+        });
+
+        courseBlock.appendChild(itemsUl);
+        body.appendChild(courseBlock);
+      });
+
+      // Footer Actions
+      const foot = document.createElement('div');
+      foot.className = 'kds-ticket-footer';
+
+      // Check if there is a next course to fire
+      const nextHeldIdx = ticket.courses.findIndex(c => c.status === 'held');
+      const hasCooking = ticket.courses.some(c => c.status === 'cooking');
+
+      const fireBtn = document.createElement('button');
+      fireBtn.type = 'button';
+      fireBtn.className = 'kds-ticket-btn fire-btn';
+      if (nextHeldIdx !== -1) {
+        fireBtn.textContent = `🔥 Fire ${ticket.courses[nextHeldIdx].name}`;
+        fireBtn.onclick = () => {
+          ticket.courses[nextHeldIdx].status = 'cooking';
+          playKitchenChime(true);
+          statusNote.textContent = `[${ticket.table}] Fired course: ${ticket.courses[nextHeldIdx].name}! Stations alerted.`;
+          renderTickets();
+          updateStationCounts();
+        };
+      } else if (hasCooking) {
+        fireBtn.textContent = '🍽️ Plating Course';
+        fireBtn.onclick = () => {
+          const cookIdx = ticket.courses.findIndex(c => c.status === 'cooking');
+          if (cookIdx !== -1) {
+            ticket.courses[cookIdx].status = 'ready';
+            playKitchenChime(false);
+            statusNote.textContent = `[${ticket.table}] Plated course: ${ticket.courses[cookIdx].name}! Ready for service runner.`;
+            renderTickets();
+            updateStationCounts();
+          }
+        };
+      } else {
+        fireBtn.textContent = 'All Plated';
+        fireBtn.disabled = true;
+      }
+
+      const bumpBtn = document.createElement('button');
+      bumpBtn.type = 'button';
+      bumpBtn.className = 'kds-ticket-btn bump-btn';
+      bumpBtn.textContent = '✓ Bump Ticket';
+      bumpBtn.onclick = () => {
+        tickets = tickets.filter(t => t.id !== ticket.id);
+        playKitchenChime(false);
+        statusNote.textContent = `[${ticket.table}] Ticket ${ticket.id} bumped & archived to POS history.`;
+        renderTickets();
+        updateStationCounts();
+      };
+
+      foot.appendChild(fireBtn);
+      foot.appendChild(bumpBtn);
+
+      ticketEl.appendChild(clip);
+      ticketEl.appendChild(head);
+      ticketEl.appendChild(body);
+      ticketEl.appendChild(foot);
+
+      ticketsContainer.appendChild(ticketEl);
+    });
+  }
+
+  // Open & Close Modal
+  function openKds() {
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    renderTickets();
+    updateStationCounts();
+  }
+
+  function closeKds() {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  openBtn.addEventListener('click', openKds);
+  closeBtn.addEventListener('click', closeKds);
+  backdrop.addEventListener('click', closeKds);
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) {
+      closeKds();
+    }
+  });
+
+  // Sound Toggle
+  soundToggle.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    soundToggle.setAttribute('aria-pressed', String(soundEnabled));
+    soundIcon.textContent = soundEnabled ? '🔔' : '🔕';
+    soundText.textContent = soundEnabled ? 'Chime ON' : 'Chime MUTED';
+    statusNote.textContent = soundEnabled ? 'Kitchen order chimes unmuted.' : 'Kitchen order chimes muted.';
+  });
+
+  // Station Filter Tabs
+  stationTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      stationTabs.forEach(t => {
+        const isSelected = (t === tab);
+        t.classList.toggle('active', isSelected);
+        t.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+      });
+      activeStation = tab.getAttribute('data-station') || 'all';
+      renderTickets();
+    });
+  });
+
+  // Course Filter Select
+  courseSelect.addEventListener('change', (e) => {
+    activeCourseFilter = e.target.value;
+    renderTickets();
+  });
+
+  // Add Rush Ticket Simulation
+  addRushBtn.addEventListener('click', () => {
+    ticketSequence++;
+    const tableNum = Math.floor(Math.random() * 15) + 1;
+    const servers = ['Élodie', 'Antoine', 'Lucas', 'Béatrice'];
+    const serverName = servers[Math.floor(Math.random() * servers.length)];
+
+    const newTicket = {
+      id: `T-${ticketSequence}`,
+      table: `TABLE ${String(tableNum).padStart(2, '0')} (RUSH)`,
+      guests: Math.floor(Math.random() * 3) + 2,
+      server: serverName,
+      rush: true,
+      elapsedSeconds: 0,
+      courses: [
+        {
+          name: 'Appetizer',
+          status: 'cooking',
+          items: [
+            { name: 'Hamachi Crudo', station: 'garde-manger', mod: 'Allergy alert: Sesame' },
+            { name: 'Brittany Lobster Bisque', station: 'garde-manger', mod: '' }
+          ]
+        },
+        {
+          name: 'Entrée',
+          status: 'held',
+          items: [
+            { name: 'Seared Wagyu Ribeye', station: 'grill', mod: 'Medium rare' }
+          ]
+        },
+        {
+          name: 'Dessert',
+          status: 'held',
+          items: [
+            { name: 'Soufflé Grand Marnier', station: 'pastry', mod: '' }
+          ]
+        }
+      ]
+    };
+
+    tickets.unshift(newTicket);
+    playKitchenChime(true);
+    statusNote.textContent = `⚡ Rush order received for Table ${String(tableNum).padStart(2, '0')}! Added to expediter queue.`;
+    renderTickets();
+    updateStationCounts();
+  });
+
+  // Initial render
+  renderTickets();
+  updateStationCounts();
+}
+
+window.initKitchenDisplaySystem = initKitchenDisplaySystem;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initKitchenDisplaySystem);
+} else {
+  initKitchenDisplaySystem();
+}

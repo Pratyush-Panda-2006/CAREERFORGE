@@ -16,6 +16,7 @@
     <p>Seasonal farm-to-table tasting menus curated by Chef Gabriel Laurent in downtown Paris.</p>
     <button type="button" class="reserve-btn" id="reserveBtn" onclick="reserveTable()" aria-haspopup="dialog" aria-controls="reservationModal">Reserve a Table</button>
     <button type="button" class="order-btn order-hero" id="orderOnline">Order Online</button>
+    <button type="button" class="order-btn kds-hero-btn" id="openKdsBtn" aria-haspopup="dialog" aria-controls="kdsModal">🧑‍🍳 Kitchen Display (KDS)</button>
   </header>
 
   <main className="menu-section" id="menu">
@@ -630,6 +631,96 @@
       <button type="button" class="order-btn wide" id="newOrder">Start a new order</button>
     </div>
   </aside>
+
+  <!-- ===== Kitchen Display System (KDS) Modal ===== -->
+  <div class="kds-overlay" id="kdsModal" role="dialog" aria-modal="true" aria-labelledby="kdsTitle" hidden>
+    <div class="kds-backdrop" id="kdsBackdrop"></div>
+    <div class="kds-window">
+      <!-- Stainless Steel Header Bar -->
+      <header class="kds-header">
+        <div class="kds-brand-block">
+          <span class="kds-icon">🧑‍🍳</span>
+          <div>
+            <h2 id="kdsTitle" class="kds-title">LUMIÈRE KITCHEN DISPLAY SYSTEM</h2>
+            <span class="kds-sub">Live Service Expediter • Rush Order Queue</span>
+          </div>
+        </div>
+
+        <div class="kds-header-metrics">
+          <div class="kds-metric-pill">
+            <span class="kds-metric-label">ACTIVE TICKETS</span>
+            <span class="kds-metric-value" id="kdsActiveCount">4</span>
+          </div>
+          <div class="kds-metric-pill">
+            <span class="kds-metric-label">AVG LEAD TIME</span>
+            <span class="kds-metric-value" id="kdsAvgTime">8.5 min</span>
+          </div>
+          <div class="kds-clock" id="kdsClock">19:42:15</div>
+        </div>
+
+        <div class="kds-header-actions">
+          <button type="button" class="kds-btn" id="kdsSoundToggle" aria-pressed="true" title="Toggle audio chime alert">
+            <span id="kdsSoundIcon">🔔</span> <span id="kdsSoundText">Chime ON</span>
+          </button>
+          <button type="button" class="kds-btn kds-btn-primary" id="kdsAddRushBtn">
+            <span>⚡ Add Rush Ticket</span>
+          </button>
+          <button type="button" class="kds-close-btn" id="kdsCloseBtn" aria-label="Close Kitchen Display System">&times;</button>
+        </div>
+      </header>
+
+      <!-- Station & Course Filter Bar -->
+      <nav class="kds-filter-bar" aria-label="KDS Station Filters">
+        <div class="kds-station-tabs" role="tablist">
+          <button type="button" class="kds-station-tab active" data-station="all" role="tab" aria-selected="true">
+            All Stations (<span id="countAll">4</span>)
+          </button>
+          <button type="button" class="kds-station-tab" data-station="grill" role="tab" aria-selected="false">
+            🔥 Grill (<span id="countGrill">2</span>)
+          </button>
+          <button type="button" class="kds-station-tab" data-station="garde-manger" role="tab" aria-selected="false">
+            🥗 Garde Manger (<span id="countGarde">3</span>)
+          </button>
+          <button type="button" class="kds-station-tab" data-station="pastry" role="tab" aria-selected="false">
+            🍰 Pastry (<span id="countPastry">2</span>)
+          </button>
+        </div>
+
+        <div class="kds-course-filters">
+          <label for="kdsCourseSelect">Course Filter:</label>
+          <select id="kdsCourseSelect" class="kds-select">
+            <option value="all">All Courses</option>
+            <option value="appetizer">Appetizer</option>
+            <option value="entree">Entrée</option>
+            <option value="dessert">Dessert</option>
+          </select>
+        </div>
+      </nav>
+
+      <!-- Ticket Rail Viewport -->
+      <main class="kds-rail-viewport">
+        <div class="kds-rail-bar" aria-hidden="true">
+          <span class="rail-rivet"></span><span class="rail-rivet"></span><span class="rail-rivet"></span><span class="rail-rivet"></span>
+        </div>
+        <div class="kds-tickets-container" id="kdsTicketsContainer" role="region" aria-live="polite">
+          <!-- Dynamically populated kitchen tickets -->
+        </div>
+      </main>
+
+      <!-- Footer Expediter Summary -->
+      <footer class="kds-footer">
+        <div class="kds-legend">
+          <span class="legend-item"><i class="status-dot green"></i> &lt; 5m On Track</span>
+          <span class="legend-item"><i class="status-dot amber"></i> 5-10m In Prep</span>
+          <span class="legend-item"><i class="status-dot red flash"></i> &gt; 10m Delayed/Rush</span>
+        </div>
+        <div class="kds-footer-status" id="kdsStatusNote">
+          Station queue nominal. Click "Fire Course" to advance table courses, or "Bump" to complete ticket.
+        </div>
+      </footer>
+    </div>
+  </div>
+
 
   <script src="script.js"></script>
   <script type="module" src="floor-plan.js"></script>
