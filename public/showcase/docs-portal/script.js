@@ -969,3 +969,254 @@ if (document.readyState === 'loading') {
 } else {
   initOpenApiExplorer();
 }
+
+// ==========================================================================
+// Token Bucket Algorithm & Interactive 429 Throttle Simulator (Issue #443)
+// ==========================================================================
+
+class TokenBucket {
+  constructor(capacity = 100, refillRate = 10, initialTokens = 60) {
+    this.capacity = capacity;
+    this.refillRate = refillRate; // tokens replenished per second
+    this.tokens = Math.min(capacity, initialTokens);
+    this.lastRefill = Date.now();
+    this.accepted = 0;
+    this.throttled = 0;
+  }
+
+  refill(now = Date.now()) {
+    const elapsed = Math.max(0, (now - this.lastRefill) / 1000);
+    this.lastRefill = now;
+    this.tokens = Math.min(this.capacity, this.tokens + elapsed * this.refillRate);
+    return this.tokens;
+  }
+
+  consume(cost = 1, now = Date.now()) {
+    this.refill(now);
+    if (this.tokens >= cost) {
+      this.tokens -= cost;
+      this.accepted++;
+      return {
+        success: true,
+        status: 200,
+        cost,
+        remaining: Math.floor(this.tokens),
+        capacity: this.capacity,
+        resetSec: Math.max(1, Math.ceil((this.capacity - this.tokens) / (this.refillRate || 1))),
+        retryAfter: 0
+      };
+    } else {
+      this.throttled++;
+      const deficit = cost - this.tokens;
+      const retryAfter = Math.max(1, Math.ceil(deficit / (this.refillRate || 1)));
+      return {
+        success: false,
+        status: 429,
+        cost,
+        remaining: Math.floor(this.tokens),
+        capacity: this.capacity,
+        resetSec: Math.max(1, Math.ceil((this.capacity - this.tokens) / (this.refillRate || 1))),
+        retryAfter
+      };
+    }
+  }
+
+  setCapacity(newCapacity) {
+    this.capacity = Number(newCapacity) || 100;
+    this.tokens = Math.min(this.tokens, this.capacity);
+  }
+
+  setRefillRate(newRate) {
+    this.refillRate = Number(newRate) || 10;
+  }
+
+  reset() {
+    this.tokens = this.capacity;
+    this.lastRefill = Date.now();
+  }
+}
+
+function initTokenBucketSimulator() {
+  const lab = document.getElementById('tokenBucketLab');
+  if (!lab) return null;
+
+  const bucket = new TokenBucket(100, 10, 60);
+
+  const el = {
+    vessel: document.getElementById('bucketVessel'),
+    liquid: document.getElementById('bucketLiquid'),
+    capLabel: document.getElementById('bucketCapLabel'),
+    currentTokens: document.getElementById('currentTokensDisplay'),
+    capacityDenom: document.getElementById('capacityDenom'),
+    statusTag: document.getElementById('bucketStatusTag'),
+    capSelect: document.getElementById('bucketCapacitySelect'),
+    capValDisplay: document.getElementById('capacityValDisplay'),
+    rateSlider: document.getElementById('refillRateSlider'),
+    rateDisplay: document.getElementById('refillRateDisplay'),
+    btnSingle: document.getElementById('btnReqSingle'),
+    btnBatch: document.getElementById('btnReqBatch'),
+    btnBurst: document.getElementById('btnReqBurst'),
+    btnSteady: document.getElementById('btnScenarioSteady'),
+    btnDDoS: document.getElementById('btnScenarioDDoS'),
+    btnReset: document.getElementById('btnResetBucket'),
+    statusPill: document.getElementById('httpStatusPill'),
+    headers: document.getElementById('bucketResponseHeaders'),
+    accepted: document.getElementById('metricAccepted'),
+    throttled: document.getElementById('metricThrottled'),
+    fill: document.getElementById('metricFill'),
+    banner: document.getElementById('throttleWarningBanner')
+  };
+
+  let steadyTimer = null;
+
+  function render(lastResult = null) {
+    const fillPercent = Math.min(100, Math.max(0, (bucket.tokens / bucket.capacity) * 100));
+    if (el.liquid) {
+      el.liquid.style.height = `${fillPercent.toFixed(1)}%`;
+      if (fillPercent <= 15) {
+        el.liquid.className = 'bucket-liquid depleted';
+      } else if (fillPercent <= 40) {
+        el.liquid.className = 'bucket-liquid warning';
+      } else {
+        el.liquid.className = 'bucket-liquid healthy';
+      }
+    }
+
+    if (el.currentTokens) el.currentTokens.textContent = Math.floor(bucket.tokens);
+    if (el.capacityDenom) el.capacityDenom.textContent = bucket.capacity;
+    if (el.capLabel) el.capLabel.textContent = bucket.capacity;
+    if (el.fill) el.fill.textContent = `${Math.round(fillPercent)}%`;
+    if (el.accepted) el.accepted.textContent = bucket.accepted;
+    if (el.throttled) el.throttled.textContent = bucket.throttled;
+
+    if (el.statusTag) {
+      if (fillPercent === 0) {
+        el.statusTag.textContent = 'EXHAUSTED';
+        el.statusTag.className = 'bucket-status-tag exhausted';
+      } else if (fillPercent <= 25) {
+        el.statusTag.textContent = 'RESTRICTED';
+        el.statusTag.className = 'bucket-status-tag warning';
+      } else {
+        el.statusTag.textContent = 'HEALTHY';
+        el.statusTag.className = 'bucket-status-tag healthy';
+      }
+    }
+
+    if (lastResult) {
+      if (el.statusPill) {
+        if (lastResult.status === 200) {
+          el.statusPill.textContent = '200 OK';
+          el.statusPill.className = 'http-status-pill status-200';
+        } else {
+          el.statusPill.textContent = '429 Too Many Requests';
+          el.statusPill.className = 'http-status-pill status-429';
+        }
+      }
+
+      if (el.headers) {
+        el.headers.textContent = [
+          `HTTP/1.1 ${lastResult.status} ${lastResult.status === 200 ? 'OK' : 'Too Many Requests'}`,
+          'Content-Type: application/json',
+          `X-RateLimit-Limit: ${lastResult.capacity}`,
+          `X-RateLimit-Remaining: ${lastResult.remaining}`,
+          `X-RateLimit-Reset: ${lastResult.resetSec}s`,
+          `Retry-After: ${lastResult.retryAfter}s`
+        ].join('\n');
+      }
+
+      if (el.banner) {
+        el.banner.hidden = lastResult.status === 200;
+      }
+
+      if (el.vessel && lastResult.status === 429) {
+        el.vessel.classList.add('shake-vessel');
+        setTimeout(() => el.vessel.classList.remove('shake-vessel'), 350);
+      }
+    }
+  }
+
+  function handleRequest(cost) {
+    const res = bucket.consume(cost);
+    render(res);
+    return res;
+  }
+
+  // Hook event listeners
+  if (el.btnSingle) el.btnSingle.addEventListener('click', () => handleRequest(1));
+  if (el.btnBatch) el.btnBatch.addEventListener('click', () => handleRequest(5));
+  if (el.btnBurst) el.btnBurst.addEventListener('click', () => handleRequest(25));
+
+  if (el.capSelect) {
+    el.capSelect.addEventListener('change', () => {
+      bucket.setCapacity(Number(el.capSelect.value));
+      if (el.capValDisplay) el.capValDisplay.textContent = `${bucket.capacity} tokens`;
+      render();
+    });
+  }
+
+  if (el.rateSlider) {
+    el.rateSlider.addEventListener('input', () => {
+      bucket.setRefillRate(Number(el.rateSlider.value));
+      if (el.rateDisplay) el.rateDisplay.textContent = `${bucket.refillRate} tokens/sec`;
+    });
+  }
+
+  if (el.btnSteady) {
+    el.btnSteady.addEventListener('click', () => {
+      if (steadyTimer) {
+        clearInterval(steadyTimer);
+        steadyTimer = null;
+        el.btnSteady.classList.remove('active');
+        el.btnSteady.textContent = 'Steady Stream (5/s)';
+      } else {
+        el.btnSteady.classList.add('active');
+        el.btnSteady.textContent = 'Stop Steady Stream';
+        steadyTimer = setInterval(() => {
+          handleRequest(1);
+        }, 200);
+      }
+    });
+  }
+
+  if (el.btnDDoS) {
+    el.btnDDoS.addEventListener('click', () => {
+      // Blast 120 requests in rapid succession
+      for (let i = 0; i < 24; i++) {
+        handleRequest(5);
+      }
+    });
+  }
+
+  if (el.btnReset) {
+    el.btnReset.addEventListener('click', () => {
+      bucket.reset();
+      render({
+        status: 200,
+        capacity: bucket.capacity,
+        remaining: bucket.capacity,
+        resetSec: 0,
+        retryAfter: 0
+      });
+    });
+  }
+
+  // Refill loop (updates every 100ms)
+  const ticker = setInterval(() => {
+    bucket.refill();
+    render();
+  }, 100);
+
+  // Initial render
+  render();
+
+  return { bucket, ticker };
+}
+
+window.TokenBucket = TokenBucket;
+window.initTokenBucketSimulator = initTokenBucketSimulator;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTokenBucketSimulator);
+} else {
+  initTokenBucketSimulator();
+}

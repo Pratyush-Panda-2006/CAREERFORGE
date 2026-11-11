@@ -177,18 +177,6 @@ X-RateLimit-Reset: 1063</code></pre>
       </section>
 
       <!-- SSE Event Stream Section -->
-      <section id="streaming" class="doc-section">
-        <h2>Server-Sent Events (SSE) Stream</h2>
-        <p>Subscribe to token chunks and tool call events over HTTP/2 persistent streaming sockets.</p>
-        <div class="endpoint-pill get"><span class="method">GET</span> /v1/agents/{id}/stream</div>
-      </section>
-
-      <!-- Rate Limits Section -->
-      <section id="rate-limits" class="doc-section">
-        <h2>Rate Limits &amp; Quotas</h2>
-        <p>Standard tiers are provisioned with 1,000 requests per minute and burst allocations up to 2,500 RPM.</p>
-      </section>
-
       <!-- SSE Streaming Section -->
       <section id="streaming" class="doc-section">
         <h2>SSE Event Stream</h2>
@@ -211,8 +199,131 @@ data: {"total_tokens": 42, "latency_ms": 114, "finish_reason": "stop"}</code></p
 
       <!-- Rate Limits Section -->
       <section id="rate-limits" class="doc-section">
-        <h2>Rate Limits & Quotas</h2>
-        <p>To preserve high availability and protect global cluster health, standard tier rate limits are enforced across sliding 60-second windows. Every response header includes your real-time usage metrics:</p>
+        <h2>Rate Limits &amp; Quotas</h2>
+        <p>To preserve high availability and protect global cluster health, standard tier rate limits are enforced across sliding 60-second windows and backed by distributed Token Bucket algorithms. Every response header includes real-time token capacity metrics:</p>
+
+        <!-- Interactive Token Bucket Laboratory (Issue #443) -->
+        <div class="token-bucket-card" id="tokenBucketLab">
+          <div class="bucket-card-header">
+            <div class="bucket-header-title">
+              <span class="bucket-badge">ALGORITHM LAB</span>
+              <h3>Interactive Token Bucket &amp; 429 Throttle Simulator</h3>
+            </div>
+            <div class="bucket-live-badge">
+              <span class="live-pulse"></span>
+              <span>Leaky Token Engine</span>
+            </div>
+          </div>
+
+          <div class="bucket-workspace">
+            <!-- Left: Visual Bucket & Liquid Fill Level -->
+            <div class="bucket-visual-col">
+              <div class="bucket-cylinder-wrap">
+                <div class="bucket-faucet">
+                  <div class="faucet-pipe"></div>
+                  <div class="faucet-drop" id="faucetDrop"></div>
+                </div>
+                <div class="bucket-vessel" id="bucketVessel">
+                  <div class="bucket-liquid" id="bucketLiquid" style="height: 60%;">
+                    <div class="liquid-surface"></div>
+                  </div>
+                  <div class="bucket-capacity-marker top">Cap: <span id="bucketCapLabel">100</span></div>
+                  <div class="bucket-capacity-marker mid">50%</div>
+                  <div class="bucket-capacity-marker bot">0</div>
+                </div>
+                <div class="bucket-fill-stats">
+                  <span class="current-tokens" id="currentTokensDisplay">60</span>
+                  <span class="tokens-denom">/ <span id="capacityDenom">100</span> tokens</span>
+                </div>
+                <div class="bucket-status-tag" id="bucketStatusTag">HEALTHY</div>
+              </div>
+            </div>
+
+            <!-- Middle: Controls & Triggers -->
+            <div class="bucket-controls-col">
+              <div class="control-group">
+                <label for="bucketCapacitySelect" class="control-label">
+                  <span>Bucket Capacity (<em>C</em>)</span>
+                  <span class="control-val" id="capacityValDisplay">100 tokens</span>
+                </label>
+                <select id="bucketCapacitySelect" class="bucket-select">
+                  <option value="50">50 tokens (Strict)</option>
+                  <option value="100" selected>100 tokens (Standard)</option>
+                  <option value="250">250 tokens (Burst Tier)</option>
+                  <option value="500">500 tokens (Enterprise)</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label for="refillRateSlider" class="control-label">
+                  <span>Refill Rate (<em>r</em>)</span>
+                  <span class="control-val" id="refillRateDisplay">10 tokens/sec</span>
+                </label>
+                <input type="range" id="refillRateSlider" min="1" max="50" value="10" class="bucket-slider" />
+              </div>
+
+              <div class="request-triggers-group">
+                <span class="control-label">Send Simulated Requests</span>
+                <div class="trigger-buttons">
+                  <button type="button" class="btn-bucket-req" id="btnReqSingle" data-cost="1">
+                    <span class="btn-icon">⚡</span> Single (1 tok)
+                  </button>
+                  <button type="button" class="btn-bucket-req" id="btnReqBatch" data-cost="5">
+                    <span class="btn-icon">📦</span> Batch (5 tok)
+                  </button>
+                  <button type="button" class="btn-bucket-req burst" id="btnReqBurst" data-cost="25">
+                    <span class="btn-icon">💥</span> Burst (25 tok)
+                  </button>
+                </div>
+              </div>
+
+              <div class="preset-scenarios">
+                <span class="control-label">Traffic Scenarios</span>
+                <div class="scenario-buttons">
+                  <button type="button" class="btn-scenario" id="btnScenarioSteady">Steady Stream (5/s)</button>
+                  <button type="button" class="btn-scenario danger" id="btnScenarioDDoS">DDoS Burst (120 reqs)</button>
+                  <button type="button" class="btn-scenario reset" id="btnResetBucket">Instant Refill</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Real-Time HTTP Header & Telemetry Inspector -->
+            <div class="bucket-telemetry-col">
+              <div class="telemetry-box">
+                <div class="telemetry-header">
+                  <span>Simulated Edge HTTP Response</span>
+                  <span class="http-status-pill status-200" id="httpStatusPill">200 OK</span>
+                </div>
+                <pre class="telemetry-headers"><code id="bucketResponseHeaders">HTTP/1.1 200 OK
+Content-Type: application/json
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 60
+X-RateLimit-Reset: 4s
+Retry-After: 0s</code></pre>
+              </div>
+
+              <div class="bucket-metrics-grid">
+                <div class="metric-card">
+                  <span class="m-label">Accepted</span>
+                  <span class="m-val text-success" id="metricAccepted">0</span>
+                </div>
+                <div class="metric-card">
+                  <span class="m-label">Throttled (429)</span>
+                  <span class="m-val text-danger" id="metricThrottled">0</span>
+                </div>
+                <div class="metric-card">
+                  <span class="m-label">Token Fill</span>
+                  <span class="m-val" id="metricFill">60%</span>
+                </div>
+              </div>
+
+              <div class="throttle-warning-banner" id="throttleWarningBanner" hidden>
+                <strong>⚠️ HTTP 429 Too Many Requests</strong>
+                <p>Token bucket depleted! Client throttled until tokens replenish.</p>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="table-container">
           <table class="doc-table">
             <thead>
