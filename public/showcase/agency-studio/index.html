@@ -264,6 +264,146 @@
   </div>
 </section>
 
+<!-- ===== BEGIN Issue #435: Interactive Project Scope & Budget Estimator ===== -->
+<section id="interactive-project-estimator" class="scope-estimator-section" aria-labelledby="scopeEstTitle">
+  <div class="scope-est-header">
+    <div>
+      <span class="badge">// INTERACTIVE PROJECT ESTIMATOR</span>
+      <h2 id="scopeEstTitle">Interactive Project Estimator</h2>
+      <p class="scope-est-sub">Toggle deliverables, tune complexity, and dial your delivery timeline to calculate real-time budget ranges and phased sprint milestones.</p>
+    </div>
+    <button type="button" class="scope-reset-btn" id="scopeResetBtn">Reset Scope ↺</button>
+  </div>
+
+  <div class="scope-est-grid">
+    <!-- Left Column: Deliverable Chips, Complexity & Timeline Slider -->
+    <div class="scope-controls-col">
+      <div class="scope-block">
+        <div class="scope-block-head">
+          <h3>1. Toggle Core Service Deliverables</h3>
+          <span class="scope-count-pill" id="scopeServiceCount">3 selected</span>
+        </div>
+        <div class="deliverable-chips-grid" id="deliverableChipsGrid" role="group" aria-label="Service deliverable toggle chips">
+          <button type="button" class="deliverable-chip active" data-service="brand-identity" aria-pressed="true">
+            <span class="chip-glow-dot"></span>
+            <span class="chip-icon">🎨</span>
+            <span class="chip-info">
+              <strong>Brand Identity</strong>
+              <small>$5,500 · 2–3 wks</small>
+            </span>
+          </button>
+
+          <button type="button" class="deliverable-chip active" data-service="web-dev" aria-pressed="true">
+            <span class="chip-glow-dot"></span>
+            <span class="chip-icon">⚡</span>
+            <span class="chip-info">
+              <strong>Web Development</strong>
+              <small>$14,000 · 4–6 wks</small>
+            </span>
+          </button>
+
+          <button type="button" class="deliverable-chip" data-service="3d-motion" aria-pressed="false">
+            <span class="chip-glow-dot"></span>
+            <span class="chip-icon">🌀</span>
+            <span class="chip-info">
+              <strong>3D Motion</strong>
+              <small>$6,500 · 2–3 wks</small>
+            </span>
+          </button>
+
+          <button type="button" class="deliverable-chip active" data-service="design-systems" aria-pressed="true">
+            <span class="chip-glow-dot"></span>
+            <span class="chip-icon">🧩</span>
+            <span class="chip-info">
+              <strong>Design Systems</strong>
+              <small>$7,500 · 2–4 wks</small>
+            </span>
+          </button>
+
+          <button type="button" class="deliverable-chip" data-service="seo" aria-pressed="false">
+            <span class="chip-glow-dot"></span>
+            <span class="chip-icon">📈</span>
+            <span class="chip-info">
+              <strong>SEO</strong>
+              <small>$3,200 · 1–2 wks</small>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="scope-block">
+        <div class="scope-block-head">
+          <h3>2. Deliverable Complexity Tier</h3>
+          <span class="scope-count-pill" id="scopeComplexityMultiplier">1.0x Baseline</span>
+        </div>
+        <div class="complexity-chips-row" id="complexityChipsRow" role="radiogroup" aria-label="Deliverable complexity tier">
+          <button type="button" class="complexity-chip" data-complexity="mvp" aria-pressed="false">
+            <strong>Startup MVP</strong>
+            <span>0.85x · Lean launch</span>
+          </button>
+          <button type="button" class="complexity-chip active" data-complexity="scaleup" aria-pressed="true">
+            <strong>Scaleup Standard</strong>
+            <span>1.0x · Multi-viewport</span>
+          </button>
+          <button type="button" class="complexity-chip" data-complexity="enterprise" aria-pressed="false">
+            <strong>Flagship Enterprise</strong>
+            <span>1.45x · Custom architecture</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="scope-block">
+        <div class="scope-block-head">
+          <h3>3. Target Launch Timeline</h3>
+          <span class="scope-timeline-val" id="scopeTimelineValue">10 Weeks</span>
+        </div>
+        <div class="scope-slider-wrap">
+          <input type="range" id="scopeTimelineSlider" min="4" max="24" step="1" value="10" aria-label="Target project timeline in weeks" />
+          <div class="scope-slider-scale">
+            <span>4 wks (Hyper-Sprint)</span>
+            <span>12 wks (Balanced)</span>
+            <span>24 wks (Phased)</span>
+          </div>
+        </div>
+        <p class="scope-pace-note" id="scopePaceNote">Balanced delivery pace — optimal squad velocity with zero rush surcharge.</p>
+      </div>
+    </div>
+
+    <!-- Right Column: Glassmorphic Cost Summary Card & Timeline Milestones -->
+    <aside class="scope-summary-card" aria-labelledby="scopeSummaryHeading">
+      <div class="summary-card-top">
+        <span class="summary-kicker" id="scopeSummaryHeading">ESTIMATED INVESTMENT RANGE</span>
+        <div class="budget-range-display" id="scopeBudgetRange">$24,300 – $31,100</div>
+        <div class="summary-meta-badges">
+          <span class="summary-meta-pill" id="scopeVelocityBadge">10 Wk Target</span>
+          <span class="summary-meta-pill" id="scopeBurnBadge">~$2,700 / wk</span>
+          <span class="summary-meta-pill accent" id="scopeSprintModeBadge">Standard Pace</span>
+        </div>
+      </div>
+
+      <div class="summary-deliverables-list" id="scopeSelectedChipsPreview">
+        <!-- Populated by script.js -->
+      </div>
+
+      <div class="milestones-block">
+        <div class="milestones-head">
+          <h4>Projected Timeline Milestones</h4>
+          <span id="scopeTotalMilestonesWeeks">Weeks 1–10</span>
+        </div>
+        <ol class="milestones-timeline" id="scopeMilestonesList">
+          <!-- Populated dynamically by script.js -->
+        </ol>
+      </div>
+
+      <div class="summary-actions">
+        <button type="button" class="scope-primary-cta" id="scopeLockEstimateBtn">Lock Scope &amp; Open Brief ↗</button>
+        <p class="scope-cta-status" id="scopeCtaStatus" role="status" aria-live="polite"></p>
+      </div>
+    </aside>
+  </div>
+</section>
+<!-- ===== END Issue #435 ===== -->
+
 <section id="estimator" class="estimator" aria-labelledby="estTitle">
   <div class="est-header-wrap">
     <span class="badge">// CLIENT DELIVERABLES &amp; IMPACT</span>
