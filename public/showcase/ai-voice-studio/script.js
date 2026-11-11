@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initVoiceStudioTuner();
   initTtsStudio();
   initMultiTrackWaveform();
+  initDawTimeline();
 });
 
 // ---------- Voice Studio Tuner Engine ----------
@@ -1105,4 +1106,639 @@ function initMultiTrackWaveform() {
       }, 3500);
     });
   }
+}
+
+
+// ==========================================================================
+// Multi-Track Audio Timeline Editor (DAW) Engine
+// Handles clip boundaries, track trimming, gain modulation & WAV mixdown
+// ==========================================================================
+function initDawTimeline() {
+  const dawSection = document.getElementById('daw-timeline');
+  if (!dawSection) return;
+
+  const PIXELS_PER_SECOND = 60; // 1 second = 60px
+  const TOTAL_DURATION = 16.0;   // 16 seconds timeline
+
+  // State
+  const state = {
+    isPlaying: false,
+    currentTime: 0.0,
+    loop: false,
+    snap: 0.5,
+    tracks: {
+      voice: {
+        volume: 1.0,
+        muted: false,
+        solo: false,
+        clip: {
+          start: 1.0,
+          rawDuration: 6.0,
+          trimStart: 0.0,
+          trimEnd: 0.0
+        }
+      },
+      ambience: {
+        volume: 0.6,
+        muted: false,
+        solo: false,
+        preset: 'rain',
+        clip: {
+          start: 0.0,
+          rawDuration: 12.0,
+          trimStart: 0.0,
+          trimEnd: 0.0
+        }
+      }
+    }
+  };
+
+  let audioCtx = null;
+  let activeNodes = [];
+  let playbackStartTime = 0;
+  let animId = null;
+
+  // DOM Elements
+  const playBtn = document.getElementById('dawPlayBtn');
+  const playIcon = document.getElementById('dawPlayIcon');
+  const playText = document.getElementById('dawPlayText');
+  const stopBtn = document.getElementById('dawStopBtn');
+  const loopBtn = document.getElementById('dawLoopBtn');
+  const timecodeEl = document.getElementById('dawTimecode');
+  const snapSelect = document.getElementById('dawSnapSelect');
+  const exportBtn = document.getElementById('dawExportBtn');
+  const statusBar = document.getElementById('dawStatusBar');
+  const rulerEl = document.getElementById('dawRuler');
+  const playheadEl = document.getElementById('dawPlayhead');
+  const scrollableEl = document.getElementById('dawTimelineScrollable');
+
+  // Track 1 DOM
+  const muteVoiceBtn = document.getElementById('dawMuteVoice');
+  const soloVoiceBtn = document.getElementById('dawSoloVoice');
+  const volVoiceInput = document.getElementById('dawVolVoice');
+  const volVoiceVal = document.getElementById('dawVolVoiceVal');
+  const clipVoiceEl = document.getElementById('dawClipVoice');
+  const voiceDurEl = document.getElementById('dawVoiceDuration');
+  const waveVoiceCanvas = document.getElementById('dawWaveformVoice');
+
+  // Track 2 DOM
+  const muteAmbienceBtn = document.getElementById('dawMuteAmbience');
+  const soloAmbienceBtn = document.getElementById('dawSoloAmbience');
+  const volAmbienceInput = document.getElementById('dawVolAmbience');
+  const volAmbienceVal = document.getElementById('dawVolAmbienceVal');
+  const ambiencePresetSelect = document.getElementById('dawAmbiencePreset');
+  const clipAmbienceEl = document.getElementById('dawClipAmbience');
+  const ambienceDurEl = document.getElementById('dawAmbienceDuration');
+  const waveAmbienceCanvas = document.getElementById('dawWaveformAmbience');
+
+  // Helper to format time seconds to 00:00.00
+  function formatTime(s) {
+    const mins = Math.floor(s / 60);
+    const secs = Math.floor(s % 60);
+    const cs = Math.floor((s % 1) * 100);
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(cs).padStart(2, '0')}`;
+  }
+
+  function updateTimecode() {
+    if (timecodeEl) {
+      timecodeEl.textContent = `${formatTime(state.currentTime)} / ${formatTime(TOTAL_DURATION)}`;
+    }
+    if (playheadEl) {
+      playheadEl.style.left = `${state.currentTime * PIXELS_PER_SECOND}px`;
+    }
+  }
+
+  // Render Time Ruler ticks
+  function renderRuler() {
+    if (!rulerEl) return;
+    rulerEl.innerHTML = '';
+    const totalSeconds = Math.ceil(TOTAL_DURATION);
+    for (let s = 0; s <= totalSeconds; s++) {
+      const tick = document.createElement('div');
+      tick.className = 'daw-ruler-tick';
+      tick.style.left = `${s * PIXELS_PER_SECOND}px`;
+      tick.textContent = `${s}s`;
+      rulerEl.appendChild(tick);
+    }
+  }
+
+  // Draw simulated waveform bars on canvas
+  function drawWaveform(canvas, color, count, seed) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.fillStyle = color;
+    const barWidth = w / count;
+    for (let i = 0; i < count; i++) {
+      const angle = (i * seed * 0.15);
+      const amp = Math.sin(angle) * 0.35 + Math.cos(angle * 2.3) * 0.25 + 0.4;
+      const barH = Math.max(4, amp * (h - 10));
+      const y = (h - barH) / 2;
+      ctx.fillRect(i * barWidth + 1, y, Math.max(1, barWidth - 2), barH);
+    }
+  }
+
+  function updateClipDom(trackKey, clipEl, durEl, canvas) {
+    const track = state.tracks[trackKey];
+    const effectiveDur = Math.max(0.2, track.clip.rawDuration - track.clip.trimStart - track.clip.trimEnd);
+    const leftPx = track.clip.start * PIXELS_PER_SECOND;
+    const widthPx = effectiveDur * PIXELS_PER_SECOND;
+
+    clipEl.style.left = `${leftPx}px`;
+    clipEl.style.width = `${widthPx}px`;
+    clipEl.setAttribute('aria-valuenow', track.clip.start.toFixed(1));
+    durEl.textContent = `${effectiveDur.toFixed(1)}s`;
+
+    if (canvas) {
+      canvas.width = Math.max(50, Math.floor(widthPx));
+      const color = trackKey === 'voice' ? 'rgba(56, 189, 248, 0.75)' : 'rgba(192, 132, 252, 0.75)';
+      const seed = trackKey === 'voice' ? 4.2 : 2.7;
+      drawWaveform(canvas, color, Math.floor(widthPx / 4), seed);
+    }
+  }
+
+  function refreshAllClips() {
+    updateClipDom('voice', clipVoiceEl, voiceDurEl, waveVoiceCanvas);
+    updateClipDom('ambience', clipAmbienceEl, ambienceDurEl, waveAmbienceCanvas);
+  }
+
+  // Snap a time value to current grid resolution
+  function snapTime(val) {
+    if (state.snap <= 0) return Math.max(0, val);
+    return Math.max(0, Math.round(val / state.snap) * state.snap);
+  }
+
+  // Setup interactive drag & trim handles
+  function setupClipInteraction(trackKey, clipEl) {
+    let activeDrag = null; // 'move', 'trim-left', 'trim-right'
+    let startX = 0;
+    let initialStart = 0;
+    let initialTrimStart = 0;
+    let initialTrimEnd = 0;
+
+    clipEl.addEventListener('mousedown', (e) => {
+      const target = e.target;
+      startX = e.clientX;
+      const track = state.tracks[trackKey];
+      initialStart = track.clip.start;
+      initialTrimStart = track.clip.trimStart;
+      initialTrimEnd = track.clip.trimEnd;
+
+      if (target.classList.contains('daw-trim-left')) {
+        activeDrag = 'trim-left';
+      } else if (target.classList.contains('daw-trim-right')) {
+        activeDrag = 'trim-right';
+      } else {
+        activeDrag = 'move';
+      }
+
+      e.preventDefault();
+      document.body.style.cursor = activeDrag === 'move' ? 'grabbing' : 'ew-resize';
+
+      const onMouseMove = (moveEvt) => {
+        if (!activeDrag) return;
+        const deltaPx = moveEvt.clientX - startX;
+        const deltaSec = deltaPx / PIXELS_PER_SECOND;
+
+        if (activeDrag === 'move') {
+          const newStart = snapTime(initialStart + deltaSec);
+          track.clip.start = Math.max(0, Math.min(TOTAL_DURATION - 0.5, newStart));
+          statusBar.textContent = `[${trackKey.toUpperCase()}] Moved clip start to ${track.clip.start.toFixed(2)}s`;
+        } else if (activeDrag === 'trim-left') {
+          const maxTrim = track.clip.rawDuration - track.clip.trimEnd - 0.5;
+          const newTrim = Math.max(0, Math.min(maxTrim, initialTrimStart + deltaSec));
+          track.clip.trimStart = snapTime(newTrim);
+          statusBar.textContent = `[${trackKey.toUpperCase()}] Trimmed head: +${track.clip.trimStart.toFixed(2)}s`;
+        } else if (activeDrag === 'trim-right') {
+          const maxTrim = track.clip.rawDuration - track.clip.trimStart - 0.5;
+          const newTrim = Math.max(0, Math.min(maxTrim, initialTrimEnd - deltaSec));
+          track.clip.trimEnd = snapTime(newTrim);
+          statusBar.textContent = `[${trackKey.toUpperCase()}] Trimmed tail: -${track.clip.trimEnd.toFixed(2)}s`;
+        }
+
+        refreshAllClips();
+      };
+
+      const onMouseUp = () => {
+        activeDrag = null;
+        document.body.style.cursor = '';
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    });
+  }
+
+  // Audio Graph Engine
+  function getAudioContext() {
+    if (!audioCtx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioCtx();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function stopAudio() {
+    activeNodes.forEach((node) => {
+      try { node.stop(); } catch { /* ignore already stopped */ }
+      try { node.disconnect(); } catch { /* ignore */ }
+    });
+    activeNodes = [];
+  }
+
+  function playTimeline() {
+    const ctx = getAudioContext();
+    stopAudio();
+
+    const now = ctx.currentTime;
+    playbackStartTime = now - state.currentTime;
+
+    const hasSolo = state.tracks.voice.solo || state.tracks.ambience.solo;
+
+    // Schedule Track 1: Voice Synth (Formant speech simulation)
+    const voiceTrack = state.tracks.voice;
+    const isVoiceAudible = (!voiceTrack.muted && (!hasSolo || voiceTrack.solo));
+    const voiceStart = voiceTrack.clip.start;
+    const voiceDur = Math.max(0.1, voiceTrack.clip.rawDuration - voiceTrack.clip.trimStart - voiceTrack.clip.trimEnd);
+    const voiceEnd = voiceStart + voiceDur;
+
+    if (isVoiceAudible && state.currentTime < voiceEnd) {
+      const offsetInClip = Math.max(0, state.currentTime - voiceStart);
+      const scheduleTime = Math.max(0, voiceStart - state.currentTime);
+
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, now + scheduleTime);
+      // Frequency speech contour
+      osc.frequency.exponentialRampToValueAtTime(240, now + scheduleTime + 1.2);
+      osc.frequency.exponentialRampToValueAtTime(170, now + scheduleTime + voiceDur);
+
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1200, now + scheduleTime);
+      filter.Q.setValueAtTime(4.0, now + scheduleTime);
+
+      gainNode.gain.setValueAtTime(0.001, now + scheduleTime);
+      gainNode.gain.exponentialRampToValueAtTime(voiceTrack.volume * 0.4, now + scheduleTime + 0.1);
+      gainNode.gain.setValueAtTime(voiceTrack.volume * 0.4, now + scheduleTime + (voiceDur - offsetInClip) - 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + scheduleTime + (voiceDur - offsetInClip));
+
+      osc.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      osc.start(now + scheduleTime);
+      osc.stop(now + scheduleTime + (voiceDur - offsetInClip));
+      activeNodes.push(osc);
+    }
+
+    // Schedule Track 2: Ambience (Pink/white noise or resonant drone)
+    const ambTrack = state.tracks.ambience;
+    const isAmbAudible = (!ambTrack.muted && (!hasSolo || ambTrack.solo));
+    const ambStart = ambTrack.clip.start;
+    const ambDur = Math.max(0.1, ambTrack.clip.rawDuration - ambTrack.clip.trimStart - ambTrack.clip.trimEnd);
+    const ambEnd = ambStart + ambDur;
+
+    if (isAmbAudible && state.currentTime < ambEnd) {
+      const offsetInClip = Math.max(0, state.currentTime - ambStart);
+      const scheduleTime = Math.max(0, ambStart - state.currentTime);
+
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const ambGain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      if (ambTrack.preset === 'rain') {
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(65, now + scheduleTime);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(450, now + scheduleTime);
+      } else if (ambTrack.preset === 'drone') {
+        osc1.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(110, now + scheduleTime);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(320, now + scheduleTime);
+      } else {
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(80, now + scheduleTime);
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(800, now + scheduleTime);
+      }
+
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(112, now + scheduleTime);
+
+      ambGain.gain.setValueAtTime(0.001, now + scheduleTime);
+      ambGain.gain.exponentialRampToValueAtTime(ambTrack.volume * 0.25, now + scheduleTime + 0.2);
+      ambGain.gain.setValueAtTime(ambTrack.volume * 0.25, now + scheduleTime + (ambDur - offsetInClip) - 0.2);
+      ambGain.gain.exponentialRampToValueAtTime(0.001, now + scheduleTime + (ambDur - offsetInClip));
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(ambGain);
+      ambGain.connect(ctx.destination);
+
+      osc1.start(now + scheduleTime);
+      osc1.stop(now + scheduleTime + (ambDur - offsetInClip));
+      osc2.start(now + scheduleTime);
+      osc2.stop(now + scheduleTime + (ambDur - offsetInClip));
+      activeNodes.push(osc1, osc2);
+    }
+
+    state.isPlaying = true;
+    playIcon.textContent = '⏸';
+    playText.textContent = 'Pause';
+    statusBar.textContent = 'Playing multi-track timeline...';
+
+    function tick() {
+      if (!state.isPlaying) return;
+      const elapsed = ctx.currentTime - playbackStartTime;
+      state.currentTime = elapsed;
+
+      if (state.currentTime >= TOTAL_DURATION) {
+        if (state.loop) {
+          state.currentTime = 0;
+          playTimeline();
+          return;
+        } else {
+          stopTimeline();
+          state.currentTime = 0;
+          updateTimecode();
+          return;
+        }
+      }
+
+      updateTimecode();
+      animId = requestAnimationFrame(tick);
+    }
+    animId = requestAnimationFrame(tick);
+  }
+
+  function pauseTimeline() {
+    state.isPlaying = false;
+    stopAudio();
+    if (animId) cancelAnimationFrame(animId);
+    playIcon.textContent = '▶';
+    playText.textContent = 'Resume Timeline';
+    statusBar.textContent = `Paused at ${state.currentTime.toFixed(2)}s.`;
+  }
+
+  function stopTimeline() {
+    state.isPlaying = false;
+    stopAudio();
+    if (animId) cancelAnimationFrame(animId);
+    state.currentTime = 0.0;
+    updateTimecode();
+    playIcon.textContent = '▶';
+    playText.textContent = 'Play Timeline';
+    statusBar.textContent = 'Timeline stopped and rewound to 00:00.00.';
+  }
+
+  // Ruler scrub interaction
+  if (rulerEl) {
+    rulerEl.addEventListener('click', (e) => {
+      const rect = rulerEl.getBoundingClientRect();
+      const clickX = e.clientX - rect.left + scrollableEl.scrollLeft;
+      const newTime = Math.max(0, Math.min(TOTAL_DURATION, clickX / PIXELS_PER_SECOND));
+      state.currentTime = snapTime(newTime);
+      updateTimecode();
+      if (state.isPlaying) {
+        playTimeline();
+      }
+    });
+  }
+
+  // Transport button events
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      if (state.isPlaying) {
+        pauseTimeline();
+      } else {
+        playTimeline();
+      }
+    });
+  }
+
+  if (stopBtn) {
+    stopBtn.addEventListener('click', stopTimeline);
+  }
+
+  if (loopBtn) {
+    loopBtn.addEventListener('click', () => {
+      state.loop = !state.loop;
+      loopBtn.setAttribute('aria-pressed', String(state.loop));
+      statusBar.textContent = state.loop ? 'Timeline looping enabled.' : 'Timeline looping disabled.';
+    });
+  }
+
+  if (snapSelect) {
+    snapSelect.addEventListener('change', (e) => {
+      state.snap = parseFloat(e.target.value);
+      statusBar.textContent = `Grid snap set to ${e.target.options[e.target.selectedIndex].text}.`;
+    });
+  }
+
+  // Track Faders & Buttons
+  if (volVoiceInput) {
+    volVoiceInput.addEventListener('input', (e) => {
+      state.tracks.voice.volume = parseFloat(e.target.value);
+      volVoiceVal.textContent = `${Math.round(state.tracks.voice.volume * 100)}%`;
+    });
+  }
+
+  if (volAmbienceInput) {
+    volAmbienceInput.addEventListener('input', (e) => {
+      state.tracks.ambience.volume = parseFloat(e.target.value);
+      volAmbienceVal.textContent = `${Math.round(state.tracks.ambience.volume * 100)}%`;
+    });
+  }
+
+  if (ambiencePresetSelect) {
+    ambiencePresetSelect.addEventListener('change', (e) => {
+      state.tracks.ambience.preset = e.target.value;
+      statusBar.textContent = `Ambience soundscape set to: ${e.target.options[e.target.selectedIndex].text}`;
+    });
+  }
+
+  if (muteVoiceBtn) {
+    muteVoiceBtn.addEventListener('click', () => {
+      state.tracks.voice.muted = !state.tracks.voice.muted;
+      muteVoiceBtn.setAttribute('aria-pressed', String(state.tracks.voice.muted));
+      if (state.isPlaying) playTimeline();
+    });
+  }
+
+  if (muteAmbienceBtn) {
+    muteAmbienceBtn.addEventListener('click', () => {
+      state.tracks.ambience.muted = !state.tracks.ambience.muted;
+      muteAmbienceBtn.setAttribute('aria-pressed', String(state.tracks.ambience.muted));
+      if (state.isPlaying) playTimeline();
+    });
+  }
+
+  if (soloVoiceBtn) {
+    soloVoiceBtn.addEventListener('click', () => {
+      state.tracks.voice.solo = !state.tracks.voice.solo;
+      soloVoiceBtn.setAttribute('aria-pressed', String(state.tracks.voice.solo));
+      if (state.isPlaying) playTimeline();
+    });
+  }
+
+  if (soloAmbienceBtn) {
+    soloAmbienceBtn.addEventListener('click', () => {
+      state.tracks.ambience.solo = !state.tracks.ambience.solo;
+      soloAmbienceBtn.setAttribute('aria-pressed', String(state.tracks.ambience.solo));
+      if (state.isPlaying) playTimeline();
+    });
+  }
+
+  // WAV Mixdown Export Utility using OfflineAudioContext
+  function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  }
+
+  function audioBufferToWav(buffer) {
+    const numChannels = 1;
+    const sampleRate = buffer.sampleRate;
+    const format = 1; // PCM
+    const bitDepth = 16;
+    const bytesPerSample = bitDepth / 8;
+    const blockAlign = numChannels * bytesPerSample;
+
+    const dataLength = buffer.length * bytesPerSample;
+    const bufferSize = 44 + dataLength;
+    const arrayBuffer = new ArrayBuffer(bufferSize);
+    const view = new DataView(arrayBuffer);
+
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + dataLength, true);
+    writeString(view, 8, 'WAVE');
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitDepth, true);
+    writeString(view, 36, 'data');
+    view.setUint32(40, dataLength, true);
+
+    const channelData = buffer.getChannelData(0);
+    let offset = 44;
+    for (let i = 0; i < channelData.length; i++, offset += 2) {
+      const sample = Math.max(-1, Math.min(1, channelData[i]));
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+    }
+
+    return new Blob([view], { type: 'audio/wav' });
+  }
+
+  if (exportBtn) {
+    exportBtn.addEventListener('click', async () => {
+      try {
+        statusBar.textContent = 'Rendering 16-bit PCM multi-track audio mixdown...';
+        const sampleRate = 44100;
+        const OfflineContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        const offlineCtx = new OfflineContext(1, Math.floor(sampleRate * TOTAL_DURATION), sampleRate);
+
+        const hasSolo = state.tracks.voice.solo || state.tracks.ambience.solo;
+
+        // Render Voice Track
+        const voiceTrack = state.tracks.voice;
+        if (!voiceTrack.muted && (!hasSolo || voiceTrack.solo)) {
+          const vStart = voiceTrack.clip.start;
+          const vDur = Math.max(0.1, voiceTrack.clip.rawDuration - voiceTrack.clip.trimStart - voiceTrack.clip.trimEnd);
+
+          const osc = offlineCtx.createOscillator();
+          const gain = offlineCtx.createGain();
+          const filter = offlineCtx.createBiquadFilter();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, vStart);
+          osc.frequency.exponentialRampToValueAtTime(240, vStart + 1.2);
+          osc.frequency.exponentialRampToValueAtTime(170, vStart + vDur);
+
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(1200, vStart);
+
+          gain.gain.setValueAtTime(0.001, vStart);
+          gain.gain.exponentialRampToValueAtTime(voiceTrack.volume * 0.4, vStart + 0.1);
+          gain.gain.setValueAtTime(voiceTrack.volume * 0.4, vStart + vDur - 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.001, vStart + vDur);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(offlineCtx.destination);
+
+          osc.start(vStart);
+          osc.stop(vStart + vDur);
+        }
+
+        // Render Ambience Track
+        const ambTrack = state.tracks.ambience;
+        if (!ambTrack.muted && (!hasSolo || ambTrack.solo)) {
+          const aStart = ambTrack.clip.start;
+          const aDur = Math.max(0.1, ambTrack.clip.rawDuration - ambTrack.clip.trimStart - ambTrack.clip.trimEnd);
+
+          const osc1 = offlineCtx.createOscillator();
+          const gain = offlineCtx.createGain();
+          const filter = offlineCtx.createBiquadFilter();
+
+          osc1.type = ambTrack.preset === 'rain' ? 'triangle' : 'sawtooth';
+          osc1.frequency.setValueAtTime(ambTrack.preset === 'rain' ? 65 : 110, aStart);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(ambTrack.preset === 'rain' ? 450 : 320, aStart);
+
+          gain.gain.setValueAtTime(0.001, aStart);
+          gain.gain.exponentialRampToValueAtTime(ambTrack.volume * 0.25, aStart + 0.2);
+          gain.gain.setValueAtTime(ambTrack.volume * 0.25, aStart + aDur - 0.2);
+          gain.gain.exponentialRampToValueAtTime(0.001, aStart + aDur);
+
+          osc1.connect(filter);
+          filter.connect(gain);
+          gain.connect(offlineCtx.destination);
+
+          osc1.start(aStart);
+          osc1.stop(aStart + aDur);
+        }
+
+        const renderedBuffer = await offlineCtx.startRendering();
+        const wavBlob = audioBufferToWav(renderedBuffer);
+        const downloadUrl = URL.createObjectURL(wavBlob);
+
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'sonora-multitrack-mix.wav';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
+
+        statusBar.textContent = '🎉 Multi-track WAV audio successfully exported and downloaded!';
+      } catch (err) {
+        statusBar.textContent = `Export failed: ${err.message}`;
+      }
+    });
+  }
+
+  // Setup interactions and initial render
+  setupClipInteraction('voice', clipVoiceEl);
+  setupClipInteraction('ambience', clipAmbienceEl);
+  renderRuler();
+  refreshAllClips();
+  updateTimecode();
 }
