@@ -2529,3 +2529,249 @@ exportCalendarBtn.addEventListener('click', () => {
 
   showPlannerMessage('Calendar exported successfully!');
 });
+
+
+/* ===== BEGIN Issue #404: Interactive Regex Pattern Tester Sandbox ===== */
+(function initRegexSandbox() {
+  'use strict';
+
+  const MATCH_COLORS = [
+    '#facc15', '#38bdf8', '#a78bfa', '#f472b6',
+    '#34d399', '#fb923c', '#e879f9', '#2dd4bf'
+  ];
+
+  const patternInput = document.getElementById('regexPatternInput');
+  const testStringArea = document.getElementById('regexTestString');
+  const highlightOutput = document.getElementById('regexHighlightOutput');
+  const errorBanner = document.getElementById('regexErrorBanner');
+  const errorText = document.getElementById('regexErrorText');
+  const flagsDisplay = document.getElementById('regexFlagsDisplay');
+  const matchCountEl = document.getElementById('regexMatchCount');
+  const groupCountEl = document.getElementById('regexGroupCount');
+  const execTimeEl = document.getElementById('regexExecTime');
+  const groupsBody = document.getElementById('regexGroupsBody');
+  const groupsTable = document.getElementById('regexGroupsTable');
+
+  if (!patternInput || !testStringArea) return;
+
+  function getActiveFlags() {
+    let flags = '';
+    document.querySelectorAll('.regex-flag-checkbox').forEach(chk => {
+      if (chk.checked) flags += chk.value;
+    });
+    return flags;
+  }
+
+  function updateFlagsDisplay() {
+    if (flagsDisplay) flagsDisplay.textContent = getActiveFlags() || '—';
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function buildHighlightedHtml(text, matches) {
+    if (matches.length === 0) return escapeHtml(text);
+
+    // Sort by index to process left-to-right
+    const sorted = matches.slice().sort((a, b) => a.index - b.index);
+    let html = '';
+    let cursor = 0;
+
+    sorted.forEach((m, idx) => {
+      const start = m.index;
+      const end = start + m[0].length;
+
+      // Skip overlapping matches
+      if (start < cursor) return;
+
+      // Append text before match
+      if (start > cursor) {
+        html += escapeHtml(text.slice(cursor, start));
+      }
+
+      // The matched segment
+      const colorIdx = idx % MATCH_COLORS.length;
+      const color = MATCH_COLORS[colorIdx];
+      html += `<span class="regex-match" style="background-color: ${color}; color: #000;" title="Match #${idx + 1}: ${escapeHtml(m[0])}">${escapeHtml(m[0])}</span>`;
+      cursor = end;
+    });
+
+    // Remaining text after last match
+    if (cursor < text.length) {
+      html += escapeHtml(text.slice(cursor));
+    }
+
+    return html;
+  }
+
+  function buildGroupsTable(matches) {
+    if (!groupsBody || !groupsTable) return;
+
+    if (matches.length === 0) {
+      groupsBody.innerHTML = '<tr><td colspan="4" class="regex-empty-row">No matches yet</td></tr>';
+      // Reset header to default
+      const thead = groupsTable.querySelector('thead tr');
+      if (thead) {
+        thead.innerHTML = '<th>Match #</th><th>Full Match</th><th>Group 1</th><th>Index</th>';
+      }
+      return;
+    }
+
+    // Determine max capture groups across all matches
+    let maxGroups = 0;
+    matches.forEach(m => {
+      const groupCount = m.length - 1;
+      if (groupCount > maxGroups) maxGroups = groupCount;
+    });
+
+    // Build header
+    const thead = groupsTable.querySelector('thead tr');
+    if (thead) {
+      let headerHtml = '<th>Match #</th><th>Full Match</th>';
+      for (let g = 1; g <= maxGroups; g++) {
+        headerHtml += `<th>Group ${g}</th>`;
+      }
+      headerHtml += '<th>Index</th>';
+      thead.innerHTML = headerHtml;
+    }
+
+    // Build rows
+    let rowsHtml = '';
+    matches.forEach((m, idx) => {
+      const colorIdx = idx % MATCH_COLORS.length;
+      rowsHtml += `<tr>`;
+      rowsHtml += `<td><span class="regex-match-badge" style="background: ${MATCH_COLORS[colorIdx]}; color: #000;">${idx + 1}</span></td>`;
+      rowsHtml += `<td><code>${escapeHtml(m[0])}</code></td>`;
+      for (let g = 1; g <= maxGroups; g++) {
+        const groupVal = m[g] !== undefined ? m[g] : '';
+        rowsHtml += `<td><code>${escapeHtml(groupVal)}</code></td>`;
+      }
+      rowsHtml += `<td>${m.index}</td>`;
+      rowsHtml += `</tr>`;
+    });
+    groupsBody.innerHTML = rowsHtml;
+  }
+
+  function runRegex() {
+    const pattern = patternInput.value;
+    const testStr = testStringArea.value;
+    const flags = getActiveFlags();
+
+    // Clear previous error
+    if (errorBanner) errorBanner.style.display = 'none';
+
+    if (!pattern) {
+      if (highlightOutput) highlightOutput.innerHTML = '<span class="regex-placeholder">Enter a pattern to see matches...</span>';
+      if (matchCountEl) matchCountEl.textContent = '0';
+      if (groupCountEl) groupCountEl.textContent = '0';
+      if (execTimeEl) execTimeEl.textContent = '0ms';
+      buildGroupsTable([]);
+      return;
+    }
+
+    // Try to compile the regex
+    let regex;
+    try {
+      regex = new RegExp(pattern, flags);
+    } catch {
+      if (errorBanner) {
+        errorBanner.style.display = 'flex';
+        if (errorText) errorText.textContent = 'Invalid regular expression pattern';
+      }
+      if (highlightOutput) highlightOutput.innerHTML = `<span class="regex-error-preview">${escapeHtml(testStr)}</span>`;
+      if (matchCountEl) matchCountEl.textContent = '0';
+      if (groupCountEl) groupCountEl.textContent = '0';
+      if (execTimeEl) execTimeEl.textContent = '—';
+      buildGroupsTable([]);
+      return;
+    }
+
+    // Execute and time it
+    const startTime = performance.now();
+    const matches = [];
+    let match;
+    const MAX_ITERATIONS = 1000;
+    let iterations = 0;
+
+    if (flags.includes('g')) {
+      while ((match = regex.exec(testStr)) !== null && iterations < MAX_ITERATIONS) {
+        matches.push(match);
+        iterations++;
+        // Prevent infinite loops on zero-length matches
+        if (match[0].length === 0) {
+          regex.lastIndex++;
+        }
+      }
+    } else {
+      match = regex.exec(testStr);
+      if (match) matches.push(match);
+    }
+
+    const endTime = performance.now();
+    const elapsed = (endTime - startTime).toFixed(2);
+
+    // Update stats
+    if (matchCountEl) matchCountEl.textContent = matches.length;
+    if (execTimeEl) execTimeEl.textContent = `${elapsed}ms`;
+
+    // Count unique capture groups
+    let totalGroups = 0;
+    if (matches.length > 0) {
+      totalGroups = Math.max(0, matches[0].length - 1);
+    }
+    if (groupCountEl) groupCountEl.textContent = totalGroups;
+
+    // Render highlighted output
+    if (highlightOutput) {
+      if (matches.length === 0) {
+        highlightOutput.innerHTML = `<span class="regex-no-match">${escapeHtml(testStr)}</span>`;
+      } else {
+        highlightOutput.innerHTML = buildHighlightedHtml(testStr, matches);
+      }
+    }
+
+    // Build groups table
+    buildGroupsTable(matches);
+  }
+
+  // Event listeners
+  patternInput.addEventListener('input', runRegex);
+  testStringArea.addEventListener('input', runRegex);
+
+  document.querySelectorAll('.regex-flag-checkbox').forEach(chk => {
+    chk.addEventListener('change', () => {
+      updateFlagsDisplay();
+      runRegex();
+    });
+  });
+
+  // Preset buttons
+  document.querySelectorAll('.regex-preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const presetPattern = btn.getAttribute('data-pattern') || '';
+      const presetFlags = btn.getAttribute('data-flags') || 'g';
+      const presetTest = btn.getAttribute('data-test') || '';
+
+      patternInput.value = presetPattern;
+      testStringArea.value = presetTest;
+
+      // Set flags
+      document.querySelectorAll('.regex-flag-checkbox').forEach(chk => {
+        chk.checked = presetFlags.includes(chk.value);
+      });
+
+      updateFlagsDisplay();
+      runRegex();
+    });
+  });
+
+  // Initial run
+  updateFlagsDisplay();
+  runRegex();
+})();
+/* ===== END Issue #404 ===== */

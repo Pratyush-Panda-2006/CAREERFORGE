@@ -982,6 +982,162 @@
     </div>
   </section>
 
+  <!-- ===== BEGIN Issue #404: Interactive Regex Pattern Tester Sandbox ===== -->
+  <section class="regex-sandbox-section" id="regexSandbox" aria-labelledby="regexHeading">
+    <div class="regex-section-header">
+      <div class="tag">// INTERACTIVE REGEX TESTER</div>
+      <h2 id="regexHeading">Regex Pattern Sandbox</h2>
+      <p>Enter a regular expression pattern and test it against sample text in real-time. Matched substrings are color-coded, capture groups are broken down, and a cheat-sheet reference is always at hand.</p>
+    </div>
+
+    <div class="regex-layout">
+      <!-- Left Panel: Controls -->
+      <div class="regex-controls-panel">
+        <div class="regex-input-group">
+          <label class="regex-label" for="regexPatternInput">
+            <span class="regex-label-icon">⚡</span> Pattern
+          </label>
+          <div class="regex-pattern-row">
+            <span class="regex-slash">/</span>
+            <input type="text" id="regexPatternInput" class="regex-pattern-input" value="\b(\w+)\b" autocomplete="off" spellcheck="false" placeholder="Enter regex pattern..." />
+            <span class="regex-slash">/</span>
+            <div class="regex-flags-display" id="regexFlagsDisplay">gi</div>
+          </div>
+          <div class="regex-error-banner" id="regexErrorBanner" style="display: none;" role="alert">
+            <span class="regex-error-icon">⚠️</span>
+            <span id="regexErrorText">Invalid regex</span>
+          </div>
+        </div>
+
+        <div class="regex-flags-group">
+          <label class="regex-label">Flags</label>
+          <div class="regex-flags-row">
+            <label class="regex-flag-toggle">
+              <input type="checkbox" class="regex-flag-checkbox" value="g" checked />
+              <span class="flag-btn">g</span>
+              <span class="flag-desc">Global</span>
+            </label>
+            <label class="regex-flag-toggle">
+              <input type="checkbox" class="regex-flag-checkbox" value="i" checked />
+              <span class="flag-btn">i</span>
+              <span class="flag-desc">Ignore Case</span>
+            </label>
+            <label class="regex-flag-toggle">
+              <input type="checkbox" class="regex-flag-checkbox" value="m" />
+              <span class="flag-btn">m</span>
+              <span class="flag-desc">Multiline</span>
+            </label>
+            <label class="regex-flag-toggle">
+              <input type="checkbox" class="regex-flag-checkbox" value="s" />
+              <span class="flag-btn">s</span>
+              <span class="flag-desc">Dot-All</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="regex-input-group">
+          <label class="regex-label" for="regexTestString">
+            <span class="regex-label-icon">📝</span> Test String
+          </label>
+          <textarea id="regexTestString" class="regex-test-textarea" rows="6" spellcheck="false" placeholder="Enter text to test against...">Hello World! The quick brown fox jumps over 42 lazy dogs.
+Email: dev@synapse.io | Phone: +1-555-0199
+2026-11-11 14:30:00 UTC — session_id=abc-123</textarea>
+        </div>
+
+        <!-- Match Stats -->
+        <div class="regex-stats-bar">
+          <div class="regex-stat">
+            <span class="regex-stat-label">Matches</span>
+            <span class="regex-stat-value" id="regexMatchCount">0</span>
+          </div>
+          <div class="regex-stat">
+            <span class="regex-stat-label">Groups</span>
+            <span class="regex-stat-value" id="regexGroupCount">0</span>
+          </div>
+          <div class="regex-stat">
+            <span class="regex-stat-label">Exec Time</span>
+            <span class="regex-stat-value" id="regexExecTime">0ms</span>
+          </div>
+        </div>
+
+        <!-- Quick Pattern Presets -->
+        <div class="regex-presets">
+          <label class="regex-label">Quick Presets</label>
+          <div class="regex-presets-grid">
+            <button type="button" class="regex-preset-btn" data-pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" data-flags="gi" data-test="Contact us at hello@example.com or support@test.org">📧 Email</button>
+            <button type="button" class="regex-preset-btn" data-pattern="\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b" data-flags="g" data-test="Server logs: 192.168.1.1 connected, 10.0.0.42 timed out">🌐 IPv4</button>
+            <button type="button" class="regex-preset-btn" data-pattern="#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})\b" data-flags="gi" data-test="Primary: #FF5733, accent: #0af, background: #1A1A2E">🎨 Hex Color</button>
+            <button type="button" class="regex-preset-btn" data-pattern="\d{4}-\d{2}-\d{2}" data-flags="g" data-test="Dates: 2026-11-11, 2025-01-15, 2024-12-31">📅 ISO Date</button>
+            <button type="button" class="regex-preset-btn" data-pattern="https?://[^\s/$.?#].[^\s]*" data-flags="gi" data-test="Visit https://github.com or http://example.com/page?q=test">🔗 URL</button>
+            <button type="button" class="regex-preset-btn" data-pattern="\+?\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}" data-flags="g" data-test="Call +1-555-0199 or (123) 456-7890 or +44 20 7946 0958">📞 Phone</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Results -->
+      <div class="regex-results-panel">
+        <div class="regex-result-section">
+          <h3 class="regex-result-title">🎯 Highlighted Matches</h3>
+          <div class="regex-highlight-output" id="regexHighlightOutput" aria-live="polite">
+            <span class="regex-placeholder">Enter a pattern and test string to see matches...</span>
+          </div>
+        </div>
+
+        <div class="regex-result-section">
+          <h3 class="regex-result-title">📊 Capture Groups</h3>
+          <div class="regex-groups-table-wrap" id="regexGroupsWrap">
+            <table class="regex-groups-table" id="regexGroupsTable">
+              <thead>
+                <tr>
+                  <th>Match #</th>
+                  <th>Full Match</th>
+                  <th>Group 1</th>
+                  <th>Index</th>
+                </tr>
+              </thead>
+              <tbody id="regexGroupsBody">
+                <tr><td colspan="4" class="regex-empty-row">No matches yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <details class="regex-result-section regex-cheatsheet-details">
+          <summary class="regex-cheatsheet-summary">📖 Regex Cheat-Sheet Reference</summary>
+          <div class="regex-cheatsheet-grid">
+            <div class="cheat-group">
+              <h4>Character Classes</h4>
+              <div class="cheat-item"><code>.</code> Any character except newline</div>
+              <div class="cheat-item"><code>\d</code> Digit [0-9]</div>
+              <div class="cheat-item"><code>\w</code> Word character [a-zA-Z0-9_]</div>
+              <div class="cheat-item"><code>\s</code> Whitespace</div>
+              <div class="cheat-item"><code>[abc]</code> Character set</div>
+              <div class="cheat-item"><code>[^abc]</code> Negated set</div>
+            </div>
+            <div class="cheat-group">
+              <h4>Quantifiers</h4>
+              <div class="cheat-item"><code>*</code> 0 or more</div>
+              <div class="cheat-item"><code>+</code> 1 or more</div>
+              <div class="cheat-item"><code>?</code> 0 or 1</div>
+              <div class="cheat-item"><code>{n}</code> Exactly n</div>
+              <div class="cheat-item"><code>{n,m}</code> Between n and m</div>
+            </div>
+            <div class="cheat-group">
+              <h4>Anchors &amp; Groups</h4>
+              <div class="cheat-item"><code>^</code> Start of string</div>
+              <div class="cheat-item"><code>$</code> End of string</div>
+              <div class="cheat-item"><code>\b</code> Word boundary</div>
+              <div class="cheat-item"><code>(abc)</code> Capture group</div>
+              <div class="cheat-item"><code>(?:abc)</code> Non-capturing group</div>
+              <div class="cheat-item"><code>a|b</code> Alternation</div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #404 ===== -->
+
   <!-- Notification Toast Container -->
   <div class="edtech-toast-container" id="edtechToastContainer" aria-live="polite"></div>
 
