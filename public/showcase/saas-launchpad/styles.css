@@ -3920,3 +3920,392 @@ mark.regex-match {
   }
 }
 /* ===== END Issue #440 ===== */
+
+/* ===== BEGIN Issue #439: Enterprise System Status & 90-Day Uptime History Matrix ===== */
+.uptime-matrix-section {
+  max-width: 1180px;
+  margin: 56px auto;
+  padding: 34px 32px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(9, 13, 24, 0.98) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  position: relative;
+}
+
+.uptime-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 22px;
+}
+
+.uptime-kicker {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: #34d399;
+  margin-bottom: 6px;
+}
+
+.uptime-header-row h2 {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 6px;
+}
+
+.uptime-subtitle {
+  color: #94a3b8;
+  font-size: 0.94rem;
+  max-width: 650px;
+  line-height: 1.5;
+}
+
+.uptime-global-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #d1fae5;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.uptime-pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 12px #10b981;
+  animation: uptimePulse 2s infinite;
+}
+
+@keyframes uptimePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.7; }
+}
+
+.uptime-controls-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.severity-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sev-tag-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sev-tag-btn:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.sev-tag-btn.active {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: #38bdf8;
+  color: #7dd3fc;
+}
+
+.sev-tag-btn.op.active {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: #10b981;
+  color: #34d399;
+}
+
+.sev-tag-btn.deg.active {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+.sev-tag-btn.out.active {
+  background: rgba(244, 63, 94, 0.18);
+  border-color: #f43f5e;
+  color: #fda4af;
+}
+
+.uptime-legend-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.leg-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.leg-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.leg-dot.op { background: #10b981; }
+.leg-dot.deg { background: #f59e0b; }
+.leg-dot.out { background: #f43f5e; }
+
+.uptime-services-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.uptime-service-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.uptime-service-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.service-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.service-name-wrap h3 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.service-region-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.service-sla-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+}
+
+.sla-latency {
+  color: #94a3b8;
+}
+
+.sla-percent {
+  color: #34d399;
+  font-weight: 700;
+}
+
+.uptime-bars-scroll {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.uptime-bars-track {
+  display: grid;
+  grid-template-columns: repeat(90, minmax(6px, 1fr));
+  gap: 3px;
+  min-width: 660px;
+  align-items: stretch;
+}
+
+.uptime-bar-pill {
+  height: 30px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.14s ease, opacity 0.18s ease, filter 0.14s ease;
+}
+
+.uptime-bar-pill.op {
+  background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+}
+
+.uptime-bar-pill.deg {
+  background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+}
+
+.uptime-bar-pill.out {
+  background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%);
+}
+
+.uptime-bar-pill:hover,
+.uptime-bar-pill:focus-visible {
+  transform: scaleY(1.22) scaleX(1.25);
+  filter: brightness(1.18);
+  z-index: 2;
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+}
+
+.uptime-bar-pill.is-dimmed {
+  opacity: 0.16;
+}
+
+.uptime-bar-axis {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.uptime-day-inspector {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  padding: 13px 16px;
+  margin-bottom: 22px;
+}
+
+.inspector-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.86rem;
+  color: #e2e8f0;
+}
+
+.inspector-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.inspector-badge.op { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+.inspector-badge.deg { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+.inspector-badge.out { background: rgba(244, 63, 94, 0.22); color: #fda4af; }
+
+.inspector-metrics {
+  display: flex;
+  gap: 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.inspector-metrics strong {
+  color: #f8fafc;
+}
+
+.uptime-floating-tooltip {
+  position: fixed;
+  z-index: 950;
+  background: rgba(2, 6, 23, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  padding: 10px 12px;
+  pointer-events: none;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  font-size: 0.78rem;
+  color: #e2e8f0;
+  max-width: 260px;
+}
+
+.incident-matrix-panel {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.incident-matrix-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.incident-matrix-head h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.matrix-count-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+.incident-matrix-scroll {
+  overflow-x: auto;
+}
+
+.incident-severity-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+  min-width: 640px;
+}
+
+.incident-severity-table th {
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.incident-severity-table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+}
+
+@media (max-width: 640px) {
+  .uptime-matrix-section {
+    padding: 22px 16px;
+  }
+}
+/* ===== END Issue #439 ===== */
