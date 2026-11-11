@@ -350,6 +350,93 @@
       </div>
     </section>
 
+    <!-- Git Commit Tree Visualization Graph Section (Issue #398) -->
+    <section class="git-tree-section" id="git-graph" aria-labelledby="git-graph-title">
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">dev@kernel-box: ~/repo % git log --graph --oneline --all</span>
+          <div class="head-pointer-badge" id="gitHeadBadge">HEAD &rarr; main @ a4f9e1c</div>
+        </div>
+
+        <div class="terminal-body git-graph-body">
+          <div class="git-graph-intro">
+            <div>
+              <h2 id="git-graph-title" class="git-graph-title">Git Commit History &amp; Branch DAG</h2>
+              <p class="git-graph-desc">Interactive topology visualizer showing branch merges, commit hashes, and a checkout/cherry-pick simulator.</p>
+            </div>
+          </div>
+
+          <!-- Controls & Branch Selector Pills -->
+          <div class="git-controls-toolbar">
+            <div class="git-branch-pills" role="tablist" aria-label="Branch filters">
+              <button type="button" class="git-pill active" data-branch="all" role="tab" aria-selected="true">
+                <span class="pill-dot all"></span> All Branches
+              </button>
+              <button type="button" class="git-pill" data-branch="main" role="tab" aria-selected="false">
+                <span class="pill-dot main"></span> main
+              </button>
+              <button type="button" class="git-pill" data-branch="feature/v2-zero-copy" role="tab" aria-selected="false">
+                <span class="pill-dot feature"></span> feature/v2-zero-copy
+              </button>
+              <button type="button" class="git-pill" data-branch="hotfix/ebpf-ring-buffer" role="tab" aria-selected="false">
+                <span class="pill-dot hotfix"></span> hotfix/ebpf-ring-buffer
+              </button>
+            </div>
+
+            <div class="git-action-btns">
+              <button type="button" class="git-action-btn" id="gitCheckoutBtn" title="Checkout selected branch">
+                <span>🔀 git checkout</span>
+              </button>
+              <button type="button" class="git-action-btn" id="gitCherryPickBtn" title="Cherry-pick selected commit onto current branch">
+                <span>🍒 git cherry-pick</span>
+              </button>
+              <button type="button" class="git-action-btn" id="gitNewCommitBtn" title="Simulate git commit -m">
+                <span>➕ git commit</span>
+              </button>
+              <button type="button" class="git-action-btn ghost" id="gitResetTreeBtn" title="Reset DAG to default state">
+                <span>🔄 Reset</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- SVG Visualizer Canvas & Rail -->
+          <div class="git-canvas-wrap" id="gitCanvasWrap">
+            <svg class="git-dag-svg" id="gitDagSvg" width="100%" height="240" aria-label="Git Directed Acyclic Graph"></svg>
+            <div class="git-nodes-layer" id="gitNodesLayer"></div>
+          </div>
+
+          <!-- Selected Commit Inspection Card & Console -->
+          <div class="git-inspection-grid">
+            <div class="git-commit-card" id="gitCommitCard">
+              <div class="commit-card-head">
+                <div class="commit-hash-pill" id="cardHash">commit a4f9e1c</div>
+                <span class="commit-branch-tag" id="cardBranch">main</span>
+              </div>
+              <h3 class="commit-card-msg" id="cardMsg">Merge pull request #42 from feature/v2-zero-copy</h3>
+              <div class="commit-card-meta">
+                <span id="cardAuthor">👤 Alex Vance &lt;alex@kernel-box.org&gt;</span>
+                <span id="cardDate">📅 2 hours ago</span>
+              </div>
+              <div class="commit-card-diff" id="cardDiff">
+                <span class="diff-add">+184 additions</span>
+                <span class="diff-del">-26 deletions</span>
+                <span class="diff-files">4 files changed</span>
+              </div>
+            </div>
+
+            <div class="git-terminal-output" id="gitTermOutput" aria-live="polite">
+              <div class="term-line prompt">$ git status</div>
+              <div class="term-line output">On branch main. Your branch is up to date with 'origin/main'.</div>
+              <div class="term-line output text-dim">Nothing to commit, working tree clean. Click any commit node or branch pill to simulate git commands.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="shell" aria-labelledby="shell-title">
       <h2 id="shell-title">Interactive Terminal</h2>
       <p class="shell-hint">Poke around my virtual file system. Type <code>help</code> to see the commands.</p>

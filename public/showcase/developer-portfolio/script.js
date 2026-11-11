@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initResumeDownload();
   initArticleReader();
   initAvailabilityBadge();
+  initGitGraph();
 });
 
 // Availability badge: tooltip opens on hover, focus or click, and closes on
@@ -1126,3 +1127,418 @@ func (r *RaftNode) RunPreVote(ctx context.Context) bool {
   });
 }
 
+
+// ==========================================================================
+// Interactive Git Commit Tree & DAG Branch Visualizer Engine (Issue #398)
+// Renders SVG branch bezier curves, simulates checkout, cherry-pick & commits
+// ==========================================================================
+function initGitGraph() {
+  const section = document.getElementById('git-graph');
+  if (!section) return;
+
+  const svg = document.getElementById('gitDagSvg');
+  const nodesLayer = document.getElementById('gitNodesLayer');
+  const headBadge = document.getElementById('gitHeadBadge');
+  const cardHash = document.getElementById('cardHash');
+  const cardBranch = document.getElementById('cardBranch');
+  const cardMsg = document.getElementById('cardMsg');
+  const cardAuthor = document.getElementById('cardAuthor');
+  const cardDate = document.getElementById('cardDate');
+  const cardDiff = document.getElementById('cardDiff');
+  const termOutput = document.getElementById('gitTermOutput');
+
+  const checkoutBtn = document.getElementById('gitCheckoutBtn');
+  const cherryPickBtn = document.getElementById('gitCherryPickBtn');
+  const newCommitBtn = document.getElementById('gitNewCommitBtn');
+  const resetTreeBtn = document.getElementById('gitResetTreeBtn');
+  const pills = document.querySelectorAll('.git-pill');
+
+  const ROW_Y = {
+    'main': 60,
+    'feature/v2-zero-copy': 120,
+    'hotfix/ebpf-ring-buffer': 180
+  };
+
+  const BRANCH_COLORS = {
+    'main': '#38bdf8',
+    'feature/v2-zero-copy': '#a855f7',
+    'hotfix/ebpf-ring-buffer': '#f97316'
+  };
+
+  // Canonical Commits DAG
+  function getDefaultCommits() {
+    return [
+      {
+        id: 'c1',
+        hash: 'e81a3d2',
+        branch: 'main',
+        x: 60,
+        y: ROW_Y['main'],
+        msg: 'Initial architecture setup and kernel harness',
+        author: 'Alex Vance <alex@kernel-box.org>',
+        date: '3 days ago',
+        additions: 320,
+        deletions: 0,
+        files: 6,
+        parents: []
+      },
+      {
+        id: 'c2',
+        hash: 'b19c44f',
+        branch: 'main',
+        x: 180,
+        y: ROW_Y['main'],
+        msg: 'Implement epoll-based network event pump',
+        author: 'Alex Vance <alex@kernel-box.org>',
+        date: '2 days ago',
+        additions: 142,
+        deletions: 18,
+        files: 3,
+        parents: ['c1']
+      },
+      {
+        id: 'c3',
+        hash: 'f42e88a',
+        branch: 'feature/v2-zero-copy',
+        x: 280,
+        y: ROW_Y['feature/v2-zero-copy'],
+        msg: 'Draft zero-copy slice deserialization logic',
+        author: 'Alex Vance <alex@kernel-box.org>',
+        date: '36 hours ago',
+        additions: 215,
+        deletions: 42,
+        files: 4,
+        parents: ['c2']
+      },
+      {
+        id: 'c4',
+        hash: 'c37a91d',
+        branch: 'feature/v2-zero-copy',
+        x: 400,
+        y: ROW_Y['feature/v2-zero-copy'],
+        msg: 'Integrate FlatBuffers memory layout benchmarks',
+        author: 'Alex Vance <alex@kernel-box.org>',
+        date: '28 hours ago',
+        additions: 98,
+        deletions: 12,
+        files: 2,
+        parents: ['c3']
+      },
+      {
+        id: 'c5',
+        hash: 'd09a25b',
+        branch: 'hotfix/ebpf-ring-buffer',
+        x: 320,
+        y: ROW_Y['hotfix/ebpf-ring-buffer'],
+        msg: 'Fix eBPF ring buffer consumer lockup on overflow',
+        author: 'Alex Vance <alex@kernel-box.org>',
+        date: '20 hours ago',
+        additions: 34,
+        deletions: 9,
+        files: 1,
+        parents: ['c1']
+      },
+      {
+        id: 'c6',
+        hash: '7ec128f',
+        branch: 'main',
+        x: 480,
+        y: ROW_Y['main'],
+        msg: 'Merge branch hotfix/ebpf-ring-buffer into main',
+        author: 'Alex Vance <alex@kernel-box.org>',
+        date: '16 hours ago',
+        additions: 34,
+        deletions: 9,
+        files: 1,
+        parents: ['c2', 'c5']
+      },
+      {
+        id: 'c7',
+        hash: 'a4f9e1c',
+        branch: 'main',
+        x: 640,
+        y: ROW_Y['main'],
+        msg: 'Merge pull request #42 from feature/v2-zero-copy',
+        author: 'Alex Vance <alex@kernel-box.org>',
+        date: '2 hours ago',
+        additions: 184,
+        deletions: 26,
+        files: 4,
+        parents: ['c6', 'c4']
+      }
+    ];
+  }
+
+  let commits = getDefaultCommits();
+  let currentHeadCommitId = 'c7';
+  let selectedCommitId = 'c7';
+  let activeBranchFilter = 'all';
+
+  function logTerminal(prompt, output) {
+    if (!termOutput) return;
+    const pLine = document.createElement('div');
+    pLine.className = 'term-line prompt';
+    pLine.textContent = `$ ${prompt}`;
+
+    const oLine = document.createElement('div');
+    oLine.className = 'term-line output';
+    oLine.textContent = output;
+
+    termOutput.appendChild(pLine);
+    termOutput.appendChild(oLine);
+    termOutput.scrollTop = termOutput.scrollHeight;
+  }
+
+  function getCommitById(id) {
+    return commits.find(c => c.id === id);
+  }
+
+  function renderDag() {
+    if (!svg || !nodesLayer) return;
+
+    svg.innerHTML = '';
+    nodesLayer.innerHTML = '';
+
+    // Filter commits based on activeBranchFilter
+    const visibleCommits = commits.filter(c => {
+      if (activeBranchFilter === 'all') return true;
+      return c.branch === activeBranchFilter;
+    });
+
+    const visibleIds = new Set(visibleCommits.map(c => c.id));
+
+    // Draw SVG curves between commits and their parents
+    visibleCommits.forEach(commit => {
+      commit.parents.forEach(pId => {
+        if (!visibleIds.has(pId)) return;
+        const parent = getCommitById(pId);
+        if (!parent) return;
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const strokeColor = BRANCH_COLORS[commit.branch] || '#38bdf8';
+
+        // Calculate smooth cubic bezier curve
+        let d = '';
+        if (commit.y === parent.y) {
+          // Horizontal line
+          d = `M ${parent.x} ${parent.y} L ${commit.x} ${commit.y}`;
+        } else {
+          // Curved fork or merge
+          const cp1x = parent.x + (commit.x - parent.x) * 0.55;
+          const cp1y = parent.y;
+          const cp2x = parent.x + (commit.x - parent.x) * 0.45;
+          const cp2y = commit.y;
+          d = `M ${parent.x} ${parent.y} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${commit.x} ${commit.y}`;
+        }
+
+        path.setAttribute('d', d);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', strokeColor);
+        path.setAttribute('stroke-width', '3');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('opacity', '0.75');
+        svg.appendChild(path);
+      });
+    });
+
+    // Render Commit Nodes
+    visibleCommits.forEach(commit => {
+      const node = document.createElement('div');
+      const isHead = (commit.id === currentHeadCommitId);
+      const isSelected = (commit.id === selectedCommitId);
+      const branchClass = commit.branch.startsWith('feature') ? 'feature' : commit.branch.startsWith('hotfix') ? 'hotfix' : 'main';
+
+      node.className = `git-node ${branchClass} ${isHead ? 'is-head' : ''} ${isSelected ? 'is-selected' : ''}`;
+      node.style.left = `${commit.x}px`;
+      node.style.top = `${commit.y}px`;
+      node.setAttribute('data-id', commit.id);
+      node.title = `[${commit.branch}] ${commit.hash} - ${commit.msg}`;
+
+      node.innerHTML = `
+        <div class="git-circle"></div>
+        <span class="git-node-label">${commit.hash}</span>
+      `;
+
+      node.addEventListener('click', () => {
+        selectCommit(commit.id);
+      });
+
+      nodesLayer.appendChild(node);
+
+      // If HEAD, attach animated head pointer marker
+      if (isHead) {
+        const headMarker = document.createElement('div');
+        headMarker.className = 'git-head-pointer-marker';
+        headMarker.style.left = `${commit.x}px`;
+        headMarker.style.top = `${commit.y - 12}px`;
+        headMarker.innerHTML = `
+          <div class="head-marker-pill">HEAD</div>
+          <div class="head-marker-arrow"></div>
+        `;
+        nodesLayer.appendChild(headMarker);
+      }
+    });
+
+    updateSelectedCard();
+  }
+
+  function selectCommit(id) {
+    selectedCommitId = id;
+    const commit = getCommitById(id);
+    if (commit) {
+      logTerminal(`git log -1 ${commit.hash}`, `commit ${commit.hash} (${commit.branch})
+Author: ${commit.author}
+"${commit.msg}"`);
+    }
+    renderDag();
+  }
+
+  function updateSelectedCard() {
+    const commit = getCommitById(selectedCommitId) || getCommitById(currentHeadCommitId);
+    if (!commit) return;
+
+    if (cardHash) cardHash.textContent = `commit ${commit.hash}`;
+    if (cardBranch) cardBranch.textContent = commit.branch;
+    if (cardMsg) cardMsg.textContent = commit.msg;
+    if (cardAuthor) cardAuthor.textContent = `👤 ${commit.author}`;
+    if (cardDate) cardDate.textContent = `📅 ${commit.date}`;
+    if (cardDiff) {
+      cardDiff.innerHTML = `
+        <span class="diff-add">+${commit.additions} additions</span>
+        <span class="diff-del">-${commit.deletions} deletions</span>
+        <span class="diff-files">${commit.files} files changed</span>
+      `;
+    }
+
+    const headCommit = getCommitById(currentHeadCommitId);
+    if (headBadge && headCommit) {
+      headBadge.textContent = `HEAD → ${headCommit.branch} @ ${headCommit.hash}`;
+    }
+  }
+
+  // Action: git checkout
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener('click', () => {
+      const targetCommit = getCommitById(selectedCommitId);
+      if (!targetCommit) return;
+      currentHeadCommitId = targetCommit.id;
+      logTerminal(`git checkout ${targetCommit.branch}`, `Switched to branch '${targetCommit.branch}'.
+HEAD is now at ${targetCommit.hash} "${targetCommit.msg}"`);
+      renderDag();
+    });
+  }
+
+  // Action: git cherry-pick
+  if (cherryPickBtn) {
+    cherryPickBtn.addEventListener('click', () => {
+      const source = getCommitById(selectedCommitId);
+      const head = getCommitById(currentHeadCommitId);
+      if (!source || !head) return;
+
+      if (source.branch === head.branch) {
+        logTerminal(`git cherry-pick ${source.hash}`, `Commit ${source.hash} already exists in branch '${head.branch}'.`);
+        return;
+      }
+
+      const newId = `c${commits.length + 1}`;
+      const newHash = Math.random().toString(16).substring(2, 9);
+      const newCommit = {
+        id: newId,
+        hash: newHash,
+        branch: head.branch,
+        x: head.x + 90,
+        y: ROW_Y[head.branch] || ROW_Y['main'],
+        msg: `[cherry-pick] ${source.msg}`,
+        author: 'Alex Vance <alex@kernel-box.org>',
+        date: 'just now',
+        additions: source.additions,
+        deletions: source.deletions,
+        files: source.files,
+        parents: [head.id]
+      };
+
+      commits.push(newCommit);
+      currentHeadCommitId = newId;
+      selectedCommitId = newId;
+      logTerminal(`git cherry-pick ${source.hash}`, `[${head.branch} ${newHash}] ${source.msg}
+Cherry-picked onto ${head.branch}!`);
+      renderDag();
+    });
+  }
+
+  // Action: git commit (simulate new commit)
+  if (newCommitBtn) {
+    newCommitBtn.addEventListener('click', () => {
+      const head = getCommitById(currentHeadCommitId);
+      if (!head) return;
+
+      const newId = `c${commits.length + 1}`;
+      const newHash = Math.random().toString(16).substring(2, 9);
+      const sampleMessages = [
+        'Optimize lock-free concurrent ring buffer read pointer',
+        'Add zero-allocation parser benchmarks',
+        'Refactor memory layout for SIMD vectorization',
+        'Harden boundary assertions and add unit tests'
+      ];
+      const randomMsg = sampleMessages[Math.floor(Math.random() * sampleMessages.length)];
+
+      const newCommit = {
+        id: newId,
+        hash: newHash,
+        branch: head.branch,
+        x: head.x + 90,
+        y: ROW_Y[head.branch] || ROW_Y['main'],
+        msg: randomMsg,
+        author: 'Alex Vance <alex@kernel-box.org>',
+        date: 'just now',
+        additions: Math.floor(Math.random() * 80) + 20,
+        deletions: Math.floor(Math.random() * 15) + 2,
+        files: Math.floor(Math.random() * 3) + 1,
+        parents: [head.id]
+      };
+
+      commits.push(newCommit);
+      currentHeadCommitId = newId;
+      selectedCommitId = newId;
+      logTerminal(`git commit -m "${randomMsg}"`, `[${head.branch} ${newHash}] ${randomMsg}
+ 1 file changed, ${newCommit.additions} insertions(+), ${newCommit.deletions} deletions(-)`);
+      renderDag();
+    });
+  }
+
+  // Action: reset tree
+  if (resetTreeBtn) {
+    resetTreeBtn.addEventListener('click', () => {
+      commits = getDefaultCommits();
+      currentHeadCommitId = 'c7';
+      selectedCommitId = 'c7';
+      activeBranchFilter = 'all';
+      pills.forEach(p => {
+        const isAll = p.getAttribute('data-branch') === 'all';
+        p.classList.toggle('active', isAll);
+        p.setAttribute('aria-selected', String(isAll));
+      });
+      logTerminal('git reset --hard origin/main', 'HEAD is now at a4f9e1c Merge pull request #42 from feature/v2-zero-copy. Tree graph reset to canonical topology.');
+      renderDag();
+    });
+  }
+
+  // Branch filter pills
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      pills.forEach(p => {
+        const isCurrent = (p === pill);
+        p.classList.toggle('active', isCurrent);
+        p.setAttribute('aria-selected', String(isCurrent));
+      });
+      activeBranchFilter = pill.getAttribute('data-branch') || 'all';
+      logTerminal(`git branch --list "${activeBranchFilter}"`, `Filtering DAG view to branch: ${activeBranchFilter}`);
+      renderDag();
+    });
+  });
+
+  // Initial DAG render
+  renderDag();
+}
+
+window.initGitGraph = initGitGraph;
