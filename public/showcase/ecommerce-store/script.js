@@ -1,19 +1,457 @@
-// Cart state dictionary: { [id]: { name, price, qty, img } }
+// Cart state dictionary: { [id]: { id, name, price, qty, img, category } }
 const cart = {};
 
-// Promo coupon engine. type "percent" takes value off the subtotal,
-// type "freeship" waives the flat shipping fee.
-const COUPONS = {
-  CAREER20: { type: 'percent', value: 0.2, label: 'CAREER20: 20% off' },
-  FREESHIP: { type: 'freeship', value: 0, label: 'FREESHIP: free delivery' }
+const ITEM_META_FALLBACK = {
+  p1: { name: 'CyberDeck Pro Mechanical', price: 249.00, img: '⌨️', category: 'keyboards' },
+  p2: { name: 'Acoustic Pulse ANC Headset', price: 199.00, img: '🎧', category: 'audio' },
+  p3: { name: 'Horizon 32" Curved OLED', price: 899.00, img: '🖥️', category: 'displays' },
+  p4: { name: 'Nexus Neo 65% Low-Profile', price: 149.00, img: '⌨️', category: 'keyboards' },
+  p5: { name: 'Vortex Reference Studio Monitors', price: 349.00, img: '🔊', category: 'audio' },
+  p6: { name: 'Apex UltraWide 49" 240Hz', price: 1199.00, img: '🖥️', category: 'displays' },
+  p7: { name: 'HyperStream Studio Mic & Arm', price: 179.00, img: '🎙️', category: 'audio' },
+  p8: { name: 'Keychronix Ergo Alice Custom', price: 289.00, img: '⌨️', category: 'keyboards' }
 };
+
+/**
+ * Pure, stateless promotional discount, spend-tier, tax & shipping engine.
+ */
+class PromoDiscountEngine {
+  constructor(config = {}) {
+    this.tiers = config.tiers || [
+      { id: 'builder', name: 'Builder Tier', minSpend: 200, rate: 0.05 },
+      { id: 'studio', name: 'Studio Tier', minSpend: 500, rate: 0.10 },
+      { id: 'enterprise', name: 'Enterprise Rig Tier', minSpend: 1000, rate: 0.15 }
+    ];
+
+    this.coupons = config.coupons || {
+      CYBER20: {
+        code: 'CYBER20',
+        type: 'percent',
+        value: 0.20,
+        minSubtotal: 0,
+        categories: null,
+        label: 'CYBER20: 20% off entire cart',
+        conditionText: 'Any order subtotal'
+      },
+      FREESHIP: {
+        code: 'FREESHIP',
+        type: 'freeship',
+        value: 0,
+        minSubtotal: 100,
+        categories: null,
+        label: 'FREESHIP: Free ground shipping ($100+)',
+        conditionText: 'Subtotal ≥ $100.00'
+      },
+      BUNDLE3: {
+        code: 'BUNDLE3',
+        type: 'bogo',
+        buyQty: 2,
+        getQty: 1,
+        minSubtotal: 0,
+        categories: null,
+        label: 'BUNDLE3: Buy 2, Get 1 Free (lowest unit free)',
+        conditionText: 'Cart quantity ≥ 3 items'
+      },
+      KEYB15: {
+        code: 'KEYB15',
+        type: 'category_percent',
+        value: 0.15,
+        minSubtotal: 150,
+        categories: ['keyboards'],
+        label: 'KEYB15: 15% off Keyboards ($150+)',
+        conditionText: 'Keyboards subtotal ≥ $150.00'
+      },
+      AUDIO25: {
+        code: 'AUDIO25',
+        type: 'category_fixed',
+        value: 25,
+        minSubtotal: 180,
+        categories: ['audio'],
+        label: 'AUDIO25: $25 off Audio gear ($180+)',
+        conditionText: 'Audio subtotal ≥ $180.00'
+      },
+      CAREER20: {
+        code: 'CAREER20',
+        type: 'percent',
+        value: 0.20,
+        minSubtotal: 0,
+        categories: null,
+        label: 'CAREER20: 20% off developer gear',
+        conditionText: 'Any order subtotal'
+      }
+    };
+
+    this.taxJurisdictions = config.taxJurisdictions || {
+      CA: { code: 'CA', label: 'California (CA)', rate: 0.0825, baseShipping: 12.00 },
+      NY: { code: 'NY', label: 'New York (NY)', rate: 0.08875, baseShipping: 12.00 },
+      TX: { code: 'TX', label: 'Texas (TX)', rate: 0.0625, baseShipping: 12.00 },
+      WA: { code: 'WA', label: 'Washington (WA)', rate: 0.065, baseShipping: 12.00 },
+      OR: { code: 'OR', label: 'Oregon (OR)', rate: 0.00, baseShipping: 14.00 },
+      DE: { code: 'DE', label: 'Delaware (DE)', rate: 0.00, baseShipping: 14.00 },
+      'EU-DE': { code: 'EU-DE', label: 'Germany / EU (VAT)', rate: 0.19, baseShipping: 28.00 },
+      UK: { code: 'UK', label: 'United Kingdom (VAT)', rate: 0.20, baseShipping: 26.00 }
+    };
+
+    this.vipFreeShipThreshold = 1200;
+  }
+
+  normalizeCart(cartInput) {
+    const rawList = Array.isArray(cartInput)
+      ? cartInput
+      : Object.values(cartInput || {});
+
+    return rawList
+      .filter((item) => item && Number(item.qty) > 0 && Number(item.price) >= 0)
+      .map((item) => {
+        const meta = ITEM_META_FALLBACK[item.id] || {};
+        return {
+          id: String(item.id || meta.name || 'item'),
+          name: String(item.name || meta.name || 'Hardware Item'),
+          category: String(item.category || meta.category || 'general').toLowerCase(),
+          price: Number(item.price || meta.price || 0),
+          qty: Math.max(1, Math.floor(Number(item.qty || 1))),
+          img: item.img || meta.img || '📦'
+        };
+      });
+  }
+
+  evaluateTierDiscount(subtotal) {
+    const cleanSubtotal = Math.max(0, Number(subtotal) || 0);
+    let activeTier = null;
+    for (let i = this.tiers.length - 1; i >= 0; i -= 1) {
+      if (cleanSubtotal >= this.tiers[i].minSpend) {
+        activeTier = this.tiers[i];
+        break;
+      }
+    }
+
+    const nextTier = this.tiers.find((t) => cleanSubtotal < t.minSpend) || null;
+    const rate = activeTier ? activeTier.rate : 0;
+    const discountAmount = Math.round(cleanSubtotal * rate * 100) / 100;
+    const topThreshold = this.tiers[this.tiers.length - 1].minSpend;
+
+    return {
+      tierId: activeTier ? activeTier.id : 'standard',
+      tierName: activeTier ? activeTier.name : 'Standard',
+      rate,
+      discountAmount,
+      minSpend: activeTier ? activeTier.minSpend : 0,
+      nextTierName: nextTier ? nextTier.name : null,
+      nextTierRate: nextTier ? nextTier.rate : null,
+      nextTierThreshold: nextTier ? nextTier.minSpend : null,
+      amountToNextTier: nextTier ? Math.max(0, Math.round((nextTier.minSpend - cleanSubtotal) * 100) / 100) : 0,
+      progressPercent: Math.min(100, Math.round((cleanSubtotal / topThreshold) * 100)),
+      tiers: this.tiers
+    };
+  }
+
+  applyCoupon(code, cartInput) {
+    const normalizedCode = String(code || '').trim().toUpperCase();
+    const items = this.normalizeCart(cartInput);
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const totalUnits = items.reduce((sum, item) => sum + item.qty, 0);
+
+    if (!normalizedCode) {
+      return {
+        valid: false,
+        code: '',
+        type: 'none',
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal: 0,
+        label: '',
+        reason: 'Enter a promo code to apply conditional rules.'
+      };
+    }
+
+    const rule = this.coupons[normalizedCode];
+    if (!rule) {
+      return {
+        valid: false,
+        code: normalizedCode,
+        type: 'unknown',
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal: 0,
+        label: '',
+        reason: `"${normalizedCode}" is not a valid promo code.`
+      };
+    }
+
+    if (items.length === 0 || subtotal <= 0) {
+      return {
+        valid: false,
+        code: normalizedCode,
+        type: rule.type,
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal: 0,
+        label: rule.label,
+        reason: `Add gear to your order before applying ${normalizedCode}.`
+      };
+    }
+
+    const eligibleItems = rule.categories
+      ? items.filter((item) => rule.categories.includes(item.category))
+      : items;
+    const eligibleSubtotal = eligibleItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+    if (rule.categories && eligibleItems.length === 0) {
+      return {
+        valid: false,
+        code: normalizedCode,
+        type: rule.type,
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal: 0,
+        label: rule.label,
+        reason: `${normalizedCode} requires items in category: ${rule.categories.join(', ')}.`
+      };
+    }
+
+    if (eligibleSubtotal < rule.minSubtotal) {
+      const gap = (rule.minSubtotal - eligibleSubtotal).toFixed(2);
+      return {
+        valid: false,
+        code: normalizedCode,
+        type: rule.type,
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal,
+        label: rule.label,
+        reason: `${normalizedCode} requires $${rule.minSubtotal.toFixed(2)} eligible spend ($${gap} away).`
+      };
+    }
+
+    let discountAmount = 0;
+    let freeShipping = false;
+    let freeItemsCount = 0;
+    const freeUnits = [];
+
+    if (rule.type === 'percent' || rule.type === 'category_percent') {
+      discountAmount = Math.round(eligibleSubtotal * rule.value * 100) / 100;
+    } else if (rule.type === 'category_fixed') {
+      discountAmount = Math.min(eligibleSubtotal, rule.value);
+    } else if (rule.type === 'freeship') {
+      freeShipping = true;
+    } else if (rule.type === 'bogo') {
+      const groupSize = (rule.buyQty || 2) + (rule.getQty || 1);
+      if (totalUnits < groupSize) {
+        return {
+          valid: false,
+          code: normalizedCode,
+          type: rule.type,
+          discountAmount: 0,
+          freeShipping: false,
+          freeItemsCount: 0,
+          freeUnits: [],
+          eligibleSubtotal,
+          label: rule.label,
+          reason: `BUNDLE3 requires at least ${groupSize} items in cart (currently ${totalUnits}).`
+        };
+      }
+      const unitPool = [];
+      items.forEach((item) => {
+        for (let q = 0; q < item.qty; q += 1) {
+          unitPool.push({ id: item.id, name: item.name, price: item.price });
+        }
+      });
+      unitPool.sort((a, b) => a.price - b.price);
+      freeItemsCount = Math.floor(unitPool.length / groupSize) * (rule.getQty || 1);
+      for (let i = 0; i < freeItemsCount; i += 1) {
+        discountAmount += unitPool[i].price;
+        freeUnits.push(unitPool[i]);
+      }
+      discountAmount = Math.round(discountAmount * 100) / 100;
+    }
+
+    return {
+      valid: true,
+      code: normalizedCode,
+      type: rule.type,
+      discountAmount,
+      freeShipping,
+      freeItemsCount,
+      freeUnits,
+      eligibleSubtotal,
+      label: rule.label,
+      reason:
+        rule.type === 'bogo'
+          ? `${normalizedCode} applied: ${freeItemsCount} free unit(s) credited (-$${discountAmount.toFixed(2)}).`
+          : rule.type === 'freeship'
+            ? `${normalizedCode} applied: Standard shipping fee waived!`
+            : `${normalizedCode} applied: -$${discountAmount.toFixed(2)} saved.`
+    };
+  }
+
+  calculateTaxAndShipping(address, subtotal, options = {}) {
+    const cleanSubtotal = Math.max(0, Number(subtotal) || 0);
+    const discountTotal = Math.max(0, Number(options.discountTotal) || 0);
+    const addrObj =
+      typeof address === 'string'
+        ? { state: address }
+        : address || { state: 'CA', zip: '94107', shippingMethod: 'standard' };
+
+    const regionKey = String(addrObj.state || 'CA').toUpperCase();
+    const jurisdiction = this.taxJurisdictions[regionKey] || {
+      code: regionKey,
+      label: `${regionKey} Standard`,
+      rate: 0.08,
+      baseShipping: 12.00
+    };
+
+    const method = String(addrObj.shippingMethod || 'standard').toLowerCase();
+    const vipUnlocked = cleanSubtotal >= this.vipFreeShipThreshold;
+    const freeShipCoupon = Boolean(options.freeShipping);
+
+    let shippingAmount = 0;
+    let freeShippingReason = '';
+
+    if (cleanSubtotal > 0) {
+      if (method === 'express') {
+        shippingAmount = (freeShipCoupon || vipUnlocked ? 0 : jurisdiction.baseShipping) + 18.00;
+        if (freeShipCoupon || vipUnlocked) {
+          freeShippingReason = 'Base shipping waived; Express upgrade applied';
+        }
+      } else if (freeShipCoupon) {
+        shippingAmount = 0;
+        freeShippingReason = 'FREESHIP coupon ($100+ threshold)';
+      } else if (vipUnlocked) {
+        shippingAmount = 0;
+        freeShippingReason = 'VIP Order ≥ $1,200 Free Ground';
+      } else {
+        shippingAmount = jurisdiction.baseShipping;
+      }
+    }
+
+    const taxableAmount = Math.max(0, cleanSubtotal - discountTotal);
+    const taxAmount = Math.round(taxableAmount * jurisdiction.rate * 100) / 100;
+
+    return {
+      regionCode: jurisdiction.code,
+      regionLabel: jurisdiction.label,
+      zip: String(addrObj.zip || ''),
+      taxRate: jurisdiction.rate,
+      taxableAmount,
+      taxAmount,
+      shippingMethod: method,
+      shippingAmount: Math.round(shippingAmount * 100) / 100,
+      freeShippingApplied: cleanSubtotal > 0 && shippingAmount === 0,
+      freeShippingReason
+    };
+  }
+
+  evaluateMatrix(cartInput, activeCouponCode, address) {
+    const items = this.normalizeCart(cartInput);
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const tier = this.evaluateTierDiscount(subtotal);
+    const rows = [];
+
+    rows.push({
+      key: 'TIER',
+      title: `Auto Spend Tier (${tier.tierName})`,
+      condition: tier.nextTierThreshold
+        ? `Next unlock at $${tier.nextTierThreshold.toFixed(0)}`
+        : 'Max 15% tier unlocked',
+      status: tier.discountAmount > 0 ? 'ACTIVE' : 'LOCKED',
+      impact: tier.discountAmount,
+      applied: tier.discountAmount > 0
+    });
+
+    const matrixCodes = ['CYBER20', 'BUNDLE3', 'FREESHIP', 'KEYB15', 'AUDIO25'];
+    matrixCodes.forEach((code) => {
+      const rule = this.coupons[code];
+      const evalRes = this.applyCoupon(code, items);
+      const isSelected = String(activeCouponCode || '').toUpperCase() === code;
+      let status = 'LOCKED';
+      if (isSelected && evalRes.valid) status = 'ACTIVE';
+      else if (evalRes.valid) status = 'READY';
+
+      let potentialImpact = evalRes.discountAmount;
+      if (code === 'FREESHIP' && evalRes.valid) {
+        const taxShip = this.calculateTaxAndShipping(address, subtotal, { freeShipping: false });
+        potentialImpact = taxShip.shippingAmount > 0 ? 12.00 : 0;
+      }
+
+      rows.push({
+        key: code,
+        title: code,
+        condition: rule.conditionText,
+        status,
+        impact: potentialImpact,
+        applied: isSelected && evalRes.valid,
+        valid: evalRes.valid,
+        reason: evalRes.reason
+      });
+    });
+
+    return rows;
+  }
+
+  calculateOrderSummary(cartInput, couponCode, address, metadata = {}) {
+    const items = this.normalizeCart(cartInput);
+    const subtotal = Math.round(items.reduce((sum, item) => sum + item.price * item.qty, 0) * 100) / 100;
+    const tierResult = this.evaluateTierDiscount(subtotal);
+    const couponResult = this.applyCoupon(couponCode, items);
+    const rawDiscount = tierResult.discountAmount + (couponResult.valid ? couponResult.discountAmount : 0);
+    const totalDiscount = Math.min(subtotal, Math.round(rawDiscount * 100) / 100);
+
+    const taxAndShipping = this.calculateTaxAndShipping(address, subtotal, {
+      discountTotal: totalDiscount,
+      freeShipping: couponResult.valid && couponResult.freeShipping
+    });
+
+    const baseShipTax = this.calculateTaxAndShipping(address, subtotal, {
+      discountTotal: totalDiscount,
+      freeShipping: false
+    });
+    const shippingSaved = Math.max(0, Math.round((baseShipTax.shippingAmount - taxAndShipping.shippingAmount) * 100) / 100);
+    const grandTotal = Math.max(0, Math.round((subtotal - totalDiscount + taxAndShipping.shippingAmount + taxAndShipping.taxAmount) * 100) / 100);
+
+    return {
+      invoiceId: metadata.invoiceId || 'NX-2026-4340',
+      issuedAt: metadata.issuedAt || new Date(),
+      status: metadata.status || 'VERIFIED QUOTE',
+      customerName: (address && address.customerName) || metadata.customerName || 'Alex Rivera · Nexus Labs',
+      address: {
+        state: taxAndShipping.regionCode,
+        regionLabel: taxAndShipping.regionLabel,
+        zip: taxAndShipping.zip || '94107',
+        shippingMethod: taxAndShipping.shippingMethod
+      },
+      items,
+      subtotal,
+      tierResult,
+      couponResult,
+      totalDiscount,
+      shippingSaved,
+      totalSavings: Math.round((totalDiscount + shippingSaved) * 100) / 100,
+      taxAndShipping,
+      grandTotal,
+      matrixRows: this.evaluateMatrix(items, couponCode, address)
+    };
+  }
+}
+
+const promoEngine = new PromoDiscountEngine();
+window.PromoDiscountEngine = PromoDiscountEngine;
+
 const SHIPPING_FEE = 12;
-const TAX_RATE = 0.08;
 const COUPON_KEY = 'nexusStoreCoupon';
 let appliedCoupon = null;
 
 function formatMoney(amount) {
-  return `$${amount.toFixed(2)}`;
+  return `$${Number(amount || 0).toFixed(2)}`;
 }
 
 function normalizeCode(raw) {
@@ -23,7 +461,7 @@ function normalizeCode(raw) {
 function loadSavedCoupon() {
   try {
     const saved = normalizeCode(localStorage.getItem(COUPON_KEY));
-    if (COUPONS[saved]) appliedCoupon = saved;
+    if (promoEngine.coupons[saved]) appliedCoupon = saved;
   } catch {
     appliedCoupon = null;
   }
@@ -38,15 +476,44 @@ function saveCoupon() {
   }
 }
 
-// Pure helper so the maths is in one place.
+// Pure helper so the maths uses PromoDiscountEngine consistently.
 function calculateTotals(subtotal, couponCode) {
-  const coupon = COUPONS[couponCode] || null;
-  const discount = coupon && coupon.type === 'percent' ? subtotal * coupon.value : 0;
-  let shipping = subtotal > 0 ? SHIPPING_FEE : 0;
-  if (coupon && coupon.type === 'freeship') shipping = 0;
-  const tax = (subtotal - discount) * TAX_RATE;
-  const total = subtotal - discount + shipping + tax;
-  return { subtotal, discount, shipping, tax, total };
+  const items = Object.values(cart);
+  if (items.length === 0) {
+    const tierEmpty = promoEngine.evaluateTierDiscount(subtotal);
+    const couponFallback = couponCode && promoEngine.coupons[couponCode] ? promoEngine.coupons[couponCode] : null;
+    const couponDisc = couponFallback && couponFallback.type === 'percent' ? subtotal * couponFallback.value : 0;
+    let shipping = subtotal > 0 ? SHIPPING_FEE : 0;
+    if (couponFallback && couponFallback.type === 'freeship' && subtotal >= 100) shipping = 0;
+    const totalDisc = Math.min(subtotal, tierEmpty.discountAmount + couponDisc);
+    const tax = Math.max(0, subtotal - totalDisc) * 0.08;
+    return {
+      subtotal,
+      tierDiscount: tierEmpty.discountAmount,
+      tierName: tierEmpty.tierName,
+      couponDiscount: couponDisc,
+      discount: totalDisc,
+      shipping,
+      tax,
+      taxRate: 0.08,
+      total: Math.max(0, subtotal - totalDisc + shipping + tax),
+      couponResult: null
+    };
+  }
+
+  const summary = promoEngine.calculateOrderSummary(items, couponCode, { state: 'CA', zip: '94107', shippingMethod: 'standard' });
+  return {
+    subtotal: summary.subtotal,
+    tierDiscount: summary.tierResult.discountAmount,
+    tierName: summary.tierResult.tierName,
+    couponDiscount: summary.couponResult.valid ? summary.couponResult.discountAmount : 0,
+    discount: summary.totalDiscount,
+    shipping: summary.taxAndShipping.shippingAmount,
+    tax: summary.taxAndShipping.taxAmount,
+    taxRate: summary.taxAndShipping.taxRate,
+    total: summary.grandTotal,
+    couponResult: summary.couponResult
+  };
 }
 
 function setCouponMessage(text, isError) {
@@ -65,13 +532,21 @@ function applyCoupon(rawCode) {
     setCouponMessage('Enter a promo code first.', true);
     return false;
   }
-  if (!COUPONS[code]) {
+  if (!promoEngine.coupons[code]) {
     setCouponMessage(`"${code}" is not a valid promo code.`, true);
     return false;
   }
   if (appliedCoupon === code) {
     setCouponMessage(`${code} is already applied.`, true);
     return false;
+  }
+  const items = Object.values(cart);
+  if (items.length > 0) {
+    const check = promoEngine.applyCoupon(code, items);
+    if (!check.valid) {
+      setCouponMessage(check.reason, true);
+      return false;
+    }
   }
   appliedCoupon = code;
   saveCoupon();
@@ -108,8 +583,9 @@ function toggleCartDrawer() {
 }
 
 function addToCart(id, name, price, img) {
+  const meta = ITEM_META_FALLBACK[id] || {};
   if (!cart[id]) {
-    cart[id] = { id, name, price, qty: 1, img };
+    cart[id] = { id, name, price, qty: 1, img, category: meta.category || 'general' };
   } else {
     cart[id].qty += 1;
   }
@@ -147,31 +623,38 @@ function renderCart() {
     cartCountEl.innerText = totalItems;
   }
 
-  // Update order summary (subtotal, discount, shipping, tax, total)
+  // Update order summary (subtotal, tier discount, promo discount, shipping, tax, total)
   const totals = calculateTotals(totalPrice, appliedCoupon);
   const setText = (id, value) => {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
   };
   setText('cartSubtotal', formatMoney(totals.subtotal));
-  setText('cartDiscount', `-${formatMoney(totals.discount)}`);
-  setText('cartShipping', totals.shipping === 0 && appliedCoupon === 'FREESHIP' && totals.subtotal > 0 ? 'FREE' : formatMoney(totals.shipping));
+  setText('cartTierDiscount', `-${formatMoney(totals.tierDiscount)}`);
+  setText('cartDiscount', `-${formatMoney(totals.couponDiscount)}`);
+  setText('cartShipping', totals.shipping === 0 && totals.subtotal > 0 ? 'FREE' : formatMoney(totals.shipping));
+  setText('cartTaxLabel', `Est. tax (${(totals.taxRate * 100).toFixed(2).replace(/\.00$/, '')}%)`);
   setText('cartTax', formatMoney(totals.tax));
   setText('cartTotal', formatMoney(totals.total));
 
+  const tierRow = document.getElementById('tierDiscountRow');
+  if (tierRow) tierRow.hidden = !(totals.tierDiscount > 0);
+  setText('tierDiscountLabel', totals.tierName ? `${totals.tierName}` : 'Tier Discount');
+
   const discountRow = document.getElementById('discountRow');
-  if (discountRow) discountRow.hidden = !(totals.discount > 0);
-  setText('discountLabel', appliedCoupon ? `Discount (${appliedCoupon})` : 'Discount');
+  if (discountRow) discountRow.hidden = !(totals.couponDiscount > 0);
+  setText('discountLabel', appliedCoupon ? `Promo (${appliedCoupon})` : 'Discount');
 
   const chip = document.getElementById('promoChip');
   if (chip) {
     chip.hidden = !appliedCoupon;
-    if (appliedCoupon) setText('promoChipText', COUPONS[appliedCoupon].label);
+    if (appliedCoupon && promoEngine.coupons[appliedCoupon]) {
+      setText('promoChipText', promoEngine.coupons[appliedCoupon].label);
+    }
   }
 
-  // 2. Render Product Card Buttons / Quantity Controls
-  const productIds = ['p1', 'p2', 'p3'];
-  productIds.forEach((id) => {
+  // 2. Render Product Card Buttons / Quantity Controls for p1..p8
+  Object.keys(ITEM_META_FALLBACK).forEach((id) => {
     const container = document.getElementById(`action-${id}`);
     if (!container) return;
 
@@ -185,19 +668,18 @@ function renderCart() {
         </div>
       `;
     } else {
-      // Revert to original Add to Cart button
-      let name = 'Product';
-      let price = 0;
-      let img = '📦';
-      if (id === 'p1') { name = 'CyberDeck Pro Mechanical'; price = 249.00; img = '⌨️'; }
-      if (id === 'p2') { name = 'Acoustic Pulse ANC Headset'; price = 199.00; img = '🎧'; }
-      if (id === 'p3') { name = 'Horizon 32 Curved OLED'; price = 899.00; img = '🖥️'; }
-
+      const meta = ITEM_META_FALLBACK[id];
+      const safeName = meta.name.replace(/"/g, '&quot;');
       container.innerHTML = `
-        <button class="add-btn" onclick="addToCart('${id}', '${name}', ${price}, '${img}')">Add to Cart</button>
+        <button class="add-btn" onclick="addToCart('${id}', '${safeName}', ${meta.price}, '${meta.img}')">Add to Cart</button>
       `;
     }
   });
+
+  // Notify Promo Studio if initialized
+  if (typeof window.syncPromoStudioWithCart === 'function') {
+    window.syncPromoStudioWithCart();
+  }
 
   // 3. Render Drawer List
   const drawerBody = document.getElementById('cartItemsList');
@@ -247,7 +729,10 @@ function checkout() {
     showToast('Your cart is empty!');
     return;
   }
-  showToast('Order placed successfully! Thank you for testing Nexus Store.');
+  if (typeof window.captureCheckoutInvoice === 'function') {
+    window.captureCheckoutInvoice(items, appliedCoupon);
+  }
+  showToast('Order placed! High-DPI Canvas Invoice updated.');
   Object.keys(cart).forEach((key) => delete cart[key]);
   renderCart();
   toggleCartDrawer();
@@ -2593,3 +3078,728 @@ window.handleReviewSubmit = handleReviewSubmit;
   document.addEventListener('DOMContentLoaded', initComparisonMatrix);
 })();
 /* ===== END Issue #283 ===== */
+
+/* ===== BEGIN Issue #434: Canvas Invoice Generator & Promo Matrix Controller ===== */
+function drawCanvasRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawReceiptBarcode(ctx, codeText, startX, startY, width, height) {
+  const seed = String(codeText || 'NX-2026-4340');
+  const bars = [];
+  for (let i = 0; i < seed.length; i += 1) {
+    const ch = seed.charCodeAt(i);
+    bars.push(2, (ch % 3) + 1, ((ch >> 2) % 2) + 1, ((ch >> 4) % 3) + 1);
+  }
+  // Start and end guard bars
+  const pattern = [2, 1, 2, 1, ...bars, 2, 1, 2];
+  const totalUnits = pattern.reduce((a, b) => a + b, 0);
+  const unitW = width / totalUnits;
+
+  let cursorX = startX;
+  pattern.forEach((units, idx) => {
+    const barW = units * unitW;
+    if (idx % 2 === 0) {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(cursorX, startY, Math.max(1, barW - 0.35), height);
+    }
+    cursorX += barW;
+  });
+
+  ctx.fillStyle = '#475569';
+  ctx.font = '600 11px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(`* ${seed} · AUTH-CRC94 *`, startX + width / 2, startY + height + 16);
+  ctx.textAlign = 'left';
+}
+
+function generateInvoiceReceipt(orderData, targetCanvas) {
+  const canvas = targetCanvas || document.getElementById('invoiceReceiptCanvas') || document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const data = orderData || promoEngine.calculateOrderSummary([], null, { state: 'CA', zip: '94107' });
+  const items = Array.isArray(data.items) ? data.items : [];
+  const dpr = Math.max(window.devicePixelRatio || 1, 2);
+  const logicalWidth = 460;
+  const rowHeight = 36;
+  const rowsCount = Math.max(1, items.length);
+  const logicalHeight = Math.max(660, 465 + rowsCount * rowHeight);
+
+  canvas.width = Math.round(logicalWidth * dpr);
+  canvas.height = Math.round(logicalHeight * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  // Crisp paper background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+  // Top amber accent header bar
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, logicalWidth, 82);
+  ctx.fillStyle = '#f59e0b';
+  ctx.fillRect(0, 78, logicalWidth, 4);
+
+  // Brand + Invoice badge
+  ctx.fillStyle = '#f59e0b';
+  ctx.font = '700 18px "Inter", sans-serif';
+  ctx.fillText('⚡ NEXUS STORE', 24, 34);
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '500 11px "JetBrains Mono", monospace';
+  ctx.fillText('NEXT-GEN DEVELOPER HARDWARE · SF, CA', 24, 54);
+
+  drawCanvasRoundRect(ctx, logicalWidth - 148, 22, 124, 28, 6);
+  ctx.fillStyle = data.status === 'PAID RECEIPT' ? '#059669' : '#f59e0b';
+  ctx.fill();
+  ctx.fillStyle = data.status === 'PAID RECEIPT' ? '#ffffff' : '#0f172a';
+  ctx.font = '700 10px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(data.status || 'VERIFIED QUOTE', logicalWidth - 86, 40);
+  ctx.textAlign = 'left';
+
+  // Metadata strip
+  let y = 106;
+  ctx.fillStyle = '#475569';
+  ctx.font = '600 10px "JetBrains Mono", monospace';
+  ctx.fillText('INVOICE ID', 24, y);
+  ctx.fillText('DATE ISSUED', 176, y);
+  ctx.fillText('DESTINATION', 320, y);
+
+  y += 16;
+  const dateObj = data.issuedAt instanceof Date ? data.issuedAt : new Date();
+  const formattedDate = dateObj.toISOString().slice(0, 10);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = '700 12px "JetBrains Mono", monospace';
+  ctx.fillText(String(data.invoiceId || 'NX-2026-4340'), 24, y);
+  ctx.fillText(formattedDate, 176, y);
+  ctx.fillText(`${data.address.state} ${data.address.zip || '94107'}`, 320, y);
+
+  y += 22;
+  ctx.fillStyle = '#475569';
+  ctx.font = '500 11px "Inter", sans-serif';
+  ctx.fillText(`Billed To: ${String(data.customerName || 'Alex Rivera · Nexus Labs').slice(0, 44)}`, 24, y);
+
+  // Dashed separator
+  y += 14;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(24, y);
+  ctx.lineTo(logicalWidth - 24, y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Table header
+  y += 22;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(24, y - 14, logicalWidth - 48, 24);
+  ctx.fillStyle = '#334155';
+  ctx.font = '700 10px "JetBrains Mono", monospace';
+  ctx.fillText('ITEM & CATEGORY', 30, y + 2);
+  ctx.textAlign = 'center';
+  ctx.fillText('QTY', 278, y + 2);
+  ctx.textAlign = 'right';
+  ctx.fillText('UNIT', 352, y + 2);
+  ctx.fillText('TOTAL', logicalWidth - 30, y + 2);
+  ctx.textAlign = 'left';
+
+  y += 26;
+  if (items.length === 0) {
+    ctx.fillStyle = '#64748b';
+    ctx.font = '500 12px "Inter", sans-serif';
+    ctx.fillText('No items in order. Add gear to generate receipt.', 30, y);
+    y += rowHeight;
+  } else {
+    items.forEach((item, idx) => {
+      if (idx % 2 === 1) {
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(24, y - 16, logicalWidth - 48, rowHeight - 2);
+      }
+      const lineTotal = item.price * item.qty;
+      const title = item.name.length > 29 ? `${item.name.slice(0, 27)}…` : item.name;
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '600 12px "Inter", sans-serif';
+      ctx.fillText(title, 30, y);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '500 9px "JetBrains Mono", monospace';
+      ctx.fillText(String(item.category || 'hardware').toUpperCase(), 30, y + 13);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '600 11px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`x${item.qty}`, 278, y + 4);
+      ctx.textAlign = 'right';
+      ctx.fillText(formatMoney(item.price), 352, y + 4);
+      ctx.fillText(formatMoney(lineTotal), logicalWidth - 30, y + 4);
+      ctx.textAlign = 'left';
+      y += rowHeight;
+    });
+  }
+
+  // Divider before summary
+  y += 6;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.beginPath();
+  ctx.moveTo(24, y);
+  ctx.lineTo(logicalWidth - 24, y);
+  ctx.stroke();
+
+  const drawSummaryRow = (label, value, color = '#0f172a', bold = false) => {
+    y += 22;
+    ctx.fillStyle = bold ? '#0f172a' : '#475569';
+    ctx.font = `${bold ? '700' : '500'} 12px "Inter", sans-serif`;
+    ctx.fillText(label, 28, y);
+    ctx.fillStyle = color;
+    ctx.font = `${bold ? '700' : '600'} 12px "JetBrains Mono", monospace`;
+    ctx.textAlign = 'right';
+    ctx.fillText(value, logicalWidth - 28, y);
+    ctx.textAlign = 'left';
+  };
+
+  drawSummaryRow('Order Subtotal', formatMoney(data.subtotal));
+
+  if (data.tierResult && data.tierResult.discountAmount > 0) {
+    drawSummaryRow(
+      `${data.tierResult.tierName} (${Math.round(data.tierResult.rate * 100)}% Off)`,
+      `-${formatMoney(data.tierResult.discountAmount)}`,
+      '#059669'
+    );
+  }
+
+  if (data.couponResult && data.couponResult.valid) {
+    const couponSuffix =
+      data.couponResult.type === 'bogo'
+        ? ` (${data.couponResult.freeItemsCount} Free Unit)`
+        : data.couponResult.type === 'freeship'
+          ? ' (Shipping Waived)'
+          : '';
+    drawSummaryRow(
+      `Promo Code: ${data.couponResult.code}${couponSuffix}`,
+      data.couponResult.discountAmount > 0 ? `-${formatMoney(data.couponResult.discountAmount)}` : 'FREE SHIP',
+      '#059669'
+    );
+  }
+
+  const shipText =
+    data.taxAndShipping.shippingAmount === 0 && data.subtotal > 0
+      ? 'FREE ($0.00)'
+      : formatMoney(data.taxAndShipping.shippingAmount);
+  drawSummaryRow(
+    `Shipping (${data.address.shippingMethod === 'express' ? 'Express' : 'Standard'})`,
+    shipText,
+    data.taxAndShipping.shippingAmount === 0 && data.subtotal > 0 ? '#059669' : '#0f172a'
+  );
+
+  const taxPct = (data.taxAndShipping.taxRate * 100).toFixed(2).replace(/\.00$/, '');
+  drawSummaryRow(`Est. Tax (${data.address.state} · ${taxPct}%)`, formatMoney(data.taxAndShipping.taxAmount));
+
+  // Grand total card
+  y += 18;
+  drawCanvasRoundRect(ctx, 24, y, logicalWidth - 48, 52, 10);
+  ctx.fillStyle = '#0f172a';
+  ctx.fill();
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '600 10px "JetBrains Mono", monospace';
+  ctx.fillText('GRAND TOTAL (USD)', 38, y + 20);
+
+  if (data.totalSavings > 0) {
+    ctx.fillStyle = '#34d399';
+    ctx.font = '600 11px "JetBrains Mono", monospace';
+    ctx.fillText(`YOU SAVED ${formatMoney(data.totalSavings)}`, 38, y + 39);
+  } else {
+    ctx.fillStyle = '#64748b';
+    ctx.font = '500 10px "Inter", sans-serif';
+    ctx.fillText('Add $200+ or promo code to save', 38, y + 39);
+  }
+
+  ctx.fillStyle = '#f59e0b';
+  ctx.font = '700 22px "JetBrains Mono", monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(formatMoney(data.grandTotal), logicalWidth - 38, y + 35);
+  ctx.textAlign = 'left';
+
+  // Barcode footer
+  y += 76;
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(24, y - 10);
+  ctx.lineTo(logicalWidth - 24, y - 10);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  drawReceiptBarcode(ctx, data.invoiceId, 70, y + 4, logicalWidth - 140, 44);
+
+  return {
+    canvas,
+    dataUrl: canvas.toDataURL('image/png'),
+    fileName: `nexus-invoice-${String(data.invoiceId || 'receipt').toLowerCase()}.png`
+  };
+}
+
+window.generateInvoiceReceipt = generateInvoiceReceipt;
+
+(function initPromoInvoiceStudioModule() {
+  const studioState = {
+    mode: 'preset',
+    presetName: 'bundle3',
+    couponCode: 'BUNDLE3',
+    invoiceId: 'NX-2026-4340',
+    status: 'VERIFIED QUOTE',
+    items: [
+      { id: 'p1', name: 'CyberDeck Pro Mechanical', category: 'keyboards', price: 249.00, qty: 2, img: '⌨️' },
+      { id: 'p4', name: 'Nexus Neo 65% Low-Profile', category: 'keyboards', price: 149.00, qty: 1, img: '⌨️' },
+      { id: 'p2', name: 'Acoustic Pulse ANC Headset', category: 'audio', price: 199.00, qty: 1, img: '🎧' }
+    ]
+  };
+
+  let lastRenderedInvoice = null;
+
+  function getAddressFromInputs() {
+    const nameEl = document.getElementById('estCustomerName');
+    const stateEl = document.getElementById('estStateSelect');
+    const zipEl = document.getElementById('estZipInput');
+    const shipEl = document.getElementById('estShippingSpeed');
+    return {
+      customerName: nameEl ? nameEl.value.trim() || 'Alex Rivera · Nexus Labs' : 'Alex Rivera · Nexus Labs',
+      state: stateEl ? stateEl.value : 'CA',
+      zip: zipEl ? zipEl.value.trim() || '94107' : '94107',
+      shippingMethod: shipEl ? shipEl.value : 'standard'
+    };
+  }
+
+  function getActiveOrderItems() {
+    if (studioState.mode === 'live') {
+      return Object.values(cart).map((item) => ({
+        ...item,
+        category: item.category || (ITEM_META_FALLBACK[item.id] ? ITEM_META_FALLBACK[item.id].category : 'general')
+      }));
+    }
+    return studioState.items;
+  }
+
+  function renderStudio() {
+    const itemsListEl = document.getElementById('studioItemsList');
+    if (!itemsListEl) return;
+
+    const items = getActiveOrderItems();
+    const address = getAddressFromInputs();
+    const summary = promoEngine.calculateOrderSummary(items, studioState.couponCode, address, {
+      invoiceId: studioState.invoiceId,
+      status: studioState.status
+    });
+
+    // 1. Tier Progress Bar & Hints
+    const tierBadge = document.getElementById('activeTierBadge');
+    const tierHint = document.getElementById('tierNextHint');
+    const tierSavings = document.getElementById('tierSavingsValue');
+    const tierMeter = document.getElementById('tierMeterFill');
+    const tierPct = Math.round(summary.tierResult.rate * 100);
+
+    if (tierBadge) tierBadge.textContent = `${summary.tierResult.tierName} · ${tierPct}%`;
+    if (tierSavings) tierSavings.textContent = `-${formatMoney(summary.tierResult.discountAmount)}`;
+    if (tierMeter) tierMeter.style.width = `${summary.tierResult.progressPercent}%`;
+    if (tierHint) {
+      tierHint.textContent = summary.tierResult.nextTierName
+        ? `Add ${formatMoney(summary.tierResult.amountToNextTier)} to unlock ${summary.tierResult.nextTierName} (${Math.round(summary.tierResult.nextTierRate * 100)}% off)`
+        : 'Maximum Enterprise Rig Tier (15% off) unlocked!';
+    }
+
+    document.querySelectorAll('.tier-milestone').forEach((el) => {
+      const tierKey = el.getAttribute('data-tier');
+      const tierObj = promoEngine.tiers.find((t) => t.id === tierKey);
+      el.classList.toggle('unlocked', Boolean(tierObj && summary.subtotal >= tierObj.minSpend));
+    });
+
+    // 2. Source pill & Line Items
+    const sourcePill = document.getElementById('orderSourcePill');
+    if (sourcePill) {
+      if (studioState.mode === 'live') {
+        sourcePill.textContent = `Live Store Cart (${items.length} SKU)`;
+      } else {
+        const labels = { bundle3: 'BUNDLE3 Trio', cyber20: 'CYBER20 Rig', freeship: 'FREESHIP Order' };
+        sourcePill.textContent = `Preset: ${labels[studioState.presetName] || 'Custom Builder'}`;
+      }
+    }
+
+    const freeUnitIds = new Set(
+      summary.couponResult.valid && summary.couponResult.freeUnits
+        ? summary.couponResult.freeUnits.map((u) => u.id)
+        : []
+    );
+
+    if (items.length === 0) {
+      itemsListEl.innerHTML = `<div class="studio-item-row"><span class="tier-hint">No items in order yet. Click "+ Add Item" or select a preset above.</span></div>`;
+    } else {
+      itemsListEl.innerHTML = items
+        .map(
+          (item) => `
+          <div class="studio-item-row">
+            <div class="studio-item-left">
+              <span class="studio-item-emoji">${item.img || '📦'}</span>
+              <div>
+                <div class="studio-item-title">${item.name}</div>
+                <div class="studio-item-meta">
+                  <span class="studio-cat-tag">${item.category}</span>
+                  <span>${formatMoney(item.price)} ea</span>
+                  ${freeUnitIds.has(item.id) ? '<span class="studio-bogo-tag">BOGO FREE UNIT</span>' : ''}
+                </div>
+              </div>
+            </div>
+            <div class="studio-item-actions">
+              <div class="qty-controls">
+                <button type="button" class="qty-btn studio-qty-btn" data-id="${item.id}" data-delta="-1" aria-label="Decrease ${item.name} quantity">-</button>
+                <span class="qty-count">${item.qty}</span>
+                <button type="button" class="qty-btn studio-qty-btn" data-id="${item.id}" data-delta="1" aria-label="Increase ${item.name} quantity">+</button>
+              </div>
+              <span class="studio-line-total">${formatMoney(item.price * item.qty)}</span>
+              <button type="button" class="studio-remove-btn" data-remove-id="${item.id}" aria-label="Remove ${item.name}">&times;</button>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    // 3. Promo input, pills & feedback
+    const couponInput = document.getElementById('studioCouponInput');
+    if (couponInput && document.activeElement !== couponInput) {
+      couponInput.value = studioState.couponCode || '';
+    }
+
+    const promoBadge = document.getElementById('activePromoStatusBadge');
+    const feedbackEl = document.getElementById('studioCouponFeedback');
+    if (studioState.couponCode) {
+      if (summary.couponResult.valid) {
+        if (promoBadge) {
+          promoBadge.textContent = `${summary.couponResult.code} ACTIVE`;
+          promoBadge.classList.add('active');
+        }
+        if (feedbackEl) {
+          feedbackEl.textContent = summary.couponResult.reason;
+          feedbackEl.classList.remove('error');
+        }
+      } else {
+        if (promoBadge) {
+          promoBadge.textContent = `${studioState.couponCode} UNMET`;
+          promoBadge.classList.remove('active');
+        }
+        if (feedbackEl) {
+          feedbackEl.textContent = summary.couponResult.reason;
+          feedbackEl.classList.add('error');
+        }
+      }
+    } else {
+      if (promoBadge) {
+        promoBadge.textContent = 'No Code Applied';
+        promoBadge.classList.remove('active');
+      }
+      if (feedbackEl) {
+        feedbackEl.textContent = 'Select a quick promo chip or enter a custom code above.';
+        feedbackEl.classList.remove('error');
+      }
+    }
+
+    document.querySelectorAll('.coupon-quick-pill').forEach((pill) => {
+      pill.classList.toggle('active', pill.getAttribute('data-code') === studioState.couponCode);
+    });
+
+    // 4. Rule-Based Discount Matrix
+    const matrixBody = document.getElementById('discountMatrixBody');
+    if (matrixBody) {
+      matrixBody.innerHTML = summary.matrixRows
+        .map((row) => {
+          const pillCls = row.status === 'ACTIVE' ? 'active' : row.status === 'READY' ? 'ready' : 'locked';
+          const impactText = row.impact > 0 ? `-${formatMoney(row.impact)}` : '$0.00';
+          return `
+            <tr class="${row.applied ? 'rule-active' : ''}">
+              <td><strong>${row.title}</strong></td>
+              <td>${row.condition}</td>
+              <td><span class="matrix-status-pill ${pillCls}">${row.status}</span></td>
+              <td class="matrix-impact ${row.impact > 0 ? 'positive' : ''}">${impactText}</td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+
+    // 5. Tax Pill & KPIs
+    const taxRatePill = document.getElementById('taxRatePill');
+    if (taxRatePill) {
+      const pct = (summary.taxAndShipping.taxRate * 100).toFixed(2).replace(/\.00$/, '');
+      taxRatePill.textContent = `${summary.address.state} · ${pct}%`;
+    }
+
+    const headerId = document.getElementById('invoiceHeaderId');
+    if (headerId) headerId.textContent = `Invoice #${summary.invoiceId}`;
+    const grossEl = document.getElementById('studioGrossTotal');
+    const savingsEl = document.getElementById('studioTotalSavings');
+    const taxShipEl = document.getElementById('studioTaxShipTotal');
+    const grandEl = document.getElementById('studioGrandTotal');
+
+    if (grossEl) grossEl.textContent = formatMoney(summary.subtotal);
+    if (savingsEl) savingsEl.textContent = `-${formatMoney(summary.totalSavings)}`;
+    if (taxShipEl) taxShipEl.textContent = formatMoney(summary.taxAndShipping.taxAmount + summary.taxAndShipping.shippingAmount);
+    if (grandEl) grandEl.textContent = formatMoney(summary.grandTotal);
+
+    // 6. Render High-DPI HTML5 Canvas Invoice
+    const canvas = document.getElementById('invoiceReceiptCanvas');
+    lastRenderedInvoice = generateInvoiceReceipt(summary, canvas);
+  }
+
+  function applyPreset(presetName) {
+    studioState.presetName = presetName;
+    studioState.status = 'VERIFIED QUOTE';
+    if (presetName === 'bundle3') {
+      studioState.mode = 'preset';
+      studioState.couponCode = 'BUNDLE3';
+      studioState.items = [
+        { id: 'p1', name: 'CyberDeck Pro Mechanical', category: 'keyboards', price: 249.00, qty: 2, img: '⌨️' },
+        { id: 'p4', name: 'Nexus Neo 65% Low-Profile', category: 'keyboards', price: 149.00, qty: 1, img: '⌨️' },
+        { id: 'p2', name: 'Acoustic Pulse ANC Headset', category: 'audio', price: 199.00, qty: 1, img: '🎧' }
+      ];
+    } else if (presetName === 'cyber20') {
+      studioState.mode = 'preset';
+      studioState.couponCode = 'CYBER20';
+      studioState.items = [
+        { id: 'p3', name: 'Horizon 32" Curved OLED', category: 'displays', price: 899.00, qty: 1, img: '🖥️' },
+        { id: 'p1', name: 'CyberDeck Pro Mechanical', category: 'keyboards', price: 249.00, qty: 1, img: '⌨️' },
+        { id: 'p5', name: 'Vortex Reference Studio Monitors', category: 'audio', price: 349.00, qty: 1, img: '🔊' }
+      ];
+    } else if (presetName === 'freeship') {
+      studioState.mode = 'preset';
+      studioState.couponCode = 'FREESHIP';
+      studioState.items = [
+        { id: 'p4', name: 'Nexus Neo 65% Low-Profile', category: 'keyboards', price: 149.00, qty: 1, img: '⌨️' },
+        { id: 'p7', name: 'HyperStream Studio Mic & Arm', category: 'audio', price: 179.00, qty: 1, img: '🎙️' }
+      ];
+    } else if (presetName === 'live') {
+      studioState.mode = 'live';
+      studioState.couponCode = appliedCoupon || '';
+    }
+
+    document.querySelectorAll('.promo-preset-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-preset') === presetName);
+    });
+    renderStudio();
+  }
+
+  function adjustStudioItemQty(id, delta) {
+    if (studioState.mode === 'live') {
+      updateQuantity(id, delta);
+      return;
+    }
+    const target = studioState.items.find((it) => it.id === id);
+    if (!target) return;
+    target.qty += delta;
+    if (target.qty <= 0) {
+      studioState.items = studioState.items.filter((it) => it.id !== id);
+    }
+    renderStudio();
+  }
+
+  function addItemToStudio(id) {
+    const meta = ITEM_META_FALLBACK[id];
+    if (!meta) return;
+    if (studioState.mode === 'live') {
+      addToCart(id, meta.name, meta.price, meta.img);
+      return;
+    }
+    const existing = studioState.items.find((it) => it.id === id);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      studioState.items.push({ id, name: meta.name, category: meta.category, price: meta.price, qty: 1, img: meta.img });
+    }
+    renderStudio();
+  }
+
+  function nextInvoiceSerial() {
+    const randomPart = Math.floor(1000 + Math.random() * 8999);
+    studioState.invoiceId = `NX-2026-${randomPart}`;
+  }
+
+  window.syncPromoStudioWithCart = function syncPromoStudioWithCart() {
+    const hasCartItems = Object.keys(cart).length > 0;
+    if (hasCartItems && studioState.mode !== 'live') {
+      studioState.mode = 'live';
+      studioState.couponCode = appliedCoupon || studioState.couponCode;
+      document.querySelectorAll('.promo-preset-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-preset') === 'live');
+      });
+    } else if (!hasCartItems && studioState.mode === 'live') {
+      applyPreset('bundle3');
+      return;
+    }
+    renderStudio();
+  };
+
+  window.captureCheckoutInvoice = function captureCheckoutInvoice(checkedOutItems, couponUsed) {
+    nextInvoiceSerial();
+    studioState.mode = 'preset';
+    studioState.presetName = 'checkout';
+    studioState.status = 'PAID RECEIPT';
+    studioState.couponCode = couponUsed || '';
+    studioState.items = checkedOutItems.map((it) => ({ ...it }));
+    document.querySelectorAll('.promo-preset-btn').forEach((btn) => btn.classList.remove('active'));
+    renderStudio();
+  };
+
+  function wireStudioEvents() {
+    const section = document.getElementById('promoInvoiceSection');
+    if (!section) return;
+
+    document.querySelectorAll('.promo-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const preset = btn.getAttribute('data-preset');
+        if (preset === 'live' && Object.keys(cart).length === 0) {
+          showToast('Live cart is empty — add items from catalog or click "Load Into Cart".');
+        }
+        applyPreset(preset);
+      });
+    });
+
+    const itemsListEl = document.getElementById('studioItemsList');
+    if (itemsListEl) {
+      itemsListEl.addEventListener('click', (event) => {
+        const qtyBtn = event.target.closest('.studio-qty-btn');
+        if (qtyBtn) {
+          adjustStudioItemQty(qtyBtn.getAttribute('data-id'), Number(qtyBtn.getAttribute('data-delta')));
+          return;
+        }
+        const remBtn = event.target.closest('.studio-remove-btn');
+        if (remBtn) {
+          const rid = remBtn.getAttribute('data-remove-id');
+          if (studioState.mode === 'live') {
+            if (cart[rid]) {
+              delete cart[rid];
+              renderCart();
+            }
+          } else {
+            studioState.items = studioState.items.filter((it) => it.id !== rid);
+            renderStudio();
+          }
+        }
+      });
+    }
+
+    const addBtn = document.getElementById('studioAddItemBtn');
+    const selectEl = document.getElementById('studioProductSelect');
+    if (addBtn && selectEl) {
+      addBtn.addEventListener('click', () => addItemToStudio(selectEl.value));
+    }
+
+    const applyBtn = document.getElementById('studioCouponApplyBtn');
+    const clearBtn = document.getElementById('studioCouponClearBtn');
+    const inputEl = document.getElementById('studioCouponInput');
+
+    if (applyBtn && inputEl) {
+      applyBtn.addEventListener('click', () => {
+        studioState.couponCode = normalizeCode(inputEl.value);
+        if (studioState.mode === 'live' && promoEngine.coupons[studioState.couponCode]) {
+          appliedCoupon = studioState.couponCode;
+          saveCoupon();
+          renderCart();
+        } else {
+          renderStudio();
+        }
+      });
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyBtn.click();
+        }
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        studioState.couponCode = '';
+        if (studioState.mode === 'live') {
+          removeCoupon();
+        } else {
+          renderStudio();
+        }
+      });
+    }
+
+    document.querySelectorAll('.coupon-quick-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const code = pill.getAttribute('data-code');
+        studioState.couponCode = code;
+        if (studioState.mode === 'live') {
+          applyCoupon(code);
+        } else {
+          renderStudio();
+        }
+      });
+    });
+
+    ['estCustomerName', 'estStateSelect', 'estZipInput', 'estShippingSpeed'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', renderStudio);
+        el.addEventListener('change', renderStudio);
+      }
+    });
+
+    const downloadBtn = document.getElementById('downloadInvoiceBtn');
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', () => {
+        renderStudio();
+        if (!lastRenderedInvoice || !lastRenderedInvoice.dataUrl) return;
+        const link = document.createElement('a');
+        link.href = lastRenderedInvoice.dataUrl;
+        link.download = lastRenderedInvoice.fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        showToast(`Downloaded ${lastRenderedInvoice.fileName}`);
+      });
+    }
+
+    const regenBtn = document.getElementById('regenInvoiceBtn');
+    if (regenBtn) {
+      regenBtn.addEventListener('click', () => {
+        nextInvoiceSerial();
+        renderStudio();
+        showToast(`Generated ${studioState.invoiceId}`);
+      });
+    }
+
+    const pushCartBtn = document.getElementById('pushOrderToCartBtn');
+    if (pushCartBtn) {
+      pushCartBtn.addEventListener('click', () => {
+        const items = getActiveOrderItems();
+        items.forEach((it) => {
+          cart[it.id] = { ...it };
+        });
+        if (studioState.couponCode && promoEngine.coupons[studioState.couponCode]) {
+          appliedCoupon = studioState.couponCode;
+          saveCoupon();
+        }
+        studioState.mode = 'live';
+        renderCart();
+        toggleCartDrawer();
+      });
+    }
+
+    renderStudio();
+  }
+
+  document.addEventListener('DOMContentLoaded', wireStudioEvents);
+})();
+/* ===== END Issue #434 ===== */
