@@ -78,6 +78,17 @@ jobs:
             const issueNumber = context.payload.issue.number;
             const currentAssignees = context.payload.issue.assignees.map(a => a.login);
 
+            // If commenter is already assigned to this issue
+            if (currentAssignees.includes(commenter)) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: `ℹ️ @${commenter}, you are already assigned to this issue! Keep up the great work.`
+              });
+              return;
+            }
+
             // If already assigned to someone else
             if (currentAssignees.length > 0 && !currentAssignees.includes(commenter)) {
               await github.rest.issues.createComment({
@@ -87,6 +98,48 @@ jobs:
                 body: `⚠️ @${commenter}, this issue is already assigned to @${currentAssignees.join(', @')}. Please choose an unassigned issue.`
               });
               return;
+            }
+
+            // Check if current issue is a Level 3 issue
+            const issueLabels = (context.payload.issue.labels || []).map(l => (typeof l === 'string' ? l : l.name).toLowerCase());
+            const isLevel3 = issueLabels.includes('level3') || issueLabels.includes('level 3');
+
+            // Enforce maximum 4 concurrent Level 3 claims per user
+            if (isLevel3) {
+              const assignedIssues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                assignee: commenter,
+                state: 'open',
+                per_page: 100
+              });
+
+              const activeLevel3Issues = assignedIssues.data.filter(item => {
+                if (item.pull_request) return false;
+                if (item.number === issueNumber) return false;
+                const labels = (item.labels || []).map(l => (typeof l === 'string' ? l : l.name).toLowerCase());
+                return labels.includes('level3') || labels.includes('level 3');
+              });
+
+              if (activeLevel3Issues.length >= 4) {
+                const issueListStr = activeLevel3Issues.map(i => `#${i.number}`).join(', ');
+                const limitMessage = `### ⚠️ Level 3 Claim Limit Reached (Max 4 Active Claims)\n\n` +
+                  `Hello @${commenter},\n\n` +
+                  `You have already claimed **${activeLevel3Issues.length} active Level 3 issues** (${issueListStr}).\n\n` +
+                  `To ensure fair access to high-value (10-point) tasks across the community, contributors are permitted a maximum of **4 concurrent Level 3 claims**.\n\n` +
+                  `👉 **Next Steps:**\n` +
+                  `- Please resolve, submit Pull Requests for, and complete your 4 existing Level 3 issues first.\n` +
+                  `- Once any of your active Level 3 issues is resolved and closed, you will immediately become eligible to claim another Level 3 issue.\n\n` +
+                  `*(Note: This limit applies strictly to Level 3 issues. You are still welcome to claim and contribute to Level 1 and Level 2 issues in the meantime!)*`;
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  body: limitMessage
+                });
+                return;
+              }
             }
 
             // Assign the user

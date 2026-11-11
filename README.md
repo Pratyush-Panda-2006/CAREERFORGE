@@ -30,6 +30,7 @@ All issues and pull requests in this repository follow the official **Nexus Spri
 > [!TIP]
 > - Our automated GitHub bots immediately attach the **`nsoc26`** label to any new issue and pull request.
 > - Maintainers assign the corresponding difficulty level tag (`level1`, `level2`, or `level3`) to reflect the points awarded upon merging.
+> - **Level 3 Claim Cap:** To ensure fair distribution of high-value tasks, contributors may claim at most **4 concurrent Level 3 issues**. A 5th Level 3 issue can only be claimed once one of the active 4 is closed via a merged PR.
 > - Contributor rankings and merged metrics are automatically updated every 12 hours (at 12:00 PM noon and midnight UTC) on the live platform [Leaderboard](https://careerforge.live/leaderboard).
 
 ---

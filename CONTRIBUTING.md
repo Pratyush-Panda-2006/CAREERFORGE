@@ -21,6 +21,11 @@ Every task and contribution is graded under the official NSoC scoring system:
 - The **`nsoc26`** tag is automatically added to all issues and PRs by our CI automation bots.
 - Issues will have their difficulty assigned by maintainers (`level1`, `level2`, or `level3`).
 
+### 🎯 Issue Claiming & Level 3 Concurrency Limit
+- Reply with **`/claim`** on any unassigned issue to assign yourself.
+- **3-Day (72h) Deadline:** Once assigned, you have 72 hours to submit a linked Pull Request. If inactive, the claim automatically expires via cron.
+- **Level 3 Maximum Limit (4 Active Claims):** To maintain fair distribution of high-value tasks across all community members, contributors can have at most **4 active Level 3 issues** claimed at any given time. If you have 4 active Level 3 claims, you must submit PRs and close at least one of them before claiming a 5th. This concurrency restriction applies **strictly to Level 3** tasks (Level 1 and Level 2 issues are exempt).
+
 ---
 
 ## 🚨 Strict Contribution Rules
