@@ -2529,3 +2529,407 @@ exportCalendarBtn.addEventListener('click', () => {
 
   showPlannerMessage('Calendar exported successfully!');
 });
+
+// ===============================================================
+// Algorithm Code Visualizer (Sorting & Binary Search) (Issue #341)
+// ===============================================================
+(() => {
+  'use strict';
+
+  function initAlgorithmVisualizer() {
+    const visualizer = document.getElementById('algoVisualizer');
+    if (!visualizer) return;
+
+    const algoSelect = document.getElementById('algoSelect');
+    const sizeSelect = document.getElementById('algoSizeSelect');
+    const targetGroup = document.getElementById('algoTargetGroup');
+    const targetInput = document.getElementById('algoTargetInput');
+    const speedSlider = document.getElementById('algoSpeedSlider');
+    const speedVal = document.getElementById('algoSpeedVal');
+    const playBtn = document.getElementById('algoPlayBtn');
+    const stepBtn = document.getElementById('algoStepBtn');
+    const shuffleBtn = document.getElementById('algoShuffleBtn');
+
+    const barsContainer = document.getElementById('algoBarsContainer');
+    const hudComparisons = document.getElementById('hudComparisons');
+    const hudSwaps = document.getElementById('hudSwaps');
+    const hudComplexity = document.getElementById('hudComplexity');
+    const hudStatusText = document.getElementById('hudStatusText');
+    const hudStatusDot = document.getElementById('hudStatusDot');
+    const codeTrace = document.getElementById('algoCodeTrace');
+
+    let array = [];
+    let generator = null;
+    let timer = null;
+    let isPlaying = false;
+    let comparisons = 0;
+    let swaps = 0;
+
+    const TRACES = {
+      bubble:
+`function bubbleSort(arr):
+  for i from 0 to n - 1:
+    for j from 0 to n - i - 1:
+      if arr[j] > arr[j + 1]:
+        swap(arr[j], arr[j + 1])
+  return arr`,
+      quick:
+`function quickSort(arr, low, high):
+  if low < high:
+    pivotIndex = partition(arr, low, high)
+    quickSort(arr, low, pivotIndex - 1)
+    quickSort(arr, pivotIndex + 1, high)`,
+      binary:
+`function binarySearch(arr, target):
+  left = 0, right = n - 1
+  while left <= right:
+    mid = floor((left + right) / 2)
+    if arr[mid] == target: return mid
+    else if arr[mid] < target: left = mid + 1
+    else: right = mid - 1
+  return -1`
+    };
+
+    function generateRandomArray(size, isSorted = false) {
+      const arr = [];
+      for (let i = 0; i < size; i++) {
+        arr.push(Math.floor(Math.random() * 85) + 12);
+      }
+      if (isSorted) {
+        arr.sort((a, b) => a - b);
+      }
+      return arr;
+    }
+
+    function renderBars(highlights = {}) {
+      barsContainer.innerHTML = '';
+      const maxVal = Math.max(...array, 100);
+
+      array.forEach((val, idx) => {
+        const col = document.createElement('div');
+        col.className = 'algo-bar-col';
+
+        const bar = document.createElement('div');
+        bar.className = 'algo-bar';
+
+        let stateClass = 'bar-default';
+        if (highlights.sorted && highlights.sorted.has(idx)) {
+          stateClass = 'bar-sorted';
+        } else if (highlights.swapping && highlights.swapping.includes(idx)) {
+          stateClass = 'bar-swap';
+        } else if (highlights.inspecting && highlights.inspecting.includes(idx)) {
+          stateClass = 'bar-inspect';
+        } else if (highlights.discarded && highlights.discarded.has(idx)) {
+          stateClass = 'bar-discard';
+        }
+
+        bar.classList.add(stateClass);
+        const heightPct = Math.max(8, (val / maxVal) * 95);
+        bar.style.height = `${heightPct}%`;
+
+        const lbl = document.createElement('span');
+        lbl.className = 'bar-val-lbl';
+        lbl.textContent = val;
+
+        col.appendChild(bar);
+        col.appendChild(lbl);
+        barsContainer.appendChild(col);
+      });
+    }
+
+    // --- Generators ---
+
+    function* bubbleSortGen(arr) {
+      const n = arr.length;
+      const sortedIndices = new Set();
+
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+          yield {
+            type: 'compare',
+            inspecting: [j, j + 1],
+            sorted: sortedIndices,
+            desc: `Comparing array[${j}] (${arr[j]}) with array[${j + 1}] (${arr[j + 1]})`
+          };
+
+          if (arr[j] > arr[j + 1]) {
+            const temp = arr[j];
+            arr[j] = arr[j + 1];
+            arr[j + 1] = temp;
+
+            yield {
+              type: 'swap',
+              swapping: [j, j + 1],
+              sorted: sortedIndices,
+              desc: `Swapped array[${j}] and array[${j + 1}]`
+            };
+          }
+        }
+        sortedIndices.add(n - i - 1);
+        yield {
+          type: 'element-sorted',
+          sorted: sortedIndices,
+          desc: `Confirmed array[${n - i - 1}] in its final sorted position`
+        };
+      }
+      sortedIndices.add(0);
+      yield { type: 'done', sorted: sortedIndices, desc: 'Bubble sort complete! Array is fully sorted.' };
+    }
+
+    function* quickSortGen(arr) {
+      const sortedIndices = new Set();
+
+      function* partition(low, high) {
+        const pivot = arr[high];
+        yield {
+          type: 'pivot',
+          swapping: [high],
+          sorted: sortedIndices,
+          desc: `Selected pivot = ${pivot} at index ${high}`
+        };
+
+        let i = low - 1;
+        for (let j = low; j < high; j++) {
+          yield {
+            type: 'compare',
+            inspecting: [j, high],
+            sorted: sortedIndices,
+            desc: `Comparing element array[${j}] (${arr[j]}) with pivot (${pivot})`
+          };
+
+          if (arr[j] < pivot) {
+            i++;
+            if (i !== j) {
+              const temp = arr[i];
+              arr[i] = arr[j];
+              arr[j] = temp;
+              yield {
+                type: 'swap',
+                swapping: [i, j],
+                sorted: sortedIndices,
+                desc: `Swapping smaller element ${arr[i]} into left partition at index ${i}`
+              };
+            }
+          }
+        }
+
+        const temp = arr[i + 1];
+        arr[i + 1] = arr[high];
+        arr[high] = temp;
+
+        sortedIndices.add(i + 1);
+        yield {
+          type: 'swap',
+          swapping: [i + 1, high],
+          sorted: sortedIndices,
+          desc: `Placed pivot ${arr[i + 1]} into its sorted index ${i + 1}`
+        };
+
+        return i + 1;
+      }
+
+      function* qs(low, high) {
+        if (low <= high) {
+          if (low === high) {
+            sortedIndices.add(low);
+            yield { type: 'element-sorted', sorted: sortedIndices, desc: `Index ${low} is sorted` };
+            return;
+          }
+          const pIndex = yield* partition(low, high);
+          yield* qs(low, pIndex - 1);
+          yield* qs(pIndex + 1, high);
+        }
+      }
+
+      yield* qs(0, arr.length - 1);
+      for (let k = 0; k < arr.length; k++) sortedIndices.add(k);
+      yield { type: 'done', sorted: sortedIndices, desc: 'Quick Sort complete! Array fully partitioned and sorted.' };
+    }
+
+    function* binarySearchGen(arr, target) {
+      let left = 0;
+      let right = arr.length - 1;
+      const discarded = new Set();
+      const sorted = new Set();
+
+      while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+
+        yield {
+          type: 'compare',
+          inspecting: [mid],
+          discarded: new Set(discarded),
+          desc: `Inspecting midpoint index ${mid} (value: ${arr[mid]}) against target ${target}`
+        };
+
+        if (arr[mid] === target) {
+          sorted.add(mid);
+          yield {
+            type: 'found',
+            sorted: sorted,
+            discarded: new Set(discarded),
+            desc: `🎯 Target ${target} successfully FOUND at index ${mid}!`
+          };
+          return;
+        } else if (arr[mid] < target) {
+          for (let i = left; i <= mid; i++) discarded.add(i);
+          yield {
+            type: 'discard',
+            discarded: new Set(discarded),
+            desc: `${arr[mid]} < ${target}. Discarding left half (indices ${left} to ${mid}).`
+          };
+          left = mid + 1;
+        } else {
+          for (let i = mid; i <= right; i++) discarded.add(i);
+          yield {
+            type: 'discard',
+            discarded: new Set(discarded),
+            desc: `${arr[mid]} > ${target}. Discarding right half (indices ${mid} to ${right}).`
+          };
+          right = mid - 1;
+        }
+      }
+
+      yield {
+        type: 'not-found',
+        discarded: new Set(discarded),
+        desc: `Target ${target} was not found in the array.`
+      };
+    }
+
+    // --- State & Reset ---
+
+    function resetVisualizer() {
+      stopPlayback();
+      const algo = algoSelect.value;
+      const size = parseInt(sizeSelect.value, 10);
+      const isBS = algo === 'binary';
+
+      targetGroup.style.display = isBS ? 'flex' : 'none';
+
+      array = generateRandomArray(size, isBS);
+
+      if (isBS && targetInput) {
+        // Pick an existing number or random target
+        targetInput.value = array[Math.floor(array.length / 2)];
+      }
+
+      comparisons = 0;
+      swaps = 0;
+      hudComparisons.textContent = '0';
+      hudSwaps.textContent = '0';
+      hudStatusDot.style.background = '#34d399';
+
+      if (algo === 'bubble') {
+        hudComplexity.textContent = 'O(n²)';
+        generator = bubbleSortGen(array);
+        hudStatusText.textContent = 'Bubble Sort initialized. Click Play or Step.';
+      } else if (algo === 'quick') {
+        hudComplexity.textContent = 'O(n log n)';
+        generator = quickSortGen(array);
+        hudStatusText.textContent = 'Quick Sort initialized. Click Play or Step.';
+      } else if (algo === 'binary') {
+        hudComplexity.textContent = 'O(log n)';
+        const target = parseInt(targetInput.value, 10);
+        generator = binarySearchGen(array, target);
+        hudStatusText.textContent = `Binary Search initialized for target ${target}. Click Play or Step.`;
+      }
+
+      codeTrace.textContent = TRACES[algo] || '';
+      renderBars();
+    }
+
+    function step() {
+      if (!generator) return false;
+      const res = generator.next();
+
+      if (res.done) {
+        stopPlayback();
+        hudStatusDot.style.background = '#10b981';
+        return false;
+      }
+
+      const stepData = res.value;
+      if (stepData.type === 'compare') {
+        comparisons++;
+        hudComparisons.textContent = String(comparisons);
+      } else if (stepData.type === 'swap') {
+        swaps++;
+        hudSwaps.textContent = String(swaps);
+      }
+
+      hudStatusText.textContent = stepData.desc || 'Executing step...';
+      renderBars(stepData);
+      return true;
+    }
+
+    function startPlayback() {
+      isPlaying = true;
+      playBtn.textContent = '⏸ Pause';
+      playBtn.classList.add('playing');
+
+      function tick() {
+        if (!isPlaying) return;
+        const hasMore = step();
+        if (hasMore) {
+          const speed = parseInt(speedSlider.value, 10);
+          timer = setTimeout(tick, speed);
+        }
+      }
+
+      const speed = parseInt(speedSlider.value, 10);
+      timer = setTimeout(tick, speed);
+    }
+
+    function stopPlayback() {
+      isPlaying = false;
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      playBtn.textContent = '▶ Play';
+      playBtn.classList.remove('playing');
+    }
+
+    // --- Listeners ---
+
+    playBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        stopPlayback();
+      } else {
+        startPlayback();
+      }
+    });
+
+    stepBtn.addEventListener('click', () => {
+      stopPlayback();
+      step();
+    });
+
+    shuffleBtn.addEventListener('click', resetVisualizer);
+    algoSelect.addEventListener('change', resetVisualizer);
+    sizeSelect.addEventListener('change', resetVisualizer);
+
+    if (targetInput) {
+      targetInput.addEventListener('change', () => {
+        if (algoSelect.value === 'binary') {
+          resetVisualizer();
+        }
+      });
+    }
+
+    speedSlider.addEventListener('input', (e) => {
+      const ms = e.target.value;
+      speedVal.textContent = ms < 80 ? `Fast (${ms}ms)` : (ms > 350 ? `Slow (${ms}ms)` : `Normal (${ms}ms)`);
+    });
+
+    resetVisualizer();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAlgorithmVisualizer);
+  } else {
+    initAlgorithmVisualizer();
+  }
+})();
+
