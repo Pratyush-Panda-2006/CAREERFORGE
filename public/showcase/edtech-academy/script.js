@@ -2211,6 +2211,56 @@ function showCertificate(name) {
   renderCertificate();
 })();
 
+// ===============================================================
+// Course Prerequisite Checklist (Issue #284)
+// ===============================================================
+(function initPrerequisiteChecklist() {
+  'use strict';
+
+  const checklist = document.getElementById('coursePrerequisites');
+  const checkboxes = document.querySelectorAll('.prerequisite-checkbox');
+  const countText = document.getElementById('prerequisiteCount');
+  const progressFill = document.getElementById('prerequisiteProgressFill');
+  const readinessBadge = document.getElementById('readinessBadge');
+
+  if (
+    !checklist ||
+    !checkboxes.length ||
+    !countText ||
+    !progressFill ||
+    !readinessBadge
+  ) {
+    return;
+  }
+
+  function updatePrerequisiteStatus() {
+    const completed = [...checkboxes].filter(
+      (checkbox) => checkbox.checked
+    ).length;
+
+    const total = checkboxes.length;
+    const progress = (completed / total) * 100;
+
+    countText.textContent = `${completed} / ${total} completed`;
+    progressFill.style.width = `${progress}%`;
+
+    if (completed === total) {
+      readinessBadge.classList.add('ready');
+      readinessBadge.innerHTML =
+        '<span class="readiness-icon">✓</span><span>Ready to Enroll!</span>';
+    } else {
+      readinessBadge.classList.remove('ready');
+      readinessBadge.innerHTML =
+        '<span class="readiness-icon">○</span><span>Complete prerequisites to enroll</span>';
+    }
+  }
+
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', updatePrerequisiteStatus);
+  });
+
+  updatePrerequisiteStatus();
+})();
 // ==========================================================
 // Study Schedule Planner
 // ==========================================================

@@ -2978,6 +2978,228 @@ body {
   }
 }
 
+/* ===============================================================
+   Course Prerequisite Checklist (Issue #284)
+*/
+.prerequisite-section {
+  max-width: 1180px;
+  margin: 0 auto 100px;
+  padding: 0 24px;
+}
+
+.prerequisite-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+.prerequisite-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.prerequisite-badge {
+  display: inline-block;
+  padding: 7px 12px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(129, 140, 248, 0.45);
+  border-radius: 999px;
+  color: var(--indigo-light);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.prerequisite-header h2 {
+  margin-bottom: 10px;
+  font-size: 1.8rem;
+  color: #f8fafc;
+}
+
+.prerequisite-header p {
+  max-width: 680px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.readiness-badge {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: 0.3s ease;
+}
+
+.readiness-icon {
+  font-size: 1rem;
+}
+
+.readiness-badge.ready {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+}
+
+.prerequisite-progress {
+  margin-bottom: 24px;
+}
+
+.prerequisite-progress-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+#prerequisiteCount {
+  color: var(--indigo-light);
+  font-weight: 700;
+}
+
+.prerequisite-progress-track {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.prerequisite-progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--indigo);
+  box-shadow: 0 0 16px var(--indigo-glow);
+  transition: width 0.35s ease;
+}
+
+.prerequisite-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.prerequisite-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.prerequisite-item:hover {
+  border-color: rgba(129, 140, 248, 0.55);
+  transform: translateY(-2px);
+}
+
+.prerequisite-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.custom-checkbox {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 2px solid #64748b;
+  border-radius: 6px;
+  transition: 0.25s ease;
+}
+
+.prerequisite-text {
+  flex: 1;
+  color: #e2e8f0;
+  font-weight: 600;
+  transition: 0.25s ease;
+}
+
+.prerequisite-checkmark {
+  opacity: 0;
+  color: #34d399;
+  font-size: 1.1rem;
+  font-weight: 800;
+  transform: scale(0.6);
+  transition: 0.25s ease;
+}
+
+.prerequisite-item:has(.prerequisite-checkbox:checked) {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.prerequisite-checkbox:checked + .custom-checkbox {
+  border-color: #10b981;
+  background: #10b981;
+}
+
+.prerequisite-checkbox:checked + .custom-checkbox::after {
+  content: "✓";
+  display: block;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+}
+
+.prerequisite-checkbox:checked
+  ~ .prerequisite-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.prerequisite-checkbox:checked
+  ~ .prerequisite-checkmark {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.prerequisite-item:focus-within {
+  outline: 2px solid var(--indigo);
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .prerequisite-section {
+    padding: 0 16px;
+  }
+
+  .prerequisite-card {
+    padding: 22px;
+  }
+
+  .prerequisite-header {
+    flex-direction: column;
+  }
+
+  .readiness-badge {
+    white-space: normal;
+  }
+
+  .prerequisite-list {
+    grid-template-columns: 1fr;
 /* ==========================================================
    Study Schedule Planner
    ========================================================== */
