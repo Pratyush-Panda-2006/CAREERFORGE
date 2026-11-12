@@ -2333,7 +2333,7 @@ window.handleReviewSubmit = handleReviewSubmit;
 })();
 /* ===== END issue #188 ===== */
 
-/* ===== BEGIN Issue #283: Product Comparison Matrix Drawer ===== */
+/* ===== BEGIN Issue #283 & #433: Multi-Product Specification Comparison Matrix Drawer ===== */
 (function () {
   'use strict';
 
@@ -2343,12 +2343,17 @@ window.handleReviewSubmit = handleReviewSubmit;
       name: 'CyberDeck Pro Mechanical',
       img: '⌨️',
       price: 249.00,
+      rating: 4.9,
+      inStock: true,
+      availability: 'In Stock',
       specs: {
-        'Processor': 'ARM Cortex-M4F 120MHz Microcontroller',
+        'Pricing': '$249.00',
+        'Availability': 'In Stock',
+        'User Rating': '★ 4.9 / 5.0 (72 reviews)',
+        'Processor / Core': 'ARM Cortex-M4F 120MHz (QMK/VIA)',
         'Battery Life': '140 Hours (RGB Off) / 45 Hours (RGB On)',
         'Connectivity': 'Tri-Mode: 2.4GHz + Bluetooth 5.3 + USB-C',
         'Weight': '780g (Aircraft-grade Aluminum)',
-        'Price': '$249.00',
         'Warranty': '2 Years Full Hardware Replacement'
       }
     },
@@ -2357,12 +2362,17 @@ window.handleReviewSubmit = handleReviewSubmit;
       name: 'Acoustic Pulse ANC Headset',
       img: '🎧',
       price: 199.00,
+      rating: 4.8,
+      inStock: true,
+      availability: 'Only 3 Left',
       specs: {
-        'Processor': 'Dual-Core 32-bit DSP + ANC Neural Engine',
+        'Pricing': '$199.00',
+        'Availability': 'Only 3 Left',
+        'User Rating': '★ 4.8 / 5.0 (46 reviews)',
+        'Processor / Core': 'Dual-Core 32-bit DSP + ANC Neural Engine',
         'Battery Life': '60 Hours (ANC On) / 100 Hours (ANC Off)',
-        'Connectivity': 'Bluetooth 5.4 Low-Latency + 3.5mm Hi-Res',
+        'Connectivity': 'Wireless 2.4GHz + Bluetooth 5.3 + 3.5mm',
         'Weight': '245g (Memory Foam & Titanium)',
-        'Price': '$199.00',
         'Warranty': '1 Year Global Manufacturer Coverage'
       }
     },
@@ -2371,20 +2381,131 @@ window.handleReviewSubmit = handleReviewSubmit;
       name: 'Horizon 32" Curved OLED',
       img: '🖥️',
       price: 899.00,
+      rating: 4.9,
+      inStock: true,
+      availability: 'In Stock',
       specs: {
-        'Processor': 'Quantum QD Neo Display Engine (240Hz)',
-        'Battery Life': 'AC Powered (Internal 120W PSU, 0.5W Standby)',
+        'Pricing': '$899.00',
+        'Availability': 'In Stock',
+        'User Rating': '★ 4.9 / 5.0 (30 reviews)',
+        'Processor / Core': 'Quantum QD Neo Display Engine (240Hz)',
+        'Battery Life': 'AC Powered (120W PSU, 0.5W Standby)',
         'Connectivity': '2x HDMI 2.1 + 1x DP 2.1 + USB-C PD 90W',
         'Weight': '6.8kg (Ergonomic Heavy-Duty Stand)',
-        'Price': '$899.00',
         'Warranty': '3 Years Burn-In & Panel Protection'
+      }
+    },
+    p4: {
+      id: 'p4',
+      name: 'Nexus Neo 65% Low-Profile',
+      img: '⌨️',
+      price: 149.00,
+      rating: 4.7,
+      inStock: true,
+      availability: 'In Stock',
+      specs: {
+        'Pricing': '$149.00',
+        'Availability': 'In Stock',
+        'User Rating': '★ 4.7 / 5.0 (54 reviews)',
+        'Processor / Core': 'Nordic nRF52840 Ultra-Low-Power SoC',
+        'Battery Life': '120 Hours Continuous Wireless',
+        'Connectivity': 'Bluetooth 5.3 + USB-C Wired',
+        'Weight': '520g (CNC Anodized Aluminum)',
+        'Warranty': '2 Years Hardware Coverage'
+      }
+    },
+    p5: {
+      id: 'p5',
+      name: 'Vortex Reference Studio Monitors',
+      img: '🔊',
+      price: 349.00,
+      rating: 4.6,
+      inStock: true,
+      availability: 'In Stock',
+      specs: {
+        'Pricing': '$349.00',
+        'Availability': 'In Stock',
+        'User Rating': '★ 4.6 / 5.0 (28 reviews)',
+        'Processor / Core': 'Dual Class-D Bi-Amp + Room Correction DSP',
+        'Battery Life': 'AC Studio Mains (2x 90W RMS)',
+        'Connectivity': 'Balanced TRS + RCA + Optical S/PDIF',
+        'Weight': '4.9kg per pair (Damped MDF Enclosure)',
+        'Warranty': '2 Years Studio Monitor Warranty'
+      }
+    },
+    p6: {
+      id: 'p6',
+      name: 'Apex UltraWide 49" 240Hz',
+      img: '🖥️',
+      price: 1199.00,
+      rating: 4.9,
+      inStock: false,
+      availability: 'Backorder',
+      specs: {
+        'Pricing': '$1,199.00',
+        'Availability': 'Backorder',
+        'User Rating': '★ 4.9 / 5.0 (19 reviews)',
+        'Processor / Core': 'Dual-Engine 5120x1440 240Hz KVM Controller',
+        'Battery Life': 'AC Powered (Internal 240W PSU, USB-C PD)',
+        'Connectivity': 'USB-C 96W + Dual HDMI 2.1 + DP 2.1 + KVM',
+        'Weight': '11.4kg (1000R Curved Alloy Frame)',
+        'Warranty': '3 Years Zero-Bright-Dot & Burn-In'
+      }
+    },
+    p7: {
+      id: 'p7',
+      name: 'HyperStream Studio Mic & Arm',
+      img: '🎙️',
+      price: 179.00,
+      rating: 4.5,
+      inStock: true,
+      availability: 'In Stock',
+      specs: {
+        'Pricing': '$179.00',
+        'Availability': 'In Stock',
+        'User Rating': '★ 4.5 / 5.0 (39 reviews)',
+        'Processor / Core': '24-Bit / 192kHz Broadcast ADC + FET Preamp',
+        'Battery Life': 'USB-C Bus Powered (Zero Battery Required)',
+        'Connectivity': 'USB-C + 3.5mm Zero-Latency Monitor Out',
+        'Weight': '1.35kg (Capsule + Articulated Boom Arm)',
+        'Warranty': '2 Years Studio Replacement'
+      }
+    },
+    p8: {
+      id: 'p8',
+      name: 'Keychronix Ergo Alice Custom',
+      img: '⌨️',
+      price: 289.00,
+      rating: 4.8,
+      inStock: true,
+      availability: 'In Stock',
+      specs: {
+        'Pricing': '$289.00',
+        'Availability': 'In Stock',
+        'User Rating': '★ 4.8 / 5.0 (33 reviews)',
+        'Processor / Core': 'STM32F402 + Gasket Poron Acoustic Matrix',
+        'Battery Life': '180 Hours (4,000mAh Li-Po)',
+        'Connectivity': 'Tri-Mode: 2.4GHz + BT 5.3 + USB-C',
+        'Weight': '1.42kg (Brass Counterweight Chassis)',
+        'Warranty': '2 Years Enthusiast Hardware Support'
       }
     }
   };
 
-  const SPEC_KEYS = ['Processor', 'Battery Life', 'Connectivity', 'Weight', 'Price', 'Warranty'];
+  const SPEC_KEYS = [
+    'Pricing',
+    'Availability',
+    'User Rating',
+    'Processor / Core',
+    'Battery Life',
+    'Connectivity',
+    'Weight',
+    'Warranty'
+  ];
 
-  const selectedCompare = new Set();
+  // In-memory comparisonList array (max 3 items)
+  const comparisonList = [];
+  window.comparisonList = comparisonList;
 
   function initComparisonMatrix() {
     const compareBar = document.getElementById('compareBar');
@@ -2392,28 +2513,43 @@ window.handleReviewSubmit = handleReviewSubmit;
     const compareBarThumbs = document.getElementById('compareBarThumbs');
     const compareClearBtn = document.getElementById('compareClearBtn');
     const compareOpenBtn = document.getElementById('compareOpenBtn');
+    const compareFooterHint = document.getElementById('compareFooterHint');
 
     const compareBackdrop = document.getElementById('compareBackdrop');
     const compareDrawer = document.getElementById('compareDrawer');
     const compareCloseBtn = document.getElementById('compareCloseBtn');
     const compareCloseBottomBtn = document.getElementById('compareCloseBottomBtn');
     const compareDiffToggle = document.getElementById('compareDiffToggle');
+    const compareOnlyDiffToggle = document.getElementById('compareOnlyDiffToggle');
     const compareTableWrapper = document.getElementById('compareTableWrapper');
     const compareAddAllBtn = document.getElementById('compareAddAllBtn');
 
     const checkboxes = document.querySelectorAll('.compare-checkbox');
 
+    function addToComparison(id) {
+      if (!PRODUCT_SPECS[id] || comparisonList.includes(id)) return false;
+      if (comparisonList.length >= 3) return false;
+      comparisonList.push(id);
+      return true;
+    }
+
+    function removeFromComparison(id) {
+      const idx = comparisonList.indexOf(id);
+      if (idx !== -1) comparisonList.splice(idx, 1);
+    }
+
     function updateCompareBar() {
-      const count = selectedCompare.size;
+      const count = comparisonList.length;
       if (compareCount) compareCount.textContent = count;
+      if (compareFooterHint) compareFooterHint.textContent = `Comparing ${count} of 3 hardware slots`;
 
       if (!compareBar) return;
 
       if (count > 0) {
         compareBar.hidden = false;
         if (compareBarThumbs) {
-          compareBarThumbs.innerHTML = Array.from(selectedCompare)
-            .map(id => {
+          compareBarThumbs.innerHTML = comparisonList
+            .map((id) => {
               const p = PRODUCT_SPECS[id];
               return `<span class="compare-thumb-pill" title="${p ? p.name : id}">${p ? p.img : '📦'}</span>`;
             })
@@ -2426,46 +2562,56 @@ window.handleReviewSubmit = handleReviewSubmit;
 
     function renderMatrixTable() {
       if (!compareTableWrapper) return;
-      const ids = Array.from(selectedCompare);
 
-      if (ids.length === 0) {
+      if (comparisonList.length === 0) {
         compareTableWrapper.innerHTML = `
           <div style="text-align: center; padding: 40px; color: #94a3b8;">
             <p style="font-size: 1.1rem; margin-bottom: 12px;">No products selected for comparison.</p>
-            <p style="font-size: 0.85rem;">Check the "Compare" box on 2 or 3 items in the store to view their side-by-side spec matrix.</p>
+            <p style="font-size: 0.85rem;">Check the "Compare" box on up to 3 catalog items to inspect pricing, availability, ratings, battery life, and specs side-by-side.</p>
           </div>
         `;
         return;
       }
 
-      const products = ids.map(id => PRODUCT_SPECS[id]).filter(Boolean);
+      const products = comparisonList.map((id) => PRODUCT_SPECS[id]).filter(Boolean);
+      const minPrice = Math.min(...products.map((p) => p.price));
+      const maxRating = Math.max(...products.map((p) => p.rating));
 
       let html = `<table class="compare-matrix-table">`;
-
-      // Header row
       html += `<thead><tr><th class="compare-spec-col">Feature / Specification</th>`;
-      products.forEach(p => {
+      products.forEach((p) => {
+        const isBestPrice = products.length > 1 && p.price === minPrice;
+        const isTopRated = products.length > 1 && p.rating === maxRating;
         html += `
           <th class="compare-item-header">
             <div class="comp-prod-visual">${p.img}</div>
             <div class="comp-prod-name">${p.name}</div>
+            <div class="comp-prod-badges">
+              ${isBestPrice ? '<span class="comp-winner-pill best-price">Best Value</span>' : ''}
+              ${isTopRated ? '<span class="comp-winner-pill top-rated">Top Rated</span>' : ''}
+            </div>
             <div class="comp-prod-price">$${p.price.toFixed(2)}</div>
-            <button type="button" class="btn-remove-comp" data-remove-id="${p.id}" aria-label="Remove ${p.name} from comparison">Remove &times;</button>
+            <div class="comp-header-btns">
+              <button type="button" class="btn-remove-comp" data-remove-id="${p.id}" aria-label="Remove ${p.name} from comparison">Remove &times;</button>
+            </div>
           </th>
         `;
       });
       html += `</tr></thead><tbody>`;
 
-      // Spec rows
-      SPEC_KEYS.forEach(specKey => {
-        const values = products.map(p => p.specs[specKey] || 'N/A');
-        // Check if there is a difference across the products
+      SPEC_KEYS.forEach((specKey) => {
+        const values = products.map((p) => p.specs[specKey] || 'N/A');
         const hasDiff = products.length > 1 && new Set(values).size > 1;
-        const diffClass = hasDiff ? 'is-diff' : '';
+        const rowClass = hasDiff ? 'is-diff' : 'is-same';
 
-        html += `<tr class="${diffClass}"><td class="compare-spec-col">${specKey}</td>`;
-        values.forEach(val => {
-          html += `<td>${val}</td>`;
+        html += `<tr class="${rowClass}"><td class="compare-spec-col">${specKey}</td>`;
+        values.forEach((val) => {
+          if (specKey === 'Availability') {
+            const cls = val === 'In Stock' ? 'in-stock' : 'low-stock';
+            html += `<td><span class="comp-avail-chip ${cls}">${val}</span></td>`;
+          } else {
+            html += `<td>${val}</td>`;
+          }
         });
         html += `</tr>`;
       });
@@ -2473,16 +2619,15 @@ window.handleReviewSubmit = handleReviewSubmit;
       html += `</tbody></table>`;
       compareTableWrapper.innerHTML = html;
 
-      // Attach remove button listeners
-      compareTableWrapper.querySelectorAll('.btn-remove-comp').forEach(btn => {
+      compareTableWrapper.querySelectorAll('.btn-remove-comp').forEach((btn) => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-remove-id');
-          selectedCompare.delete(id);
+          removeFromComparison(id);
           const cb = document.querySelector(`.compare-checkbox[data-compare="${id}"]`);
           if (cb) cb.checked = false;
           updateCompareBar();
           renderMatrixTable();
-          if (selectedCompare.size === 0) {
+          if (comparisonList.length === 0) {
             closeDrawer();
           }
         });
@@ -2491,7 +2636,7 @@ window.handleReviewSubmit = handleReviewSubmit;
 
     function openDrawer() {
       if (!compareDrawer || !compareBackdrop) return;
-      if (selectedCompare.size === 0) {
+      if (comparisonList.length === 0) {
         if (typeof showToast === 'function') {
           showToast('Select at least 1 product to compare!');
         }
@@ -2503,6 +2648,9 @@ window.handleReviewSubmit = handleReviewSubmit;
       if (compareDiffToggle && compareDiffToggle.checked) {
         compareDrawer.classList.add('show-diff');
       }
+      if (compareOnlyDiffToggle && compareOnlyDiffToggle.checked) {
+        compareDrawer.classList.add('only-diff');
+      }
       compareDrawer.focus();
     }
 
@@ -2512,21 +2660,19 @@ window.handleReviewSubmit = handleReviewSubmit;
       compareBackdrop.classList.remove('open');
     }
 
-    // Checkbox changes
-    checkboxes.forEach(cb => {
+    checkboxes.forEach((cb) => {
       cb.addEventListener('change', () => {
         const id = cb.getAttribute('data-compare');
         if (cb.checked) {
-          if (selectedCompare.size >= 3) {
+          if (!addToComparison(id)) {
             cb.checked = false;
             if (typeof showToast === 'function') {
               showToast('Maximum 3 items can be compared at once.');
             }
             return;
           }
-          selectedCompare.add(id);
         } else {
-          selectedCompare.delete(id);
+          removeFromComparison(id);
         }
         updateCompareBar();
         if (compareDrawer && compareDrawer.classList.contains('open')) {
@@ -2535,43 +2681,41 @@ window.handleReviewSubmit = handleReviewSubmit;
       });
     });
 
-    // Clear comparison
     if (compareClearBtn) {
       compareClearBtn.addEventListener('click', () => {
-        selectedCompare.clear();
-        checkboxes.forEach(cb => { cb.checked = false; });
+        comparisonList.length = 0;
+        checkboxes.forEach((cb) => { cb.checked = false; });
         updateCompareBar();
         closeDrawer();
       });
     }
 
-    // Open & Close drawer
     if (compareOpenBtn) compareOpenBtn.addEventListener('click', openDrawer);
     if (compareCloseBtn) compareCloseBtn.addEventListener('click', closeDrawer);
     if (compareCloseBottomBtn) compareCloseBottomBtn.addEventListener('click', closeDrawer);
     if (compareBackdrop) compareBackdrop.addEventListener('click', closeDrawer);
 
-    // Difference toggle
     if (compareDiffToggle && compareDrawer) {
       compareDrawer.classList.add('show-diff');
       compareDiffToggle.addEventListener('change', () => {
-        if (compareDiffToggle.checked) {
-          compareDrawer.classList.add('show-diff');
-        } else {
-          compareDrawer.classList.remove('show-diff');
-        }
+        compareDrawer.classList.toggle('show-diff', compareDiffToggle.checked);
       });
     }
 
-    // Add All to Cart
+    if (compareOnlyDiffToggle && compareDrawer) {
+      compareOnlyDiffToggle.addEventListener('change', () => {
+        compareDrawer.classList.toggle('only-diff', compareOnlyDiffToggle.checked);
+      });
+    }
+
     if (compareAddAllBtn) {
       compareAddAllBtn.addEventListener('click', () => {
         let addedCount = 0;
-        selectedCompare.forEach(id => {
+        comparisonList.forEach((id) => {
           const p = PRODUCT_SPECS[id];
           if (p && typeof addToCart === 'function') {
             addToCart(p.id, p.name, p.price, p.img);
-            addedCount++;
+            addedCount += 1;
           }
         });
         if (typeof showToast === 'function') {
@@ -2580,7 +2724,6 @@ window.handleReviewSubmit = handleReviewSubmit;
       });
     }
 
-    // Escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && compareDrawer && compareDrawer.classList.contains('open')) {
         closeDrawer();
@@ -2592,4 +2735,4 @@ window.handleReviewSubmit = handleReviewSubmit;
 
   document.addEventListener('DOMContentLoaded', initComparisonMatrix);
 })();
-/* ===== END Issue #283 ===== */
+/* ===== END Issue #283 & #433 ===== */

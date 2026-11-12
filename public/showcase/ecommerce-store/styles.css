@@ -2503,9 +2503,11 @@ body {
   left: 0;
   right: 0;
   max-height: 88vh;
-  background: #0f172a;
-  border-top: 1px solid rgba(56, 189, 248, 0.4);
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+  background: rgba(15, 23, 42, 0.86);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(56, 189, 248, 0.45);
+  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.85);
   border-radius: 20px 20px 0 0;
   z-index: 1001;
   display: flex;
@@ -2525,7 +2527,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.75);
 }
 
 .compare-drawer-header h2 {
@@ -2543,7 +2545,8 @@ body {
 .compare-header-controls {
   display: flex;
   align-items: center;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 18px;
 }
 
 /* Difference Toggle Switch */
@@ -2603,7 +2606,7 @@ body {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 600px;
+  min-width: 640px;
 }
 
 .compare-matrix-table th,
@@ -2615,20 +2618,21 @@ body {
 }
 
 .compare-spec-col {
-  width: 200px;
-  background: #0b1120;
+  width: 210px;
+  min-width: 180px;
+  background: rgba(11, 17, 32, 0.96);
   color: #94a3b8;
   font-weight: 600;
   position: sticky;
   left: 0;
-  z-index: 2;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 3;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .compare-item-header {
   vertical-align: top;
   text-align: center;
-  background: rgba(30, 41, 59, 0.5);
+  background: rgba(30, 41, 59, 0.55);
   border-radius: 12px 12px 0 0;
   padding: 18px 14px;
 }
@@ -2645,6 +2649,34 @@ body {
   margin-bottom: 6px;
 }
 
+.comp-prod-badges {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.comp-winner-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.comp-winner-pill.best-price {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.comp-winner-pill.top-rated {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
 .comp-prod-price {
   font-size: 1.15rem;
   font-weight: 800;
@@ -2652,12 +2684,18 @@ body {
   margin-bottom: 10px;
 }
 
+.comp-header-btns {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
 .btn-remove-comp {
   background: transparent;
   border: 1px solid rgba(248, 113, 113, 0.4);
   color: #f87171;
   font-size: 0.75rem;
-  padding: 3px 10px;
+  padding: 4px 10px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2669,31 +2707,68 @@ body {
 }
 
 .compare-matrix-table tbody tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
 }
 
-/* Difference Highlighting */
+/* Difference Highlighting & Filtering */
 .compare-drawer.show-diff tr.is-diff td {
-  background: rgba(245, 158, 11, 0.07);
+  background: rgba(245, 158, 11, 0.08);
 }
 
 .compare-drawer.show-diff tr.is-diff td.compare-spec-col {
-  background: #191b1f;
+  background: rgba(25, 27, 36, 0.98);
   color: #fbbf24;
-  position: relative;
+  position: sticky;
+  left: 0;
 }
 
 .compare-drawer.show-diff tr.is-diff td.compare-spec-col::before {
   content: '⚡ ';
 }
 
+.compare-drawer.only-diff tr.is-same {
+  display: none;
+}
+
+.comp-avail-chip {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.comp-avail-chip.in-stock {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+}
+
+.comp-avail-chip.low-stock {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
 .compare-drawer-footer {
   padding: 18px 28px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.92);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 14px;
+}
+
+.compare-footer-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.compare-footer-buttons {
+  display: flex;
+  gap: 12px;
 }
 
 .btn-compare-add-all {
@@ -2749,7 +2824,7 @@ body {
     justify-content: space-between;
   }
 }
-/* ===== END Issue #283 ===== */
+/* ===== END Issue #283 & #433 ===== */
 
 
 /* ===== BEGIN Issue #402: Faceted Filter Engine & Responsive Layout ===== */
