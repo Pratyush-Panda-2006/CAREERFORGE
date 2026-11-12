@@ -1737,3 +1737,415 @@ if (document.readyState === 'loading') {
   }
 })();
 /* ===== END Issue #291 ===== */
+
+// ===============================================================
+// Fantasy Esports Draft Simulator (Issue #347)
+// ===============================================================
+(function initFantasyDraftSimulator() {
+  'use strict';
+
+  var SALARY_CAP = 50000;
+  var STORAGE_KEY = 'moba_fantasy_draft_347';
+  var ROLES = ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT'];
+
+  var PLAYERS = [
+    // TOP
+    { id: 'p_zeus', name: 'Zeus', team: 'T1', role: 'TOP', salary: 11500, pts: 38.4, kda: '3.8' },
+    { id: 'p_bin', name: 'Bin', team: 'BLG', role: 'TOP', salary: 11200, pts: 37.1, kda: '3.6' },
+    { id: 'p_369', name: '369', team: 'TES', role: 'TOP', salary: 10500, pts: 35.2, kda: '3.4' },
+    { id: 'p_kiin', name: 'Kiin', team: 'GEN.G', role: 'TOP', salary: 10000, pts: 34.5, kda: '3.5' },
+    { id: 'p_bb', name: 'BrokenBlade', team: 'G2', role: 'TOP', salary: 9200, pts: 31.8, kda: '3.1' },
+
+    // JUNGLE
+    { id: 'p_canyon', name: 'Canyon', team: 'GEN.G', role: 'JUNGLE', salary: 11800, pts: 42.1, kda: '4.5' },
+    { id: 'p_oner', name: 'Oner', team: 'T1', role: 'JUNGLE', salary: 11000, pts: 39.5, kda: '4.1' },
+    { id: 'p_tarzan', name: 'Tarzan', team: 'WBG', role: 'JUNGLE', salary: 10400, pts: 36.8, kda: '3.7' },
+    { id: 'p_tian', name: 'Tian', team: 'TES', role: 'JUNGLE', salary: 10100, pts: 35.0, kda: '3.6' },
+    { id: 'p_yike', name: 'Yike', team: 'G2', role: 'JUNGLE', salary: 9500, pts: 33.2, kda: '3.3' },
+
+    // MID
+    { id: 'p_faker', name: 'Faker', team: 'T1', role: 'MID', salary: 12500, pts: 44.6, kda: '4.6' },
+    { id: 'p_chovy', name: 'Chovy', team: 'GEN.G', role: 'MID', salary: 12400, pts: 45.2, kda: '4.8' },
+    { id: 'p_knight', name: 'Knight', team: 'BLG', role: 'MID', salary: 11900, pts: 42.0, kda: '4.2' },
+    { id: 'p_caps', name: 'Caps', team: 'G2', role: 'MID', salary: 11200, pts: 39.8, kda: '3.9' },
+    { id: 'p_scout', name: 'Scout', team: 'LNG', role: 'MID', salary: 10800, pts: 37.5, kda: '3.8' },
+
+    // ADC
+    { id: 'p_ruler', name: 'Ruler', team: 'JDG', role: 'ADC', salary: 12000, pts: 43.8, kda: '4.9' },
+    { id: 'p_viper', name: 'Viper', team: 'HLE', role: 'ADC', salary: 11800, pts: 42.2, kda: '4.4' },
+    { id: 'p_gumayusi', name: 'Gumayusi', team: 'T1', role: 'ADC', salary: 11600, pts: 41.5, kda: '4.3' },
+    { id: 'p_jackey', name: 'JackeyLove', team: 'TES', role: 'ADC', salary: 11300, pts: 40.1, kda: '4.0' },
+    { id: 'p_hans', name: 'Hans Sama', team: 'G2', role: 'ADC', salary: 9800, pts: 34.6, kda: '3.6' },
+
+    // SUPPORT
+    { id: 'p_keria', name: 'Keria', team: 'T1', role: 'SUPPORT', salary: 10800, pts: 36.5, kda: '4.2' },
+    { id: 'p_delight', name: 'Delight', team: 'HLE', role: 'SUPPORT', salary: 9900, pts: 32.8, kda: '3.7' },
+    { id: 'p_lehends', name: 'Lehends', team: 'GEN.G', role: 'SUPPORT', salary: 9800, pts: 32.4, kda: '3.6' },
+    { id: 'p_meiko', name: 'Meiko', team: 'TES', role: 'SUPPORT', salary: 9600, pts: 31.9, kda: '3.5' },
+    { id: 'p_mikyx', name: 'Mikyx', team: 'G2', role: 'SUPPORT', salary: 9100, pts: 30.5, kda: '3.4' }
+  ];
+
+  var playerById = {};
+  PLAYERS.forEach(function (p) {
+    playerById[p.id] = p;
+  });
+
+  var state = {
+    roster: { TOP: null, JUNGLE: null, MID: null, ADC: null, SUPPORT: null },
+    activeFilter: 'ALL'
+  };
+
+  function loadSavedRoster() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        ROLES.forEach(function (r) {
+          if (parsed[r] && playerById[parsed[r]]) {
+            state.roster[r] = parsed[r];
+          }
+        });
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }
+
+  function saveRoster() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.roster));
+    } catch {
+      // Ignore quota errors
+    }
+  }
+
+  function formatMoney(amount) {
+    return '$' + Number(amount).toLocaleString('en-US');
+  }
+
+  function getDraftedList() {
+    return ROLES.map(function (r) {
+      return state.roster[r] ? playerById[state.roster[r]] : null;
+    }).filter(Boolean);
+  }
+
+  function calculateTotalSalary() {
+    return getDraftedList().reduce(function (sum, p) {
+      return sum + p.salary;
+    }, 0);
+  }
+
+  function calculateTotalPts() {
+    return getDraftedList().reduce(function (sum, p) {
+      return sum + p.pts;
+    }, 0);
+  }
+
+  function renderRosterSlots() {
+    var container = document.getElementById('draft-slots-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    ROLES.forEach(function (role) {
+      var playerId = state.roster[role];
+      var player = playerId ? playerById[playerId] : null;
+
+      var card = document.createElement('div');
+      card.className = 'draft-slot-card' + (player ? ' filled' : '');
+
+      var roleTag = document.createElement('span');
+      roleTag.className = 'slot-role-tag role-' + role;
+      roleTag.textContent = role;
+      card.appendChild(roleTag);
+
+      if (player) {
+        var info = document.createElement('div');
+        info.className = 'slot-player-info';
+
+        info.innerHTML =
+          '<div>' +
+            '<div class="slot-player-name">' + player.name + '</div>' +
+            '<div class="slot-player-team">' + player.team + ' • ' + player.kda + ' KDA</div>' +
+          '</div>' +
+          '<div class="slot-player-stats">' +
+            '<span class="card-salary">' + formatMoney(player.salary) + '</span>' +
+            '<span class="card-pts">' + player.pts.toFixed(1) + ' PTS</span>' +
+          '</div>';
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-slot-remove';
+        removeBtn.textContent = '✕ Remove';
+        removeBtn.setAttribute('aria-label', 'Remove ' + player.name + ' from ' + role + ' slot');
+        removeBtn.addEventListener('click', function () {
+          state.roster[role] = null;
+          saveRoster();
+          updateUI();
+        });
+
+        info.appendChild(removeBtn);
+        card.appendChild(info);
+      } else {
+        var empty = document.createElement('div');
+        empty.className = 'slot-empty-state';
+        empty.innerHTML = '<span>➕</span><span>Empty ' + role + ' Slot</span>';
+        card.appendChild(empty);
+      }
+
+      container.appendChild(card);
+    });
+  }
+
+  function renderBenchGrid() {
+    var grid = document.getElementById('draft-players-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    var totalSpent = calculateTotalSalary();
+    var remBudget = SALARY_CAP - totalSpent;
+
+    var filtered = PLAYERS.filter(function (p) {
+      return state.activeFilter === 'ALL' || p.role === state.activeFilter;
+    });
+
+    filtered.forEach(function (player) {
+      var isDrafted = state.roster[player.role] === player.id;
+      var currentInSlot = state.roster[player.role] ? playerById[state.roster[player.role]] : null;
+      var netCost = player.salary - (currentInSlot ? currentInSlot.salary : 0);
+      var canAfford = isDrafted || netCost <= remBudget;
+
+      var card = document.createElement('div');
+      card.className = 'draft-player-card' + (isDrafted ? ' is-drafted' : '');
+
+      card.innerHTML =
+        '<div>' +
+          '<div class="card-top-row">' +
+            '<span class="slot-role-tag role-' + player.role + '">' + player.role + '</span>' +
+            '<span class="card-pts">' + player.pts.toFixed(1) + ' PTS</span>' +
+          '</div>' +
+          '<div class="card-player-name">' + player.name + '</div>' +
+          '<div class="card-player-team">' + player.team + ' • ' + player.kda + ' KDA</div>' +
+          '<div class="card-meta-row">' +
+            '<span class="card-salary">' + formatMoney(player.salary) + '</span>' +
+            '<span style="color:#94a3b8;font-size:0.75rem;">Cap Impact: ' + (netCost >= 0 ? '+' : '') + formatMoney(netCost) + '</span>' +
+          '</div>' +
+        '</div>';
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-card-draft ' + (isDrafted ? 'in-roster' : 'draft-action');
+
+      if (isDrafted) {
+        btn.textContent = '✓ In Roster (Remove)';
+        btn.addEventListener('click', function () {
+          state.roster[player.role] = null;
+          saveRoster();
+          updateUI();
+        });
+      } else {
+        btn.textContent = currentInSlot ? '🔄 Swap ' + player.role : '➕ Draft ' + player.role;
+        btn.disabled = !canAfford;
+        if (!canAfford) {
+          btn.title = 'Cannot afford: exceeds cap by ' + formatMoney(netCost - remBudget);
+        }
+        btn.addEventListener('click', function () {
+          state.roster[player.role] = player.id;
+          saveRoster();
+          updateUI();
+        });
+      }
+
+      card.appendChild(btn);
+      grid.appendChild(card);
+    });
+  }
+
+  function updateUI() {
+    var spent = calculateTotalSalary();
+    var remaining = SALARY_CAP - spent;
+    var pts = calculateTotalPts();
+    var draftedCount = getDraftedList().length;
+    var isCompliant = draftedCount === 5 && spent <= SALARY_CAP;
+
+    // Header counters
+    var countEl = document.getElementById('draft-roster-count');
+    if (countEl) countEl.textContent = draftedCount + ' / 5 FILLED';
+
+    var spentEl = document.getElementById('draft-spent-text');
+    if (spentEl) spentEl.textContent = formatMoney(spent);
+
+    var remEl = document.getElementById('draft-rem-text');
+    if (remEl) {
+      remEl.textContent = formatMoney(remaining);
+      remEl.className = remaining >= 0 ? 'text-emerald' : 'text-red';
+    }
+
+    var capFill = document.getElementById('draft-cap-fill');
+    var capBar = document.getElementById('draft-cap-bar');
+    if (capFill && capBar) {
+      var pct = Math.min(100, (spent / SALARY_CAP) * 100);
+      capFill.style.width = pct + '%';
+      capBar.setAttribute('aria-valuenow', String(spent));
+      capFill.classList.toggle('over-budget', spent > SALARY_CAP);
+    }
+
+    // Points display
+    var ptsEl = document.getElementById('draft-total-pts');
+    if (ptsEl) ptsEl.textContent = pts.toFixed(1);
+
+    var ptsSub = document.getElementById('draft-pts-sub');
+    if (ptsSub) {
+      if (isCompliant) {
+        ptsSub.textContent = 'Roster is 100% compliant. Projected output: ' + pts.toFixed(1) + ' points.';
+      } else if (draftedCount < 5) {
+        ptsSub.textContent = 'Draft ' + (5 - draftedCount) + ' more player(s) to finalize team.';
+      } else {
+        ptsSub.textContent = 'Salary cap exceeded! Trim player salaries to enable roster lock.';
+      }
+    }
+
+    var badge = document.getElementById('draft-compliance-badge');
+    if (badge) {
+      if (isCompliant) {
+        badge.textContent = 'ROSTER COMPLIANT // READY';
+        badge.className = 'draft-compliance-badge valid';
+      } else if (spent > SALARY_CAP) {
+        badge.textContent = 'SALARY CAP EXCEEDED';
+        badge.className = 'draft-compliance-badge';
+      } else {
+        badge.textContent = 'INCOMPLETE ROSTER';
+        badge.className = 'draft-compliance-badge';
+      }
+    }
+
+    var lockinBtn = document.getElementById('draft-lockin-btn');
+    if (lockinBtn) {
+      lockinBtn.disabled = !isCompliant;
+    }
+
+    renderRosterSlots();
+    renderBenchGrid();
+  }
+
+  function autoDraftBestLineup() {
+    var best = null;
+    var maxPts = -1;
+
+    // Pick 1 from each role maximizing points within $50,000
+    var tops = PLAYERS.filter(function (p) { return p.role === 'TOP'; });
+    var jungles = PLAYERS.filter(function (p) { return p.role === 'JUNGLE'; });
+    var mids = PLAYERS.filter(function (p) { return p.role === 'MID'; });
+    var adcs = PLAYERS.filter(function (p) { return p.role === 'ADC'; });
+    var supps = PLAYERS.filter(function (p) { return p.role === 'SUPPORT'; });
+
+    tops.forEach(function (t) {
+      jungles.forEach(function (j) {
+        if (t.salary + j.salary >= SALARY_CAP) return;
+        mids.forEach(function (m) {
+          if (t.salary + j.salary + m.salary >= SALARY_CAP) return;
+          adcs.forEach(function (a) {
+            if (t.salary + j.salary + m.salary + a.salary >= SALARY_CAP) return;
+            supps.forEach(function (s) {
+              var cost = t.salary + j.salary + m.salary + a.salary + s.salary;
+              if (cost <= SALARY_CAP) {
+                var totalPts = t.pts + j.pts + m.pts + a.pts + s.pts;
+                if (totalPts > maxPts) {
+                  maxPts = totalPts;
+                  best = { TOP: t.id, JUNGLE: j.id, MID: m.id, ADC: a.id, SUPPORT: s.id };
+                }
+              }
+            });
+          });
+        });
+      });
+    });
+
+    if (best) {
+      state.roster = best;
+      saveRoster();
+      updateUI();
+    }
+  }
+
+  function setupEventListeners() {
+    var resetBtn = document.getElementById('draft-reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        state.roster = { TOP: null, JUNGLE: null, MID: null, ADC: null, SUPPORT: null };
+        saveRoster();
+        updateUI();
+      });
+    }
+
+    var autoBtn = document.getElementById('draft-autofill-btn');
+    if (autoBtn) {
+      autoBtn.addEventListener('click', autoDraftBestLineup);
+    }
+
+    // Role filter buttons
+    var filterBtns = document.querySelectorAll('.draft-role-btn');
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        filterBtns.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        state.activeFilter = btn.getAttribute('data-role');
+        renderBenchGrid();
+      });
+    });
+
+    // Celebration modal lock-in
+    var lockinBtn = document.getElementById('draft-lockin-btn');
+    var modal = document.getElementById('draft-celebration-modal');
+    var celebClose = document.getElementById('celeb-close-btn');
+    var celebSummary = document.getElementById('celeb-summary');
+
+    if (lockinBtn && modal) {
+      lockinBtn.addEventListener('click', function () {
+        var drafted = getDraftedList();
+        if (drafted.length !== 5 || calculateTotalSalary() > SALARY_CAP) return;
+
+        if (celebSummary) {
+          celebSummary.innerHTML =
+            '<div><strong>TOP:</strong> ' + playerById[state.roster.TOP].name + ' (' + formatMoney(playerById[state.roster.TOP].salary) + ')</div>' +
+            '<div><strong>JGL:</strong> ' + playerById[state.roster.JUNGLE].name + ' (' + formatMoney(playerById[state.roster.JUNGLE].salary) + ')</div>' +
+            '<div><strong>MID:</strong> ' + playerById[state.roster.MID].name + ' (' + formatMoney(playerById[state.roster.MID].salary) + ')</div>' +
+            '<div><strong>ADC:</strong> ' + playerById[state.roster.ADC].name + ' (' + formatMoney(playerById[state.roster.ADC].salary) + ')</div>' +
+            '<div><strong>SUP:</strong> ' + playerById[state.roster.SUPPORT].name + ' (' + formatMoney(playerById[state.roster.SUPPORT].salary) + ')</div>' +
+            '<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px;">' +
+              '<strong>TOTAL SALARY:</strong> ' + formatMoney(calculateTotalSalary()) + ' / $50,000<br/>' +
+              '<strong>PROJECTED PTS:</strong> ' + calculateTotalPts().toFixed(1) + ' PTS' +
+            '</div>';
+        }
+
+        if (typeof modal.showModal === 'function') {
+          modal.showModal();
+        } else {
+          modal.setAttribute('open', '');
+        }
+      });
+    }
+
+    if (celebClose && modal) {
+      celebClose.addEventListener('click', function () {
+        if (typeof modal.close === 'function') {
+          modal.close();
+        } else {
+          modal.removeAttribute('open');
+        }
+      });
+    }
+  }
+
+  function start() {
+    loadSavedRoster();
+    setupEventListeners();
+    updateUI();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+
