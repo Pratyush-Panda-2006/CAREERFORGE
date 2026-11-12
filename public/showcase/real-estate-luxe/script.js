@@ -738,17 +738,29 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 })();
 
-/* ===== BEGIN Issue #357: Interactive 2D Architectural Floor Plan & Sunlight Simulator ===== */
-(function initFloorplanSunlightSimulator() {
-  const section = document.getElementById('estate-floorplan-section');
-  if (!section) return;
+/* ===== BEGIN Issue #357 & #448: Interactive Multi-Level Architectural Floor Plan & Sunlight Simulator ===== */
+function calculateMeasurement(p1, p2, scale = 0.05) {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const distPx = Math.hypot(dx, dy);
+  const meters = +(distPx * scale).toFixed(2);
+  const feet = +(meters * 3.28084).toFixed(1);
+  const angleDeg = Math.round((Math.atan2(dy, dx) * 180) / Math.PI);
+  return { distPx, meters, feet, angleDeg };
+}
 
+window.calculateMeasurement = calculateMeasurement;
+
+(function initFloorplanSunlightSimulator() {
   // Rooms Architectural Specs Catalog
   const ROOMS_DATA = {
     foyer: {
       tag: 'GROUND LEVEL · ZONE 01',
       name: 'Grand Foyer',
       dim: "18' 4\" × 22' 0\" · 403 SQ FT",
+      dimMetric: "5.59m × 6.70m · 37.4 SQ M",
+      sqft: 403,
+      sqm: 37.4,
       ceiling: "14' Coffered with Bronze Reveal",
       exposure: 'Southern Ambient Light',
       orientation: 'south',
@@ -760,6 +772,9 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'GROUND LEVEL · ZONE 02',
       name: 'Great Salon & Living Atrium',
       dim: "35' 0\" × 24' 6\" · 857 SQ FT",
+      dimMetric: "10.67m × 7.47m · 79.6 SQ M",
+      sqft: 857,
+      sqm: 79.6,
       ceiling: "16' Architectural Exposed Timber Beams",
       exposure: 'Dual North-South Cross Illumination',
       orientation: 'south-north',
@@ -771,6 +786,9 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'GROUND LEVEL · ZONE 03',
       name: "Gourmet Chef's Kitchen & Pantry",
       dim: "22' 0\" × 18' 6\" · 407 SQ FT",
+      dimMetric: "6.70m × 5.64m · 37.8 SQ M",
+      sqft: 407,
+      sqm: 37.8,
       ceiling: "12' Flush Drywall with Integrated Linear LED",
       exposure: 'Eastern Morning Solar Light',
       orientation: 'east',
@@ -782,6 +800,9 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'GROUND LEVEL · ZONE 04',
       name: 'Sommelier Wine Vault',
       dim: "16' 0\" × 14' 0\" · 224 SQ FT",
+      dimMetric: "4.88m × 4.27m · 20.8 SQ M",
+      sqft: 224,
+      sqm: 20.8,
       ceiling: "10' Vaulted Tuscan Brick Arch",
       exposure: 'Protected Sub-Level (Zero Direct UV Solar)',
       orientation: 'protected',
@@ -793,6 +814,9 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'GROUND LEVEL · ZONE 05',
       name: 'Executive Library & Study',
       dim: "24' 0\" × 16' 8\" · 400 SQ FT",
+      dimMetric: "7.31m × 5.08m · 37.2 SQ M",
+      sqft: 400,
+      sqm: 37.2,
       ceiling: "13' Custom Fluted Walnut Millwork",
       exposure: 'Western Sunset & Golden Hour Light',
       orientation: 'west',
@@ -804,6 +828,9 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'GROUND LEVEL · ZONE 06 (EXTERIOR)',
       name: 'Infinity Ocean Terrace & Resort Pool',
       dim: "68' 0\" × 26' 0\" · 1,768 SQ FT",
+      dimMetric: "20.73m × 7.92m · 164.3 SQ M",
+      sqft: 1768,
+      sqm: 164.3,
       ceiling: 'Open Sky / Cantilevered Bronze Canopy',
       exposure: 'Full Panoramic 180° Solar Arch (Dawn to Dusk)',
       orientation: 'all',
@@ -815,6 +842,9 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'UPPER LEVEL · ZONE 07',
       name: 'Master Penthouse Sanctuary Suite',
       dim: "38' 0\" × 22' 0\" · 836 SQ FT",
+      dimMetric: "11.58m × 6.70m · 77.7 SQ M",
+      sqft: 836,
+      sqm: 77.7,
       ceiling: "14' Raised Tray with Hidden Perimeter Cove Light",
       exposure: 'Direct Western Sunset & Golden Hour Glow',
       orientation: 'west',
@@ -826,6 +856,9 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'UPPER LEVEL · ZONE 08',
       name: 'Dual Designer Dressing Salons',
       dim: "22' 0\" × 15' 0\" · 330 SQ FT",
+      dimMetric: "6.70m × 4.57m · 30.7 SQ M",
+      sqft: 330,
+      sqm: 30.7,
       ceiling: "11' Flush Ceiling with 98 CRI Vanity Spotlights",
       exposure: 'Filtered Northern Diffused Light (Color Neutral)',
       orientation: 'north',
@@ -837,14 +870,78 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'UPPER LEVEL · ZONE 09',
       name: 'Spa Wellness Bath & Cedar Sauna',
       dim: "22' 0\" × 15' 0\" · 330 SQ FT",
+      dimMetric: "6.70m × 4.57m · 30.7 SQ M",
+      sqft: 330,
+      sqm: 30.7,
       ceiling: "12' Water-Resistant Tadelakt Plaster Ceiling",
       exposure: 'Eastern Morning Awakening Sun',
       orientation: 'east',
       flooring: 'Bookmatched Statuario Marble Heated Slabs',
       glazing: 'Privacy Smart Glass (Opaque/Clear Electrochromic)',
       note: 'Features an oversized carved marble freestanding soaking tub overlooking the canyon, steam shower with chroma-therapy, and custom Scandinavian red cedar dry sauna.'
+    },
+    skylounge: {
+      tag: 'ROOFTOP LEVEL · ZONE 10',
+      name: 'Rooftop Sky Lounge & Cocktail Pavilion',
+      dim: "32' 0\" × 18' 0\" · 576 SQ FT",
+      dimMetric: "9.75m × 5.48m · 53.5 SQ M",
+      sqft: 576,
+      sqm: 53.5,
+      ceiling: "12' Motorized Louvered Bioclimatic Pergola",
+      exposure: 'Panoramic 360° Sky Arc',
+      orientation: 'all',
+      flooring: 'Textured Flamed Basalt Flagstones',
+      glazing: 'Frameless Glass Windbreak Panels',
+      note: 'Commanding uninterrupted 360-degree Pacific ocean and Santa Monica mountain views with custom teak banquette seating, integrated quartz bar, and gas fire ribbon.'
+    },
+    observatory: {
+      tag: 'ROOFTOP LEVEL · ZONE 11',
+      name: 'Stargazing Telescope Observatory',
+      dim: "18' DIA · 254 SQ FT",
+      dimMetric: "5.48m DIA · 23.6 SQ M",
+      sqft: 254,
+      sqm: 23.6,
+      ceiling: "16' Motorized Hemispherical Rotating Dome",
+      exposure: 'Zenith Night Sky Orientation',
+      orientation: 'north',
+      flooring: 'Anti-Vibration Carbon Composite Decking',
+      glazing: 'Aperture Shutter with Zero Light Pollution Sealing',
+      note: 'Equipped with a research-grade PlaneWave CDK17 astrograph telescope on a direct bedrock-isolated concrete pier.'
+    },
+    sundeck: {
+      tag: 'ROOFTOP LEVEL · ZONE 12 (EXTERIOR)',
+      name: 'Cantilevered Sky Pool & Sun Deck',
+      dim: "68' 0\" × 22' 0\" · 1,496 SQ FT",
+      dimMetric: "20.7m × 6.7m · 139.0 SQ M",
+      sqft: 1496,
+      sqm: 139.0,
+      ceiling: 'Open Celestial Sky',
+      exposure: 'Full Unobstructed Southern Solar Arc',
+      orientation: 'south',
+      flooring: 'Cool-Touch Thermo-Ash Decking',
+      glazing: 'Structural Acrylic Infinity Spillway',
+      note: 'Dramatic glass-bottom cantilever hovering 200 feet over the bluff with hydrotherapy jets and daybed cabanas.'
+    },
+    alfresco: {
+      tag: 'ROOFTOP LEVEL · ZONE 13',
+      name: 'Alfresco Teppanyaki Grill & Kitchen',
+      dim: "16' 0\" × 14' 0\" · 224 SQ FT",
+      dimMetric: "4.88m × 4.27m · 20.8 SQ M",
+      sqft: 224,
+      sqm: 20.8,
+      ceiling: "11' Marine-Grade Stainless Canopy",
+      exposure: 'Eastern Morning & Twilight Light',
+      orientation: 'east',
+      flooring: 'Honed Non-Porous Quartzite Tiles',
+      glazing: 'Open-Air Architectural Screen',
+      note: 'Complete outdoor culinary theater with Evo Affinity teppanyaki flattop, wood-fired Mugnaini pizza oven, and dual beverage taps.'
     }
   };
+
+  window.ROOMS_DATA = ROOMS_DATA;
+
+  const section = document.getElementById('estate-floorplan-section');
+  if (!section) return;
 
   // State
   let _currentLevel = 'ground';
@@ -854,8 +951,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
   const tabGround = document.getElementById('tabGroundLevel');
   const tabUpper = document.getElementById('tabUpperLevel');
+  const tabRooftop = document.getElementById('tabRooftopLevel');
   const roomsGroundGroup = document.getElementById('roomsGroundLevel');
   const roomsUpperGroup = document.getElementById('roomsUpperLevel');
+  const roomsRooftopGroup = document.getElementById('roomsRooftopLevel');
 
   const sunTimeRange = document.getElementById('sunTimeRange');
   const sunTimeDisplay = document.getElementById('sunTimeDisplay');
@@ -880,28 +979,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const daylightMeterFill = document.getElementById('daylightMeterFill');
   const specArchitectNote = document.getElementById('specArchitectNote');
 
-  // Level Switcher
-  tabGround.addEventListener('click', () => {
-    _currentLevel = 'ground';
-    tabGround.classList.add('active');
-    tabGround.setAttribute('aria-selected', 'true');
-    tabUpper.classList.remove('active');
-    tabUpper.setAttribute('aria-selected', 'false');
-    roomsGroundGroup.style.display = 'block';
-    roomsUpperGroup.style.display = 'none';
-    selectRoom('foyer');
-  });
+  // Unit Toggle (Imperial / Metric)
+  let currentUnit = 'imperial';
+  const btnUnitToggle = document.getElementById('btnUnitToggle');
+  const unitToggleLabel = document.getElementById('unitToggleLabel');
 
-  tabUpper.addEventListener('click', () => {
-    _currentLevel = 'upper';
-    tabUpper.classList.add('active');
-    tabUpper.setAttribute('aria-selected', 'true');
-    tabGround.classList.remove('active');
-    tabGround.setAttribute('aria-selected', 'false');
-    roomsUpperGroup.style.display = 'block';
-    roomsGroundGroup.style.display = 'none';
-    selectRoom('master');
-  });
+  if (btnUnitToggle) {
+    btnUnitToggle.addEventListener('click', () => {
+      currentUnit = currentUnit === 'imperial' ? 'metric' : 'imperial';
+      if (unitToggleLabel) {
+        unitToggleLabel.textContent = currentUnit === 'imperial' ? 'Metric (m)' : 'Imperial (ft)';
+      }
+      if (currentRoomId && ROOMS_DATA[currentRoomId]) {
+        selectRoom(currentRoomId);
+      }
+    });
+  }
+
+  // Level Switcher Engine (Ground, Penthouse/Upper, Rooftop Terrace)
+  function setLevel(lvl) {
+    _currentLevel = lvl;
+    const tabs = [
+      { tab: tabGround, group: roomsGroundGroup, lvl: 'ground', defaultRoom: 'foyer' },
+      { tab: tabUpper, group: roomsUpperGroup, lvl: 'upper', defaultRoom: 'master' },
+      { tab: tabRooftop, group: roomsRooftopGroup, lvl: 'rooftop', defaultRoom: 'skylounge' }
+    ];
+
+    tabs.forEach(({ tab, group, lvl: l, defaultRoom }) => {
+      const isCur = (l === lvl);
+      if (tab) {
+        tab.classList.toggle('active', isCur);
+        tab.setAttribute('aria-selected', String(isCur));
+      }
+      if (group) {
+        group.style.display = isCur ? 'block' : 'none';
+      }
+      if (isCur) {
+        selectRoom(defaultRoom);
+      }
+    });
+  }
+
+  if (tabGround) tabGround.addEventListener('click', () => setLevel('ground'));
+  if (tabUpper) tabUpper.addEventListener('click', () => setLevel('upper'));
+  if (tabRooftop) tabRooftop.addEventListener('click', () => setLevel('rooftop'));
 
   // Room Selection Handler
   function selectRoom(roomId) {
@@ -918,17 +1039,181 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update Sidebar Specs
     const d = ROOMS_DATA[roomId];
-    specRoomTag.textContent = d.tag;
-    specRoomName.textContent = d.name;
-    specRoomDim.textContent = d.dim;
-    specCeiling.textContent = d.ceiling;
-    specExposure.textContent = d.exposure;
-    specFlooring.textContent = d.flooring;
-    specGlazing.textContent = d.glazing;
-    specArchitectNote.textContent = `"${d.note}"`;
+    if (specRoomTag) specRoomTag.textContent = d.tag;
+    if (specRoomName) specRoomName.textContent = d.name;
+    if (specRoomDim) specRoomDim.textContent = currentUnit === 'imperial' ? d.dim : (d.dimMetric || d.dim);
+    if (specCeiling) specCeiling.textContent = d.ceiling;
+    if (specExposure) specExposure.textContent = d.exposure;
+    if (specFlooring) specFlooring.textContent = d.flooring;
+    if (specGlazing) specGlazing.textContent = d.glazing;
+    if (specArchitectNote) specArchitectNote.textContent = `"${d.note}"`;
 
     updateSolarAnalysis();
   }
+
+  // Interactive Measurement Annotator Tool (Issue #448)
+  let isMeasuring = false;
+  let measureStart = null;
+  const btnMeasureTool = document.getElementById('btnMeasureTool');
+  const btnClearMeasure = document.getElementById('btnClearMeasure');
+  const measureActivePill = document.getElementById('measureActivePill');
+  const blueprintSvg = document.getElementById('blueprintSvg');
+
+  const measureLine = document.getElementById('measureLine');
+  const measureStartPoint = document.getElementById('measureStartPoint');
+  const measureEndPoint = document.getElementById('measureEndPoint');
+  const measureLabelGroup = document.getElementById('measureLabelGroup');
+  const measureLabelBg = document.getElementById('measureLabelBg');
+  const measureLabelText = document.getElementById('measureLabelText');
+
+  function calculateMeasurement(p1, p2, scale = 0.05) {
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const distPx = Math.hypot(dx, dy);
+    const meters = +(distPx * scale).toFixed(2);
+    const feet = +(meters * 3.28084).toFixed(1);
+    const angleDeg = Math.round((Math.atan2(dy, dx) * 180) / Math.PI);
+    return { distPx, meters, feet, angleDeg };
+  }
+
+  function getSvgCoords(evt) {
+    if (!blueprintSvg || typeof blueprintSvg.createSVGPoint !== 'function') {
+      return { x: 0, y: 0 };
+    }
+    const pt = blueprintSvg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    const ctm = blueprintSvg.getScreenCTM();
+    if (!ctm) return { x: 0, y: 0 };
+    const transformed = pt.matrixTransform(ctm.inverse());
+    return { x: Math.round(transformed.x), y: Math.round(transformed.y) };
+  }
+
+  function renderMeasurement(p1, p2) {
+    const meas = calculateMeasurement(p1, p2);
+    if (measureLine) {
+      measureLine.setAttribute('x1', p1.x);
+      measureLine.setAttribute('y1', p1.y);
+      measureLine.setAttribute('x2', p2.x);
+      measureLine.setAttribute('y2', p2.y);
+      measureLine.style.display = 'block';
+    }
+    if (measureStartPoint) {
+      measureStartPoint.setAttribute('cx', p1.x);
+      measureStartPoint.setAttribute('cy', p1.y);
+      measureStartPoint.style.display = 'block';
+    }
+    if (measureEndPoint) {
+      measureEndPoint.setAttribute('cx', p2.x);
+      measureEndPoint.setAttribute('cy', p2.y);
+      measureEndPoint.style.display = 'block';
+    }
+    if (measureLabelGroup && measureLabelText) {
+      const midX = (p1.x + p2.x) / 2;
+      const midY = (p1.y + p2.y) / 2 - 14;
+      measureLabelText.textContent = `${meas.meters}m (${meas.feet}ft)`;
+      measureLabelText.setAttribute('x', midX);
+      measureLabelText.setAttribute('y', midY + 4);
+      if (measureLabelBg) {
+        measureLabelBg.setAttribute('x', midX - 55);
+        measureLabelBg.setAttribute('y', midY - 10);
+        measureLabelBg.setAttribute('width', 110);
+        measureLabelBg.setAttribute('height', 24);
+      }
+      measureLabelGroup.style.display = 'block';
+    }
+    return meas;
+  }
+
+  function clearMeasurement() {
+    measureStart = null;
+    if (measureLine) measureLine.style.display = 'none';
+    if (measureStartPoint) measureStartPoint.style.display = 'none';
+    if (measureEndPoint) measureEndPoint.style.display = 'none';
+    if (measureLabelGroup) measureLabelGroup.style.display = 'none';
+    if (btnClearMeasure) btnClearMeasure.hidden = true;
+  }
+
+  if (btnMeasureTool) {
+    btnMeasureTool.addEventListener('click', () => {
+      isMeasuring = !isMeasuring;
+      btnMeasureTool.classList.toggle('active', isMeasuring);
+      btnMeasureTool.setAttribute('aria-pressed', String(isMeasuring));
+      if (measureActivePill) measureActivePill.hidden = !isMeasuring;
+      if (blueprintSvg) blueprintSvg.classList.toggle('measuring-mode', isMeasuring);
+      if (!isMeasuring) {
+        measureStart = null;
+      }
+    });
+  }
+
+  if (btnClearMeasure) {
+    btnClearMeasure.addEventListener('click', clearMeasurement);
+  }
+
+  if (blueprintSvg) {
+    blueprintSvg.addEventListener('click', (e) => {
+      if (!isMeasuring) return;
+      const coords = getSvgCoords(e);
+      if (!measureStart) {
+        measureStart = coords;
+        if (measureStartPoint) {
+          measureStartPoint.setAttribute('cx', coords.x);
+          measureStartPoint.setAttribute('cy', coords.y);
+          measureStartPoint.style.display = 'block';
+        }
+        if (btnClearMeasure) btnClearMeasure.hidden = false;
+      } else {
+        renderMeasurement(measureStart, coords);
+        measureStart = null;
+      }
+    });
+
+    blueprintSvg.addEventListener('mousemove', (e) => {
+      if (!isMeasuring || !measureStart) return;
+      const coords = getSvgCoords(e);
+      renderMeasurement(measureStart, coords);
+    });
+  }
+
+  // Pan & Zoom Controls
+  let zoomLevel = 1.0;
+  const btnZoomIn = document.getElementById('btnZoomIn');
+  const btnZoomOut = document.getElementById('btnZoomOut');
+  const btnZoomReset = document.getElementById('btnZoomReset');
+
+  function updateZoom() {
+    if (!blueprintSvg) return;
+    const baseW = 900;
+    const baseH = 600;
+    const newW = baseW / zoomLevel;
+    const newH = baseH / zoomLevel;
+    const newX = (baseW - newW) / 2;
+    const newY = (baseH - newH) / 2;
+    blueprintSvg.setAttribute('viewBox', `${newX} ${newY} ${newW} ${newH}`);
+  }
+
+  if (btnZoomIn) {
+    btnZoomIn.addEventListener('click', () => {
+      zoomLevel = Math.min(2.5, +(zoomLevel + 0.25).toFixed(2));
+      updateZoom();
+    });
+  }
+  if (btnZoomOut) {
+    btnZoomOut.addEventListener('click', () => {
+      zoomLevel = Math.max(0.75, +(zoomLevel - 0.25).toFixed(2));
+      updateZoom();
+    });
+  }
+  if (btnZoomReset) {
+    btnZoomReset.addEventListener('click', () => {
+      zoomLevel = 1.0;
+      updateZoom();
+    });
+  }
+
+  window.calculateMeasurement = calculateMeasurement;
+  window.ROOMS_DATA = ROOMS_DATA;
 
   // Attach Click Listeners to all Room SVG groups
   document.querySelectorAll('.room-group').forEach(rg => {
