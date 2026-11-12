@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initArticleReader();
   initAvailabilityBadge();
   initGitGraph();
+  initContributionHeatmap();
 });
 
 // Availability badge: tooltip opens on hover, focus or click, and closes on
@@ -1675,6 +1676,355 @@ function initNeofetchTelemetryWidget() {
 
 window.formatAsciiBar = formatAsciiBar;
 window.initNeofetchTelemetryWidget = initNeofetchTelemetryWidget;
+
+/* ==========================================================================
+   GitHub Contribution Activity Heatmap Logic (Issue #334)
+   ========================================================================== */
+
+function getIntensityLevel(count) {
+  if (!count || count <= 0) return 0;
+  if (count <= 3) return 1;
+  if (count <= 6) return 2;
+  if (count <= 9) return 3;
+  return 4;
+}
+
+function generateYearActivity(year) {
+  const startDay = new Date(year, 0, 1);
+  const dayOfWeekJan1 = startDay.getDay(); // 0 = Sunday
+  startDay.setDate(startDay.getDate() - dayOfWeekJan1);
+
+  const endDay = new Date(year, 11, 31);
+  const dayOfWeekDec31 = endDay.getDay();
+  endDay.setDate(endDay.getDate() + (6 - dayOfWeekDec31));
+
+  let totalContributions = 0;
+  let busiestCount = 0;
+  let busiestDateObj = null;
+  let longestStreak = 0;
+  let activeStreakTracker = 0;
+
+  const current = new Date(startDay.getTime());
+  const weeks = [];
+  let currentWeek = [];
+
+  const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  while (current <= endDay) {
+    const isCurrentYear = current.getFullYear() === year;
+    const y = current.getFullYear();
+    const m = String(current.getMonth() + 1).padStart(2, '0');
+    const d = String(current.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+    const dayOfWeek = current.getDay();
+
+    let count = 0;
+    let level = 0;
+    let details = '';
+
+    if (isCurrentYear) {
+      let hash = 0;
+      for (let i = 0; i < dateStr.length; i++) {
+        hash = (hash * 31 + dateStr.charCodeAt(i)) & 0xffffffff;
+      }
+      hash = Math.abs(hash);
+
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      const roll = hash % 100;
+      const activeThreshold = isWeekend ? 35 : 82;
+
+      if (roll <= activeThreshold) {
+        const countRoll = (hash >> 3) % 100;
+        if (countRoll < 55) {
+          count = 1 + (hash % 3);
+        } else if (countRoll < 80) {
+          count = 4 + (hash % 3);
+        } else if (countRoll < 94) {
+          count = 7 + (hash % 3);
+        } else {
+          count = 10 + (hash % 9);
+        }
+      }
+
+      level = getIntensityLevel(count);
+      totalContributions += count;
+
+      if (count > busiestCount) {
+        busiestCount = count;
+        busiestDateObj = new Date(current.getTime());
+      }
+
+      if (count > 0) {
+        activeStreakTracker++;
+        if (activeStreakTracker > longestStreak) {
+          longestStreak = activeStreakTracker;
+        }
+      } else {
+        activeStreakTracker = 0;
+      }
+
+      const repos = ['kernel-box/zero-copy', 'ebpf-guard/network-telemetry', 'wasm-mesh/router-core', 'linux-rust-driver'];
+      const repo = repos[hash % repos.length];
+      if (count === 0) {
+        details = 'No activity recorded';
+      } else if (count === 1) {
+        details = `1 commit to ${repo}`;
+      } else {
+        const prs = (hash % 3 === 0) ? Math.min(2, Math.floor(count / 3)) : 0;
+        const commits = count - prs;
+        if (prs > 0) {
+          details = `${commits} commit${commits !== 1 ? 's' : ''} to ${repo} • ${prs} pull request${prs !== 1 ? 's' : ''}`;
+        } else {
+          details = `${commits} commits to ${repo}`;
+        }
+      }
+    }
+
+    const cellData = {
+      date: dateStr,
+      dateObj: new Date(current.getTime()),
+      dayOfWeek,
+      dayName: DAY_NAMES[dayOfWeek],
+      monthName: MONTH_NAMES[current.getMonth()],
+      dayOfMonth: current.getDate(),
+      year: current.getFullYear(),
+      isCurrentYear,
+      count,
+      level,
+      details
+    };
+
+    currentWeek.push(cellData);
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return {
+    year,
+    weeks,
+    totalContributions,
+    longestStreak,
+    currentStreak: activeStreakTracker,
+    busiestCount,
+    busiestDateFormatted: busiestDateObj
+      ? `${MONTH_NAMES[busiestDateObj.getMonth()]} ${busiestDateObj.getDate()}, ${year}`
+      : 'N/A'
+  };
+}
+
+function initContributionHeatmap() {
+  const section = document.getElementById('contribution-heatmap');
+  if (!section) return;
+
+  const matrix = document.getElementById('heatmapMatrix');
+  const monthsRow = document.getElementById('heatmapMonthsRow');
+  const tooltip = document.getElementById('heatmapTooltip');
+  const tooltipTitle = document.getElementById('heatmapTooltipTitle');
+  const tooltipMeta = document.getElementById('heatmapTooltipMeta');
+  const selectedInfo = document.getElementById('heatmapSelectedInfo');
+  const liveText = document.getElementById('heatmapLiveText');
+
+  const metricTotal = document.getElementById('metricTotalCommits');
+  const metricYearSub = document.getElementById('metricYearSub');
+  const metricCurrentStreak = document.getElementById('metricCurrentStreak');
+  const metricLongestStreak = document.getElementById('metricLongestStreak');
+  const metricBusiestDay = document.getElementById('metricBusiestDay');
+  const metricBusiestDate = document.getElementById('metricBusiestDate');
+
+  const yearButtons = section.querySelectorAll('.heatmap-year-btn');
+  let selectedCell = null;
+  let currentYear = 2026;
+
+  function showTooltip(cell) {
+    if (!tooltip || !tooltipTitle || !tooltipMeta) return;
+
+    const count = parseInt(cell.getAttribute('data-count'), 10) || 0;
+    const dayName = cell.getAttribute('data-day') || '';
+    const monthName = cell.getAttribute('data-month') || '';
+    const dayNum = cell.getAttribute('data-day-num') || '';
+    const year = cell.getAttribute('data-year') || '';
+    const details = cell.getAttribute('data-details') || '';
+
+    const countStr = count === 0 ? 'No contributions' : `${count} contribution${count !== 1 ? 's' : ''}`;
+    tooltipTitle.innerHTML = `<strong>${countStr}</strong> on ${dayName}, ${monthName} ${dayNum}, ${year}`;
+    tooltipMeta.textContent = details;
+
+    tooltip.removeAttribute('hidden');
+    tooltip.setAttribute('aria-hidden', 'false');
+
+    const rect = cell.getBoundingClientRect();
+    const tipWidth = tooltip.offsetWidth;
+    const tipHeight = tooltip.offsetHeight;
+
+    let left = rect.left + rect.width / 2 - tipWidth / 2;
+    let top = rect.top - tipHeight - 8;
+
+    if (left < 10) left = 10;
+    if (left + tipWidth > window.innerWidth - 10) {
+      left = window.innerWidth - tipWidth - 10;
+    }
+
+    if (top < 10) {
+      top = rect.bottom + 8;
+      tooltip.classList.add('tooltip-bottom');
+    } else {
+      tooltip.classList.remove('tooltip-bottom');
+    }
+
+    tooltip.style.left = `${Math.round(left)}px`;
+    tooltip.style.top = `${Math.round(top)}px`;
+    tooltip.classList.add('visible');
+  }
+
+  function hideTooltip() {
+    if (!tooltip) return;
+    tooltip.classList.remove('visible');
+    tooltip.setAttribute('aria-hidden', 'true');
+  }
+
+  function selectCell(cell) {
+    if (selectedCell) {
+      selectedCell.classList.remove('selected');
+    }
+    selectedCell = cell;
+    cell.classList.add('selected');
+
+    if (!selectedInfo) return;
+    const count = parseInt(cell.getAttribute('data-count'), 10) || 0;
+    const dayName = cell.getAttribute('data-day') || '';
+    const monthName = cell.getAttribute('data-month') || '';
+    const dayNum = cell.getAttribute('data-day-num') || '';
+    const year = cell.getAttribute('data-year') || '';
+    const details = cell.getAttribute('data-details') || '';
+
+    const countStr = count === 0 ? 'No contributions' : `${count} contribution${count !== 1 ? 's' : ''}`;
+    selectedInfo.innerHTML = `<span class="selected-pin">📌</span> <strong>${dayName}, ${monthName} ${dayNum}, ${year}:</strong> ${countStr}${details ? ` &bull; ${details}` : ''}`;
+  }
+
+  function renderHeatmap(year) {
+    currentYear = year;
+    const data = generateYearActivity(year);
+
+    if (metricTotal) metricTotal.textContent = data.totalContributions.toLocaleString();
+    if (metricYearSub) metricYearSub.textContent = `in ${year}`;
+    if (metricCurrentStreak) metricCurrentStreak.textContent = `${data.currentStreak} day${data.currentStreak !== 1 ? 's' : ''}`;
+    if (metricLongestStreak) metricLongestStreak.textContent = `${data.longestStreak} day${data.longestStreak !== 1 ? 's' : ''}`;
+    if (metricBusiestDay) metricBusiestDay.textContent = `${data.busiestCount} commits`;
+    if (metricBusiestDate) metricBusiestDate.textContent = data.busiestDateFormatted;
+    if (liveText) liveText.textContent = `${data.totalContributions.toLocaleString()} contributions in ${year}`;
+
+    if (selectedInfo) {
+      selectedInfo.textContent = 'Hover or focus on any date square to inspect contribution details.';
+    }
+    selectedCell = null;
+    hideTooltip();
+
+    // Render Month labels
+    if (monthsRow) {
+      monthsRow.innerHTML = '';
+      const renderedMonths = new Set();
+      data.weeks.forEach((week, weekIdx) => {
+        for (let d = 0; d < week.length; d++) {
+          const day = week[d];
+          if (day.isCurrentYear && day.dayOfMonth <= 7 && !renderedMonths.has(day.monthName)) {
+            renderedMonths.add(day.monthName);
+            const label = document.createElement('span');
+            label.className = 'heatmap-month-label';
+            label.style.left = `${weekIdx * 15}px`;
+            label.textContent = day.monthName;
+            monthsRow.appendChild(label);
+            break;
+          }
+        }
+      });
+    }
+
+    // Render 52-53 Week Columns of 7 Day Cells
+    if (matrix) {
+      matrix.innerHTML = '';
+      data.weeks.forEach(week => {
+        const weekCol = document.createElement('div');
+        weekCol.className = 'heatmap-week-col';
+
+        week.forEach(day => {
+          if (!day.isCurrentYear) {
+            const emptyCell = document.createElement('span');
+            emptyCell.className = 'heatmap-cell heatmap-cell-empty';
+            emptyCell.setAttribute('aria-hidden', 'true');
+            weekCol.appendChild(emptyCell);
+          } else {
+            const cell = document.createElement('button');
+            cell.type = 'button';
+            cell.className = `heatmap-cell level-${day.level}`;
+            cell.setAttribute('data-date', day.date);
+            cell.setAttribute('data-count', String(day.count));
+            cell.setAttribute('data-level', String(day.level));
+            cell.setAttribute('data-day', day.dayName);
+            cell.setAttribute('data-month', day.monthName);
+            cell.setAttribute('data-day-num', String(day.dayOfMonth));
+            cell.setAttribute('data-year', String(day.year));
+            cell.setAttribute('data-details', day.details);
+            cell.setAttribute('role', 'gridcell');
+
+            const countText = day.count === 0 ? 'No' : String(day.count);
+            cell.setAttribute('aria-label', `${countText} contribution${day.count !== 1 ? 's' : ''} on ${day.dayName}, ${day.monthName} ${day.dayOfMonth}, ${day.year}`);
+
+            cell.addEventListener('mouseenter', () => showTooltip(cell));
+            cell.addEventListener('mouseleave', hideTooltip);
+            cell.addEventListener('focus', () => showTooltip(cell));
+            cell.addEventListener('blur', hideTooltip);
+            cell.addEventListener('click', () => selectCell(cell));
+
+            weekCol.appendChild(cell);
+          }
+        });
+
+        matrix.appendChild(weekCol);
+      });
+    }
+  }
+
+  // Set up year selector click handlers
+  yearButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetYear = parseInt(btn.getAttribute('data-year'), 10);
+      if (isNaN(targetYear) || targetYear === currentYear) return;
+
+      yearButtons.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+
+      renderHeatmap(targetYear);
+    });
+  });
+
+  // Global listeners to hide tooltip on scroll or Escape key
+  window.addEventListener('scroll', hideTooltip, { passive: true });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideTooltip();
+  });
+
+  // Initial render with 2026
+  renderHeatmap(2026);
+}
+
+window.getIntensityLevel = getIntensityLevel;
+window.generateYearActivity = generateYearActivity;
+window.initContributionHeatmap = initContributionHeatmap;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initContributionHeatmap);
+} else {
+  initContributionHeatmap();
+}
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNeofetchTelemetryWidget);

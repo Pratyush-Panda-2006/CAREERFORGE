@@ -536,6 +536,108 @@
       </div>
     </section>
 
+    <!-- GitHub Contribution Activity Heatmap Section (Issue #334) -->
+    <section class="contribution-heatmap-section" id="contribution-heatmap" aria-labelledby="heatmap-title">
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">dev@kernel-box: ~/github % gh user activity --graph</span>
+          <div class="heatmap-live-badge" id="heatmapLiveBadge">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span id="heatmapLiveText">1,193 contributions in 2026</span>
+          </div>
+        </div>
+
+        <div class="terminal-body heatmap-body">
+          <div class="heatmap-toolbar">
+            <div class="heatmap-intro">
+              <h2 id="heatmap-title" class="heatmap-title">GitHub Contribution Activity</h2>
+              <p class="heatmap-desc">Interactive 52-week activity heatmap graph with 4-level commit intensity, streak telemetry, and date cell inspection.</p>
+            </div>
+
+            <div class="heatmap-year-selector" role="tablist" aria-label="Contribution year selection">
+              <button type="button" class="heatmap-year-btn active" data-year="2026" role="tab" aria-selected="true">2026</button>
+              <button type="button" class="heatmap-year-btn" data-year="2025" role="tab" aria-selected="false">2025</button>
+              <button type="button" class="heatmap-year-btn" data-year="2024" role="tab" aria-selected="false">2024</button>
+            </div>
+          </div>
+
+          <!-- Quick Telemetry Metrics Grid -->
+          <div class="heatmap-metrics-row">
+            <div class="heatmap-metric-card">
+              <span class="metric-label">TOTAL CONTRIBUTIONS</span>
+              <span class="metric-value" id="metricTotalCommits">1,193</span>
+              <span class="metric-sub" id="metricYearSub">in 2026</span>
+            </div>
+            <div class="heatmap-metric-card">
+              <span class="metric-label">CURRENT STREAK</span>
+              <span class="metric-value" id="metricCurrentStreak">12 days</span>
+              <span class="metric-sub">Active continuous commit run</span>
+            </div>
+            <div class="heatmap-metric-card">
+              <span class="metric-label">LONGEST STREAK</span>
+              <span class="metric-value" id="metricLongestStreak">19 days</span>
+              <span class="metric-sub">Peak consistency streak</span>
+            </div>
+            <div class="heatmap-metric-card">
+              <span class="metric-label">BUSIEST DAY</span>
+              <span class="metric-value" id="metricBusiestDay">18 commits</span>
+              <span class="metric-sub" id="metricBusiestDate">Apr 27, 2026</span>
+            </div>
+          </div>
+
+          <!-- Heatmap Outer Scrollable Wrapper -->
+          <div class="heatmap-container-outer">
+            <div class="heatmap-grid-wrapper" id="heatmapGridWrapper">
+              <!-- Month Labels Header Row -->
+              <div class="heatmap-months-row" id="heatmapMonthsRow" aria-hidden="true"></div>
+
+              <!-- Main Graph Row: Day column + 52-53 Week Columns -->
+              <div class="heatmap-graph-area">
+                <div class="heatmap-days-col" aria-hidden="true">
+                  <span class="day-label-empty"></span>
+                  <span class="day-label">Mon</span>
+                  <span class="day-label-empty"></span>
+                  <span class="day-label">Wed</span>
+                  <span class="day-label-empty"></span>
+                  <span class="day-label">Fri</span>
+                  <span class="day-label-empty"></span>
+                </div>
+                <div class="heatmap-matrix" id="heatmapMatrix" role="grid" aria-label="GitHub Contribution Heatmap Grid">
+                  <!-- Injected via JavaScript -->
+                </div>
+              </div>
+
+              <!-- Footer with Legend & Selected Cell Status Bar -->
+              <div class="heatmap-footer-row">
+                <div class="heatmap-legend" aria-label="Contribution intensity scale">
+                  <span class="legend-text">Less</span>
+                  <span class="legend-cell level-0" title="0 contributions"></span>
+                  <span class="legend-cell level-1" title="1-3 contributions"></span>
+                  <span class="legend-cell level-2" title="4-6 contributions"></span>
+                  <span class="legend-cell level-3" title="7-9 contributions"></span>
+                  <span class="legend-cell level-4" title="10+ contributions"></span>
+                  <span class="legend-text">More</span>
+                </div>
+
+                <div class="heatmap-selected-info" id="heatmapSelectedInfo" aria-live="polite">
+                  Hover or focus on any date square to inspect contribution details.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Dynamic Tooltip -->
+      <div class="heatmap-tooltip" id="heatmapTooltip" role="tooltip" aria-hidden="true" hidden>
+        <div class="tooltip-title" id="heatmapTooltipTitle"></div>
+        <div class="tooltip-meta" id="heatmapTooltipMeta"></div>
+      </div>
+    </section>
+
     <section class="shell" aria-labelledby="shell-title">
       <h2 id="shell-title">Interactive Terminal</h2>
       <p class="shell-hint">Poke around my virtual file system. Type <code>help</code> to see the commands.</p>
