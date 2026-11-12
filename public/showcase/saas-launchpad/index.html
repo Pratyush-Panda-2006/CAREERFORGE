@@ -1071,6 +1071,330 @@
   </dialog>
   <!-- ===== END Issue #303 ===== -->
 
+  <!-- ===== BEGIN Issue #440: Real-Time Telemetry Anomaly Detection & Adaptive Alert Threshold Simulator ===== -->
+  <section class="telemetry-anomaly-section" id="telemetry-anomaly-section" aria-labelledby="telemetry-title">
+    <div class="telemetry-container">
+      <div class="telemetry-header">
+        <div class="telemetry-badge">⚡ REAL-TIME OBSERVABILITY &amp; ADAPTIVE INTELLIGENCE</div>
+        <h2 id="telemetry-title">Streaming Telemetry Anomaly Detection &amp; Adaptive Alert Simulator</h2>
+        <p class="telemetry-subtitle">
+          High-frequency rolling window telemetry engine with statistical Z-score outlier detection,
+          dynamic standard-deviation envelope tracking, and automated webhook dispatch simulation.
+        </p>
+      </div>
+
+      <!-- Telemetry Control Center -->
+      <div class="telemetry-control-card">
+        <div class="control-row-metric-tabs">
+          <span class="control-label">📊 Telemetry Metric Stream:</span>
+          <div class="metric-tab-pills" id="telemetryMetricTabs" role="tablist" aria-label="Telemetry Metrics">
+            <button type="button" class="metric-tab-pill active" data-metric="cpu" role="tab" aria-selected="true">
+              <span class="pill-dot dot-cpu"></span>
+              <span>CPU Utilization (%)</span>
+            </button>
+            <button type="button" class="metric-tab-pill" data-metric="memory" role="tab" aria-selected="false">
+              <span class="pill-dot dot-memory"></span>
+              <span>Memory Heap (%)</span>
+            </button>
+            <button type="button" class="metric-tab-pill" data-metric="latency" role="tab" aria-selected="false">
+              <span class="pill-dot dot-latency"></span>
+              <span>Query Latency (ms)</span>
+            </button>
+            <button type="button" class="metric-tab-pill" data-metric="composite" role="tab" aria-selected="false">
+              <span class="pill-dot dot-composite"></span>
+              <span>Tri-Series Composite</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="control-row-actions">
+          <!-- Sensitivity Slider -->
+          <div class="slider-control-group">
+            <div class="slider-label-row">
+              <label for="zScoreSlider">Sensitivity Threshold (Zσ):</label>
+              <span class="slider-val-badge" id="zScoreDisplay">2.5σ (98.8% Confidence)</span>
+            </div>
+            <input type="range" id="zScoreSlider" min="1.5" max="3.5" step="0.1" value="2.5" aria-label="Z-Score Anomaly Sensitivity" />
+            <span class="slider-hint">Outliers flagged when |Z| &gt; Threshold</span>
+          </div>
+
+          <!-- Stream Play/Pause & Reset -->
+          <div class="stream-playback-group">
+            <button type="button" class="btn-stream-toggle" id="btnStreamToggle" aria-label="Pause or resume live telemetry feed">
+              <span id="btnStreamIcon">⏸</span>
+              <span id="btnStreamLabel">Pause Stream</span>
+            </button>
+            <button type="button" class="btn-stream-reset" id="btnStreamReset" aria-label="Reset telemetry buffer and statistics">
+              <span>↺ Reset Buffer</span>
+            </button>
+            <label class="webhook-toggle-label" for="webhookToggle">
+              <input type="checkbox" id="webhookToggle" checked />
+              <span class="toggle-track"></span>
+              <span class="toggle-text">Auto-Dispatch Webhooks</span>
+            </label>
+          </div>
+
+          <!-- Synthetic Anomaly Spike Injectors -->
+          <div class="chaos-inject-group">
+            <span class="chaos-label">⚡ Inject Chaos Anomaly:</span>
+            <div class="chaos-buttons-grid">
+              <button type="button" class="btn-chaos btn-chaos-cpu" id="btnInjectCpu" title="Simulate a CPU core peg to 92%">
+                <span>⚡ CPU Spike (+45%)</span>
+              </button>
+              <button type="button" class="btn-chaos btn-chaos-mem" id="btnInjectMemory" title="Simulate an abrupt memory leak to 90%">
+                <span>🔥 Memory Surge (+35%)</span>
+              </button>
+              <button type="button" class="btn-chaos btn-chaos-lat" id="btnInjectLatency" title="Simulate a database lock query surge to 195ms">
+                <span>⏱ Query Lock (+150ms)</span>
+              </button>
+              <button type="button" class="btn-chaos btn-chaos-rand" id="btnInjectRandom" title="Inject random high-magnitude chaos burst">
+                <span>🎲 Chaos Burst</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time 60fps Canvas Telemetry Viewport -->
+      <div class="telemetry-chart-card">
+        <div class="chart-card-header">
+          <div class="chart-title-group">
+            <span class="live-indicator-dot" aria-hidden="true"></span>
+            <h3 id="chartStreamTitle">CPU Utilization Telemetry — 60s Rolling Window</h3>
+            <span class="chart-status-pill healthy" id="chartStreamStatus">STREAM HEALTHY</span>
+          </div>
+          <div class="chart-legend-strip" id="chartLegendStrip">
+            <span class="legend-item item-data"><span class="legend-swatch swatch-data"></span> Live Value</span>
+            <span class="legend-item item-mean"><span class="legend-swatch swatch-mean"></span> Rolling Mean (μ)</span>
+            <span class="legend-item item-band"><span class="legend-swatch swatch-band"></span> Adaptive Band (+Zσ)</span>
+            <span class="legend-item item-anomaly"><span class="legend-swatch swatch-anomaly"></span> Anomaly Outlier</span>
+          </div>
+        </div>
+
+        <div class="canvas-chart-viewport" id="telemetryCanvasViewport">
+          <canvas id="telemetryCanvas" width="1120" height="380" aria-label="Real-time multi-series telemetry chart plotting rolling window data points, adaptive threshold bands, and anomaly markers"></canvas>
+          <div class="canvas-crosshair-tooltip" id="canvasTooltip" hidden></div>
+        </div>
+
+        <div class="chart-axis-footer">
+          <span>T - 60s</span>
+          <span>T - 45s</span>
+          <span>T - 30s</span>
+          <span>T - 15s</span>
+          <span class="time-live">● LIVE (NOW)</span>
+        </div>
+      </div>
+
+      <!-- Live Telemetry KPI Metrics Grid (4 Cards) -->
+      <div class="telemetry-kpi-grid">
+        <!-- Card 1: Current Live Sample -->
+        <div class="kpi-card" id="kpiCurrentVal">
+          <div class="kpi-kicker">CURRENT SAMPLE</div>
+          <div class="kpi-value-row">
+            <span class="kpi-main-val" id="metricCurrentVal">42.4%</span>
+            <span class="kpi-delta-pill positive" id="metricDeltaVal">+0.8%</span>
+          </div>
+          <div class="kpi-subtext" id="metricSampleSubtext">Normalized sampling at 60Hz</div>
+        </div>
+
+        <!-- Card 2: Rolling Statistics (Mean & Std Dev) -->
+        <div class="kpi-card" id="kpiRollingStats">
+          <div class="kpi-kicker">ROLLING STATISTICAL MODEL (N=60)</div>
+          <div class="kpi-stats-row">
+            <div>
+              <span class="stat-mini-label">Mean (μ):</span>
+              <strong class="stat-mini-val" id="metricMeanVal">41.8%</strong>
+            </div>
+            <div class="stat-divider"></div>
+            <div>
+              <span class="stat-mini-label">Std Dev (σ):</span>
+              <strong class="stat-mini-val" id="metricStdDevVal">3.4%</strong>
+            </div>
+          </div>
+          <div class="kpi-subtext">Dynamic variance tracking</div>
+        </div>
+
+        <!-- Card 3: Instantaneous Z-Score -->
+        <div class="kpi-card" id="kpiZScore">
+          <div class="kpi-kicker">INSTANTANEOUS Z-SCORE</div>
+          <div class="kpi-value-row">
+            <span class="kpi-main-val zscore-normal" id="metricZScoreVal">+0.18</span>
+            <span class="kpi-zbadge normal" id="metricZScoreBadge">NORMAL</span>
+          </div>
+          <div class="kpi-subtext" id="metricZScoreFormula">Z = (42.4 - 41.8) / 3.4</div>
+        </div>
+
+        <!-- Card 4: Adaptive Threshold Envelope -->
+        <div class="kpi-card" id="kpiThreshold">
+          <div class="kpi-kicker">ADAPTIVE ALERT ENVELOPE</div>
+          <div class="kpi-value-row">
+            <span class="kpi-main-val" id="metricThresholdVal">50.3%</span>
+            <span class="kpi-margin-pill" id="metricMarginVal">+7.9% Margin</span>
+          </div>
+          <div class="kpi-subtext" id="metricThresholdFormula">Upper Limit = μ + 2.50σ</div>
+        </div>
+      </div>
+
+      <!-- Incident Stream & Webhook Trigger Event Feed -->
+      <div class="telemetry-incident-grid">
+        <!-- Left: Incident Stream Terminal -->
+        <div class="incident-terminal-card">
+          <div class="terminal-header">
+            <div class="terminal-title-group">
+              <span class="term-dot dot-red"></span>
+              <span class="term-dot dot-yellow"></span>
+              <span class="term-dot dot-green"></span>
+              <h4>Anomaly Incident Stream &amp; Automated Webhook Log</h4>
+            </div>
+            <div class="terminal-actions">
+              <span class="incident-count-pill" id="incidentCountBadge">0 Anomalies Logged</span>
+              <button type="button" class="btn-term-action" id="btnClearIncidents" title="Clear incident history">Clear Log</button>
+              <button type="button" class="btn-term-action" id="btnExportIncidents" title="Copy incident stream as JSON">Export JSON</button>
+            </div>
+          </div>
+
+          <div class="incident-log-feed" id="incidentLogFeed" role="log" aria-live="polite">
+            <div class="incident-empty-state" id="incidentEmptyState">
+              <span class="empty-icon">🛡️</span>
+              <p>No anomaly outliers detected in current rolling window. System operating within normal Gaussian variance.</p>
+              <span class="empty-hint">Click any Chaos button above to simulate an immediate spike event.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Simulated Webhook Payload Inspection Drawer -->
+        <div class="webhook-payload-card">
+          <div class="webhook-header">
+            <div class="webhook-title-group">
+              <span class="wh-icon">🔔</span>
+              <h4>Simulated Webhook Dispatch</h4>
+            </div>
+            <span class="wh-status-badge ready" id="webhookStatusBadge">LISTENER ACTIVE</span>
+          </div>
+
+          <p class="webhook-desc">
+            When an anomaly exceeds the configured Z-score threshold (|Z| &gt; Threshold),
+            CloudPulse triggers an automated asynchronous webhook dispatch to alert endpoints.
+          </p>
+
+          <div class="webhook-endpoints-list">
+            <div class="wh-endpoint active">
+              <span class="wh-ep-icon">💬</span>
+              <div class="wh-ep-info">
+                <strong>Slack Ops Alert</strong>
+                <code>#prod-cloudpulse-alerts</code>
+              </div>
+              <span class="wh-ep-status">READY</span>
+            </div>
+            <div class="wh-endpoint active">
+              <span class="wh-ep-icon">📟</span>
+              <div class="wh-ep-info">
+                <strong>PagerDuty Service</strong>
+                <code>service/high-sev-telemetry</code>
+              </div>
+              <span class="wh-ep-status">READY</span>
+            </div>
+          </div>
+
+          <div class="webhook-payload-preview">
+            <div class="payload-header">
+              <span>LAST DISPATCHED PAYLOAD (JSON)</span>
+              <button type="button" class="btn-copy-payload" id="btnCopyPayload">Copy JSON</button>
+            </div>
+            <pre class="payload-code-block" id="payloadCodeBlock"><code>{
+  "event": "system.telemetry_nominal",
+  "status": "HEALTHY",
+  "active_streams": ["cpu", "memory", "latency"],
+  "z_score_threshold": 2.5,
+  "confidence_level": "98.8%",
+  "monitored_points": 60,
+  "timestamp": 1794407140
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast Feedback Notifications -->
+      <div class="telemetry-toast-container" id="telemetryToastContainer" aria-live="assertive"></div>
+    </div>
+  </section>
+  <!-- ===== END Issue #440 ===== -->
+
+  <!-- ===== BEGIN Issue #439: Enterprise System Status & 90-Day Uptime History Matrix ===== -->
+  <section class="uptime-matrix-section" id="enterprise-uptime-section" aria-labelledby="uptime-matrix-title">
+    <div class="uptime-header-row">
+      <div>
+        <span class="uptime-kicker">// SLA TELEMETRY · 90-DAY AUDIT TRAIL</span>
+        <h2 id="uptime-matrix-title">Enterprise System Status &amp; Uptime History</h2>
+        <p class="uptime-subtitle">Inspect 90-day daily availability telemetry across all 4 core microservices, hover any day for P95 latency &amp; incident notes, and filter by severity.</p>
+      </div>
+      <div class="uptime-global-pill">
+        <span class="uptime-pulse-dot" aria-hidden="true"></span>
+        <span>All Systems Operational · <strong id="globalSlaPct">99.94%</strong> 90d SLA</span>
+      </div>
+    </div>
+
+    <div class="uptime-controls-bar">
+      <div class="severity-filter-tags" id="severityFilterTags" role="group" aria-label="Filter days and incidents by severity">
+        <button type="button" class="sev-tag-btn active" data-severity="all" aria-pressed="true">All Days (360)</button>
+        <button type="button" class="sev-tag-btn op" data-severity="operational" aria-pressed="false">● Operational</button>
+        <button type="button" class="sev-tag-btn deg" data-severity="degraded" aria-pressed="false">▲ Degraded</button>
+        <button type="button" class="sev-tag-btn out" data-severity="outage" aria-pressed="false">■ Major Outage</button>
+      </div>
+      <div class="uptime-legend-pills" aria-hidden="true">
+        <span class="leg-item"><i class="leg-dot op"></i> 100% Healthy</span>
+        <span class="leg-item"><i class="leg-dot deg"></i> Degraded Latency</span>
+        <span class="leg-item"><i class="leg-dot out"></i> Partial / Outage</span>
+      </div>
+    </div>
+
+    <!-- 4 Microservice 90-Day Bar Tracks -->
+    <div class="uptime-services-stack" id="uptimeServicesStack">
+      <!-- Populated dynamically by script.js -->
+    </div>
+
+    <!-- Interactive Inspected Day Details Card -->
+    <div class="uptime-day-inspector" id="uptimeDayInspector" aria-live="polite">
+      <div class="inspector-left">
+        <span class="inspector-badge op" id="inspStatusBadge">OPERATIONAL</span>
+        <strong id="inspDateService">Hover or click any of the 90 daily segments above to inspect latency &amp; incident details</strong>
+      </div>
+      <div class="inspector-metrics">
+        <span>P95 Latency: <strong id="inspLatency">28ms</strong></span>
+        <span>Uptime: <strong id="inspUptime">100.00%</strong></span>
+      </div>
+    </div>
+
+    <!-- Floating Hover Tooltip -->
+    <div class="uptime-floating-tooltip" id="uptimeFloatingTooltip" role="tooltip" hidden></div>
+
+    <!-- Incident Severity Matrix Table -->
+    <div class="incident-matrix-panel">
+      <div class="incident-matrix-head">
+        <h3>90-Day Incident Severity Matrix</h3>
+        <span class="matrix-count-label" id="incidentMatrixCount">Showing all recorded events</span>
+      </div>
+      <div class="incident-matrix-scroll">
+        <table class="incident-severity-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Service</th>
+              <th>Severity</th>
+              <th>Duration</th>
+              <th>P95 Latency</th>
+              <th>Root Cause Summary</th>
+            </tr>
+          </thead>
+          <tbody id="incidentMatrixBody">
+            <!-- Populated dynamically by script.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #439 ===== -->
+
   <section class="tco-calculator" id="tco-calculator" aria-labelledby="tco-title">
     <p class="tco-kicker">INFRASTRUCTURE PLANNING SANDBOX</p>
     <h2 id="tco-title">Compare three years of cloud costs</h2>

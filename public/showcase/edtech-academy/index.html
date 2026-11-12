@@ -982,6 +982,109 @@
     </div>
   </section>
 
+  <!-- ===== Algorithm Visualizer Section (Issue #341) START ===== -->
+  <section class="algo-visualizer-section" id="algoVisualizer" aria-labelledby="algoVisualizerHeading">
+    <div class="algo-header">
+      <div>
+        <span class="algo-eyebrow">COMPUTER SCIENCE LAB // INTERACTIVE VISUALIZER</span>
+        <h2 id="algoVisualizerHeading">ALGORITHMIC CODE VISUALIZER</h2>
+        <p class="algo-subtitle">
+          Step through fundamental computer science algorithms in real time. Watch comparisons, swaps, pivot partitioning, and logarithmic search boundaries rendered dynamically with color-coded bar heights.
+        </p>
+      </div>
+    </div>
+
+    <!-- Algorithm Controls Bar -->
+    <div class="algo-controls-bar">
+      <!-- Algorithm Picker -->
+      <div class="algo-control-group">
+        <label for="algoSelect" class="algo-control-lbl">ALGORITHM</label>
+        <select id="algoSelect" class="algo-select">
+          <option value="bubble" selected>Bubble Sort — O(n²)</option>
+          <option value="quick">Quick Sort — O(n log n)</option>
+          <option value="binary">Binary Search — O(log n)</option>
+        </select>
+      </div>
+
+      <!-- Array Size -->
+      <div class="algo-control-group">
+        <label for="algoSizeSelect" class="algo-control-lbl">ARRAY SIZE</label>
+        <select id="algoSizeSelect" class="algo-select">
+          <option value="12">12 Elements</option>
+          <option value="18" selected>18 Elements</option>
+          <option value="25">25 Elements</option>
+        </select>
+      </div>
+
+      <!-- Binary Search Target (Conditional) -->
+      <div class="algo-control-group" id="algoTargetGroup" style="display: none;">
+        <label for="algoTargetInput" class="algo-control-lbl">SEARCH TARGET</label>
+        <input type="number" id="algoTargetInput" class="algo-input-num" value="45" min="5" max="100" />
+      </div>
+
+      <!-- Execution Speed Slider -->
+      <div class="algo-control-group speed-group">
+        <div class="algo-label-inline">
+          <label for="algoSpeedSlider" class="algo-control-lbl">ANIMATION SPEED</label>
+          <span class="speed-val" id="algoSpeedVal">Normal (150ms)</span>
+        </div>
+        <input type="range" id="algoSpeedSlider" class="algo-range" min="30" max="600" value="150" step="10" />
+      </div>
+
+      <!-- Playback Buttons -->
+      <div class="algo-playback-actions">
+        <button type="button" class="btn-algo-action btn-play" id="algoPlayBtn">▶ Play</button>
+        <button type="button" class="btn-algo-action btn-step" id="algoStepBtn">⏭ Step</button>
+        <button type="button" class="btn-algo-action btn-shuffle" id="algoShuffleBtn">↺ Reset / Shuffle</button>
+      </div>
+    </div>
+
+    <!-- Telemetry HUD & Complexity Info -->
+    <div class="algo-telemetry-hud">
+      <div class="hud-chip">
+        <span class="hud-lbl">COMPARISONS</span>
+        <strong class="hud-val" id="hudComparisons">0</strong>
+      </div>
+      <div class="hud-chip">
+        <span class="hud-lbl">SWAPS / OPERATIONS</span>
+        <strong class="hud-val" id="hudSwaps">0</strong>
+      </div>
+      <div class="hud-chip">
+        <span class="hud-lbl">TIME COMPLEXITY</span>
+        <strong class="hud-val text-cyan" id="hudComplexity">O(n²)</strong>
+      </div>
+      <div class="hud-status-box">
+        <span class="hud-status-dot" id="hudStatusDot" aria-hidden="true"></span>
+        <span class="hud-status-text" id="hudStatusText">Ready. Click Play or Step to begin visual execution.</span>
+      </div>
+    </div>
+
+    <!-- Interactive Bars Stage -->
+    <div class="algo-stage-wrapper">
+      <div class="algo-bars-stage" id="algoBarsContainer" role="region" aria-label="Visual Array Bars">
+        <!-- Bars dynamically rendered -->
+      </div>
+      <!-- Color Legend -->
+      <div class="algo-legend">
+        <span class="legend-item"><span class="legend-box box-default"></span> Unsorted</span>
+        <span class="legend-item"><span class="legend-box box-inspect"></span> Inspecting / Comparing</span>
+        <span class="legend-item"><span class="legend-box box-swap"></span> Swapping / Pivot</span>
+        <span class="legend-item"><span class="legend-box box-sorted"></span> Sorted / Found</span>
+        <span class="legend-item"><span class="legend-box box-discard"></span> Discarded Range</span>
+      </div>
+    </div>
+
+    <!-- Active Pseudocode Trace Block -->
+    <div class="algo-trace-card">
+      <div class="trace-header">
+        <span class="trace-title">ALGORITHM PSEUDOCODE TRACE</span>
+        <span class="trace-lang">ES6 GENERATOR STEP ENGINE</span>
+      </div>
+      <pre class="trace-code"><code id="algoCodeTrace">// Algorithm trace will appear here during execution</code></pre>
+    </div>
+  </section>
+  <!-- ===== Algorithm Visualizer Section END ===== -->
+
   <!-- Notification Toast Container -->
   <div class="edtech-toast-container" id="edtechToastContainer" aria-live="polite"></div>
 

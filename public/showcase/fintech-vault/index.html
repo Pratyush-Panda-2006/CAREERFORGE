@@ -506,6 +506,97 @@
     </div>
   </section>
 
+  <!-- ===== Fraud Inspection Engine START ===== -->
+  <section class="engine-section fraud-section" id="fraud-inspection-engine" aria-labelledby="fraudTitle">
+    <div class="engine-container">
+      <div class="section-header">
+        <h2 id="fraudTitle">Fraud Inspection Engine</h2>
+        <p>Every transaction is scored from 0 to 100 by five rules. Change a threshold to see scores update, and select a Red row to run the simulated OTP step-up. Sample data for demonstration.</p>
+      </div>
+
+      <div class="fraud-controls" id="fraudControls" role="group" aria-label="Rule thresholds">
+        <div class="ledger-field">
+          <label for="fraudWindow">Velocity window (min)</label>
+          <input type="number" id="fraudWindow" class="num-input" min="1" max="1440" step="1" value="60" />
+        </div>
+        <div class="ledger-field">
+          <label for="fraudMaxTx">Max transactions in window</label>
+          <input type="number" id="fraudMaxTx" class="num-input" min="1" max="50" step="1" value="3" />
+        </div>
+        <div class="ledger-field">
+          <label for="fraudSpeed">Max travel speed (km/h)</label>
+          <input type="number" id="fraudSpeed" class="num-input" min="1" max="20000" step="50" value="900" />
+        </div>
+        <div class="ledger-field">
+          <label for="fraudSpike">Amount spike (x baseline)</label>
+          <input type="number" id="fraudSpike" class="num-input" min="1.1" max="1000" step="0.5" value="4" />
+        </div>
+        <div class="ledger-field">
+          <label for="fraudOffAmount">Off-hours minimum ($)</label>
+          <input type="number" id="fraudOffAmount" class="num-input" min="0" step="100" value="1000" />
+        </div>
+        <div class="ledger-field fraud-blacklist">
+          <label for="fraudBlacklist">Blacklisted categories</label>
+          <input type="text" id="fraudBlacklist" class="num-input" autocomplete="off" value="Gambling, Crypto Mixer, Prepaid Cards" />
+        </div>
+        <button type="button" id="fraudReset" class="reset-btn">Reset thresholds</button>
+      </div>
+
+      <p id="fraudSummary" class="ledger-status" role="status" aria-live="polite"></p>
+
+      <div class="milestone-table-container fraud-table-wrap" id="fraudTableWrap">
+        <table class="milestone-table fraud-table" id="fraudTable">
+          <caption class="fraud-sr-only">Scored transactions, most recent first</caption>
+          <thead>
+            <tr>
+              <th scope="col">Date (UTC)</th>
+              <th scope="col">Merchant</th>
+              <th scope="col">Location</th>
+              <th scope="col" class="fraud-num">Amount</th>
+              <th scope="col">Score</th>
+              <th scope="col">Triggers</th>
+              <th scope="col"><span class="fraud-sr-only">Inspect</span></th>
+            </tr>
+          </thead>
+          <tbody id="fraudBody"></tbody>
+        </table>
+      </div>
+
+      <div class="fraud-panels">
+        <div class="fraud-panel" aria-labelledby="fraudDetailTitle">
+          <h3 id="fraudDetailTitle">Inspection detail</h3>
+          <div id="fraudDetail" class="fraud-detail" aria-live="polite">
+            <p class="fraud-muted">Select a transaction to see why it was scored this way.</p>
+          </div>
+        </div>
+        <div class="fraud-panel" aria-labelledby="fraudAuditTitle">
+          <h3 id="fraudAuditTitle">Audit trail</h3>
+          <ol id="fraudAudit" class="fraud-audit" role="log" aria-live="polite"></ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="fraud-modal-backdrop" id="fraudOtpModal" hidden>
+    <div class="fraud-modal-card" role="dialog" aria-modal="true" aria-labelledby="fraudOtpTitle" aria-describedby="fraudOtpDesc">
+      <div class="modal-tag">STEP-UP VERIFICATION</div>
+      <h3 id="fraudOtpTitle">Confirm this transaction</h3>
+      <p id="fraudOtpDesc" class="fraud-muted"></p>
+      <ul id="fraudOtpReasons" class="fraud-reasons"></ul>
+      <p class="fraud-demo-note">Simulated step-up: no message is sent. Demo code: <strong id="fraudOtpHint"></strong></p>
+      <form id="fraudOtpForm" class="fraud-otp-form" novalidate>
+        <label for="fraudOtpInput">6-digit code</label>
+        <input type="text" id="fraudOtpInput" class="num-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" />
+        <p id="fraudOtpError" class="ledger-error" role="alert" hidden></p>
+        <div class="fraud-modal-actions">
+          <button type="button" id="fraudOtpCancel" class="btn-cancel">Cancel</button>
+          <button type="submit" id="fraudOtpSubmit" class="btn-submit-stash">Verify</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- ===== Fraud Inspection Engine END ===== -->
+
   <!-- Deposit Modal -->
   <div class="modal-backdrop" id="depositModal" style="display: none;">
     <div class="modal-card">
@@ -535,6 +626,327 @@
       </div>
     </div>
   </div>
+
+  <!-- ===== Automated Budget Allocation Engine (50/30/20 Rule) START ===== -->
+  <section class="engine-section budget-section" id="budget-allocation-engine" aria-labelledby="budgetTitle">
+    <div class="engine-header">
+      <span class="engine-tag">WEALTH ENGINE // 50-30-20 MODELING</span>
+      <h2 id="budgetTitle" class="engine-title">AUTOMATED BUDGET ALLOCATION ENGINE</h2>
+      <p class="engine-subtitle">
+        Categorize your monthly net income according to the gold-standard <strong>50/30/20 Rule</strong>. Model customized cashflow splits in real time with our dynamic SVG donut chart and actionable wealth advisory insights.
+      </p>
+    </div>
+
+    <div class="budget-layout-grid">
+      <!-- Controls Column -->
+      <div class="budget-controls-card">
+        <!-- Monthly Income Input -->
+        <div class="budget-input-group">
+          <div class="budget-label-row">
+            <label for="budgetIncomeInput" class="budget-field-label">Monthly Net Take-Home Income</label>
+            <span class="budget-income-display" id="budgetIncomeDisplay">$8,500</span>
+          </div>
+          <div class="budget-income-input-wrap">
+            <span class="budget-currency-prefix">$</span>
+            <input type="number" id="budgetIncomeInput" class="budget-income-input" value="8500" min="500" max="250000" step="100" aria-label="Monthly net income in USD" />
+          </div>
+          <div class="budget-presets" role="group" aria-label="Quick income presets">
+            <button type="button" class="preset-chip" data-income="5000">$5,000</button>
+            <button type="button" class="preset-chip active" data-income="8500">$8,500</button>
+            <button type="button" class="preset-chip" data-income="12500">$12,500</button>
+            <button type="button" class="preset-chip" data-income="20000">$20,000</button>
+          </div>
+        </div>
+
+        <!-- Allocation Sliders -->
+        <div class="budget-sliders-wrap">
+          <!-- Bucket 1: Needs -->
+          <div class="budget-slider-block block-needs">
+            <div class="slider-header-row">
+              <span class="bucket-name">
+                <span class="bucket-dot dot-needs" aria-hidden="true"></span>
+                Essential Needs
+              </span>
+              <span class="bucket-pct" id="pctNeedsDisplay">50%</span>
+            </div>
+            <input type="range" id="sliderNeeds" class="budget-range range-needs" min="10" max="80" value="50" step="1" aria-label="Needs allocation percentage" />
+            <div class="slider-meta-row">
+              <span class="slider-amount" id="amountNeedsDisplay">$4,250.00 / mo</span>
+              <span class="slider-target">Target: ~50%</span>
+            </div>
+          </div>
+
+          <!-- Bucket 2: Wants -->
+          <div class="budget-slider-block block-wants">
+            <div class="slider-header-row">
+              <span class="bucket-name">
+                <span class="bucket-dot dot-wants" aria-hidden="true"></span>
+                Discretionary Wants
+              </span>
+              <span class="bucket-pct" id="pctWantsDisplay">30%</span>
+            </div>
+            <input type="range" id="sliderWants" class="budget-range range-wants" min="5" max="60" value="30" step="1" aria-label="Wants allocation percentage" />
+            <div class="slider-meta-row">
+              <span class="slider-amount" id="amountWantsDisplay">$2,550.00 / mo</span>
+              <span class="slider-target">Target: ~30%</span>
+            </div>
+          </div>
+
+          <!-- Bucket 3: Savings -->
+          <div class="budget-slider-block block-savings">
+            <div class="slider-header-row">
+              <span class="bucket-name">
+                <span class="bucket-dot dot-savings" aria-hidden="true"></span>
+                Savings &amp; Wealth Acceleration
+              </span>
+              <span class="bucket-pct" id="pctSavingsDisplay">20%</span>
+            </div>
+            <input type="range" id="sliderSavings" class="budget-range range-savings" min="5" max="60" value="20" step="1" aria-label="Savings allocation percentage" />
+            <div class="slider-meta-row">
+              <span class="slider-amount" id="amountSavingsDisplay">$1,700.00 / mo</span>
+              <span class="slider-target">Target: ~20%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Allocation Balance & Reset -->
+        <div class="allocation-status-bar">
+          <div class="balance-indicator">
+            <span class="balance-tag" id="allocationBalanceTag">TOTAL ALLOCATED: 100%</span>
+            <span class="balance-status-dot balanced" id="balanceStatusDot" aria-hidden="true">●</span>
+          </div>
+          <button type="button" class="btn-reset-rule" id="btnResetRule">↺ Reset to 50/30/20</button>
+        </div>
+
+        <!-- Actionable Saving Advisory Insight -->
+        <div class="budget-advisory-card" id="budgetAdvisoryCard">
+          <div class="advisory-title">💡 STRATEGIC WEALTH ADVISORY</div>
+          <p class="advisory-text" id="budgetAdvisoryText">
+            Your budget follows the balanced 50/30/20 structure. Allocating $1,700/mo to savings yields over $312,000 in wealth over 10 years at a 7% annual yield.
+          </p>
+        </div>
+      </div>
+
+      <!-- Visualization & Breakdown Column -->
+      <div class="budget-vis-card">
+        <!-- SVG Donut Container -->
+        <div class="donut-chart-container">
+          <svg class="budget-donut-svg" id="budgetDonutSvg" viewBox="0 0 320 320" aria-label="Income distribution donut chart">
+            <defs>
+              <linearGradient id="gradNeeds" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#059669" />
+              </linearGradient>
+              <linearGradient id="gradWants" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" />
+                <stop offset="100%" stop-color="#2563eb" />
+              </linearGradient>
+              <linearGradient id="gradSavings" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fbbf24" />
+                <stop offset="100%" stop-color="#d97706" />
+              </linearGradient>
+            </defs>
+            <!-- Donut arcs populated dynamically by script.js -->
+            <g id="donutSegmentsGroup"></g>
+            <!-- Center Hole Readout -->
+            <circle cx="160" cy="160" r="82" class="donut-center-hole" />
+            <text x="160" y="148" text-anchor="middle" class="donut-center-sub">TOTAL INCOME</text>
+            <text x="160" y="174" text-anchor="middle" class="donut-center-val" id="donutCenterAmount">$8,500</text>
+          </svg>
+        </div>
+
+        <!-- Category Detail Breakdown Cards -->
+        <div class="budget-breakdown-list">
+          <div class="breakdown-card card-emerald">
+            <div class="breakdown-left">
+              <span class="breakdown-badge">NEEDS</span>
+              <div class="breakdown-desc">Housing, utilities, groceries, healthcare</div>
+            </div>
+            <div class="breakdown-right">
+              <strong class="breakdown-val" id="cardNeedsAmount">$4,250</strong>
+              <small class="breakdown-pct" id="cardNeedsPct">50% of budget</small>
+            </div>
+          </div>
+
+          <div class="breakdown-card card-sapphire">
+            <div class="breakdown-left">
+              <span class="breakdown-badge badge-blue">WANTS</span>
+              <div class="breakdown-desc">Dining, entertainment, travel, lifestyle</div>
+            </div>
+            <div class="breakdown-right">
+              <strong class="breakdown-val" id="cardWantsAmount">$2,550</strong>
+              <small class="breakdown-pct" id="cardWantsPct">30% of budget</small>
+            </div>
+          </div>
+
+          <div class="breakdown-card card-gold">
+            <div class="breakdown-left">
+              <span class="breakdown-badge badge-amber">SAVINGS &amp; DEBT</span>
+              <div class="breakdown-desc">ApexVault high-yield, ETF investing, debt paydown</div>
+            </div>
+            <div class="breakdown-right">
+              <strong class="breakdown-val" id="cardSavingsAmount">$1,700</strong>
+              <small class="breakdown-pct" id="cardSavingsPct">20% of budget</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== Automated Budget Allocation Engine END ===== -->
+
+  <!-- ===== Savings Goals & Growth Vault (Issue #449) START ===== -->
+  <section class="engine-section savings-vault-section" id="savings-goals-vault" aria-labelledby="savingsVaultTitle">
+    <div class="engine-header">
+      <div class="tag-pill">// WEALTH RECURRING STASH</div>
+      <h2 id="savingsVaultTitle">SAVINGS GOALS &amp; COMPOUND WEALTH PROJECTOR</h2>
+      <p class="section-lead">Automate weekly recurring contributions into dedicated asset vaults and forecast exponential compound returns across 1 to 10 year trajectories.</p>
+    </div>
+
+    <!-- Savings Stash Grid & Controls -->
+    <div class="savings-container">
+      <div class="savings-toolbar">
+        <div class="savings-stats-summary">
+          <div class="stat-pill-item">
+            <span class="stat-pill-label">Total Vault Assets</span>
+            <strong class="stat-pill-val" id="totalVaultAssets">$74,500</strong>
+          </div>
+          <div class="stat-pill-item">
+            <span class="stat-pill-label">Weekly Auto-Deploy</span>
+            <strong class="stat-pill-val green" id="totalWeeklyAuto">$1,100 / wk</strong>
+          </div>
+          <div class="stat-pill-item">
+            <span class="stat-pill-label">Active Stashes</span>
+            <strong class="stat-pill-val" id="activeStashCount">3 Goals</strong>
+          </div>
+        </div>
+        <button type="button" class="btn-create-stash" id="btnOpenNewStashModal" aria-haspopup="dialog">+ Create New Savings Goal</button>
+      </div>
+
+      <!-- Stash Cards Grid -->
+      <div class="stash-cards-grid" id="stashCardsGrid">
+        <!-- Rendered dynamically from state & localStorage -->
+      </div>
+
+      <!-- Compound Interest Wealth Projector -->
+      <div class="wealth-projector-panel" id="wealthProjectorPanel">
+        <div class="projector-header">
+          <div class="projector-title-row">
+            <span class="icon-sparkle">📈</span>
+            <div>
+              <h3>COMPOUND INTEREST TRAJECTORY PROJECTOR</h3>
+              <p class="projector-subtitle">Simulate recurring deposits with institutional high-yield compounding</p>
+            </div>
+          </div>
+          <div class="timeline-selector" id="timelineSelector" role="group" aria-label="Investment Horizon">
+            <button type="button" class="timeline-chip" data-years="1">1 Year</button>
+            <button type="button" class="timeline-chip" data-years="3">3 Years</button>
+            <button type="button" class="timeline-chip active" data-years="5">5 Years</button>
+            <button type="button" class="timeline-chip" data-years="10">10 Years</button>
+          </div>
+        </div>
+
+        <div class="projector-body-grid">
+          <div class="projector-controls-col">
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="projectorInitialBalance">Starting Principal ($)</label>
+                <span class="control-val-badge" id="valInitialBalance">$74,500</span>
+              </div>
+              <input type="range" id="projectorInitialBalance" min="0" max="250000" step="500" value="74500" class="fin-slider" />
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="projectorWeeklyDeposit">Weekly Contribution ($)</label>
+                <span class="control-val-badge" id="valWeeklyDeposit">$1,100 / wk</span>
+              </div>
+              <input type="range" id="projectorWeeklyDeposit" min="25" max="3000" step="25" value="1100" class="fin-slider" />
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="projectorApy">Annual Yield (APY %)</label>
+                <span class="control-val-badge" id="valApy">7.5%</span>
+              </div>
+              <input type="range" id="projectorApy" min="1.0" max="15.0" step="0.1" value="7.5" class="fin-slider" />
+            </div>
+          </div>
+
+          <div class="projector-display-col">
+            <div class="wealth-result-card">
+              <span class="result-label">PROJECTED TOTAL WEALTH</span>
+              <div class="result-big-amount" id="projectedTotalWealth">$442,185</div>
+              <div class="result-sub-metrics">
+                <div class="sub-metric">
+                  <span>Total Deposits:</span>
+                  <strong id="projectedTotalPrincipal">$360,500</strong>
+                </div>
+                <div class="sub-metric profit-metric">
+                  <span>Compound Interest:</span>
+                  <strong class="green-glow" id="projectedTotalInterest">+$81,685</strong>
+                </div>
+              </div>
+              <div class="yield-multiplier-chip" id="yieldMultiplierChip">
+                <span>⚡ 1.23x Wealth Multiplier over 5 Years</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- New Stash Modal (Issue #449) -->
+  <div class="stash-modal-backdrop" id="stashModalBackdrop" hidden>
+    <div class="stash-modal" role="dialog" aria-modal="true" aria-labelledby="stashModalTitle">
+      <div class="stash-modal-header">
+        <h3 id="stashModalTitle">Create Wealth Savings Stash</h3>
+        <button type="button" class="btn-close-stash-modal" id="btnCloseStashModal" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="newStashForm" class="stash-form">
+        <div class="form-row">
+          <label for="stashName">Goal Name</label>
+          <input type="text" id="stashName" required placeholder="e.g. Dream Villa Down Payment" class="fin-input" />
+        </div>
+        <div class="form-row-grid">
+          <div>
+            <label for="stashCategory">Category</label>
+            <select id="stashCategory" class="fin-select">
+              <option value="Real Estate">🏙️ Real Estate</option>
+              <option value="Security">🛡️ Safety / Emergency</option>
+              <option value="Growth">🚀 Venture / Growth</option>
+              <option value="Vehicle">🏎️ Luxury Vehicle</option>
+              <option value="Travel">✈️ Expedition</option>
+            </select>
+          </div>
+          <div>
+            <label for="stashApy">Expected APY (%)</label>
+            <input type="number" id="stashApy" step="0.1" min="1" max="20" value="6.5" class="fin-input" />
+          </div>
+        </div>
+        <div class="form-row-grid">
+          <div>
+            <label for="stashTarget">Target Goal ($)</label>
+            <input type="number" id="stashTarget" min="500" step="500" required placeholder="50000" class="fin-input" />
+          </div>
+          <div>
+            <label for="stashInitial">Initial Deposit ($)</label>
+            <input type="number" id="stashInitial" min="0" step="100" value="5000" class="fin-input" />
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="stashWeekly">Weekly Auto-Contribution ($)</label>
+          <input type="number" id="stashWeekly" min="10" step="10" value="250" class="fin-input" />
+        </div>
+        <div class="stash-modal-actions">
+          <button type="button" class="btn-cancel" id="btnCancelStash">Cancel</button>
+          <button type="submit" class="btn-submit-stash">Create Stash Vault</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- ===== Savings Goals & Growth Vault END ===== -->
 
   <footer class="footer">
     <div class="footer-content">

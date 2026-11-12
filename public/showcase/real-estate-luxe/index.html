@@ -284,6 +284,93 @@
         </div>
       </div>
 
+      <!-- 15-Year vs 30-Year Amortization Trajectory Chart Card (Issue #447) -->
+      <div class="calc-card trajectory-card" id="trajectory-card">
+        <div class="card-title-wrap">
+          <span class="card-num">03</span>
+          <div class="trajectory-title-box">
+            <h3>15-Year vs 30-Year Amortization &amp; Yield Trajectory</h3>
+            <p class="trajectory-sub">Visualizing multi-decade balance paydown curves and cumulative interest trajectories.</p>
+          </div>
+        </div>
+
+        <!-- Trajectory Chart Metrics Comparison -->
+        <div class="trajectory-metrics-row">
+          <div class="trajectory-pill pill-15">
+            <span class="pill-badge badge-15">15-YEAR FIXED</span>
+            <div class="pill-stat">
+              <span class="stat-lbl">Monthly P&amp;I:</span>
+              <strong id="traj-pi-15">$101,000</strong>
+            </div>
+            <div class="pill-stat">
+              <span class="stat-lbl">Total Interest:</span>
+              <strong id="traj-interest-15">$6,580,000</strong>
+            </div>
+          </div>
+
+          <div class="trajectory-savings-badge" id="traj-savings-badge">
+            <span class="savings-kicker">15-YR INTEREST SAVINGS</span>
+            <strong class="savings-amount" id="traj-savings-amount">Save $8,240,000</strong>
+          </div>
+
+          <div class="trajectory-pill pill-30">
+            <span class="pill-badge badge-30">30-YEAR FIXED</span>
+            <div class="pill-stat">
+              <span class="stat-lbl">Monthly P&amp;I:</span>
+              <strong id="traj-pi-30">$73,320</strong>
+            </div>
+            <div class="pill-stat">
+              <span class="stat-lbl">Total Interest:</span>
+              <strong id="traj-interest-30">$14,820,000</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Line Chart Viewport -->
+        <div class="trajectory-svg-wrap">
+          <svg id="trajectory-chart-svg" viewBox="0 0 700 260" preserveAspectRatio="none" role="img" aria-label="15-Year vs 30-Year Mortgage Amortization Trajectory">
+            <!-- Grid lines & axis labels -->
+            <g class="grid-lines" id="traj-grid-lines"></g>
+            <!-- 30-Year Trajectory Line & Gradient -->
+            <path id="traj-path-30" class="traj-line line-30" d="" />
+            <!-- 15-Year Trajectory Line & Gradient -->
+            <path id="traj-path-15" class="traj-line line-15" d="" />
+            <!-- Axis labels -->
+            <g class="axis-labels" id="traj-axis-labels"></g>
+          </svg>
+          <div class="trajectory-legend">
+            <span class="leg-item leg-15"><span class="leg-dot dot-15"></span> 15-Year Loan Balance (Paid off at Year 15)</span>
+            <span class="leg-item leg-30"><span class="leg-dot dot-30"></span> 30-Year Loan Balance (Paid off at Year 30)</span>
+          </div>
+        </div>
+
+        <!-- Investment Yield & Cap Rate Estimator Subcard -->
+        <div class="yield-projector-subcard">
+          <div class="yield-header">
+            <h4>Financing &amp; Investment Yield Trajectory</h4>
+            <span class="yield-tag">PRIME ASSET BENCHMARK</span>
+          </div>
+          <div class="yield-grid">
+            <div class="yield-item">
+              <span class="yield-label">Projected Monthly Rent</span>
+              <strong class="yield-val" id="yield-monthly-rent">$85,000 / mo</strong>
+            </div>
+            <div class="yield-item">
+              <span class="yield-label">Gross Annual Yield</span>
+              <strong class="yield-val gold" id="yield-gross-rate">7.03%</strong>
+            </div>
+            <div class="yield-item">
+              <span class="yield-label">Net Cap Rate (NOI)</span>
+              <strong class="yield-val green" id="yield-net-cap">5.28%</strong>
+            </div>
+            <div class="yield-item">
+              <span class="yield-label">5-Year Equity ROI</span>
+              <strong class="yield-val" id="yield-5yr-roi">+42.6%</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Amortization Schedule Table Drawer -->
       <div class="amortization-drawer" id="amortization-drawer" style="display: none;">
         <div class="drawer-header">

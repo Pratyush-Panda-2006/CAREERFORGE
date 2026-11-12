@@ -1102,6 +1102,381 @@
   </dialog>
   <!-- ===== END Issue #305 ===== -->
 
+  <!-- ===== BEGIN Issue #424: Celestial Navigation & Night Sky Stargazing Visibility Predictor ===== -->
+  <section class="celestial-predictor-section" id="celestial-predictor" aria-labelledby="celestial-title">
+    <div class="celestial-container">
+      <div class="celestial-header">
+        <div class="celestial-badge">🔭 CELESTIAL FIELD NAVIGATION &amp; NIGHT SKY PREDICTOR</div>
+        <h2 id="celestial-title">Wilderness Stargazing &amp; Dark Sky Visibility Simulator</h2>
+        <p class="celestial-subtitle">
+          Predict lunar phase illumination, Bortle dark-sky darkness classes, Milky Way galactic core viewing windows,
+          and ISS satellite flyovers for remote expedition campsites across the globe.
+        </p>
+      </div>
+
+      <!-- Campsite Preset Selector & Geographic Coordinate Controls -->
+      <div class="celestial-control-card">
+        <div class="control-row-presets">
+          <span class="control-label">📍 Preset Expedition Campsites:</span>
+          <div class="campsite-preset-pills" id="campsite-preset-pills" role="radiogroup" aria-label="Expedition Campsite Presets">
+            <button type="button" class="preset-pill active" data-preset="atacama" aria-checked="true" role="radio">
+              <span>🇨🇱 Atacama Plateau (Class 1)</span>
+            </button>
+            <button type="button" class="preset-pill" data-preset="vatnajokull" aria-checked="false" role="radio">
+              <span>🇮🇸 Vatnajökull Glacier (Class 2)</span>
+            </button>
+            <button type="button" class="preset-pill" data-preset="wadirum" aria-checked="false" role="radio">
+              <span>🇯🇴 Wadi Rum Nomad Camp (Class 2)</span>
+            </button>
+            <button type="button" class="preset-pill" data-preset="maunakea" aria-checked="false" role="radio">
+              <span>🇺🇸 Mauna Kea Ridge (Class 1)</span>
+            </button>
+            <button type="button" class="preset-pill" data-preset="patagonia" aria-checked="false" role="radio">
+              <span>🇦🇷 Fitz Roy Outpost (Class 2)</span>
+            </button>
+            <button type="button" class="preset-pill" data-preset="banff" aria-checked="false" role="radio">
+              <span>🇨🇦 Banff Backcountry (Class 3)</span>
+            </button>
+          </div>
+        </div>
+
+        <form class="celestial-inputs-grid" id="celestial-inputs-form" onsubmit="return false;">
+          <div class="input-field-group">
+            <label for="celestial-campsite-name">Campsite Name / Description</label>
+            <input type="text" id="celestial-campsite-name" value="Atacama Desert High Plateau Basecamp, Chile" />
+          </div>
+
+          <div class="input-field-group">
+            <label for="celestial-lat">Latitude (° N/S)</label>
+            <input type="number" id="celestial-lat" step="0.0001" min="-90" max="90" value="-23.8634" />
+            <span class="field-hint">Range: -90.0° to +90.0°</span>
+          </div>
+
+          <div class="input-field-group">
+            <label for="celestial-lon">Longitude (° E/W)</label>
+            <input type="number" id="celestial-lon" step="0.0001" min="-180" max="180" value="-69.1328" />
+            <span class="field-hint">Range: -180.0° to +180.0°</span>
+          </div>
+
+          <div class="input-field-group">
+            <label for="celestial-elevation">Elevation (Meters)</label>
+            <input type="number" id="celestial-elevation" step="50" min="0" max="8848" value="2400" />
+            <span class="field-hint">Alpine atmospheric clarity</span>
+          </div>
+
+          <div class="input-field-group">
+            <label for="celestial-date">Observation Date</label>
+            <input type="date" id="celestial-date" />
+            <span class="field-hint">Lunar &amp; planetary epoch</span>
+          </div>
+
+          <div class="input-field-group">
+            <label for="celestial-time-slider">Observation Time: <strong id="celestial-time-display">23:00 Local</strong></label>
+            <input type="range" id="celestial-time-slider" min="18" max="30" step="0.25" value="23" />
+            <span class="field-hint">Scrub: 18:00 (Dusk) → 06:00 (Dawn)</span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Live Interactive Sky Dome Canvas -->
+      <div class="celestial-skydome-wrap">
+        <div class="skydome-header">
+          <div class="skydome-title-group">
+            <span class="skydome-tag">LIVE SIMULATION</span>
+            <h3>Interactive Night Sky Dome &amp; Horizon Projection</h3>
+          </div>
+          <div class="skydome-legend">
+            <span class="legend-chip chip-milkyway"><span class="chip-color"></span> Milky Way Core</span>
+            <span class="legend-chip chip-moon"><span class="chip-color"></span> Moon &amp; Phase</span>
+            <span class="legend-chip chip-iss"><span class="chip-color"></span> ISS Trajectory</span>
+            <span class="legend-chip chip-stars"><span class="chip-color"></span> Constellations</span>
+          </div>
+        </div>
+
+        <div class="canvas-viewport" id="celestial-canvas-viewport">
+          <canvas id="celestialSkyCanvas" width="1120" height="380" aria-label="Interactive starry sky dome simulation with constellations, Milky Way core, and ISS pass"></canvas>
+          <div class="skydome-compass-overlay">
+            <span class="compass-pt pt-w">WEST</span>
+            <span class="compass-pt pt-sw">SW</span>
+            <span class="compass-pt pt-s">SOUTH (Zenith 90°)</span>
+            <span class="compass-pt pt-se">SE</span>
+            <span class="compass-pt pt-e">EAST</span>
+          </div>
+          <div class="skydome-status-overlay">
+            <span id="canvas-celestial-brief">Active Sky: Bortle Class 1 · Galactic Core Altitude 68° · Moon 14.8% Waxing Crescent</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Celestial Telemetry Cards (4-column Grid) -->
+      <div class="celestial-telemetry-grid">
+        <!-- Card 1: Lunar Phase & Illumination -->
+        <div class="telemetry-card card-moon" id="card-moon-phase">
+          <div class="card-kicker">LUNAR DYNAMICS</div>
+          <div class="moon-phase-visual-wrap">
+            <div class="moon-svg-container" id="moon-phase-svg-slot">
+              <!-- Rendered via script -->
+            </div>
+            <div class="moon-meta-text">
+              <h4 id="moon-phase-name">Waxing Crescent</h4>
+              <div class="illumination-badge" id="moon-illumination-val">14.8% Illumination</div>
+            </div>
+          </div>
+          <div class="telemetry-details">
+            <div class="detail-row">
+              <span class="detail-label">Moon Age:</span>
+              <strong id="moon-age-display">3.6 days into cycle</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Rise / Set:</span>
+              <strong id="moon-rise-set-display">Rise 09:42 · Set 23:18</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Position at Time:</span>
+              <strong id="moon-alt-az-display">Alt +18.4° · Az 252° (WSW)</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Sky Washout Penalty:</span>
+              <span class="washout-tag minimal" id="moon-washout-tag">Minimal (+0.1 Bortle)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Bortle Dark-Sky Scale -->
+        <div class="telemetry-card card-bortle" id="card-bortle-scale">
+          <div class="card-kicker">DARK-SKY SCALE</div>
+          <div class="bortle-hero">
+            <div class="bortle-badge-ring" id="bortle-class-badge">CLASS 1</div>
+            <div class="bortle-info">
+              <h4 id="bortle-class-title">Excellent Dark-Sky Site</h4>
+              <p id="bortle-description">Zodiacal light prominent; Milky Way casts discernible shadows on ground; M33 easily seen naked-eye.</p>
+            </div>
+          </div>
+          <div class="telemetry-details">
+            <div class="detail-row">
+              <span class="detail-label">Limiting Magnitude:</span>
+              <strong id="bortle-nelm">NELM: 7.6 - 8.0 mag</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Sky Brightness (SQM):</span>
+              <strong id="bortle-sqm">21.85 mag/arcsec²</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Effective Night Darkness:</span>
+              <span class="darkness-meter-pill pristine" id="bortle-effective-pill">Pristine Wilderness</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Milky Way Galactic Core Window -->
+        <div class="telemetry-card card-milkyway" id="card-milkyway-window">
+          <div class="card-kicker">GALACTIC CENTER (SAGITTARIUS A*)</div>
+          <div class="milkyway-status-head">
+            <div class="mw-visibility-badge prime" id="mw-visibility-badge">OPTIMAL PRIME WINDOW</div>
+            <h4 id="mw-window-title">Galactic Core High Altitude</h4>
+          </div>
+          <div class="telemetry-details">
+            <div class="detail-row">
+              <span class="detail-label">Prime Viewing Window:</span>
+              <strong id="mw-viewing-hours">22:30 — 03:45 (5h 15m)</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Culmination Altitude:</span>
+              <strong id="mw-max-altitude">74.2° (South-Southwest)</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Seasonal Feasibility:</span>
+              <strong id="mw-season-status">Peak Galactic Center Season</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Astrophoto Contrast:</span>
+              <span class="contrast-score high" id="mw-contrast-score">Exceptional Core Detail</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: ISS Space Station Passes -->
+        <div class="telemetry-card card-iss" id="card-iss-flyover">
+          <div class="card-kicker">ORBITAL PASSES · ISS TELEMETRY</div>
+          <div class="iss-status-head">
+            <div class="iss-live-badge" id="iss-pass-badge">VISIBLE PASS CONFIRMED</div>
+            <h4 id="iss-next-pass-time">21:14 — 21:20 (6m duration)</h4>
+          </div>
+          <div class="telemetry-details">
+            <div class="detail-row">
+              <span class="detail-label">Peak Elevation:</span>
+              <strong id="iss-peak-alt">68° Alt (SW sky)</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Visual Brightness:</span>
+              <strong id="iss-magnitude">-3.4 mag (Brighter than Venus)</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Pass Trajectory:</span>
+              <strong id="iss-trajectory">Appears WNW → Zenith → Disappears SE</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Orbital Stats:</span>
+              <span class="iss-speed-tag">420 km alt · 27,600 km/h</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Astronomical Twilight & Observation Timeline Bar -->
+      <div class="celestial-timeline-card">
+        <div class="timeline-card-header">
+          <div class="tl-title-group">
+            <span class="section-tag">24-HOUR FIELD SCHEDULE</span>
+            <h3>Twilight Phases &amp; Deep Stargazing Timeline (18:00 — 06:00)</h3>
+          </div>
+          <div class="tl-summary-chips">
+            <span class="chip-dark-window" id="chip-astronomical-darkness">🌌 Deep Dark Window: 21:15 — 04:30 (7h 15m)</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Timeline Bar Component -->
+        <div class="timeline-visual-track" id="celestial-timeline-track" role="img" aria-label="Timeline of twilight and darkness phases throughout the expedition night">
+          <div class="tl-segment seg-sunset" id="seg-sunset" style="width: 8%;" title="Sunset / Civil Twilight">
+            <span class="seg-label">Civil</span>
+          </div>
+          <div class="tl-segment seg-nautical" id="seg-nautical" style="width: 10%;" title="Nautical Twilight">
+            <span class="seg-label">Nautical</span>
+          </div>
+          <div class="tl-segment seg-astro-dusk" id="seg-astro-dusk" style="width: 10%;" title="Astronomical Twilight">
+            <span class="seg-label">Astro Dusk</span>
+          </div>
+          <div class="tl-segment seg-deep-dark" id="seg-deep-dark" style="width: 44%;" title="Deep Astronomical Night (True Darkness)">
+            <span class="seg-label">🌌 True Astronomical Night</span>
+            <div class="tl-mw-overlay" id="tl-mw-overlay" title="Milky Way Core Visible">
+              <span>✦ Galactic Core Window ✦</span>
+            </div>
+            <div class="tl-iss-marker" id="tl-iss-marker" title="ISS Flyover Pass" style="left: 35%;">
+              <span class="marker-dot">🛰️</span>
+              <span class="marker-label">ISS Pass</span>
+            </div>
+          </div>
+          <div class="tl-segment seg-astro-dawn" id="seg-astro-dawn" style="width: 10%;" title="Astronomical Dawn">
+            <span class="seg-label">Astro Dawn</span>
+          </div>
+          <div class="tl-segment seg-naut-dawn" id="seg-naut-dawn" style="width: 10%;" title="Nautical Dawn">
+            <span class="seg-label">Nautical</span>
+          </div>
+          <div class="tl-segment seg-sunrise" id="seg-sunrise" style="width: 8%;" title="Civil Dawn / Sunrise">
+            <span class="seg-label">Sunrise</span>
+          </div>
+
+          <!-- Current Time Scrubber Indicator Needle -->
+          <div class="timeline-current-needle" id="timeline-current-needle" style="left: 41.6%;">
+            <div class="needle-flag" id="needle-time-label">23:00</div>
+          </div>
+        </div>
+
+        <div class="timeline-hour-ticks">
+          <span>18:00</span>
+          <span>19:00</span>
+          <span>20:00</span>
+          <span>21:00</span>
+          <span>22:00</span>
+          <span>23:00</span>
+          <span>00:00</span>
+          <span>01:00</span>
+          <span>02:00</span>
+          <span>03:00</span>
+          <span>04:00</span>
+          <span>05:00</span>
+          <span>06:00</span>
+        </div>
+      </div>
+
+      <!-- Stargazing Condition Index & Expedition Target Briefing -->
+      <div class="celestial-briefing-grid">
+        <div class="condition-index-card">
+          <div class="condition-score-wrap">
+            <div class="circular-score-ring">
+              <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Stargazing Condition Index">
+                <circle cx="60" cy="60" r="50" class="score-ring-bg"></circle>
+                <circle cx="60" cy="60" r="50" class="score-ring-bar" id="celestial-score-circle"></circle>
+              </svg>
+              <div class="score-center-text">
+                <span class="score-num" id="celestial-score-num">95</span>
+                <span class="score-max">/100</span>
+              </div>
+            </div>
+            <div class="condition-score-meta">
+              <div class="score-grade-badge exceptional" id="celestial-score-badge">EXCEPTIONAL CONDITIONS</div>
+              <h4>Expedition Stargazing Index</h4>
+              <p id="celestial-score-summary">Outstanding dark sky with zero light pollution, thin high-altitude air, and negligible lunar interference.</p>
+            </div>
+          </div>
+
+          <div class="condition-factors-list">
+            <div class="factor-row">
+              <span class="factor-name">Dark-Sky Darkness:</span>
+              <div class="factor-bar-wrap">
+                <div class="factor-bar-fill fill-darkness" id="factor-bar-darkness" style="width: 98%;"></div>
+              </div>
+              <span class="factor-val" id="factor-val-darkness">98%</span>
+            </div>
+            <div class="factor-row">
+              <span class="factor-name">Lunar Translucency:</span>
+              <div class="factor-bar-wrap">
+                <div class="factor-bar-fill fill-moon" id="factor-bar-moon" style="width: 92%;"></div>
+              </div>
+              <span class="factor-val" id="factor-val-moon">92%</span>
+            </div>
+            <div class="factor-row">
+              <span class="factor-name">Alpine Air Transparency:</span>
+              <div class="factor-bar-wrap">
+                <div class="factor-bar-fill fill-elevation" id="factor-bar-elevation" style="width: 95%;"></div>
+              </div>
+              <span class="factor-val" id="factor-val-elevation">95%</span>
+            </div>
+            <div class="factor-row">
+              <span class="factor-name">Astronomical Dark Duration:</span>
+              <div class="factor-bar-wrap">
+                <div class="factor-bar-fill fill-duration" id="factor-bar-duration" style="width: 90%;"></div>
+              </div>
+              <span class="factor-val" id="factor-val-duration">90%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="targets-planner-card">
+          <div class="card-kicker">PRIME FIELD TARGETS TONIGHT</div>
+          <h3>Recommended Celestial Targets &amp; Optics Setup</h3>
+          <div class="targets-list" id="celestial-targets-list">
+            <!-- Dynamically populated based on campsite hemisphere and time -->
+          </div>
+          <div class="astrophoto-settings-callout" id="astrophoto-settings-box">
+            <div class="callout-header">
+              <span class="cam-icon">📷</span>
+              <strong>Astrophotography Exposure Settings (500-Rule Guide)</strong>
+            </div>
+            <div class="cam-stats-grid">
+              <div><span>Recommended Lens:</span> <strong>14mm - 24mm f/1.8 - f/2.8</strong></div>
+              <div><span>Shutter Speed:</span> <strong id="cam-shutter">20s - 25s (Pin-point stars)</strong></div>
+              <div><span>Sensor ISO:</span> <strong id="cam-iso">ISO 3200 - 6400</strong></div>
+              <div><span>Focus Target:</span> <strong>Manual infinity on bright star / planet</strong></div>
+            </div>
+          </div>
+          <div class="celestial-action-row">
+            <button type="button" class="btn-celestial-export" id="btn-celestial-export" onclick="exportCelestialFieldLog()">
+              <span>📋 Copy Expedition Celestial Log</span>
+            </button>
+            <button type="button" class="btn-celestial-reset" id="btn-celestial-reset" onclick="resetCelestialPredictor()">
+              <span>↺ Reset Basecamp</span>
+            </button>
+            <div class="copy-feedback-toast" id="celestial-copy-toast" hidden>
+              <span>✓ Celestial field log copied to clipboard!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #424 ===== -->
+
   <section id="flight-planner" class="flight-planner" aria-labelledby="flight-title">
     <p class="flight-kicker">EXPEDITION TRANSIT DESK</p>
     <h2 id="flight-title">Flight route &amp; layover planner</h2>

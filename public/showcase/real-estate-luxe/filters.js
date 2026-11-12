@@ -167,7 +167,7 @@ function cardHtml(e) {
     '</section>' +
 
     '<button type="button" class="calc-estate-btn" onclick="applyEstatePrice(' +
-    e.price + ')">Calculate Mortgage ↗</button>' +
+    e.price + ')">Financing &amp; Yield Calculator ↗</button>' +
   '</div>';
 }
 

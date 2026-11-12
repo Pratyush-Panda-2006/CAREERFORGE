@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Pulse Wave Festival Hub loaded');
   initFestivalCountdown();
+  initFestivalWeather();
   initStageFilters();
   initScheduleTabs();
   initTicketCalculator();
   initPackingChecklist();
+  initCyberSoundboard();
 });
 
 // ---------------------------------------------------------------
@@ -94,23 +96,273 @@ function initStageFilters() {
 }
 
 // ---------------------------------------------------------------
-// Schedule Tabs & Favorite Bookmarking
+// Schedule Tabs, Itinerary Drawer, Conflict Detection & ICS Export (Issue #437)
 // ---------------------------------------------------------------
+const ITINERARY_STORAGE_KEY = 'pulsewave_itinerary_v1';
+
+const ARTIST_SCHEDULE_DATA = {
+  'aura-matrix': { id: 'aura-matrix', name: 'AURA MATRIX', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-24', dayLabel: 'Day 01 · Oct 24', start: '19:30', end: '21:20', genre: 'Electro House & Laser Show' },
+  'neon-apex': { id: 'neon-apex', name: 'NEON APEX', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-24', dayLabel: 'Day 01 · Oct 24', start: '21:00', end: '22:30', genre: 'Cyberpunk Synthwave' },
+  'sub-zero': { id: 'sub-zero', name: 'SUB ZERO BASS', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-24', dayLabel: 'Day 01 · Oct 24', start: '23:00', end: '24:30', genre: 'Sub-Bass Riddim & Dubstep' },
+  'neural-collider': { id: 'neural-collider', name: 'NEURAL COLLIDER', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-25', dayLabel: 'Day 02 · Oct 25', start: '20:45', end: '22:15', genre: 'Neurofunk Drum & Bass' },
+  'synth-pulse': { id: 'synth-pulse', name: 'SYNTH PULSE', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-25', dayLabel: 'Day 02 · Oct 25', start: '21:15', end: '22:45', genre: 'Analog Modular & Chiptune' },
+  'cyber-kinetic': { id: 'cyber-kinetic', name: 'CYBER KINETIC', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-25', dayLabel: 'Day 02 · Oct 25', start: '22:30', end: '24:00', genre: 'Melodic Techno Live' },
+  'solar-flare': { id: 'solar-flare', name: 'SOLAR FLARE', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-26', dayLabel: 'Day 03 · Oct 26', start: '20:00', end: '21:45', genre: 'Progressive Trance' },
+  'quantum-drop': { id: 'quantum-drop', name: 'QUANTUM DROP', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-26', dayLabel: 'Day 03 · Oct 26', start: '21:30', end: '23:00', genre: 'Future Bass & Cyber Trap' },
+  'hex-void': { id: 'hex-void', name: 'HEX VOID', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-26', dayLabel: 'Day 03 · Oct 26', start: '22:45', end: '24:15', genre: 'Industrial Darkwave EBM' }
+};
+
+function timeStrToMins(hhmm) {
+  const [h, m] = String(hhmm || '18:00').split(':').map(Number);
+  return (h < 6 ? h + 24 : h) * 60 + (m || 0);
+}
+
+function formatDisplayTime(hhmm) {
+  const [h, m] = String(hhmm || '00:00').split(':').map(Number);
+  const normH = h >= 24 ? h - 24 : h;
+  return `${String(normH).padStart(2, '0')}:${String(m || 0).padStart(2, '0')}`;
+}
+
+function detectItineraryConflicts(items) {
+  const conflicts = [];
+  const conflictingIds = new Set();
+  const sorted = [...items].sort((a, b) => (a.day === b.day ? timeStrToMins(a.start) - timeStrToMins(b.start) : a.day.localeCompare(b.day)));
+
+  for (let i = 0; i < sorted.length; i += 1) {
+    for (let j = i + 1; j < sorted.length; j += 1) {
+      const a = sorted[i];
+      const b = sorted[j];
+      if (a.day !== b.day) continue;
+      const aStart = timeStrToMins(a.start);
+      const aEnd = timeStrToMins(a.end);
+      const bStart = timeStrToMins(b.start);
+      const bEnd = timeStrToMins(b.end);
+      const overlapStart = Math.max(aStart, bStart);
+      const overlapEnd = Math.min(aEnd, bEnd);
+      if (overlapEnd > overlapStart) {
+        conflictingIds.add(a.id);
+        conflictingIds.add(b.id);
+        conflicts.push({
+          dayLabel: a.dayLabel,
+          first: a,
+          second: b,
+          overlapMinutes: overlapEnd - overlapStart
+        });
+      }
+    }
+  }
+  return { conflicts, conflictingIds };
+}
+
+function toIcsTimestamp(dayStr, hhmm) {
+  const [y, mo, d] = dayStr.split('-').map(Number);
+  const [rawH, m] = hhmm.split(':').map(Number);
+  const date = new Date(Date.UTC(y, mo - 1, d, rawH, m || 0, 0));
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}00`;
+}
+
+function generateItineraryICS(items) {
+  const dtstamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Pulse Wave 2026//Festival Itinerary Planner//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Pulse Wave 2026 Personal Lineup',
+    'X-WR-TIMEZONE:Asia/Tokyo'
+  ];
+
+  items.forEach((item) => {
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:${item.id}-${item.day}@pulsewave2026.jp`,
+      `DTSTAMP:${dtstamp}`,
+      `DTSTART;TZID=Asia/Tokyo:${toIcsTimestamp(item.day, item.start)}`,
+      `DTEND;TZID=Asia/Tokyo:${toIcsTimestamp(item.day, item.end)}`,
+      `SUMMARY:${item.name} — ${item.stageLabel}`,
+      `LOCATION:${item.stageLabel}, Tokyo Cyber Dome`,
+      `DESCRIPTION:${item.genre} (${formatDisplayTime(item.start)}–${formatDisplayTime(item.end)})`,
+      'END:VEVENT'
+    );
+  });
+
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
+window.generateItineraryICS = generateItineraryICS;
+window.detectItineraryConflicts = detectItineraryConflicts;
+
 function initScheduleTabs() {
   const lineupTab = document.getElementById('lineup-tab');
   const scheduleTab = document.getElementById('schedule-tab');
+  const itineraryTab = document.getElementById('itinerary-drawer-tab');
   const lineupView = document.getElementById('lineup-view');
   const scheduleView = document.getElementById('schedule-view');
+  const itineraryView = document.getElementById('itinerary-drawer-view');
   const scheduleGrid = document.getElementById('scheduleGrid');
   const scheduleEmpty = document.getElementById('schedule-empty');
   const favCountEl = document.getElementById('favorite-count');
+  const itinCountPill = document.getElementById('itinerary-count-pill');
+  const itinConflictBadge = document.getElementById('itinerary-conflict-badge');
 
   if (!lineupTab || !scheduleTab || !lineupView || !scheduleView) return;
 
   const favorites = new Set();
+  let activeDayFilter = 'all';
+
+  function loadSavedItinerary() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(ITINERARY_STORAGE_KEY) || '[]');
+      if (Array.isArray(parsed)) {
+        parsed.forEach((id) => {
+          if (ARTIST_SCHEDULE_DATA[id]) favorites.add(id);
+        });
+      }
+    } catch {
+      // ignore storage access issues
+    }
+  }
+
+  function saveItinerary() {
+    try {
+      localStorage.setItem(ITINERARY_STORAGE_KEY, JSON.stringify(Array.from(favorites)));
+    } catch {
+      // ignore storage access issues
+    }
+  }
+
+  function syncCardButtons(artistId) {
+    const isSaved = favorites.has(artistId);
+    document.querySelectorAll(`.artist-card[data-artist-id="${artistId}"]`).forEach((card) => {
+      const heartBtn = card.querySelector('.favorite-button');
+      if (heartBtn) {
+        heartBtn.classList.toggle('is-favorite', isSaved);
+        heartBtn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+        const sp = heartBtn.querySelector('span');
+        if (sp) sp.textContent = isSaved ? '♥' : '♡';
+      }
+      const starBtn = card.querySelector('.itinerary-star-btn');
+      if (starBtn) {
+        starBtn.classList.toggle('is-bookmarked', isSaved);
+        starBtn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+        starBtn.textContent = isSaved ? '★' : '☆';
+      }
+    });
+  }
+
+  function renderItineraryDrawer() {
+    const container = document.getElementById('itineraryTracksContainer');
+    const conflictBanner = document.getElementById('itineraryConflictBanner');
+    const conflictList = document.getElementById('itineraryConflictList');
+    const conflictTag = document.getElementById('conflictCountTag');
+    const okBanner = document.getElementById('itineraryOkBanner');
+
+    const savedItems = Array.from(favorites)
+      .map((id) => ARTIST_SCHEDULE_DATA[id])
+      .filter(Boolean)
+      .sort((a, b) => (a.day === b.day ? timeStrToMins(a.start) - timeStrToMins(b.start) : a.day.localeCompare(b.day)));
+
+    const { conflicts, conflictingIds } = detectItineraryConflicts(savedItems);
+
+    if (itinConflictBadge) {
+      itinConflictBadge.hidden = conflicts.length === 0;
+      itinConflictBadge.textContent = `${conflicts.length} ⚠`;
+    }
+
+    if (!container) return;
+
+    if (conflictBanner && conflictList && conflictTag && okBanner) {
+      if (conflicts.length > 0) {
+        conflictBanner.hidden = false;
+        okBanner.hidden = true;
+        conflictTag.textContent = `${conflicts.length} overlap${conflicts.length === 1 ? '' : 's'}`;
+        conflictList.innerHTML = conflicts
+          .map(
+            (c) =>
+              `<li><strong>${c.dayLabel}:</strong> ${c.first.name} (${c.first.stageLabel}, ${formatDisplayTime(c.first.start)}–${formatDisplayTime(c.first.end)}) overlaps <strong>${c.second.name}</strong> (${c.second.stageLabel}, ${formatDisplayTime(c.second.start)}–${formatDisplayTime(c.second.end)}) by <strong>${c.overlapMinutes} min</strong></li>`
+          )
+          .join('');
+      } else {
+        conflictBanner.hidden = true;
+        okBanner.hidden = savedItems.length === 0;
+      }
+    }
+
+    const filteredItems = activeDayFilter === 'all' ? savedItems : savedItems.filter((it) => it.day === activeDayFilter);
+
+    if (filteredItems.length === 0) {
+      container.innerHTML = `
+        <div class="itinerary-empty-box">
+          <h4>No Sets Bookmarked ${activeDayFilter === 'all' ? 'Yet' : 'For This Day'}</h4>
+          <p>Tap the ★ bookmark icon on any artist card or click "⚡ Load Sample Lineup" above to preview chronological stage tracking &amp; conflict detection.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const daysPresent = [...new Set(filteredItems.map((it) => it.day))];
+    const minWindowStart = 18 * 60; // 18:00
+    const totalWindowMins = 7 * 60; // 18:00 -> 01:00 (420 mins)
+
+    container.innerHTML = daysPresent
+      .map((dayKey) => {
+        const daySets = filteredItems.filter((it) => it.day === dayKey);
+        const dayConflicts = daySets.filter((it) => conflictingIds.has(it.id)).length;
+        const rowsHtml = daySets
+          .map((item) => {
+            const startMin = Math.max(minWindowStart, timeStrToMins(item.start));
+            const endMin = Math.min(minWindowStart + totalWindowMins, timeStrToMins(item.end));
+            const leftPct = Math.max(0, Math.min(72, ((startMin - minWindowStart) / totalWindowMins) * 100));
+            const widthPct = Math.max(25, Math.min(100 - leftPct, ((endMin - startMin) / totalWindowMins) * 100));
+            const isConf = conflictingIds.has(item.id);
+            return `
+              <div class="timeline-lane">
+                <div class="timeline-bar ${item.stage} ${isConf ? 'has-conflict' : ''}" style="left: ${leftPct.toFixed(1)}%; width: ${widthPct.toFixed(1)}%;">
+                  <div class="timeline-bar-info">
+                    <strong>${item.name}</strong>
+                    <span>${item.stageLabel} · ${formatDisplayTime(item.start)}–${formatDisplayTime(item.end)}</span>
+                  </div>
+                  <div class="timeline-bar-right">
+                    ${isConf ? '<span class="timeline-conflict-chip">⚠ CONFLICT</span>' : ''}
+                    <button type="button" class="timeline-remove-btn" data-remove-artist="${item.id}" aria-label="Remove ${item.name} from itinerary">&times;</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+
+        return `
+          <div class="itinerary-day-group">
+            <div class="itinerary-day-title">
+              <span>${daySets[0].dayLabel} · ${daySets.length} Set${daySets.length === 1 ? '' : 's'}</span>
+              <span>${dayConflicts > 0 ? '⚠️ Overlap Alert' : '✓ Clear'}</span>
+            </div>
+            <div class="timeline-ruler" aria-hidden="true">
+              <span>18:00</span><span>19:00</span><span>20:00</span><span>21:00</span><span>22:00</span><span>23:00</span><span>00:00+</span>
+            </div>
+            <div class="timeline-rows">${rowsHtml}</div>
+          </div>
+        `;
+      })
+      .join('');
+
+    container.querySelectorAll('.timeline-remove-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const rid = btn.getAttribute('data-remove-artist');
+        if (rid && favorites.has(rid)) {
+          toggleFavorite(rid);
+        }
+      });
+    });
+  }
 
   function updateScheduleUI() {
     if (favCountEl) favCountEl.textContent = String(favorites.size);
+    if (itinCountPill) itinCountPill.textContent = String(favorites.size);
 
     if (scheduleGrid && scheduleEmpty) {
       scheduleGrid.replaceChildren();
@@ -123,16 +375,16 @@ function initScheduleTabs() {
           if (original) {
             const clone = original.cloneNode(true);
             const favBtn = clone.querySelector('.favorite-button');
-            if (favBtn) {
-              favBtn.addEventListener('click', () => {
-                toggleFavorite(artistId);
-              });
-            }
+            if (favBtn) favBtn.addEventListener('click', () => toggleFavorite(artistId));
+            const starBtn = clone.querySelector('.itinerary-star-btn');
+            if (starBtn) starBtn.addEventListener('click', () => toggleFavorite(artistId));
             scheduleGrid.appendChild(clone);
           }
         });
       }
     }
+
+    renderItineraryDrawer();
   }
 
   function toggleFavorite(artistId) {
@@ -141,18 +393,12 @@ function initScheduleTabs() {
     } else {
       favorites.add(artistId);
     }
-
-    document.querySelectorAll(`.artist-card[data-artist-id="${artistId}"] .favorite-button`).forEach((btn) => {
-      const isFav = favorites.has(artistId);
-      btn.classList.toggle('is-favorite', isFav);
-      btn.setAttribute('aria-pressed', isFav ? 'true' : 'false');
-      btn.querySelector('span').textContent = isFav ? '♥' : '♡';
-    });
-
+    saveItinerary();
+    syncCardButtons(artistId);
     updateScheduleUI();
   }
 
-  document.querySelectorAll('.artist-card .favorite-button').forEach((btn) => {
+  document.querySelectorAll('.artist-card .favorite-button, .artist-card .itinerary-star-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const card = btn.closest('.artist-card');
@@ -162,24 +408,92 @@ function initScheduleTabs() {
     });
   });
 
-  lineupTab.addEventListener('click', () => {
-    lineupTab.classList.add('active');
-    lineupTab.setAttribute('aria-selected', 'true');
-    scheduleTab.classList.remove('active');
-    scheduleTab.setAttribute('aria-selected', 'false');
-    lineupView.hidden = false;
-    scheduleView.hidden = true;
+  function switchTab(activeKey) {
+    const tabs = [
+      { key: 'lineup', tab: lineupTab, view: lineupView },
+      { key: 'schedule', tab: scheduleTab, view: scheduleView },
+      { key: 'itinerary', tab: itineraryTab, view: itineraryView }
+    ];
+    tabs.forEach((entry) => {
+      if (!entry.tab || !entry.view) return;
+      const isOn = entry.key === activeKey;
+      entry.tab.classList.toggle('active', isOn);
+      entry.tab.setAttribute('aria-selected', String(isOn));
+      entry.view.hidden = !isOn;
+    });
+    updateScheduleUI();
+  }
+
+  lineupTab.addEventListener('click', () => switchTab('lineup'));
+  scheduleTab.addEventListener('click', () => switchTab('schedule'));
+  if (itineraryTab && itineraryView) {
+    itineraryTab.addEventListener('click', () => switchTab('itinerary'));
+  }
+
+  document.querySelectorAll('.itinerary-day-pill').forEach((pill) => {
+    pill.addEventListener('click', () => {
+      activeDayFilter = pill.getAttribute('data-day') || 'all';
+      document.querySelectorAll('.itinerary-day-pill').forEach((p) => {
+        const on = p === pill;
+        p.classList.toggle('active', on);
+        p.setAttribute('aria-selected', String(on));
+      });
+      renderItineraryDrawer();
+    });
   });
 
-  scheduleTab.addEventListener('click', () => {
-    scheduleTab.classList.add('active');
-    scheduleTab.setAttribute('aria-selected', 'true');
-    lineupTab.classList.remove('active');
-    lineupTab.setAttribute('aria-selected', 'false');
-    scheduleView.hidden = false;
-    lineupView.hidden = true;
-    updateScheduleUI();
-  });
+  const sampleBtn = document.getElementById('loadSampleItineraryBtn');
+  if (sampleBtn) {
+    sampleBtn.addEventListener('click', () => {
+      ['aura-matrix', 'neon-apex', 'neural-collider', 'synth-pulse', 'solar-flare'].forEach((id) => {
+        favorites.add(id);
+      });
+      saveItinerary();
+      Object.keys(ARTIST_SCHEDULE_DATA).forEach(syncCardButtons);
+      updateScheduleUI();
+    });
+  }
+
+  const clearBtn = document.getElementById('clearItineraryBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      favorites.clear();
+      saveItinerary();
+      Object.keys(ARTIST_SCHEDULE_DATA).forEach(syncCardButtons);
+      updateScheduleUI();
+      const status = document.getElementById('icsStatusStrip');
+      if (status) status.textContent = 'Itinerary cleared.';
+    });
+  }
+
+  const exportIcsBtn = document.getElementById('exportIcsBtn');
+  if (exportIcsBtn) {
+    exportIcsBtn.addEventListener('click', () => {
+      const items = Array.from(favorites).map((id) => ARTIST_SCHEDULE_DATA[id]).filter(Boolean);
+      const status = document.getElementById('icsStatusStrip');
+      if (items.length === 0) {
+        if (status) status.textContent = 'Bookmark at least 1 artist performance before exporting .ics.';
+        return;
+      }
+      const icsText = generateItineraryICS(items);
+      const blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'pulsewave-2026-itinerary.ics';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      if (status) {
+        status.textContent = `Exported ${items.length} event(s) to pulsewave-2026-itinerary.ics (RFC 5545 VCALENDAR).`;
+      }
+    });
+  }
+
+  loadSavedItinerary();
+  Object.keys(ARTIST_SCHEDULE_DATA).forEach(syncCardButtons);
+  updateScheduleUI();
 }
 
 // All money is handled in cents so the totals never pick up float rounding errors.
@@ -794,4 +1108,415 @@ function initPackingChecklist() {
   // Initial calculation
   updateUI();
 }
+
+// ---------------------------------------------------------------
+// Cyber DJ Synthesizer Launchpad & Soundboard (Issue #343)
+// ---------------------------------------------------------------
+function initCyberSoundboard() {
+  const launchpad = document.getElementById('cyber-launchpad');
+  if (!launchpad) return;
+
+  let audioCtx = null;
+  let masterGain = null;
+  let sequencerInterval = null;
+  let currentStep = 0;
+
+  const bpmSlider = document.getElementById('djBpmSlider');
+  const bpmDisplay = document.getElementById('djBpmDisplay');
+  const bpmPresets = launchpad.querySelectorAll('.btn-bpm-chip');
+  const volSlider = document.getElementById('djMasterVol');
+  const volDisplay = document.getElementById('djVolDisplay');
+  const beatDot = document.getElementById('beatPulseDot');
+  const beatStatus = document.getElementById('beatStatusText');
+  const seqToggleBtn = document.getElementById('btnSeqToggle');
+  const seqBtnText = document.getElementById('seqBtnText');
+  const pads = Array.from(launchpad.querySelectorAll('.dj-pad'));
+
+  function getAudioContext() {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContextClass();
+      masterGain = audioCtx.createGain();
+      const vol = volSlider ? parseInt(volSlider.value, 10) / 100 : 0.8;
+      masterGain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      masterGain.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  // Create White Noise buffer helper
+  function createNoiseBuffer(ctx, duration) {
+    const bufferSize = Math.floor(ctx.sampleRate * duration);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    return buffer;
+  }
+
+  // 1. Sub Kick 808
+  function playKick() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.exponentialRampToValueAtTime(35, t + 0.35);
+
+    gain.gain.setValueAtTime(1.0, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.4);
+  }
+
+  // 2. Cyber Snare
+  function playSnare() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+
+    // Body
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(220, t);
+    osc.frequency.exponentialRampToValueAtTime(90, t + 0.1);
+    oscGain.gain.setValueAtTime(0.7, t);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    osc.connect(oscGain);
+    oscGain.connect(masterGain);
+    osc.start(t);
+    osc.stop(t + 0.15);
+
+    // Snap noise
+    const noise = ctx.createBufferSource();
+    noise.buffer = createNoiseBuffer(ctx, 0.2);
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(1000, t);
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.8, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+    noise.start(t);
+    noise.stop(t + 0.22);
+  }
+
+  // 3. Neon Hi-Hat
+  function playHiHat() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const noise = ctx.createBufferSource();
+    noise.buffer = createNoiseBuffer(ctx, 0.08);
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(8000, t);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.6, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    noise.start(t);
+    noise.stop(t + 0.06);
+  }
+
+  // 4. Glitch Clap
+  function playClap() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const noise = ctx.createBufferSource();
+    noise.buffer = createNoiseBuffer(ctx, 0.25);
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1200, t);
+    filter.Q.setValueAtTime(2, t);
+
+    const gain = ctx.createGain();
+    // Multi-burst envelope
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.setValueAtTime(0.7, t + 0.01);
+    gain.gain.setValueAtTime(0.1, t + 0.02);
+    gain.gain.setValueAtTime(0.7, t + 0.03);
+    gain.gain.setValueAtTime(0.1, t + 0.04);
+    gain.gain.setValueAtTime(0.9, t + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    noise.start(t);
+    noise.stop(t + 0.25);
+  }
+
+  // 5. Sub Bass Drop
+  function playBassDrop() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(85, t);
+    osc.frequency.exponentialRampToValueAtTime(32, t + 0.7);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(300, t);
+    filter.Q.setValueAtTime(4, t);
+
+    gain.gain.setValueAtTime(0.9, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.75);
+  }
+
+  // 6. Synth Stab (C5 chord)
+  function playSynthStab() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+
+    [523.25, 659.25, 783.99].forEach((freq) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0.25, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+
+      osc.start(t);
+      osc.stop(t + 0.35);
+    });
+  }
+
+  // 7. Laser Chirp FX
+  function playLaser() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1800, t);
+    osc.frequency.exponentialRampToValueAtTime(200, t + 0.18);
+
+    gain.gain.setValueAtTime(0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.2);
+  }
+
+  // 8. Dome Crash
+  function playCrash() {
+    const ctx = getAudioContext();
+    const t = ctx.currentTime;
+    const noise = ctx.createBufferSource();
+    noise.buffer = createNoiseBuffer(ctx, 1.2);
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(3000, t);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    noise.start(t);
+    noise.stop(t + 1.2);
+  }
+
+  const SOUND_HANDLERS = [
+    playKick,      // 1
+    playSnare,     // 2
+    playHiHat,     // 3
+    playClap,      // 4
+    playBassDrop,  // 5
+    playSynthStab, // 6
+    playLaser,     // 7
+    playCrash      // 8
+  ];
+
+  function triggerPad(index) {
+    if (index >= 0 && index < SOUND_HANDLERS.length) {
+      SOUND_HANDLERS[index]();
+      const padEl = pads[index];
+      if (padEl) {
+        padEl.classList.add('active-press');
+        setTimeout(() => padEl.classList.remove('active-press'), 140);
+      }
+    }
+  }
+
+  // Bind Pads click
+  pads.forEach((pad, idx) => {
+    pad.addEventListener('click', () => {
+      triggerPad(idx);
+    });
+  });
+
+  // Global Keyboard listener for keys 1 through 8
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+    const num = parseInt(e.key, 10);
+    if (!isNaN(num) && num >= 1 && num <= 8) {
+      triggerPad(num - 1);
+    }
+  });
+
+  // BPM Slider & Presets
+  function setBpm(bpm) {
+    if (bpmSlider) bpmSlider.value = bpm;
+    if (bpmDisplay) bpmDisplay.textContent = `${bpm} BPM`;
+    if (sequencerInterval) {
+      stopSequencer();
+      startSequencer();
+    }
+  }
+
+  if (bpmSlider) {
+    bpmSlider.addEventListener('input', (e) => {
+      setBpm(e.target.value);
+    });
+  }
+
+  bpmPresets.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      bpmPresets.forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const targetBpm = chip.getAttribute('data-bpm');
+      setBpm(targetBpm);
+    });
+  });
+
+  // Master Volume
+  if (volSlider) {
+    volSlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (volDisplay) volDisplay.textContent = `${val}%`;
+      if (masterGain && audioCtx) {
+        masterGain.gain.setValueAtTime(val / 100, audioCtx.currentTime);
+      }
+    });
+  }
+
+  // 4/4 Beat Sequencer Loop
+  function flashMetronome() {
+    if (beatDot) {
+      beatDot.classList.add('flash');
+      setTimeout(() => beatDot.classList.remove('flash'), 120);
+    }
+  }
+
+  function startSequencer() {
+    const bpm = bpmSlider ? parseInt(bpmSlider.value, 10) : 128;
+    const intervalMs = (60000 / bpm) / 2; // 8th note resolution
+
+    currentStep = 0;
+    if (beatStatus) beatStatus.textContent = 'LOOP ACTIVE';
+    if (seqToggleBtn) seqToggleBtn.classList.add('playing');
+    if (seqBtnText) seqBtnText.textContent = 'Stop Beat Loop';
+
+    sequencerInterval = setInterval(() => {
+      // 8 steps in a 4/4 bar (0 to 7)
+      // Metronome flash on quarter beats
+      if (currentStep % 2 === 0) {
+        flashMetronome();
+      }
+
+      // Step 0: Kick (beat 1)
+      if (currentStep === 0) {
+        playKick();
+      }
+      // Step 1: Hat
+      else if (currentStep === 1) {
+        playHiHat();
+      }
+      // Step 2: Clap + Snare (beat 2)
+      else if (currentStep === 2) {
+        playSnare();
+        playClap();
+      }
+      // Step 3: Hat
+      else if (currentStep === 3) {
+        playHiHat();
+      }
+      // Step 4: Kick (beat 3)
+      else if (currentStep === 4) {
+        playKick();
+      }
+      // Step 5: Hat
+      else if (currentStep === 5) {
+        playHiHat();
+      }
+      // Step 6: Clap + Snare (beat 4)
+      else if (currentStep === 6) {
+        playSnare();
+        playClap();
+      }
+      // Step 7: Offbeat Hat + Synth stab accent
+      else if (currentStep === 7) {
+        playHiHat();
+      }
+
+      currentStep = (currentStep + 1) % 8;
+    }, intervalMs);
+  }
+
+  function stopSequencer() {
+    if (sequencerInterval) {
+      clearInterval(sequencerInterval);
+      sequencerInterval = null;
+    }
+    if (beatStatus) beatStatus.textContent = 'PULSE READY';
+    if (seqToggleBtn) seqToggleBtn.classList.remove('playing');
+    if (seqBtnText) seqBtnText.textContent = 'Start 4/4 Beat Loop';
+  }
+
+  if (seqToggleBtn) {
+    seqToggleBtn.addEventListener('click', () => {
+      if (sequencerInterval) {
+        stopSequencer();
+      } else {
+        startSequencer();
+      }
+    });
+  }
+}
+
 

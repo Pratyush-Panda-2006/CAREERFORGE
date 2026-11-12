@@ -641,19 +641,57 @@
   <!-- ===== END issue #197 ===== -->
 
   <section class="compare" id="compare" aria-labelledby="compare-title">
-    <h2 id="compare-title">PLAYER COMPARATOR</h2>
-    <p class="compare-intro">Pick two pros and see how they stack up head to head.</p>
+    <div class="compare-header-row">
+      <div class="fr-tag">VORTEX ANALYTICS // COMBAT LAB</div>
+      <h2 id="compare-title">PRO PLAYER HEAD-TO-HEAD RADAR &amp; WIN ESTIMATOR</h2>
+      <p class="compare-intro">Compare elite esports athletes across 5 core tactical dimensions with real-time Elo-weighted matchup win probability estimation.</p>
+    </div>
 
     <div class="compare-pickers">
       <div class="picker picker-a">
-        <label for="player-a">Player A</label>
-        <select id="player-a"></select>
+        <label for="player-a">Player A (Cyan)</label>
+        <select id="player-a" aria-label="Select Player A"></select>
         <span class="picker-team" id="team-a"></span>
       </div>
+      <div class="compare-vs-badge" aria-hidden="true">VS</div>
       <div class="picker picker-b">
-        <label for="player-b">Player B</label>
-        <select id="player-b"></select>
+        <label for="player-b">Player B (Magenta)</label>
+        <select id="player-b" aria-label="Select Player B"></select>
         <span class="picker-team" id="team-b"></span>
+      </div>
+    </div>
+
+    <!-- Win Probability Estimator HUD (Issue #451) -->
+    <div class="win-estimator-card" id="winEstimatorCard">
+      <div class="estimator-header">
+        <span class="estimator-label">⚡ MATCH WIN PROBABILITY ESTIMATOR</span>
+        <span class="estimator-model-tag">ELO-WEIGHTED COMBAT ALGORITHM</span>
+      </div>
+      <div class="estimator-meter-container">
+        <div class="estimator-bar-wrap">
+          <div class="estimator-bar-a" id="estimatorBarA" style="width: 50%;">
+            <span class="bar-percent-text" id="percentTextA">50%</span>
+          </div>
+          <div class="estimator-bar-b" id="estimatorBarB" style="width: 50%;">
+            <span class="bar-percent-text" id="percentTextB">50%</span>
+          </div>
+        </div>
+      </div>
+      <div class="estimator-footer">
+        <div class="estimator-player-stat a-side">
+          <span class="player-pill cyan" id="hudNameA">Player A</span>
+          <span class="win-chance-big cyan-text" id="hudChanceA">50%</span>
+          <span class="stat-role-chip" id="hudRoleA">Duelist</span>
+        </div>
+        <div class="estimator-verdict" id="hudVerdict">
+          <span class="verdict-badge even" id="verdictBadge">EVEN MATCHUP</span>
+          <span class="verdict-sub" id="verdictSub">Equal projected performance</span>
+        </div>
+        <div class="estimator-player-stat b-side">
+          <span class="player-pill magenta" id="hudNameB">Player B</span>
+          <span class="win-chance-big magenta-text" id="hudChanceB">50%</span>
+          <span class="stat-role-chip" id="hudRoleB">Duelist</span>
+        </div>
       </div>
     </div>
 
@@ -664,8 +702,8 @@
           <desc id="radar-desc"></desc>
         </svg>
         <figcaption class="radar-legend">
-          <span class="lg lg-a" id="legend-a">Player A</span>
-          <span class="lg lg-b" id="legend-b">Player B</span>
+          <span class="lg lg-a" id="legend-a">Player A (Cyan)</span>
+          <span class="lg lg-b" id="legend-b">Player B (Magenta)</span>
         </figcaption>
       </figure>
 
@@ -673,15 +711,112 @@
         <table class="compare-table" id="compare-table">
           <caption class="sr-only">Stat comparison. The better value in each row is marked.</caption>
           <thead>
-            <tr><th scope="col">Stat</th><th scope="col" id="th-a">Player A</th><th scope="col" id="th-b">Player B</th></tr>
+            <tr><th scope="col">Tactical Dimension</th><th scope="col" id="th-a">Player A</th><th scope="col" id="th-b">Player B</th></tr>
           </thead>
           <tbody id="compare-body"></tbody>
         </table>
         <p class="compare-summary" id="compare-summary" role="status" aria-live="polite"></p>
-        <p class="compare-note">Reaction time is inverted on the chart because lower is better. Stats are made-up demo data.</p>
+        <p class="compare-note">Metrics normalized across 5 competitive axes: KDA, CS/min, Damage Share %, First Blood %, and Champion Pool Mastery.</p>
       </div>
     </div>
   </section>
+
+  <!-- ===== Fantasy Esports Draft Simulator (Issue #347) START ===== -->
+  <section class="draft-arena-section" id="fantasy-draft-arena" aria-labelledby="draft-arena-heading">
+    <div class="draft-arena-container">
+      <div class="draft-arena-header">
+        <span class="draft-pill-tag">⚡ CHAMPIONSHIP DRAFT ARENA</span>
+        <h2 id="draft-arena-heading">PRO ESPORTS FANTASY DRAFT SIMULATOR</h2>
+        <p class="draft-arena-sub">
+          Draft a powerhouse 5-member MOBA championship squad across <strong>Top</strong>, <strong>Jungle</strong>, <strong>Mid</strong>, <strong>ADC</strong>, and <strong>Support</strong> within the strict <strong>$50,000 Salary Cap</strong>. Maximize projected fantasy points and lock in your roster for matchday glory!
+        </p>
+      </div>
+
+      <!-- Salary & Stats Overview -->
+      <div class="draft-dashboard">
+        <!-- Salary Cap Widget -->
+        <div class="draft-metric-tile" id="draft-salary-card">
+          <div class="draft-tile-top">
+            <span class="draft-tile-title">SALARY BUDGET // $50,000 CAP</span>
+            <span class="draft-count-badge" id="draft-roster-count">0 / 5 FILLED</span>
+          </div>
+          <div class="draft-cap-bar-wrap">
+            <div class="draft-cap-bar" id="draft-cap-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="50000" aria-label="Salary Cap Used">
+              <div class="draft-cap-fill" id="draft-cap-fill" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="draft-cap-numbers">
+            <div>
+              <small>SPENT</small>
+              <strong id="draft-spent-text">$0</strong>
+            </div>
+            <div class="text-right">
+              <small>REMAINING</small>
+              <strong id="draft-rem-text" class="text-emerald">$50,000</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fantasy Points Calculator -->
+        <div class="draft-metric-tile" id="draft-points-card">
+          <div class="draft-tile-top">
+            <span class="draft-tile-title">PROJECTED FANTASY PTS</span>
+            <span class="draft-compliance-badge" id="draft-compliance-badge">INCOMPLETE ROSTER</span>
+          </div>
+          <div class="draft-pts-display">
+            <div class="draft-hero-pts" id="draft-total-pts">0.0</div>
+            <p class="draft-pts-sub" id="draft-pts-sub">Select players from each role to calculate total projected points.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 Role Slots Roster -->
+      <div class="draft-slots-header">
+        <h3>ACTIVE 5-ROLE ROSTER</h3>
+        <div class="draft-header-actions">
+          <button type="button" class="btn-draft-action btn-autodraft" id="draft-autofill-btn">⚡ Auto-Draft Best</button>
+          <button type="button" class="btn-draft-action btn-clear" id="draft-reset-btn">✖ Reset</button>
+          <button type="button" class="btn-draft-action btn-lockin" id="draft-lockin-btn" disabled>🔒 Lock In Roster</button>
+        </div>
+      </div>
+
+      <div class="draft-slots-grid" id="draft-slots-container">
+        <!-- Top, Jungle, Mid, ADC, Support slots rendered dynamically -->
+      </div>
+
+      <!-- Player Bench Pool with Filters -->
+      <div class="draft-bench-header">
+        <div>
+          <h3>PRO PLAYER POOL</h3>
+          <p>Filter by lane role and click "Draft" to assign to your starting roster.</p>
+        </div>
+        <div class="draft-role-filters" id="draft-role-filters">
+          <button type="button" class="draft-role-btn active" data-role="ALL">ALL ROLES</button>
+          <button type="button" class="draft-role-btn" data-role="TOP">TOP</button>
+          <button type="button" class="draft-role-btn" data-role="JUNGLE">JUNGLE</button>
+          <button type="button" class="draft-role-btn" data-role="MID">MID</button>
+          <button type="button" class="draft-role-btn" data-role="ADC">ADC</button>
+          <button type="button" class="draft-role-btn" data-role="SUPPORT">SUPPORT</button>
+        </div>
+      </div>
+
+      <div class="draft-players-grid" id="draft-players-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Celebration Modal -->
+    <dialog class="draft-lockin-modal" id="draft-celebration-modal" aria-labelledby="draft-celeb-title">
+      <div class="celeb-content">
+        <div class="celeb-trophy" aria-hidden="true">🏆</div>
+        <h3 id="draft-celeb-title">ROSTER LOCKED &amp; SUBMITTED!</h3>
+        <p class="celeb-desc">Your 5-player championship fantasy lineup is officially validated and locked under the $50,000 salary cap!</p>
+        <div class="celeb-summary" id="celeb-summary"></div>
+        <button type="button" class="btn-draft-action btn-lockin" id="celeb-close-btn">Return to Arena</button>
+      </div>
+    </dialog>
+  </section>
+  <!-- ===== Fantasy Esports Draft Simulator (Issue #347) END ===== -->
 
   <div id="fr-toast-container" class="fr-toast-container" aria-live="polite"></div>
 
@@ -788,5 +923,32 @@
   </div>
   <!-- ===== END Issue #196 ===== -->
 
+  <section id="tactical-simulator" class="tactical-simulator" aria-labelledby="tactical-title">
+    <p class="tactical-kicker">TACTICAL LAB / SYNTHETIC MATCH</p>
+    <h2 id="tactical-title">Aurora vs Umbra</h2>
+    <p>A fictional five-player tactical simulation. Seeded Elo-weighted duels combine equipment, individual momentum and a planted objective bonus. These are illustrative rules, not real match predictions or tournament rules.</p>
+    <form>
+      <div class="tactical-fields">
+        <label>Replay seed<input name="seed" type="number" min="0" max="4294967295" step="1" value="42" required></label>
+        <label>Aurora Elo<input name="ratingA" type="number" min="800" max="2400" step="1" value="1600" required></label>
+        <label>Umbra Elo<input name="ratingB" type="number" min="800" max="2400" step="1" value="1600" required></label>
+        <label>Match format<select name="firstTo"><option value="7">First to 7 rounds</option><option value="13">First to 13 rounds</option></select></label>
+      </div>
+      <button type="submit">Start / restart simulation</button>
+    </form>
+    <div class="tactical-controls"><label for="tactical-speed">Playback speed</label><select id="tactical-speed"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="instant">Instant</option></select><button type="button" id="tactical-pause" disabled>Pause</button></div>
+    <p>Playback advances one event every 0.4 seconds at 1×; log timestamps show simulated round time. Changing speed does not change the generated match.</p>
+    <p id="tactical-score" class="tactical-score">Aurora 0 — 0 Umbra</p>
+    <p role="status" aria-live="polite">Choose ratings and a seed, then start the match.</p>
+    <div id="tactical-history" class="tactical-history" aria-label="Round winners"></div>
+    <h3>Economy trajectory</h3>
+    <p>Aurora: cyan · Umbra: pink. Budget units range 0–16,000; exact end-of-round values are in the table. These are simplified team budgets, not a real game's economy.</p>
+    <svg viewBox="0 0 600 160" role="img" aria-label="End-of-round team budget trajectories"></svg>
+    <details><summary>Economy rules</summary><p>Start with 800 units. Full buy costs 4,200; force buy 2,200; eco up to 500. Winners receive 3,250, losers receive 1,400 plus 500 for each additional loss (cap 3,400). Each elimination adds 60; planting adds 300. Budgets cap at 16,000. Attacking alternates every round. All players respawn each round; momentum persists within this simulation.</p></details>
+    <div class="tactical-table" tabindex="0" role="region" aria-label="Round economy history, scroll horizontally on small screens"><table><thead><tr><th scope="col">Round</th><th scope="col">Winner</th><th scope="col">Score</th><th scope="col">Aurora buy</th><th scope="col">Umbra buy</th><th scope="col">Aurora budget</th><th scope="col">Umbra budget</th></tr></thead><tbody></tbody></table></div>
+    <h3>Tactical event feed</h3><p>Shows the latest 100 events. Clutch percentages refer to a single duel, not the whole round.</p>
+    <ol aria-label="Simulated tactical events" aria-live="off"></ol>
+  </section>
+  <script type="module" src="match-simulator.js"></script>
 </body>
 </html>

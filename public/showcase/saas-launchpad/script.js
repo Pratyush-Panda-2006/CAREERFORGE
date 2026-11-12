@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initBillingToggle();
   initIntegrationFilters();
   initSystemStatus();
+  initTelemetryAnomalyDetector();
+  initUptimeHistoryMatrix();
 });
 
 function initFaqAccordion() {
@@ -583,7 +585,7 @@ function initOnboardingChecklist() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
       return Array.isArray(saved) ? saved : [];
-    } catch (err) {
+    } catch {
       return [];
     }
   }
@@ -592,7 +594,7 @@ function initOnboardingChecklist() {
     try {
       const done = steps.filter(s => s.querySelector('.onb-check').checked).map(s => s.dataset.step);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(done));
-    } catch (err) {
+    } catch {
       /* storage can be blocked, the checklist still works for this visit */
     }
   }
@@ -868,7 +870,7 @@ function initOnboardingChecklist() {
   const footerMatchesCount = document.getElementById('footerMatchesCount');
 
   // Microservices & Log Templates
-  const SERVICES = [
+  const _SERVICES = [
     'api-gateway',
     'auth-service',
     'payment-processor',
@@ -1174,6 +1176,1058 @@ function initOnboardingChecklist() {
   startLoop();
 })();
 /* ===== END Issue #359 ===== */
+
+/* ===== BEGIN Issue #440: Real-Time Telemetry Anomaly Detection & Adaptive Alert Threshold Simulator ===== */
+function initTelemetryAnomalyDetector() {
+  'use strict';
+
+  const canvas = document.getElementById('telemetryCanvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const ROLLING_WINDOW = 60;
+  let isStreaming = true;
+  let activeMetric = 'cpu'; // 'cpu' | 'memory' | 'latency' | 'composite'
+  let zThreshold = 2.5;
+  let autoWebhook = true;
+  let animationFrameId = null;
+  let tickIntervalId = null;
+  const incidentLogs = [];
+
+  // Metric Stream Specifications
+  const METRIC_SPECS = Object.freeze({
+    cpu: {
+      id: 'cpu',
+      name: 'CPU Utilization',
+      unit: '%',
+      baseMean: 42.0,
+      baseStdDev: 3.2,
+      minVal: 5,
+      maxVal: 100,
+      color: '#06b6d4',
+      glowColor: 'rgba(6, 182, 212, 0.35)',
+      yMin: 0,
+      yMax: 100
+    },
+    memory: {
+      id: 'memory',
+      name: 'Memory Heap',
+      unit: '%',
+      baseMean: 58.0,
+      baseStdDev: 2.8,
+      minVal: 10,
+      maxVal: 100,
+      color: '#a855f7',
+      glowColor: 'rgba(168, 85, 247, 0.35)',
+      yMin: 0,
+      yMax: 100
+    },
+    latency: {
+      id: 'latency',
+      name: 'Query Latency',
+      unit: 'ms',
+      baseMean: 34.0,
+      baseStdDev: 4.5,
+      minVal: 5,
+      maxVal: 220,
+      color: '#f59e0b',
+      glowColor: 'rgba(245, 158, 11, 0.35)',
+      yMin: 0,
+      yMax: 220
+    }
+  });
+
+  // Ring buffers for rolling 60 data points
+  const streamBuffers = {
+    cpu: [],
+    memory: [],
+    latency: []
+  };
+
+  // Seed initial 60 samples using Box-Muller transform for realistic Gaussian telemetry
+  function generateGaussian(mean, stdDev, min, max) {
+    const u1 = Math.max(0.0001, Math.random());
+    const u2 = Math.random();
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    const val = mean + z0 * stdDev;
+    return Math.max(min, Math.min(max, Math.round(val * 10) / 10));
+  }
+
+  function seedBuffer(metricKey) {
+    const spec = METRIC_SPECS[metricKey];
+    const arr = [];
+    for (let i = 0; i < ROLLING_WINDOW; i++) {
+      arr.push(generateGaussian(spec.baseMean, spec.baseStdDev, spec.minVal, spec.maxVal));
+    }
+    return arr;
+  }
+
+  function resetBuffers() {
+    streamBuffers.cpu = seedBuffer('cpu');
+    streamBuffers.memory = seedBuffer('memory');
+    streamBuffers.latency = seedBuffer('latency');
+  }
+  resetBuffers();
+
+  // Statistical Engine: Rolling Mean, Std Dev, Z-Score
+  function computeStats(buffer) {
+    const n = buffer.length;
+    if (n === 0) return { mean: 0, stdDev: 1, zScore: 0, upperThreshold: 0, latest: 0 };
+
+    const sum = buffer.reduce((acc, v) => acc + v, 0);
+    const mean = sum / n;
+
+    const varianceSum = buffer.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0);
+    const stdDev = Math.max(0.5, Math.sqrt(varianceSum / n)); // Guard against division by zero
+
+    const latest = buffer[n - 1];
+    const zScore = (latest - mean) / stdDev;
+    const upperThreshold = mean + zThreshold * stdDev;
+
+    return {
+      mean: Math.round(mean * 10) / 10,
+      stdDev: Math.round(stdDev * 10) / 10,
+      zScore: Math.round(zScore * 100) / 100,
+      upperThreshold: Math.round(upperThreshold * 10) / 10,
+      latest: Math.round(latest * 10) / 10,
+      isAnomaly: zScore > zThreshold
+    };
+  }
+
+  // Toast Notification Trigger
+  function showToast(metricName, value, unit, zVal) {
+    const container = document.getElementById('telemetryToastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'telemetry-toast';
+    toast.setAttribute('role', 'alert');
+
+    const icon = document.createElement('span');
+    icon.className = 'toast-icon';
+    icon.textContent = '🚨';
+
+    const content = document.createElement('div');
+    content.className = 'toast-content';
+
+    const title = document.createElement('strong');
+    title.textContent = `Telemetry Anomaly: ${metricName}`;
+
+    const text = document.createElement('span');
+    text.textContent = `Spike detected: ${value}${unit} (Z = +${zVal}σ) · Automated Webhook Dispatched`;
+
+    content.appendChild(title);
+    content.appendChild(text);
+    toast.appendChild(icon);
+    toast.appendChild(content);
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(40px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 350);
+    }, 4000);
+  }
+
+  // Simulated Webhook Dispatch Engine
+  function dispatchWebhook(metricKey, stats) {
+    const spec = METRIC_SPECS[metricKey];
+    const now = new Date();
+    const isoTime = now.toISOString();
+    const epochSec = Math.floor(now.getTime() / 1000);
+
+    const payload = {
+      event: 'telemetry.anomaly_detected',
+      incident_id: `inc_${Math.random().toString(36).substring(2, 9)}`,
+      timestamp: epochSec,
+      iso_timestamp: isoTime,
+      metric: spec.name,
+      metric_key: metricKey,
+      current_value: `${stats.latest}${spec.unit}`,
+      rolling_mean: `${stats.mean}${spec.unit}`,
+      rolling_std_dev: `${stats.stdDev}${spec.unit}`,
+      z_score: stats.zScore,
+      threshold_sigma: zThreshold,
+      confidence_level: `${(100 - (1 / Math.pow(zThreshold, 2)) * 10).toFixed(1)}%`,
+      severity: stats.zScore >= 3.5 ? 'CRITICAL' : 'HIGH',
+      channels_notified: [
+        'slack:#prod-cloudpulse-alerts',
+        'pagerduty:service/high-sev-telemetry'
+      ]
+    };
+
+    const codeBlock = document.getElementById('payloadCodeBlock');
+    if (codeBlock) {
+      codeBlock.querySelector('code').textContent = JSON.stringify(payload, null, 2);
+    }
+
+    // Append to Incident Stream
+    const logItem = {
+      time: now.toTimeString().split(' ')[0],
+      metric: spec.name,
+      value: `${stats.latest}${spec.unit}`,
+      threshold: `${stats.upperThreshold}${spec.unit}`,
+      zScore: stats.zScore,
+      severity: payload.severity
+    };
+    incidentLogs.unshift(logItem);
+    if (incidentLogs.length > 50) incidentLogs.pop();
+    renderIncidentLogs();
+
+    if (autoWebhook) {
+      showToast(spec.name, stats.latest, spec.unit, stats.zScore);
+    }
+  }
+
+  // Render Incident Stream Feed
+  function renderIncidentLogs() {
+    const feed = document.getElementById('incidentLogFeed');
+    const badge = document.getElementById('incidentCountBadge');
+    if (!feed) return;
+
+    if (badge) {
+      badge.textContent = `${incidentLogs.length} Anomal${incidentLogs.length === 1 ? 'y' : 'ies'} Logged`;
+    }
+
+    if (incidentLogs.length === 0) {
+      feed.replaceChildren();
+      const empty = document.createElement('div');
+      empty.className = 'incident-empty-state';
+      empty.innerHTML = `
+        <span class="empty-icon">🛡️</span>
+        <p>No anomaly outliers detected in current rolling window. System operating within normal Gaussian variance.</p>
+        <span class="empty-hint">Click any Chaos button above to simulate an immediate spike event.</span>
+      `;
+      feed.appendChild(empty);
+      return;
+    }
+
+    feed.replaceChildren();
+    incidentLogs.forEach((item) => {
+      const el = document.createElement('div');
+      el.className = 'incident-event-item';
+
+      const mainInfo = document.createElement('div');
+      mainInfo.className = 'event-main-info';
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'event-time';
+      timeSpan.textContent = `[${item.time}]`;
+
+      const descBlock = document.createElement('div');
+      descBlock.className = 'event-desc';
+
+      const strong = document.createElement('strong');
+      strong.textContent = `${item.metric}: ${item.value} (Upper Limit: ${item.threshold})`;
+
+      const sub = document.createElement('span');
+      sub.textContent = `Dispatched to Slack #prod-cloudpulse-alerts & PagerDuty`;
+
+      descBlock.appendChild(strong);
+      descBlock.appendChild(sub);
+      mainInfo.appendChild(timeSpan);
+      mainInfo.appendChild(descBlock);
+
+      const badgesCol = document.createElement('div');
+      badgesCol.className = 'event-badges-col';
+
+      const zBadge = document.createElement('span');
+      zBadge.className = 'event-z-badge';
+      zBadge.textContent = `Z = +${item.zScore}σ`;
+
+      const whStatus = document.createElement('span');
+      whStatus.className = 'event-wh-status';
+      whStatus.textContent = '● POST 200 OK';
+
+      badgesCol.appendChild(zBadge);
+      badgesCol.appendChild(whStatus);
+
+      el.appendChild(mainInfo);
+      el.appendChild(badgesCol);
+      feed.appendChild(el);
+    });
+  }
+
+  // Telemetry Sample Step (Tick Engine)
+  function pushNextSamples() {
+    Object.keys(METRIC_SPECS).forEach((key) => {
+      const spec = METRIC_SPECS[key];
+      const nextVal = generateGaussian(spec.baseMean, spec.baseStdDev, spec.minVal, spec.maxVal);
+      streamBuffers[key].push(nextVal);
+      if (streamBuffers[key].length > ROLLING_WINDOW) {
+        streamBuffers[key].shift();
+      }
+
+      // Check anomaly on active or all
+      const stats = computeStats(streamBuffers[key]);
+      if (stats.isAnomaly && (activeMetric === key || activeMetric === 'composite')) {
+        dispatchWebhook(key, stats);
+      }
+    });
+
+    updateKpiCards();
+  }
+
+  // Update KPI Metrics Cards
+  function updateKpiCards() {
+    const metricKey = activeMetric === 'composite' ? 'cpu' : activeMetric;
+    const spec = METRIC_SPECS[metricKey];
+    const stats = computeStats(streamBuffers[metricKey]);
+
+    const curValEl = document.getElementById('metricCurrentVal');
+    if (curValEl) curValEl.textContent = `${stats.latest}${spec.unit}`;
+
+    const deltaEl = document.getElementById('metricDeltaVal');
+    if (deltaEl) {
+      const delta = Math.round((stats.latest - stats.mean) * 10) / 10;
+      deltaEl.textContent = `${delta >= 0 ? '+' : ''}${delta}${spec.unit}`;
+      deltaEl.className = `kpi-delta-pill ${delta >= 0 ? 'positive' : 'negative'}`;
+    }
+
+    const meanEl = document.getElementById('metricMeanVal');
+    if (meanEl) meanEl.textContent = `${stats.mean}${spec.unit}`;
+
+    const stdDevEl = document.getElementById('metricStdDevVal');
+    if (stdDevEl) stdDevEl.textContent = `${stats.stdDev}${spec.unit}`;
+
+    const zValEl = document.getElementById('metricZScoreVal');
+    if (zValEl) {
+      zValEl.textContent = `${stats.zScore >= 0 ? '+' : ''}${stats.zScore.toFixed(2)}`;
+      zValEl.style.color = stats.isAnomaly ? '#ef4444' : (stats.zScore > 1.5 ? '#f59e0b' : '#34d399');
+    }
+
+    const zBadgeEl = document.getElementById('metricZScoreBadge');
+    if (zBadgeEl) {
+      if (stats.isAnomaly) {
+        zBadgeEl.className = 'kpi-zbadge critical';
+        zBadgeEl.textContent = 'ANOMALY ALERT';
+      } else if (stats.zScore > 1.5) {
+        zBadgeEl.className = 'kpi-zbadge elevated';
+        zBadgeEl.textContent = 'ELEVATED';
+      } else {
+        zBadgeEl.className = 'kpi-zbadge normal';
+        zBadgeEl.textContent = 'NORMAL';
+      }
+    }
+
+    const zFormulaEl = document.getElementById('metricZScoreFormula');
+    if (zFormulaEl) {
+      zFormulaEl.textContent = `Z = (${stats.latest} - ${stats.mean}) / ${stats.stdDev}`;
+    }
+
+    const threshValEl = document.getElementById('metricThresholdVal');
+    if (threshValEl) threshValEl.textContent = `${stats.upperThreshold}${spec.unit}`;
+
+    const marginEl = document.getElementById('metricMarginVal');
+    if (marginEl) {
+      const margin = Math.round((stats.upperThreshold - stats.latest) * 10) / 10;
+      marginEl.textContent = `${margin >= 0 ? '+' : ''}${margin}${spec.unit} Margin`;
+      marginEl.style.color = margin <= 0 ? '#ef4444' : '#38bdf8';
+    }
+
+    const threshFormulaEl = document.getElementById('metricThresholdFormula');
+    if (threshFormulaEl) {
+      threshFormulaEl.textContent = `Upper Limit = μ + ${zThreshold.toFixed(2)}σ`;
+    }
+
+    const statusPill = document.getElementById('chartStreamStatus');
+    if (statusPill) {
+      if (stats.isAnomaly) {
+        statusPill.className = 'chart-status-pill anomaly';
+        statusPill.textContent = '⚠️ ANOMALY DETECTED';
+      } else {
+        statusPill.className = 'chart-status-pill healthy';
+        statusPill.textContent = 'STREAM HEALTHY';
+      }
+    }
+  }
+
+  // Chaos Injection Handlers
+  function injectAnomaly(metricKey, boostAmount) {
+    const spec = METRIC_SPECS[metricKey];
+    const buffer = streamBuffers[metricKey];
+    const n = buffer.length;
+    if (n === 0) return;
+
+    const stats = computeStats(buffer);
+    const spikeVal = Math.min(spec.maxVal, Math.round((stats.mean + stats.stdDev * 3.8 + boostAmount) * 10) / 10);
+    buffer[n - 1] = spikeVal;
+
+    const updatedStats = computeStats(buffer);
+    dispatchWebhook(metricKey, updatedStats);
+    updateKpiCards();
+  }
+
+  // Canvas Multi-Series Chart Rendering Loop (60fps)
+  function renderCanvas() {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // Reset and clear with deep cyber aesthetic
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#030712';
+    ctx.fillRect(0, 0, w, h);
+
+    const padLeft = 55;
+    const padRight = 30;
+    const padTop = 35;
+    const padBottom = 35;
+    const chartW = w - padLeft - padRight;
+    const chartH = h - padTop - padBottom;
+
+    // Determine scale limits
+    let yMin = 0;
+    let yMax = 100;
+    if (activeMetric === 'latency') {
+      yMax = 220;
+    }
+
+    // Draw Grid Lines & Y-Axis Labels
+    const numYTicks = 5;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#64748b';
+    ctx.font = '11px Outfit, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i <= numYTicks; i++) {
+      const val = Math.round(yMin + (yMax - yMin) * (i / numYTicks));
+      const y = padTop + chartH - (i / numYTicks) * chartH;
+
+      ctx.beginPath();
+      ctx.moveTo(padLeft, y);
+      ctx.lineTo(w - padRight, y);
+      ctx.stroke();
+
+      const unit = activeMetric === 'latency' ? 'ms' : '%';
+      ctx.fillText(`${val}${unit}`, padLeft - 8, y);
+    }
+
+    // Draw Vertical Time Grid Ticks
+    const numXTicks = 4;
+    for (let j = 0; j <= numXTicks; j++) {
+      const x = padLeft + (j / numXTicks) * chartW;
+      ctx.beginPath();
+      ctx.moveTo(x, padTop);
+      ctx.lineTo(x, padTop + chartH);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Render Metric Series Function
+    function drawSeries(metricKey, isSecondary = false) {
+      const spec = METRIC_SPECS[metricKey];
+      const buffer = streamBuffers[metricKey];
+      const n = buffer.length;
+      if (n < 2) return;
+
+      const stats = computeStats(buffer);
+
+      const getX = (idx) => padLeft + (idx / (ROLLING_WINDOW - 1)) * chartW;
+      const getY = (val) => padTop + chartH - ((Math.min(yMax, Math.max(yMin, val)) - yMin) / (yMax - yMin)) * chartH;
+
+      // Draw Adaptive Threshold Envelope & Shaded Confidence Band (Primary series only)
+      if (!isSecondary) {
+        const meanY = getY(stats.mean);
+        const threshY = getY(stats.upperThreshold);
+
+        // Confidence Area Fill
+        ctx.save();
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.08)';
+        ctx.fillRect(padLeft, threshY, chartW, Math.max(0, meanY - threshY));
+
+        // Upper Alert Bound Line (Dashed)
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.75)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(padLeft, threshY);
+        ctx.lineTo(w - padRight, threshY);
+        ctx.stroke();
+
+        ctx.font = 'bold 10px Outfit, sans-serif';
+        ctx.fillStyle = '#f87171';
+        ctx.textAlign = 'right';
+        ctx.fillText(`+${zThreshold.toFixed(1)}σ THRESHOLD (${stats.upperThreshold}${spec.unit})`, w - padRight - 6, threshY - 7);
+
+        // Rolling Mean Line (Dotted)
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(padLeft, meanY);
+        ctx.lineTo(w - padRight, meanY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(`MEAN μ (${stats.mean}${spec.unit})`, w - padRight - 6, meanY - 6);
+        ctx.restore();
+      }
+
+      // Draw Gradient Area under Curve
+      if (!isSecondary) {
+        ctx.save();
+        const areaGrad = ctx.createLinearGradient(0, padTop, 0, padTop + chartH);
+        areaGrad.addColorStop(0, spec.glowColor);
+        areaGrad.addColorStop(1, 'rgba(6, 182, 212, 0)');
+        ctx.fillStyle = areaGrad;
+
+        ctx.beginPath();
+        ctx.moveTo(getX(0), padTop + chartH);
+        for (let i = 0; i < n; i++) {
+          ctx.lineTo(getX(i), getY(buffer[i]));
+        }
+        ctx.lineTo(getX(n - 1), padTop + chartH);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Draw Smooth Telemetry Polyline
+      ctx.save();
+      ctx.strokeStyle = spec.color;
+      ctx.lineWidth = isSecondary ? 1.5 : 2.5;
+      ctx.shadowColor = spec.color;
+      ctx.shadowBlur = isSecondary ? 4 : 10;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const x = getX(i);
+        const y = getY(buffer[i]);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Highlight Anomaly Data Points
+      ctx.save();
+      for (let i = 0; i < n; i++) {
+        const val = buffer[i];
+        const pointZ = (val - stats.mean) / stats.stdDev;
+        if (pointZ > zThreshold) {
+          const x = getX(i);
+          const y = getY(val);
+
+          // Pulsating outer warning ring
+          const pulse = (Math.sin(Date.now() * 0.008) + 1) * 4;
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(x, y, 7 + pulse, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Solid inner alert marker
+          ctx.fillStyle = '#ef4444';
+          ctx.shadowColor = '#ef4444';
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Callout tag if latest
+          if (i === n - 1) {
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+            ctx.strokeStyle = '#f87171';
+            ctx.lineWidth = 1;
+            const tagText = `⚠️ ANOMALY SPIKE: ${val}${spec.unit} (Z = +${pointZ.toFixed(2)}σ)`;
+            const tagW = ctx.measureText(tagText).width + 16;
+            const tagX = Math.min(w - padRight - tagW, Math.max(padLeft, x - tagW / 2));
+            const tagY = Math.max(padTop + 14, y - 24);
+
+            ctx.beginPath();
+            ctx.roundRect(tagX, tagY - 14, tagW, 20, 4);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px Outfit, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(tagText, tagX + 8, tagY);
+          }
+        }
+      }
+      ctx.restore();
+
+      // Latest Sample Glowing Pulse Head
+      if (n > 0) {
+        const latestX = getX(n - 1);
+        const latestY = getY(buffer[n - 1]);
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = spec.color;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(latestX, latestY, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    if (activeMetric === 'composite') {
+      drawSeries('latency', true);
+      drawSeries('memory', true);
+      drawSeries('cpu', false);
+    } else {
+      drawSeries(activeMetric, false);
+    }
+
+    if (isStreaming) {
+      animationFrameId = requestAnimationFrame(renderCanvas);
+    }
+  }
+
+  // Event Listeners & Controls Binding
+  function bindEvents() {
+    // Metric Switcher Tabs
+    const tabsContainer = document.getElementById('telemetryMetricTabs');
+    if (tabsContainer) {
+      tabsContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.metric-tab-pill');
+        if (!btn) return;
+
+        const metric = btn.getAttribute('data-metric');
+        if (!metric) return;
+
+        activeMetric = metric;
+
+        tabsContainer.querySelectorAll('.metric-tab-pill').forEach((b) => {
+          const isSelected = b === btn;
+          b.classList.toggle('active', isSelected);
+          b.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
+
+        // Update chart title
+        const titleEl = document.getElementById('chartStreamTitle');
+        if (titleEl) {
+          if (activeMetric === 'composite') {
+            titleEl.textContent = 'Tri-Series Telemetry (CPU, Memory, Latency) — 60s Window';
+          } else {
+            const spec = METRIC_SPECS[activeMetric];
+            titleEl.textContent = `${spec.name} Telemetry — 60s Rolling Window`;
+          }
+        }
+
+        updateKpiCards();
+        if (!isStreaming) renderCanvas();
+      });
+    }
+
+    // Sensitivity Threshold Slider
+    const slider = document.getElementById('zScoreSlider');
+    const display = document.getElementById('zScoreDisplay');
+    if (slider) {
+      slider.addEventListener('input', () => {
+        zThreshold = parseFloat(slider.value);
+        if (display) {
+          const conf = (100 - (1 / Math.pow(zThreshold, 2)) * 10).toFixed(1);
+          display.textContent = `${zThreshold.toFixed(1)}σ (${conf}% Confidence)`;
+        }
+        updateKpiCards();
+        if (!isStreaming) renderCanvas();
+      });
+    }
+
+    // Play / Pause Stream Button
+    const btnToggle = document.getElementById('btnStreamToggle');
+    const icon = document.getElementById('btnStreamIcon');
+    const label = document.getElementById('btnStreamLabel');
+    if (btnToggle) {
+      btnToggle.addEventListener('click', () => {
+        isStreaming = !isStreaming;
+        if (icon) icon.textContent = isStreaming ? '⏸' : '▶';
+        if (label) label.textContent = isStreaming ? 'Pause Stream' : 'Resume Stream';
+        btnToggle.classList.toggle('paused', !isStreaming);
+
+        if (isStreaming) {
+          startStreamLoops();
+        } else {
+          clearInterval(tickIntervalId);
+          cancelAnimationFrame(animationFrameId);
+        }
+      });
+    }
+
+    // Reset Buffer Button
+    const btnReset = document.getElementById('btnStreamReset');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        resetBuffers();
+        updateKpiCards();
+        if (!isStreaming) renderCanvas();
+      });
+    }
+
+    // Webhook Toggle
+    const whToggle = document.getElementById('webhookToggle');
+    if (whToggle) {
+      whToggle.addEventListener('change', () => {
+        autoWebhook = whToggle.checked;
+        const statusBadge = document.getElementById('webhookStatusBadge');
+        if (statusBadge) {
+          statusBadge.textContent = autoWebhook ? 'LISTENER ACTIVE' : 'DISPATCH PAUSED';
+          statusBadge.className = `wh-status-badge ${autoWebhook ? 'ready' : 'paused'}`;
+        }
+      });
+    }
+
+    // Chaos Spike Buttons
+    const btnCpu = document.getElementById('btnInjectCpu');
+    if (btnCpu) btnCpu.addEventListener('click', () => injectAnomaly('cpu', 45));
+
+    const btnMem = document.getElementById('btnInjectMemory');
+    if (btnMem) btnMem.addEventListener('click', () => injectAnomaly('memory', 35));
+
+    const btnLat = document.getElementById('btnInjectLatency');
+    if (btnLat) btnLat.addEventListener('click', () => injectAnomaly('latency', 150));
+
+    const btnRand = document.getElementById('btnInjectRandom');
+    if (btnRand) {
+      btnRand.addEventListener('click', () => {
+        const keys = ['cpu', 'memory', 'latency'];
+        const chosen = keys[Math.floor(Math.random() * keys.length)];
+        injectAnomaly(chosen, 40);
+      });
+    }
+
+    // Incident Feed Actions
+    const btnClear = document.getElementById('btnClearIncidents');
+    if (btnClear) {
+      btnClear.addEventListener('click', () => {
+        incidentLogs.length = 0;
+        renderIncidentLogs();
+      });
+    }
+
+    const btnExport = document.getElementById('btnExportIncidents');
+    if (btnExport) {
+      btnExport.addEventListener('click', () => {
+        navigator.clipboard.writeText(JSON.stringify(incidentLogs, null, 2)).then(() => {
+          showToast('Incident Feed', incidentLogs.length, ' events', '0.0');
+        }).catch(() => {});
+      });
+    }
+
+    const btnCopyPayload = document.getElementById('btnCopyPayload');
+    if (btnCopyPayload) {
+      btnCopyPayload.addEventListener('click', () => {
+        const code = document.querySelector('#payloadCodeBlock code');
+        if (code) {
+          navigator.clipboard.writeText(code.textContent).then(() => {
+            btnCopyPayload.textContent = 'Copied!';
+            setTimeout(() => { btnCopyPayload.textContent = 'Copy JSON'; }, 2000);
+          }).catch(() => {});
+        }
+      });
+    }
+
+    // Responsive Canvas Resize Observer
+    const resizeCanvas = () => {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width > 0) {
+        canvas.width = Math.round(rect.width * window.devicePixelRatio);
+        canvas.height = Math.round(rect.width * 0.35 * window.devicePixelRatio);
+        if (!isStreaming) renderCanvas();
+      }
+    };
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+  }
+
+  // Start Sampling & 60fps Animation Loop
+  function startStreamLoops() {
+    clearInterval(tickIntervalId);
+    tickIntervalId = setInterval(() => {
+      if (isStreaming) {
+        pushNextSamples();
+      }
+    }, 1000); // 1 sample per second rolling time series
+
+    cancelAnimationFrame(animationFrameId);
+    renderCanvas();
+  }
+
+  // Initial Run
+  bindEvents();
+  updateKpiCards();
+  startStreamLoops();
+}
+/* ===== END Issue #440 ===== */
+
+/* ===== BEGIN Issue #439: Enterprise System Status & 90-Day Uptime History Matrix ===== */
+function initUptimeHistoryMatrix() {
+  const stackEl = document.getElementById('uptimeServicesStack');
+  if (!stackEl) return;
+
+  const SERVICES = [
+    {
+      id: 'api',
+      name: 'API Gateway & Edge Compute',
+      region: 'GLOBAL ANYCAST',
+      baseLatency: 26,
+      incidents: {
+        18: { status: 'degraded', latency: 142, uptime: 99.62, duration: '14m', note: 'Elevated TLS handshake latency in US-East POPs' },
+        53: { status: 'outage', latency: 620, uptime: 98.45, duration: '22m', note: 'BGP route flap upstream transit mitigation completed' },
+        74: { status: 'degraded', latency: 98, uptime: 99.84, duration: '8m', note: 'Burst rate-limit cache warm-up post deployment' }
+      }
+    },
+    {
+      id: 'dashboard',
+      name: 'Customer Control Dashboard',
+      region: 'US-EAST / EU-WEST',
+      baseLatency: 41,
+      incidents: {
+        29: { status: 'degraded', latency: 185, uptime: 99.72, duration: '11m', note: 'Read-replica lag spike during batch billing export' },
+        67: { status: 'degraded', latency: 164, uptime: 99.78, duration: '9m', note: 'CDN cache invalidation queue backlog cleared' }
+      }
+    },
+    {
+      id: 'ingestion',
+      name: 'Telemetry Ingestion Pipeline',
+      region: 'KAFKA CLUSTER',
+      baseLatency: 18,
+      incidents: {
+        11: { status: 'outage', latency: 840, uptime: 97.90, duration: '31m', note: 'Partition leader re-election under 4.2M req/s surge' },
+        42: { status: 'degraded', latency: 112, uptime: 99.68, duration: '16m', note: 'Backpressure throttling during schema migration' },
+        81: { status: 'degraded', latency: 94, uptime: 99.85, duration: '7m', note: 'Compaction throughput rebalancing across brokers' }
+      }
+    },
+    {
+      id: 'webhooks',
+      name: 'Outbound Event Webhooks',
+      region: 'ASYNC WORKERS',
+      baseLatency: 58,
+      incidents: {
+        24: { status: 'degraded', latency: 230, uptime: 99.65, duration: '18m', note: 'Partner endpoint timeout retries increased worker queue depth' },
+        54: { status: 'outage', latency: 710, uptime: 98.15, duration: '26m', note: 'Dead-letter worker pool scaled from 32 to 128 replicas' }
+      }
+    }
+  ];
+
+  const DAYS = 90;
+  const anchorEnd = new Date('2026-11-11T00:00:00Z');
+  const allIncidents = [];
+
+  const serviceData = SERVICES.map((svc, sIdx) => {
+    const days = [];
+    for (let i = 0; i < DAYS; i += 1) {
+      const dateObj = new Date(anchorEnd.getTime() - (DAYS - 1 - i) * 86400000);
+      const dateStr = dateObj.toISOString().slice(0, 10);
+      const incident = svc.incidents[i];
+      const jitter = ((i * 7 + sIdx * 13) % 9) - 4;
+      if (incident) {
+        days.push({
+          dayIndex: i,
+          dateStr,
+          serviceId: svc.id,
+          serviceName: svc.name,
+          status: incident.status,
+          latency: incident.latency,
+          uptime: incident.uptime,
+          duration: incident.duration,
+          note: incident.note
+        });
+        allIncidents.push({
+          dateStr,
+          serviceId: svc.id,
+          serviceName: svc.name,
+          status: incident.status,
+          duration: incident.duration,
+          latency: incident.latency,
+          note: incident.note
+        });
+      } else {
+        days.push({
+          dayIndex: i,
+          dateStr,
+          serviceId: svc.id,
+          serviceName: svc.name,
+          status: 'operational',
+          latency: Math.max(8, svc.baseLatency + jitter),
+          uptime: 100.0,
+          duration: '0m',
+          note: 'All health checks & synthetic probes passed.'
+        });
+      }
+    }
+    const avgUptime = days.reduce((s, d) => s + d.uptime, 0) / DAYS;
+    const avgLatency = Math.round(days.reduce((s, d) => s + d.latency, 0) / DAYS);
+    return { ...svc, days, avgUptime, avgLatency };
+  });
+
+  allIncidents.sort((a, b) => b.dateStr.localeCompare(a.dateStr));
+
+  let activeSeverity = 'all';
+
+  const statusMeta = {
+    operational: { cls: 'op', label: 'OPERATIONAL' },
+    degraded: { cls: 'deg', label: 'DEGRADED' },
+    outage: { cls: 'out', label: 'MAJOR OUTAGE' }
+  };
+
+  function inspectDay(dayObj) {
+    const badge = document.getElementById('inspStatusBadge');
+    const titleEl = document.getElementById('inspDateService');
+    const latEl = document.getElementById('inspLatency');
+    const upEl = document.getElementById('inspUptime');
+    const meta = statusMeta[dayObj.status] || statusMeta.operational;
+
+    if (badge) {
+      badge.className = `inspector-badge ${meta.cls}`;
+      badge.textContent = meta.label;
+    }
+    if (titleEl) {
+      titleEl.textContent = `${dayObj.dateStr} · ${dayObj.serviceName} — ${dayObj.note}`;
+    }
+    if (latEl) latEl.textContent = `${dayObj.latency}ms`;
+    if (upEl) upEl.textContent = `${dayObj.uptime.toFixed(2)}%`;
+  }
+
+  function showTooltip(barBtn, dayObj) {
+    const tip = document.getElementById('uptimeFloatingTooltip');
+    if (!tip) return;
+    const rect = barBtn.getBoundingClientRect();
+    const meta = statusMeta[dayObj.status] || statusMeta.operational;
+    tip.innerHTML = `
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #94a3b8; margin-bottom: 3px;">${dayObj.dateStr} · ${meta.label}</div>
+      <div style="font-weight: 700; color: #f8fafc; margin-bottom: 4px;">${dayObj.serviceName}</div>
+      <div style="color: #cbd5e1; margin-bottom: 4px;">P95 Latency: <strong>${dayObj.latency}ms</strong> · SLA: <strong>${dayObj.uptime.toFixed(2)}%</strong></div>
+      <div style="color: #94a3b8; font-size: 0.74rem;">${dayObj.note}</div>
+    `;
+    tip.hidden = false;
+    const left = Math.min(window.innerWidth - 276, Math.max(12, rect.left - 90));
+    const top = Math.max(12, rect.top - tip.offsetHeight - 10);
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+  }
+
+  function hideTooltip() {
+    const tip = document.getElementById('uptimeFloatingTooltip');
+    if (tip) tip.hidden = true;
+  }
+
+  function renderServices() {
+    const globalSlaEl = document.getElementById('globalSlaPct');
+    const aggregateSla = serviceData.reduce((s, svc) => s + svc.avgUptime, 0) / serviceData.length;
+    if (globalSlaEl) globalSlaEl.textContent = `${aggregateSla.toFixed(2)}%`;
+
+    stackEl.innerHTML = serviceData
+      .map((svc) => {
+        const barsHtml = svc.days
+          .map((d) => {
+            const meta = statusMeta[d.status];
+            const dimmed = activeSeverity !== 'all' && d.status !== activeSeverity;
+            return `<button type="button" class="uptime-bar-pill ${meta.cls} ${dimmed ? 'is-dimmed' : ''}" data-svc="${svc.id}" data-day="${d.dayIndex}" aria-label="${svc.name} ${d.dateStr}: ${meta.label}, ${d.latency}ms"></button>`;
+          })
+          .join('');
+
+        return `
+          <div class="uptime-service-card">
+            <div class="uptime-service-head">
+              <div class="service-name-wrap">
+                <h3>${svc.name}</h3>
+                <span class="service-region-tag">${svc.region}</span>
+              </div>
+              <div class="service-sla-meta">
+                <span class="sla-latency">Avg P95: ${svc.avgLatency}ms</span>
+                <span class="sla-percent">${svc.avgUptime.toFixed(2)}% uptime</span>
+              </div>
+            </div>
+            <div class="uptime-bars-scroll">
+              <div class="uptime-bars-track">${barsHtml}</div>
+            </div>
+            <div class="uptime-bar-axis">
+              <span>90 days ago</span>
+              <span>45 days ago</span>
+              <span>Today</span>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+
+    stackEl.querySelectorAll('.uptime-bar-pill').forEach((btn) => {
+      const svc = serviceData.find((s) => s.id === btn.getAttribute('data-svc'));
+      const dayObj = svc ? svc.days[Number(btn.getAttribute('data-day'))] : null;
+      if (!dayObj) return;
+      btn.addEventListener('mouseenter', () => {
+        inspectDay(dayObj);
+        showTooltip(btn, dayObj);
+      });
+      btn.addEventListener('focus', () => {
+        inspectDay(dayObj);
+        showTooltip(btn, dayObj);
+      });
+      btn.addEventListener('mouseleave', hideTooltip);
+      btn.addEventListener('blur', hideTooltip);
+      btn.addEventListener('click', () => inspectDay(dayObj));
+    });
+  }
+
+  function renderIncidentMatrix() {
+    const tbody = document.getElementById('incidentMatrixBody');
+    const countLabel = document.getElementById('incidentMatrixCount');
+    if (!tbody) return;
+
+    const filtered = activeSeverity === 'all'
+      ? allIncidents
+      : allIncidents.filter((inc) => inc.status === activeSeverity);
+
+    if (countLabel) {
+      countLabel.textContent = filtered.length
+        ? `${filtered.length} incident${filtered.length === 1 ? '' : 's'} shown`
+        : '0 degraded/outage incidents for this filter';
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:18px;">100% healthy — no incident events match "${activeSeverity}".</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered
+      .map((inc) => {
+        const meta = statusMeta[inc.status];
+        return `
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace;">${inc.dateStr}</td>
+            <td><strong>${inc.serviceName}</strong></td>
+            <td><span class="inspector-badge ${meta.cls}">${meta.label}</span></td>
+            <td style="font-family:'JetBrains Mono',monospace;">${inc.duration}</td>
+            <td style="font-family:'JetBrains Mono',monospace;">${inc.latency}ms</td>
+            <td>${inc.note}</td>
+          </tr>
+        `;
+      })
+      .join('');
+  }
+
+  document.querySelectorAll('#severityFilterTags .sev-tag-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      activeSeverity = btn.getAttribute('data-severity') || 'all';
+      document.querySelectorAll('#severityFilterTags .sev-tag-btn').forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      renderServices();
+      renderIncidentMatrix();
+    });
+  });
+
+  renderServices();
+  renderIncidentMatrix();
+  if (allIncidents.length > 0) {
+    const latest = serviceData.find((s) => s.id === allIncidents[0].serviceId);
+    const matchedDay = latest && latest.days.find((d) => d.dateStr === allIncidents[0].dateStr);
+    if (matchedDay) inspectDay(matchedDay);
+  }
+}
+/* ===== END Issue #439 ===== */
 
 /*System Status Indicator*/
 function initSystemStatus() {
