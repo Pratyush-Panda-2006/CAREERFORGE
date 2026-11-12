@@ -704,6 +704,159 @@
   </section>
   <!-- ===== Automated Budget Allocation Engine END ===== -->
 
+  <!-- ===== Savings Goals & Growth Vault (Issue #449) START ===== -->
+  <section class="engine-section savings-vault-section" id="savings-goals-vault" aria-labelledby="savingsVaultTitle">
+    <div class="engine-header">
+      <div class="tag-pill">// WEALTH RECURRING STASH</div>
+      <h2 id="savingsVaultTitle">SAVINGS GOALS &amp; COMPOUND WEALTH PROJECTOR</h2>
+      <p class="section-lead">Automate weekly recurring contributions into dedicated asset vaults and forecast exponential compound returns across 1 to 10 year trajectories.</p>
+    </div>
+
+    <!-- Savings Stash Grid & Controls -->
+    <div class="savings-container">
+      <div class="savings-toolbar">
+        <div class="savings-stats-summary">
+          <div class="stat-pill-item">
+            <span class="stat-pill-label">Total Vault Assets</span>
+            <strong class="stat-pill-val" id="totalVaultAssets">$74,500</strong>
+          </div>
+          <div class="stat-pill-item">
+            <span class="stat-pill-label">Weekly Auto-Deploy</span>
+            <strong class="stat-pill-val green" id="totalWeeklyAuto">$1,100 / wk</strong>
+          </div>
+          <div class="stat-pill-item">
+            <span class="stat-pill-label">Active Stashes</span>
+            <strong class="stat-pill-val" id="activeStashCount">3 Goals</strong>
+          </div>
+        </div>
+        <button type="button" class="btn-create-stash" id="btnOpenNewStashModal" aria-haspopup="dialog">+ Create New Savings Goal</button>
+      </div>
+
+      <!-- Stash Cards Grid -->
+      <div class="stash-cards-grid" id="stashCardsGrid">
+        <!-- Rendered dynamically from state & localStorage -->
+      </div>
+
+      <!-- Compound Interest Wealth Projector -->
+      <div class="wealth-projector-panel" id="wealthProjectorPanel">
+        <div class="projector-header">
+          <div class="projector-title-row">
+            <span class="icon-sparkle">📈</span>
+            <div>
+              <h3>COMPOUND INTEREST TRAJECTORY PROJECTOR</h3>
+              <p class="projector-subtitle">Simulate recurring deposits with institutional high-yield compounding</p>
+            </div>
+          </div>
+          <div class="timeline-selector" id="timelineSelector" role="group" aria-label="Investment Horizon">
+            <button type="button" class="timeline-chip" data-years="1">1 Year</button>
+            <button type="button" class="timeline-chip" data-years="3">3 Years</button>
+            <button type="button" class="timeline-chip active" data-years="5">5 Years</button>
+            <button type="button" class="timeline-chip" data-years="10">10 Years</button>
+          </div>
+        </div>
+
+        <div class="projector-body-grid">
+          <div class="projector-controls-col">
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="projectorInitialBalance">Starting Principal ($)</label>
+                <span class="control-val-badge" id="valInitialBalance">$74,500</span>
+              </div>
+              <input type="range" id="projectorInitialBalance" min="0" max="250000" step="500" value="74500" class="fin-slider" />
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="projectorWeeklyDeposit">Weekly Contribution ($)</label>
+                <span class="control-val-badge" id="valWeeklyDeposit">$1,100 / wk</span>
+              </div>
+              <input type="range" id="projectorWeeklyDeposit" min="25" max="3000" step="25" value="1100" class="fin-slider" />
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="projectorApy">Annual Yield (APY %)</label>
+                <span class="control-val-badge" id="valApy">7.5%</span>
+              </div>
+              <input type="range" id="projectorApy" min="1.0" max="15.0" step="0.1" value="7.5" class="fin-slider" />
+            </div>
+          </div>
+
+          <div class="projector-display-col">
+            <div class="wealth-result-card">
+              <span class="result-label">PROJECTED TOTAL WEALTH</span>
+              <div class="result-big-amount" id="projectedTotalWealth">$442,185</div>
+              <div class="result-sub-metrics">
+                <div class="sub-metric">
+                  <span>Total Deposits:</span>
+                  <strong id="projectedTotalPrincipal">$360,500</strong>
+                </div>
+                <div class="sub-metric profit-metric">
+                  <span>Compound Interest:</span>
+                  <strong class="green-glow" id="projectedTotalInterest">+$81,685</strong>
+                </div>
+              </div>
+              <div class="yield-multiplier-chip" id="yieldMultiplierChip">
+                <span>⚡ 1.23x Wealth Multiplier over 5 Years</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- New Stash Modal (Issue #449) -->
+  <div class="stash-modal-backdrop" id="stashModalBackdrop" hidden>
+    <div class="stash-modal" role="dialog" aria-modal="true" aria-labelledby="stashModalTitle">
+      <div class="stash-modal-header">
+        <h3 id="stashModalTitle">Create Wealth Savings Stash</h3>
+        <button type="button" class="btn-close-stash-modal" id="btnCloseStashModal" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="newStashForm" class="stash-form">
+        <div class="form-row">
+          <label for="stashName">Goal Name</label>
+          <input type="text" id="stashName" required placeholder="e.g. Dream Villa Down Payment" class="fin-input" />
+        </div>
+        <div class="form-row-grid">
+          <div>
+            <label for="stashCategory">Category</label>
+            <select id="stashCategory" class="fin-select">
+              <option value="Real Estate">🏙️ Real Estate</option>
+              <option value="Security">🛡️ Safety / Emergency</option>
+              <option value="Growth">🚀 Venture / Growth</option>
+              <option value="Vehicle">🏎️ Luxury Vehicle</option>
+              <option value="Travel">✈️ Expedition</option>
+            </select>
+          </div>
+          <div>
+            <label for="stashApy">Expected APY (%)</label>
+            <input type="number" id="stashApy" step="0.1" min="1" max="20" value="6.5" class="fin-input" />
+          </div>
+        </div>
+        <div class="form-row-grid">
+          <div>
+            <label for="stashTarget">Target Goal ($)</label>
+            <input type="number" id="stashTarget" min="500" step="500" required placeholder="50000" class="fin-input" />
+          </div>
+          <div>
+            <label for="stashInitial">Initial Deposit ($)</label>
+            <input type="number" id="stashInitial" min="0" step="100" value="5000" class="fin-input" />
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="stashWeekly">Weekly Auto-Contribution ($)</label>
+          <input type="number" id="stashWeekly" min="10" step="10" value="250" class="fin-input" />
+        </div>
+        <div class="stash-modal-actions">
+          <button type="button" class="btn-cancel" id="btnCancelStash">Cancel</button>
+          <button type="submit" class="btn-submit-stash">Create Stash Vault</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- ===== Savings Goals & Growth Vault END ===== -->
+
   <footer class="footer">
     <div class="footer-content">
       <div class="brand">💎 APEXVAULT</div>
