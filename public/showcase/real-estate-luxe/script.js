@@ -144,6 +144,9 @@ function calculateMortgage() {
 
   // Update Amortization Schedule
   generateAmortizationSchedule(loanPrincipal, monthlyRate, monthlyPI, numberOfPayments, downPaymentAmount);
+
+  // Update 15-Year vs 30-Year Trajectory & Yield (Issue #447)
+  updateAmortizationTrajectory(homePrice, loanPrincipal, interestRate);
 }
 
 function updateElementText(id, text) {
@@ -230,6 +233,152 @@ function generateAmortizationSchedule(principal, monthlyRate, monthlyPayment, to
     `;
     tbody.appendChild(row);
   }
+}
+
+// 15-Year vs 30-Year Amortization Trajectory Chart & Yield Projector (Issue #447)
+function updateAmortizationTrajectory(homePrice, loanPrincipal, interestRate) {
+  if (loanPrincipal <= 0) return;
+
+  const rateMonthly = (interestRate / 100) / 12;
+
+  // 1. Calculate 15-Year Fixed
+  const n15 = 15 * 12;
+  const c15 = Math.pow(1 + rateMonthly, n15);
+  const pi15 = rateMonthly > 0 ? loanPrincipal * ((rateMonthly * c15) / (c15 - 1)) : loanPrincipal / n15;
+  const totalInterest15 = (pi15 * n15) - loanPrincipal;
+
+  // 2. Calculate 30-Year Fixed
+  const n30 = 30 * 12;
+  const c30 = Math.pow(1 + rateMonthly, n30);
+  const pi30 = rateMonthly > 0 ? loanPrincipal * ((rateMonthly * c30) / (c30 - 1)) : loanPrincipal / n30;
+  const totalInterest30 = (pi30 * n30) - loanPrincipal;
+
+  const savings = Math.max(0, totalInterest30 - totalInterest15);
+
+  updateElementText('traj-pi-15', formatCurrency(pi15) + ' / mo');
+  updateElementText('traj-interest-15', formatShortCurrency(totalInterest15));
+
+  updateElementText('traj-pi-30', formatCurrency(pi30) + ' / mo');
+  updateElementText('traj-interest-30', formatShortCurrency(totalInterest30));
+
+  updateElementText('traj-savings-amount', 'Save ' + formatShortCurrency(savings));
+
+  // 3. Compute year-by-year remaining balances for 15-yr and 30-yr
+  const balances15 = [loanPrincipal];
+  let curBal15 = loanPrincipal;
+  for (let m = 1; m <= n15; m++) {
+    const interest = curBal15 * rateMonthly;
+    const principalPaid = pi15 - interest;
+    curBal15 = Math.max(0, curBal15 - principalPaid);
+    if (m % 12 === 0) {
+      balances15.push(curBal15);
+    }
+  }
+
+  const balances30 = [loanPrincipal];
+  let curBal30 = loanPrincipal;
+  for (let m = 1; m <= n30; m++) {
+    const interest = curBal30 * rateMonthly;
+    const principalPaid = pi30 - interest;
+    curBal30 = Math.max(0, curBal30 - principalPaid);
+    if (m % 12 === 0) {
+      balances30.push(curBal30);
+    }
+  }
+
+  // 4. Render SVG paths on 700x260 viewport (padding: left 60, right 670, top 20, bottom 220)
+  const left = 60;
+  const right = 670;
+  const top = 20;
+  const bottom = 220;
+  const width = right - left;
+  const height = bottom - top;
+
+  // Grid lines & labels
+  const gridG = document.getElementById('traj-grid-lines');
+  const axisG = document.getElementById('traj-axis-labels');
+  if (gridG && axisG) {
+    gridG.innerHTML = '';
+    axisG.innerHTML = '';
+
+    // Horizontal grid lines (4 lines: 0%, 25%, 50%, 75%, 100%)
+    for (let i = 0; i <= 4; i++) {
+      const y = bottom - (i / 4) * height;
+      const amt = (i / 4) * loanPrincipal;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', left);
+      line.setAttribute('x2', right);
+      line.setAttribute('y1', y);
+      line.setAttribute('y2', y);
+      line.setAttribute('class', 'grid-line');
+      gridG.appendChild(line);
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', left - 8);
+      text.setAttribute('y', y + 4);
+      text.setAttribute('text-anchor', 'end');
+      text.setAttribute('class', 'chart-axis-text');
+      text.textContent = formatShortCurrency(amt);
+      axisG.appendChild(text);
+    }
+
+    // Vertical year ticks (Year 0, 5, 10, 15, 20, 25, 30)
+    for (let yr = 0; yr <= 30; yr += 5) {
+      const x = left + (yr / 30) * width;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x);
+      line.setAttribute('x2', x);
+      line.setAttribute('y1', top);
+      line.setAttribute('y2', bottom);
+      line.setAttribute('class', 'grid-line');
+      gridG.appendChild(line);
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', x);
+      text.setAttribute('y', bottom + 20);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('class', 'chart-axis-text');
+      text.textContent = `Yr ${yr}`;
+      axisG.appendChild(text);
+    }
+  }
+
+  // Build path D strings
+  const path15 = document.getElementById('traj-path-15');
+  const path30 = document.getElementById('traj-path-30');
+
+  if (path15) {
+    const pts15 = [];
+    for (let yr = 0; yr <= 15; yr++) {
+      const x = left + (yr / 30) * width;
+      const y = bottom - (balances15[yr] / loanPrincipal) * height;
+      pts15.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+    }
+    path15.setAttribute('d', `M ${pts15.join(' L ')}`);
+  }
+
+  if (path30) {
+    const pts30 = [];
+    for (let yr = 0; yr <= 30; yr++) {
+      const x = left + (yr / 30) * width;
+      const y = bottom - (balances30[yr] / loanPrincipal) * height;
+      pts30.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+    }
+    path30.setAttribute('d', `M ${pts30.join(' L ')}`);
+  }
+
+  // 5. Update Investment Yield & Cap Rate Estimator Subcard
+  const monthlyRent = Math.round((homePrice * 0.07) / 12);
+  const grossYield = ((monthlyRent * 12) / homePrice) * 100;
+  const annualExpenses = (homePrice * 0.012) + (homePrice * 0.0035) + 10200 + (monthlyRent * 12 * 0.1);
+  const netOperatingIncome = (monthlyRent * 12) - annualExpenses;
+  const capRate = Math.max(1.0, (netOperatingIncome / homePrice) * 100);
+  const equityRoi = 38.5 + (grossYield * 0.6);
+
+  updateElementText('yield-monthly-rent', formatCurrency(monthlyRent) + ' / mo');
+  updateElementText('yield-gross-rate', grossYield.toFixed(2) + '%');
+  updateElementText('yield-net-cap', capRate.toFixed(2) + '%');
+  updateElementText('yield-5yr-roi', '+' + equityRoi.toFixed(1) + '%');
 }
 
 // Global hook for Estate Card buttons
@@ -698,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // State
-  let currentLevel = 'ground';
+  let _currentLevel = 'ground';
   let currentRoomId = 'foyer';
   let currentHour = 13; // 1:00 PM
 
@@ -733,7 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Level Switcher
   tabGround.addEventListener('click', () => {
-    currentLevel = 'ground';
+    _currentLevel = 'ground';
     tabGround.classList.add('active');
     tabGround.setAttribute('aria-selected', 'true');
     tabUpper.classList.remove('active');
@@ -744,7 +893,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   tabUpper.addEventListener('click', () => {
-    currentLevel = 'upper';
+    _currentLevel = 'upper';
     tabUpper.classList.add('active');
     tabUpper.setAttribute('aria-selected', 'true');
     tabGround.classList.remove('active');
