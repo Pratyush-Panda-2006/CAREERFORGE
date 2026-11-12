@@ -1548,6 +1548,8 @@ body {
   .review-modal {
     padding: 25px;
   }
+}
+
 /*CLIENT FAQ ACCORDION*/
 
 .faq-section {
@@ -2638,3 +2640,397 @@ body {
     animation: none;
   }
 }
+
+/* ===== BEGIN Issue #435: Interactive Project Scope & Budget Estimator ===== */
+.scope-estimator-section {
+  max-width: 1180px;
+  margin: 0 auto 72px;
+  padding: 56px 24px 24px;
+}
+
+.scope-est-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.scope-est-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 6px 0 8px;
+}
+
+.scope-est-sub {
+  color: #9ca3af;
+  max-width: 640px;
+  line-height: 1.55;
+  font-size: 0.96rem;
+}
+
+.scope-reset-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: #cbd5e1;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scope-reset-btn:hover {
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.scope-est-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.95fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.scope-controls-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.scope-block {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.scope-block-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.scope-block-head h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.scope-count-pill,
+.scope-timeline-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.14);
+  color: #e9d5ff;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+.deliverable-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.deliverable-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 13px 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease, background 0.2s ease;
+  position: relative;
+}
+
+.deliverable-chip:hover {
+  transform: translateY(-2px);
+  border-color: rgba(168, 85, 247, 0.55);
+}
+
+.deliverable-chip.active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.22) 0%, rgba(124, 58, 237, 0.12) 100%);
+  border-color: #c084fc;
+  box-shadow: 0 0 22px rgba(168, 85, 247, 0.32), inset 0 0 12px rgba(192, 132, 252, 0.12);
+}
+
+.chip-glow-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #475569;
+  flex-shrink: 0;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.deliverable-chip.active .chip-glow-dot {
+  background: #c084fc;
+  box-shadow: 0 0 10px #c084fc, 0 0 18px rgba(168, 85, 247, 0.85);
+}
+
+.chip-icon {
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.chip-info strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.chip-info small {
+  display: block;
+  font-size: 0.76rem;
+  color: #9ca3af;
+}
+
+.deliverable-chip.active .chip-info small {
+  color: #e9d5ff;
+}
+
+.complexity-chips-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.complexity-chip {
+  background: rgba(17, 24, 39, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: left;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.complexity-chip strong {
+  display: block;
+  font-size: 0.86rem;
+  margin-bottom: 3px;
+}
+
+.complexity-chip span {
+  font-size: 0.74rem;
+  color: #9ca3af;
+}
+
+.complexity-chip.active {
+  background: rgba(168, 85, 247, 0.18);
+  border-color: #c084fc;
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.24);
+}
+
+.complexity-chip.active span {
+  color: #e9d5ff;
+}
+
+.scope-slider-wrap input[type="range"] {
+  width: 100%;
+  accent-color: #a855f7;
+  cursor: pointer;
+}
+
+.scope-slider-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 6px;
+}
+
+.scope-pace-note {
+  margin-top: 10px;
+  font-size: 0.83rem;
+  color: #c4b5fd;
+  line-height: 1.45;
+}
+
+/* Glassmorphic Cost Summary Card */
+.scope-summary-card {
+  background: linear-gradient(155deg, rgba(30, 27, 75, 0.55) 0%, rgba(15, 23, 42, 0.78) 100%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  border-radius: 20px;
+  padding: 26px;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.5), 0 0 36px rgba(168, 85, 247, 0.12);
+  position: sticky;
+  top: 24px;
+}
+
+.summary-kicker {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  color: #c084fc;
+  margin-bottom: 6px;
+}
+
+.budget-range-display {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.summary-meta-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.summary-meta-pill {
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+}
+
+.summary-meta-pill.accent {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: rgba(192, 132, 252, 0.45);
+  color: #e9d5ff;
+}
+
+.summary-deliverables-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-chip-tag {
+  font-size: 0.74rem;
+  padding: 4px 9px;
+  border-radius: 8px;
+  background: rgba(168, 85, 247, 0.16);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  color: #f3e8ff;
+}
+
+.milestones-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.milestones-head h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+}
+
+.milestones-head span {
+  font-size: 0.78rem;
+  color: #c084fc;
+  font-weight: 600;
+}
+
+.milestones-timeline {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.milestone-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(3, 7, 18, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #a855f7;
+  border-radius: 10px;
+}
+
+.milestone-item strong {
+  display: block;
+  font-size: 0.84rem;
+  margin-bottom: 2px;
+}
+
+.milestone-item small {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.milestone-wk-badge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #c084fc;
+  white-space: nowrap;
+}
+
+.scope-primary-cta {
+  width: 100%;
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-weight: 700;
+  font-size: 0.94rem;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.38);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.scope-primary-cta:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.scope-cta-status {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #34d399;
+  min-height: 1.1em;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .scope-est-grid {
+    grid-template-columns: 1fr;
+  }
+  .scope-summary-card {
+    position: static;
+  }
+}
+
+@media (max-width: 600px) {
+  .complexity-chips-row {
+    grid-template-columns: 1fr;
+  }
+  .budget-range-display {
+    font-size: 1.65rem;
+  }
+}
+/* ===== END Issue #435 ===== */

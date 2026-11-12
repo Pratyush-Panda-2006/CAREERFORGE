@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initIntegrationFilters();
   initSystemStatus();
   initTelemetryAnomalyDetector();
+  initUptimeHistoryMatrix();
 });
 
 function initFaqAccordion() {
@@ -1957,6 +1958,276 @@ function initTelemetryAnomalyDetector() {
   startStreamLoops();
 }
 /* ===== END Issue #440 ===== */
+
+/* ===== BEGIN Issue #439: Enterprise System Status & 90-Day Uptime History Matrix ===== */
+function initUptimeHistoryMatrix() {
+  const stackEl = document.getElementById('uptimeServicesStack');
+  if (!stackEl) return;
+
+  const SERVICES = [
+    {
+      id: 'api',
+      name: 'API Gateway & Edge Compute',
+      region: 'GLOBAL ANYCAST',
+      baseLatency: 26,
+      incidents: {
+        18: { status: 'degraded', latency: 142, uptime: 99.62, duration: '14m', note: 'Elevated TLS handshake latency in US-East POPs' },
+        53: { status: 'outage', latency: 620, uptime: 98.45, duration: '22m', note: 'BGP route flap upstream transit mitigation completed' },
+        74: { status: 'degraded', latency: 98, uptime: 99.84, duration: '8m', note: 'Burst rate-limit cache warm-up post deployment' }
+      }
+    },
+    {
+      id: 'dashboard',
+      name: 'Customer Control Dashboard',
+      region: 'US-EAST / EU-WEST',
+      baseLatency: 41,
+      incidents: {
+        29: { status: 'degraded', latency: 185, uptime: 99.72, duration: '11m', note: 'Read-replica lag spike during batch billing export' },
+        67: { status: 'degraded', latency: 164, uptime: 99.78, duration: '9m', note: 'CDN cache invalidation queue backlog cleared' }
+      }
+    },
+    {
+      id: 'ingestion',
+      name: 'Telemetry Ingestion Pipeline',
+      region: 'KAFKA CLUSTER',
+      baseLatency: 18,
+      incidents: {
+        11: { status: 'outage', latency: 840, uptime: 97.90, duration: '31m', note: 'Partition leader re-election under 4.2M req/s surge' },
+        42: { status: 'degraded', latency: 112, uptime: 99.68, duration: '16m', note: 'Backpressure throttling during schema migration' },
+        81: { status: 'degraded', latency: 94, uptime: 99.85, duration: '7m', note: 'Compaction throughput rebalancing across brokers' }
+      }
+    },
+    {
+      id: 'webhooks',
+      name: 'Outbound Event Webhooks',
+      region: 'ASYNC WORKERS',
+      baseLatency: 58,
+      incidents: {
+        24: { status: 'degraded', latency: 230, uptime: 99.65, duration: '18m', note: 'Partner endpoint timeout retries increased worker queue depth' },
+        54: { status: 'outage', latency: 710, uptime: 98.15, duration: '26m', note: 'Dead-letter worker pool scaled from 32 to 128 replicas' }
+      }
+    }
+  ];
+
+  const DAYS = 90;
+  const anchorEnd = new Date('2026-11-11T00:00:00Z');
+  const allIncidents = [];
+
+  const serviceData = SERVICES.map((svc, sIdx) => {
+    const days = [];
+    for (let i = 0; i < DAYS; i += 1) {
+      const dateObj = new Date(anchorEnd.getTime() - (DAYS - 1 - i) * 86400000);
+      const dateStr = dateObj.toISOString().slice(0, 10);
+      const incident = svc.incidents[i];
+      const jitter = ((i * 7 + sIdx * 13) % 9) - 4;
+      if (incident) {
+        days.push({
+          dayIndex: i,
+          dateStr,
+          serviceId: svc.id,
+          serviceName: svc.name,
+          status: incident.status,
+          latency: incident.latency,
+          uptime: incident.uptime,
+          duration: incident.duration,
+          note: incident.note
+        });
+        allIncidents.push({
+          dateStr,
+          serviceId: svc.id,
+          serviceName: svc.name,
+          status: incident.status,
+          duration: incident.duration,
+          latency: incident.latency,
+          note: incident.note
+        });
+      } else {
+        days.push({
+          dayIndex: i,
+          dateStr,
+          serviceId: svc.id,
+          serviceName: svc.name,
+          status: 'operational',
+          latency: Math.max(8, svc.baseLatency + jitter),
+          uptime: 100.0,
+          duration: '0m',
+          note: 'All health checks & synthetic probes passed.'
+        });
+      }
+    }
+    const avgUptime = days.reduce((s, d) => s + d.uptime, 0) / DAYS;
+    const avgLatency = Math.round(days.reduce((s, d) => s + d.latency, 0) / DAYS);
+    return { ...svc, days, avgUptime, avgLatency };
+  });
+
+  allIncidents.sort((a, b) => b.dateStr.localeCompare(a.dateStr));
+
+  let activeSeverity = 'all';
+
+  const statusMeta = {
+    operational: { cls: 'op', label: 'OPERATIONAL' },
+    degraded: { cls: 'deg', label: 'DEGRADED' },
+    outage: { cls: 'out', label: 'MAJOR OUTAGE' }
+  };
+
+  function inspectDay(dayObj) {
+    const badge = document.getElementById('inspStatusBadge');
+    const titleEl = document.getElementById('inspDateService');
+    const latEl = document.getElementById('inspLatency');
+    const upEl = document.getElementById('inspUptime');
+    const meta = statusMeta[dayObj.status] || statusMeta.operational;
+
+    if (badge) {
+      badge.className = `inspector-badge ${meta.cls}`;
+      badge.textContent = meta.label;
+    }
+    if (titleEl) {
+      titleEl.textContent = `${dayObj.dateStr} · ${dayObj.serviceName} — ${dayObj.note}`;
+    }
+    if (latEl) latEl.textContent = `${dayObj.latency}ms`;
+    if (upEl) upEl.textContent = `${dayObj.uptime.toFixed(2)}%`;
+  }
+
+  function showTooltip(barBtn, dayObj) {
+    const tip = document.getElementById('uptimeFloatingTooltip');
+    if (!tip) return;
+    const rect = barBtn.getBoundingClientRect();
+    const meta = statusMeta[dayObj.status] || statusMeta.operational;
+    tip.innerHTML = `
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #94a3b8; margin-bottom: 3px;">${dayObj.dateStr} · ${meta.label}</div>
+      <div style="font-weight: 700; color: #f8fafc; margin-bottom: 4px;">${dayObj.serviceName}</div>
+      <div style="color: #cbd5e1; margin-bottom: 4px;">P95 Latency: <strong>${dayObj.latency}ms</strong> · SLA: <strong>${dayObj.uptime.toFixed(2)}%</strong></div>
+      <div style="color: #94a3b8; font-size: 0.74rem;">${dayObj.note}</div>
+    `;
+    tip.hidden = false;
+    const left = Math.min(window.innerWidth - 276, Math.max(12, rect.left - 90));
+    const top = Math.max(12, rect.top - tip.offsetHeight - 10);
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+  }
+
+  function hideTooltip() {
+    const tip = document.getElementById('uptimeFloatingTooltip');
+    if (tip) tip.hidden = true;
+  }
+
+  function renderServices() {
+    const globalSlaEl = document.getElementById('globalSlaPct');
+    const aggregateSla = serviceData.reduce((s, svc) => s + svc.avgUptime, 0) / serviceData.length;
+    if (globalSlaEl) globalSlaEl.textContent = `${aggregateSla.toFixed(2)}%`;
+
+    stackEl.innerHTML = serviceData
+      .map((svc) => {
+        const barsHtml = svc.days
+          .map((d) => {
+            const meta = statusMeta[d.status];
+            const dimmed = activeSeverity !== 'all' && d.status !== activeSeverity;
+            return `<button type="button" class="uptime-bar-pill ${meta.cls} ${dimmed ? 'is-dimmed' : ''}" data-svc="${svc.id}" data-day="${d.dayIndex}" aria-label="${svc.name} ${d.dateStr}: ${meta.label}, ${d.latency}ms"></button>`;
+          })
+          .join('');
+
+        return `
+          <div class="uptime-service-card">
+            <div class="uptime-service-head">
+              <div class="service-name-wrap">
+                <h3>${svc.name}</h3>
+                <span class="service-region-tag">${svc.region}</span>
+              </div>
+              <div class="service-sla-meta">
+                <span class="sla-latency">Avg P95: ${svc.avgLatency}ms</span>
+                <span class="sla-percent">${svc.avgUptime.toFixed(2)}% uptime</span>
+              </div>
+            </div>
+            <div class="uptime-bars-scroll">
+              <div class="uptime-bars-track">${barsHtml}</div>
+            </div>
+            <div class="uptime-bar-axis">
+              <span>90 days ago</span>
+              <span>45 days ago</span>
+              <span>Today</span>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+
+    stackEl.querySelectorAll('.uptime-bar-pill').forEach((btn) => {
+      const svc = serviceData.find((s) => s.id === btn.getAttribute('data-svc'));
+      const dayObj = svc ? svc.days[Number(btn.getAttribute('data-day'))] : null;
+      if (!dayObj) return;
+      btn.addEventListener('mouseenter', () => {
+        inspectDay(dayObj);
+        showTooltip(btn, dayObj);
+      });
+      btn.addEventListener('focus', () => {
+        inspectDay(dayObj);
+        showTooltip(btn, dayObj);
+      });
+      btn.addEventListener('mouseleave', hideTooltip);
+      btn.addEventListener('blur', hideTooltip);
+      btn.addEventListener('click', () => inspectDay(dayObj));
+    });
+  }
+
+  function renderIncidentMatrix() {
+    const tbody = document.getElementById('incidentMatrixBody');
+    const countLabel = document.getElementById('incidentMatrixCount');
+    if (!tbody) return;
+
+    const filtered = activeSeverity === 'all'
+      ? allIncidents
+      : allIncidents.filter((inc) => inc.status === activeSeverity);
+
+    if (countLabel) {
+      countLabel.textContent = filtered.length
+        ? `${filtered.length} incident${filtered.length === 1 ? '' : 's'} shown`
+        : '0 degraded/outage incidents for this filter';
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:18px;">100% healthy — no incident events match "${activeSeverity}".</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered
+      .map((inc) => {
+        const meta = statusMeta[inc.status];
+        return `
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace;">${inc.dateStr}</td>
+            <td><strong>${inc.serviceName}</strong></td>
+            <td><span class="inspector-badge ${meta.cls}">${meta.label}</span></td>
+            <td style="font-family:'JetBrains Mono',monospace;">${inc.duration}</td>
+            <td style="font-family:'JetBrains Mono',monospace;">${inc.latency}ms</td>
+            <td>${inc.note}</td>
+          </tr>
+        `;
+      })
+      .join('');
+  }
+
+  document.querySelectorAll('#severityFilterTags .sev-tag-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      activeSeverity = btn.getAttribute('data-severity') || 'all';
+      document.querySelectorAll('#severityFilterTags .sev-tag-btn').forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      renderServices();
+      renderIncidentMatrix();
+    });
+  });
+
+  renderServices();
+  renderIncidentMatrix();
+  if (allIncidents.length > 0) {
+    const latest = serviceData.find((s) => s.id === allIncidents[0].serviceId);
+    const matchedDay = latest && latest.days.find((d) => d.dateStr === allIncidents[0].dateStr);
+    if (matchedDay) inspectDay(matchedDay);
+  }
+}
+/* ===== END Issue #439 ===== */
 
 /*System Status Indicator*/
 function initSystemStatus() {

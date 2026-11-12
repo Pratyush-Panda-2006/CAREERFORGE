@@ -912,36 +912,38 @@ window.watchStream = function watchStream() {
 
 document.addEventListener('DOMContentLoaded', initComparator);
 
-// Demo roster (made-up numbers).
+// Pro Player Roster with Elo ratings and 5 core tactical performance dimensions
 const PLAYERS = [
-  { id: 'nova',   name: 'NOVA',   team: 'Team Cyber',     aim: 94, reaction: 148, kd: 1.92, clutch: 58, win: 71 },
-  { id: 'specter', name: 'SPECTER', team: 'Phantom Squad', aim: 89, reaction: 136, kd: 1.64, clutch: 49, win: 66 },
-  { id: 'blaze',  name: 'BLAZE',  team: 'Neon Riders',    aim: 91, reaction: 162, kd: 1.78, clutch: 41, win: 62 },
-  { id: 'titan',  name: 'TITAN',  team: 'Apex Titans',    aim: 82, reaction: 171, kd: 1.31, clutch: 63, win: 74 },
-  { id: 'hex',    name: 'HEX',    team: 'Team Cyber',     aim: 86, reaction: 154, kd: 1.47, clutch: 37, win: 58 },
-  { id: 'ryo',    name: 'RYO',    team: 'Phantom Squad',  aim: 97, reaction: 142, kd: 2.05, clutch: 44, win: 69 },
-  { id: 'vex',    name: 'VEX',    team: 'Neon Riders',    aim: 78, reaction: 189, kd: 1.12, clutch: 52, win: 55 },
-  { id: 'echo',   name: 'ECHO',   team: 'Apex Titans',    aim: 84, reaction: 158, kd: 1.38, clutch: 66, win: 72 }
+  { id: 'zenith',  name: 'ZENITH',  team: 'Phantom Squad', role: 'Duelist',    elo: 1940, kda: 4.85, csMin: 10.4, dmgShare: 32.5, firstBlood: 34, champPool: 12 },
+  { id: 'kairo',   name: 'KAIRO',   team: 'Team Cyber',    role: 'Duelist',    elo: 1890, kda: 4.40, csMin: 9.8,  dmgShare: 29.8, firstBlood: 28, champPool: 10 },
+  { id: 'drift',   name: 'DRIFT',   team: 'Neon Riders',   role: 'Duelist',    elo: 1780, kda: 3.75, csMin: 9.1,  dmgShare: 27.2, firstBlood: 24, champPool: 9  },
+  { id: 'striker', name: 'STRIKER', team: 'Vortex Prime',  role: 'Duelist',    elo: 1720, kda: 3.45, csMin: 8.6,  dmgShare: 25.4, firstBlood: 21, champPool: 8  },
+  { id: 'pulse',   name: 'PULSE',   team: 'Team Cyber',    role: 'Initiator',  elo: 1860, kda: 4.20, csMin: 8.2,  dmgShare: 23.5, firstBlood: 22, champPool: 14 },
+  { id: 'sable',   name: 'SABLE',   team: 'Neon Riders',   role: 'Initiator',  elo: 1810, kda: 3.90, csMin: 8.0,  dmgShare: 22.0, firstBlood: 19, champPool: 11 },
+  { id: 'nimbus',  name: 'NIMBUS',  team: 'Apex Titans',   role: 'Controller', elo: 1840, kda: 3.80, csMin: 7.8,  dmgShare: 20.5, firstBlood: 16, champPool: 13 },
+  { id: 'haze',    name: 'HAZE',    team: 'Phantom Squad', role: 'Controller', elo: 1790, kda: 3.50, csMin: 7.5,  dmgShare: 19.8, firstBlood: 14, champPool: 11 },
+  { id: 'warden',  name: 'WARDEN',  team: 'Neon Riders',   role: 'Sentinel',   elo: 1820, kda: 4.10, csMin: 7.4,  dmgShare: 18.9, firstBlood: 15, champPool: 12 },
+  { id: 'anvil',   name: 'ANVIL',   team: 'Apex Titans',   role: 'Sentinel',   elo: 1760, kda: 3.60, csMin: 7.1,  dmgShare: 18.0, firstBlood: 13, champPool: 9  },
+  { id: 'oracle',  name: 'ORACLE',  team: 'Team Cyber',    role: 'IGL',        elo: 1850, kda: 3.70, csMin: 7.6,  dmgShare: 21.0, firstBlood: 18, champPool: 15 },
+  { id: 'maestro', name: 'MAESTRO', team: 'Phantom Squad', role: 'IGL',        elo: 1800, kda: 3.40, csMin: 7.3,  dmgShare: 19.5, firstBlood: 16, champPool: 13 }
 ];
 
-// One entry per radar axis. `min`/`max` map the raw value onto 0..1 for the chart.
-// Reaction time is inverted (lower ms is better), so its range runs from the slow end to the fast end.
+// One entry per radar axis: KDA, CS/min, Damage Share %, First Blood %, Champion Pool
 const STATS = [
-  { key: 'aim',      label: 'Aim Accuracy',  unit: '%',  decimals: 0, higherIsBetter: true,  min: 50,  max: 100 },
-  { key: 'reaction', label: 'Reaction Time', unit: ' ms', decimals: 0, higherIsBetter: false, min: 220, max: 120 },
-  { key: 'kd',       label: 'K/D Ratio',     unit: '',   decimals: 2, higherIsBetter: true,  min: 0.5, max: 2.5 },
-  { key: 'clutch',   label: 'Clutch Rate',   unit: '%',  decimals: 0, higherIsBetter: true,  min: 0,   max: 80 },
-  { key: 'win',      label: 'Win %',         unit: '%',  decimals: 0, higherIsBetter: true,  min: 30,  max: 90 }
+  { key: 'kda',        label: 'KDA Ratio',             unit: '',    decimals: 2, higherIsBetter: true, min: 1.5, max: 6.0 },
+  { key: 'csMin',      label: 'CS / Min',              unit: '',    decimals: 1, higherIsBetter: true, min: 5.0, max: 12.0 },
+  { key: 'dmgShare',   label: 'Damage Share',          unit: '%',   decimals: 1, higherIsBetter: true, min: 12,  max: 38 },
+  { key: 'firstBlood', label: 'First Blood %',         unit: '%',   decimals: 0, higherIsBetter: true, min: 8,   max: 42 },
+  { key: 'champPool',  label: 'Champion Pool Mastery', unit: ' Ch', decimals: 0, higherIsBetter: true, min: 4,   max: 18 }
 ];
 
-// Raw value -> 0..1 (clamped). Works for inverted stats because min > max there.
+// Raw value -> 0..1 (clamped)
 function normalize(stat, value) {
   const t = (value - stat.min) / (stat.max - stat.min);
   return Math.min(Math.max(t, 0), 1);
 }
 
 // Vertex of the radar polygon for axis `i` of `n` at fraction `t` of the radius.
-// Axis 0 points straight up, the rest go clockwise.
 function radarPoint(i, n, t, cx, cy, radius) {
   const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
   return { x: cx + radius * t * Math.cos(angle), y: cy + radius * t * Math.sin(angle) };
@@ -956,6 +958,42 @@ function betterSide(stat, a, b) {
 
 function formatStat(stat, value) {
   return value.toFixed(stat.decimals) + stat.unit;
+}
+
+function computeWinProbability(playerA, playerB) {
+  if (playerA.id === playerB.id) {
+    return { probA: 50, probB: 50, advantage: 'Even Matchup', delta: 0 };
+  }
+
+  // Calculate stat advantage differential across all 5 axes
+  let statScoreA = 0;
+  let statScoreB = 0;
+  STATS.forEach((stat) => {
+    statScoreA += normalize(stat, playerA[stat.key]);
+    statScoreB += normalize(stat, playerB[stat.key]);
+  });
+  const statDiff = (statScoreA - statScoreB) / STATS.length;
+
+  // Elo rating differential combined with stat performance
+  const eloDiff = (playerA.elo - playerB.elo) + (statDiff * 300);
+
+  // Logistic win probability formula
+  const probA = 1 / (1 + Math.pow(10, -eloDiff / 400));
+  const roundedA = Math.max(5, Math.min(95, Math.round(probA * 100)));
+  const roundedB = 100 - roundedA;
+
+  let advantage = 'Even Matchup';
+  if (roundedA >= 60) advantage = `${playerA.name} Heavily Favored`;
+  else if (roundedA > 52) advantage = `${playerA.name} Slight Edge`;
+  else if (roundedB >= 60) advantage = `${playerB.name} Heavily Favored`;
+  else if (roundedB > 52) advantage = `${playerB.name} Slight Edge`;
+
+  return {
+    probA: roundedA,
+    probB: roundedB,
+    advantage,
+    delta: Math.abs(roundedA - roundedB)
+  };
 }
 
 function svgNode(name, attrs, text) {
@@ -984,8 +1022,8 @@ function initComparator() {
       sel.appendChild(opt);
     });
   });
-  selA.value = 'nova';
-  selB.value = 'titan';
+  selA.value = 'zenith';
+  selB.value = 'kairo';
 
   const byId = (id) => PLAYERS.find((p) => p.id === id);
 
@@ -1080,6 +1118,46 @@ function initComparator() {
     else if (winsA === winsB) summary = a.name + ' and ' + b.name + ' are level: ' + winsA + ' stat wins each.';
     else summary = (winsA > winsB ? a.name : b.name) + ' leads, winning ' + Math.max(winsA, winsB) + ' of ' + STATS.length + ' stats.';
     setText('compare-summary', summary);
+
+    // Update Win Probability Estimator HUD
+    const winData = computeWinProbability(a, b);
+    const barA = document.getElementById('estimatorBarA');
+    const barB = document.getElementById('estimatorBarB');
+    if (barA && barB) {
+      barA.style.width = winData.probA + '%';
+      barB.style.width = winData.probB + '%';
+      setText('percentTextA', winData.probA + '%');
+      setText('percentTextB', winData.probB + '%');
+    }
+    setText('hudNameA', a.name);
+    setText('hudChanceA', winData.probA + '%');
+    setText('hudRoleA', a.role + ' • ' + a.team);
+
+    setText('hudNameB', b.name);
+    setText('hudChanceB', winData.probB + '%');
+    setText('hudRoleB', b.role + ' • ' + b.team);
+
+    const vBadge = document.getElementById('verdictBadge');
+    const vSub = document.getElementById('verdictSub');
+    if (vBadge && vSub) {
+      if (a.id === b.id) {
+        vBadge.className = 'verdict-badge even';
+        vBadge.textContent = 'EVEN MATCHUP';
+        vSub.textContent = 'Identical athlete selected';
+      } else if (winData.delta <= 4) {
+        vBadge.className = 'verdict-badge even';
+        vBadge.textContent = 'EVEN MATCHUP';
+        vSub.textContent = 'Tight tactical duel predicted';
+      } else if (winData.probA > winData.probB) {
+        vBadge.className = 'verdict-badge favored-a';
+        vBadge.textContent = `${a.name} FAVORED (+${winData.delta}%)`;
+        vSub.textContent = `${a.name} holds projected combat advantage`;
+      } else {
+        vBadge.className = 'verdict-badge favored-b';
+        vBadge.textContent = `${b.name} FAVORED (+${winData.delta}%)`;
+        vSub.textContent = `${b.name} holds projected combat advantage`;
+      }
+    }
 
     setText('radar-desc', a.name + ' versus ' + b.name + ' across ' + STATS.map((s) => s.label).join(', ') + '. ' + summary);
   }
@@ -1630,7 +1708,7 @@ if (document.readyState === 'loading') {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : {};
-    } catch (e) {
+    } catch {
       return {};
     }
   }
@@ -1640,7 +1718,7 @@ if (document.readyState === 'loading') {
       var saved = readSavedVotes();
       saved[matchId] = teamPick;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-    } catch (e) {
+    } catch {
       // Storage unavailable, in-memory vote still functions
     }
   }
@@ -1737,3 +1815,415 @@ if (document.readyState === 'loading') {
   }
 })();
 /* ===== END Issue #291 ===== */
+
+// ===============================================================
+// Fantasy Esports Draft Simulator (Issue #347)
+// ===============================================================
+(function initFantasyDraftSimulator() {
+  'use strict';
+
+  var SALARY_CAP = 50000;
+  var STORAGE_KEY = 'moba_fantasy_draft_347';
+  var ROLES = ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT'];
+
+  var PLAYERS = [
+    // TOP
+    { id: 'p_zeus', name: 'Zeus', team: 'T1', role: 'TOP', salary: 11500, pts: 38.4, kda: '3.8' },
+    { id: 'p_bin', name: 'Bin', team: 'BLG', role: 'TOP', salary: 11200, pts: 37.1, kda: '3.6' },
+    { id: 'p_369', name: '369', team: 'TES', role: 'TOP', salary: 10500, pts: 35.2, kda: '3.4' },
+    { id: 'p_kiin', name: 'Kiin', team: 'GEN.G', role: 'TOP', salary: 10000, pts: 34.5, kda: '3.5' },
+    { id: 'p_bb', name: 'BrokenBlade', team: 'G2', role: 'TOP', salary: 9200, pts: 31.8, kda: '3.1' },
+
+    // JUNGLE
+    { id: 'p_canyon', name: 'Canyon', team: 'GEN.G', role: 'JUNGLE', salary: 11800, pts: 42.1, kda: '4.5' },
+    { id: 'p_oner', name: 'Oner', team: 'T1', role: 'JUNGLE', salary: 11000, pts: 39.5, kda: '4.1' },
+    { id: 'p_tarzan', name: 'Tarzan', team: 'WBG', role: 'JUNGLE', salary: 10400, pts: 36.8, kda: '3.7' },
+    { id: 'p_tian', name: 'Tian', team: 'TES', role: 'JUNGLE', salary: 10100, pts: 35.0, kda: '3.6' },
+    { id: 'p_yike', name: 'Yike', team: 'G2', role: 'JUNGLE', salary: 9500, pts: 33.2, kda: '3.3' },
+
+    // MID
+    { id: 'p_faker', name: 'Faker', team: 'T1', role: 'MID', salary: 12500, pts: 44.6, kda: '4.6' },
+    { id: 'p_chovy', name: 'Chovy', team: 'GEN.G', role: 'MID', salary: 12400, pts: 45.2, kda: '4.8' },
+    { id: 'p_knight', name: 'Knight', team: 'BLG', role: 'MID', salary: 11900, pts: 42.0, kda: '4.2' },
+    { id: 'p_caps', name: 'Caps', team: 'G2', role: 'MID', salary: 11200, pts: 39.8, kda: '3.9' },
+    { id: 'p_scout', name: 'Scout', team: 'LNG', role: 'MID', salary: 10800, pts: 37.5, kda: '3.8' },
+
+    // ADC
+    { id: 'p_ruler', name: 'Ruler', team: 'JDG', role: 'ADC', salary: 12000, pts: 43.8, kda: '4.9' },
+    { id: 'p_viper', name: 'Viper', team: 'HLE', role: 'ADC', salary: 11800, pts: 42.2, kda: '4.4' },
+    { id: 'p_gumayusi', name: 'Gumayusi', team: 'T1', role: 'ADC', salary: 11600, pts: 41.5, kda: '4.3' },
+    { id: 'p_jackey', name: 'JackeyLove', team: 'TES', role: 'ADC', salary: 11300, pts: 40.1, kda: '4.0' },
+    { id: 'p_hans', name: 'Hans Sama', team: 'G2', role: 'ADC', salary: 9800, pts: 34.6, kda: '3.6' },
+
+    // SUPPORT
+    { id: 'p_keria', name: 'Keria', team: 'T1', role: 'SUPPORT', salary: 10800, pts: 36.5, kda: '4.2' },
+    { id: 'p_delight', name: 'Delight', team: 'HLE', role: 'SUPPORT', salary: 9900, pts: 32.8, kda: '3.7' },
+    { id: 'p_lehends', name: 'Lehends', team: 'GEN.G', role: 'SUPPORT', salary: 9800, pts: 32.4, kda: '3.6' },
+    { id: 'p_meiko', name: 'Meiko', team: 'TES', role: 'SUPPORT', salary: 9600, pts: 31.9, kda: '3.5' },
+    { id: 'p_mikyx', name: 'Mikyx', team: 'G2', role: 'SUPPORT', salary: 9100, pts: 30.5, kda: '3.4' }
+  ];
+
+  var playerById = {};
+  PLAYERS.forEach(function (p) {
+    playerById[p.id] = p;
+  });
+
+  var state = {
+    roster: { TOP: null, JUNGLE: null, MID: null, ADC: null, SUPPORT: null },
+    activeFilter: 'ALL'
+  };
+
+  function loadSavedRoster() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        ROLES.forEach(function (r) {
+          if (parsed[r] && playerById[parsed[r]]) {
+            state.roster[r] = parsed[r];
+          }
+        });
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }
+
+  function saveRoster() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.roster));
+    } catch {
+      // Ignore quota errors
+    }
+  }
+
+  function formatMoney(amount) {
+    return '$' + Number(amount).toLocaleString('en-US');
+  }
+
+  function getDraftedList() {
+    return ROLES.map(function (r) {
+      return state.roster[r] ? playerById[state.roster[r]] : null;
+    }).filter(Boolean);
+  }
+
+  function calculateTotalSalary() {
+    return getDraftedList().reduce(function (sum, p) {
+      return sum + p.salary;
+    }, 0);
+  }
+
+  function calculateTotalPts() {
+    return getDraftedList().reduce(function (sum, p) {
+      return sum + p.pts;
+    }, 0);
+  }
+
+  function renderRosterSlots() {
+    var container = document.getElementById('draft-slots-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    ROLES.forEach(function (role) {
+      var playerId = state.roster[role];
+      var player = playerId ? playerById[playerId] : null;
+
+      var card = document.createElement('div');
+      card.className = 'draft-slot-card' + (player ? ' filled' : '');
+
+      var roleTag = document.createElement('span');
+      roleTag.className = 'slot-role-tag role-' + role;
+      roleTag.textContent = role;
+      card.appendChild(roleTag);
+
+      if (player) {
+        var info = document.createElement('div');
+        info.className = 'slot-player-info';
+
+        info.innerHTML =
+          '<div>' +
+            '<div class="slot-player-name">' + player.name + '</div>' +
+            '<div class="slot-player-team">' + player.team + ' • ' + player.kda + ' KDA</div>' +
+          '</div>' +
+          '<div class="slot-player-stats">' +
+            '<span class="card-salary">' + formatMoney(player.salary) + '</span>' +
+            '<span class="card-pts">' + player.pts.toFixed(1) + ' PTS</span>' +
+          '</div>';
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-slot-remove';
+        removeBtn.textContent = '✕ Remove';
+        removeBtn.setAttribute('aria-label', 'Remove ' + player.name + ' from ' + role + ' slot');
+        removeBtn.addEventListener('click', function () {
+          state.roster[role] = null;
+          saveRoster();
+          updateUI();
+        });
+
+        info.appendChild(removeBtn);
+        card.appendChild(info);
+      } else {
+        var empty = document.createElement('div');
+        empty.className = 'slot-empty-state';
+        empty.innerHTML = '<span>➕</span><span>Empty ' + role + ' Slot</span>';
+        card.appendChild(empty);
+      }
+
+      container.appendChild(card);
+    });
+  }
+
+  function renderBenchGrid() {
+    var grid = document.getElementById('draft-players-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    var totalSpent = calculateTotalSalary();
+    var remBudget = SALARY_CAP - totalSpent;
+
+    var filtered = PLAYERS.filter(function (p) {
+      return state.activeFilter === 'ALL' || p.role === state.activeFilter;
+    });
+
+    filtered.forEach(function (player) {
+      var isDrafted = state.roster[player.role] === player.id;
+      var currentInSlot = state.roster[player.role] ? playerById[state.roster[player.role]] : null;
+      var netCost = player.salary - (currentInSlot ? currentInSlot.salary : 0);
+      var canAfford = isDrafted || netCost <= remBudget;
+
+      var card = document.createElement('div');
+      card.className = 'draft-player-card' + (isDrafted ? ' is-drafted' : '');
+
+      card.innerHTML =
+        '<div>' +
+          '<div class="card-top-row">' +
+            '<span class="slot-role-tag role-' + player.role + '">' + player.role + '</span>' +
+            '<span class="card-pts">' + player.pts.toFixed(1) + ' PTS</span>' +
+          '</div>' +
+          '<div class="card-player-name">' + player.name + '</div>' +
+          '<div class="card-player-team">' + player.team + ' • ' + player.kda + ' KDA</div>' +
+          '<div class="card-meta-row">' +
+            '<span class="card-salary">' + formatMoney(player.salary) + '</span>' +
+            '<span style="color:#94a3b8;font-size:0.75rem;">Cap Impact: ' + (netCost >= 0 ? '+' : '') + formatMoney(netCost) + '</span>' +
+          '</div>' +
+        '</div>';
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-card-draft ' + (isDrafted ? 'in-roster' : 'draft-action');
+
+      if (isDrafted) {
+        btn.textContent = '✓ In Roster (Remove)';
+        btn.addEventListener('click', function () {
+          state.roster[player.role] = null;
+          saveRoster();
+          updateUI();
+        });
+      } else {
+        btn.textContent = currentInSlot ? '🔄 Swap ' + player.role : '➕ Draft ' + player.role;
+        btn.disabled = !canAfford;
+        if (!canAfford) {
+          btn.title = 'Cannot afford: exceeds cap by ' + formatMoney(netCost - remBudget);
+        }
+        btn.addEventListener('click', function () {
+          state.roster[player.role] = player.id;
+          saveRoster();
+          updateUI();
+        });
+      }
+
+      card.appendChild(btn);
+      grid.appendChild(card);
+    });
+  }
+
+  function updateUI() {
+    var spent = calculateTotalSalary();
+    var remaining = SALARY_CAP - spent;
+    var pts = calculateTotalPts();
+    var draftedCount = getDraftedList().length;
+    var isCompliant = draftedCount === 5 && spent <= SALARY_CAP;
+
+    // Header counters
+    var countEl = document.getElementById('draft-roster-count');
+    if (countEl) countEl.textContent = draftedCount + ' / 5 FILLED';
+
+    var spentEl = document.getElementById('draft-spent-text');
+    if (spentEl) spentEl.textContent = formatMoney(spent);
+
+    var remEl = document.getElementById('draft-rem-text');
+    if (remEl) {
+      remEl.textContent = formatMoney(remaining);
+      remEl.className = remaining >= 0 ? 'text-emerald' : 'text-red';
+    }
+
+    var capFill = document.getElementById('draft-cap-fill');
+    var capBar = document.getElementById('draft-cap-bar');
+    if (capFill && capBar) {
+      var pct = Math.min(100, (spent / SALARY_CAP) * 100);
+      capFill.style.width = pct + '%';
+      capBar.setAttribute('aria-valuenow', String(spent));
+      capFill.classList.toggle('over-budget', spent > SALARY_CAP);
+    }
+
+    // Points display
+    var ptsEl = document.getElementById('draft-total-pts');
+    if (ptsEl) ptsEl.textContent = pts.toFixed(1);
+
+    var ptsSub = document.getElementById('draft-pts-sub');
+    if (ptsSub) {
+      if (isCompliant) {
+        ptsSub.textContent = 'Roster is 100% compliant. Projected output: ' + pts.toFixed(1) + ' points.';
+      } else if (draftedCount < 5) {
+        ptsSub.textContent = 'Draft ' + (5 - draftedCount) + ' more player(s) to finalize team.';
+      } else {
+        ptsSub.textContent = 'Salary cap exceeded! Trim player salaries to enable roster lock.';
+      }
+    }
+
+    var badge = document.getElementById('draft-compliance-badge');
+    if (badge) {
+      if (isCompliant) {
+        badge.textContent = 'ROSTER COMPLIANT // READY';
+        badge.className = 'draft-compliance-badge valid';
+      } else if (spent > SALARY_CAP) {
+        badge.textContent = 'SALARY CAP EXCEEDED';
+        badge.className = 'draft-compliance-badge';
+      } else {
+        badge.textContent = 'INCOMPLETE ROSTER';
+        badge.className = 'draft-compliance-badge';
+      }
+    }
+
+    var lockinBtn = document.getElementById('draft-lockin-btn');
+    if (lockinBtn) {
+      lockinBtn.disabled = !isCompliant;
+    }
+
+    renderRosterSlots();
+    renderBenchGrid();
+  }
+
+  function autoDraftBestLineup() {
+    var best = null;
+    var maxPts = -1;
+
+    // Pick 1 from each role maximizing points within $50,000
+    var tops = PLAYERS.filter(function (p) { return p.role === 'TOP'; });
+    var jungles = PLAYERS.filter(function (p) { return p.role === 'JUNGLE'; });
+    var mids = PLAYERS.filter(function (p) { return p.role === 'MID'; });
+    var adcs = PLAYERS.filter(function (p) { return p.role === 'ADC'; });
+    var supps = PLAYERS.filter(function (p) { return p.role === 'SUPPORT'; });
+
+    tops.forEach(function (t) {
+      jungles.forEach(function (j) {
+        if (t.salary + j.salary >= SALARY_CAP) return;
+        mids.forEach(function (m) {
+          if (t.salary + j.salary + m.salary >= SALARY_CAP) return;
+          adcs.forEach(function (a) {
+            if (t.salary + j.salary + m.salary + a.salary >= SALARY_CAP) return;
+            supps.forEach(function (s) {
+              var cost = t.salary + j.salary + m.salary + a.salary + s.salary;
+              if (cost <= SALARY_CAP) {
+                var totalPts = t.pts + j.pts + m.pts + a.pts + s.pts;
+                if (totalPts > maxPts) {
+                  maxPts = totalPts;
+                  best = { TOP: t.id, JUNGLE: j.id, MID: m.id, ADC: a.id, SUPPORT: s.id };
+                }
+              }
+            });
+          });
+        });
+      });
+    });
+
+    if (best) {
+      state.roster = best;
+      saveRoster();
+      updateUI();
+    }
+  }
+
+  function setupEventListeners() {
+    var resetBtn = document.getElementById('draft-reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        state.roster = { TOP: null, JUNGLE: null, MID: null, ADC: null, SUPPORT: null };
+        saveRoster();
+        updateUI();
+      });
+    }
+
+    var autoBtn = document.getElementById('draft-autofill-btn');
+    if (autoBtn) {
+      autoBtn.addEventListener('click', autoDraftBestLineup);
+    }
+
+    // Role filter buttons
+    var filterBtns = document.querySelectorAll('.draft-role-btn');
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        filterBtns.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        state.activeFilter = btn.getAttribute('data-role');
+        renderBenchGrid();
+      });
+    });
+
+    // Celebration modal lock-in
+    var lockinBtn = document.getElementById('draft-lockin-btn');
+    var modal = document.getElementById('draft-celebration-modal');
+    var celebClose = document.getElementById('celeb-close-btn');
+    var celebSummary = document.getElementById('celeb-summary');
+
+    if (lockinBtn && modal) {
+      lockinBtn.addEventListener('click', function () {
+        var drafted = getDraftedList();
+        if (drafted.length !== 5 || calculateTotalSalary() > SALARY_CAP) return;
+
+        if (celebSummary) {
+          celebSummary.innerHTML =
+            '<div><strong>TOP:</strong> ' + playerById[state.roster.TOP].name + ' (' + formatMoney(playerById[state.roster.TOP].salary) + ')</div>' +
+            '<div><strong>JGL:</strong> ' + playerById[state.roster.JUNGLE].name + ' (' + formatMoney(playerById[state.roster.JUNGLE].salary) + ')</div>' +
+            '<div><strong>MID:</strong> ' + playerById[state.roster.MID].name + ' (' + formatMoney(playerById[state.roster.MID].salary) + ')</div>' +
+            '<div><strong>ADC:</strong> ' + playerById[state.roster.ADC].name + ' (' + formatMoney(playerById[state.roster.ADC].salary) + ')</div>' +
+            '<div><strong>SUP:</strong> ' + playerById[state.roster.SUPPORT].name + ' (' + formatMoney(playerById[state.roster.SUPPORT].salary) + ')</div>' +
+            '<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px;">' +
+              '<strong>TOTAL SALARY:</strong> ' + formatMoney(calculateTotalSalary()) + ' / $50,000<br/>' +
+              '<strong>PROJECTED PTS:</strong> ' + calculateTotalPts().toFixed(1) + ' PTS' +
+            '</div>';
+        }
+
+        if (typeof modal.showModal === 'function') {
+          modal.showModal();
+        } else {
+          modal.setAttribute('open', '');
+        }
+      });
+    }
+
+    if (celebClose && modal) {
+      celebClose.addEventListener('click', function () {
+        if (typeof modal.close === 'function') {
+          modal.close();
+        } else {
+          modal.removeAttribute('open');
+        }
+      });
+    }
+  }
+
+  function start() {
+    loadSavedRoster();
+    setupEventListeners();
+    updateUI();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+

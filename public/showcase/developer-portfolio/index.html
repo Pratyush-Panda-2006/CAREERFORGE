@@ -113,6 +113,105 @@
       </div>
     </header>
 
+    <!-- Terminal Neofetch Hardware Stats & Live Gauges Widget (Issue #441) -->
+    <section class="terminal-card neofetch-card" id="neofetch-section" aria-labelledby="neofetch-title">
+      <div class="terminal-header">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span class="terminal-title" id="neofetch-title">dev@kernel-box: ~ % neofetch --live-gauges</span>
+        <div class="neofetch-actions">
+          <button type="button" class="btn-neofetch-stress" id="neofetchStressBtn" title="Toggle CPU/Memory workload stress simulation">
+            <span class="stress-icon">⚡</span> <span id="stressBtnLabel">Stress Test</span>
+          </button>
+        </div>
+      </div>
+      <div class="terminal-body neofetch-body">
+        <div class="neofetch-grid">
+          <!-- Left: ASCII Art Logo -->
+          <div class="neofetch-logo" aria-hidden="true">
+            <pre class="ascii-art"><code>       /\
+      /  \
+     /\   \
+    /      \
+   /   ,,   \
+  /   |  |  -\
+ /_-''    ''-_\</code></pre>
+            <div class="neofetch-color-blocks" aria-label="ANSI 16-color palette">
+              <span class="c-blk c0"></span><span class="c-blk c1"></span><span class="c-blk c2"></span><span class="c-blk c3"></span><span class="c-blk c4"></span><span class="c-blk c5"></span><span class="c-blk c6"></span><span class="c-blk c7"></span>
+            </div>
+          </div>
+
+          <!-- Middle: System & Kernel Telemetry -->
+          <div class="neofetch-meta">
+            <div class="meta-header">
+              <span class="user-host"><strong class="user">alex</strong>@<strong class="host">kernel-box</strong></span>
+              <div class="meta-divider">-----------------------</div>
+            </div>
+            <dl class="neofetch-dl">
+              <div class="neofetch-row"><dt>OS:</dt><dd>Arch Linux x86_64</dd></div>
+              <div class="neofetch-row"><dt>Host:</dt><dd>Precision 7780 Kernel Rig</dd></div>
+              <div class="neofetch-row"><dt>Kernel:</dt><dd>6.8.9-zen1-1-zen (x86_64)</dd></div>
+              <div class="neofetch-row"><dt>Uptime:</dt><dd id="neofetchUptime">3 days, 14 hours, 28 mins</dd></div>
+              <div class="neofetch-row"><dt>Shell:</dt><dd>zsh 5.9 (x86_64-pc-linux-gnu)</dd></div>
+              <div class="neofetch-row"><dt>WM:</dt><dd>Hyprland (Wayland)</dd></div>
+              <div class="neofetch-row"><dt>Terminal:</dt><dd>kitty / xterm-256color</dd></div>
+              <div class="neofetch-row"><dt>CPU:</dt><dd>AMD Ryzen 9 7950X (32) @ 5.700GHz</dd></div>
+              <div class="neofetch-row"><dt>GPU:</dt><dd>NVIDIA GeForce RTX 4090 24GB</dd></div>
+              <div class="neofetch-row"><dt>eBPF Ring:</dt><dd id="neofetchEbpf">Active (14 probes loaded)</dd></div>
+            </dl>
+          </div>
+
+          <!-- Right: Live Interactive ASCII Hardware Gauges -->
+          <div class="neofetch-gauges">
+            <div class="gauge-group">
+              <div class="gauge-header">
+                <span class="gauge-name">CPU LOAD</span>
+                <span class="gauge-val" id="cpuLoadVal">34%</span>
+              </div>
+              <div class="ascii-bar-wrap">
+                <span class="ascii-bar" id="cpuAsciiBar">[=======>--------------]</span>
+              </div>
+              <div class="meter-track"><div class="meter-fill" id="cpuMeterFill" style="width: 34%;"></div></div>
+            </div>
+
+            <div class="gauge-group">
+              <div class="gauge-header">
+                <span class="gauge-name">MEMORY (RAM)</span>
+                <span class="gauge-val" id="memUsageVal">18.4 GiB / 64.0 GiB (28%)</span>
+              </div>
+              <div class="ascii-bar-wrap">
+                <span class="ascii-bar" id="memAsciiBar">[=====>----------------]</span>
+              </div>
+              <div class="meter-track"><div class="meter-fill" id="memMeterFill" style="width: 28%;"></div></div>
+            </div>
+
+            <div class="gauge-group">
+              <div class="gauge-header">
+                <span class="gauge-name">NVMe CACHE / SWAP</span>
+                <span class="gauge-val" id="swapUsageVal">2.1 GiB / 32.0 GiB (6%)</span>
+              </div>
+              <div class="ascii-bar-wrap">
+                <span class="ascii-bar" id="swapAsciiBar">[=>--------------------]</span>
+              </div>
+              <div class="meter-track"><div class="meter-fill" id="swapMeterFill" style="width: 6%;"></div></div>
+            </div>
+
+            <div class="gauge-group">
+              <div class="gauge-header">
+                <span class="gauge-name">NETWORK I/O</span>
+                <span class="gauge-val" id="netIoVal">↓ 8.4 MB/s  ↑ 2.1 MB/s</span>
+              </div>
+              <div class="ascii-bar-wrap">
+                <span class="ascii-bar" id="netAsciiBar">[========>-------------]</span>
+              </div>
+              <div class="meter-track"><div class="meter-fill" id="netMeterFill" style="width: 42%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="skills-section" id="skills">
       <div class="section-heading">
         <h2>Technical Skills</h2>
@@ -437,6 +536,108 @@
       </div>
     </section>
 
+    <!-- GitHub Contribution Activity Heatmap Section (Issue #334) -->
+    <section class="contribution-heatmap-section" id="contribution-heatmap" aria-labelledby="heatmap-title">
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">dev@kernel-box: ~/github % gh user activity --graph</span>
+          <div class="heatmap-live-badge" id="heatmapLiveBadge">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span id="heatmapLiveText">1,193 contributions in 2026</span>
+          </div>
+        </div>
+
+        <div class="terminal-body heatmap-body">
+          <div class="heatmap-toolbar">
+            <div class="heatmap-intro">
+              <h2 id="heatmap-title" class="heatmap-title">GitHub Contribution Activity</h2>
+              <p class="heatmap-desc">Interactive 52-week activity heatmap graph with 4-level commit intensity, streak telemetry, and date cell inspection.</p>
+            </div>
+
+            <div class="heatmap-year-selector" role="tablist" aria-label="Contribution year selection">
+              <button type="button" class="heatmap-year-btn active" data-year="2026" role="tab" aria-selected="true">2026</button>
+              <button type="button" class="heatmap-year-btn" data-year="2025" role="tab" aria-selected="false">2025</button>
+              <button type="button" class="heatmap-year-btn" data-year="2024" role="tab" aria-selected="false">2024</button>
+            </div>
+          </div>
+
+          <!-- Quick Telemetry Metrics Grid -->
+          <div class="heatmap-metrics-row">
+            <div class="heatmap-metric-card">
+              <span class="metric-label">TOTAL CONTRIBUTIONS</span>
+              <span class="metric-value" id="metricTotalCommits">1,193</span>
+              <span class="metric-sub" id="metricYearSub">in 2026</span>
+            </div>
+            <div class="heatmap-metric-card">
+              <span class="metric-label">CURRENT STREAK</span>
+              <span class="metric-value" id="metricCurrentStreak">12 days</span>
+              <span class="metric-sub">Active continuous commit run</span>
+            </div>
+            <div class="heatmap-metric-card">
+              <span class="metric-label">LONGEST STREAK</span>
+              <span class="metric-value" id="metricLongestStreak">19 days</span>
+              <span class="metric-sub">Peak consistency streak</span>
+            </div>
+            <div class="heatmap-metric-card">
+              <span class="metric-label">BUSIEST DAY</span>
+              <span class="metric-value" id="metricBusiestDay">18 commits</span>
+              <span class="metric-sub" id="metricBusiestDate">Apr 27, 2026</span>
+            </div>
+          </div>
+
+          <!-- Heatmap Outer Scrollable Wrapper -->
+          <div class="heatmap-container-outer">
+            <div class="heatmap-grid-wrapper" id="heatmapGridWrapper">
+              <!-- Month Labels Header Row -->
+              <div class="heatmap-months-row" id="heatmapMonthsRow" aria-hidden="true"></div>
+
+              <!-- Main Graph Row: Day column + 52-53 Week Columns -->
+              <div class="heatmap-graph-area">
+                <div class="heatmap-days-col" aria-hidden="true">
+                  <span class="day-label-empty"></span>
+                  <span class="day-label">Mon</span>
+                  <span class="day-label-empty"></span>
+                  <span class="day-label">Wed</span>
+                  <span class="day-label-empty"></span>
+                  <span class="day-label">Fri</span>
+                  <span class="day-label-empty"></span>
+                </div>
+                <div class="heatmap-matrix" id="heatmapMatrix" role="grid" aria-label="GitHub Contribution Heatmap Grid">
+                  <!-- Injected via JavaScript -->
+                </div>
+              </div>
+
+              <!-- Footer with Legend & Selected Cell Status Bar -->
+              <div class="heatmap-footer-row">
+                <div class="heatmap-legend" aria-label="Contribution intensity scale">
+                  <span class="legend-text">Less</span>
+                  <span class="legend-cell level-0" title="0 contributions"></span>
+                  <span class="legend-cell level-1" title="1-3 contributions"></span>
+                  <span class="legend-cell level-2" title="4-6 contributions"></span>
+                  <span class="legend-cell level-3" title="7-9 contributions"></span>
+                  <span class="legend-cell level-4" title="10+ contributions"></span>
+                  <span class="legend-text">More</span>
+                </div>
+
+                <div class="heatmap-selected-info" id="heatmapSelectedInfo" aria-live="polite">
+                  Hover or focus on any date square to inspect contribution details.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Dynamic Tooltip -->
+      <div class="heatmap-tooltip" id="heatmapTooltip" role="tooltip" aria-hidden="true" hidden>
+        <div class="tooltip-title" id="heatmapTooltipTitle"></div>
+        <div class="tooltip-meta" id="heatmapTooltipMeta"></div>
+      </div>
+    </section>
+
     <section class="shell" aria-labelledby="shell-title">
       <h2 id="shell-title">Interactive Terminal</h2>
       <p class="shell-hint">Poke around my virtual file system. Type <code>help</code> to see the commands.</p>
@@ -470,6 +671,7 @@
           <button type="button" data-terminal-command="skills">skills</button>
           <button type="button" data-terminal-command="projects">projects</button>
           <button type="button" data-terminal-command="contact">contact</button>
+          <button type="button" data-terminal-command="neofetch">neofetch</button>
           <button type="button" data-terminal-command="clear">clear</button>
             <button type="button" data-terminal-command="play">play</button>
         </div>

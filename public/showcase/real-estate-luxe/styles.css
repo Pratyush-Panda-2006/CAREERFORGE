@@ -1951,3 +1951,241 @@ body.cmp-open { overflow: hidden; }
   letter-spacing: 0.05em;
 }
 /* ===== END Issue #357 ===== */
+
+/* ==========================================================
+   15-Year vs 30-Year Amortization & Yield Trajectory (Issue #447)
+   ========================================================== */
+
+.trajectory-card {
+  grid-column: 1 / -1;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.trajectory-title-box h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.trajectory-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.trajectory-metrics-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.trajectory-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pill-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.badge-15 {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.badge-30 {
+  background: rgba(212, 175, 55, 0.15);
+  color: #d4af37;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.pill-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.stat-lbl {
+  color: var(--text-muted);
+}
+
+.pill-stat strong {
+  font-family: 'Cinzel', serif;
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.trajectory-savings-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 18px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(6, 78, 59, 0.25) 100%);
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+.savings-kicker {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #a7f3d0;
+}
+
+.savings-amount {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  color: #34d399;
+  font-weight: 700;
+}
+
+.trajectory-svg-wrap {
+  position: relative;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px 20px 10px;
+  margin-bottom: 24px;
+}
+
+#trajectory-chart-svg {
+  width: 100%;
+  height: 240px;
+  display: block;
+}
+
+.traj-line {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: all 0.4s ease;
+}
+
+.traj-line.line-15 {
+  stroke: #10b981;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6));
+}
+
+.traj-line.line-30 {
+  stroke: #d4af37;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6));
+}
+
+.grid-line {
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-dasharray: 4 4;
+}
+
+.chart-axis-text {
+  fill: #94a3b8;
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+}
+
+.trajectory-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.leg-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-15 { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.dot-30 { background: #d4af37; box-shadow: 0 0 8px #d4af37; }
+
+/* Yield Projector Subcard */
+.yield-projector-subcard {
+  background: rgba(212, 175, 55, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.yield-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.yield-header h4 {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: #f1f5f9;
+}
+
+.yield-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.12);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.yield-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.yield-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.yield-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.yield-val {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.yield-val.gold { color: #d4af37; }
+.yield-val.green { color: #34d399; }

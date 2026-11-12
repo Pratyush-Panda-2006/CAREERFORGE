@@ -1320,6 +1320,81 @@
   </section>
   <!-- ===== END Issue #440 ===== -->
 
+  <!-- ===== BEGIN Issue #439: Enterprise System Status & 90-Day Uptime History Matrix ===== -->
+  <section class="uptime-matrix-section" id="enterprise-uptime-section" aria-labelledby="uptime-matrix-title">
+    <div class="uptime-header-row">
+      <div>
+        <span class="uptime-kicker">// SLA TELEMETRY · 90-DAY AUDIT TRAIL</span>
+        <h2 id="uptime-matrix-title">Enterprise System Status &amp; Uptime History</h2>
+        <p class="uptime-subtitle">Inspect 90-day daily availability telemetry across all 4 core microservices, hover any day for P95 latency &amp; incident notes, and filter by severity.</p>
+      </div>
+      <div class="uptime-global-pill">
+        <span class="uptime-pulse-dot" aria-hidden="true"></span>
+        <span>All Systems Operational · <strong id="globalSlaPct">99.94%</strong> 90d SLA</span>
+      </div>
+    </div>
+
+    <div class="uptime-controls-bar">
+      <div class="severity-filter-tags" id="severityFilterTags" role="group" aria-label="Filter days and incidents by severity">
+        <button type="button" class="sev-tag-btn active" data-severity="all" aria-pressed="true">All Days (360)</button>
+        <button type="button" class="sev-tag-btn op" data-severity="operational" aria-pressed="false">● Operational</button>
+        <button type="button" class="sev-tag-btn deg" data-severity="degraded" aria-pressed="false">▲ Degraded</button>
+        <button type="button" class="sev-tag-btn out" data-severity="outage" aria-pressed="false">■ Major Outage</button>
+      </div>
+      <div class="uptime-legend-pills" aria-hidden="true">
+        <span class="leg-item"><i class="leg-dot op"></i> 100% Healthy</span>
+        <span class="leg-item"><i class="leg-dot deg"></i> Degraded Latency</span>
+        <span class="leg-item"><i class="leg-dot out"></i> Partial / Outage</span>
+      </div>
+    </div>
+
+    <!-- 4 Microservice 90-Day Bar Tracks -->
+    <div class="uptime-services-stack" id="uptimeServicesStack">
+      <!-- Populated dynamically by script.js -->
+    </div>
+
+    <!-- Interactive Inspected Day Details Card -->
+    <div class="uptime-day-inspector" id="uptimeDayInspector" aria-live="polite">
+      <div class="inspector-left">
+        <span class="inspector-badge op" id="inspStatusBadge">OPERATIONAL</span>
+        <strong id="inspDateService">Hover or click any of the 90 daily segments above to inspect latency &amp; incident details</strong>
+      </div>
+      <div class="inspector-metrics">
+        <span>P95 Latency: <strong id="inspLatency">28ms</strong></span>
+        <span>Uptime: <strong id="inspUptime">100.00%</strong></span>
+      </div>
+    </div>
+
+    <!-- Floating Hover Tooltip -->
+    <div class="uptime-floating-tooltip" id="uptimeFloatingTooltip" role="tooltip" hidden></div>
+
+    <!-- Incident Severity Matrix Table -->
+    <div class="incident-matrix-panel">
+      <div class="incident-matrix-head">
+        <h3>90-Day Incident Severity Matrix</h3>
+        <span class="matrix-count-label" id="incidentMatrixCount">Showing all recorded events</span>
+      </div>
+      <div class="incident-matrix-scroll">
+        <table class="incident-severity-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Service</th>
+              <th>Severity</th>
+              <th>Duration</th>
+              <th>P95 Latency</th>
+              <th>Root Cause Summary</th>
+            </tr>
+          </thead>
+          <tbody id="incidentMatrixBody">
+            <!-- Populated dynamically by script.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #439 ===== -->
+
   <section class="tco-calculator" id="tco-calculator" aria-labelledby="tco-title">
     <p class="tco-kicker">INFRASTRUCTURE PLANNING SANDBOX</p>
     <h2 id="tco-title">Compare three years of cloud costs</h2>

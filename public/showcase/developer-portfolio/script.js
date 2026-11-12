@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initArticleReader();
   initAvailabilityBadge();
   initGitGraph();
+  initContributionHeatmap();
 });
 
 // Availability badge: tooltip opens on hover, focus or click, and closes on
@@ -80,6 +81,7 @@ const EXECUTABLES = ['hello.sh'];
 
 const HELP_LINES = [
   ['help', 'show this list'],
+  ['neofetch', 'display hardware stats & live ASCII telemetry gauges'],
   ['skills', 'show technical skills'],
   ['projects', 'list portfolio project files'],
   ['contact', 'show demo contact details'],
@@ -93,6 +95,8 @@ const HELP_LINES = [
   ['play | game', 'start a 30-second typing challenge with local high scores'],
   ['clear', 'clear the screen']
 ];
+
+window.HELP_LINES = HELP_LINES;
 
 // Turn a path (relative to cwd parts) into a normalised array of segments.
 function resolvePath(cwdParts, input) {
@@ -175,6 +179,25 @@ function initTerminal() {
         screen.appendChild(row);
       });
     },
+    neofetch() {
+      const art = [
+        '       /\\          alex@kernel-box',
+        '      /  \\         ---------------',
+        '     /\\   \\        OS: Arch Linux x86_64',
+        '    /      \\       Host: Precision 7780 Kernel Rig',
+        '   /   ,,   \\      Kernel: 6.8.9-zen1-1-zen',
+        '  /   |  |  -\\     Uptime: 3 days, 14 hours, 28 mins',
+        ' /_-\'\'    \'\'-_\\    Shell: zsh 5.9 (x86_64-pc-linux-gnu)',
+        '                   WM: Hyprland (Wayland)',
+        '                   CPU: AMD Ryzen 9 7950X (32) @ 5.700GHz',
+        '                   GPU: NVIDIA GeForce RTX 4090 24GB',
+        '                   Memory: 18.4 GiB / 64.0 GiB (28%)',
+        '                   CPU Load: [=======>------------] 34%'
+      ];
+      art.forEach(l => line(l, 'vterm-neofetch-line'));
+    },
+    fetch() { commands.neofetch(); },
+    sysinfo() { commands.neofetch(); },
     skills() { lines(FS['skills.txt']); },
     projects() { lines(FS.projects['README.md']); printLs(FS.projects); },
     contact() { lines(FS['contact.txt']); },
@@ -788,7 +811,7 @@ function initResumeDownload() {
     try {
       await navigator.clipboard.writeText(jsonString);
       copyBtn.textContent = 'Copied!';
-    } catch (error) {
+    } catch {
       copyBtn.textContent = 'Copy unavailable';
     }
 
@@ -1542,3 +1565,469 @@ Cherry-picked onto ${head.branch}!`);
 }
 
 window.initGitGraph = initGitGraph;
+
+// ==========================================================================
+// Terminal Neofetch Hardware Stats & Live Gauges Widget Engine (Issue #441)
+// ==========================================================================
+
+function formatAsciiBar(percent, width = 20) {
+  const clamped = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+  const fillLen = Math.round((clamped / 100) * width);
+  if (fillLen <= 0) return `[${'-'.repeat(width)}]`;
+  if (fillLen >= width) return `[${'='.repeat(width)}]`;
+  return `[${'='.repeat(fillLen - 1)}>${'-'.repeat(width - fillLen)}]`;
+}
+
+function initNeofetchTelemetryWidget() {
+  const section = document.getElementById('neofetch-section');
+  if (!section) return null;
+
+  const uptimeEl = document.getElementById('neofetchUptime');
+  const stressBtn = document.getElementById('neofetchStressBtn');
+  const stressLabel = document.getElementById('stressBtnLabel');
+
+  const cpuVal = document.getElementById('cpuLoadVal');
+  const cpuAscii = document.getElementById('cpuAsciiBar');
+  const cpuFill = document.getElementById('cpuMeterFill');
+
+  const memVal = document.getElementById('memUsageVal');
+  const memAscii = document.getElementById('memAsciiBar');
+  const memFill = document.getElementById('memMeterFill');
+
+  const swapVal = document.getElementById('swapUsageVal');
+  const swapAscii = document.getElementById('swapAsciiBar');
+  const swapFill = document.getElementById('swapMeterFill');
+
+  const netVal = document.getElementById('netIoVal');
+  const netAscii = document.getElementById('netAsciiBar');
+  const netFill = document.getElementById('netMeterFill');
+
+  let stressActive = false;
+  const startTimestamp = Date.now() - (3 * 86400 + 14 * 3600 + 28 * 60 + 12) * 1000;
+
+  function update() {
+    const elapsedSeconds = Math.floor((Date.now() - startTimestamp) / 1000);
+    const days = Math.floor(elapsedSeconds / 86400);
+    const hours = Math.floor((elapsedSeconds % 86400) / 3600);
+    const mins = Math.floor((elapsedSeconds % 3600) / 60);
+    const secs = elapsedSeconds % 60;
+    if (uptimeEl) {
+      uptimeEl.textContent = `${days} days, ${hours} hours, ${mins} mins, ${secs}s`;
+    }
+
+    // Telemetry simulation
+    let cpuPercent;
+    let memPercent;
+    let swapPercent;
+    let netRx;
+    let netTx;
+    let netPercent;
+
+    if (stressActive) {
+      cpuPercent = Math.min(99, Math.floor(84 + Math.random() * 15));
+      memPercent = Math.min(95, Math.floor(78 + Math.random() * 10));
+      swapPercent = Math.min(45, Math.floor(18 + Math.random() * 8));
+      netRx = 38.5 + Math.random() * 14.0;
+      netTx = 22.0 + Math.random() * 8.5;
+      netPercent = Math.min(95, Math.floor((netRx / 60) * 100));
+    } else {
+      cpuPercent = Math.floor(24 + Math.random() * 18);
+      memPercent = Math.floor(27 + Math.random() * 3);
+      swapPercent = Math.floor(5 + Math.random() * 2);
+      netRx = 6.2 + Math.random() * 4.1;
+      netTx = 1.8 + Math.random() * 1.5;
+      netPercent = Math.min(60, Math.floor((netRx / 30) * 100));
+    }
+
+    if (cpuVal) cpuVal.textContent = `${cpuPercent}%`;
+    if (cpuAscii) cpuAscii.textContent = formatAsciiBar(cpuPercent, 20);
+    if (cpuFill) cpuFill.style.width = `${cpuPercent}%`;
+
+    const memGib = ((memPercent / 100) * 64).toFixed(1);
+    if (memVal) memVal.textContent = `${memGib} GiB / 64.0 GiB (${memPercent}%)`;
+    if (memAscii) memAscii.textContent = formatAsciiBar(memPercent, 20);
+    if (memFill) memFill.style.width = `${memPercent}%`;
+
+    const swapGib = ((swapPercent / 100) * 32).toFixed(1);
+    if (swapVal) swapVal.textContent = `${swapGib} GiB / 32.0 GiB (${swapPercent}%)`;
+    if (swapAscii) swapAscii.textContent = formatAsciiBar(swapPercent, 20);
+    if (swapFill) swapFill.style.width = `${swapPercent}%`;
+
+    if (netVal) netVal.textContent = `↓ ${netRx.toFixed(1)} MB/s  ↑ ${netTx.toFixed(1)} MB/s`;
+    if (netAscii) netAscii.textContent = formatAsciiBar(netPercent, 20);
+    if (netFill) netFill.style.width = `${netPercent}%`;
+  }
+
+  if (stressBtn) {
+    stressBtn.addEventListener('click', () => {
+      stressActive = !stressActive;
+      section.classList.toggle('stress-mode', stressActive);
+      if (stressLabel) stressLabel.textContent = stressActive ? 'Stop Stress' : 'Stress Test';
+      stressBtn.classList.toggle('active', stressActive);
+      update();
+    });
+  }
+
+  const ticker = setInterval(update, 1000);
+  update();
+
+  return { update, toggleStress: () => stressBtn && stressBtn.click(), ticker };
+}
+
+window.formatAsciiBar = formatAsciiBar;
+window.initNeofetchTelemetryWidget = initNeofetchTelemetryWidget;
+
+/* ==========================================================================
+   GitHub Contribution Activity Heatmap Logic (Issue #334)
+   ========================================================================== */
+
+function getIntensityLevel(count) {
+  if (!count || count <= 0) return 0;
+  if (count <= 3) return 1;
+  if (count <= 6) return 2;
+  if (count <= 9) return 3;
+  return 4;
+}
+
+function generateYearActivity(year) {
+  const startDay = new Date(year, 0, 1);
+  const dayOfWeekJan1 = startDay.getDay(); // 0 = Sunday
+  startDay.setDate(startDay.getDate() - dayOfWeekJan1);
+
+  const endDay = new Date(year, 11, 31);
+  const dayOfWeekDec31 = endDay.getDay();
+  endDay.setDate(endDay.getDate() + (6 - dayOfWeekDec31));
+
+  let totalContributions = 0;
+  let busiestCount = 0;
+  let busiestDateObj = null;
+  let longestStreak = 0;
+  let activeStreakTracker = 0;
+
+  const current = new Date(startDay.getTime());
+  const weeks = [];
+  let currentWeek = [];
+
+  const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  while (current <= endDay) {
+    const isCurrentYear = current.getFullYear() === year;
+    const y = current.getFullYear();
+    const m = String(current.getMonth() + 1).padStart(2, '0');
+    const d = String(current.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+    const dayOfWeek = current.getDay();
+
+    let count = 0;
+    let level = 0;
+    let details = '';
+
+    if (isCurrentYear) {
+      let hash = 0;
+      for (let i = 0; i < dateStr.length; i++) {
+        hash = (hash * 31 + dateStr.charCodeAt(i)) & 0xffffffff;
+      }
+      hash = Math.abs(hash);
+
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      const roll = hash % 100;
+      const activeThreshold = isWeekend ? 35 : 82;
+
+      if (roll <= activeThreshold) {
+        const countRoll = (hash >> 3) % 100;
+        if (countRoll < 55) {
+          count = 1 + (hash % 3);
+        } else if (countRoll < 80) {
+          count = 4 + (hash % 3);
+        } else if (countRoll < 94) {
+          count = 7 + (hash % 3);
+        } else {
+          count = 10 + (hash % 9);
+        }
+      }
+
+      level = getIntensityLevel(count);
+      totalContributions += count;
+
+      if (count > busiestCount) {
+        busiestCount = count;
+        busiestDateObj = new Date(current.getTime());
+      }
+
+      if (count > 0) {
+        activeStreakTracker++;
+        if (activeStreakTracker > longestStreak) {
+          longestStreak = activeStreakTracker;
+        }
+      } else {
+        activeStreakTracker = 0;
+      }
+
+      const repos = ['kernel-box/zero-copy', 'ebpf-guard/network-telemetry', 'wasm-mesh/router-core', 'linux-rust-driver'];
+      const repo = repos[hash % repos.length];
+      if (count === 0) {
+        details = 'No activity recorded';
+      } else if (count === 1) {
+        details = `1 commit to ${repo}`;
+      } else {
+        const prs = (hash % 3 === 0) ? Math.min(2, Math.floor(count / 3)) : 0;
+        const commits = count - prs;
+        if (prs > 0) {
+          details = `${commits} commit${commits !== 1 ? 's' : ''} to ${repo} • ${prs} pull request${prs !== 1 ? 's' : ''}`;
+        } else {
+          details = `${commits} commits to ${repo}`;
+        }
+      }
+    }
+
+    const cellData = {
+      date: dateStr,
+      dateObj: new Date(current.getTime()),
+      dayOfWeek,
+      dayName: DAY_NAMES[dayOfWeek],
+      monthName: MONTH_NAMES[current.getMonth()],
+      dayOfMonth: current.getDate(),
+      year: current.getFullYear(),
+      isCurrentYear,
+      count,
+      level,
+      details
+    };
+
+    currentWeek.push(cellData);
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return {
+    year,
+    weeks,
+    totalContributions,
+    longestStreak,
+    currentStreak: activeStreakTracker,
+    busiestCount,
+    busiestDateFormatted: busiestDateObj
+      ? `${MONTH_NAMES[busiestDateObj.getMonth()]} ${busiestDateObj.getDate()}, ${year}`
+      : 'N/A'
+  };
+}
+
+function initContributionHeatmap() {
+  const section = document.getElementById('contribution-heatmap');
+  if (!section) return;
+
+  const matrix = document.getElementById('heatmapMatrix');
+  const monthsRow = document.getElementById('heatmapMonthsRow');
+  const tooltip = document.getElementById('heatmapTooltip');
+  const tooltipTitle = document.getElementById('heatmapTooltipTitle');
+  const tooltipMeta = document.getElementById('heatmapTooltipMeta');
+  const selectedInfo = document.getElementById('heatmapSelectedInfo');
+  const liveText = document.getElementById('heatmapLiveText');
+
+  const metricTotal = document.getElementById('metricTotalCommits');
+  const metricYearSub = document.getElementById('metricYearSub');
+  const metricCurrentStreak = document.getElementById('metricCurrentStreak');
+  const metricLongestStreak = document.getElementById('metricLongestStreak');
+  const metricBusiestDay = document.getElementById('metricBusiestDay');
+  const metricBusiestDate = document.getElementById('metricBusiestDate');
+
+  const yearButtons = section.querySelectorAll('.heatmap-year-btn');
+  let selectedCell = null;
+  let currentYear = 2026;
+
+  function showTooltip(cell) {
+    if (!tooltip || !tooltipTitle || !tooltipMeta) return;
+
+    const count = parseInt(cell.getAttribute('data-count'), 10) || 0;
+    const dayName = cell.getAttribute('data-day') || '';
+    const monthName = cell.getAttribute('data-month') || '';
+    const dayNum = cell.getAttribute('data-day-num') || '';
+    const year = cell.getAttribute('data-year') || '';
+    const details = cell.getAttribute('data-details') || '';
+
+    const countStr = count === 0 ? 'No contributions' : `${count} contribution${count !== 1 ? 's' : ''}`;
+    tooltipTitle.innerHTML = `<strong>${countStr}</strong> on ${dayName}, ${monthName} ${dayNum}, ${year}`;
+    tooltipMeta.textContent = details;
+
+    tooltip.removeAttribute('hidden');
+    tooltip.setAttribute('aria-hidden', 'false');
+
+    const rect = cell.getBoundingClientRect();
+    const tipWidth = tooltip.offsetWidth;
+    const tipHeight = tooltip.offsetHeight;
+
+    let left = rect.left + rect.width / 2 - tipWidth / 2;
+    let top = rect.top - tipHeight - 8;
+
+    if (left < 10) left = 10;
+    if (left + tipWidth > window.innerWidth - 10) {
+      left = window.innerWidth - tipWidth - 10;
+    }
+
+    if (top < 10) {
+      top = rect.bottom + 8;
+      tooltip.classList.add('tooltip-bottom');
+    } else {
+      tooltip.classList.remove('tooltip-bottom');
+    }
+
+    tooltip.style.left = `${Math.round(left)}px`;
+    tooltip.style.top = `${Math.round(top)}px`;
+    tooltip.classList.add('visible');
+  }
+
+  function hideTooltip() {
+    if (!tooltip) return;
+    tooltip.classList.remove('visible');
+    tooltip.setAttribute('aria-hidden', 'true');
+  }
+
+  function selectCell(cell) {
+    if (selectedCell) {
+      selectedCell.classList.remove('selected');
+    }
+    selectedCell = cell;
+    cell.classList.add('selected');
+
+    if (!selectedInfo) return;
+    const count = parseInt(cell.getAttribute('data-count'), 10) || 0;
+    const dayName = cell.getAttribute('data-day') || '';
+    const monthName = cell.getAttribute('data-month') || '';
+    const dayNum = cell.getAttribute('data-day-num') || '';
+    const year = cell.getAttribute('data-year') || '';
+    const details = cell.getAttribute('data-details') || '';
+
+    const countStr = count === 0 ? 'No contributions' : `${count} contribution${count !== 1 ? 's' : ''}`;
+    selectedInfo.innerHTML = `<span class="selected-pin">📌</span> <strong>${dayName}, ${monthName} ${dayNum}, ${year}:</strong> ${countStr}${details ? ` &bull; ${details}` : ''}`;
+  }
+
+  function renderHeatmap(year) {
+    currentYear = year;
+    const data = generateYearActivity(year);
+
+    if (metricTotal) metricTotal.textContent = data.totalContributions.toLocaleString();
+    if (metricYearSub) metricYearSub.textContent = `in ${year}`;
+    if (metricCurrentStreak) metricCurrentStreak.textContent = `${data.currentStreak} day${data.currentStreak !== 1 ? 's' : ''}`;
+    if (metricLongestStreak) metricLongestStreak.textContent = `${data.longestStreak} day${data.longestStreak !== 1 ? 's' : ''}`;
+    if (metricBusiestDay) metricBusiestDay.textContent = `${data.busiestCount} commits`;
+    if (metricBusiestDate) metricBusiestDate.textContent = data.busiestDateFormatted;
+    if (liveText) liveText.textContent = `${data.totalContributions.toLocaleString()} contributions in ${year}`;
+
+    if (selectedInfo) {
+      selectedInfo.textContent = 'Hover or focus on any date square to inspect contribution details.';
+    }
+    selectedCell = null;
+    hideTooltip();
+
+    // Render Month labels
+    if (monthsRow) {
+      monthsRow.innerHTML = '';
+      const renderedMonths = new Set();
+      data.weeks.forEach((week, weekIdx) => {
+        for (let d = 0; d < week.length; d++) {
+          const day = week[d];
+          if (day.isCurrentYear && day.dayOfMonth <= 7 && !renderedMonths.has(day.monthName)) {
+            renderedMonths.add(day.monthName);
+            const label = document.createElement('span');
+            label.className = 'heatmap-month-label';
+            label.style.left = `${weekIdx * 15}px`;
+            label.textContent = day.monthName;
+            monthsRow.appendChild(label);
+            break;
+          }
+        }
+      });
+    }
+
+    // Render 52-53 Week Columns of 7 Day Cells
+    if (matrix) {
+      matrix.innerHTML = '';
+      data.weeks.forEach(week => {
+        const weekCol = document.createElement('div');
+        weekCol.className = 'heatmap-week-col';
+
+        week.forEach(day => {
+          if (!day.isCurrentYear) {
+            const emptyCell = document.createElement('span');
+            emptyCell.className = 'heatmap-cell heatmap-cell-empty';
+            emptyCell.setAttribute('aria-hidden', 'true');
+            weekCol.appendChild(emptyCell);
+          } else {
+            const cell = document.createElement('button');
+            cell.type = 'button';
+            cell.className = `heatmap-cell level-${day.level}`;
+            cell.setAttribute('data-date', day.date);
+            cell.setAttribute('data-count', String(day.count));
+            cell.setAttribute('data-level', String(day.level));
+            cell.setAttribute('data-day', day.dayName);
+            cell.setAttribute('data-month', day.monthName);
+            cell.setAttribute('data-day-num', String(day.dayOfMonth));
+            cell.setAttribute('data-year', String(day.year));
+            cell.setAttribute('data-details', day.details);
+            cell.setAttribute('role', 'gridcell');
+
+            const countText = day.count === 0 ? 'No' : String(day.count);
+            cell.setAttribute('aria-label', `${countText} contribution${day.count !== 1 ? 's' : ''} on ${day.dayName}, ${day.monthName} ${day.dayOfMonth}, ${day.year}`);
+
+            cell.addEventListener('mouseenter', () => showTooltip(cell));
+            cell.addEventListener('mouseleave', hideTooltip);
+            cell.addEventListener('focus', () => showTooltip(cell));
+            cell.addEventListener('blur', hideTooltip);
+            cell.addEventListener('click', () => selectCell(cell));
+
+            weekCol.appendChild(cell);
+          }
+        });
+
+        matrix.appendChild(weekCol);
+      });
+    }
+  }
+
+  // Set up year selector click handlers
+  yearButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetYear = parseInt(btn.getAttribute('data-year'), 10);
+      if (isNaN(targetYear) || targetYear === currentYear) return;
+
+      yearButtons.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+
+      renderHeatmap(targetYear);
+    });
+  });
+
+  // Global listeners to hide tooltip on scroll or Escape key
+  window.addEventListener('scroll', hideTooltip, { passive: true });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideTooltip();
+  });
+
+  // Initial render with 2026
+  renderHeatmap(2026);
+}
+
+window.getIntensityLevel = getIntensityLevel;
+window.generateYearActivity = generateYearActivity;
+window.initContributionHeatmap = initContributionHeatmap;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initContributionHeatmap);
+} else {
+  initContributionHeatmap();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNeofetchTelemetryWidget);
+} else {
+  initNeofetchTelemetryWidget();
+}

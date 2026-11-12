@@ -55,7 +55,7 @@
         <div class="tasting-meta-bar">
           <div class="meta-pill"><span class="meta-icon">⏳</span> <span>Experience: 2.5 Hours</span></div>
           <div class="meta-pill price-pill"><span class="meta-icon">💶</span> <span>€185 per guest</span></div>
-          <div class="meta-pill gold-pill"><span class="meta-icon">🍷</span> <span>Prestige Cru Wine Pairing (+€95)</span></div>
+          <button type="button" class="meta-pill gold-pill btn-open-sommelier" onclick="openWineRadarModal(1)"><span class="meta-icon">🍷</span> <span>Sommelier Flavor Radar Guide</span></button>
           <div class="meta-pill"><span class="meta-icon">👨‍🍳</span> <span>Table du Chef Seating</span></div>
         </div>
       </div>
@@ -721,6 +721,64 @@
     </div>
   </div>
 
+
+  <!-- Sommelier Wine Pairing & Flavor Radar Modal (Issue #445) -->
+  <div class="sommelier-modal-backdrop" id="sommelierModalBackdrop" hidden>
+    <div class="sommelier-drawer" id="sommelierDrawer" role="dialog" aria-modal="true" aria-labelledby="sommelierDrawerTitle">
+      <div class="sommelier-drawer-header">
+        <div class="drawer-title-group">
+          <span class="drawer-kicker">CAVE &amp; CELLIER PRIVÉ • SOMMELIER ÉLÉONORE MOREAU</span>
+          <h3 id="sommelierDrawerTitle">Sommelier Wine &amp; Flavor Radar Guide</h3>
+        </div>
+        <button type="button" class="drawer-close-btn" id="closeSommelierDrawer" aria-label="Close sommelier guide">&times;</button>
+      </div>
+
+      <!-- Course / Wine Picker Tabs -->
+      <div class="sommelier-course-tabs" id="sommelierCourseTabs" role="tablist" aria-label="Tasting courses">
+        <!-- Tabs for Course I to VII injected dynamically -->
+      </div>
+
+      <div class="sommelier-drawer-body">
+        <!-- Left Column: Wine Profile & Pairing Notes -->
+        <div class="sommelier-wine-card">
+          <div class="wine-hero-badge" id="wineTypeBadge">PRESTIGE CRU</div>
+          <h4 class="wine-title" id="wineTitle">NV Delamotte Blanc de Blancs Brut Champagne</h4>
+          <div class="wine-region-tag" id="wineRegionTag">AOC Le Mesnil-sur-Oger, Champagne</div>
+          <div class="wine-dish-match">
+            <span class="dish-match-lbl">Paired Tasting Course:</span>
+            <strong id="wineMatchedCourse">Course I: Brittany Gillardeau Oyster &amp; Champagne Granité</strong>
+          </div>
+          <p class="wine-sommelier-notes" id="wineSommelierNotes">
+            Chalky minerality, white flowers, brioche and razor-sharp acidity that electrifies the oyster brine.
+          </p>
+          <div class="wine-specs-pills">
+            <div class="spec-pill"><span>Serving Temp:</span> <strong id="wineServingTemp">6°C</strong></div>
+            <div class="spec-pill"><span>Varietal:</span> <strong id="wineVarietal">100% Chardonnay</strong></div>
+            <div class="spec-pill"><span>Terroir:</span> <strong id="wineTerroir">Côte des Blancs Chalk</strong></div>
+          </div>
+        </div>
+
+        <!-- Right Column: SVG Flavor Radar Wheel -->
+        <div class="sommelier-radar-box">
+          <div class="radar-box-header">
+            <span class="radar-box-title">SENSORY FLAVOR RADAR</span>
+            <span class="radar-box-subtitle">5-DIMENSIONAL SOMMELIER PROFILE</span>
+          </div>
+          <div class="radar-svg-container">
+            <svg id="wineFlavorRadarSvg" viewBox="0 0 340 320" role="img" aria-label="5-Axis Wine Flavor Radar Chart">
+              <g id="wineRadarGrid"></g>
+              <polygon id="wineRadarPolygon" class="wine-radar-poly" points=""></polygon>
+              <g id="wineRadarPoints"></g>
+              <g id="wineRadarLabels"></g>
+            </svg>
+          </div>
+          <div class="radar-metrics-chips" id="radarMetricsChips">
+            <!-- Chips showing Tannin, Acidity, Body, Sweetness, Fruit -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
   <script type="module" src="floor-plan.js"></script>

@@ -970,6 +970,433 @@ if (document.readyState === 'loading') {
   initOpenApiExplorer();
 }
 
+/* ==========================================================
+   Full-Text Client-Side Documentation Search Engine (Issue #337)
+   ========================================================== */
+
+class DocsSearchEngine {
+  constructor() {
+    this.index = [];
+  }
+
+  escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  escapeRegExp(str) {
+    return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  buildIndex() {
+    this.index = [];
+    const sections = document.querySelectorAll ? document.querySelectorAll('.doc-section') : [];
+    sections.forEach((sec) => {
+      const secId = sec.id || '';
+      // Find section title from h1 or h2
+      const mainHeading = sec.querySelector ? sec.querySelector('h1, h2') : null;
+      const sectionTitle = mainHeading ? mainHeading.textContent.replace(/#/g, '').trim() : secId;
+
+      // 1. Index Headings (h1, h2, h3, h4)
+      if (sec.querySelectorAll) {
+        sec.querySelectorAll('h1, h2, h3, h4').forEach((h) => {
+          const text = h.textContent.replace(/#/g, '').trim();
+          if (!text) return;
+          this.index.push({
+            type: 'heading',
+            sectionId: secId,
+            sectionTitle,
+            title: text,
+            content: text,
+            anchorId: h.id || secId,
+            tag: (h.tagName || 'h2').toLowerCase()
+          });
+        });
+
+        // 2. Index Paragraphs & Callouts
+        sec.querySelectorAll('p, .callout-body').forEach((p) => {
+          const text = p.textContent.trim();
+          if (text.length < 15) return;
+          this.index.push({
+            type: 'text',
+            sectionId: secId,
+            sectionTitle,
+            title: sectionTitle,
+            content: text,
+            anchorId: secId,
+            tag: 'p'
+          });
+        });
+
+        // 3. Index Code Snippets
+        sec.querySelectorAll('pre code, pre.code-block').forEach((codeBlock) => {
+          const text = codeBlock.textContent.trim();
+          if (text.length < 10) return;
+          this.index.push({
+            type: 'code',
+            sectionId: secId,
+            sectionTitle,
+            title: `${sectionTitle} (Code)`,
+            content: text,
+            anchorId: secId,
+            tag: 'code'
+          });
+        });
+      }
+    });
+
+    return this.index;
+  }
+
+  search(rawQuery, maxResults = 12) {
+    const query = String(rawQuery || '').trim().toLowerCase();
+    if (!query) return [];
+
+    const queryTokens = query.split(/\s+/).filter(Boolean);
+    const results = [];
+
+    for (const item of this.index) {
+      const titleLower = item.title.toLowerCase();
+      const contentLower = item.content.toLowerCase();
+      const sectionLower = item.sectionTitle.toLowerCase();
+
+      let score = 0;
+      const matchedIndices = [];
+
+      // Exact title match
+      if (titleLower === query) {
+        score += 150;
+      } else if (titleLower.startsWith(query)) {
+        score += 90;
+      } else if (titleLower.includes(query)) {
+        score += 60;
+      }
+
+      // Exact content substring match
+      const fullContentIndex = contentLower.indexOf(query);
+      if (fullContentIndex !== -1) {
+        score += 40;
+        matchedIndices.push(fullContentIndex);
+      }
+
+      // Check tokens
+      let tokenMatches = 0;
+      for (const token of queryTokens) {
+        let tokenFound = false;
+        if (titleLower.includes(token)) {
+          score += 25;
+          tokenFound = true;
+        }
+        if (sectionLower.includes(token)) {
+          score += 15;
+          tokenFound = true;
+        }
+        const idx = contentLower.indexOf(token);
+        if (idx !== -1) {
+          score += 15;
+          tokenFound = true;
+          matchedIndices.push(idx);
+        }
+        if (tokenFound) tokenMatches++;
+      }
+
+      // All tokens matched bonus
+      if (tokenMatches > 0 && tokenMatches === queryTokens.length) {
+        score += 30;
+      }
+
+      // Fuzzy subsequence test if no score yet and query length >= 3
+      if (score === 0 && query.length >= 3) {
+        if (this.fuzzyMatch(query, titleLower)) {
+          score += 20;
+        } else if (this.fuzzyMatch(query, sectionLower)) {
+          score += 15;
+        }
+      }
+
+      // Type weighting (only applied when an actual match occurred)
+      if (score > 0) {
+        if (item.type === 'heading') score += 15;
+        if (item.type === 'code') score += 5;
+
+        results.push({
+          item,
+          score,
+          matchedIndex: matchedIndices.length > 0 ? Math.min(...matchedIndices) : -1
+        });
+      }
+    }
+
+    results.sort((a, b) => b.score - a.score);
+
+    return results.slice(0, maxResults).map(({ item, score, matchedIndex }) => ({
+      ...item,
+      score,
+      highlightedTitle: this.highlightMatches(item.title, queryTokens),
+      snippet: this.generateSnippet(item.content, matchedIndex, queryTokens),
+      isCode: item.type === 'code'
+    }));
+  }
+
+  fuzzyMatch(needle, haystack) {
+    let nIdx = 0;
+    let hIdx = 0;
+    while (nIdx < needle.length && hIdx < haystack.length) {
+      if (needle[nIdx] === haystack[hIdx]) {
+        nIdx++;
+      }
+      hIdx++;
+    }
+    return nIdx === needle.length;
+  }
+
+  generateSnippet(content, matchIndex, tokens, snippetLength = 140) {
+    if (!content) return '';
+    let start = 0;
+    if (matchIndex > 40) {
+      start = Math.max(0, matchIndex - 35);
+    }
+    const end = Math.min(content.length, start + snippetLength);
+    let snippet = content.substring(start, end).replace(/\s+/g, ' ');
+    if (start > 0) snippet = '...' + snippet;
+    if (end < content.length) snippet = snippet + '...';
+
+    return this.highlightMatches(snippet, tokens);
+  }
+
+  highlightMatches(text, tokens) {
+    if (!tokens || tokens.length === 0) return this.escapeHtml(text);
+
+    const pattern = tokens
+      .filter(t => t.length > 0)
+      .map(t => this.escapeRegExp(t))
+      .join('|');
+
+    if (!pattern) return this.escapeHtml(text);
+
+    const regex = new RegExp(`(${pattern})`, 'gi');
+    const escaped = this.escapeHtml(text);
+    return escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
+  }
+}
+
+function initDocsSearch() {
+  const engine = new DocsSearchEngine();
+  engine.buildIndex();
+
+  const backdrop = document.getElementById('searchModalBackdrop');
+  const input = document.getElementById('docsSearchInput');
+  const resultsContainer = document.getElementById('docsSearchResults');
+  const countLabel = document.getElementById('searchResultsCount');
+  const closeBtn = document.getElementById('searchModalClose');
+  const triggerBtn = document.getElementById('docsSearchTrigger');
+
+  let selectedIndex = 0;
+  let currentResults = [];
+
+  function openSearch() {
+    if (!backdrop || !input) return;
+    backdrop.hidden = false;
+    input.value = '';
+    selectedIndex = 0;
+    currentResults = [];
+    renderResults([]);
+    input.focus();
+    if (document.body && document.body.style) {
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeSearch() {
+    if (!backdrop) return;
+    backdrop.hidden = true;
+    if (document.body && document.body.style) {
+      document.body.style.overflow = '';
+    }
+    if (triggerBtn && typeof triggerBtn.focus === 'function') {
+      triggerBtn.focus();
+    }
+  }
+
+  function navigateTo(anchorId) {
+    closeSearch();
+    if (!anchorId) return;
+    const target = document.getElementById(anchorId) || (document.querySelector ? document.querySelector(`[id="${anchorId}"]`) : null);
+    if (target) {
+      if (typeof target.scrollIntoView === 'function') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      if (target.classList) {
+        target.classList.add('search-target-highlight');
+      }
+      if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+        window.history.pushState(null, '', `#${anchorId}`);
+      }
+      setTimeout(() => {
+        if (target.classList) {
+          target.classList.remove('search-target-highlight');
+        }
+      }, 2500);
+    }
+  }
+
+  function renderResults(results) {
+    currentResults = results;
+    if (!resultsContainer || !countLabel) return;
+
+    if (!input.value.trim()) {
+      countLabel.textContent = 'Type to search documentation';
+      resultsContainer.innerHTML = `
+        <div class="search-empty-state">
+          <div class="search-empty-icon">⚡</div>
+          <div class="search-empty-title">Instant Full-Text Search</div>
+          <p>Search across guides, API endpoints, error specs, and code blocks.</p>
+        </div>
+      `;
+      return;
+    }
+
+    if (results.length === 0) {
+      countLabel.textContent = '0 results';
+      resultsContainer.innerHTML = `
+        <div class="search-empty-state">
+          <div class="search-empty-icon">🔍</div>
+          <div class="search-empty-title">No matching documentation</div>
+          <p>No results found for "${engine.escapeHtml(input.value)}". Try searching for keywords like "stream", "agent", "rate", or "token".</p>
+        </div>
+      `;
+      return;
+    }
+
+    countLabel.textContent = `${results.length} result${results.length > 1 ? 's' : ''}`;
+    resultsContainer.innerHTML = results.map((res, idx) => `
+      <div
+        class="search-result-item ${idx === selectedIndex ? 'selected' : ''}"
+        role="option"
+        id="search-res-${idx}"
+        aria-selected="${idx === selectedIndex}"
+        data-anchor="${engine.escapeHtml(res.anchorId)}"
+        data-index="${idx}"
+      >
+        <div class="search-result-header">
+          <div class="search-result-title">${res.highlightedTitle}</div>
+          <span class="search-breadcrumb-chip">${engine.escapeHtml(res.sectionTitle)}</span>
+        </div>
+        <div class="search-result-snippet ${res.isCode ? 'search-result-code' : ''}">
+          ${res.snippet}
+        </div>
+      </div>
+    `).join('');
+
+    // Attach click listeners to result items
+    resultsContainer.querySelectorAll('.search-result-item').forEach((item) => {
+      item.addEventListener('click', () => {
+        const anchor = item.getAttribute('data-anchor');
+        navigateTo(anchor);
+      });
+      item.addEventListener('mouseenter', () => {
+        const idx = parseInt(item.getAttribute('data-index'), 10);
+        if (!isNaN(idx)) {
+          selectedIndex = idx;
+          updateSelectedVisual();
+        }
+      });
+    });
+  }
+
+  function updateSelectedVisual() {
+    if (!resultsContainer) return;
+    const items = resultsContainer.querySelectorAll('.search-result-item');
+    items.forEach((item, idx) => {
+      const isSel = idx === selectedIndex;
+      item.classList.toggle('selected', isSel);
+      item.setAttribute('aria-selected', String(isSel));
+      if (isSel && typeof item.scrollIntoView === 'function') {
+        item.scrollIntoView({ block: 'nearest' });
+      }
+    });
+  }
+
+  if (input) {
+    input.addEventListener('input', () => {
+      const q = input.value.trim();
+      selectedIndex = 0;
+      const res = engine.search(q);
+      renderResults(res);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (currentResults.length > 0) {
+          selectedIndex = (selectedIndex + 1) % currentResults.length;
+          updateSelectedVisual();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentResults.length > 0) {
+          selectedIndex = (selectedIndex - 1 + currentResults.length) % currentResults.length;
+          updateSelectedVisual();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (currentResults.length > 0 && currentResults[selectedIndex]) {
+          navigateTo(currentResults[selectedIndex].anchorId);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeSearch();
+      }
+    });
+  }
+
+  if (triggerBtn) {
+    triggerBtn.addEventListener('click', openSearch);
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeSearch);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) closeSearch();
+    });
+  }
+
+  // Global keyboard shortcut: Cmd+K / Ctrl+K & Escape
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (backdrop && !backdrop.hidden) {
+        closeSearch();
+      } else {
+        openSearch();
+      }
+    } else if (e.key === 'Escape' && backdrop && !backdrop.hidden) {
+      e.preventDefault();
+      closeSearch();
+    }
+  });
+
+  return { engine, openSearch, closeSearch, navigateTo };
+}
+
+if (typeof window !== 'undefined') {
+  window.DocsSearchEngine = DocsSearchEngine;
+  window.initDocsSearch = initDocsSearch;
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDocsSearch);
+} else {
+  initDocsSearch();
+}
+
 // ==========================================================================
 // Token Bucket Algorithm & Interactive 429 Throttle Simulator (Issue #443)
 // ==========================================================================

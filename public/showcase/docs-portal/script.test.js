@@ -202,3 +202,127 @@ test('injects copy code button into pre blocks, copies snippet, and shows checkm
   assert.equal(copyBtn.classList.contains('copied'), false);
   assert.equal(toast.classList.visible, false);
 });
+
+test('DocsSearchEngine correctly builds index and executes full-text search with highlighting and fuzzy matching', async () => {
+  const source = await readFile(new URL('./script.js', import.meta.url), 'utf8');
+  const listeners = {};
+  const mockSections = [
+    {
+      id: 'agents',
+      querySelector(sel) {
+        if (sel === 'h1, h2') return { textContent: 'Agent Dispatcher API' };
+        return null;
+      },
+      querySelectorAll(sel) {
+        if (sel === 'h1, h2, h3, h4') {
+          return [
+            { id: 'agents-dispatch', tagName: 'H2', textContent: 'Agent Dispatcher API' },
+            { id: 'agents-orchestrator', tagName: 'H3', textContent: 'Multi-Agent Orchestrator Node' }
+          ];
+        }
+        if (sel === 'p, .callout-body') {
+          return [
+            { textContent: 'Interact with high-throughput vector RAG pipelines and coordinate multi-agent worker nodes.' }
+          ];
+        }
+        if (sel === 'pre code, pre.code-block') {
+          return [
+            { textContent: 'curl -X POST https://api.prisma.io/v1/agents/dispatch -H "Authorization: Bearer token"' }
+          ];
+        }
+        return [];
+      }
+    },
+    {
+      id: 'streaming',
+      querySelector(sel) {
+        if (sel === 'h1, h2') return { textContent: 'SSE Event Stream' };
+        return null;
+      },
+      querySelectorAll(sel) {
+        if (sel === 'h1, h2, h3, h4') {
+          return [
+            { id: 'streaming-sse', tagName: 'H2', textContent: 'SSE Event Stream' }
+          ];
+        }
+        if (sel === 'p, .callout-body') {
+          return [
+            { textContent: 'Real-time server-sent events for streaming token responses with zero latency.' }
+          ];
+        }
+        if (sel === 'pre code, pre.code-block') {
+          return [];
+        }
+        return [];
+      }
+    }
+  ];
+
+  const document = {
+    addEventListener: (name, cb) => { listeners[name] = cb; },
+    readyState: 'complete',
+    body: { appendChild() {}, style: {} },
+    getElementById: () => null,
+    querySelector: () => null,
+    querySelectorAll: (sel) => {
+      if (sel === '.doc-section') return mockSections;
+      return [];
+    },
+    createElement: () => ({
+      setAttribute() {},
+      classList: { add() {}, remove() {} },
+      addEventListener() {}
+    })
+  };
+
+  const window = {
+    addEventListener() {},
+    location: { origin: 'https://docs.example', pathname: '/api', hash: '' },
+    history: { pushState() {} }
+  };
+
+  const ctx = {
+    document,
+    window,
+    console,
+    setTimeout() {},
+    clearTimeout() {}
+  };
+
+  vm.runInNewContext(source, ctx);
+
+  const DocsSearchEngine = ctx.window.DocsSearchEngine;
+  assert.ok(DocsSearchEngine, 'DocsSearchEngine should be attached to window');
+
+  const engine = new DocsSearchEngine();
+  const index = engine.buildIndex();
+
+  assert.ok(index.length >= 4, 'index should contain headings, paragraphs, and code blocks');
+
+  // Exact heading search
+  const agentResults = engine.search('Agent Dispatcher');
+  assert.ok(agentResults.length > 0, 'should return results for Agent Dispatcher');
+  assert.equal(agentResults[0].sectionId, 'agents');
+  assert.ok(agentResults[0].highlightedTitle.includes('<mark class="search-highlight">Agent</mark>'));
+
+  // Content token search
+  const ragResults = engine.search('vector RAG');
+  assert.ok(ragResults.length > 0, 'should match paragraph content containing vector RAG');
+  assert.ok(ragResults[0].snippet.includes('<mark class="search-highlight">vector</mark>'));
+
+  // Code snippet search
+  const codeResults = engine.search('Authorization Bearer');
+  assert.ok(codeResults.length > 0, 'should match code blocks');
+  assert.equal(codeResults[0].type, 'code');
+
+  // Fuzzy subsequence search
+  const fuzzyResults = engine.search('agtdisp');
+  assert.ok(fuzzyResults.length > 0, 'fuzzy subsequence agtdisp should match Agent Dispatcher');
+
+  // Empty search should return empty array
+  assert.equal(engine.search('').length, 0);
+  assert.equal(engine.search('   ').length, 0);
+
+  // Non-matching search should return empty array
+  assert.equal(engine.search('completelyunrelatedqueryxyz123').length, 0);
+});

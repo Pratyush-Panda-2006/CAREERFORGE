@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAwardsShowcase();
   initCaseStudyDrawer();
   initEstimator();
+  initInteractiveScopeEstimator();
   initReviewModal();
   initFaqAccordion();
 });
@@ -1753,3 +1754,241 @@ function initAwardsShowcase() {
 window.AWARDS_DATA = AWARDS_DATA;
 window.initAwardsShowcase = initAwardsShowcase;
 window.CASE_STUDIES = CASE_STUDIES;
+
+/* ===== BEGIN Issue #435: Interactive Project Scope & Budget Estimator ===== */
+function initInteractiveScopeEstimator() {
+  const section = document.getElementById('interactive-project-estimator');
+  if (!section) return;
+
+  const SERVICES = {
+    'brand-identity': { id: 'brand-identity', label: 'Brand Identity', icon: '🎨', cost: 5500, baseWeeks: 2.5, milestone: 'Discovery, Identity System & Guidelines' },
+    'web-dev': { id: 'web-dev', label: 'Web Development', icon: '⚡', cost: 14000, baseWeeks: 5.0, milestone: 'Full-Stack Architecture & Core Build' },
+    '3d-motion': { id: '3d-motion', label: '3D Motion', icon: '🌀', cost: 6500, baseWeeks: 2.5, milestone: 'WebGL Shaders & Interactive Motion Choreography' },
+    'design-systems': { id: 'design-systems', label: 'Design Systems', icon: '🧩', cost: 7500, baseWeeks: 3.0, milestone: 'Tokenized Component Library & Figma Sync' },
+    seo: { id: 'seo', label: 'SEO', icon: '📈', cost: 3200, baseWeeks: 1.5, milestone: 'Core Web Vitals, Schema & Launch Optimization' }
+  };
+
+  const COMPLEXITY = {
+    mvp: { label: 'Startup MVP', mult: 0.85 },
+    scaleup: { label: 'Scaleup Standard', mult: 1.0 },
+    enterprise: { label: 'Flagship Enterprise', mult: 1.45 }
+  };
+
+  const scopeState = {
+    selected: new Set(['brand-identity', 'web-dev', 'design-systems']),
+    complexity: 'scaleup',
+    targetWeeks: 10
+  };
+
+  const chips = Array.from(section.querySelectorAll('.deliverable-chip'));
+  const compButtons = Array.from(section.querySelectorAll('.complexity-chip'));
+  const timelineSlider = document.getElementById('scopeTimelineSlider');
+  const resetBtn = document.getElementById('scopeResetBtn');
+  const lockBtn = document.getElementById('scopeLockEstimateBtn');
+
+  function formatUsd(val) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+  }
+
+  function renderScopeEstimate() {
+    const activeServices = Object.values(SERVICES).filter((s) => scopeState.selected.has(s.id));
+    const comp = COMPLEXITY[scopeState.complexity] || COMPLEXITY.scaleup;
+    const baseCost = activeServices.reduce((sum, s) => sum + s.cost, 0);
+    const recommendedWeeks = Math.max(4, Math.round(activeServices.reduce((sum, s) => sum + s.baseWeeks, 0) * (comp.mult >= 1.4 ? 1.15 : 1)));
+    const targetWeeks = scopeState.targetWeeks;
+
+    // Compression multiplier when timeline is squeezed below recommended sprint length
+    let paceMultiplier = 1.0;
+    let paceBadge = 'Standard Pace';
+    let paceNote = 'Balanced delivery pace — optimal squad velocity with zero rush surcharge.';
+    if (activeServices.length > 0 && targetWeeks < recommendedWeeks) {
+      const compression = Math.min(0.45, (recommendedWeeks - targetWeeks) * 0.08);
+      paceMultiplier = 1 + compression;
+      paceBadge = `+${Math.round(compression * 100)}% Sprint Boost`;
+      paceNote = `Parallel multi-pod sprint active (${targetWeeks} wks vs ${recommendedWeeks} wks recommended). Includes ${Math.round(compression * 100)}% acceleration capacity.`;
+    } else if (targetWeeks >= recommendedWeeks + 4) {
+      paceMultiplier = 0.94;
+      paceBadge = '6% Phased Savings';
+      paceNote = 'Extended multi-milestone cadence — unlocks 6% retainer efficiency discount.';
+    }
+
+    const totalBase = Math.round(baseCost * comp.mult * paceMultiplier);
+    const budgetLow = Math.round((totalBase * 0.9) / 100) * 100;
+    const budgetHigh = Math.round((totalBase * 1.15) / 100) * 100;
+    const weeklyBurn = targetWeeks > 0 ? Math.round(totalBase / targetWeeks) : 0;
+
+    // Update control labels
+    const countPill = document.getElementById('scopeServiceCount');
+    if (countPill) countPill.textContent = `${activeServices.length} selected`;
+
+    const compPill = document.getElementById('scopeComplexityMultiplier');
+    if (compPill) compPill.textContent = `${comp.mult}x · ${comp.label}`;
+
+    const timelineValEl = document.getElementById('scopeTimelineValue');
+    if (timelineValEl) timelineValEl.textContent = `${targetWeeks} Weeks`;
+
+    const paceNoteEl = document.getElementById('scopePaceNote');
+    if (paceNoteEl) paceNoteEl.textContent = activeServices.length ? paceNote : 'Toggle one or more deliverable chips above to generate an estimate.';
+
+    // Summary Card KPIs
+    const rangeEl = document.getElementById('scopeBudgetRange');
+    if (rangeEl) rangeEl.textContent = activeServices.length ? `${formatUsd(budgetLow)} – ${formatUsd(budgetHigh)}` : '$0 – $0';
+
+    const velEl = document.getElementById('scopeVelocityBadge');
+    if (velEl) velEl.textContent = `${targetWeeks} Wk Target`;
+
+    const burnEl = document.getElementById('scopeBurnBadge');
+    if (burnEl) burnEl.textContent = `~${formatUsd(weeklyBurn)} / wk`;
+
+    const sprintEl = document.getElementById('scopeSprintModeBadge');
+    if (sprintEl) sprintEl.textContent = paceBadge;
+
+    const totalMsEl = document.getElementById('scopeTotalMilestonesWeeks');
+    if (totalMsEl) totalMsEl.textContent = `Weeks 1–${targetWeeks}`;
+
+    // Selected Chips Preview
+    const previewEl = document.getElementById('scopeSelectedChipsPreview');
+    if (previewEl) {
+      previewEl.innerHTML = activeServices.length
+        ? activeServices.map((s) => `<span class="summary-chip-tag">${s.icon} ${s.label}</span>`).join('')
+        : '<span class="summary-chip-tag">No deliverables selected</span>';
+    }
+
+    // Dynamic Timeline Milestones
+    const milestonesEl = document.getElementById('scopeMilestonesList');
+    if (milestonesEl) {
+      if (activeServices.length === 0) {
+        milestonesEl.innerHTML = '<li class="milestone-item"><div><strong>Awaiting Deliverable Selection</strong><small>Select services on the left to map project milestones.</small></div><span class="milestone-wk-badge">—</span></li>';
+      } else {
+        const w1End = Math.max(1, Math.round(targetWeeks * 0.2));
+        const w2End = Math.max(w1End + 1, Math.round(targetWeeks * 0.48));
+        const w3End = Math.max(w2End + 1, Math.round(targetWeeks * 0.82));
+
+        const phases = [
+          {
+            title: 'Phase 1 · Discovery & Architecture',
+            detail: activeServices.some((s) => s.id === 'brand-identity')
+              ? 'Brand positioning, moodboards & technical scoping'
+              : 'Requirements mapping, UX wireframes & sprint plan',
+            weeks: `Wk 1–${w1End}`
+          },
+          {
+            title: 'Phase 2 · Visual Systems & Prototyping',
+            detail: activeServices.some((s) => s.id === 'design-systems')
+              ? 'Component token library, interactive prototypes & QA'
+              : 'High-fidelity art direction & responsive layouts',
+            weeks: `Wk ${w1End + 1}–${w2End}`
+          },
+          {
+            title: 'Phase 3 · Core Engineering & Motion',
+            detail: activeServices
+              .filter((s) => s.id === 'web-dev' || s.id === '3d-motion')
+              .map((s) => s.label)
+              .join(' + ') || 'Frontend polish & CMS integration',
+            weeks: `Wk ${w2End + 1}–${w3End}`
+          },
+          {
+            title: 'Phase 4 · Optimization, QA & Launch',
+            detail: activeServices.some((s) => s.id === 'seo')
+              ? 'Technical SEO audit, Lighthouse 99+ tuning & launch'
+              : 'Cross-browser verification, staging sign-off & deploy',
+            weeks: `Wk ${Math.min(targetWeeks, w3End + 1)}–${targetWeeks}`
+          }
+        ];
+
+        milestonesEl.innerHTML = phases
+          .map(
+            (p) => `
+            <li class="milestone-item">
+              <div>
+                <strong>${p.title}</strong>
+                <small>${p.detail}</small>
+              </div>
+              <span class="milestone-wk-badge">${p.weeks}</span>
+            </li>
+          `
+          )
+          .join('');
+      }
+    }
+
+    return { activeServices, comp, targetWeeks, budgetLow, budgetHigh };
+  }
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const id = chip.getAttribute('data-service');
+      if (scopeState.selected.has(id)) {
+        scopeState.selected.delete(id);
+        chip.classList.remove('active');
+        chip.setAttribute('aria-pressed', 'false');
+      } else {
+        scopeState.selected.add(id);
+        chip.classList.add('active');
+        chip.setAttribute('aria-pressed', 'true');
+      }
+      renderScopeEstimate();
+    });
+  });
+
+  compButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      scopeState.complexity = btn.getAttribute('data-complexity');
+      compButtons.forEach((b) => {
+        const isOn = b === btn;
+        b.classList.toggle('active', isOn);
+        b.setAttribute('aria-pressed', String(isOn));
+      });
+      renderScopeEstimate();
+    });
+  });
+
+  if (timelineSlider) {
+    timelineSlider.addEventListener('input', () => {
+      scopeState.targetWeeks = Number(timelineSlider.value);
+      renderScopeEstimate();
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      scopeState.selected = new Set(['brand-identity', 'web-dev', 'design-systems']);
+      scopeState.complexity = 'scaleup';
+      scopeState.targetWeeks = 10;
+      chips.forEach((chip) => {
+        const on = scopeState.selected.has(chip.getAttribute('data-service'));
+        chip.classList.toggle('active', on);
+        chip.setAttribute('aria-pressed', String(on));
+      });
+      compButtons.forEach((b) => {
+        const on = b.getAttribute('data-complexity') === 'scaleup';
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      if (timelineSlider) timelineSlider.value = '10';
+      const status = document.getElementById('scopeCtaStatus');
+      if (status) status.textContent = '';
+      renderScopeEstimate();
+    });
+  }
+
+  if (lockBtn) {
+    lockBtn.addEventListener('click', () => {
+      const res = renderScopeEstimate();
+      const status = document.getElementById('scopeCtaStatus');
+      if (status) {
+        status.textContent = res.activeServices.length
+          ? `Scope locked (${res.activeServices.length} deliverables · ${res.targetWeeks} wks). Ready for inquiry!`
+          : 'Select at least one deliverable chip first.';
+      }
+      const quoteBtn = document.getElementById('quoteBtn');
+      const quoteBox = document.getElementById('quoteBox');
+      if (quoteBtn && quoteBox && quoteBox.hidden) {
+        quoteBtn.click();
+      }
+    });
+  }
+
+  renderScopeEstimate();
+}
+/* ===== END Issue #435 ===== */

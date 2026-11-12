@@ -19,6 +19,11 @@
   <div class="layout">
     <aside class="sidebar">
       <div class="logo">📖 PRISMA DOCS</div>
+      <button type="button" id="docsSearchTrigger" class="docs-search-trigger" aria-label="Search documentation" aria-keyshortcuts="Control+K Meta+K">
+        <span class="search-trigger-icon">🔍</span>
+        <span class="search-trigger-text">Search docs...</span>
+        <kbd class="search-trigger-kbd">Ctrl+K</kbd>
+      </button>
       <label class="topic-filter-label" for="topic-filter">Filter topics <kbd>/</kbd></label>
       <input type="search" id="topic-filter" class="topic-filter" placeholder="Filter topics..." aria-controls="doc-topic-nav" />
       <p id="topic-filter-status" class="topic-filter-status" role="status"></p>
@@ -795,6 +800,40 @@ async with AsyncPrismaClient(api_key="prisma_live_...") as client:
         <p class="updated-time">Last updated: October 2026 • Contributed via Nexus Spring of Code</p>
       </footer>
     </main>
+  </div>
+
+  <!-- Search Modal Overlay (Issue #337) -->
+  <div class="search-modal-backdrop" id="searchModalBackdrop" hidden>
+    <div class="search-modal" id="searchModal" role="dialog" aria-modal="true" aria-label="Documentation search">
+      <div class="search-modal-header">
+        <span class="search-input-icon">🔍</span>
+        <input
+          type="search"
+          id="docsSearchInput"
+          class="docs-search-input"
+          placeholder="Search documentation, guides, APIs, code samples..."
+          autocomplete="off"
+          spellcheck="false"
+          role="combobox"
+          aria-expanded="false"
+          aria-autocomplete="list"
+          aria-controls="docsSearchResults"
+        />
+        <button type="button" class="search-modal-close" id="searchModalClose" aria-label="Close search">✕</button>
+      </div>
+      <div class="search-modal-meta">
+        <span id="searchResultsCount" class="search-results-count">Type to search documentation</span>
+        <span class="search-meta-hint">Full-Text Fuzzy Index</span>
+      </div>
+      <div class="search-modal-results" id="docsSearchResults" role="listbox" aria-label="Search results">
+        <!-- Search result items injected dynamically -->
+      </div>
+      <div class="search-modal-footer">
+        <div class="search-shortcut-item"><kbd>↑</kbd><kbd>↓</kbd> <span>Navigate</span></div>
+        <div class="search-shortcut-item"><kbd>↵</kbd> <span>Open Section</span></div>
+        <div class="search-shortcut-item"><kbd>Esc</kbd> <span>Close</span></div>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
