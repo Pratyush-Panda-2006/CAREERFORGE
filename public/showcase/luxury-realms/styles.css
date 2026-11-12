@@ -2657,3 +2657,838 @@ html.vt-lock { overflow: hidden; }
   }
 }
 /* ===== END Issue #351 ===== */
+
+/* ===== BEGIN Issue #413: Private Island Luxury Villa Custom Booking Package Builder ===== */
+.island-builder-section {
+  margin: 80px auto;
+  max-width: 1320px;
+  padding: 0 24px;
+}
+
+.island-builder-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.island-builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.ib-header-left {
+  max-width: 720px;
+}
+
+.ib-kicker {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  color: #d4af37;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.island-builder-header h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.ib-sub {
+  color: #9ca3af;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.ib-currency-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(18, 20, 29, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 12px;
+  padding: 6px 10px;
+}
+
+.ib-curr-lbl {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  margin-right: 4px;
+}
+
+.ib-curr-btn {
+  background: transparent;
+  color: #cbd5e1;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ib-curr-btn:hover {
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.ib-curr-btn.active {
+  background: linear-gradient(135deg, #d4af37, #f59e0b);
+  color: #0b0f19;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(212, 175, 55, 0.35);
+}
+
+/* Controls Bar */
+.ib-controls-bar {
+  background: rgba(18, 20, 29, 0.8);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1.2fr;
+  gap: 32px;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.ib-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ib-ctrl-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.ib-ctrl-label-row label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9ca3af;
+}
+
+.ib-ctrl-val {
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+.ib-ctrl-val strong {
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  color: #d4af37;
+  margin-right: 2px;
+}
+
+.ib-slider {
+  width: 100%;
+  accent-color: #d4af37;
+  cursor: pointer;
+}
+
+.ib-slider-hints {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #6b7280;
+}
+
+.ib-select {
+  background: rgba(11, 15, 25, 0.8);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.ib-select option {
+  background: #0f131f;
+  color: #ffffff;
+}
+
+.ib-vip-badge {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vip-icon {
+  color: #d4af37;
+  font-size: 0.9rem;
+}
+
+/* Layout Grid */
+.ib-layout-grid {
+  display: grid;
+  grid-template-columns: 1.65fr 1fr;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.ib-selection-col {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.ib-step-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ib-step-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.step-num {
+  font-family: 'Cinzel', serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0b0f19;
+  background: #d4af37;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ib-step-header h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Villa Tier Cards */
+.villa-tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.villa-tier-card {
+  background: rgba(18, 20, 29, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.villa-tier-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.villa-tier-card.active {
+  border-color: #d4af37;
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(18, 20, 29, 0.95) 100%);
+  box-shadow: 0 10px 32px rgba(212, 175, 55, 0.22);
+}
+
+.vtc-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  background: rgba(2, 132, 199, 0.85);
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  z-index: 2;
+}
+
+.vtc-badge.gold-badge {
+  background: linear-gradient(135deg, #d4af37, #f59e0b);
+  color: #0b0f19;
+}
+
+.vtc-badge.black-badge {
+  background: rgba(15, 23, 42, 0.95);
+  color: #d4af37;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.vtc-thumb {
+  height: 120px;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  padding: 8px 12px;
+}
+
+.overwater-thumb {
+  background: linear-gradient(135deg, #0369a1, #0f172a);
+}
+
+.royal-thumb {
+  background: linear-gradient(135deg, #0f766e, #1e1b4b);
+}
+
+.coral-thumb {
+  background: linear-gradient(135deg, #701a75, #0f172a);
+}
+
+.vtc-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #e2e8f0;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.vtc-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.vtc-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.vtc-desc {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  line-height: 1.45;
+}
+
+.vtc-features {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.vtc-features span {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+}
+
+.vtc-price-row {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.vtc-price-val {
+  font-family: 'Cinzel', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+.vtc-price-period {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* Addons List */
+.addons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addon-item {
+  cursor: pointer;
+  display: block;
+}
+
+.addon-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.addon-box {
+  background: rgba(18, 20, 29, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.2s ease;
+}
+
+.addon-item:hover .addon-box {
+  border-color: rgba(212, 175, 55, 0.35);
+  background: rgba(18, 20, 29, 0.9);
+}
+
+.addon-checkbox:checked + .addon-box {
+  border-color: #d4af37;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, rgba(18, 20, 29, 0.9) 100%);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+}
+
+.addon-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.addon-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.addon-title {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 3px;
+}
+
+.addon-desc {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.addon-pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.addon-price {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+.addon-cadence {
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
+
+/* Luxury Invoice Card */
+.ib-invoice-col {
+  position: sticky;
+  top: 30px;
+}
+
+.luxury-invoice-card {
+  background: #0d101b;
+  border: 1px solid #d4af37;
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(212, 175, 55, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: relative;
+}
+
+.luxury-invoice-card::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 14px;
+  pointer-events: none;
+}
+
+.invoice-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  padding-bottom: 16px;
+}
+
+.invoice-brand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-crest {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: #d4af37;
+  font-weight: 700;
+}
+
+.invoice-folio {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+.invoice-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.invoice-dates-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+
+.invoice-status-pill {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.12);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.invoice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.invoice-line-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.line-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.line-desc strong {
+  font-size: 0.88rem;
+  color: #f1f5f9;
+}
+
+.line-desc span {
+  font-size: 0.74rem;
+  color: #9ca3af;
+}
+
+.line-price {
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.inv-addons-sublist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.invoice-divider {
+  height: 1px;
+  background: rgba(212, 175, 55, 0.2);
+  margin: 4px 0;
+}
+
+.invoice-subtotal-row,
+.invoice-tax-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.invoice-subtotal-row span:last-child {
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+.invoice-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 6px;
+}
+
+.total-lbl-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.total-kicker {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #d4af37;
+}
+
+.total-currency {
+  font-size: 0.68rem;
+  color: #6b7280;
+}
+
+.total-val-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.grand-total-price {
+  font-family: 'Cinzel', serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #d4af37;
+  letter-spacing: -0.01em;
+}
+
+.per-night-avg {
+  font-size: 0.74rem;
+  color: #9ca3af;
+}
+
+/* Concierge Booking CTA */
+.invoice-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-reserve-concierge {
+  background: linear-gradient(135deg, #d4af37, #f59e0b);
+  color: #0b0f19;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+}
+
+.btn-reserve-concierge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(212, 175, 55, 0.55);
+}
+
+.btn-sparkle {
+  font-size: 1.1rem;
+}
+
+.invoice-guarantee {
+  font-size: 0.72rem;
+  color: #6b7280;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Reservation Dialog */
+.island-booking-dialog {
+  border: 1px solid #d4af37;
+  border-radius: 18px;
+  background: #0d101b;
+  color: #ffffff;
+  padding: 0;
+  max-width: 540px;
+  width: 90vw;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.25);
+  margin: auto;
+}
+
+.island-booking-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+}
+
+.dialog-inner {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dialog-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  padding-bottom: 16px;
+}
+
+.dialog-kicker {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: #d4af37;
+}
+
+.dialog-head h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin-top: 4px;
+}
+
+.dialog-close-btn {
+  background: transparent;
+  color: #9ca3af;
+  border: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.dialog-close-btn:hover {
+  color: #ffffff;
+}
+
+.confirm-badge {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.confirm-badge .check-icon {
+  background: #10b981;
+  color: #064e3b;
+  font-weight: 800;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.confirm-badge p {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin-top: 4px;
+  line-height: 1.45;
+}
+
+.dialog-summary-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialog-summary-box .d-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+}
+
+.dialog-summary-box .d-row span {
+  color: #9ca3af;
+}
+
+.dialog-done-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #d4af37, #f59e0b);
+  color: #0b0f19;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .ib-layout-grid {
+    grid-template-columns: 1fr;
+  }
+  .ib-controls-bar {
+    grid-template-columns: 1fr;
+  }
+  .villa-tiers-grid {
+    grid-template-columns: 1fr;
+  }
+  .ib-invoice-col {
+    position: static;
+  }
+}
+/* ===== END Issue #413 ===== */
+

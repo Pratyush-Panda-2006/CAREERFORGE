@@ -2224,3 +2224,274 @@
   calculateImpact();
 })();
 /* ===== END Issue #351 ===== */
+
+/* ===== BEGIN Issue #413: Private Island Luxury Villa Custom Booking Package Builder ===== */
+(function initIslandPackageBuilder() {
+  'use strict';
+
+  var CURRENCIES = {
+    USD: { rate: 1.0, sym: '$', suffix: 'USD' },
+    EUR: { rate: 0.92, sym: '€', suffix: 'EUR' },
+    GBP: { rate: 0.79, sym: '£', suffix: 'GBP' },
+    AED: { rate: 3.67, sym: 'AED ', suffix: 'AED' }
+  };
+
+  var VILLA_TIERS = {
+    overwater: { id: 'overwater', name: 'Overwater Horizon Villa', baseUsd: 14500 },
+    royal: { id: 'royal', name: 'Royal Atoll Pavilion Estate', baseUsd: 28000 },
+    coral: { id: 'coral', name: 'Presidential Coral Sanctuary', baseUsd: 45000 }
+  };
+
+  var ADDONS = {
+    chef: { id: 'chef', title: 'Private 3-Star Michelin Chef & Caviar Service', costType: 'perDay', baseUsd: 3500 },
+    heli: { id: 'heli', title: 'Airbus ACH130 Helicopter Transfer', costType: 'fixed', baseUsd: 8500 },
+    yacht: { id: 'yacht', title: '88ft Sunseeker Yacht Coral Atoll Excursion', costType: 'perDay', baseUsd: 12000 },
+    sommelier: { id: 'sommelier', title: 'Cellar Reserve Grand Cru Sommelier Pairing', costType: 'fixed', baseUsd: 4200 },
+    spa: { id: 'spa', title: 'Rejuvenation Holistic Ayurvedic Spa Package', costType: 'perDay', baseUsd: 2800 }
+  };
+
+  var state = {
+    currency: 'USD',
+    tier: 'overwater',
+    nights: 5,
+    guests: 4,
+    addons: {
+      chef: true,
+      heli: true,
+      yacht: false,
+      sommelier: false,
+      spa: false
+    }
+  };
+
+  function fmtMoney(usdVal) {
+    var c = CURRENCIES[state.currency] || CURRENCIES.USD;
+    var converted = Math.round(usdVal * c.rate);
+    return c.sym + converted.toLocaleString();
+  }
+
+  function updatePricing() {
+    var currentTier = VILLA_TIERS[state.tier] || VILLA_TIERS.overwater;
+    var nights = state.nights;
+    var guests = state.guests;
+
+    // Update Slider / Guests UI
+    var nightsValEl = document.getElementById('ibNightsVal');
+    var guestsValEl = document.getElementById('ibGuestsVal');
+    if (nightsValEl) nightsValEl.textContent = nights;
+    if (guestsValEl) guestsValEl.textContent = guests;
+
+    // Update Tier Cards Prices
+    document.querySelectorAll('.villa-tier-card').forEach(function (card) {
+      var tierKey = card.dataset.tier;
+      var tierObj = VILLA_TIERS[tierKey];
+      if (!tierObj) return;
+      var priceEl = card.querySelector('.vtc-price-val');
+      if (priceEl) priceEl.textContent = fmtMoney(tierObj.baseUsd);
+      var isAct = tierKey === state.tier;
+      card.classList.toggle('active', isAct);
+      card.setAttribute('aria-checked', String(isAct));
+    });
+
+    // Update Addons Prices
+    document.querySelectorAll('.addon-item').forEach(function (item) {
+      var chk = item.querySelector('.addon-checkbox');
+      if (!chk) return;
+      var addonKey = chk.dataset.addon;
+      var addonObj = ADDONS[addonKey];
+      if (!addonObj) return;
+      var priceEl = item.querySelector('.addon-price');
+      if (priceEl) priceEl.textContent = '+' + fmtMoney(addonObj.baseUsd);
+      chk.checked = !!state.addons[addonKey];
+    });
+
+    // Calculate Totals
+    var villaTotalUsd = currentTier.baseUsd * nights;
+    var addonsTotalUsd = 0;
+    var activeAddonItems = [];
+
+    Object.keys(state.addons).forEach(function (key) {
+      if (state.addons[key] && ADDONS[key]) {
+        var add = ADDONS[key];
+        var cost = add.costType === 'perDay' ? (add.baseUsd * nights) : add.baseUsd;
+        addonsTotalUsd += cost;
+        activeAddonItems.push({
+          title: add.title,
+          desc: add.costType === 'perDay' ? (nights + ' days × ' + fmtMoney(add.baseUsd) + ' / day') : 'Fixed reservation fee',
+          costUsd: cost
+        });
+      }
+    });
+
+    var subtotalUsd = villaTotalUsd + addonsTotalUsd;
+    var gratuityUsd = subtotalUsd * 0.10;
+    var taxUsd = subtotalUsd * 0.12;
+    var grandTotalUsd = subtotalUsd + gratuityUsd + taxUsd;
+    var perNightAvgUsd = grandTotalUsd / nights;
+
+    // Update Invoice Card
+    var invDates = document.getElementById('invDatesDisplay');
+    var invVillaTitle = document.getElementById('invVillaTitle');
+    var invVillaCalc = document.getElementById('invVillaCalc');
+    var invVillaPrice = document.getElementById('invVillaPrice');
+    var invAddonsList = document.getElementById('invAddonsList');
+    var invSubtotal = document.getElementById('invSubtotalPrice');
+    var invGratuity = document.getElementById('invGratuityPrice');
+    var invTax = document.getElementById('invTaxPrice');
+    var invGrandTotal = document.getElementById('invGrandTotal');
+    var invPerNight = document.getElementById('invPerNightAvg');
+
+    if (invDates) invDates.textContent = nights + ' Nights • ' + guests + ' Guests';
+    if (invVillaTitle) invVillaTitle.textContent = currentTier.name;
+    if (invVillaCalc) invVillaCalc.textContent = nights + ' nights × ' + fmtMoney(currentTier.baseUsd) + ' / night';
+    if (invVillaPrice) invVillaPrice.textContent = fmtMoney(villaTotalUsd);
+
+    if (invAddonsList) {
+      invAddonsList.innerHTML = '';
+      activeAddonItems.forEach(function (item) {
+        var row = document.createElement('div');
+        row.className = 'invoice-line-item';
+        row.innerHTML =
+          '<div class="line-desc">' +
+            '<strong>' + item.title + '</strong>' +
+            '<span>' + item.desc + '</span>' +
+          '</div>' +
+          '<strong class="line-price">' + fmtMoney(item.costUsd) + '</strong>';
+        invAddonsList.appendChild(row);
+      });
+    }
+
+    if (invSubtotal) invSubtotal.textContent = fmtMoney(subtotalUsd);
+    if (invGratuity) invGratuity.textContent = fmtMoney(gratuityUsd);
+    if (invTax) invTax.textContent = fmtMoney(taxUsd);
+    if (invGrandTotal) invGrandTotal.textContent = fmtMoney(grandTotalUsd);
+    if (invPerNight) invPerNight.textContent = fmtMoney(perNightAvgUsd) + ' / night';
+  }
+
+  function setupEvents() {
+    // Currency buttons
+    var currBtns = document.querySelectorAll('.ib-curr-btn');
+    currBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var curr = btn.dataset.curr;
+        if (!curr || !CURRENCIES[curr]) return;
+        state.currency = curr;
+        currBtns.forEach(function (b) {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+        updatePricing();
+      });
+    });
+
+    // Nights slider
+    var nightsSlider = document.getElementById('ibNightsSlider');
+    if (nightsSlider) {
+      nightsSlider.addEventListener('input', function (e) {
+        state.nights = parseInt(e.target.value, 10) || 5;
+        updatePricing();
+      });
+    }
+
+    // Guests select
+    var guestsSelect = document.getElementById('ibGuestsSelect');
+    if (guestsSelect) {
+      guestsSelect.addEventListener('change', function (e) {
+        state.guests = parseInt(e.target.value, 10) || 4;
+        updatePricing();
+      });
+    }
+
+    // Villa Tier selection
+    var tierCards = document.querySelectorAll('.villa-tier-card');
+    tierCards.forEach(function (card) {
+      function selectTier() {
+        var t = card.dataset.tier;
+        if (!t || !VILLA_TIERS[t]) return;
+        state.tier = t;
+        updatePricing();
+      }
+      card.addEventListener('click', selectTier);
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectTier();
+        }
+      });
+    });
+
+    // Addons checkboxes
+    var addonCheckboxes = document.querySelectorAll('.addon-checkbox');
+    addonCheckboxes.forEach(function (chk) {
+      chk.addEventListener('change', function () {
+        var addonKey = chk.dataset.addon;
+        if (addonKey) {
+          state.addons[addonKey] = chk.checked;
+          updatePricing();
+        }
+      });
+    });
+
+    // Reservation Dialog
+    var reserveBtn = document.getElementById('btnReserveConcierge');
+    var bookingDialog = document.getElementById('islandBookingDialog');
+    var closeDialogBtn = document.getElementById('closeBookingDialogBtn');
+    var doneDialogBtn = document.getElementById('dialogDoneBtn');
+
+    if (reserveBtn && bookingDialog) {
+      reserveBtn.addEventListener('click', function () {
+        var currentTier = VILLA_TIERS[state.tier] || VILLA_TIERS.overwater;
+        var dlgVilla = document.getElementById('dlgVillaName');
+        var dlgNights = document.getElementById('dlgNights');
+        var dlgGuests = document.getElementById('dlgGuests');
+        var dlgTotal = document.getElementById('dlgTotalInvestment');
+        var dlgRef = document.getElementById('dlgRefCode');
+
+        if (dlgVilla) dlgVilla.textContent = currentTier.name;
+        if (dlgNights) dlgNights.textContent = state.nights + ' Nights';
+        if (dlgGuests) dlgGuests.textContent = state.guests + ' Guests';
+
+        var invGrandTotal = document.getElementById('invGrandTotal');
+        if (dlgTotal && invGrandTotal) {
+          dlgTotal.textContent = invGrandTotal.textContent + ' ' + state.currency;
+        }
+
+        var randomHex = Math.random().toString(16).substring(2, 6).toUpperCase();
+        if (dlgRef) dlgRef.textContent = 'AURA-ISLAND-2026-' + randomHex;
+
+        if (typeof bookingDialog.showModal === 'function') {
+          bookingDialog.showModal();
+        } else {
+          bookingDialog.setAttribute('open', '');
+        }
+      });
+    }
+
+    function closeDialog() {
+      if (bookingDialog) {
+        if (typeof bookingDialog.close === 'function') {
+          bookingDialog.close();
+        } else {
+          bookingDialog.removeAttribute('open');
+        }
+      }
+    }
+
+    if (closeDialogBtn) closeDialogBtn.addEventListener('click', closeDialog);
+    if (doneDialogBtn) doneDialogBtn.addEventListener('click', closeDialog);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      updatePricing();
+      setupEvents();
+    });
+  } else {
+    updatePricing();
+    setupEvents();
+  }
+})();
+/* ===== END Issue #413 ===== */
+
