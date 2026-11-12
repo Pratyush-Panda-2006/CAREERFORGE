@@ -1837,3 +1837,494 @@ pre.has-copy-btn {
     background-color: transparent;
   }
 }
+
+/* ==========================================================================
+   Token Bucket & Rate Limiting Quota Laboratory (Issue #443)
+   ========================================================================== */
+
+.token-bucket-card {
+  margin: 28px 0;
+  background: radial-gradient(circle at 15% 15%, #0f172a 0%, #030712 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(56, 189, 248, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.bucket-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background: rgba(15, 23, 42, 0.7);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.bucket-badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  margin-bottom: 6px;
+}
+
+.bucket-header-title h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.bucket-live-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.live-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulse-ring 1.8s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.bucket-workspace {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr;
+  gap: 20px;
+  padding: 24px;
+}
+
+@media (max-width: 992px) {
+  .bucket-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Vessel & Cylinder */
+.bucket-visual-col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bucket-cylinder-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.bucket-faucet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.faucet-pipe {
+  width: 14px;
+  height: 12px;
+  background: linear-gradient(180deg, #64748b, #334155);
+  border-radius: 2px 2px 0 0;
+}
+
+.faucet-drop {
+  width: 6px;
+  height: 9px;
+  background: #38bdf8;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: drip 1.4s infinite cubic-bezier(0.5, 0, 0.75, 0);
+}
+
+@keyframes drip {
+  0% { transform: translateY(0) scale(0.7); opacity: 0; }
+  40% { transform: translateY(4px) scale(1); opacity: 1; }
+  90% { transform: translateY(14px) scale(0.9); opacity: 1; }
+  100% { transform: translateY(16px) scale(0.3); opacity: 0; }
+}
+
+.bucket-vessel {
+  width: 120px;
+  height: 190px;
+  border: 2px solid rgba(56, 189, 248, 0.4);
+  border-top: none;
+  border-radius: 0 0 20px 20px;
+  position: relative;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  overflow: hidden;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.1);
+  transition: transform 0.15s ease;
+}
+
+.bucket-vessel.shake-vessel {
+  animation: vessel-shake 0.35s ease-in-out;
+  border-color: #ef4444;
+}
+
+@keyframes vessel-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.bucket-liquid {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: height 0.12s linear, background 0.25s ease;
+  overflow: hidden;
+}
+
+.bucket-liquid.healthy {
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 60%, #0369a1 100%);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
+}
+
+.bucket-liquid.warning {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 60%, #b45309 100%);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+}
+
+.bucket-liquid.depleted {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 60%, #991b1b 100%);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.5);
+}
+
+.liquid-surface {
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  animation: liquid-wave 2.2s infinite linear;
+}
+
+@keyframes liquid-wave {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(25%); }
+}
+
+.bucket-capacity-marker {
+  position: absolute;
+  right: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.bucket-capacity-marker.top { top: 8px; }
+.bucket-capacity-marker.mid { top: 50%; transform: translateY(-50%); }
+.bucket-capacity-marker.bot { bottom: 6px; }
+
+.bucket-fill-stats {
+  margin-top: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.current-tokens {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.tokens-denom {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.bucket-status-tag {
+  margin-top: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.bucket-status-tag.healthy {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.bucket-status-tag.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.bucket-status-tag.exhausted {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* Controls Column */
+.bucket-controls-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.control-val {
+  font-family: 'JetBrains Mono', monospace;
+  color: #38bdf8;
+}
+
+.bucket-select {
+  background: #020617;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #f8fafc;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.bucket-select:focus {
+  border-color: #38bdf8;
+}
+
+.bucket-slider {
+  accent-color: #38bdf8;
+  height: 6px;
+  cursor: pointer;
+}
+
+.trigger-buttons, .scenario-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.btn-bucket-req {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 6px;
+  color: #e0f2fe;
+  padding: 8px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-bucket-req:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.btn-bucket-req:active {
+  transform: translateY(1px);
+}
+
+.btn-bucket-req.burst {
+  border-color: rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.1);
+  color: #fecdd3;
+}
+
+.btn-bucket-req.burst:hover {
+  background: rgba(244, 63, 94, 0.22);
+  border-color: #f43f5e;
+}
+
+.btn-scenario {
+  background: #0b1329;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  color: #94a3b8;
+  padding: 7px 10px;
+  font-size: 0.74rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-scenario:hover {
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+.btn-scenario.active {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: #22c55e;
+  color: #86efac;
+}
+
+.btn-scenario.danger:hover {
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.btn-scenario.reset:hover {
+  border-color: #38bdf8;
+  color: #7dd3fc;
+}
+
+/* Telemetry Column */
+.bucket-telemetry-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.telemetry-box {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.telemetry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.http-status-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.http-status-pill.status-200 {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.http-status-pill.status-429 {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.telemetry-headers {
+  margin: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.telemetry-headers code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #38bdf8;
+  display: block;
+}
+
+.bucket-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.metric-card {
+  background: #0b1329;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-card .m-label {
+  font-size: 0.66rem;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.metric-card .m-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.metric-card .m-val.text-success { color: #4ade80; }
+.metric-card .m-val.text-danger { color: #f87171; }
+
+.throttle-warning-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #fecdd3;
+  font-size: 0.76rem;
+  animation: banner-flash 0.3s ease;
+}
+
+.throttle-warning-banner strong {
+  display: block;
+  color: #f87171;
+  margin-bottom: 2px;
+}
+
+.throttle-warning-banner p {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+@keyframes banner-flash {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
