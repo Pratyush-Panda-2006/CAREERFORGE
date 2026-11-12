@@ -1855,3 +1855,328 @@ var FraudDetector = (function () {
   };
 })();
 /* END FraudDetector */
+
+(function () {
+  'use strict';
+  if (typeof document === 'undefined' || typeof Ledger === 'undefined') return;
+
+  const MAX_ATTEMPTS = 3;
+  const AUDIT_LIMIT = 40;
+
+  function initFraudInspection() {
+    const body = document.getElementById('fraudBody');
+    if (!body) return;
+
+    const inputs = {
+      window: document.getElementById('fraudWindow'),
+      maxTx: document.getElementById('fraudMaxTx'),
+      speed: document.getElementById('fraudSpeed'),
+      spike: document.getElementById('fraudSpike'),
+      offAmount: document.getElementById('fraudOffAmount'),
+      blacklist: document.getElementById('fraudBlacklist')
+    };
+    const resetBtn = document.getElementById('fraudReset');
+    const summary = document.getElementById('fraudSummary');
+    const detail = document.getElementById('fraudDetail');
+    const auditList = document.getElementById('fraudAudit');
+
+    const modal = document.getElementById('fraudOtpModal');
+    const otpDesc = document.getElementById('fraudOtpDesc');
+    const otpReasons = document.getElementById('fraudOtpReasons');
+    const otpHint = document.getElementById('fraudOtpHint');
+    const otpForm = document.getElementById('fraudOtpForm');
+    const otpInput = document.getElementById('fraudOtpInput');
+    const otpError = document.getElementById('fraudOtpError');
+    const otpCancel = document.getElementById('fraudOtpCancel');
+
+    const dataset = FraudDetector.buildDataset(Ledger.TRANSACTIONS);
+    const verified = new Set();
+    const audit = [];
+    let results = [];
+    let selectedId = null;
+    let otp = null; // { id, code, attempts }
+
+    function el(tag, cls, text) {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    }
+
+    function readConfig() {
+      return {
+        velocityWindowMinutes: inputs.window.value,
+        velocityMaxTransactions: inputs.maxTx.value,
+        geoMaxSpeedKmh: inputs.speed.value,
+        spikeMultiplier: inputs.spike.value,
+        offHoursMinAmount: inputs.offAmount.value,
+        blacklistedCategories: inputs.blacklist.value
+      };
+    }
+
+    function logAudit(type, message) {
+      audit.unshift({ time: new Date().toISOString().slice(11, 19) + ' UTC', type: type, message: message });
+      if (audit.length > AUDIT_LIMIT) audit.length = AUDIT_LIMIT;
+      auditList.textContent = '';
+      audit.forEach((a) => {
+        const li = el('li', 'fraud-audit-item fraud-audit-' + a.type);
+        li.appendChild(el('span', 'fraud-audit-time', a.time));
+        li.appendChild(el('span', 'fraud-audit-msg', a.message));
+        auditList.appendChild(li);
+      });
+    }
+
+    function findResult(id) {
+      return results.find((r) => r.tx.id === id) || null;
+    }
+
+    function scoreBadge(r) {
+      const b = el('span', 'fraud-score fraud-score-' + r.band);
+      b.appendChild(el('strong', null, String(r.score)));
+      b.appendChild(el('span', null, r.bandLabel));
+      return b;
+    }
+
+    function renderTable() {
+      body.textContent = '';
+      results.slice().reverse().forEach((r) => {
+        const t = r.tx;
+        const tr = document.createElement('tr');
+        tr.className = 'fraud-row fraud-row-' + r.band + (t.id === selectedId ? ' is-selected' : '');
+        tr.appendChild(el('td', 'ledger-date', t.ts.slice(0, 16).replace('T', ' ')));
+        const tdM = document.createElement('td');
+        tdM.appendChild(el('div', 'fraud-merchant', t.merchant));
+        tdM.appendChild(el('span', 'ledger-badge', t.category));
+        tr.appendChild(tdM);
+        tr.appendChild(el('td', null, t.loc.city));
+        tr.appendChild(el('td', 'ledger-amount ' + (t.amount >= 0 ? 'ledger-in' : 'ledger-out'), Ledger.formatAmount(t.amount)));
+
+        const tdS = document.createElement('td');
+        tdS.appendChild(scoreBadge(r));
+        tr.appendChild(tdS);
+
+        const tdT = document.createElement('td');
+        const chips = el('div', 'fraud-chips');
+        if (!r.triggers.length) chips.appendChild(el('span', 'fraud-muted', 'None'));
+        r.triggers.forEach((trg) => {
+          const chip = el('span', 'fraud-chip fraud-chip-' + trg.rule, trg.label + ' +' + trg.weight);
+          chip.title = trg.explanation;
+          chips.appendChild(chip);
+        });
+        if (verified.has(t.id)) chips.appendChild(el('span', 'fraud-chip fraud-chip-ok', 'OTP verified'));
+        tdT.appendChild(chips);
+        tr.appendChild(tdT);
+
+        const tdA = document.createElement('td');
+        const needsStepUp = r.band === 'red' && !verified.has(t.id);
+        const btn = el('button', 'fraud-inspect' + (needsStepUp ? ' is-stepup' : ''), needsStepUp ? 'Step-up' : 'Inspect');
+        btn.type = 'button';
+        btn.setAttribute('data-id', String(t.id));
+        btn.setAttribute('aria-label', (needsStepUp ? 'Step-up verify ' : 'Inspect ') + t.merchant + ' ' + Ledger.formatAmount(t.amount));
+        if (t.id === selectedId) btn.setAttribute('aria-current', 'true');
+        tdA.appendChild(btn);
+        tr.appendChild(tdA);
+
+        body.appendChild(tr);
+      });
+    }
+
+    function renderSummary() {
+      const counts = { green: 0, yellow: 0, red: 0 };
+      results.forEach((r) => { counts[r.band] += 1; });
+      summary.textContent = results.length + ' transactions scored: ' + counts.green + ' Green (0-29), ' +
+        counts.yellow + ' Yellow (30-69), ' + counts.red + ' Red (70-100).';
+    }
+
+    function renderDetail() {
+      detail.textContent = '';
+      const r = selectedId == null ? null : findResult(selectedId);
+      if (!r) {
+        detail.appendChild(el('p', 'fraud-muted', 'Select a transaction to see why it was scored this way.'));
+        return;
+      }
+      const head = el('div', 'fraud-detail-head');
+      head.appendChild(el('strong', null, r.tx.merchant + ' ' + Ledger.formatAmount(r.tx.amount)));
+      head.appendChild(scoreBadge(r));
+      detail.appendChild(head);
+      if (!r.triggers.length) {
+        detail.appendChild(el('p', 'fraud-muted', 'No rule fired. This transaction looks normal.'));
+      } else {
+        const ul = el('ul', 'fraud-reasons');
+        r.triggers.forEach((trg) => {
+          const li = document.createElement('li');
+          li.appendChild(el('strong', null, trg.label + ' (+' + trg.weight + '): '));
+          li.appendChild(document.createTextNode(trg.explanation));
+          ul.appendChild(li);
+        });
+        detail.appendChild(ul);
+        if (r.rawScore > 100) detail.appendChild(el('p', 'fraud-muted', 'Raw total ' + r.rawScore + ' is capped at 100.'));
+      }
+      if (r.band === 'red') {
+        detail.appendChild(el('p', 'fraud-muted', verified.has(r.tx.id)
+          ? 'Step-up verification completed for this transaction.'
+          : 'Red band: step-up verification is required.'));
+      }
+    }
+
+    function render() {
+      results = FraudDetector.scoreAll(dataset, readConfig());
+      renderTable();
+      renderSummary();
+      renderDetail();
+    }
+
+    // --- OTP step-up modal ---
+    function demoCode(id) {
+      return String(100000 + ((id * 7919 + 4217) % 900000));
+    }
+
+    function focusables() {
+      return Array.prototype.slice.call(modal.querySelectorAll('input, button')).filter((n) => !n.disabled);
+    }
+
+    function openModal(r) {
+      otp = { id: r.tx.id, code: demoCode(r.tx.id), attempts: 0 };
+      otpDesc.textContent = r.tx.merchant + ', ' + Ledger.formatAmount(r.tx.amount) + ', risk score ' + r.score + ' (Red). Enter the one-time code to release it.';
+      otpReasons.textContent = '';
+      r.triggers.forEach((trg) => {
+        const li = document.createElement('li');
+        li.appendChild(el('strong', null, trg.label + ': '));
+        li.appendChild(document.createTextNode(trg.explanation));
+        otpReasons.appendChild(li);
+      });
+      otpHint.textContent = otp.code;
+      otpInput.value = '';
+      otpInput.disabled = false;
+      otpError.hidden = true;
+      otpError.textContent = '';
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      otpInput.focus();
+      logAudit('stepup', 'OTP step-up issued for transaction #' + r.tx.id + ' (' + r.tx.merchant + ', score ' + r.score + ').');
+    }
+
+    function closeModal(reason) {
+      if (modal.hidden) return;
+      modal.hidden = true;
+      document.body.style.overflow = '';
+      const id = otp ? otp.id : null;
+      if (reason && otp) logAudit('cancel', 'Step-up for #' + otp.id + ' ' + reason + '.');
+      otp = null;
+      const back = id == null ? null : body.querySelector('[data-id="' + id + '"]');
+      if (back) back.focus();
+    }
+
+    function showOtpError(msg) {
+      otpError.textContent = msg;
+      otpError.hidden = false;
+    }
+
+    otpForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!otp) return;
+      const entered = otpInput.value.trim();
+      if (entered === otp.code) {
+        const id = otp.id;
+        verified.add(id);
+        logAudit('verified', 'Transaction #' + id + ' verified with OTP after ' + (otp.attempts + 1) + ' attempt(s).');
+        otp = null;
+        modal.hidden = true;
+        document.body.style.overflow = '';
+        render();
+        const back = body.querySelector('[data-id="' + id + '"]');
+        if (back) back.focus();
+        return;
+      }
+      otp.attempts += 1;
+      const left = MAX_ATTEMPTS - otp.attempts;
+      logAudit('failed', 'Wrong OTP for #' + otp.id + ' (attempt ' + otp.attempts + ' of ' + MAX_ATTEMPTS + ').');
+      if (left <= 0) {
+        showOtpError('Too many wrong codes. This transaction stays blocked.');
+        logAudit('blocked', 'Transaction #' + otp.id + ' blocked after ' + MAX_ATTEMPTS + ' failed OTP attempts.');
+        otpInput.disabled = true;
+        otpInput.value = '';
+        return;
+      }
+      showOtpError('That code is not correct. ' + left + (left === 1 ? ' attempt' : ' attempts') + ' left.');
+      otpInput.select();
+    });
+
+    otpCancel.addEventListener('click', () => closeModal('cancelled'));
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal('dismissed');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (modal.hidden) return;
+      if (e.key === 'Escape') {
+        closeModal('dismissed with Escape');
+      } else if (e.key === 'Tab') {
+        const f = focusables();
+        if (!f.length) return;
+        const first = f[0];
+        const last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        else if (!modal.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+      }
+    });
+
+    function select(id) {
+      const r = findResult(id);
+      if (!r) return;
+      selectedId = id;
+      render();
+      if (r.band === 'red' && !verified.has(id)) {
+        openModal(r);
+      } else {
+        logAudit('inspect', 'Inspected #' + id + ' (' + r.tx.merchant + '): score ' + r.score + ' ' + r.bandLabel +
+          (r.triggers.length ? ', ' + r.triggers.length + ' rule(s) fired.' : ', no rules fired.'));
+        const back = body.querySelector('[data-id="' + id + '"]');
+        if (back) back.focus();
+      }
+    }
+
+    body.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-id]');
+      const row = e.target.closest('tr');
+      const id = btn ? Number(btn.getAttribute('data-id')) : null;
+      if (id != null) { select(id); return; }
+      if (row) {
+        const b = row.querySelector('[data-id]');
+        if (b) select(Number(b.getAttribute('data-id')));
+      }
+    });
+
+    const labels = {
+      window: 'Velocity window', maxTx: 'Max transactions', speed: 'Max travel speed',
+      spike: 'Amount spike multiplier', offAmount: 'Off-hours minimum', blacklist: 'Blacklisted categories'
+    };
+    Object.keys(inputs).forEach((key) => {
+      inputs[key].addEventListener('input', render);
+      inputs[key].addEventListener('change', () => {
+        logAudit('config', labels[key] + ' set to ' + inputs[key].value + '. Scores recalculated.');
+      });
+    });
+
+    resetBtn.addEventListener('click', () => {
+      const d = FraudDetector.DEFAULT_CONFIG;
+      inputs.window.value = d.velocityWindowMinutes;
+      inputs.maxTx.value = d.velocityMaxTransactions;
+      inputs.speed.value = d.geoMaxSpeedKmh;
+      inputs.spike.value = d.spikeMultiplier;
+      inputs.offAmount.value = d.offHoursMinAmount;
+      inputs.blacklist.value = d.blacklistedCategories.join(', ');
+      render();
+      logAudit('config', 'Thresholds reset to defaults.');
+    });
+
+    render();
+    logAudit('system', 'Engine ready: ' + results.length + ' transactions scored with default thresholds.');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFraudInspection);
+  } else {
+    initFraudInspection();
+  }
+})();
