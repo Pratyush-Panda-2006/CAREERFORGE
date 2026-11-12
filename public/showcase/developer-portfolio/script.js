@@ -60,11 +60,15 @@ function initAvailabilityBadge() {
 // Virtual file system: objects are directories, strings are files.
 // Files whose name is listed in EXECUTABLES are shown in green and can be run as ./name.
 const FS = {
+  '.bashrc': 'export PS1="dev@kernel-box:\\w\\$ "\\nalias ll="ls -la"',
+  'about.md': '# About Me\nDistributed systems engineer passionate about Rust, WebAssembly, and high-performance computing.',
   'bio.txt': 'Alex Vance - Senior Distributed Systems & Rust Kernel Developer.\nI build high-throughput microservice mesh routers, eBPF network monitors\nand WebAssembly runtimes. Based on the internet, mostly.',
   'skills.txt': 'Languages : Rust, Go, C, TypeScript\nPlatforms : Kubernetes, eBPF, WebAssembly, Linux\nInterests : packet processing, schedulers, observability',
   'contact.txt': 'email  : alex@example.dev\ngithub : github.com/alexvance\nnote   : placeholder details for this demo portfolio',
   projects: {
+    '.git': { 'config': '[core]\nrepositoryformatversion = 0' },
     'README.md': '# Projects\nTwo open source projects live here. Try: cat hyper-mesh-router.md',
+    'projects.txt': 'hyper-mesh-router: Rust eBPF proxy\nwasm-container-daemon: Go WASM container\nreact-admin-dashboard: React developer tools UI',
     'hyper-mesh-router.md': '# hyper-mesh-router  (Rust, 4.8k stars)\nZero-allocation HTTP/3 load balancer compiled to eBPF byte-code.',
     'wasm-container-daemon.md': '# wasm-container-daemon  (Go, 2.3k stars)\nUltra-lightweight OCI compliant container runtime running WASM binaries in under 5ms.'
   },
@@ -85,11 +89,16 @@ const HELP_LINES = [
   ['skills', 'show technical skills'],
   ['projects', 'list portfolio project files'],
   ['contact', 'show demo contact details'],
-  ['ls [path]', 'list directory contents'],
+  ['ls [-la] [path]', 'list directory contents with optional -l and -a flags'],
   ['cd [path]', 'change directory (supports .., ~ and absolute paths)'],
   ['pwd', 'print the working directory'],
-  ['cat <file>', 'print a file'],
+  ['cat <file>', 'print a file (supports stdin pipes)'],
+  ['mkdir <dir>', 'create a directory'],
+  ['touch <file>', 'create an empty file'],
+  ['rm [-r] <path>', 'remove a file or directory'],
+  ['grep [-i] <pattern>', 'search pattern in file or piped stdin'],
   ['echo <text>', 'print text'],
+  ['cmd1 | cmd2', 'pipe standard output between commands'],
   ['theme dark|light', 'switch the terminal theme'],
   ['history', 'show previous commands'],
   ['play | game', 'start a 30-second typing challenge with local high scores'],
@@ -97,6 +106,7 @@ const HELP_LINES = [
 ];
 
 window.HELP_LINES = HELP_LINES;
+window.FS = FS;
 
 // Turn a path (relative to cwd parts) into a normalised array of segments.
 function resolvePath(cwdParts, input) {
@@ -110,10 +120,10 @@ function resolvePath(cwdParts, input) {
 }
 
 // Walk the tree. Returns the directory/file node, or null if any segment is missing.
-function lookup(parts) {
-  let node = FS;
+function lookup(parts, root = FS) {
+  let node = root;
   for (const seg of parts) {
-    if (typeof node !== 'object' || !Object.prototype.hasOwnProperty.call(node, seg)) return null;
+    if (typeof node !== 'object' || node === null || !Object.prototype.hasOwnProperty.call(node, seg)) return null;
     node = node[seg];
   }
   return node;
@@ -121,6 +131,335 @@ function lookup(parts) {
 
 const isDir = (node) => typeof node === 'object' && node !== null;
 const toPathString = (parts) => '/' + parts.join('/');
+
+function cloneFs(node) {
+  if (typeof node !== 'object' || node === null) return node;
+  const copy = {};
+  for (const [k, v] of Object.entries(node)) {
+    copy[k] = cloneFs(v);
+  }
+  return copy;
+}
+
+class ShellSandbox {
+  constructor(fs = null) {
+    this.fs = fs || cloneFs(FS);
+    this.cwd = [];
+    this.history = [];
+  }
+
+  resolvePath(input, baseCwd = this.cwd) {
+    return resolvePath(baseCwd, input);
+  }
+
+  lookup(parts) {
+    return lookup(parts, this.fs);
+  }
+
+  toPathString(parts = this.cwd) {
+    return toPathString(parts);
+  }
+
+  tokenize(cmdStr) {
+    const stages = [];
+    let cur = '';
+    let inQuote = false;
+    let quoteChar = '';
+
+    for (let i = 0; i < cmdStr.length; i++) {
+      const ch = cmdStr[i];
+      if ((ch === '"' || ch === "'") && (i === 0 || cmdStr[i - 1] !== '\\')) {
+        if (!inQuote) {
+          inQuote = true;
+          quoteChar = ch;
+        } else if (quoteChar === ch) {
+          inQuote = false;
+        }
+        cur += ch;
+      } else if (ch === '|' && !inQuote) {
+        stages.push(cur.trim());
+        cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    if (cur.trim()) stages.push(cur.trim());
+    return stages;
+  }
+
+  parseArgs(stage) {
+    const tokens = [];
+    let cur = '';
+    let inQuote = false;
+    let quoteChar = '';
+
+    for (let i = 0; i < stage.length; i++) {
+      const ch = stage[i];
+      if ((ch === '"' || ch === "'") && (i === 0 || stage[i - 1] !== '\\')) {
+        if (!inQuote) {
+          inQuote = true;
+          quoteChar = ch;
+        } else if (quoteChar === ch) {
+          inQuote = false;
+        }
+      } else if (/\s/.test(ch) && !inQuote) {
+        if (cur.length > 0) {
+          tokens.push(cur);
+          cur = '';
+        }
+      } else {
+        cur += ch;
+      }
+    }
+    if (cur.length > 0) tokens.push(cur);
+    return tokens;
+  }
+
+  tabComplete(currentLine) {
+    const tokens = this.parseArgs(currentLine);
+    const lastToken = currentLine.endsWith(' ') ? '' : (tokens[tokens.length - 1] || '');
+
+    let searchParts = this.cwd.slice();
+    let prefix = lastToken;
+
+    if (lastToken.includes('/')) {
+      const lastSlashIdx = lastToken.lastIndexOf('/');
+      const pathPart = lastToken.slice(0, lastSlashIdx) || '/';
+      prefix = lastToken.slice(lastSlashIdx + 1);
+      searchParts = this.resolvePath(pathPart);
+    }
+
+    const dirNode = this.lookup(searchParts);
+    if (!dirNode || typeof dirNode !== 'object') {
+      return { matches: [], completion: null };
+    }
+
+    const entries = Object.keys(dirNode).filter(name => name.startsWith(prefix));
+    if (entries.length === 0) {
+      return { matches: [], completion: null };
+    }
+
+    if (entries.length === 1) {
+      const match = entries[0];
+      const isDirectory = typeof dirNode[match] === 'object' && dirNode[match] !== null;
+      const completionSuffix = match + (isDirectory ? '/' : '');
+      const completion = lastToken.includes('/')
+        ? lastToken.slice(0, lastToken.lastIndexOf('/') + 1) + completionSuffix
+        : completionSuffix;
+      return { matches: entries, completion };
+    }
+
+    return { matches: entries, completion: null };
+  }
+
+  execute(cmdLine) {
+    const raw = cmdLine.trim();
+    if (!raw) return { output: '', error: null, exitCode: 0 };
+
+    this.history.push(raw);
+    const stages = this.tokenize(raw);
+    let pipeData = '';
+
+    for (let s = 0; s < stages.length; s++) {
+      const stageStr = stages[s];
+      const tokens = this.parseArgs(stageStr);
+      if (!tokens.length) continue;
+
+      const name = tokens[0];
+      const args = tokens.slice(1);
+      const res = this.runSingle(name, args, pipeData);
+
+      if (res.error && s === stages.length - 1) {
+        return res;
+      }
+      pipeData = res.output;
+    }
+
+    return { output: pipeData, error: null, exitCode: 0 };
+  }
+
+  runSingle(name, args, stdin) {
+    switch (name) {
+      case 'pwd':
+        return { output: this.toPathString(), exitCode: 0 };
+
+      case 'cd': {
+        const target = args[0] ? this.resolvePath(args[0]) : [];
+        const node = this.lookup(target);
+        if (node === null) return { output: '', error: `cd: no such file or directory: ${args[0]}`, exitCode: 1 };
+        if (typeof node !== 'object') return { output: '', error: `cd: not a directory: ${args[0]}`, exitCode: 1 };
+        this.cwd = target;
+        return { output: '', exitCode: 0 };
+      }
+
+      case 'ls': {
+        const flags = args.filter(a => a.startsWith('-')).join('').replace(/-/g, '');
+        const showAll = flags.includes('a');
+        const longListing = flags.includes('l');
+        const pathArg = args.find(a => !a.startsWith('-'));
+
+        const target = pathArg ? this.resolvePath(pathArg) : this.cwd;
+        const node = this.lookup(target);
+        if (node === null) return { output: '', error: `ls: cannot access '${pathArg}': No such file or directory`, exitCode: 1 };
+
+        if (typeof node !== 'object') {
+          return { output: pathArg || '', exitCode: 0 };
+        }
+
+        let names = Object.keys(node);
+        if (!showAll) {
+          names = names.filter(n => !n.startsWith('.'));
+        }
+        names.sort();
+
+        if (longListing) {
+          const lines = names.map(n => {
+            const isDirNode = typeof node[n] === 'object' && node[n] !== null;
+            const perms = isDirNode ? 'drwxr-xr-x' : (EXECUTABLES.includes(n) ? '-rwxr-xr-x' : '-rw-r--r--');
+            const size = isDirNode ? 4096 : (typeof node[n] === 'string' ? node[n].length : 0);
+            const dateStr = 'Nov 12 12:00';
+            const suffix = isDirNode ? '/' : (EXECUTABLES.includes(n) ? '*' : '');
+            return `${perms} 1 dev dev ${String(size).padStart(5, ' ')} ${dateStr} ${n}${suffix}`;
+          });
+          return { output: lines.join('\n'), exitCode: 0 };
+        }
+
+        const formatted = names.map(n => {
+          const isDirNode = typeof node[n] === 'object' && node[n] !== null;
+          return n + (isDirNode ? '/' : (EXECUTABLES.includes(n) ? '*' : ''));
+        });
+        return { output: formatted.join('\n'), exitCode: 0 };
+      }
+
+      case 'cat': {
+        const fileArgs = args.filter(a => !a.startsWith('-'));
+        if (fileArgs.length === 0) {
+          return { output: stdin || '', exitCode: 0 };
+        }
+        const outputs = [];
+        for (const file of fileArgs) {
+          const node = this.lookup(this.resolvePath(file));
+          if (node === null) return { output: '', error: `cat: ${file}: No such file or directory`, exitCode: 1 };
+          if (typeof node === 'object' && node !== null) return { output: '', error: `cat: ${file}: Is a directory`, exitCode: 1 };
+          outputs.push(node);
+        }
+        return { output: outputs.join('\n'), exitCode: 0 };
+      }
+
+      case 'grep': {
+        const flags = args.filter(a => a.startsWith('-')).join('').replace(/-/g, '');
+        const ignoreCase = flags.includes('i');
+        const lineNumbers = flags.includes('n');
+        const invert = flags.includes('v');
+        const nonFlagArgs = args.filter(a => !a.startsWith('-'));
+
+        const pattern = nonFlagArgs[0] || '';
+        const fileArg = nonFlagArgs[1];
+
+        let content = stdin;
+        if (fileArg) {
+          const node = this.lookup(this.resolvePath(fileArg));
+          if (node === null) return { output: '', error: `grep: ${fileArg}: No such file or directory`, exitCode: 1 };
+          if (typeof node === 'object') return { output: '', error: `grep: ${fileArg}: Is a directory`, exitCode: 1 };
+          content = node;
+        }
+
+        if (!content) return { output: '', exitCode: 0 };
+
+        const re = new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), ignoreCase ? 'i' : '');
+        const matchingLines = [];
+        const lines = content.split('\n');
+
+        lines.forEach((l, idx) => {
+          const matches = re.test(l);
+          const keep = invert ? !matches : matches;
+          if (keep) {
+            matchingLines.push(lineNumbers ? `${idx + 1}:${l}` : l);
+          }
+        });
+
+        return { output: matchingLines.join('\n'), exitCode: 0 };
+      }
+
+      case 'mkdir': {
+        const dirName = args[0];
+        if (!dirName) return { output: '', error: 'mkdir: missing operand', exitCode: 1 };
+        const parts = this.resolvePath(dirName);
+        const parentParts = parts.slice(0, -1);
+        const namePart = parts[parts.length - 1];
+
+        const parentNode = this.lookup(parentParts);
+        if (!parentNode || typeof parentNode !== 'object') {
+          return { output: '', error: `mkdir: cannot create directory '${dirName}': No such file or directory`, exitCode: 1 };
+        }
+        if (parentNode[namePart]) {
+          return { output: '', error: `mkdir: cannot create directory '${dirName}': File exists`, exitCode: 1 };
+        }
+        parentNode[namePart] = {};
+        return { output: '', exitCode: 0 };
+      }
+
+      case 'touch': {
+        const fileName = args[0];
+        if (!fileName) return { output: '', error: 'touch: missing operand', exitCode: 1 };
+        const parts = this.resolvePath(fileName);
+        const parentParts = parts.slice(0, -1);
+        const namePart = parts[parts.length - 1];
+
+        const parentNode = this.lookup(parentParts);
+        if (!parentNode || typeof parentNode !== 'object') {
+          return { output: '', error: `touch: cannot touch '${fileName}': No such file or directory`, exitCode: 1 };
+        }
+        if (!parentNode[namePart]) {
+          parentNode[namePart] = '';
+        }
+        return { output: '', exitCode: 0 };
+      }
+
+      case 'rm': {
+        const recursive = args.includes('-r') || args.includes('-rf') || args.includes('-fr');
+        const targetArg = args.find(a => !a.startsWith('-'));
+        if (!targetArg) return { output: '', error: 'rm: missing operand', exitCode: 1 };
+
+        const parts = this.resolvePath(targetArg);
+        if (parts.length === 0) return { output: '', error: 'rm: cannot remove root directory', exitCode: 1 };
+
+        const parentParts = parts.slice(0, -1);
+        const namePart = parts[parts.length - 1];
+        const parentNode = this.lookup(parentParts);
+
+        if (!parentNode || !Object.prototype.hasOwnProperty.call(parentNode, namePart)) {
+          return { output: '', error: `rm: cannot remove '${targetArg}': No such file or directory`, exitCode: 1 };
+        }
+
+        const targetIsDir = typeof parentNode[namePart] === 'object' && parentNode[namePart] !== null;
+        if (targetIsDir && !recursive) {
+          return { output: '', error: `rm: cannot remove '${targetArg}': Is a directory`, exitCode: 1 };
+        }
+
+        delete parentNode[namePart];
+        return { output: '', exitCode: 0 };
+      }
+
+      case 'echo':
+        return { output: args.join(' '), exitCode: 0 };
+
+      case 'history':
+        return {
+          output: this.history.map((h, i) => `${String(i + 1).padStart(3, ' ')}  ${h}`).join('\n'),
+          exitCode: 0
+        };
+
+      case 'clear':
+        return { output: '__CLEAR__', exitCode: 0 };
+
+      default:
+        return { output: '', error: `${name}: command not found`, exitCode: 127 };
+    }
+  }
+}
+
+window.ShellSandbox = ShellSandbox;
 
 function initTerminal() {
   const screen = document.getElementById('vterm-screen');
@@ -130,8 +469,7 @@ function initTerminal() {
   const term = document.getElementById('vterm');
   if (!screen || !form || !input) return;
 
-  let cwd = [];
-  const history = [];
+  const sandbox = new ShellSandbox(FS);
   let historyIndex = 0;
   let draft = '';
 
@@ -148,7 +486,7 @@ function initTerminal() {
   }
 
   function updatePrompt() {
-    promptEl.textContent = 'dev@kernel-box:' + toPathString(cwd) + '$';
+    promptEl.textContent = 'dev@kernel-box:' + sandbox.toPathString() + '$';
   }
 
   function printLs(node) {
@@ -165,14 +503,14 @@ function initTerminal() {
     screen.appendChild(row);
   }
 
-  const commands = {
+  const specialCommands = {
     help() {
       HELP_LINES.forEach(([cmd, desc]) => {
         const row = document.createElement('div');
         row.className = 'vterm-line';
         const c = document.createElement('span');
         c.className = 'vterm-cmd';
-        c.textContent = cmd.padEnd(18, ' ');
+        c.textContent = cmd.padEnd(20, ' ');
         const d = document.createElement('span');
         d.textContent = desc;
         row.append(c, d);
@@ -196,46 +534,16 @@ function initTerminal() {
       ];
       art.forEach(l => line(l, 'vterm-neofetch-line'));
     },
-    fetch() { commands.neofetch(); },
-    sysinfo() { commands.neofetch(); },
+    fetch() { specialCommands.neofetch(); },
+    sysinfo() { specialCommands.neofetch(); },
     skills() { lines(FS['skills.txt']); },
     projects() { lines(FS.projects['README.md']); printLs(FS.projects); },
     contact() { lines(FS['contact.txt']); },
-    pwd() { line(toPathString(cwd)); },
-    ls(args) {
-      const target = args[0] ? resolvePath(cwd, args[0]) : cwd;
-      const node = lookup(target);
-      if (node === null) return line('ls: cannot access \'' + args[0] + '\': No such file or directory', 'vterm-err');
-      if (!isDir(node)) return line(args[0]);
-      printLs(node);
-    },
-    cd(args) {
-      if (!args[0]) { cwd = []; return; }
-      const target = resolvePath(cwd, args[0]);
-      const node = lookup(target);
-      if (node === null) return line('cd: no such file or directory: ' + args[0], 'vterm-err');
-      if (!isDir(node)) return line('cd: not a directory: ' + args[0], 'vterm-err');
-      cwd = target;
-    },
-    cat(args) {
-      if (!args.length) return line('cat: missing file operand', 'vterm-err');
-      args.forEach((arg) => {
-        const node = lookup(resolvePath(cwd, arg));
-        if (node === null) line('cat: ' + arg + ': No such file or directory', 'vterm-err');
-        else if (isDir(node)) line('cat: ' + arg + ': Is a directory', 'vterm-err');
-        else lines(node);
-      });
-    },
-    echo(args) { line(args.join(' ')); },
     theme(args) {
       const mode = args[0];
       if (mode !== 'dark' && mode !== 'light') return line('usage: theme dark|light', 'vterm-err');
       term.setAttribute('data-theme', mode);
       line('theme set to ' + mode);
-    },
-    history() {
-      if (!history.length) return line('(no history yet)');
-      history.forEach((h, i) => line(String(i + 1).padStart(3, ' ') + '  ' + h));
     },
     clear() { screen.textContent = ''; },
     play() { document.dispatchEvent(new CustomEvent('portfolio:play')); },
@@ -251,22 +559,33 @@ function initTerminal() {
     echoed.append(p, document.createTextNode(raw));
     if (!text) return;
 
-    history.push(text);
-    const [name, ...args] = text.split(/\s+/);
+    const [firstWord, ...rest] = text.split(/\s+/);
 
-    if (Object.prototype.hasOwnProperty.call(commands, name)) {
-      commands[name](args);
-    } else if (name.startsWith('./') && EXECUTABLES.includes(name.slice(2)) && lookup(resolvePath(cwd, name)) !== null) {
-      lines(lookup(resolvePath(cwd, name)));
+    // If it's a pipe command or sandbox-handled command
+    if (text.includes('|') || ['pwd', 'cd', 'ls', 'cat', 'grep', 'mkdir', 'touch', 'rm', 'echo', 'history'].includes(firstWord)) {
+      const res = sandbox.execute(text);
+      if (res.output === '__CLEAR__') {
+        screen.textContent = '';
+      } else {
+        if (res.output) lines(res.output);
+        if (res.error) line(res.error, 'vterm-err');
+      }
+    } else if (Object.prototype.hasOwnProperty.call(specialCommands, firstWord)) {
+      sandbox.history.push(text);
+      specialCommands[firstWord](rest);
+    } else if (firstWord.startsWith('./') && EXECUTABLES.includes(firstWord.slice(2)) && lookup(resolvePath(sandbox.cwd, firstWord)) !== null) {
+      sandbox.history.push(text);
+      lines(lookup(resolvePath(sandbox.cwd, firstWord)));
     } else {
-      line(name + ': command not found. Type \'help\' for the list of commands.', 'vterm-err');
+      sandbox.history.push(text);
+      line(firstWord + ': command not found. Type \'help\' for the list of commands.', 'vterm-err');
     }
   }
 
   function submitCommand(raw) {
     run(raw);
     input.value = '';
-    historyIndex = history.length;
+    historyIndex = sandbox.history.length;
     draft = '';
     updatePrompt();
     screen.scrollTop = screen.scrollHeight;
@@ -288,16 +607,33 @@ function initTerminal() {
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') {
       e.preventDefault();
-      if (historyIndex === history.length) draft = input.value;
+      if (historyIndex === sandbox.history.length) draft = input.value;
       if (historyIndex > 0) historyIndex--;
-      if (history.length) input.value = history[historyIndex];
+      if (sandbox.history.length) input.value = sandbox.history[historyIndex];
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      if (historyIndex < history.length) historyIndex++;
-      input.value = historyIndex === history.length ? draft : history[historyIndex];
+      if (historyIndex < sandbox.history.length) historyIndex++;
+      input.value = historyIndex === sandbox.history.length ? draft : sandbox.history[historyIndex];
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      const comp = sandbox.tabComplete(input.value);
+      if (comp.completion) {
+        const tokens = sandbox.parseArgs(input.value);
+        if (input.value.endsWith(' ')) {
+          input.value += comp.completion;
+        } else if (tokens.length > 0) {
+          tokens[tokens.length - 1] = comp.completion;
+          input.value = tokens.join(' ');
+        } else {
+          input.value = comp.completion;
+        }
+      } else if (comp.matches && comp.matches.length > 1) {
+        line(promptEl.textContent + ' ' + input.value, 'vterm-echo');
+        line(comp.matches.join('  '));
+      }
     } else if (e.key === 'l' && e.ctrlKey) {
       e.preventDefault();
-      commands.clear();
+      screen.textContent = '';
     }
   });
 
@@ -312,7 +648,7 @@ function initTerminal() {
 
   window.terminalApi = {
     clear() {
-      commands.clear();
+      screen.textContent = '';
     },
     toggleTheme() {
       const cur = term.getAttribute('data-theme') || 'dark';
