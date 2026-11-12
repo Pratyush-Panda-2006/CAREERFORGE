@@ -3,13 +3,14 @@ import { TABLES, SeatingPlan, seatingInterval } from './table-state.js';
 const root = document.getElementById('floor-plan');
 if (root) {
   const plan = new SeatingPlan();
+  if (typeof window !== 'undefined') window.floorPlanEngine = plan;
   const svg = root.querySelector('svg');
   const select = root.querySelector('select');
   const release = root.querySelector('#floor-release');
   const status = root.querySelector('#floor-status');
   let context = {}, contextKey = '', activeHold = null, selectedId = null;
   const nodes = new Map();
-  const labels = { available: 'Available', reserved: 'Reserved', occupied: 'Occupied now', held: 'Held', 'too-small': 'Too small', unavailable: 'Choose a future time' };
+  const labels = { available: 'Available', reserved: 'Reserved', occupied: 'Occupied now', held: 'Held', 'too-small': 'Too small', 'party-below-min': 'Party too small', unavailable: 'Choose a future time' };
   const announce = text => { status.textContent = text; };
   function emitSelection(table = null) {
     document.dispatchEvent(new CustomEvent('bistro:table-selection', { detail: table ? {
