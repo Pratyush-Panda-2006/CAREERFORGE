@@ -923,5 +923,32 @@
   </div>
   <!-- ===== END Issue #196 ===== -->
 
+  <section id="tactical-simulator" class="tactical-simulator" aria-labelledby="tactical-title">
+    <p class="tactical-kicker">TACTICAL LAB / SYNTHETIC MATCH</p>
+    <h2 id="tactical-title">Aurora vs Umbra</h2>
+    <p>A fictional five-player tactical simulation. Seeded Elo-weighted duels combine equipment, individual momentum and a planted objective bonus. These are illustrative rules, not real match predictions or tournament rules.</p>
+    <form>
+      <div class="tactical-fields">
+        <label>Replay seed<input name="seed" type="number" min="0" max="4294967295" step="1" value="42" required></label>
+        <label>Aurora Elo<input name="ratingA" type="number" min="800" max="2400" step="1" value="1600" required></label>
+        <label>Umbra Elo<input name="ratingB" type="number" min="800" max="2400" step="1" value="1600" required></label>
+        <label>Match format<select name="firstTo"><option value="7">First to 7 rounds</option><option value="13">First to 13 rounds</option></select></label>
+      </div>
+      <button type="submit">Start / restart simulation</button>
+    </form>
+    <div class="tactical-controls"><label for="tactical-speed">Playback speed</label><select id="tactical-speed"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option><option value="instant">Instant</option></select><button type="button" id="tactical-pause" disabled>Pause</button></div>
+    <p>Playback advances one event every 0.4 seconds at 1×; log timestamps show simulated round time. Changing speed does not change the generated match.</p>
+    <p id="tactical-score" class="tactical-score">Aurora 0 — 0 Umbra</p>
+    <p role="status" aria-live="polite">Choose ratings and a seed, then start the match.</p>
+    <div id="tactical-history" class="tactical-history" aria-label="Round winners"></div>
+    <h3>Economy trajectory</h3>
+    <p>Aurora: cyan · Umbra: pink. Budget units range 0–16,000; exact end-of-round values are in the table. These are simplified team budgets, not a real game's economy.</p>
+    <svg viewBox="0 0 600 160" role="img" aria-label="End-of-round team budget trajectories"></svg>
+    <details><summary>Economy rules</summary><p>Start with 800 units. Full buy costs 4,200; force buy 2,200; eco up to 500. Winners receive 3,250, losers receive 1,400 plus 500 for each additional loss (cap 3,400). Each elimination adds 60; planting adds 300. Budgets cap at 16,000. Attacking alternates every round. All players respawn each round; momentum persists within this simulation.</p></details>
+    <div class="tactical-table" tabindex="0" role="region" aria-label="Round economy history, scroll horizontally on small screens"><table><thead><tr><th scope="col">Round</th><th scope="col">Winner</th><th scope="col">Score</th><th scope="col">Aurora buy</th><th scope="col">Umbra buy</th><th scope="col">Aurora budget</th><th scope="col">Umbra budget</th></tr></thead><tbody></tbody></table></div>
+    <h3>Tactical event feed</h3><p>Shows the latest 100 events. Clutch percentages refer to a single duel, not the whole round.</p>
+    <ol aria-label="Simulated tactical events" aria-live="off"></ol>
+  </section>
+  <script type="module" src="match-simulator.js"></script>
 </body>
 </html>
