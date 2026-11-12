@@ -1619,3 +1619,239 @@ window.confirmDeposit = function confirmDeposit() {
   }
 })();
 
+
+/* ==========================================================
+   Fraud Inspection Engine (Issue #450)
+   Pure rule functions and scoring first; the UI wiring follows below.
+   ========================================================== */
+var FraudDetector = (function () {
+  'use strict';
+
+  var DEFAULT_CONFIG = {
+    velocityWindowMinutes: 60,
+    velocityMaxTransactions: 3,
+    geoMaxSpeedKmh: 900,
+    geoMinDistanceKm: 500,
+    spikeMultiplier: 4,
+    spikeMinSamples: 2,
+    blacklistedCategories: ['Gambling', 'Crypto Mixer', 'Prepaid Cards'],
+    offHoursStart: 0,
+    offHoursEnd: 5,
+    offHoursMinAmount: 1000,
+    weights: { velocity: 30, geo: 35, spike: 30, blacklist: 45, offHours: 25 }
+  };
+
+  var BANDS = [
+    { id: 'green', label: 'Green', min: 0, max: 29 },
+    { id: 'yellow', label: 'Yellow', min: 30, max: 69 },
+    { id: 'red', label: 'Red', min: 70, max: 100 }
+  ];
+
+  var HOME = { city: 'New York', lat: 40.7128, lon: -74.006 };
+  var LONDON = { city: 'London', lat: 51.5074, lon: -0.1278 };
+  var VALLETTA = { city: 'Valletta', lat: 35.8997, lon: 14.5146 };
+  var LAGOS = { city: 'Lagos', lat: 6.5244, lon: 3.3792 };
+
+  // Time of day for each ledger.js record. The fraud-only fields live here
+  // so ledger.js and its exports stay exactly as they were.
+  var LEDGER_TIMES = {
+    1: '15:20', 2: '09:00', 3: '13:45', 4: '08:10', 5: '16:30', 6: '09:00',
+    7: '07:30', 8: '08:05', 9: '14:15', 10: '11:40', 11: '08:10', 12: '09:00'
+  };
+
+  // Synthetic high-risk demo records (illustrative only, not real accounts).
+  var SYNTHETIC = [
+    { id: 101, ts: '2026-10-27T16:10:00Z', merchant: 'Aurora Gift Cards', category: 'Transfers', amount: -2300, loc: LONDON },
+    { id: 102, ts: '2026-10-28T10:02:00Z', merchant: 'QuickPay Wallet', category: 'Transfers', amount: -250, loc: HOME },
+    { id: 103, ts: '2026-10-28T10:09:00Z', merchant: 'QuickPay Wallet', category: 'Transfers', amount: -250, loc: HOME },
+    { id: 104, ts: '2026-10-28T10:14:00Z', merchant: 'QuickPay Wallet', category: 'Transfers', amount: -250, loc: HOME },
+    { id: 105, ts: '2026-10-28T10:21:00Z', merchant: 'QuickPay Wallet', category: 'Transfers', amount: -250, loc: HOME },
+    { id: 106, ts: '2026-10-29T12:30:00Z', merchant: 'Ledgerly Pro', category: 'Subscriptions', amount: -480, loc: HOME },
+    { id: 107, ts: '2026-10-30T02:40:00Z', merchant: 'Lucky Orbit Casino', category: 'Gambling', amount: -3800, loc: VALLETTA },
+    { id: 108, ts: '2026-10-30T03:15:00Z', merchant: 'Nimbus Mixer', category: 'Crypto Mixer', amount: -6200, loc: LAGOS }
+  ];
+
+  function num(v, fallback, min, max) {
+    var n = typeof v === 'string' && v.trim() === '' ? NaN : Number(v);
+    if (!isFinite(n)) return fallback;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  /** Merges user input over the defaults, coercing and clamping every value. */
+  function normalizeConfig(input) {
+    var c = input || {};
+    var d = DEFAULT_CONFIG;
+    var list = c.blacklistedCategories;
+    if (typeof list === 'string') list = list.split(',');
+    if (!Array.isArray(list)) list = d.blacklistedCategories;
+    var weights = {};
+    Object.keys(d.weights).forEach(function (k) {
+      weights[k] = num(c.weights && c.weights[k], d.weights[k], 0, 100);
+    });
+    return {
+      velocityWindowMinutes: num(c.velocityWindowMinutes, d.velocityWindowMinutes, 1, 1440),
+      velocityMaxTransactions: Math.round(num(c.velocityMaxTransactions, d.velocityMaxTransactions, 1, 50)),
+      geoMaxSpeedKmh: num(c.geoMaxSpeedKmh, d.geoMaxSpeedKmh, 1, 20000),
+      geoMinDistanceKm: num(c.geoMinDistanceKm, d.geoMinDistanceKm, 0, 20000),
+      spikeMultiplier: num(c.spikeMultiplier, d.spikeMultiplier, 1.1, 1000),
+      spikeMinSamples: Math.round(num(c.spikeMinSamples, d.spikeMinSamples, 1, 50)),
+      blacklistedCategories: list.map(function (s) { return String(s).trim(); }).filter(Boolean),
+      offHoursStart: Math.round(num(c.offHoursStart, d.offHoursStart, 0, 23)),
+      offHoursEnd: Math.round(num(c.offHoursEnd, d.offHoursEnd, 0, 24)),
+      offHoursMinAmount: num(c.offHoursMinAmount, d.offHoursMinAmount, 0, 100000000),
+      weights: weights
+    };
+  }
+
+  function time(tx) {
+    return new Date(tx.ts).getTime();
+  }
+
+  function haversineKm(a, b) {
+    var rad = Math.PI / 180;
+    var dLat = (b.lat - a.lat) * rad;
+    var dLon = (b.lon - a.lon) * rad;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 6371 * 2 * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  function trigger(rule, label, weight, explanation) {
+    return { rule: rule, label: label, weight: weight, explanation: explanation };
+  }
+
+  function usd(n) {
+    return '$' + Math.round(Math.abs(n) * 100) / 100;
+  }
+
+  /**
+   * Every rule is (tx, history, config) -> null | { rule, label, weight, explanation }.
+   * history holds the transactions strictly before tx, oldest first.
+   */
+  function ruleVelocity(tx, history, config) {
+    var windowMs = config.velocityWindowMinutes * 60000;
+    var end = time(tx);
+    var inWindow = history.filter(function (h) {
+      return end - time(h) <= windowMs;
+    }).length + 1;
+    if (inWindow <= config.velocityMaxTransactions) return null;
+    return trigger('velocity', 'Velocity', config.weights.velocity,
+      inWindow + ' transactions within ' + config.velocityWindowMinutes + ' min (limit ' + config.velocityMaxTransactions + ').');
+  }
+
+  function ruleGeoJump(tx, history, config) {
+    if (!history.length || !tx.loc) return null;
+    var prev = history[history.length - 1];
+    if (!prev.loc) return null;
+    var km = haversineKm(prev.loc, tx.loc);
+    if (km < config.geoMinDistanceKm) return null;
+    // Anything under a minute apart counts as one minute, so we never divide by zero.
+    var hours = Math.max(time(tx) - time(prev), 60000) / 3600000;
+    var speed = km / hours;
+    if (speed <= config.geoMaxSpeedKmh) return null;
+    return trigger('geo', 'Geo jump', config.weights.geo,
+      Math.round(km) + ' km from ' + prev.loc.city + ' to ' + tx.loc.city + ' in ' + (Math.round(hours * 10) / 10) +
+      ' h implies ' + Math.round(speed) + ' km/h (limit ' + config.geoMaxSpeedKmh + ').');
+  }
+
+  function ruleAmountSpike(tx, history, config) {
+    function mean(list) {
+      return list.reduce(function (s, h) { return s + Math.abs(h.amount); }, 0) / list.length;
+    }
+    // Compare like with like: money out against money out, money in against money in.
+    var sameWay = history.filter(function (h) { return (h.amount < 0) === (tx.amount < 0); });
+    var sameMerchant = sameWay.filter(function (h) { return h.merchant === tx.merchant; });
+    var sameCategory = sameWay.filter(function (h) { return h.category === tx.category; });
+    var basis = null;
+    var label = '';
+    if (sameMerchant.length >= config.spikeMinSamples) { basis = sameMerchant; label = tx.merchant; }
+    else if (sameCategory.length >= config.spikeMinSamples) { basis = sameCategory; label = tx.category; }
+    if (!basis) return null;
+    var baseline = mean(basis);
+    if (baseline <= 0 || Math.abs(tx.amount) < baseline * config.spikeMultiplier) return null;
+    return trigger('spike', 'Amount spike', config.weights.spike,
+      usd(tx.amount) + ' is ' + (Math.round(Math.abs(tx.amount) / baseline * 10) / 10) + 'x the ' + label +
+      ' baseline of ' + usd(baseline) + ' (limit ' + config.spikeMultiplier + 'x).');
+  }
+
+  function ruleBlacklist(tx, history, config) {
+    var hit = config.blacklistedCategories.some(function (c) {
+      return c.toLowerCase() === String(tx.category).toLowerCase();
+    });
+    if (!hit) return null;
+    return trigger('blacklist', 'Blacklisted category', config.weights.blacklist,
+      tx.category + ' is on the blacklisted merchant category list.');
+  }
+
+  function ruleOffHours(tx, history, config) {
+    if (tx.amount >= 0) return null;
+    var d = new Date(tx.ts);
+    var hour = d.getUTCHours();
+    var inside = config.offHoursStart <= config.offHoursEnd
+      ? hour >= config.offHoursStart && hour < config.offHoursEnd
+      : hour >= config.offHoursStart || hour < config.offHoursEnd;
+    if (!inside || Math.abs(tx.amount) < config.offHoursMinAmount) return null;
+    return trigger('offHours', 'Off-hours transfer', config.weights.offHours,
+      usd(tx.amount) + ' sent at ' + String(hour).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0') + ' UTC, inside the ' +
+      config.offHoursStart + ':00-' + config.offHoursEnd + ':00 window and above ' + usd(config.offHoursMinAmount) + '.');
+  }
+
+  var RULES = [ruleVelocity, ruleGeoJump, ruleAmountSpike, ruleBlacklist, ruleOffHours];
+
+  function band(score) {
+    var s = Math.min(100, Math.max(0, Math.round(score)));
+    for (var i = 0; i < BANDS.length; i++) {
+      if (s >= BANDS[i].min && s <= BANDS[i].max) return BANDS[i];
+    }
+    return BANDS[0];
+  }
+
+  function scoreTransaction(tx, history, config) {
+    var cfg = normalizeConfig(config);
+    var triggers = RULES.map(function (rule) { return rule(tx, history, cfg); }).filter(Boolean);
+    var raw = triggers.reduce(function (s, t) { return s + t.weight; }, 0);
+    var score = Math.min(100, Math.max(0, Math.round(raw)));
+    var b = band(score);
+    return { tx: tx, triggers: triggers, rawScore: raw, score: score, band: b.id, bandLabel: b.label };
+  }
+
+  /** Scores a whole list; each transaction only sees earlier ones. Returns results oldest first. */
+  function scoreAll(list, config) {
+    var cfg = normalizeConfig(config);
+    var sorted = list.slice().sort(function (a, b) { return time(a) - time(b) || a.id - b.id; });
+    return sorted.map(function (tx, i) { return scoreTransaction(tx, sorted.slice(0, i), cfg); });
+  }
+
+  /** Ledger records plus the synthetic ones, with timestamp and location added. Does not mutate the input. */
+  function buildDataset(ledgerTransactions) {
+    var base = (ledgerTransactions || []).map(function (t) {
+      return {
+        id: t.id,
+        ts: t.date + 'T' + (LEDGER_TIMES[t.id] || '12:00') + ':00Z',
+        merchant: t.merchant,
+        category: t.category,
+        amount: t.amount,
+        loc: HOME
+      };
+    });
+    return base.concat(SYNTHETIC.map(function (t) { return Object.assign({}, t); }));
+  }
+
+  return {
+    DEFAULT_CONFIG: DEFAULT_CONFIG,
+    BANDS: BANDS,
+    RULES: RULES,
+    normalizeConfig: normalizeConfig,
+    haversineKm: haversineKm,
+    ruleVelocity: ruleVelocity,
+    ruleGeoJump: ruleGeoJump,
+    ruleAmountSpike: ruleAmountSpike,
+    ruleBlacklist: ruleBlacklist,
+    ruleOffHours: ruleOffHours,
+    band: band,
+    scoreTransaction: scoreTransaction,
+    scoreAll: scoreAll,
+    buildDataset: buildDataset
+  };
+})();
+/* END FraudDetector */
