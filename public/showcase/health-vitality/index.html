@@ -997,6 +997,178 @@
     </div>
   </section>
 
+  <!-- ===== BEGIN Issue #411: Daily Micro-Habit Stacking Checklist with Streak Gamification ===== -->
+  <section class="habit-stack-section" id="daily-habit-stack-section" aria-labelledby="habit-stack-title">
+    <div class="habit-stack-container">
+      <div class="habit-stack-header">
+        <div class="hs-header-left">
+          <span class="pill hs-pill">⚡ LONGEVITY MICRO-HABIT STACK</span>
+          <h2 id="habit-stack-title">Daily Longevity Habit Stack &amp; Streak Engine</h2>
+          <p class="hs-sub">Stack scientifically validated micro-habits to optimize cellular vitality, circadian entrainment, and mitochondrial health. Earn daily streak multipliers and track your habit progression in real time.</p>
+        </div>
+
+        <!-- Gamified Streak Badge & Controls -->
+        <div class="hs-streak-box">
+          <div class="streak-fire-wrap">
+            <span class="streak-flame" aria-hidden="true">🔥</span>
+            <div class="streak-digits">
+              <strong id="habitStreakDays">14</strong>
+              <span>DAY STREAK</span>
+            </div>
+          </div>
+          <div class="streak-multiplier-badge" id="streakMultiplierBadge">2.5× Longevity Score</div>
+          <div class="hs-sound-toggle">
+            <button type="button" class="btn-sound-toggle" id="habitSoundToggle" aria-label="Toggle chime sound feedback" title="Toggle audio chime sound">
+              <span id="soundIcon">🔔</span> <span id="soundText">Chime: ON</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Layout: Progress Ring Hero + Habits Checklist -->
+      <div class="hs-main-grid">
+        <!-- Left: Animated SVG Circular Progress Ring & Days Track -->
+        <div class="hs-progress-card">
+          <h3 class="progress-card-title">Daily Protocol Completion</h3>
+          <div class="ring-wrapper">
+            <svg class="hs-progress-ring" viewBox="0 0 160 160" width="160" height="160" aria-hidden="true">
+              <circle class="ring-bg" cx="80" cy="80" r="68" />
+              <circle class="ring-fill" id="habitProgressRing" cx="80" cy="80" r="68" stroke-dasharray="427.26" stroke-dashoffset="427.26" />
+            </svg>
+            <div class="ring-content">
+              <span class="ring-percentage" id="habitPercentageDisplay">0%</span>
+              <span class="ring-fraction" id="habitFractionDisplay">0 of 6 Done</span>
+            </div>
+          </div>
+
+          <!-- Weekly Streak Dots -->
+          <div class="weekly-streak-wrap">
+            <span class="weekly-lbl">Weekly Consistency:</span>
+            <div class="weekly-dots-row" id="weeklyStreakDots">
+              <span class="w-day complete" title="Monday: Completed"><span>M</span><i class="dot-check">✓</i></span>
+              <span class="w-day complete" title="Tuesday: Completed"><span>T</span><i class="dot-check">✓</i></span>
+              <span class="w-day complete" title="Wednesday: Completed"><span>W</span><i class="dot-check">✓</i></span>
+              <span class="w-day complete" title="Thursday: Completed"><span>T</span><i class="dot-check">✓</i></span>
+              <span class="w-day complete" title="Friday: Completed"><span>F</span><i class="dot-check">✓</i></span>
+              <span class="w-day today" id="todayDot" title="Saturday (Today)"><span>S</span><i class="dot-check" id="todayCheckIcon">•</i></span>
+              <span class="w-day pending" title="Sunday: Upcoming"><span>S</span><i class="dot-check">○</i></span>
+            </div>
+          </div>
+
+          <!-- Protocol Status & Reset Buttons -->
+          <div class="hs-protocol-status" id="hsProtocolStatus">
+            Complete your daily micro-habits to lock in today's streak!
+          </div>
+          <div class="hs-action-row">
+            <button type="button" class="btn-hs-quick" id="btnToggleAllHabits">Complete All</button>
+            <button type="button" class="btn-hs-reset" id="btnResetHabits" title="Reset habit checklist">↺ Reset Day</button>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Habits Checklist -->
+        <div class="hs-checklist-card">
+          <div class="checklist-header-row">
+            <h4>Daily Stack Protocol</h4>
+            <span class="stack-badge-tag">Evidence-Based Longevity Stack</span>
+          </div>
+
+          <div class="habits-list" role="list" aria-label="Longevity habits checklist">
+            <!-- Habit 1 -->
+            <div class="habit-item" data-habit="sunlight" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="habit-checkbox">
+                <span class="check-mark">✓</span>
+              </div>
+              <div class="habit-icon-box">☀️</div>
+              <div class="habit-content">
+                <div class="habit-title-row">
+                  <strong class="habit-title">Morning Sunlight Exposure (15–20 min)</strong>
+                  <span class="habit-mech-tag">Circadian Cortisol Peak</span>
+                </div>
+                <p class="habit-desc">Outdoor photon intake within 1 hr of waking to suppress melatonin, optimize dopamine, and anchor sleep timing.</p>
+              </div>
+            </div>
+
+            <!-- Habit 2 -->
+            <div class="habit-item" data-habit="creatine" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="habit-checkbox">
+                <span class="check-mark">✓</span>
+              </div>
+              <div class="habit-icon-box">🧪</div>
+              <div class="habit-content">
+                <div class="habit-title-row">
+                  <strong class="habit-title">5g Micronized Creatine Monohydrate</strong>
+                  <span class="habit-mech-tag">Cellular ATP Buffer</span>
+                </div>
+                <p class="habit-desc">Phosphocreatine shuttle supporting rapid neuronal energy replenishment, cognitive resilience, and lean mass preservation.</p>
+              </div>
+            </div>
+
+            <!-- Habit 3 -->
+            <div class="habit-item" data-habit="cold" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="habit-checkbox">
+                <span class="check-mark">✓</span>
+              </div>
+              <div class="habit-icon-box">🧊</div>
+              <div class="habit-content">
+                <div class="habit-title-row">
+                  <strong class="habit-title">Cold Shower / Thermal Reset (2–3 min)</strong>
+                  <span class="habit-mech-tag">Norepinephrine &amp; PGC-1α</span>
+                </div>
+                <p class="habit-desc">Acute cold thermogenesis inducing brown adipose tissue activation, sustained dopamine elevation, and anti-inflammatory signaling.</p>
+              </div>
+            </div>
+
+            <!-- Habit 4 -->
+            <div class="habit-item" data-habit="steps" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="habit-checkbox">
+                <span class="check-mark">✓</span>
+              </div>
+              <div class="habit-icon-box">🚶‍♂️</div>
+              <div class="habit-content">
+                <div class="habit-title-row">
+                  <strong class="habit-title">10,000 Daily Steps Baseline</strong>
+                  <span class="habit-mech-tag">NEAT &amp; Insulin Sensitivity</span>
+                </div>
+                <p class="habit-desc">Non-exercise activity thermogenesis stimulating GLUT4 glucose uptake and endothelial nitric oxide release.</p>
+              </div>
+            </div>
+
+            <!-- Habit 5 -->
+            <div class="habit-item" data-habit="zone2" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="habit-checkbox">
+                <span class="check-mark">✓</span>
+              </div>
+              <div class="habit-icon-box">🏃‍♀️</div>
+              <div class="habit-content">
+                <div class="habit-title-row">
+                  <strong class="habit-title">Zone 2 Cardio Steady-State (45 min)</strong>
+                  <span class="habit-mech-tag">Mitochondrial Biogenesis</span>
+                </div>
+                <p class="habit-desc">Sub-lactate threshold endurance maintaining 1.5–2.0 mmol/L blood lactate to maximize fat oxidation efficiency and cellular longevity.</p>
+              </div>
+            </div>
+
+            <!-- Habit 6 -->
+            <div class="habit-item" data-habit="electrolytes" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="habit-checkbox">
+                <span class="check-mark">✓</span>
+              </div>
+              <div class="habit-icon-box">💧</div>
+              <div class="habit-content">
+                <div class="habit-title-row">
+                  <strong class="habit-title">Electrolyte Mineral Hydration (500ml)</strong>
+                  <span class="habit-mech-tag">Cellular Osmolyte Balance</span>
+                </div>
+                <p class="habit-desc">Bioavailable sodium, potassium, and magnesium malate to sustain membrane potential and blood pressure regulation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #411 ===== -->
+
   <!-- ===== BEGIN Issue #293: Intermittent Fasting Tracker ===== -->
   <section class="fasting-section" id="fasting-tracker-section" aria-labelledby="fasting-title">
     <div class="fasting-card-container">
