@@ -39,6 +39,7 @@
           <button type="button" class="dock-btn" id="dock-forward-btn" title="Forward 15 seconds" aria-label="Forward 15 seconds">15s ↻</button>
           <button type="button" class="dock-speed-pill" id="dock-speed-pill" onclick="toggleSpeed()" title="Cycle Playback Speed">1x</button>
           <button type="button" class="dock-speed-pill dock-eq-pill" id="dock-eq-pill" title="Open the equalizer" aria-label="Equalizer preset: Flat. Open equalizer">EQ Flat</button>
+          <button type="button" class="dock-speed-pill dock-chapters-btn" id="dock-chapters-btn" title="Scroll to chapter navigator" aria-label="Open chapter navigator">📑 Chapters (<span id="dock-chapter-badge">Ch 1/5</span>)</button>
           <button type="button" class="dock-speed-pill dock-transcript-btn" id="dock-transcript-btn" title="View interactive karaoke transcript">📖 Transcript</button>
         </div>
 
@@ -47,6 +48,7 @@
           <div class="scrubber-bar-container">
             <input type="range" class="dock-scrubber" id="dock-scrubber" min="0" max="2880" value="0" step="1" aria-label="Episode timeline scrubber" aria-valuetext="00:00 of 48:00" />
             <div class="scrubber-fill" id="scrubber-fill"></div>
+            <div class="chapter-markers-container" id="chapter-markers-container" aria-hidden="true"></div>
           </div>
           <span class="time-label" id="duration-label">48:00</span>
         </div>
@@ -95,6 +97,54 @@
     </div>
   </section>
   <!-- ===== Audio Equalizer Preset Selector (Issue #205) END ===== -->
+
+  <!-- ===== Episode Audio Chapter Markers Navigator (Issue #417) START ===== -->
+  <section class="chapters-section" id="episode-chapters-section" aria-labelledby="chapters-title">
+    <div class="chapters-container">
+      <div class="chapters-header">
+        <div class="chapters-header-left">
+          <div class="tag">📑 EPISODE CHAPTERS &amp; TOPICS</div>
+          <h2 id="chapters-title">Interactive Chapter Navigator</h2>
+          <p>Jump directly to discussion milestones, explore chapter topic summaries, and track episode progress.</p>
+        </div>
+        <div class="chapters-stepper-wrap" role="group" aria-label="Chapter stepper navigation">
+          <button type="button" class="chapter-step-btn" id="chapter-prev-btn" title="Previous chapter" aria-label="Skip to previous chapter">⏮ Prev</button>
+          <div class="chapter-stepper-info">
+            <span class="chapter-stepper-current" id="chapter-stepper-current">Chapter 1 of 5</span>
+            <span class="chapter-stepper-title" id="chapter-stepper-title">Introduction &amp; Spatial Computing</span>
+          </div>
+          <button type="button" class="chapter-step-btn" id="chapter-next-btn" title="Next chapter" aria-label="Skip to next chapter">Next ⏭</button>
+        </div>
+      </div>
+
+      <!-- Active Chapter Highlight Banner -->
+      <div class="active-chapter-banner" id="active-chapter-banner">
+        <div class="banner-badge-col">
+          <span class="now-playing-pill"><span class="pulse-dot"></span> CURRENT CHAPTER</span>
+          <span class="banner-time" id="banner-chapter-time">00:00 - 03:40</span>
+        </div>
+        <div class="banner-details">
+          <h3 id="banner-chapter-title">Introduction &amp; Spatial Computing Primer</h3>
+          <p id="banner-chapter-summary">Sarah welcomes Dr. Aris Thorne (OpenAI Lead) to explore spatial compute architectures and autonomous agency.</p>
+          <div class="banner-progress-wrap">
+            <div class="banner-progress-bar" role="progressbar" aria-label="Chapter progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div class="banner-progress-fill" id="banner-chapter-fill" style="width: 0%"></div>
+            </div>
+            <span class="banner-progress-pct" id="banner-chapter-pct">0% complete</span>
+          </div>
+        </div>
+        <div class="banner-actions">
+          <button type="button" class="banner-play-btn" id="banner-jump-btn" title="Replay chapter from beginning">↺ Replay Chapter</button>
+        </div>
+      </div>
+
+      <!-- Chapter Cards & Summary Accordion -->
+      <div class="chapters-list" id="chapters-list" role="list" aria-label="Episode discussion chapters">
+        <!-- Dynamically rendered via script.js -->
+      </div>
+    </div>
+  </section>
+  <!-- ===== Episode Audio Chapter Markers Navigator (Issue #417) END ===== -->
 
   <!-- Interactive Transcript Reader Section -->
   <section class="transcript-section" id="episode-transcript-section">

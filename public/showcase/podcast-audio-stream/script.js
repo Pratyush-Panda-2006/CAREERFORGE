@@ -150,6 +150,7 @@ function toggleSpeed() {
   saveState();
   return currentSpeed;
 }
+window.toggleSpeed = toggleSpeed;
 
 function applySpeed() {
   const currentSpeed = speeds[currentSpeedIndex];
@@ -199,6 +200,9 @@ function playEpisode(epName) {
   }
   selectedEpisode = next;
   DURATION = next === '141' ? 3240 : 2880;
+  if (typeof renderChapters === 'function') {
+    renderChapters(selectedEpisode);
+  }
   updateTimeUI();
   setEpisodeHeader(selectedEpisode);
   showDock();
@@ -207,6 +211,7 @@ function playEpisode(epName) {
   updatePlayButtonIcon();
   saveState();
 }
+window.playEpisode = playEpisode;
 
 function applyVolume() {
   const slider = document.getElementById('dock-volume');
@@ -319,6 +324,9 @@ function updatePlayButtonIcon() {
   if (heroPlayBtn) {
     heroPlayBtn.textContent = isPlaying ? '⏸ Pause Episode (#142)' : '▶ Play Latest Episode (#142)';
   }
+  if (typeof updateChapterPlayState === 'function') {
+    updateChapterPlayState();
+  }
 }
 
 function jumpToTimestamp(seconds) {
@@ -358,6 +366,10 @@ function updateTimeUI(forceScroll = false) {
 
   if (activeSeg && activeSeg.id !== activeSegmentId) {
     highlightSegment(activeSeg.id, forceScroll);
+  }
+
+  if (typeof updateActiveChapter === 'function') {
+    updateActiveChapter();
   }
 }
 
@@ -494,8 +506,384 @@ function escapeHtml(str) {
 }
 
 function escapeRegex(str) {
-  return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  return str.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
+
+// ===== BEGIN Issue #417: Episode Audio Chapter Markers Navigator =====
+const EPISODE_CHAPTERS = {
+  '142': [
+    {
+      id: 'ch-142-1',
+      index: 1,
+      title: 'Introduction & Spatial Computing Primer',
+      start: 0,
+      end: 220,
+      summary: 'Sarah welcomes Dr. Aris Thorne (OpenAI Lead) to explore the frontier of spatial computing architectures and autonomous agency.',
+      highlights: [
+        'Welcome & episode context',
+        'Parameter scale vs real-time execution context',
+        'Hardware convergence of spatial lenses & edge inference'
+      ]
+    },
+    {
+      id: 'ch-142-2',
+      index: 2,
+      title: 'Recursive Context & Agent Memory Architecture',
+      start: 220,
+      end: 615,
+      summary: 'Examining hierarchical context compression, memory degradation bounds, and scratchpad tool convergence in multi-step agents.',
+      highlights: [
+        'Preventing token context bloat and hallucination drift',
+        'Episodic vs semantic vector memory tiers',
+        'Deterministic tool execution contracts'
+      ]
+    },
+    {
+      id: 'ch-142-3',
+      index: 3,
+      title: 'Spatial Compute Integration & Multimodal Sensors',
+      start: 615,
+      end: 1185,
+      summary: 'How millimeter depth sensors, 6-DoF tracking, and ambient acoustic feeds ground LLMs in physical environments without sensory lag.',
+      highlights: [
+        '6-DoF telemetry feeds into unified spatial embeddings',
+        'Sub-15ms perceptual latency targets',
+        'Multimodal transformer disambiguation of hand gestures'
+      ]
+    },
+    {
+      id: 'ch-142-4',
+      index: 4,
+      title: 'Autonomous Subagent Swarms & Orchestration Protocols',
+      start: 1185,
+      end: 1960,
+      summary: 'Designing distributed subagent networks with peer consensus, rollback boundaries, and real-time execution sandboxes.',
+      highlights: [
+        'Coordinator vs specialist agent topologies',
+        'Consensus protocols for parallel task execution',
+        'Circuit breakers and rollback verification gates'
+      ]
+    },
+    {
+      id: 'ch-142-5',
+      index: 5,
+      title: 'Future Roadmap: The Next 3 Years in Spatial AI',
+      start: 1960,
+      end: 2880,
+      summary: 'Closing perspectives on open foundation weights, consumer spatial hardware price curves, and upcoming open-source releases.',
+      highlights: [
+        'Consumer wearable glass ergonomics and thermal limits',
+        'Societal and privacy governance of ambient observers',
+        'Dr. Thorne closing recommendations & community Q&A'
+      ]
+    }
+  ],
+  '141': [
+    {
+      id: 'ch-141-1',
+      index: 1,
+      title: 'Opening & Billion-Scale Vector Indexing Landscape',
+      start: 0,
+      end: 510,
+      summary: 'Marcus Vance from ChromaDB breaks down the memory ceiling of graph-based indexes when scaling beyond 10 billion chunks.',
+      highlights: [
+        'Marcus Vance introduction & ChromaDB origin',
+        'HNSW memory overhead at scale',
+        'In-RAM graphs vs disk-backed tiered storage'
+      ]
+    },
+    {
+      id: 'ch-141-2',
+      index: 2,
+      title: 'Vector Quantization: Product (PQ) & Scalar (SQ8)',
+      start: 510,
+      end: 1200,
+      summary: 'Compressing dense embeddings by 75-90% using Product and Scalar Quantization while preserving recall at 95%+ precision.',
+      highlights: [
+        'Sub-vector centroid clustering mathematics',
+        'Recall retention benchmark results',
+        'NVMe direct I/O memory mapping'
+      ]
+    },
+    {
+      id: 'ch-141-3',
+      index: 3,
+      title: 'Distributed Partitioning & Consensus Protocols',
+      start: 1200,
+      end: 2175,
+      summary: 'High-throughput write shards, Raft-based consensus logs, and seamless dynamic rebalancing without cluster downtime.',
+      highlights: [
+        'Consistent hashing ring across 64 storage nodes',
+        'Write-ahead logging and snapshot sync',
+        'Cross-region replica consistency under high load'
+      ]
+    },
+    {
+      id: 'ch-141-4',
+      index: 4,
+      title: 'Hybrid Search: Dense Semantic Vectors + Sparse BM25',
+      start: 2175,
+      end: 2820,
+      summary: 'Blending vector similarity scoring with inverted lexical tokens using Reciprocal Rank Fusion (RRF) for zero-drop recall.',
+      highlights: [
+        'Reciprocal Rank Fusion equation and weighting',
+        'Handling exact part numbers and acronym edge cases',
+        'Production query latency profiling'
+      ]
+    },
+    {
+      id: 'ch-141-5',
+      index: 5,
+      title: 'Future of Embeddings & Late Interaction Models',
+      start: 2820,
+      end: 3240,
+      summary: 'Multi-vector token interactions (ColBERT), memory compression trends, and the ChromaDB 2026 developer roadmap.',
+      highlights: [
+        'ColBERT token-level scoring vs single vector pooling',
+        'Roadmap sneak peeks & open-source contributions',
+        'Closing reflections for systems engineers'
+      ]
+    }
+  ]
+};
+
+let activeChapterId = null;
+
+function getCurrentChapters() {
+  return EPISODE_CHAPTERS[selectedEpisode] || EPISODE_CHAPTERS['142'];
+}
+
+function renderChapters(epId) {
+  const chapters = EPISODE_CHAPTERS[epId] || EPISODE_CHAPTERS['142'];
+  const listEl = document.getElementById('chapters-list');
+  const markersEl = document.getElementById('chapter-markers-container');
+
+  if (listEl) {
+    listEl.innerHTML = '';
+    chapters.forEach((ch, idx) => {
+      const card = document.createElement('div');
+      card.className = `chapter-card ${idx === 0 ? 'expanded' : ''}`;
+      card.id = `card-${ch.id}`;
+      card.setAttribute('role', 'listitem');
+      card.dataset.chapterId = ch.id;
+
+      const highlightsHtml = ch.highlights.map((h, hIdx) => {
+        const step = (ch.end - ch.start) / (ch.highlights.length + 1);
+        const hTime = Math.round(ch.start + step * (hIdx + 1));
+        return `<li data-seek="${hTime}" title="Seek to ${formatTime(hTime)}">${escapeHtml(h)} (${formatTime(hTime)})</li>`;
+      }).join('');
+
+      card.innerHTML = `
+        <div class="chapter-card-header" tabindex="0" role="button" aria-expanded="${idx === 0 ? 'true' : 'false'}" aria-controls="body-${ch.id}">
+          <div class="chapter-card-left">
+            <span class="chapter-index-chip">${ch.index}</span>
+            <span class="chapter-timestamp-pill">${formatTime(ch.start)} – ${formatTime(ch.end)}</span>
+            <span class="chapter-card-title">${escapeHtml(ch.title)}</span>
+          </div>
+          <div class="chapter-card-right">
+            <div class="chapter-playing-bars" aria-hidden="true"><span></span><span></span><span></span></div>
+            <button type="button" class="chapter-jump-btn" data-time="${ch.start}" title="Jump to ${escapeHtml(ch.title)}">▶ Jump</button>
+            <span class="chapter-toggle-icon" aria-hidden="true">▼</span>
+          </div>
+        </div>
+        <div class="chapter-card-body" id="body-${ch.id}">
+          <p class="chapter-summary-text">${escapeHtml(ch.summary)}</p>
+          <div class="chapter-highlights-title">Discussion Highlights</div>
+          <ul class="chapter-highlights-list">${highlightsHtml}</ul>
+        </div>
+      `;
+
+      listEl.appendChild(card);
+    });
+  }
+
+  // Render scrubber tick markers
+  if (markersEl) {
+    markersEl.innerHTML = '';
+    chapters.forEach(ch => {
+      if (ch.start > 0) {
+        const tick = document.createElement('div');
+        tick.className = 'chapter-marker-tick';
+        const leftPct = (ch.start / DURATION) * 100;
+        tick.style.left = `${leftPct}%`;
+        tick.title = `${ch.title} (${formatTime(ch.start)})`;
+        tick.addEventListener('click', (e) => {
+          e.stopPropagation();
+          jumpToTimestamp(ch.start);
+        });
+        markersEl.appendChild(tick);
+      }
+    });
+  }
+
+  updateActiveChapter(true);
+}
+
+function updateActiveChapter(force = false) {
+  const chapters = getCurrentChapters();
+  if (!chapters || chapters.length === 0) return;
+
+  const currentCh = chapters.find(ch => currentTime >= ch.start && currentTime < ch.end) || chapters[chapters.length - 1];
+  if (!currentCh) return;
+
+  const chIdx = chapters.indexOf(currentCh);
+
+  // Stepper UI
+  const stepperCurrent = document.getElementById('chapter-stepper-current');
+  const stepperTitle = document.getElementById('chapter-stepper-title');
+  const prevBtn = document.getElementById('chapter-prev-btn');
+  const nextBtn = document.getElementById('chapter-next-btn');
+  const dockBadge = document.getElementById('dock-chapter-badge');
+
+  if (stepperCurrent) stepperCurrent.textContent = `Chapter ${currentCh.index} of ${chapters.length}`;
+  if (stepperTitle) stepperTitle.textContent = currentCh.title;
+  if (prevBtn) prevBtn.disabled = (chIdx === 0 && (currentTime - currentCh.start) <= 2);
+  if (nextBtn) nextBtn.disabled = (chIdx === chapters.length - 1);
+  if (dockBadge) dockBadge.textContent = `Ch ${currentCh.index}/${chapters.length}`;
+
+  // Banner UI
+  const bannerTime = document.getElementById('banner-chapter-time');
+  const bannerTitle = document.getElementById('banner-chapter-title');
+  const bannerSummary = document.getElementById('banner-chapter-summary');
+  const bannerFill = document.getElementById('banner-chapter-fill');
+  const bannerPct = document.getElementById('banner-chapter-pct');
+  const bannerBar = document.querySelector('.banner-progress-bar');
+
+  if (bannerTime) bannerTime.textContent = `${formatTime(currentCh.start)} – ${formatTime(currentCh.end)}`;
+  if (bannerTitle) bannerTitle.textContent = currentCh.title;
+  if (bannerSummary) bannerSummary.textContent = currentCh.summary;
+
+  const chDur = Math.max(1, currentCh.end - currentCh.start);
+  const chElapsed = Math.max(0, Math.min(currentTime - currentCh.start, chDur));
+  const progressPercent = Math.min(100, Math.round((chElapsed / chDur) * 100));
+
+  if (bannerFill) bannerFill.style.width = `${progressPercent}%`;
+  if (bannerPct) bannerPct.textContent = `${progressPercent}% complete`;
+  if (bannerBar) bannerBar.setAttribute('aria-valuenow', String(progressPercent));
+
+  // Active Chapter Card Highlighting
+  if (currentCh.id !== activeChapterId || force) {
+    activeChapterId = currentCh.id;
+    chapters.forEach(ch => {
+      const card = document.getElementById(`card-${ch.id}`);
+      if (!card) return;
+      const isCur = ch.id === currentCh.id;
+      card.classList.toggle('active-chapter', isCur);
+      if (isCur) {
+        card.classList.add('expanded');
+        const header = card.querySelector('.chapter-card-header');
+        if (header) header.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  updateChapterPlayState();
+}
+
+function updateChapterPlayState() {
+  document.querySelectorAll('.chapter-card').forEach(card => {
+    const isCur = card.dataset.chapterId === activeChapterId;
+    card.classList.toggle('is-playing', isCur && isPlaying);
+  });
+}
+
+function initChapterListeners() {
+  const chaptersList = document.getElementById('chapters-list');
+  if (chaptersList) {
+    chaptersList.addEventListener('click', (e) => {
+      // Click jump button
+      const jumpBtn = e.target.closest('.chapter-jump-btn');
+      if (jumpBtn) {
+        e.stopPropagation();
+        const time = parseFloat(jumpBtn.dataset.time);
+        jumpToTimestamp(time);
+        return;
+      }
+
+      // Click highlight item
+      const highlightItem = e.target.closest('.chapter-highlights-list li');
+      if (highlightItem && highlightItem.dataset.seek) {
+        e.stopPropagation();
+        const seekTime = parseFloat(highlightItem.dataset.seek);
+        jumpToTimestamp(seekTime);
+        return;
+      }
+
+      // Click card header to toggle accordion
+      const header = e.target.closest('.chapter-card-header');
+      if (header) {
+        const card = header.closest('.chapter-card');
+        if (card) {
+          const isExpanded = card.classList.toggle('expanded');
+          header.setAttribute('aria-expanded', String(isExpanded));
+        }
+      }
+    });
+
+    chaptersList.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const header = e.target.closest('.chapter-card-header');
+        if (header) {
+          e.preventDefault();
+          const card = header.closest('.chapter-card');
+          if (card) {
+            const isExpanded = card.classList.toggle('expanded');
+            header.setAttribute('aria-expanded', String(isExpanded));
+          }
+        }
+      }
+    });
+  }
+
+  // Prev / Next Steppers
+  const prevBtn = document.getElementById('chapter-prev-btn');
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      const chapters = getCurrentChapters();
+      const currentCh = chapters.find(ch => currentTime >= ch.start && currentTime < ch.end) || chapters[0];
+      const chIdx = chapters.indexOf(currentCh);
+      if (currentTime - currentCh.start > 3 || chIdx === 0) {
+        jumpToTimestamp(currentCh.start);
+      } else {
+        const target = chapters[Math.max(0, chIdx - 1)];
+        jumpToTimestamp(target.start);
+      }
+    });
+  }
+
+  const nextBtn = document.getElementById('chapter-next-btn');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      const chapters = getCurrentChapters();
+      const currentCh = chapters.find(ch => currentTime >= ch.start && currentTime < ch.end) || chapters[0];
+      const chIdx = chapters.indexOf(currentCh);
+      if (chIdx < chapters.length - 1) {
+        const target = chapters[chIdx + 1];
+        jumpToTimestamp(target.start);
+      }
+    });
+  }
+
+  // Replay chapter banner button
+  const replayBtn = document.getElementById('banner-jump-btn');
+  if (replayBtn) {
+    replayBtn.addEventListener('click', () => {
+      const chapters = getCurrentChapters();
+      const currentCh = chapters.find(ch => currentTime >= ch.start && currentTime < ch.end) || chapters[0];
+      jumpToTimestamp(currentCh.start);
+    });
+  }
+
+  // Dock chapters button scroll
+  const dockChaptersBtn = document.getElementById('dock-chapters-btn');
+  if (dockChaptersBtn) {
+    dockChaptersBtn.addEventListener('click', () => {
+      const section = document.getElementById('episode-chapters-section');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+}
+// ===== END Issue #417 =====
 
 function applyFilters() {
   const blocks = document.querySelectorAll('.transcript-block');
@@ -541,6 +929,8 @@ function applyFilters() {
 
 document.addEventListener('DOMContentLoaded', () => {
   renderTranscript();
+  renderChapters(selectedEpisode);
+  initChapterListeners();
   updateTimeUI();
   restoreState();
   applyVolume();
