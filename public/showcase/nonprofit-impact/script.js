@@ -2183,3 +2183,355 @@ if (typeof window !== 'undefined') {
   setSplit(50);
 })();
 /* ===== END Issue #353 ===== */
+
+/* ===== BEGIN Issue #415: Clean Water Well Project Fund Progress Bar & Geo-Coordinates ===== */
+(function initCleanWaterTracker() {
+  'use strict';
+
+  var WELL_PROJECTS = {
+    turkana: {
+      id: 'turkana',
+      name: 'Turkana Basin Solar Deep Borehole',
+      country: 'Turkana County, Kenya',
+      flag: '🇰🇪',
+      coords: '3°07\'12.4"N 35°36\'08.2"E',
+      depth: '180m Deep',
+      yield: '18,500 L / day',
+      solar: '5.4 kW Array',
+      status: 'Active Drilling & Solar Array Assembly',
+      desc: 'Accessing a subterranean aquifer 180 meters deep to replace contaminated seasonal riverbed pans with continuous solar-pumped clean drinking water.',
+      target: 10000,
+      baselineFunded: 7450,
+      currentFunded: 7450,
+      donors: 148,
+      lives: 3420,
+      trekSaved: '8.5 km',
+      pathogenDrop: '99.8%',
+      phasePill: 'Phase 3 of 4: In Progress',
+      phases: [
+        {
+          num: 'Phase 1',
+          title: 'Hydrogeological Survey',
+          status: 'completed',
+          statusText: 'Completed',
+          notes: 'Resistivity electrical sounding pinpointed fracture aquifer at 178m depth.'
+        },
+        {
+          num: 'Phase 2',
+          title: 'Rotary Rig Drilling & Casing',
+          status: 'completed',
+          statusText: 'Completed',
+          notes: '8-inch continuous slot stainless steel screens installed to bedrock.'
+        },
+        {
+          num: 'Phase 3',
+          title: 'Submersible Solar Pump',
+          status: 'inprogress',
+          statusText: 'In Progress',
+          notes: 'Installing Grundfos submersible solar pump and 20,000L elevated tank tower.'
+        },
+        {
+          num: 'Phase 4',
+          title: 'Distribution & Tap Stands',
+          status: 'upcoming',
+          statusText: 'Upcoming',
+          notes: '6 gravity-fed distribution tap stands reaching primary school and health clinic.'
+        }
+      ]
+    },
+    kassala: {
+      id: 'kassala',
+      name: 'Kassala Semi-Arid Community Borehole',
+      country: 'Kassala State, Eastern Sudan',
+      flag: '🇸🇩',
+      coords: '15°27\'04.8"N 36°24\'11.6"E',
+      depth: '145m Deep',
+      yield: '14,200 L / day',
+      solar: '4.8 kW Array',
+      status: 'Aquifer Casing & Soil Stabilization',
+      desc: 'Drilling past saline surface layers to tap a pristine fossil aquifer, protecting pastoralist communities from recurrent drought cycles.',
+      target: 8500,
+      baselineFunded: 5950,
+      currentFunded: 5950,
+      donors: 112,
+      lives: 2850,
+      trekSaved: '6.2 km',
+      pathogenDrop: '99.5%',
+      phasePill: 'Phase 2 of 4: In Progress',
+      phases: [
+        {
+          num: 'Phase 1',
+          title: 'Groundwater Geophysics',
+          status: 'completed',
+          statusText: 'Completed',
+          notes: 'Satellite radar mapping identified sweet water corridor between basalts.'
+        },
+        {
+          num: 'Phase 2',
+          title: 'Deep Borehole Casing',
+          status: 'inprogress',
+          statusText: 'In Progress',
+          notes: 'Gravel pack insertion and hydraulic test pumping reaching 14,200 L/hr.'
+        },
+        {
+          num: 'Phase 3',
+          title: 'Solar Photovoltaic Inverter',
+          status: 'upcoming',
+          statusText: 'Upcoming',
+          notes: 'Mounting 16 high-efficiency bifacial solar modules on anti-theft masts.'
+        },
+        {
+          num: 'Phase 4',
+          title: 'Community Water Kiosks',
+          status: 'upcoming',
+          statusText: 'Upcoming',
+          notes: 'Sanitation washrooms and livestock watering troughs separation.'
+        }
+      ]
+    },
+    chikwawa: {
+      id: 'chikwawa',
+      name: 'Chikwawa Shire Aquifer Community Well',
+      country: 'Southern Region, Malawi',
+      flag: '🇲🇼',
+      coords: '16°02\'21.5"S 34°48\'09.3"E',
+      depth: '95m Deep',
+      yield: '11,000 L / day',
+      solar: '3.6 kW Array',
+      status: 'Solar Filtration & Tap Stand Assembly',
+      desc: 'Replacing vulnerable flood-prone surface streams with sealed, pressurized borehole infrastructure powered 100% by sunlight.',
+      target: 6000,
+      baselineFunded: 4800,
+      currentFunded: 4800,
+      donors: 96,
+      lives: 1940,
+      trekSaved: '5.0 km',
+      pathogenDrop: '99.9%',
+      phasePill: 'Phase 3 of 4: In Progress',
+      phases: [
+        {
+          num: 'Phase 1',
+          title: 'Site Selection & Permitting',
+          status: 'completed',
+          statusText: 'Completed',
+          notes: 'Community water council established with 60% women leadership.'
+        },
+        {
+          num: 'Phase 2',
+          title: 'Rig Mud-Rotary Drilling',
+          status: 'completed',
+          statusText: 'Completed',
+          notes: 'Successfully penetrated sandy gravel aquifer with zero collapse.'
+        },
+        {
+          num: 'Phase 3',
+          title: 'Solar Filtration Assembly',
+          status: 'inprogress',
+          statusText: 'In Progress',
+          notes: 'Connecting dual-stage sediment & UV filtration unit to solar battery buffer.'
+        },
+        {
+          num: 'Phase 4',
+          title: 'Water Committee Handover',
+          status: 'upcoming',
+          statusText: 'Upcoming',
+          notes: 'Maintenance technician certification and spare parts supply chain setup.'
+        }
+      ]
+    }
+  };
+
+  var activeWellId = 'turkana';
+
+  function getSvgThumb(idx) {
+    var colors = [
+      ['#0369a1', '#0284c7', '📡'],
+      ['#075985', '#0ea5e9', '🚜'],
+      ['#0c4a6e', '#06b6d4', '☀️'],
+      ['#134e4a', '#10b981', '🚰']
+    ];
+    var c = colors[idx % colors.length];
+    return '<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">' +
+      '<defs>' +
+        '<linearGradient id="wg-' + idx + '" x1="0%" y1="0%" x2="100%" y2="100%">' +
+          '<stop offset="0%" stop-color="' + c[0] + '"/>' +
+          '<stop offset="100%" stop-color="' + c[1] + '"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      '<rect width="200" height="130" fill="url(#wg-' + idx + ')"/>' +
+      '<circle cx="100" cy="65" r="32" fill="rgba(255,255,255,0.08)"/>' +
+      '<text x="100" y="74" font-size="28" text-anchor="middle" fill="#ffffff">' + c[2] + '</text>' +
+    '</svg>';
+  }
+
+  function updateWellUI() {
+    var well = WELL_PROJECTS[activeWellId];
+    if (!well) return;
+
+    var statusBadge = document.getElementById('wellStatusBadge');
+    var nameEl = document.getElementById('wellProjectName');
+    var descEl = document.getElementById('wellProjectDesc');
+    var coordsEl = document.getElementById('wellCoordsDisplay');
+    var depthEl = document.getElementById('wellDepthDisplay');
+    var yieldEl = document.getElementById('wellYieldDisplay');
+    var solarEl = document.getElementById('wellSolarDisplay');
+
+    if (statusBadge) statusBadge.textContent = well.status;
+    if (nameEl) nameEl.textContent = well.name;
+    if (descEl) descEl.textContent = well.desc;
+    if (coordsEl) coordsEl.textContent = well.coords;
+    if (depthEl) depthEl.textContent = well.depth;
+    if (yieldEl) yieldEl.textContent = well.yield;
+    if (solarEl) solarEl.textContent = well.solar;
+
+    // Funding Progress
+    var fundedEl = document.getElementById('fundedAmountDisplay');
+    var goalEl = document.getElementById('fundingGoalDisplay');
+    var pctBadge = document.getElementById('fundingPctBadge');
+    var waveFill = document.getElementById('waveProgressFill');
+    var waveBar = document.getElementById('waveProgressBar');
+    var remainingEl = document.getElementById('fundingRemainingDisplay');
+    var donorsEl = document.getElementById('fundingDonorsDisplay');
+
+    var pct = Math.min(100, (well.currentFunded / well.target) * 100);
+    var remaining = Math.max(0, well.target - well.currentFunded);
+
+    if (fundedEl) fundedEl.textContent = '$' + well.currentFunded.toLocaleString();
+    if (goalEl) goalEl.textContent = '$' + well.target.toLocaleString() + ' Milestone Target';
+    if (pctBadge) pctBadge.textContent = pct.toFixed(1) + '% Funded';
+    if (waveFill) waveFill.style.width = pct + '%';
+    if (waveBar) waveBar.setAttribute('aria-valuenow', pct.toFixed(1));
+    if (remainingEl) {
+      if (remaining > 0) {
+        remainingEl.textContent = '💧 $' + remaining.toLocaleString() + ' remaining to reach 100% completion & tap activation';
+      } else {
+        remainingEl.textContent = '🎉 100% Fully Funded! Well borehole in permanent community operation.';
+      }
+    }
+    if (donorsEl) donorsEl.textContent = well.donors + ' community donors';
+
+    // Impact Stats
+    var livesEl = document.getElementById('statLivesImpacted');
+    var cleanYieldEl = document.getElementById('statCleanYield');
+    var distEl = document.getElementById('statDistanceSaved');
+    var pathogenEl = document.getElementById('statPathogenReduction');
+
+    var bonusLives = Math.floor((well.currentFunded - well.baselineFunded) / 25);
+    var totalLives = well.lives + Math.max(0, bonusLives);
+
+    if (livesEl) livesEl.textContent = totalLives.toLocaleString() + '+';
+    if (cleanYieldEl) cleanYieldEl.textContent = well.yield;
+    if (distEl) distEl.textContent = well.trekSaved;
+    if (pathogenEl) pathogenEl.textContent = well.pathogenDrop;
+
+    // Gallery
+    var galleryGrid = document.getElementById('waterGalleryGrid');
+    var phasePill = document.getElementById('galleryPhasePill');
+    if (phasePill) phasePill.textContent = well.phasePill;
+
+    if (galleryGrid) {
+      galleryGrid.innerHTML = '';
+      well.phases.forEach(function (ph, idx) {
+        var card = document.createElement('div');
+        card.className = 'gallery-photo-card' + (ph.status === 'inprogress' ? ' active-phase' : '');
+        card.innerHTML =
+          '<div class="gallery-thumbnail">' +
+            getSvgThumb(idx) +
+            '<span class="gallery-thumb-tag ' + ph.status + '">' + ph.statusText + '</span>' +
+          '</div>' +
+          '<div class="gallery-card-body">' +
+            '<span class="phase-number">' + ph.num + '</span>' +
+            '<h5 class="phase-title">' + ph.title + '</h5>' +
+            '<p class="phase-notes">' + ph.notes + '</p>' +
+          '</div>';
+        galleryGrid.appendChild(card);
+      });
+    }
+  }
+
+  function setupEventListeners() {
+    // Project tabs
+    var tabBtns = document.querySelectorAll('.water-tab-btn');
+    tabBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var wellKey = btn.dataset.well;
+        if (!wellKey || !WELL_PROJECTS[wellKey]) return;
+        activeWellId = wellKey;
+        tabBtns.forEach(function (b) {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        updateWellUI();
+      });
+    });
+
+    // Copy GPS Coordinates
+    var copyBtn = document.getElementById('copyCoordsBtn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var well = WELL_PROJECTS[activeWellId];
+        if (!well) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(well.coords);
+        }
+        var origHtml = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span>✓</span> Copied!';
+        copyBtn.style.background = '#0284c7';
+        copyBtn.style.color = '#ffffff';
+        setTimeout(function () {
+          copyBtn.innerHTML = origHtml;
+          copyBtn.style.background = '';
+          copyBtn.style.color = '';
+        }, 1800);
+      });
+    }
+
+    // Micro-donation simulator
+    var simBtns = document.querySelectorAll('.sim-btn');
+    simBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var amt = parseInt(btn.dataset.amt, 10) || 0;
+        var well = WELL_PROJECTS[activeWellId];
+        if (!well) return;
+        well.currentFunded = Math.min(well.target + 1000, well.currentFunded + amt);
+        well.donors += 1;
+        updateWellUI();
+
+        // Celebratory flash
+        var card = document.getElementById('waterProjectCard');
+        if (card) {
+          card.style.boxShadow = '0 0 35px rgba(6, 182, 212, 0.45)';
+          setTimeout(function () {
+            card.style.boxShadow = '';
+          }, 450);
+        }
+      });
+    });
+
+    // Reset button
+    var resetBtn = document.getElementById('simResetBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        var well = WELL_PROJECTS[activeWellId];
+        if (!well) return;
+        well.currentFunded = well.baselineFunded;
+        well.donors = well.id === 'turkana' ? 148 : well.id === 'kassala' ? 112 : 96;
+        updateWellUI();
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      updateWellUI();
+      setupEventListeners();
+    });
+  } else {
+    updateWellUI();
+    setupEventListeners();
+  }
+})();
+/* ===== END Issue #415 ===== */
+
