@@ -2063,3 +2063,420 @@ kbd.key-pressed {
   font-family: 'Fira Code', monospace;
 }
 
+/* ==========================================================================
+   GitHub Contribution Activity Heatmap Section (Issue #334)
+   ========================================================================== */
+
+.contribution-heatmap-section {
+  margin-top: 48px;
+}
+
+.heatmap-live-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(63, 185, 80, 0.15);
+  border: 1px solid rgba(63, 185, 80, 0.4);
+  color: #3fb950;
+  margin-left: auto;
+  box-shadow: 0 0 10px rgba(63, 185, 80, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.heatmap-live-badge .live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3fb950;
+  animation: heatmap-pulse 2s infinite ease-in-out;
+}
+
+@keyframes heatmap-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.heatmap-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.heatmap-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.heatmap-intro h2 {
+  font-family: 'Fira Code', monospace;
+  font-size: 1.35rem;
+  margin: 0 0 6px;
+  color: #f1f5f9;
+}
+
+.heatmap-desc {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.heatmap-year-selector {
+  display: inline-flex;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.heatmap-year-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.heatmap-year-btn:hover {
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.heatmap-year-btn.active {
+  background: rgba(63, 185, 80, 0.18);
+  border-color: #3fb950;
+  color: #3fb950;
+  font-weight: 600;
+  box-shadow: 0 0 8px rgba(63, 185, 80, 0.25);
+}
+
+/* Quick Metrics Row */
+.heatmap-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.heatmap-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.heatmap-metric-card:hover {
+  border-color: rgba(63, 185, 80, 0.3);
+  transform: translateY(-1px);
+}
+
+.heatmap-metric-card .metric-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #8b949e;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.heatmap-metric-card .metric-value {
+  font-family: 'Fira Code', monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #3fb950;
+}
+
+.heatmap-metric-card .metric-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+/* Outer Scroll Container */
+.heatmap-container-outer {
+  overflow-x: auto;
+  padding: 16px 14px;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(63, 185, 80, 0.3) rgba(15, 23, 42, 0.6);
+}
+
+.heatmap-container-outer::-webkit-scrollbar {
+  height: 6px;
+}
+
+.heatmap-container-outer::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 3px;
+}
+
+.heatmap-container-outer::-webkit-scrollbar-thumb {
+  background: rgba(63, 185, 80, 0.35);
+  border-radius: 3px;
+}
+
+.heatmap-container-outer::-webkit-scrollbar-thumb:hover {
+  background: rgba(63, 185, 80, 0.6);
+}
+
+.heatmap-grid-wrapper {
+  display: inline-block;
+  min-width: max-content;
+}
+
+/* Month Labels Row */
+.heatmap-months-row {
+  position: relative;
+  height: 18px;
+  margin-left: 32px;
+  margin-bottom: 6px;
+}
+
+.heatmap-month-label {
+  position: absolute;
+  font-size: 0.68rem;
+  font-family: 'Fira Code', monospace;
+  color: #8b949e;
+  user-select: none;
+}
+
+/* Graph Area */
+.heatmap-graph-area {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* Day Labels Column */
+.heatmap-days-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 24px;
+  user-select: none;
+}
+
+.day-label {
+  height: 12px;
+  line-height: 12px;
+  font-size: 0.62rem;
+  font-family: 'Fira Code', monospace;
+  color: #64748b;
+  text-align: right;
+}
+
+.day-label-empty {
+  height: 12px;
+}
+
+/* Heatmap Grid Matrix */
+.heatmap-matrix {
+  display: flex;
+  gap: 3px;
+}
+
+.heatmap-week-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Individual Day Cell */
+.heatmap-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2.5px;
+  border: none;
+  padding: 0;
+  display: block;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease;
+}
+
+.heatmap-cell-empty {
+  background: transparent !important;
+  border: none !important;
+  pointer-events: none;
+}
+
+/* 4-level green intensity scheme (GitHub dark theme style) */
+.heatmap-cell.level-0, .legend-cell.level-0 {
+  background-color: #161b22;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.heatmap-cell.level-1, .legend-cell.level-1 {
+  background-color: #0e4429;
+  border: 1px solid rgba(0, 255, 128, 0.12);
+}
+
+.heatmap-cell.level-2, .legend-cell.level-2 {
+  background-color: #006d32;
+  border: 1px solid rgba(0, 255, 128, 0.22);
+}
+
+.heatmap-cell.level-3, .legend-cell.level-3 {
+  background-color: #26a641;
+  border: 1px solid rgba(0, 255, 128, 0.35);
+}
+
+.heatmap-cell.level-4, .legend-cell.level-4 {
+  background-color: #39d353;
+  border: 1px solid rgba(57, 211, 83, 0.5);
+  box-shadow: 0 0 4px rgba(57, 211, 83, 0.25);
+}
+
+/* Hover & Focus state */
+.heatmap-cell:hover,
+.heatmap-cell:focus-visible {
+  transform: scale(1.4);
+  z-index: 10;
+  box-shadow: 0 0 10px rgba(57, 211, 83, 0.7);
+}
+
+/* Selected state on click */
+.heatmap-cell.selected {
+  transform: scale(1.4);
+  z-index: 12;
+  box-shadow: 0 0 0 2px #58a6ff, 0 0 12px rgba(88, 166, 255, 0.7);
+}
+
+/* Heatmap Footer Row */
+.heatmap-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: #8b949e;
+  font-family: 'Fira Code', monospace;
+  user-select: none;
+}
+
+.legend-text {
+  padding: 0 4px;
+}
+
+.legend-cell {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.heatmap-selected-info {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-family: 'Fira Code', monospace;
+  min-height: 18px;
+}
+
+.heatmap-selected-info .selected-pin {
+  margin-right: 4px;
+}
+
+/* Floating Hover Tooltip */
+.heatmap-tooltip {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: 'Fira Code', monospace;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  max-width: 300px;
+  text-align: left;
+}
+
+.heatmap-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.heatmap-tooltip .tooltip-title {
+  font-size: 0.76rem;
+  color: #f1f5f9;
+  line-height: 1.4;
+}
+
+.heatmap-tooltip .tooltip-title strong {
+  color: #39d353;
+}
+
+.heatmap-tooltip .tooltip-meta {
+  font-size: 0.68rem;
+  color: #8b949e;
+  margin-top: 3px;
+  line-height: 1.3;
+}
+
+.heatmap-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #21262d;
+}
+
+.heatmap-tooltip.tooltip-bottom::after {
+  bottom: auto;
+  top: -5px;
+  border-top: none;
+  border-bottom: 5px solid #21262d;
+}
+
+@media (max-width: 768px) {
+  .heatmap-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .heatmap-metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .heatmap-footer-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+
