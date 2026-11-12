@@ -12,8 +12,33 @@ const TAX_RATE = 0.08;
 const COUPON_KEY = 'nexusStoreCoupon';
 let appliedCoupon = null;
 
-function formatMoney(amount) {
-  return `$${amount.toFixed(2)}`;
+// Multi-currency exchange rate tables and locale configurations
+const CURRENCIES = {
+  USD: { code: 'USD', symbol: '$', rate: 1.0, locale: 'en-US', digits: 2 },
+  EUR: { code: 'EUR', symbol: '€', rate: 0.92, locale: 'de-DE', digits: 2 },
+  GBP: { code: 'GBP', symbol: '£', rate: 0.78, locale: 'en-GB', digits: 2 },
+  JPY: { code: 'JPY', symbol: '¥', rate: 152.0, locale: 'ja-JP', digits: 0 },
+  CAD: { code: 'CAD', symbol: 'CA$', rate: 1.38, locale: 'en-CA', digits: 2 },
+  INR: { code: 'INR', symbol: '₹', rate: 83.5, locale: 'en-IN', digits: 2 },
+  AUD: { code: 'AUD', symbol: 'A$', rate: 1.52, locale: 'en-AU', digits: 2 }
+};
+const CURRENCY_STORAGE_KEY = 'nexus_currency_preference';
+let currentCurrency = 'USD';
+
+function formatMoney(amount, currencyCode = currentCurrency) {
+  const cur = CURRENCIES[currencyCode] || CURRENCIES.USD;
+  const converted = amount * cur.rate;
+  const digits = cur.digits !== undefined ? cur.digits : 2;
+  try {
+    return new Intl.NumberFormat(cur.locale, {
+      style: 'currency',
+      currency: cur.code,
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits
+    }).format(converted);
+  } catch {
+    return `${cur.symbol}${converted.toFixed(digits)}`;
+  }
 }
 
 function normalizeCode(raw) {
@@ -227,7 +252,7 @@ function renderCart() {
           <span class="cart-item-icon">${item.img}</span>
           <div class="cart-item-details">
             <h4>${item.name}</h4>
-            <div class="price-sub">$${(item.price * item.qty).toFixed(2)} ($${item.price.toFixed(2)} x ${item.qty})</div>
+            <div class="price-sub">${formatMoney(item.price * item.qty)} (${formatMoney(item.price)} × ${item.qty})</div>
           </div>
         </div>
         <div class="qty-controls">
@@ -1112,6 +1137,92 @@ if (document.readyState === 'loading') {
 } else {
   initFacetedFilterListeners();
 }
+
+/* ===== BEGIN Issue #339: Multi-Currency Pricing Engine ===== */
+function updateCatalogPrices() {
+  const cards = document.querySelectorAll('.products-grid .card[data-id]');
+  cards.forEach((card) => {
+    const id = card.getAttribute('data-id');
+    const priceEl = card.querySelector('.price');
+    if (priceEl && PRODUCT_CATALOG[id]) {
+      priceEl.textContent = formatMoney(PRODUCT_CATALOG[id].price);
+    }
+  });
+}
+
+function setCurrency(newCode) {
+  if (!CURRENCIES[newCode]) return;
+  currentCurrency = newCode;
+  try {
+    localStorage.setItem(CURRENCY_STORAGE_KEY, currentCurrency);
+  } catch {
+    // Ignore storage restrictions
+  }
+
+  const select = document.getElementById('currencySelect');
+  if (select && select.value !== currentCurrency) {
+    select.value = currentCurrency;
+  }
+
+  updateCatalogPrices();
+  renderCart();
+
+  // If Quick View modal is active, update displayed totals & option buttons
+  const qvModal = document.getElementById('quickViewModal');
+  if (qvModal && !qvModal.hidden && qvState.productId) {
+    updateQuickViewDisplay();
+    const product = PRODUCT_CATALOG[qvState.productId];
+    const pillsContainer = document.getElementById('qvOptionPills');
+    if (product && product.options && pillsContainer) {
+      pillsContainer.innerHTML = '';
+      product.options.choices.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `qv-pill-btn ${idx === qvState.optionIdx ? 'active' : ''}`;
+        btn.setAttribute('role', 'radio');
+        btn.setAttribute('aria-checked', String(idx === qvState.optionIdx));
+        const deltaText = opt.priceDelta > 0 ? ` (+${formatMoney(opt.priceDelta)})` : '';
+        btn.textContent = `${opt.name}${deltaText}`;
+        btn.addEventListener('click', () => selectQuickViewOption(idx));
+        pillsContainer.appendChild(btn);
+      });
+    }
+  }
+
+  // Dispatch global currencychange event for wishlist & comparison drawers
+  window.dispatchEvent(new CustomEvent('currencychange', { detail: { currency: currentCurrency } }));
+
+  showToast(`Currency changed to ${currentCurrency} (${CURRENCIES[currentCurrency].symbol})`);
+}
+
+function initCurrencyEngine() {
+  try {
+    const saved = localStorage.getItem(CURRENCY_STORAGE_KEY);
+    if (saved && CURRENCIES[saved]) {
+      currentCurrency = saved;
+    }
+  } catch {
+    currentCurrency = 'USD';
+  }
+
+  const select = document.getElementById('currencySelect');
+  if (select) {
+    select.value = currentCurrency;
+    select.addEventListener('change', (e) => {
+      setCurrency(e.target.value);
+    });
+  }
+
+  updateCatalogPrices();
+}
+
+// Initialize currency engine once DOM and product catalog are loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCurrencyEngine);
+} else {
+  initCurrencyEngine();
+}
+/* ===== END Issue #339 ===== */
 
 const qvState = {
   productId: 'p1',
@@ -2107,7 +2218,8 @@ window.handleReviewSubmit = handleReviewSubmit;
   // item is in the cart, so call addToCart() directly. renderCart() uses the
   // product names without the inch mark, so strip it here to keep one cart line.
   function addToCartFromWishlist(info) {
-    addToCart(info.id, info.name.replace(/"/g, ''), info.amount, info.icon);
+    const basePrice = (typeof PRODUCT_CATALOG !== 'undefined' && PRODUCT_CATALOG[info.id]) ? PRODUCT_CATALOG[info.id].price : info.amount;
+    addToCart(info.id, info.name.replace(/"/g, ''), basePrice, info.icon);
   }
 
   function announce(message) {
@@ -2137,7 +2249,8 @@ window.handleReviewSubmit = handleReviewSubmit;
     name.textContent = info.name;
     const price = document.createElement('span');
     price.className = 'wish-item-price';
-    price.textContent = info.price;
+    const basePrice = (typeof PRODUCT_CATALOG !== 'undefined' && PRODUCT_CATALOG[info.id]) ? PRODUCT_CATALOG[info.id].price : info.amount;
+    price.textContent = formatMoney(basePrice);
     const stock = document.createElement('span');
     stock.className = info.stockClass;
     stock.textContent = info.stockText;
@@ -2327,6 +2440,10 @@ window.handleReviewSubmit = handleReviewSubmit;
       saved = loadWishlist();
       render();
     }
+  });
+
+  window.addEventListener('currencychange', () => {
+    render();
   });
 
   render();
@@ -2590,7 +2707,7 @@ window.handleReviewSubmit = handleReviewSubmit;
               ${isBestPrice ? '<span class="comp-winner-pill best-price">Best Value</span>' : ''}
               ${isTopRated ? '<span class="comp-winner-pill top-rated">Top Rated</span>' : ''}
             </div>
-            <div class="comp-prod-price">$${p.price.toFixed(2)}</div>
+            <div class="comp-prod-price">${formatMoney(p.price)}</div>
             <div class="comp-header-btns">
               <button type="button" class="btn-remove-comp" data-remove-id="${p.id}" aria-label="Remove ${p.name} from comparison">Remove &times;</button>
             </div>
@@ -2599,8 +2716,14 @@ window.handleReviewSubmit = handleReviewSubmit;
       });
       html += `</tr></thead><tbody>`;
 
+      // Spec rows
       SPEC_KEYS.forEach((specKey) => {
-        const values = products.map((p) => p.specs[specKey] || 'N/A');
+        const values = products.map((p) => {
+          if (specKey === 'Price') {
+            return formatMoney(p.price);
+          }
+          return p.specs[specKey] || 'N/A';
+        });
         const hasDiff = products.length > 1 && new Set(values).size > 1;
         const rowClass = hasDiff ? 'is-diff' : 'is-same';
 
@@ -2727,6 +2850,13 @@ window.handleReviewSubmit = handleReviewSubmit;
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && compareDrawer && compareDrawer.classList.contains('open')) {
         closeDrawer();
+      }
+    });
+
+    // React to currency engine updates
+    window.addEventListener('currencychange', () => {
+      if (selectedCompare.size > 0 && compareDrawer && compareDrawer.classList.contains('open')) {
+        renderMatrixTable();
       }
     });
 
