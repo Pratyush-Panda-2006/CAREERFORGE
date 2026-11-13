@@ -1243,3 +1243,503 @@ mark.transcript-search-highlight {
 #queue-drawer button:disabled { opacity: .4; cursor: not-allowed; }
 #queue-drawer :focus-visible, .queue-entry :focus-visible, .episodes .card > button:focus-visible { outline: 3px solid #fbbf24; outline-offset: 3px; }
 @media (max-width: 480px) { #queue-drawer { padding: 20px; } }
+
+/* ===== BEGIN Issue #417: Episode Audio Chapter Markers Navigator ===== */
+.dock-chapters-btn {
+  background: rgba(236, 72, 153, 0.15) !important;
+  color: #f472b6 !important;
+  border: 1px solid rgba(236, 72, 153, 0.35) !important;
+}
+
+.dock-chapters-btn:hover {
+  background: rgba(236, 72, 153, 0.28) !important;
+}
+
+.chapter-markers-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.chapter-marker-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateX(-50%);
+  transition: background 0.2s, height 0.2s;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.chapter-marker-tick:hover {
+  background: #ec4899;
+  width: 3px;
+  z-index: 5;
+}
+
+.chapters-section {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 24px;
+}
+
+.chapters-container {
+  background: rgba(18, 18, 22, 0.95);
+  border: 1px solid rgba(236, 72, 153, 0.2);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.chapters-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ec4899, #8b5cf6, transparent);
+}
+
+.chapters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.chapters-header-left h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.chapters-header-left p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.chapters-stepper-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chapter-step-btn {
+  background: rgba(236, 72, 153, 0.12);
+  color: #f472b6;
+  border: 1px solid rgba(236, 72, 153, 0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chapter-step-btn:hover:not(:disabled) {
+  background: #ec4899;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.chapter-step-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.chapter-stepper-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  text-align: center;
+}
+
+.chapter-stepper-current {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ec4899;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.chapter-stepper-title {
+  font-size: 0.82rem;
+  color: #f4f4f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+/* Active Chapter Highlight Banner */
+.active-chapter-banner {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(139, 92, 246, 0.08));
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.08);
+}
+
+.banner-badge-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.now-playing-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(236, 72, 153, 0.25);
+  color: #f472b6;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(236, 72, 153, 0.4);
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ec4899;
+  box-shadow: 0 0 8px #ec4899;
+  animation: pulse-ring 1.8s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.banner-time {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.banner-details {
+  flex: 1;
+  min-width: 260px;
+}
+
+.banner-details h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.banner-details p {
+  color: #d4d4d8;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
+.banner-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.banner-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.banner-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ec4899, #a855f7);
+  border-radius: 4px;
+  transition: width 0.25s ease-out;
+}
+
+.banner-progress-pct {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-family: 'Space Grotesk', monospace;
+  min-width: 80px;
+}
+
+.banner-play-btn {
+  background: #ec4899;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.banner-play-btn:hover {
+  background: #db2777;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+}
+
+/* Chapters List & Card */
+.chapters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chapter-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.chapter-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(236, 72, 153, 0.3);
+}
+
+.chapter-card.active-chapter {
+  background: rgba(236, 72, 153, 0.08);
+  border-color: rgba(236, 72, 153, 0.5);
+  box-shadow: 0 4px 18px rgba(236, 72, 153, 0.12);
+}
+
+.chapter-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.chapter-card-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.chapter-index-chip {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.active-chapter .chapter-index-chip {
+  background: #ec4899;
+  color: #fff;
+}
+
+.chapter-timestamp-pill {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #f472b6;
+  background: rgba(236, 72, 153, 0.12);
+  padding: 3px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.chapter-card-title {
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: #f4f4f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.active-chapter .chapter-card-title {
+  color: #fff;
+  font-weight: 700;
+}
+
+.chapter-card-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.chapter-playing-bars {
+  display: none;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.active-chapter.is-playing .chapter-playing-bars {
+  display: flex;
+}
+
+.chapter-playing-bars span {
+  width: 3px;
+  background: #ec4899;
+  border-radius: 1px;
+  animation: bar-dance 1s ease-in-out infinite alternate;
+}
+
+.chapter-playing-bars span:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+.chapter-playing-bars span:nth-child(2) { height: 12px; animation-delay: 0.25s; }
+.chapter-playing-bars span:nth-child(3) { height: 14px; animation-delay: 0.4s; }
+
+@keyframes bar-dance {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1); }
+}
+
+.chapter-jump-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chapter-jump-btn:hover {
+  background: #ec4899;
+  color: #fff;
+  border-color: #ec4899;
+}
+
+.chapter-toggle-icon {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.chapter-card.expanded .chapter-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.chapter-card-body {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+  padding: 0 20px;
+  border-top: 1px solid transparent;
+}
+
+.chapter-card.expanded .chapter-card-body {
+  max-height: 300px;
+  opacity: 1;
+  padding: 14px 20px 18px;
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+.chapter-summary-text {
+  font-size: 0.88rem;
+  color: #d4d4d8;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.chapter-highlights-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #f472b6;
+  margin-bottom: 6px;
+}
+
+.chapter-highlights-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chapter-highlights-list li {
+  font-size: 0.84rem;
+  color: #a1a1aa;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.chapter-highlights-list li:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.chapter-highlights-list li::before {
+  content: '▸';
+  color: #ec4899;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .chapters-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .chapters-stepper-wrap {
+    justify-content: space-between;
+  }
+  .active-chapter-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .banner-play-btn {
+    width: 100%;
+    text-align: center;
+  }
+  .chapter-card-header {
+    flex-wrap: wrap;
+  }
+}
+/* ===== END Issue #417 ===== */
+
