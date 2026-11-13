@@ -1772,3 +1772,226 @@ document.addEventListener('DOMContentLoaded', () => {
   updateAllValues();
 });
 /* ===== END Issue #349 ===== */
+
+/* ===== BEGIN Issue #411: Daily Micro-Habit Stacking Checklist with Streak Gamification ===== */
+document.addEventListener('DOMContentLoaded', function initHabitStack() {
+  'use strict';
+
+  var STORAGE_KEY = 'vitality-habit-stack-state';
+  var CIRCUMFERENCE = 427.26; // 2 * pi * 68
+  var BASE_STREAK = 14;
+
+  var habitState = {
+    soundEnabled: true,
+    habits: {
+      sunlight: false,
+      creatine: false,
+      cold: false,
+      steps: false,
+      zone2: false,
+      electrolytes: false
+    }
+  };
+
+  // Restore from localStorage
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      if (parsed && parsed.habits) {
+        habitState.habits = Object.assign(habitState.habits, parsed.habits);
+      }
+      if (typeof parsed.soundEnabled === 'boolean') {
+        habitState.soundEnabled = parsed.soundEnabled;
+      }
+    }
+  } catch {
+    // localStorage unavailable
+  }
+
+  // Web Audio API Chime Synthesizer
+  var audioCtx = null;
+  function playChime(isCelebration) {
+    if (!habitState.soundEnabled) return;
+    try {
+      var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      var now = audioCtx.currentTime;
+      var freqs = isCelebration ? [523.25, 659.25, 783.99, 1046.50] : [659.25, 987.77];
+
+      freqs.forEach(function (f, idx) {
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now + idx * 0.08);
+
+        gain.gain.setValueAtTime(0, now + idx * 0.08);
+        gain.gain.linearRampToValueAtTime(0.18, now + idx * 0.08 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.65);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now + idx * 0.08);
+        osc.stop(now + idx * 0.08 + 0.7);
+      });
+    } catch {
+      // AudioContext blocked
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(habitState));
+    } catch {
+      // Ignore storage error
+    }
+  }
+
+  function updateHabitUI() {
+    var habitKeys = Object.keys(habitState.habits);
+    var total = habitKeys.length;
+    var completedCount = 0;
+
+    habitKeys.forEach(function (key) {
+      var isDone = !!habitState.habits[key];
+      if (isDone) completedCount++;
+
+      var item = document.querySelector('.habit-item[data-habit="' + key + '"]');
+      if (item) {
+        item.classList.toggle('checked', isDone);
+        item.setAttribute('aria-checked', String(isDone));
+      }
+    });
+
+    var pct = Math.round((completedCount / total) * 100);
+    var offset = CIRCUMFERENCE - (pct / 100) * CIRCUMFERENCE;
+
+    // Progress Ring & Text
+    var ringFill = document.getElementById('habitProgressRing');
+    var pctDisplay = document.getElementById('habitPercentageDisplay');
+    var fracDisplay = document.getElementById('habitFractionDisplay');
+    var todayDot = document.getElementById('todayDot');
+    var todayCheck = document.getElementById('todayCheckIcon');
+    var statusEl = document.getElementById('hsProtocolStatus');
+    var streakBadge = document.getElementById('streakMultiplierBadge');
+    var streakDaysEl = document.getElementById('habitStreakDays');
+
+    if (ringFill) {
+      ringFill.style.strokeDashoffset = offset;
+      ringFill.classList.toggle('all-complete', pct === 100);
+    }
+    if (pctDisplay) pctDisplay.textContent = pct + '%';
+    if (fracDisplay) fracDisplay.textContent = completedCount + ' of ' + total + ' Done';
+
+    var allDone = pct === 100;
+    if (todayDot && todayCheck) {
+      todayDot.classList.toggle('complete', allDone);
+      todayCheck.textContent = allDone ? '✓' : '•';
+    }
+
+    if (streakDaysEl) {
+      streakDaysEl.textContent = allDone ? (BASE_STREAK + 1) : BASE_STREAK;
+    }
+
+    if (streakBadge) {
+      streakBadge.textContent = allDone ? '3.0× Longevity Multiplier Active' : '2.5× Longevity Score';
+      streakBadge.style.color = allDone ? '#34d399' : '#10b981';
+    }
+
+    if (statusEl) {
+      if (allDone) {
+        statusEl.innerHTML = '🎉 <strong>Flawless Protocol!</strong> All 6 longevity habits locked in for today. Cellular rejuvenation maximized.';
+        statusEl.style.background = 'rgba(16, 185, 129, 0.18)';
+        statusEl.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+      } else if (completedCount > 0) {
+        statusEl.innerHTML = '⚡ <strong>' + (total - completedCount) + ' habits remaining</strong> to complete today\'s longevity stack and protect your streak.';
+        statusEl.style.background = 'rgba(16, 185, 129, 0.08)';
+        statusEl.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+      } else {
+        statusEl.innerHTML = 'Complete your daily micro-habits to lock in today\'s streak!';
+        statusEl.style.background = '';
+        statusEl.style.borderColor = '';
+      }
+    }
+  }
+
+  // Setup Habit Listeners
+  var habitItems = document.querySelectorAll('.habit-item');
+  habitItems.forEach(function (item) {
+    function toggleItem() {
+      var key = item.dataset.habit;
+      if (!key) return;
+      var nowDone = !habitState.habits[key];
+      habitState.habits[key] = nowDone;
+
+      if (nowDone) {
+        var habitKeys = Object.keys(habitState.habits);
+        var doneCount = habitKeys.filter(function (k) { return habitState.habits[k]; }).length;
+        playChime(doneCount === habitKeys.length);
+      }
+
+      saveState();
+      updateHabitUI();
+    }
+
+    item.addEventListener('click', toggleItem);
+    item.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleItem();
+      }
+    });
+  });
+
+  // Sound Toggle
+  var soundBtn = document.getElementById('habitSoundToggle');
+  var soundIcon = document.getElementById('soundIcon');
+  var soundText = document.getElementById('soundText');
+  if (soundBtn) {
+    soundBtn.addEventListener('click', function () {
+      habitState.soundEnabled = !habitState.soundEnabled;
+      if (soundIcon) soundIcon.textContent = habitState.soundEnabled ? '🔔' : '🔕';
+      if (soundText) soundText.textContent = habitState.soundEnabled ? 'Chime: ON' : 'Chime: OFF';
+      saveState();
+      if (habitState.soundEnabled) playChime(false);
+    });
+  }
+
+  // Quick Action Buttons
+  var btnAll = document.getElementById('btnToggleAllHabits');
+  if (btnAll) {
+    btnAll.addEventListener('click', function () {
+      var keys = Object.keys(habitState.habits);
+      var allCompleted = keys.every(function (k) { return habitState.habits[k]; });
+      keys.forEach(function (k) {
+        habitState.habits[k] = !allCompleted;
+      });
+      if (!allCompleted) playChime(true);
+      saveState();
+      updateHabitUI();
+      btnAll.textContent = allCompleted ? 'Complete All' : 'Uncheck All';
+    });
+  }
+
+  var btnReset = document.getElementById('btnResetHabits');
+  if (btnReset) {
+    btnReset.addEventListener('click', function () {
+      Object.keys(habitState.habits).forEach(function (k) {
+        habitState.habits[k] = false;
+      });
+      saveState();
+      updateHabitUI();
+      if (btnAll) btnAll.textContent = 'Complete All';
+    });
+  }
+
+  updateHabitUI();
+});
+/* ===== END Issue #411 ===== */
+
