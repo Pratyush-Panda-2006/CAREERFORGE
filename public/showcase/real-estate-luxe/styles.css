@@ -2189,3 +2189,137 @@ body.cmp-open { overflow: hidden; }
 
 .yield-val.gold { color: #d4af37; }
 .yield-val.green { color: #34d399; }
+
+/* ==========================================================================
+   Multi-Level Architectural Blueprint Viewer & Measurement Annotator (Issue #448)
+   ========================================================================== */
+
+.canvas-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  background: rgba(11, 17, 30, 0.95);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.canvas-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-canvas-tool {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #f7e7ce;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-canvas-tool:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: #d4af37;
+  color: #fff;
+}
+
+.btn-canvas-tool.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+.zoom-controls {
+  display: flex;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.btn-zoom {
+  background: rgba(255, 255, 255, 0.04);
+  border: none;
+  border-right: 1px solid rgba(212, 175, 55, 0.2);
+  color: #e2e8f0;
+  padding: 5px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-zoom:last-child {
+  border-right: none;
+}
+
+.btn-zoom:hover {
+  background: rgba(212, 175, 55, 0.2);
+  color: #fff;
+}
+
+.blueprint-scale-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.measure-active-pill {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(2, 6, 23, 0.9);
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  z-index: 10;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 14px rgba(56, 189, 248, 0.3);
+  pointer-events: none;
+  animation: pulse-border 1.5s infinite alternate;
+}
+
+@keyframes pulse-border {
+  from { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 8px rgba(56, 189, 248, 0.2); }
+  to { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 16px rgba(56, 189, 248, 0.5); }
+}
+
+.blueprint-svg.measuring-mode {
+  cursor: crosshair;
+}
+
+.room-group {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.room-group:hover .room-rect {
+  stroke: #38bdf8;
+  stroke-width: 2px;
+  fill: rgba(56, 189, 248, 0.12);
+}
+
+.room-group.active .room-rect {
+  stroke: #d4af37;
+  stroke-width: 2.5px;
+  fill: rgba(212, 175, 55, 0.18);
+}
+
