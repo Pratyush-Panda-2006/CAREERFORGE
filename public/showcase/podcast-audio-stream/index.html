@@ -63,6 +63,73 @@
     <div class="bookmarks-tray" id="bookmarks-tray" aria-label="Saved episode bookmarks"></div>
   </section>
 
+  <!-- ===== Playback Speed & Pitch Correction Engine (Issue #418) START ===== -->
+  <section class="sp-section" id="speed-pitch-section" aria-labelledby="sp-title">
+    <div class="sp-container">
+      <div class="sp-header">
+        <div class="sp-header-left">
+          <div class="tag">🎛️ SPEED &amp; PITCH ENGINE</div>
+          <h2 id="sp-title">Playback Pitch &amp; Speed</h2>
+          <p>Run episodes from 0.5x to 3.0x while a granular delay network pulls voices back to their natural pitch.</p>
+        </div>
+        <div class="sp-readout" aria-live="off">
+          <span class="sp-readout-label">Playback speed</span>
+          <strong class="sp-readout-value" id="sp-speed-value">1x</strong>
+          <span class="sp-readout-state" id="sp-correction-badge">Pitch correction on</span>
+        </div>
+      </div>
+
+      <div class="sp-console">
+        <div class="sp-row">
+          <span class="sp-row-label" id="sp-presets-label">Presets</span>
+          <div class="sp-presets" id="sp-presets" role="group" aria-labelledby="sp-presets-label">
+            <button type="button" class="sp-preset-btn" data-speed="1" aria-pressed="true">1x</button>
+            <button type="button" class="sp-preset-btn" data-speed="1.25" aria-pressed="false">1.25x</button>
+            <button type="button" class="sp-preset-btn" data-speed="1.5" aria-pressed="false">1.5x</button>
+            <button type="button" class="sp-preset-btn" data-speed="2" aria-pressed="false">2x</button>
+          </div>
+        </div>
+
+        <div class="sp-row">
+          <label class="sp-row-label" for="sp-slider">Fine tune</label>
+          <div class="sp-slider-wrap">
+            <span class="sp-slider-end" aria-hidden="true">0.5x</span>
+            <input type="range" class="sp-slider" id="sp-slider" min="0.5" max="3" step="0.05" value="1" aria-valuetext="1x speed" />
+            <span class="sp-slider-end" aria-hidden="true">3.0x</span>
+          </div>
+        </div>
+
+        <div class="sp-row sp-row-actions">
+          <label class="sp-toggle" for="sp-correction">
+            <input type="checkbox" id="sp-correction" checked />
+            <span class="sp-toggle-track" aria-hidden="true"></span>
+            <span class="sp-toggle-text">Pitch correction</span>
+          </label>
+          <button type="button" class="sp-audition-btn" id="sp-audition" aria-pressed="false">▶ Audition test voice</button>
+        </div>
+      </div>
+
+      <dl class="sp-meters" id="sp-meters">
+        <div class="sp-meter"><dt>Pitch shift applied</dt><dd id="sp-meter-shift">0.0 st</dd></div>
+        <div class="sp-meter"><dt>Grain window</dt><dd id="sp-meter-grain">100 ms</dd></div>
+        <div class="sp-meter"><dt>Delay sweep</dt><dd id="sp-meter-sweep">0 ms</dd></div>
+        <div class="sp-meter"><dt>Added latency</dt><dd id="sp-meter-latency">0 ms</dd></div>
+      </dl>
+
+      <div class="sp-viz">
+        <canvas id="sp-canvas" class="sp-canvas" width="800" height="200" role="img" aria-label="Frequency response of the test voice"></canvas>
+        <ul class="sp-legend" aria-hidden="true">
+          <li><i class="sp-key sp-key-raw"></i>Raw speed-up</li>
+          <li><i class="sp-key sp-key-fixed"></i>After correction</li>
+          <li><i class="sp-key sp-key-live"></i>Live output</li>
+        </ul>
+      </div>
+      <p class="sp-hint">The episode player here is a simulation with no audio file, so the Audition button plays a synthesized test voice (not a recording) through the real Web Audio chain. The curves are modelled from the speed setting, the live bars come from the audio output. Use Tab to reach each control and the arrow keys on the slider.</p>
+      <p class="sp-status" id="sp-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+  <!-- ===== Playback Speed & Pitch Correction Engine (Issue #418) END ===== -->
+
   <!-- ===== Audio Equalizer Preset Selector (Issue #205) START ===== -->
   <section class="eq-section" id="eq-section" aria-labelledby="eq-title">
     <div class="eq-container">
@@ -222,6 +289,7 @@
   </dialog>
   <script src="queue-logic.js"></script>
   <script src="player-logic.js"></script>
+  <script src="speed-pitch-logic.js"></script>
   <script src="script.js"></script>
   <script src="queue-manager.js"></script>
 </body>
