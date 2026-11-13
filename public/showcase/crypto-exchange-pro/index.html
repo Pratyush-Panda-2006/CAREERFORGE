@@ -12,10 +12,17 @@
 <body>
   <header class="navbar">
     <div class="brand">⚡ VORTEX DEX</div>
-    <div class="status">● ORDERBOOK ENGINE: MATCHING (0.4ms)</div>
+    <div class="stream-connection"><span id="stream-status" data-state="stopped" role="status">SIMULATED FEED · STOPPED</span><span id="stream-stats">No real network connection or market data.</span></div>
   </header>
 
   <main class="trading-container">
+    <section class="stream-lab" aria-labelledby="stream-title">
+      <h2 id="stream-title">Market connection lab</h2>
+      <p>Local WebSocket-style simulation: geometric Brownian prices, 15–120ms latency, packet loss and snapshot recovery. No real trades or network requests. Pause simulated quotes below to stop the feed.</p>
+      <div><button type="button" id="stream-outage">Simulate network outage</button><button type="button" id="stream-drop">Drop next packet</button></div>
+      <p>Outage demo: two failed connection attempts, then recovery with 1s / 2s / 4s retry delays (backoff capped at 16s).</p>
+      <h3>Stream executions · selected pair · latest 5</h3><ul id="stream-tape" aria-live="off"><li>Waiting for simulated executions…</li></ul>
+    </section>
     <div class="hero">
       <div class="pill">ON-CHAIN DERIVATIVES</div>
       <h1>100x Leverage Decentralized Futures</h1>
