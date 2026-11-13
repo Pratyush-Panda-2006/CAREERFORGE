@@ -3310,3 +3310,740 @@ body {
   margin: 0;
 }
 /* ===== END Issue #353 ===== */
+
+/* ===== BEGIN Issue #415: Clean Water Well Project Fund Progress Bar & Tracker ===== */
+.clean-water-section {
+  margin: 80px auto;
+  max-width: 1240px;
+  padding: 0 24px;
+}
+
+.water-container {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.water-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.water-header-left {
+  max-width: 680px;
+}
+
+.water-pill {
+  background: rgba(6, 182, 212, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.water-header-left h2 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #f0fdf4;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.water-sub {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.water-project-tabs {
+  display: flex;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  flex-wrap: wrap;
+}
+
+.water-tab-btn {
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.water-tab-btn:hover {
+  color: #38bdf8;
+  background: rgba(6, 182, 212, 0.08);
+}
+
+.water-tab-btn.active {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.4);
+}
+
+.tab-flag {
+  font-size: 1.05rem;
+}
+
+/* Main Project Card */
+.water-project-card {
+  background: linear-gradient(145deg, rgba(8, 30, 36, 0.9), rgba(5, 22, 16, 0.92));
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  border-radius: 20px;
+  padding: 36px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(6, 182, 212, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.water-project-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0284c7, #06b6d4, #10b981);
+}
+
+/* Card Top & Geo-Coordinates */
+.water-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.water-title-wrap {
+  flex: 1;
+  min-width: 300px;
+}
+
+.water-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(6, 182, 212, 0.12);
+  color: #38bdf8;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  margin-bottom: 12px;
+}
+
+.water-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+  animation: waterPulse 2s infinite ease-in-out;
+}
+
+@keyframes waterPulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.well-project-name {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #f0fdf4;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.well-project-desc {
+  color: #cbd5e1;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  max-width: 600px;
+}
+
+/* Geo-Coordinates Card */
+.water-geo-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 14px;
+  padding: 20px 24px;
+  min-width: 320px;
+  flex-shrink: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.geo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.geo-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+}
+
+.geo-verified-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(74, 222, 128, 0.25);
+}
+
+.geo-coords-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px dashed rgba(6, 182, 212, 0.3);
+  margin-bottom: 14px;
+}
+
+.geo-coords-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.copy-coords-btn {
+  background: rgba(6, 182, 212, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.copy-coords-btn:hover {
+  background: #0284c7;
+  color: #fff;
+}
+
+.geo-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+}
+
+.geo-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gm-lbl {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gm-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+/* Funding Progress Bar & Waves */
+.water-funding-wrap {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(6, 182, 212, 0.18);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.funding-headline {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.funding-amount-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.funding-lbl {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: #38bdf8;
+}
+
+.funding-values {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.funded-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.02em;
+}
+
+.funding-divider {
+  color: #64748b;
+  font-size: 1.4rem;
+}
+
+.funding-goal {
+  color: #94a3b8;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.funding-pct-badge {
+  background: linear-gradient(135deg, #0284c7, #06b6d4);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.wave-track-wrap {
+  height: 28px;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 14px;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  position: relative;
+  overflow: visible;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.wave-progress-fill {
+  height: 100%;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #0369a1, #0284c7, #06b6d4);
+  position: relative;
+  overflow: hidden;
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+}
+
+.wave-crest-anim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.15) 0px,
+    rgba(255, 255, 255, 0.15) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  animation: waveBarStripes 2s linear infinite;
+}
+
+@keyframes waveBarStripes {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 0; }
+}
+
+.milestone-markers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.ms-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ms-line {
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.ms-label {
+  position: absolute;
+  top: -24px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.funding-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.funding-remaining {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #38bdf8;
+}
+
+.funding-donors-count {
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+/* Impact Stats Grid */
+.water-impact-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.water-stat-card {
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(6, 182, 212, 0.18);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+
+.water-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.wstat-icon {
+  font-size: 1.7rem;
+  line-height: 1;
+  background: rgba(6, 182, 212, 0.12);
+  padding: 10px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.wstat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wstat-number {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f0fdf4;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.wstat-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.wstat-desc {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+/* Photo Installation Progress Gallery */
+.water-gallery-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gallery-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gallery-title-wrap h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 2px;
+}
+
+.gallery-subtitle {
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.gallery-phase-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.water-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.gallery-photo-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.gallery-photo-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.gallery-photo-card.active-phase {
+  border-color: rgba(6, 182, 212, 0.6);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.2);
+}
+
+.gallery-thumbnail {
+  height: 130px;
+  background: #0f172a;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.gallery-thumbnail svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-thumb-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gallery-thumb-tag.completed {
+  background: rgba(74, 222, 128, 0.9);
+  color: #064e3b;
+}
+
+.gallery-thumb-tag.inprogress {
+  background: rgba(56, 189, 248, 0.95);
+  color: #082f49;
+}
+
+.gallery-thumb-tag.upcoming {
+  background: rgba(148, 163, 184, 0.85);
+  color: #0f172a;
+}
+
+.gallery-card-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.phase-number {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.phase-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.3;
+}
+
+.phase-notes {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* Micro-Donation & Milestone Simulator */
+.water-simulator-bar {
+  background: rgba(2, 132, 199, 0.1);
+  border: 1px dashed rgba(6, 182, 212, 0.35);
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.sim-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sim-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: #38bdf8;
+  background: rgba(6, 182, 212, 0.2);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.sim-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.sim-button-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sim-btn {
+  background: rgba(6, 182, 212, 0.16);
+  color: #38bdf8;
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sim-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.sim-reset-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sim-reset-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+@media (max-width: 992px) {
+  .water-impact-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .water-gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .water-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .water-impact-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .water-gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  .water-geo-card {
+    min-width: 100%;
+  }
+}
+/* ===== END Issue #415 ===== */
+
