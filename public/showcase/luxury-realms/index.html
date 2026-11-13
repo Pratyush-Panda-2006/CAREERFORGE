@@ -139,6 +139,344 @@
   </dialog>
   <!-- ===== END issue #201 ===== -->
 
+  <!-- ===== BEGIN Issue #413: Private Island Luxury Villa Custom Booking Package Builder ===== -->
+  <section class="island-builder-section" id="island-package-builder" aria-labelledby="island-builder-title">
+    <div class="island-builder-container">
+      <div class="island-builder-header">
+        <div class="ib-header-left">
+          <div class="ib-kicker">✦ BESPOKE PRIVATE ISLAND RESERVATION ✦</div>
+          <h2 id="island-builder-title">Custom Villa Package Builder</h2>
+          <p class="ib-sub">Design your bespoke private atoll retreat. Choose an architectural villa tier, curated Michelin culinary experiences, private aviation transfers, and superyacht voyages with real-time itemized concierge pricing.</p>
+        </div>
+        <div class="ib-currency-toggle" role="radiogroup" aria-label="Package invoice currency">
+          <span class="ib-curr-lbl">CURRENCY:</span>
+          <button type="button" class="ib-curr-btn active" data-curr="USD" role="radio" aria-checked="true">$ USD</button>
+          <button type="button" class="ib-curr-btn" data-curr="EUR" role="radio" aria-checked="false">€ EUR</button>
+          <button type="button" class="ib-curr-btn" data-curr="GBP" role="radio" aria-checked="false">£ GBP</button>
+          <button type="button" class="ib-curr-btn" data-curr="AED" role="radio" aria-checked="false">د.إ AED</button>
+        </div>
+      </div>
+
+      <!-- Controls Bar: Nights & Guests -->
+      <div class="ib-controls-bar">
+        <div class="ib-control-group">
+          <div class="ib-ctrl-label-row">
+            <label for="ibNightsSlider">Stay Duration</label>
+            <span class="ib-ctrl-val"><strong id="ibNightsVal">5</strong> Nights</span>
+          </div>
+          <input type="range" class="ib-slider" id="ibNightsSlider" min="3" max="21" step="1" value="5" aria-label="Stay duration in nights">
+          <div class="ib-slider-hints"><span>3 nights min</span><span>7 nights</span><span>14 nights</span><span>21 nights max</span></div>
+        </div>
+
+        <div class="ib-control-group">
+          <div class="ib-ctrl-label-row">
+            <label for="ibGuestsSelect">Guests Count</label>
+            <span class="ib-ctrl-val"><strong id="ibGuestsVal">4</strong> Guests</span>
+          </div>
+          <select class="ib-select" id="ibGuestsSelect" aria-label="Number of guests">
+            <option value="2">2 Guests (Couples Retreat)</option>
+            <option value="4" selected>4 Guests (Executive Stays)</option>
+            <option value="6">6 Guests (Private Family)</option>
+            <option value="8">8 Guests (Full Entourage)</option>
+            <option value="12">12 Guests (Atoll Buyout)</option>
+          </select>
+        </div>
+
+        <div class="ib-control-group">
+          <div class="ib-ctrl-label-row">
+            <label>Concierge Priority</label>
+            <span class="ib-ctrl-val text-gold">VIP Ultra Tier</span>
+          </div>
+          <div class="ib-vip-badge">
+            <span class="vip-icon">✦</span> 24/7 Island Butler &amp; Dedicated Yacht Captain Included
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Layout: Villa Selection & Add-ons + Live Invoice -->
+      <div class="ib-layout-grid">
+        <!-- Left: Villa Tiers & Add-ons -->
+        <div class="ib-selection-col">
+          <!-- Step 1: Select Villa Tier -->
+          <div class="ib-step-group">
+            <div class="ib-step-header">
+              <span class="step-num">01</span>
+              <h3>Select Architectural Villa Tier</h3>
+            </div>
+            <div class="villa-tiers-grid" role="radiogroup" aria-label="Select villa tier">
+              <!-- Tier 1 -->
+              <div class="villa-tier-card active" data-tier="overwater" data-base-usd="14500" tabindex="0" role="radio" aria-checked="true">
+                <div class="vtc-badge">POPULAR BESPOKE</div>
+                <div class="vtc-thumb overwater-thumb">
+                  <div class="vtc-tag">4 BEDROOMS • 650 M²</div>
+                </div>
+                <div class="vtc-content">
+                  <h4 class="vtc-name">Overwater Horizon Villa</h4>
+                  <p class="vtc-desc">Suspended over turquoise waters with direct reef access, 18m glass-bottom pool, and sunset master observatory.</p>
+                  <div class="vtc-features">
+                    <span>✦ Direct Lagoon Access</span>
+                    <span>✦ Private Infinity Pool</span>
+                    <span>✦ Dedicated 24/7 Butler</span>
+                  </div>
+                  <div class="vtc-price-row">
+                    <span class="vtc-price-val" data-usd="14500">$14,500</span>
+                    <span class="vtc-price-period">/ night</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tier 2 -->
+              <div class="villa-tier-card" data-tier="royal" data-base-usd="28000" tabindex="0" role="radio" aria-checked="false">
+                <div class="vtc-badge gold-badge">ROYAL SIGNATURE</div>
+                <div class="vtc-thumb royal-thumb">
+                  <div class="vtc-tag">6 BEDROOMS • 1,200 M²</div>
+                </div>
+                <div class="vtc-content">
+                  <h4 class="vtc-name">Royal Atoll Pavilion Estate</h4>
+                  <p class="vtc-desc">Secluded beachfront peninsula featuring private wine cellar, open-air wellness pavilion, and private catamaran.</p>
+                  <div class="vtc-features">
+                    <span>✦ Private White Sand Beach</span>
+                    <span>✦ Subterranean Wine Cellar</span>
+                    <span>✦ Private 42ft Catamaran</span>
+                  </div>
+                  <div class="vtc-price-row">
+                    <span class="vtc-price-val" data-usd="28000">$28,000</span>
+                    <span class="vtc-price-period">/ night</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tier 3 -->
+              <div class="villa-tier-card" data-tier="coral" data-base-usd="45000" tabindex="0" role="radio" aria-checked="false">
+                <div class="vtc-badge black-badge">PRIVATE ISLAND BUYOUT</div>
+                <div class="vtc-thumb coral-thumb">
+                  <div class="vtc-tag">9 BEDROOMS • 2,400 M²</div>
+                </div>
+                <div class="vtc-content">
+                  <h4 class="vtc-name">Presidential Coral Sanctuary</h4>
+                  <p class="vtc-desc">Ultimate sovereign seclusion with dual private helipads, underwater dining chamber, and private armed security detail.</p>
+                  <div class="vtc-features">
+                    <span>✦ Twin On-Island Helipads</span>
+                    <span>✦ Underwater Dining Room</span>
+                    <span>✦ Complete Atoll Exclusivity</span>
+                  </div>
+                  <div class="vtc-price-row">
+                    <span class="vtc-price-val" data-usd="45000">$45,000</span>
+                    <span class="vtc-price-period">/ night</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Bespoke Luxury Add-Ons -->
+          <div class="ib-step-group">
+            <div class="ib-step-header">
+              <span class="step-num">02</span>
+              <h3>Bespoke Luxury Island Add-Ons</h3>
+            </div>
+            <div class="addons-list" role="group" aria-label="Luxury package add-ons">
+              <!-- Addon 1 -->
+              <label class="addon-item" for="addonChef">
+                <input type="checkbox" id="addonChef" class="addon-checkbox" data-addon="chef" data-cost-type="perDay" data-base-usd="3500" checked>
+                <div class="addon-box">
+                  <div class="addon-info">
+                    <span class="addon-icon">👨‍🍳</span>
+                    <div>
+                      <strong class="addon-title">Private 3-Star Michelin Chef &amp; Caviar Service</strong>
+                      <p class="addon-desc">Daily bespoke 7-course dégustation menu, imperial Ossetra caviar service, and customized wellness nutrition.</p>
+                    </div>
+                  </div>
+                  <div class="addon-pricing">
+                    <span class="addon-price" data-usd="3500">+$3,500</span>
+                    <span class="addon-cadence">/ day</span>
+                  </div>
+                </div>
+              </label>
+
+              <!-- Addon 2 -->
+              <label class="addon-item" for="addonHeli">
+                <input type="checkbox" id="addonHeli" class="addon-checkbox" data-addon="heli" data-cost-type="fixed" data-base-usd="8500" checked>
+                <div class="addon-box">
+                  <div class="addon-info">
+                    <span class="addon-icon">🚁</span>
+                    <div>
+                      <strong class="addon-title">Twin-Engine Airbus ACH130 Helicopter Transfer</strong>
+                      <p class="addon-desc">Direct roundtrip flight transfer from international airport to the private villa helipad (zero boat transfer needed).</p>
+                    </div>
+                  </div>
+                  <div class="addon-pricing">
+                    <span class="addon-price" data-usd="8500">+$8,500</span>
+                    <span class="addon-cadence">roundtrip</span>
+                  </div>
+                </div>
+              </label>
+
+              <!-- Addon 3 -->
+              <label class="addon-item" for="addonYacht">
+                <input type="checkbox" id="addonYacht" class="addon-checkbox" data-addon="yacht" data-cost-type="perDay" data-base-usd="12000">
+                <div class="addon-box">
+                  <div class="addon-info">
+                    <span class="addon-icon">🛥️</span>
+                    <div>
+                      <strong class="addon-title">88ft Sunseeker Yacht Coral Atoll Excursion</strong>
+                      <p class="addon-desc">Full-day private superyacht charter with Seabobs, certified dive masters, and sunset Dom Pérignon champagne deck.</p>
+                    </div>
+                  </div>
+                  <div class="addon-pricing">
+                    <span class="addon-price" data-usd="12000">+$12,000</span>
+                    <span class="addon-cadence">/ day</span>
+                  </div>
+                </div>
+              </label>
+
+              <!-- Addon 4 -->
+              <label class="addon-item" for="addonSommelier">
+                <input type="checkbox" id="addonSommelier" class="addon-checkbox" data-addon="sommelier" data-cost-type="fixed" data-base-usd="4200">
+                <div class="addon-box">
+                  <div class="addon-info">
+                    <span class="addon-icon">🍷</span>
+                    <div>
+                      <strong class="addon-title">Cellar Reserve Grand Cru Sommelier Pairing</strong>
+                      <p class="addon-desc">Rare vintage pairings from Domaine de la Romanée-Conti, Château Margaux, and vintage Dom Pérignon P2.</p>
+                    </div>
+                  </div>
+                  <div class="addon-pricing">
+                    <span class="addon-price" data-usd="4200">+$4,200</span>
+                    <span class="addon-cadence">/ stay</span>
+                  </div>
+                </div>
+              </label>
+
+              <!-- Addon 5 -->
+              <label class="addon-item" for="addonSpa">
+                <input type="checkbox" id="addonSpa" class="addon-checkbox" data-addon="spa" data-cost-type="perDay" data-base-usd="2800">
+                <div class="addon-box">
+                  <div class="addon-info">
+                    <span class="addon-icon">🌿</span>
+                    <div>
+                      <strong class="addon-title">Rejuvenation Holistic Ayurvedic Spa Package</strong>
+                      <p class="addon-desc">Two master therapists dedicated exclusively to your villa with Tibetan sound baths and daily in-villa massages.</p>
+                    </div>
+                  </div>
+                  <div class="addon-pricing">
+                    <span class="addon-price" data-usd="2800">+$2,800</span>
+                    <span class="addon-cadence">/ day</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Live Itemized Luxury Invoice -->
+        <div class="ib-invoice-col">
+          <div class="luxury-invoice-card" id="luxuryInvoiceCard">
+            <div class="invoice-header">
+              <div class="invoice-brand">
+                <span class="brand-crest">✦ AURA REALMS ✦</span>
+                <span class="invoice-folio" id="invFolioCode">FOLIO #AR-2026-897B</span>
+              </div>
+              <h3 class="invoice-title">Itemized Concierge Folio</h3>
+              <div class="invoice-dates-row">
+                <span id="invDatesDisplay">5 Nights • 4 Guests</span>
+                <span class="invoice-status-pill">PROVISIONAL ESTIMATE</span>
+              </div>
+            </div>
+
+            <!-- Itemized Rows -->
+            <div class="invoice-body">
+              <div class="invoice-line-item">
+                <div class="line-desc">
+                  <strong id="invVillaTitle">Overwater Horizon Villa</strong>
+                  <span id="invVillaCalc">5 nights × $14,500 / night</span>
+                </div>
+                <strong class="line-price" id="invVillaPrice">$72,500</strong>
+              </div>
+
+              <div id="invAddonsList" class="inv-addons-sublist">
+                <!-- Dynamically populated addon lines -->
+              </div>
+
+              <div class="invoice-divider"></div>
+
+              <div class="invoice-subtotal-row">
+                <span>Direct Services Subtotal</span>
+                <span id="invSubtotalPrice">$98,500</span>
+              </div>
+
+              <div class="invoice-tax-row">
+                <span>Island Stewardship &amp; Staff Gratuity (10%)</span>
+                <span id="invGratuityPrice">$9,850</span>
+              </div>
+
+              <div class="invoice-tax-row">
+                <span>Maldives Green Tourism Tax &amp; GST (12%)</span>
+                <span id="invTaxPrice">$11,820</span>
+              </div>
+
+              <div class="invoice-divider"></div>
+
+              <!-- Grand Total -->
+              <div class="invoice-total-row">
+                <div class="total-lbl-col">
+                  <span class="total-kicker">TOTAL BESPOKE INVESTMENT</span>
+                  <span class="total-currency" id="invCurrencyNote">All taxes &amp; maritime fees included</span>
+                </div>
+                <div class="total-val-col">
+                  <strong class="grand-total-price" id="invGrandTotal">$120,170</strong>
+                  <span class="per-night-avg" id="invPerNightAvg">$24,034 / night</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Concierge Booking Action -->
+            <div class="invoice-footer">
+              <button type="button" class="btn-reserve-concierge" id="btnReserveConcierge">
+                <span class="btn-sparkle">✦</span> Reserve via Personal Concierge
+              </button>
+              <p class="invoice-guarantee">
+                🔒 Guaranteed best private atoll allocation. 100% refundable reservation holding deposit.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reservation Confirmation Drawer -->
+  <dialog class="island-booking-dialog" id="islandBookingDialog" aria-labelledby="bookingDialogTitle">
+    <div class="dialog-inner">
+      <div class="dialog-head">
+        <div>
+          <span class="dialog-kicker">✦ BESPOKE RESERVATION CONFIRMED ✦</span>
+          <h2 id="bookingDialogTitle">Concierge Folio Submitted</h2>
+        </div>
+        <button type="button" class="dialog-close-btn" id="closeBookingDialogBtn" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="dialog-body">
+        <div class="confirm-badge">
+          <span class="check-icon">✓</span>
+          <div>
+            <strong>Reservation Reference: <span id="dlgRefCode">AURA-ISLAND-2026-7B9F</span></strong>
+            <p>Your dedicated private atoll concierge will contact you within 2 hours to confirm private jet landing slots and menu selections.</p>
+          </div>
+        </div>
+        <div class="dialog-summary-box">
+          <div class="d-row"><span>Villa Selected:</span><strong id="dlgVillaName">Overwater Horizon Villa</strong></div>
+          <div class="d-row"><span>Duration:</span><strong id="dlgNights">5 Nights</strong></div>
+          <div class="d-row"><span>Guests:</span><strong id="dlgGuests">4 Guests</strong></div>
+          <div class="d-row"><span>Total Package Investment:</span><strong class="text-gold" id="dlgTotalInvestment">$120,170 USD</strong></div>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="dialog-done-btn" id="dialogDoneBtn">Return to Sanctuary</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+  <!-- ===== END Issue #413 ===== -->
+
   <!-- ===== BEGIN issue #103: Private Aviation Fleet Explorer & Cabin Interior Walkthrough ===== -->
   <section class="fleet-section" id="fleet" aria-labelledby="fleet-title">
     <div class="fleet-intro">
