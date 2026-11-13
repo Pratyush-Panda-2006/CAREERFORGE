@@ -1647,3 +1647,782 @@ if (document.readyState === 'loading') {
 } else {
   initTokenBucketSimulator();
 }
+
+
+// ============================================================================
+// Issue #444: Interactive GraphQL Query Builder, AST Syntax Highlighter & Response Explorer
+// ============================================================================
+
+const GRAPHQL_MOCK_DATA = {
+  users: [
+    { id: 'usr_1', name: 'Alex Mercer', email: 'alex@prisma.io', role: 'Principal Architect', score: 2850, projectIds: ['prj_1', 'prj_2'] },
+    { id: 'usr_2', name: 'Elena Rostova', email: 'elena@prisma.io', role: 'Staff DevOps Architect', score: 2420, projectIds: ['prj_1'] },
+    { id: 'usr_3', name: 'Devon Vance', email: 'devon@prisma.io', role: 'Senior Security Specialist', score: 1980, projectIds: ['prj_2'] },
+    { id: 'usr_4', name: 'Sara Chen', email: 'sara@prisma.io', role: 'Full Stack Engineer', score: 1750, projectIds: ['prj_3'] }
+  ],
+  projects: [
+    { id: 'prj_1', name: 'CareerForge Core', key: 'CFC', repo: 'github.com/org/careerforge', status: 'active', issueIds: ['iss_102', 'iss_104', 'iss_105'] },
+    { id: 'prj_2', name: 'Docs Portal Engine', key: 'DOCS', repo: 'github.com/org/docs-portal', status: 'active', issueIds: ['iss_101'] },
+    { id: 'prj_3', name: 'Sentinel Security Mesh', key: 'SENT', repo: 'github.com/org/sentinel', status: 'maintenance', issueIds: ['iss_103'] }
+  ],
+  issues: [
+    { id: 'iss_101', title: 'Implement GraphQL query resolver', status: 'in-progress', priority: 'high', points: 10, assigneeId: 'usr_1', projectId: 'prj_2' },
+    { id: 'iss_102', title: 'Automate token bucket rate limiting', status: 'closed', priority: 'medium', points: 5, assigneeId: 'usr_2', projectId: 'prj_1' },
+    { id: 'iss_103', title: 'Harden cryptographic key rotation', status: 'open', priority: 'critical', points: 10, assigneeId: 'usr_3', projectId: 'prj_3' },
+    { id: 'iss_104', title: 'Multi-currency localized cart checkout', status: 'closed', priority: 'high', points: 10, assigneeId: 'usr_4', projectId: 'prj_1' },
+    { id: 'iss_105', title: 'Virtual tape measure architectural annotator', status: 'closed', priority: 'high', points: 10, assigneeId: 'usr_1', projectId: 'prj_1' }
+  ],
+  leaderboard: [
+    { rank: 1, userId: 'usr_1', score: 2850, badges: ['Champion', 'Top Contributor', 'Level 3 Master'] },
+    { rank: 2, userId: 'usr_2', score: 2420, badges: ['Runner Up', 'Infra Wizard'] },
+    { rank: 3, userId: 'usr_3', score: 1980, badges: ['Security Sentinel'] },
+    { rank: 4, userId: 'usr_4', score: 1750, badges: ['Rising Star', 'Frontend Pro'] }
+  ]
+};
+
+const GRAPHQL_SCHEMA = {
+  types: {
+    User: {
+      description: 'A registered contributor or team member in the workspace',
+      fields: {
+        id: { type: 'ID!', description: 'Unique user identifier' },
+        name: { type: 'String!', description: 'Full legal name or handle' },
+        email: { type: 'String!', description: 'Verified work email address' },
+        role: { type: 'String!', description: 'Engineering or organization role' },
+        score: { type: 'Int!', description: 'Cumulative contribution score' },
+        projects: { type: '[Project!]!', description: 'Projects this user contributes to' },
+        issues: { type: '[Issue!]!', description: 'Issues assigned to this user' }
+      }
+    },
+    Project: {
+      description: 'A codebase project or showcase service within the organization',
+      fields: {
+        id: { type: 'ID!', description: 'Unique project identifier' },
+        name: { type: 'String!', description: 'Display name of the project' },
+        key: { type: 'String!', description: 'Short alphanumeric project key' },
+        repo: { type: 'String!', description: 'GitHub repository path' },
+        status: { type: 'String!', description: 'active | maintenance | archived' },
+        issues: { type: '[Issue!]!', description: 'Issues associated with this project' }
+      }
+    },
+    Issue: {
+      description: 'A task, feature enhancement, or defect ticket',
+      fields: {
+        id: { type: 'ID!', description: 'Unique issue identifier' },
+        title: { type: 'String!', description: 'Brief issue title' },
+        status: { type: 'String!', description: 'open | in-progress | closed' },
+        priority: { type: 'String!', description: 'low | medium | high | critical' },
+        points: { type: 'Int!', description: 'Scored story points (e.g. 5, 10)' },
+        assignee: { type: 'User', description: 'Assigned contributor' },
+        project: { type: 'Project', description: 'Parent project' }
+      }
+    },
+    Leaderboard: {
+      description: 'Leaderboard ranking row for seasonal sprint',
+      fields: {
+        rank: { type: 'Int!', description: 'Numerical ranking on leaderboard' },
+        score: { type: 'Int!', description: 'Current leaderboard points total' },
+        badges: { type: '[String!]!', description: 'Awarded achievement badges' },
+        user: { type: 'User!', description: 'Ranked user details' }
+      }
+    },
+    Query: {
+      description: 'Root query entrypoints',
+      fields: {
+        user: { type: 'User', args: { id: 'ID!' }, description: 'Find user by ID' },
+        users: { type: '[User!]!', args: {}, description: 'List all contributors' },
+        project: { type: 'Project', args: { id: 'ID!' }, description: 'Find project by ID' },
+        projects: { type: '[Project!]!', args: { status: 'String' }, description: 'Filter projects by status' },
+        issue: { type: 'Issue', args: { id: 'ID!' }, description: 'Find issue by ID' },
+        issues: { type: '[Issue!]!', args: { status: 'String', priority: 'String' }, description: 'Filter issues' },
+        leaderboard: { type: '[Leaderboard!]!', args: { limit: 'Int' }, description: 'Retrieve top ranked contributors' }
+      }
+    }
+  }
+};
+
+function tokenizeGraphQL(source) {
+  const tokens = [];
+  let i = 0;
+  const len = source.length;
+
+  while (i < len) {
+    const ch = source[i];
+
+    if (/\s|,/.test(ch)) {
+      i++;
+      continue;
+    }
+
+    if (ch === '#') {
+      while (i < len && source[i] !== '\n') i++;
+      continue;
+    }
+
+    if ('{}():!$=@'.includes(ch)) {
+      tokens.push({ type: 'PUNCT', value: ch, pos: i });
+      i++;
+      continue;
+    }
+
+    if (ch === '"') {
+      let str = '';
+      i++;
+      while (i < len && source[i] !== '"') {
+        if (source[i] === '\\' && i + 1 < len) {
+          str += source[i + 1];
+          i += 2;
+        } else {
+          str += source[i];
+          i++;
+        }
+      }
+      i++;
+      tokens.push({ type: 'STRING', value: str, pos: i });
+      continue;
+    }
+
+    if (/[\d-]/.test(ch) && (i === 0 || /[\s,(:]/.test(source[i - 1]) || source[i - 1] === '[')) {
+      let numStr = '';
+      while (i < len && /[\d.-]/.test(source[i])) {
+        numStr += source[i++];
+      }
+      tokens.push({ type: 'NUMBER', value: Number(numStr), pos: i });
+      continue;
+    }
+
+    if (/[a-zA-Z_]/.test(ch)) {
+      let name = '';
+      while (i < len && /[a-zA-Z0-9_]/.test(source[i])) {
+        name += source[i++];
+      }
+      tokens.push({ type: 'NAME', value: name, pos: i });
+      continue;
+    }
+
+    i++;
+  }
+
+  tokens.push({ type: 'EOF', value: '', pos: len });
+  return tokens;
+}
+
+function parseGraphQL(source) {
+  const tokens = tokenizeGraphQL(source);
+  let cursor = 0;
+
+  function peek() {
+    return tokens[cursor] || { type: 'EOF', value: '' };
+  }
+
+  function next() {
+    return tokens[cursor++];
+  }
+
+  function expect(val) {
+    const t = next();
+    if (t.value !== val && t.type !== val) {
+      throw new Error(`Expected "${val}" but got "${t.value || t.type}"`);
+    }
+    return t;
+  }
+
+  let operation = 'query';
+  let opName = null;
+  const variableDefinitions = [];
+
+  if (peek().type === 'NAME' && (peek().value === 'query' || peek().value === 'mutation' || peek().value === 'subscription')) {
+    operation = next().value;
+    if (peek().type === 'NAME') {
+      opName = next().value;
+    }
+    if (peek().value === '(') {
+      next();
+      while (peek().value !== ')' && peek().type !== 'EOF') {
+        if (peek().value === '$') next();
+        const varName = next().value;
+        expect(':');
+        const typeToken = next().value;
+        let isRequired = false;
+        if (peek().value === '!') {
+          next();
+          isRequired = true;
+        }
+        variableDefinitions.push({ variable: `$${varName}`, type: typeToken + (isRequired ? '!' : '') });
+        if (peek().value === ',') next();
+      }
+      expect(')');
+    }
+  }
+
+  function parseSelectionSet() {
+    expect('{');
+    const fields = [];
+    while (peek().value !== '}' && peek().type !== 'EOF') {
+      fields.push(parseField());
+    }
+    expect('}');
+    return fields;
+  }
+
+  function parseField() {
+    let name = expect('NAME').value;
+    let alias = null;
+    if (peek().value === ':') {
+      next();
+      alias = name;
+      name = expect('NAME').value;
+    }
+
+    const args = {};
+    if (peek().value === '(') {
+      next();
+      while (peek().value !== ')' && peek().type !== 'EOF') {
+        const argName = expect('NAME').value;
+        expect(':');
+        let argVal;
+        if (peek().value === '$') {
+          next();
+          argVal = `$${expect('NAME').value}`;
+        } else if (peek().type === 'STRING' || peek().type === 'NUMBER') {
+          argVal = next().value;
+        } else if (peek().type === 'NAME') {
+          const valName = next().value;
+          if (valName === 'true') argVal = true;
+          else if (valName === 'false') argVal = false;
+          else if (valName === 'null') argVal = null;
+          else argVal = valName;
+        }
+        args[argName] = argVal;
+        if (peek().value === ',') next();
+      }
+      expect(')');
+    }
+
+    let subFields = null;
+    if (peek().value === '{') {
+      subFields = parseSelectionSet();
+    }
+
+    return {
+      name,
+      alias,
+      arguments: args,
+      selectionSet: subFields || []
+    };
+  }
+
+  const selectionSet = parseSelectionSet();
+  return {
+    operation,
+    name: opName,
+    variableDefinitions,
+    selectionSet
+  };
+}
+
+class GraphQLResolver {
+  constructor(data = GRAPHQL_MOCK_DATA) {
+    this.data = data;
+  }
+
+  resolve(ast, variables = {}) {
+    const root = {};
+    const errors = [];
+
+    const evalArg = val => {
+      if (typeof val === 'string' && val.startsWith('$')) {
+        const varName = val.slice(1);
+        return variables[varName] !== undefined ? variables[varName] : null;
+      }
+      return val;
+    };
+
+    const resolveFieldOnParent = (parent, parentType, fieldNode) => {
+      const fieldName = fieldNode.name;
+      if (parentType === 'User') {
+        if (fieldName === 'projects') {
+          return (parent.projectIds || []).map(pid => this.data.projects.find(p => p.id === pid)).filter(Boolean);
+        }
+        if (fieldName === 'issues') {
+          return this.data.issues.filter(i => i.assigneeId === parent.id);
+        }
+      }
+      if (parentType === 'Project') {
+        if (fieldName === 'issues') {
+          return this.data.issues.filter(i => i.projectId === parent.id);
+        }
+      }
+      if (parentType === 'Issue') {
+        if (fieldName === 'assignee') {
+          return this.data.users.find(u => u.id === parent.assigneeId) || null;
+        }
+        if (fieldName === 'project') {
+          return this.data.projects.find(p => p.id === parent.projectId) || null;
+        }
+      }
+      if (parentType === 'Leaderboard') {
+        if (fieldName === 'user') {
+          return this.data.users.find(u => u.id === parent.userId) || null;
+        }
+      }
+      return parent[fieldName];
+    };
+
+    const executeSelectionSet = (item, typeName, selectionSet) => {
+      if (item === null || item === undefined) return null;
+      const res = {};
+      for (const field of selectionSet) {
+        const key = field.alias || field.name;
+        const val = resolveFieldOnParent(item, typeName, field);
+        if (field.selectionSet && field.selectionSet.length > 0) {
+          let nextType = 'Object';
+          if (typeName === 'User' && (field.name === 'projects')) nextType = 'Project';
+          else if (typeName === 'User' && (field.name === 'issues')) nextType = 'Issue';
+          else if (typeName === 'Project' && (field.name === 'issues')) nextType = 'Issue';
+          else if (typeName === 'Issue' && (field.name === 'assignee')) nextType = 'User';
+          else if (typeName === 'Issue' && (field.name === 'project')) nextType = 'Project';
+          else if (typeName === 'Leaderboard' && (field.name === 'user')) nextType = 'User';
+
+          if (Array.isArray(val)) {
+            res[key] = val.map(el => executeSelectionSet(el, nextType, field.selectionSet));
+          } else {
+            res[key] = executeSelectionSet(val, nextType, field.selectionSet);
+          }
+        } else {
+          res[key] = val !== undefined ? val : null;
+        }
+      }
+      return res;
+    };
+
+    for (const field of ast.selectionSet) {
+      const outputKey = field.alias || field.name;
+      const args = {};
+      for (const [k, v] of Object.entries(field.arguments || {})) {
+        args[k] = evalArg(v);
+      }
+
+      let rootValue = null;
+      let targetType = 'Object';
+
+      if (field.name === 'user') {
+        targetType = 'User';
+        rootValue = this.data.users.find(u => u.id === args.id) || null;
+      } else if (field.name === 'users') {
+        targetType = 'User';
+        rootValue = this.data.users;
+      } else if (field.name === 'project') {
+        targetType = 'Project';
+        rootValue = this.data.projects.find(p => p.id === args.id) || null;
+      } else if (field.name === 'projects') {
+        targetType = 'Project';
+        let list = this.data.projects;
+        if (args.status) list = list.filter(p => p.status === args.status);
+        rootValue = list;
+      } else if (field.name === 'issue') {
+        targetType = 'Issue';
+        rootValue = this.data.issues.find(i => i.id === args.id) || null;
+      } else if (field.name === 'issues') {
+        targetType = 'Issue';
+        let list = this.data.issues;
+        if (args.status) list = list.filter(i => i.status === args.status);
+        if (args.priority) list = list.filter(i => i.priority === args.priority);
+        rootValue = list;
+      } else if (field.name === 'leaderboard') {
+        targetType = 'Leaderboard';
+        let list = this.data.leaderboard;
+        if (typeof args.limit === 'number' && args.limit > 0) list = list.slice(0, args.limit);
+        rootValue = list;
+      } else {
+        errors.push({ message: `Cannot query field "${field.name}" on type "Query".` });
+        continue;
+      }
+
+      if (field.selectionSet && field.selectionSet.length > 0) {
+        if (Array.isArray(rootValue)) {
+          root[outputKey] = rootValue.map(item => executeSelectionSet(item, targetType, field.selectionSet));
+        } else {
+          root[outputKey] = executeSelectionSet(rootValue, targetType, field.selectionSet);
+        }
+      } else {
+        root[outputKey] = rootValue;
+      }
+    }
+
+    return {
+      data: Object.keys(root).length > 0 ? root : null,
+      errors: errors.length > 0 ? errors : undefined
+    };
+  }
+}
+
+function escapeGraphQLHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function highlightGraphQL(source) {
+  let out = '';
+  let i = 0;
+  const len = source.length;
+
+  while (i < len) {
+    const ch = source[i];
+
+    if (ch === '#') {
+      const start = i;
+      while (i < len && source[i] !== '\n') i++;
+      out += `<span class="gql-comment">${escapeGraphQLHtml(source.slice(start, i))}</span>`;
+      continue;
+    }
+
+    if (ch === '"') {
+      const start = i++;
+      while (i < len && source[i] !== '"') {
+        if (source[i] === '\\' && i + 1 < len) i += 2;
+        else i++;
+      }
+      if (i < len) i++;
+      out += `<span class="gql-string">${escapeGraphQLHtml(source.slice(start, i))}</span>`;
+      continue;
+    }
+
+    if (ch === '$') {
+      const start = i++;
+      while (i < len && /[a-zA-Z0-9_]/.test(source[i])) i++;
+      out += `<span class="gql-variable">${escapeGraphQLHtml(source.slice(start, i))}</span>`;
+      continue;
+    }
+
+    if (ch === '@') {
+      const start = i++;
+      while (i < len && /[a-zA-Z0-9_]/.test(source[i])) i++;
+      out += `<span class="gql-directive">${escapeGraphQLHtml(source.slice(start, i))}</span>`;
+      continue;
+    }
+
+    if (/[\d]/.test(ch) && (i === 0 || /[\s,(:]/.test(source[i - 1]) || source[i - 1] === '[')) {
+      const start = i;
+      while (i < len && /[\d.]/.test(source[i])) i++;
+      out += `<span class="gql-number">${escapeGraphQLHtml(source.slice(start, i))}</span>`;
+      continue;
+    }
+
+    if (/[a-zA-Z_]/.test(ch)) {
+      const start = i;
+      while (i < len && /[a-zA-Z0-9_]/.test(source[i])) i++;
+      const word = source.slice(start, i);
+
+      let lookahead = i;
+      while (lookahead < len && /\s/.test(source[lookahead])) lookahead++;
+      const isArg = lookahead < len && source[lookahead] === ':';
+
+      if (['query', 'mutation', 'subscription', 'fragment', 'on', 'type', 'schema', 'true', 'false', 'null'].includes(word)) {
+        out += `<span class="gql-keyword">${escapeGraphQLHtml(word)}</span>`;
+      } else if (isArg) {
+        out += `<span class="gql-argument">${escapeGraphQLHtml(word)}</span>`;
+      } else if (['ID', 'String', 'Int', 'Float', 'Boolean', 'User', 'Project', 'Issue', 'Leaderboard'].includes(word)) {
+        out += `<span class="gql-type">${escapeGraphQLHtml(word)}</span>`;
+      } else {
+        out += `<span class="gql-field">${escapeGraphQLHtml(word)}</span>`;
+      }
+      continue;
+    }
+
+    if ('{}():![]'.includes(ch)) {
+      out += `<span class="gql-punct">${escapeGraphQLHtml(ch)}</span>`;
+      i++;
+      continue;
+    }
+
+    out += escapeGraphQLHtml(ch);
+    i++;
+  }
+
+  return out;
+}
+
+function initGraphQLPlayground() {
+  const container = document.getElementById('graphql-playground');
+  if (!container) return;
+
+  const queryInput = document.getElementById('gqlQueryInput');
+  const queryHighlight = document.getElementById('gqlQueryHighlight');
+  const variablesInput = document.getElementById('gqlVariablesInput');
+  const responseOutput = document.getElementById('gqlResponseOutput');
+  const runBtn = document.getElementById('gqlRunBtn');
+  const formatBtn = document.getElementById('gqlFormatBtn');
+  const clearBtn = document.getElementById('gqlClearBtn');
+  const presetSelect = document.getElementById('gqlPresetSelect');
+  const copyBtn = document.getElementById('gqlCopyResponseBtn');
+  const statusPill = document.getElementById('gqlStatusPill');
+  const timePill = document.getElementById('gqlTimePill');
+  const toggleVarsBtn = document.getElementById('gqlToggleVarsBtn');
+  const varsDrawer = document.getElementById('gqlVarsDrawer');
+  const pillsContainer = document.getElementById('gqlPillsContainer');
+
+  const presets = {
+    user: `query GetUser($id: ID!) {
+  user(id: $id) {
+    id
+    name
+    email
+    role
+    score
+    projects {
+      id
+      name
+      status
+    }
+    issues {
+      id
+      title
+      status
+      priority
+    }
+  }
+}`,
+    projects: `query GetActiveProjects($status: String) {
+  projects(status: $status) {
+    id
+    name
+    key
+    repo
+    status
+    issues {
+      id
+      title
+      priority
+      points
+    }
+  }
+}`,
+    leaderboard: `query GetLeaderboard($limit: Int) {
+  leaderboard(limit: $limit) {
+    rank
+    score
+    badges
+    user {
+      id
+      name
+      role
+    }
+  }
+}`,
+    issues: `query GetIssues($status: String, $priority: String) {
+  issues(status: $status, priority: $priority) {
+    id
+    title
+    status
+    priority
+    points
+    assignee {
+      name
+      email
+    }
+    project {
+      name
+      key
+    }
+  }
+}`
+  };
+
+  const presetVariables = {
+    user: '{\n  "id": "usr_1"\n}',
+    projects: '{\n  "status": "active"\n}',
+    leaderboard: '{\n  "limit": 3\n}',
+    issues: '{\n  "status": "open",\n  "priority": "critical"\n}'
+  };
+
+  const resolver = new GraphQLResolver();
+
+  function updateHighlight() {
+    if (!queryInput || !queryHighlight) return;
+    queryHighlight.innerHTML = highlightGraphQL(queryInput.value) + '\n';
+    queryHighlight.scrollTop = queryInput.scrollTop;
+    queryHighlight.scrollLeft = queryInput.scrollLeft;
+  }
+
+  function execute() {
+    if (!queryInput || !responseOutput) return;
+    const source = queryInput.value.trim();
+    if (!source) {
+      responseOutput.textContent = '// Enter a GraphQL query and click Run';
+      return;
+    }
+
+    let variables = {};
+    if (variablesInput && variablesInput.value.trim()) {
+      try {
+        variables = JSON.parse(variablesInput.value.trim());
+      } catch (err) {
+        if (statusPill) statusPill.textContent = '400 Bad Request';
+        if (statusPill) statusPill.className = 'gql-status-badge error';
+        responseOutput.textContent = JSON.stringify({
+          errors: [{ message: `Variables JSON syntax error: ${err.message}` }]
+        }, null, 2);
+        return;
+      }
+    }
+
+    const t0 = performance.now();
+    try {
+      const ast = parseGraphQL(source);
+      const res = resolver.resolve(ast, variables);
+      const latency = Math.max(8, Math.round(performance.now() - t0));
+
+      if (statusPill) {
+        statusPill.textContent = res.errors ? '200 OK (with errors)' : '200 OK';
+        statusPill.className = res.errors ? 'gql-status-badge warn' : 'gql-status-badge success';
+      }
+      if (timePill) timePill.textContent = `${latency} ms`;
+
+      responseOutput.textContent = JSON.stringify(res, null, 2);
+    } catch (err) {
+      const latency = Math.max(5, Math.round(performance.now() - t0));
+      if (statusPill) {
+        statusPill.textContent = '400 Syntax Error';
+        statusPill.className = 'gql-status-badge error';
+      }
+      if (timePill) timePill.textContent = `${latency} ms`;
+      responseOutput.textContent = JSON.stringify({
+        errors: [{ message: err.message }]
+      }, null, 2);
+    }
+  }
+
+  if (queryInput) {
+    queryInput.addEventListener('input', updateHighlight);
+    queryInput.addEventListener('scroll', () => {
+      if (queryHighlight) {
+        queryHighlight.scrollTop = queryInput.scrollTop;
+        queryHighlight.scrollLeft = queryInput.scrollLeft;
+      }
+    });
+    queryInput.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        execute();
+      }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = queryInput.selectionStart;
+        const end = queryInput.selectionEnd;
+        queryInput.value = queryInput.value.substring(0, start) + '  ' + queryInput.value.substring(end);
+        queryInput.selectionStart = queryInput.selectionEnd = start + 2;
+        updateHighlight();
+      }
+    });
+  }
+
+  if (runBtn) runBtn.addEventListener('click', execute);
+
+  if (formatBtn && queryInput) {
+    formatBtn.addEventListener('click', () => {
+      try {
+        const ast = parseGraphQL(queryInput.value);
+        // Simple prettifier from ast
+        function formatSelection(fields, indent = '  ') {
+          return fields.map(f => {
+            const argsList = Object.entries(f.arguments || {}).map(([k, v]) => `${k}: ${typeof v === 'string' && !v.startsWith('$') ? `"${v}"` : v}`).join(', ');
+            const argStr = argsList ? `(${argsList})` : '';
+            const aliasStr = f.alias ? `${f.alias}: ` : '';
+            if (f.selectionSet && f.selectionSet.length > 0) {
+              return `${indent}${aliasStr}${f.name}${argStr} {\n${formatSelection(f.selectionSet, indent + '  ')}\n${indent}}`;
+            }
+            return `${indent}${aliasStr}${f.name}${argStr}`;
+          }).join('\n');
+        }
+
+        const opStr = `${ast.operation}${ast.name ? ` ${ast.name}` : ''}`;
+        const formatted = `${opStr} {\n${formatSelection(ast.selectionSet, '  ')}\n}`;
+        queryInput.value = formatted;
+        updateHighlight();
+      } catch {
+        // Leave intact if cannot parse
+      }
+    });
+  }
+
+  if (clearBtn && queryInput) {
+    clearBtn.addEventListener('click', () => {
+      queryInput.value = '';
+      if (responseOutput) responseOutput.textContent = '// Query editor cleared';
+      if (statusPill) statusPill.textContent = 'Idle';
+      if (statusPill) statusPill.className = 'gql-status-badge';
+      if (timePill) timePill.textContent = '0 ms';
+      updateHighlight();
+    });
+  }
+
+  if (presetSelect && queryInput) {
+    presetSelect.addEventListener('change', () => {
+      const key = presetSelect.value;
+      if (presets[key]) {
+        queryInput.value = presets[key];
+        if (variablesInput && presetVariables[key]) {
+          variablesInput.value = presetVariables[key];
+        }
+        updateHighlight();
+        execute();
+      }
+    });
+  }
+
+  if (toggleVarsBtn && varsDrawer) {
+    toggleVarsBtn.addEventListener('click', () => {
+      varsDrawer.hidden = !varsDrawer.hidden;
+      toggleVarsBtn.classList.toggle('active', !varsDrawer.hidden);
+    });
+  }
+
+  if (copyBtn && responseOutput) {
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(responseOutput.textContent);
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = '✓ Copied';
+        setTimeout(() => { copyBtn.textContent = originalText; }, 1800);
+      } catch {
+        // Fallback
+      }
+    });
+  }
+
+  // Autocomplete pill clicks
+  if (pillsContainer && queryInput) {
+    pillsContainer.addEventListener('click', e => {
+      const pill = e.target.closest('.gql-pill');
+      if (!pill) return;
+      const text = pill.dataset.insert || pill.textContent.trim();
+      const pos = queryInput.selectionStart || queryInput.value.length;
+      queryInput.value = queryInput.value.slice(0, pos) + text + ' ' + queryInput.value.slice(pos);
+      queryInput.focus();
+      queryInput.selectionStart = queryInput.selectionEnd = pos + text.length + 1;
+      updateHighlight();
+    });
+  }
+
+  // Set initial preset
+  if (queryInput && !queryInput.value) {
+    queryInput.value = presets.user;
+    if (variablesInput) variablesInput.value = presetVariables.user;
+    updateHighlight();
+    execute();
+  }
+}
+
+window.GRAPHQL_SCHEMA = GRAPHQL_SCHEMA;
+window.GRAPHQL_MOCK_DATA = GRAPHQL_MOCK_DATA;
+window.tokenizeGraphQL = tokenizeGraphQL;
+window.parseGraphQL = parseGraphQL;
+window.GraphQLResolver = GraphQLResolver;
+window.highlightGraphQL = highlightGraphQL;
+window.initGraphQLPlayground = initGraphQLPlayground;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initGraphQLPlayground);
+} else {
+  initGraphQLPlayground();
+}

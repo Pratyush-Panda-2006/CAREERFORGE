@@ -37,6 +37,7 @@
         <a href="#rate-limits" class="nav-link">Rate Limits</a>
         <a href="#http-status-codes" class="nav-link">HTTP Status Codes</a>
         <a href="#openapi-explorer" class="nav-link">OpenAPI 3.0 Explorer</a>
+        <a href="#graphql-playground" class="nav-link">GraphQL Playground</a>
         <div class="section-title">ADVANCED & SDks</div>
         <a href="#sdk-quickstart" class="nav-link">Client SDKs</a>
         <a href="#error-codes" class="nav-link">Error Handling</a>
@@ -737,6 +738,158 @@ Retry-After: 0s</code></pre>
           <div class="openapi-endpoints-container" id="openapiEndpointsContainer">
             <!-- Dynamically populated endpoint cards -->
           </div>
+        </div>
+      </section>
+
+      <!-- GraphQL Query Builder, AST Syntax Highlighter & Response Explorer (Issue #444) -->
+      <section id="graphql-playground" class="doc-section">
+        <div class="meta-row">
+          <span class="badge">GRAPHQL v16</span>
+          <span class="badge category-badge">AST PLAYGROUND &amp; RESOLVER</span>
+        </div>
+        <h2>GraphQL Query Builder &amp; Schema Explorer</h2>
+        <p>Interactive client-side GraphQL query builder with an in-memory recursive resolver executing queries across <code>User</code>, <code>Project</code>, <code>Issue</code>, and <code>Leaderboard</code> types. Features real-time AST syntax highlighting, auto-completion suggestion pills, variable JSON editor, and live response tree explorer.</p>
+
+        <div class="gql-playground-card">
+          <!-- Toolbar -->
+          <div class="gql-toolbar">
+            <div class="gql-preset-group">
+              <label for="gqlPresetSelect">Sample Query:</label>
+              <select id="gqlPresetSelect" class="gql-select">
+                <option value="user" selected>User Profile &amp; Nested Issues</option>
+                <option value="projects">Active Projects &amp; Issues</option>
+                <option value="leaderboard">Seasonal Leaderboard Standings</option>
+                <option value="issues">Issue Details with Assignee &amp; Project</option>
+              </select>
+            </div>
+
+            <div class="gql-action-group">
+              <button type="button" class="gql-btn primary" id="gqlRunBtn" title="Run query (Ctrl+Enter)">
+                <span>▶ Run</span>
+              </button>
+              <button type="button" class="gql-btn" id="gqlFormatBtn" title="Prettify GraphQL query">
+                <span>✨ Prettify</span>
+              </button>
+              <button type="button" class="gql-btn" id="gqlToggleVarsBtn" title="Toggle query variables JSON">
+                <span>{ } Variables</span>
+              </button>
+              <button type="button" class="gql-btn" id="gqlClearBtn" title="Clear query editor">
+                <span>✕ Clear</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Autocomplete Suggestion Pills -->
+          <div class="gql-pills-bar">
+            <span class="gql-pills-label">Autocomplete Pills:</span>
+            <div class="gql-pills-container" id="gqlPillsContainer">
+              <button type="button" class="gql-pill" data-insert="user(id: &quot;usr_1&quot;)">user</button>
+              <button type="button" class="gql-pill" data-insert="projects(status: &quot;active&quot;)">projects</button>
+              <button type="button" class="gql-pill" data-insert="issues(status: &quot;open&quot;)">issues</button>
+              <button type="button" class="gql-pill" data-insert="leaderboard(limit: 5)">leaderboard</button>
+              <button type="button" class="gql-pill" data-insert="id">id</button>
+              <button type="button" class="gql-pill" data-insert="name">name</button>
+              <button type="button" class="gql-pill" data-insert="email">email</button>
+              <button type="button" class="gql-pill" data-insert="role">role</button>
+              <button type="button" class="gql-pill" data-insert="score">score</button>
+              <button type="button" class="gql-pill" data-insert="priority">priority</button>
+              <button type="button" class="gql-pill" data-insert="points">points</button>
+              <button type="button" class="gql-pill" data-insert="assignee { name email }">assignee { ... }</button>
+            </div>
+          </div>
+
+          <!-- Variables Drawer -->
+          <div class="gql-vars-drawer" id="gqlVarsDrawer" hidden>
+            <div class="gql-vars-header">
+              <span>Query Variables (JSON)</span>
+            </div>
+            <textarea id="gqlVariablesInput" class="gql-vars-textarea" rows="4" placeholder='{\n  "id": "usr_1"\n}'></textarea>
+          </div>
+
+          <!-- Main Split Pane (Editor + Response) -->
+          <div class="gql-split-pane">
+            <!-- Left: Query Editor & AST Highlighter Overlay -->
+            <div class="gql-pane gql-editor-pane">
+              <div class="gql-pane-header">
+                <span>Operation Editor</span>
+                <span class="gql-badge-subtle">GraphQL AST</span>
+              </div>
+              <div class="gql-editor-container">
+                <pre class="gql-highlight-overlay" id="gqlQueryHighlight" aria-hidden="true"></pre>
+                <textarea id="gqlQueryInput" class="gql-textarea" spellcheck="false" placeholder="Enter GraphQL query..."></textarea>
+              </div>
+            </div>
+
+            <!-- Right: Response Tree Explorer -->
+            <div class="gql-pane gql-response-pane">
+              <div class="gql-pane-header">
+                <div class="gql-response-status-wrap">
+                  <span>Response Explorer</span>
+                  <span class="gql-status-badge success" id="gqlStatusPill">200 OK</span>
+                  <span class="gql-time-badge" id="gqlTimePill">12 ms</span>
+                </div>
+                <button type="button" class="gql-btn-sm" id="gqlCopyResponseBtn">Copy JSON</button>
+              </div>
+              <div class="gql-response-container">
+                <pre class="gql-response-pre" id="gqlResponseOutput">// Loading response...</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schema Types Legend / Documentation Accordion -->
+          <details class="gql-schema-details">
+            <summary class="gql-schema-summary">📖 In-Memory Schema Documentation (User, Project, Issue, Leaderboard)</summary>
+            <div class="gql-schema-grid">
+              <div class="gql-schema-card">
+                <h4>type User</h4>
+                <p>Represents an engineering contributor in the workspace.</p>
+                <ul>
+                  <li><code>id: ID!</code></li>
+                  <li><code>name: String!</code></li>
+                  <li><code>email: String!</code></li>
+                  <li><code>role: String!</code></li>
+                  <li><code>score: Int!</code></li>
+                  <li><code>projects: [Project!]!</code></li>
+                  <li><code>issues: [Issue!]!</code></li>
+                </ul>
+              </div>
+              <div class="gql-schema-card">
+                <h4>type Project</h4>
+                <p>Repository and showcase microservice project.</p>
+                <ul>
+                  <li><code>id: ID!</code></li>
+                  <li><code>name: String!</code></li>
+                  <li><code>key: String!</code></li>
+                  <li><code>repo: String!</code></li>
+                  <li><code>status: String!</code></li>
+                  <li><code>issues: [Issue!]!</code></li>
+                </ul>
+              </div>
+              <div class="gql-schema-card">
+                <h4>type Issue</h4>
+                <p>Tracked task, bug, or feature enhancement.</p>
+                <ul>
+                  <li><code>id: ID!</code></li>
+                  <li><code>title: String!</code></li>
+                  <li><code>status: String!</code></li>
+                  <li><code>priority: String!</code></li>
+                  <li><code>points: Int!</code></li>
+                  <li><code>assignee: User</code></li>
+                  <li><code>project: Project</code></li>
+                </ul>
+              </div>
+              <div class="gql-schema-card">
+                <h4>type Leaderboard</h4>
+                <p>Real-time seasonal contributor rankings.</p>
+                <ul>
+                  <li><code>rank: Int!</code></li>
+                  <li><code>score: Int!</code></li>
+                  <li><code>badges: [String!]!</code></li>
+                  <li><code>user: User!</code></li>
+                </ul>
+              </div>
+            </div>
+          </details>
         </div>
       </section>
 
