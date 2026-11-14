@@ -18,6 +18,7 @@
     </div>
     <div class="nav-actions">
       <a href="#compound-engine" class="nav-link">Growth Engine</a>
+      <a href="#debt-planner" class="nav-link">Debt Planner</a>
       <span class="balance-badge">Portfolio: <span id="portfolio-balance">$128,450.00</span>
         <button type="button" id="balance-visibility" aria-controls="portfolio-balance" aria-pressed="false" aria-label="Hide balance" title="Hide balance"><span aria-hidden="true">◉</span></button>
       </span>
@@ -433,6 +434,119 @@
               </table>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="engine-section debt-planner-section" id="debt-planner" aria-labelledby="debtPlannerTitle">
+    <div class="engine-container">
+      <div class="section-header">
+        <div class="tag">// DEBT ELIMINATION STRATEGIST</div>
+        <h2 id="debtPlannerTitle">Compare Your Debt Payoff Strategies</h2>
+        <p>Enter your accounts and monthly extra payment to compare the Debt Snowball and Debt Avalanche side by side. Estimates use fixed monthly APR accrual and payments.</p>
+      </div>
+
+      <form id="debtPlannerForm" novalidate>
+        <div class="debt-input-heading">
+          <div>
+            <h3>Your debt accounts</h3>
+            <p>Minimums are paid on every active account before extra funds are applied.</p>
+          </div>
+          <button type="button" class="debt-secondary-btn" id="addDebtAccount">+ Add account</button>
+        </div>
+        <div class="debt-account-list" id="debtAccountList">
+          <div class="debt-account-row" data-debt-row>
+            <label>
+              <span>Account name</span>
+              <input type="text" name="debtName" value="Rewards credit card" maxlength="40" required />
+            </label>
+            <label>
+              <span>Balance ($)</span>
+              <input type="number" name="debtBalance" value="5400" min="0.01" step="0.01" inputmode="decimal" required />
+            </label>
+            <label>
+              <span>APR (%)</span>
+              <input type="number" name="debtApr" value="19.99" min="0" max="100" step="0.01" inputmode="decimal" required />
+            </label>
+            <label>
+              <span>Minimum / month ($)</span>
+              <input type="number" name="debtMinimum" value="165" min="0.01" step="0.01" inputmode="decimal" required />
+            </label>
+            <button type="button" class="debt-remove-btn" aria-label="Remove Rewards credit card">Remove</button>
+          </div>
+          <div class="debt-account-row" data-debt-row>
+            <label>
+              <span>Account name</span>
+              <input type="text" name="debtName" value="Auto loan" maxlength="40" required />
+            </label>
+            <label>
+              <span>Balance ($)</span>
+              <input type="number" name="debtBalance" value="8200" min="0.01" step="0.01" inputmode="decimal" required />
+            </label>
+            <label>
+              <span>APR (%)</span>
+              <input type="number" name="debtApr" value="6.4" min="0" max="100" step="0.01" inputmode="decimal" required />
+            </label>
+            <label>
+              <span>Minimum / month ($)</span>
+              <input type="number" name="debtMinimum" value="240" min="0.01" step="0.01" inputmode="decimal" required />
+            </label>
+            <button type="button" class="debt-remove-btn" aria-label="Remove Auto loan">Remove</button>
+          </div>
+          <div class="debt-account-row" data-debt-row>
+            <label>
+              <span>Account name</span>
+              <input type="text" name="debtName" value="Travel card" maxlength="40" required />
+            </label>
+            <label>
+              <span>Balance ($)</span>
+              <input type="number" name="debtBalance" value="2150" min="0.01" step="0.01" inputmode="decimal" required />
+            </label>
+            <label>
+              <span>APR (%)</span>
+              <input type="number" name="debtApr" value="14.9" min="0" max="100" step="0.01" inputmode="decimal" required />
+            </label>
+            <label>
+              <span>Minimum / month ($)</span>
+              <input type="number" name="debtMinimum" value="80" min="0.01" step="0.01" inputmode="decimal" required />
+            </label>
+            <button type="button" class="debt-remove-btn" aria-label="Remove Travel card">Remove</button>
+          </div>
+        </div>
+
+        <div class="debt-planner-actions">
+          <label class="debt-extra-field" for="debtExtraPayment">
+            <span>Extra payment each month ($)</span>
+            <input id="debtExtraPayment" type="number" value="450" min="0" step="0.01" inputmode="decimal" required />
+          </label>
+          <button type="submit" class="btn-primary">Compare strategies</button>
+          <button type="button" class="debt-secondary-btn debt-print-btn" id="printDebtPlan" disabled>Print comparison</button>
+        </div>
+        <p class="debt-planner-error" id="debtPlannerError" role="alert" hidden></p>
+      </form>
+
+      <div class="debt-results" id="debtResults" aria-live="polite" hidden>
+        <div class="debt-comparison-callout" id="debtSavingsCallout"></div>
+        <div class="debt-result-grid">
+          <article class="debt-result-card snowball-card" id="snowballCard"></article>
+          <article class="debt-result-card avalanche-card" id="avalancheCard"></article>
+        </div>
+        <div class="debt-chart-card">
+          <div class="debt-chart-heading">
+            <div>
+              <h3>Projected payoff timeline</h3>
+              <p>Remaining balance by month, using a constant monthly payment budget.</p>
+            </div>
+            <div class="debt-chart-legend">
+              <span><i class="snowball-dot"></i> Snowball</span>
+              <span><i class="avalanche-dot"></i> Avalanche</span>
+            </div>
+          </div>
+          <div class="debt-chart-wrap">
+            <svg id="debtPayoffChart" viewBox="0 0 760 280" role="img" aria-label="Projected remaining debt balance over time"></svg>
+          </div>
+          <p class="debt-disclaimer">Illustrative estimate only. Actual interest, fees, payment timing, and lender terms may change your payoff results.</p>
         </div>
       </div>
     </div>
@@ -956,6 +1070,7 @@
   </footer>
 
   <script src="ledger.js"></script>
+  <script src="debt-planner.js"></script>
   <script src="script.js"></script>
   <!-- ===== BEGIN Issue #194: Print-Optimized Statement Modal & Toast ===== -->
   <div class="statement-modal-backdrop" id="statementModal" hidden>

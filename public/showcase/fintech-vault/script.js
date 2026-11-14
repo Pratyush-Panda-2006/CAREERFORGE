@@ -1276,6 +1276,230 @@ window.confirmDeposit = function confirmDeposit() {
   }
 })();
 
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('debtPlannerForm');
+  if (!form || !window.DebtPlanner) return;
+
+  const accountList = document.getElementById('debtAccountList');
+  const addButton = document.getElementById('addDebtAccount');
+  const extraInput = document.getElementById('debtExtraPayment');
+  const error = document.getElementById('debtPlannerError');
+  const results = document.getElementById('debtResults');
+  const callout = document.getElementById('debtSavingsCallout');
+  const chart = document.getElementById('debtPayoffChart');
+  const printButton = document.getElementById('printDebtPlan');
+  const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+  const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' });
+
+  function makeAccountRow() {
+    const row = document.createElement('div');
+    row.className = 'debt-account-row';
+    row.dataset.debtRow = '';
+    [
+      ['Account name', 'debtName', 'text', '', ''],
+      ['Balance ($)', 'debtBalance', 'number', '0.01', '0.01'],
+      ['APR (%)', 'debtApr', 'number', '0', '0.01'],
+      ['Minimum / month ($)', 'debtMinimum', 'number', '0.01', '0.01']
+    ].forEach(([labelText, name, type, min, step]) => {
+      const label = document.createElement('label');
+      const caption = document.createElement('span');
+      caption.textContent = labelText;
+      const input = document.createElement('input');
+      input.type = type;
+      input.name = name;
+      input.required = true;
+      if (type === 'text') input.maxLength = 40;
+      else {
+        input.min = min;
+        input.step = step;
+        input.inputMode = 'decimal';
+      }
+      label.append(caption, input);
+      row.appendChild(label);
+    });
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'debt-remove-btn';
+    remove.textContent = 'Remove';
+    remove.setAttribute('aria-label', 'Remove debt account');
+    row.appendChild(remove);
+    return row;
+  }
+
+  function readDebts() {
+    return Array.from(accountList.querySelectorAll('[data-debt-row]')).map((row, index) => {
+      const fields = row.querySelectorAll('input');
+      return {
+        id: index + 1,
+        name: fields[0].value.trim(),
+        balance: Number(fields[1].value),
+        apr: Number(fields[2].value),
+        minimumPayment: Number(fields[3].value)
+      };
+    });
+  }
+
+  function formatDate(date) {
+    return dateFormat.format(date);
+  }
+
+  function renderCard(element, result, title, description) {
+    element.textContent = '';
+    const heading = document.createElement('div');
+    heading.className = 'debt-result-heading';
+    const copy = document.createElement('div');
+    const name = document.createElement('h3');
+    name.textContent = title;
+    const summary = document.createElement('p');
+    summary.textContent = description;
+    copy.append(name, summary);
+
+    const date = document.createElement('strong');
+    date.className = 'debt-free-date';
+    date.textContent = formatDate(result.debtFreeDate);
+    const dateLabel = document.createElement('span');
+    dateLabel.textContent = 'Projected debt-free';
+    const dateBox = document.createElement('div');
+    dateBox.className = 'debt-date-box';
+    dateBox.append(dateLabel, date);
+    heading.append(copy, dateBox);
+
+    const metrics = document.createElement('div');
+    metrics.className = 'debt-result-metrics';
+    [
+      ['Interest paid', currency.format(result.totalInterest)],
+      ['Monthly payment budget', currency.format(readDebts().reduce((sum, debt) => sum + debt.minimumPayment, 0) + Number(extraInput.value))],
+      ['Time to debt-free', result.months + (result.months === 1 ? ' month' : ' months')]
+    ].forEach(([labelText, valueText]) => {
+      const metric = document.createElement('div');
+      const label = document.createElement('span');
+      label.textContent = labelText;
+      const value = document.createElement('strong');
+      value.textContent = valueText;
+      metric.append(label, value);
+      metrics.appendChild(metric);
+    });
+
+    const milestoneHeading = document.createElement('h4');
+    milestoneHeading.textContent = 'Payoff milestones';
+    const milestones = document.createElement('ul');
+    milestones.className = 'debt-milestones';
+    result.accounts.forEach((account) => {
+      const item = document.createElement('li');
+      const accountName = document.createElement('span');
+      accountName.textContent = account.name;
+      const accountDate = document.createElement('strong');
+      accountDate.textContent = formatDate(new Date(result.debtFreeDate.getFullYear(), result.debtFreeDate.getMonth() - result.months + account.payoffMonth, 1));
+      item.append(accountName, accountDate);
+      milestones.appendChild(item);
+    });
+    element.append(heading, metrics, milestoneHeading, milestones);
+  }
+
+  function drawChart(comparison) {
+    const namespace = 'http://www.w3.org/2000/svg';
+    const width = 760;
+    const height = 280;
+    const left = 64;
+    const right = 18;
+    const top = 18;
+    const bottom = 40;
+    const maxMonths = Math.max(comparison.snowball.months, comparison.avalanche.months);
+    const maxBalance = comparison.snowball.history[0].balance;
+    const plotWidth = width - left - right;
+    const plotHeight = height - top - bottom;
+    chart.textContent = '';
+
+    function svgElement(tag, attributes, text) {
+      const element = document.createElementNS(namespace, tag);
+      Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+      if (text) element.textContent = text;
+      chart.appendChild(element);
+      return element;
+    }
+
+    [0, 0.5, 1].forEach((ratio) => {
+      const y = top + plotHeight * ratio;
+      svgElement('line', { x1: left, y1: y, x2: width - right, y2: y, class: 'debt-chart-gridline' });
+      svgElement('text', { x: left - 10, y: y + 4, 'text-anchor': 'end', class: 'debt-chart-label' }, currency.format(maxBalance * (1 - ratio)));
+    });
+    [0, maxMonths].forEach((month) => {
+      const x = left + (maxMonths ? month / maxMonths : 0) * plotWidth;
+      svgElement('text', { x, y: height - 12, 'text-anchor': month === 0 ? 'start' : 'end', class: 'debt-chart-label' }, month === 0 ? 'Today' : month + ' months');
+    });
+
+    [
+      [comparison.snowball, 'debt-snowball-line'],
+      [comparison.avalanche, 'debt-avalanche-line']
+    ].forEach(([result, className]) => {
+      const points = result.history.map((point) => {
+        const x = left + (point.month / maxMonths) * plotWidth;
+        const y = top + plotHeight * (1 - point.balance / maxBalance);
+        return (point.month === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+      });
+      if (result.months < maxMonths) points.push('L' + (width - right) + ',' + (top + plotHeight).toFixed(1));
+      svgElement('path', { d: points.join(' '), class: className });
+    });
+  }
+
+  function render() {
+    error.hidden = true;
+    error.textContent = '';
+    try {
+      if (extraInput.value.trim() === '') throw new Error('Enter an extra monthly payment, or enter 0.');
+      const comparison = window.DebtPlanner.compare(readDebts(), Number(extraInput.value));
+      const difference = Math.abs(comparison.snowball.totalInterest - comparison.avalanche.totalInterest);
+      if (difference < 0.01) {
+        callout.textContent = 'Both strategies pay the same interest with these account details.';
+      } else {
+        const lowerInterest = comparison.avalanche.totalInterest < comparison.snowball.totalInterest ? 'Avalanche' : 'Snowball';
+        const higherInterest = lowerInterest === 'Avalanche' ? 'Snowball' : 'Avalanche';
+        const monthsEarlier = Math.abs(comparison.snowball.months - comparison.avalanche.months);
+        callout.textContent = lowerInterest + ' saves ' + currency.format(difference) + ' in interest compared with ' + higherInterest +
+          (monthsEarlier ? ', and the two strategies differ by ' + monthsEarlier + (monthsEarlier === 1 ? ' month' : ' months') + ' to debt-free.' : '.');
+      }
+      renderCard(document.getElementById('snowballCard'), comparison.snowball, 'Debt Snowball', 'Prioritize your lowest balance first.');
+      renderCard(document.getElementById('avalancheCard'), comparison.avalanche, 'Debt Avalanche', 'Prioritize your highest APR first.');
+      drawChart(comparison);
+      results.hidden = false;
+      printButton.disabled = false;
+    } catch (reason) {
+      error.textContent = reason instanceof Error ? reason.message : 'Unable to calculate this payoff plan.';
+      error.hidden = false;
+      results.hidden = true;
+      printButton.disabled = true;
+    }
+    addButton.disabled = accountList.querySelectorAll('[data-debt-row]').length >= 8;
+    accountList.querySelectorAll('.debt-remove-btn').forEach((button) => {
+      button.disabled = accountList.querySelectorAll('[data-debt-row]').length <= 1;
+    });
+  }
+
+  addButton.addEventListener('click', () => {
+    if (accountList.querySelectorAll('[data-debt-row]').length >= 8) return;
+    accountList.appendChild(makeAccountRow());
+    render();
+    accountList.querySelector('[data-debt-row]:last-child input').focus();
+  });
+  accountList.addEventListener('click', (event) => {
+    const button = event.target.closest('.debt-remove-btn');
+    if (!button || accountList.querySelectorAll('[data-debt-row]').length <= 1) return;
+    button.closest('[data-debt-row]').remove();
+    render();
+  });
+  form.addEventListener('input', render);
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    render();
+  });
+  printButton.addEventListener('click', () => {
+    document.body.classList.add('print-debt-plan');
+    window.print();
+  });
+  window.addEventListener('afterprint', () => document.body.classList.remove('print-debt-plan'));
+  render();
+});
+
 /* ==========================================================
    Savings Goals Stash & Compound Wealth Projector (Issue #449)
    ========================================================== */
