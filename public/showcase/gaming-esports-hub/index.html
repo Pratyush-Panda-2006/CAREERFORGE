@@ -950,5 +950,35 @@
     <ol aria-label="Simulated tactical events" aria-live="off"></ol>
   </section>
   <script type="module" src="match-simulator.js"></script>
+  <section class="strategy-board" id="strategy-board" aria-labelledby="strategy-title">
+    <p class="strategy-kicker">VORTEX // TEAM PLAYBOOK</p>
+    <h2 id="strategy-title">TACTICAL STRATEGY WHITEBOARD</h2>
+    <p>Plan a rotation, mark utility, and share a map with your team. These are fictional practice layouts.</p>
+    <div class="strategy-toolbar">
+      <label>Practice map <select id="wb-map"><option value="courtyard">Courtyard</option><option value="lanes">Three lanes</option></select></label>
+      <fieldset><legend>Drawing tool</legend>
+        <button type="button" data-wb-tool="select" aria-pressed="true">Select / move</button>
+        <button type="button" data-wb-tool="pen" aria-pressed="false">Pen</button>
+        <button type="button" data-wb-tool="arrow" aria-pressed="false">Route arrow</button>
+        <button type="button" data-wb-tool="erase" aria-pressed="false">Eraser</button>
+      </fieldset>
+      <label>Ink <input id="wb-color" type="color" value="#67e8f9"></label>
+      <label>Line width <select id="wb-width"><option value="3">Fine</option><option value="6" selected>Medium</option><option value="10">Bold</option></select></label>
+    </div>
+    <div class="strategy-toolbar" aria-label="Add tactical markers">
+      <button type="button" data-wb-marker="blue">+ Blue player</button>
+      <button type="button" data-wb-marker="red">+ Red player</button>
+      <button type="button" data-wb-marker="smoke">+ Smoke</button>
+      <button type="button" data-wb-marker="ward">+ Ward</button>
+      <button type="button" id="wb-undo" disabled>Undo</button>
+      <button type="button" id="wb-clear" disabled>Clear map</button>
+      <button type="button" id="wb-export">Export PNG</button>
+    </div>
+    <p id="wb-help">Drag to draw or move a marker. Eraser removes a whole annotation. Choose a marker below, focus the board and use arrow keys to move it (Shift: larger steps), Delete to remove it, Escape to cancel a drag. Each map keeps its own edits for this session.</p>
+    <label class="strategy-marker-picker">Selected marker <select id="wb-marker"><option value="">None</option></select></label>
+    <canvas id="wb-canvas" width="900" height="520" tabindex="0" role="img" aria-label="Tactical practice map with annotations" aria-describedby="wb-help wb-status">Use the marker controls to plan team positions.</canvas>
+    <p id="wb-status" role="status" aria-live="polite">Courtyard · no annotations yet.</p>
+  </section>
+  <script type="module" src="whiteboard.js"></script>
 </body>
 </html>
