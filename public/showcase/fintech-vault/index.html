@@ -19,6 +19,7 @@
     <div class="nav-actions">
       <a href="#compound-engine" class="nav-link">Growth Engine</a>
       <a href="#debt-planner" class="nav-link">Debt Planner</a>
+      <a href="#dca-simulator" class="nav-link">DCA Simulator</a>
       <span class="balance-badge">Portfolio: <span id="portfolio-balance">$128,450.00</span>
         <button type="button" id="balance-visibility" aria-controls="portfolio-balance" aria-pressed="false" aria-label="Hide balance" title="Hide balance"><span aria-hidden="true">◉</span></button>
       </span>
@@ -1061,6 +1062,295 @@
     </div>
   </div>
   <!-- ===== Savings Goals & Growth Vault END ===== -->
+
+  <!-- ===== Crypto vs Stock DCA Investment Simulator (Issue #407) START ===== -->
+  <section class="engine-section dca-section" id="dca-simulator" aria-labelledby="dcaTitle">
+    <div class="engine-container">
+      <div class="section-header">
+        <div class="tag">// QUANTITATIVE ASSET ALLOCATION // DCA VS LUMP-SUM</div>
+        <h2 id="dcaTitle">Crypto vs Stock DCA Investment Simulator</h2>
+        <p>Compare recurring Dollar-Cost Averaging against lump-sum upfront investing across Bitcoin, Ethereum, and S&amp;P 500 Index over 1 to 5 years with volatility smoothing and cash savings benchmark.</p>
+      </div>
+
+      <!-- Asset Selection Bar -->
+      <div class="dca-asset-bar">
+        <span class="dca-bar-label">Select Target Asset:</span>
+        <div class="dca-asset-chips" role="radiogroup" aria-label="Target Asset Selection">
+          <button type="button" class="dca-asset-chip active" data-asset="btc" role="radio" aria-checked="true" id="dcaAssetBtc">
+            <span class="dca-asset-icon btc-icon">₿</span>
+            <div class="dca-asset-meta">
+              <span class="dca-asset-name">Bitcoin (BTC)</span>
+              <span class="dca-asset-badge btc-badge">+45.2% Hist. CAGR • High Volatility</span>
+            </div>
+          </button>
+          <button type="button" class="dca-asset-chip" data-asset="sp500" role="radio" aria-checked="false" id="dcaAssetSp500">
+            <span class="dca-asset-icon sp-icon">📈</span>
+            <div class="dca-asset-meta">
+              <span class="dca-asset-name">S&amp;P 500 Index (SPY)</span>
+              <span class="dca-asset-badge sp-badge">+12.4% Hist. CAGR • Steady Compound</span>
+            </div>
+          </button>
+          <button type="button" class="dca-asset-chip" data-asset="eth" role="radio" aria-checked="false" id="dcaAssetEth">
+            <span class="dca-asset-icon eth-icon">Ξ</span>
+            <div class="dca-asset-meta">
+              <span class="dca-asset-name">Ethereum (ETH)</span>
+              <span class="dca-asset-badge eth-badge">+38.6% Hist. CAGR • High Beta</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Simulator Dual Column Grid -->
+      <div class="simulator-grid dca-grid">
+        <!-- Controls Column -->
+        <div class="controls-card dca-controls-card">
+          <div class="card-title">
+            <span>⚙️ Strategy &amp; Contribution Inputs</span>
+            <button type="button" id="dcaResetDefaultsBtn" class="reset-btn" title="Reset DCA simulator to defaults">↺ Reset</button>
+          </div>
+
+          <!-- Strategy Mode Selector -->
+          <div class="dca-strategy-mode-card">
+            <label class="dca-field-label">Investment Execution Strategy</label>
+            <div class="dca-strategy-toggle-group" role="radiogroup" aria-label="Strategy Mode">
+              <button type="button" class="dca-strat-btn active" data-strategy="dca" role="radio" aria-checked="true" id="stratDcaBtn">
+                <span class="strat-btn-icon">🔄</span>
+                <div class="strat-btn-text">
+                  <strong>Dollar-Cost Averaging</strong>
+                  <small>Recurring periodic purchases</small>
+                </div>
+              </button>
+              <button type="button" class="dca-strat-btn" data-strategy="lump" role="radio" aria-checked="false" id="stratLumpBtn">
+                <span class="strat-btn-icon">⚡</span>
+                <div class="strat-btn-text">
+                  <strong>Lump-Sum Investment</strong>
+                  <small>Deploy 100% principal at Day 1</small>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Parameter 1: Periodic Deposit Amount -->
+          <div class="input-group">
+            <div class="input-header">
+              <label for="dcaDepositInput" id="dcaDepositLabel">Periodic Contribution Amount ($)</label>
+              <div class="value-display" id="dcaDepositDisplay">$250 / wk</div>
+            </div>
+            <div class="input-field-wrap">
+              <span class="currency-symbol">$</span>
+              <input type="number" id="dcaDepositInput" min="25" max="5000" step="25" value="250" class="num-input" />
+            </div>
+            <input type="range" id="dcaDepositSlider" min="25" max="2500" step="25" value="250" class="range-slider" />
+            <div class="slider-marks">
+              <span>$25</span>
+              <span>$500</span>
+              <span>$1,500</span>
+              <span>$2,500+</span>
+            </div>
+          </div>
+
+          <!-- Parameter 2: Contribution Frequency -->
+          <div class="input-group">
+            <label class="dca-field-label" for="dcaFrequencySelect">Contribution Frequency</label>
+            <div class="dca-select-wrap">
+              <select id="dcaFrequencySelect" class="dca-select" aria-label="Contribution Frequency">
+                <option value="weekly" selected>Weekly (52 contributions / year)</option>
+                <option value="biweekly">Bi-Weekly (26 contributions / year)</option>
+                <option value="monthly">Monthly (12 contributions / year)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Parameter 3: Investment Horizon -->
+          <div class="input-group">
+            <div class="input-header">
+              <label for="dcaHorizonSlider">Investment Horizon (Years)</label>
+              <div class="value-display" id="dcaHorizonDisplay">3 Years (36 Months)</div>
+            </div>
+            <input type="range" id="dcaHorizonSlider" min="1" max="5" step="1" value="3" class="range-slider" />
+            <div class="slider-marks">
+              <span>1 Yr</span>
+              <span>2 Yrs</span>
+              <span>3 Yrs</span>
+              <span>4 Yrs</span>
+              <span>5 Yrs</span>
+            </div>
+          </div>
+
+          <!-- Parameter 4: Benchmark Cash APY -->
+          <div class="dca-cash-benchmark-card">
+            <div class="cash-benchmark-header">
+              <span class="cash-benchmark-title">🏦 Cash Savings Benchmark</span>
+              <span class="cash-benchmark-rate" id="dcaCashApyDisplay">4.50% APY</span>
+            </div>
+            <p class="cash-benchmark-desc">Compares growth against risk-free High-Yield Cash Savings compound interest.</p>
+          </div>
+        </div>
+
+        <!-- Chart & Results Column -->
+        <div class="results-column dca-results-column">
+          <!-- Summary Cards Grid -->
+          <div class="summary-cards-grid dca-summary-grid">
+            <div class="summary-card dca-portfolio-card">
+              <span class="card-label">PROJECTED DCA PORTFOLIO</span>
+              <div class="card-value" id="dcaPortfolioValue">$68,420</div>
+              <span class="card-sub text-emerald" id="dcaRoiSub">+75.4% ROI</span>
+            </div>
+            <div class="summary-card">
+              <span class="card-label">TOTAL CAPITAL DEPOSITED</span>
+              <div class="card-value" id="dcaTotalDepositedValue">$39,000</div>
+              <span class="card-sub" id="dcaPurchasesCountSub">156 weekly purchases</span>
+            </div>
+            <div class="summary-card dca-lump-card">
+              <span class="card-label">LUMP-SUM BENCHMARK</span>
+              <div class="card-value" id="dcaLumpSumValue">$78,650</div>
+              <span class="card-sub" id="dcaLumpRoiSub">+101.7% Lump ROI</span>
+            </div>
+            <div class="summary-card dca-cash-card">
+              <span class="card-label">CASH SAVINGS (4.5% APY)</span>
+              <div class="card-value" id="dcaCashSavingsValue">$41,720</div>
+              <span class="card-sub text-emerald" id="dcaCashProfitSub">+$2,720 interest</span>
+            </div>
+          </div>
+
+          <!-- Volatility & Alpha Callout Banner -->
+          <div class="dca-alpha-banner" id="dcaAlphaBanner">
+            <div class="alpha-banner-icon" id="dcaAlphaIcon">🛡️</div>
+            <div class="alpha-banner-content">
+              <strong id="dcaAlphaTitle">DCA Volatility Smoothing Advantage</strong>
+              <p id="dcaAlphaDesc">Weekly recurring DCA smoothed purchase entry prices through market fluctuations, avoiding single-entry peak drawdown risk.</p>
+            </div>
+            <div class="alpha-badge" id="dcaAlphaBadge">+24.3% Volatility Alpha</div>
+          </div>
+
+          <!-- Interactive SVG Chart Card -->
+          <div class="chart-card dca-chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <h3>Cumulative Wealth &amp; ROI Growth Trajectory</h3>
+                <span class="chart-subtitle">Real-time simulation across 1 to 5 years (Monthly resolution)</span>
+              </div>
+              <div class="chart-legend dca-chart-legend">
+                <div class="legend-item">
+                  <span class="legend-color dca-curve-color" id="dcaLegendCurveDot"></span>
+                  <span id="dcaLegendCurveLabel">DCA Strategy</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color lump-curve-color"></span>
+                  <span>Lump-Sum</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color cash-curve-color"></span>
+                  <span>Cash (4.5% APY)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color principal-curve-color"></span>
+                  <span>Principal</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- SVG Chart Viewport -->
+            <div class="svg-wrapper" id="dcaSvgWrapper">
+              <svg id="dcaSvgChart" viewBox="0 0 800 360" preserveAspectRatio="none">
+                <defs>
+                  <!-- Gradient for DCA Area -->
+                  <linearGradient id="dcaAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35" id="dcaGradStop0" />
+                    <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.08" id="dcaGradStop1" />
+                    <stop offset="100%" stop-color="#0b1324" stop-opacity="0.0" />
+                  </linearGradient>
+
+                  <!-- Glow Filter for DCA Curve -->
+                  <filter id="dcaGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#f59e0b" flood-opacity="0.75" id="dcaGlowColor" />
+                  </filter>
+                </defs>
+
+                <!-- Grid & Axes -->
+                <g id="dcaGridGroup"></g>
+
+                <!-- Principal Line -->
+                <path id="dcaPrincipalLine" fill="none" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5" stroke-dasharray="3 3" d=""></path>
+
+                <!-- Cash Savings Curve -->
+                <path id="dcaCashLine" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" d=""></path>
+
+                <!-- Lump-Sum Curve -->
+                <path id="dcaLumpLine" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 3" d=""></path>
+
+                <!-- DCA Area & Main Glowing Curve -->
+                <path id="dcaAreaPath" fill="url(#dcaAreaGradient)" d=""></path>
+                <path id="dcaLinePath" fill="none" stroke="#f59e0b" stroke-width="3" filter="url(#dcaGlow)" d=""></path>
+
+                <!-- Crosshair Guide Line -->
+                <line id="dcaCrosshairLine" x1="0" y1="20" x2="0" y2="310" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.5" stroke-dasharray="3 3" style="display: none;"></line>
+
+                <!-- Focus Dots on curves -->
+                <circle id="dcaFocusDot" r="6" fill="#f59e0b" stroke="#ffffff" stroke-width="2.5" style="display: none;"></circle>
+                <circle id="dcaLumpDot" r="4.5" fill="#38bdf8" stroke="#ffffff" stroke-width="2" style="display: none;"></circle>
+                <circle id="dcaCashDot" r="4" fill="#94a3b8" stroke="#ffffff" stroke-width="1.5" style="display: none;"></circle>
+              </svg>
+
+              <!-- Hover Tooltip Overlay -->
+              <div id="dcaChartTooltip" class="chart-tooltip dca-tooltip" style="display: none;">
+                <div class="tooltip-header" id="dcaTooltipMonth">Month 24</div>
+                <div class="tooltip-row">
+                  <span class="tooltip-dot dca-bg" id="dcaTooltipDot"></span>
+                  <span class="tooltip-name" id="dcaTooltipName">DCA Portfolio:</span>
+                  <strong class="tooltip-val text-gold" id="dcaTooltipVal">$42,500</strong>
+                </div>
+                <div class="tooltip-row">
+                  <span class="tooltip-dot lump-bg"></span>
+                  <span class="tooltip-name">Lump-Sum:</span>
+                  <strong class="tooltip-val" id="dcaTooltipLump">$47,200</strong>
+                </div>
+                <div class="tooltip-row">
+                  <span class="tooltip-dot cash-bg"></span>
+                  <span class="tooltip-name">Cash Savings:</span>
+                  <strong class="tooltip-val" id="dcaTooltipCash">$26,800</strong>
+                </div>
+                <div class="tooltip-row highlight">
+                  <span class="tooltip-dot principal-bg"></span>
+                  <span class="tooltip-name">Total Contributed:</span>
+                  <strong class="tooltip-val text-emerald" id="dcaTooltipContributed">$26,000</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Milestone Table Toggle Button -->
+            <div class="table-toggle-wrap">
+              <button type="button" id="toggleDcaTableBtn" class="btn-toggle-table">
+                <span>View Yearly Milestone Strategy Comparison</span>
+                <span class="toggle-arrow" id="dcaToggleArrow">▼</span>
+              </button>
+            </div>
+
+            <!-- Expandable Milestone Table -->
+            <div id="dcaTableContainer" class="milestone-table-container" style="display: none;">
+              <table class="milestone-table">
+                <thead>
+                  <tr>
+                    <th>Milestone</th>
+                    <th>Total Contributed</th>
+                    <th>DCA Portfolio</th>
+                    <th>Lump-Sum Value</th>
+                    <th>Cash Savings</th>
+                    <th>DCA ROI %</th>
+                    <th>Strategy Edge</th>
+                  </tr>
+                </thead>
+                <tbody id="dcaTableBody">
+                  <!-- Populated safely by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== Crypto vs Stock DCA Investment Simulator END ===== -->
 
   <footer class="footer">
     <div class="footer-content">

@@ -15,6 +15,7 @@
     <h1>Extraordinary Architectural Residences &amp; Penthouses</h1>
     <p>Exclusive luxury property listings in Beverly Hills, Aspen, and Côte d'Azur.</p>
     <div class="hero-actions">
+      <button type="button" class="hero-link btn-launch-vr-tour" id="btnLaunchVrTour" onclick="openVrTourModal()">🌐 Launch 360° Virtual Tour</button>
       <a href="#mortgage-calculator" class="hero-link">Mortgage Financing Calculator ↓</a>
     </div>
     <figure class="property-gallery" aria-label="Featured architecture photos" aria-roledescription="carousel">
@@ -738,6 +739,99 @@
     </div>
   </div>
   <p class="cmp-sr" id="cmp-status" role="status" aria-live="polite"></p>
+
+  <!-- ===== BEGIN Issue #419: 360° Virtual Reality Panoramic Room Viewer Modal ===== -->
+  <div id="vrTourBackdrop" class="vr-modal-backdrop" onclick="closeVrTourModal()"></div>
+  <div id="vrTourModal" class="vr-modal" role="dialog" aria-modal="true" aria-labelledby="vrModalTitle" hidden>
+    <div class="vr-modal-container" id="vrModalContainer">
+      <!-- Topbar Header -->
+      <div class="vr-topbar">
+        <div class="vr-topbar-left">
+          <div class="gold-tag">// IMMERSIVE ARCHITECTURAL VR</div>
+          <h2 id="vrModalTitle">The Malibu Clifftop Sanctuary · 360° Panorama</h2>
+          <span class="vr-sub-heading">Real-time spherical coordinate panning with architectural hotspot inspection</span>
+        </div>
+        <div class="vr-topbar-controls">
+          <div class="vr-compass-chip" id="vrCompassChip">
+            <span class="compass-icon" id="vrCompassNeedle" aria-hidden="true">🧭</span>
+            <span id="vrHeadingText">Heading: 0° N</span>
+          </div>
+          <button type="button" class="vr-ctrl-btn" id="btnToggleAutoOrbit" title="Toggle automatic 360° orbit rotation">
+            <span class="ctrl-icon">🔄</span> <span id="orbitBtnText">Auto-Orbit</span>
+          </button>
+          <button type="button" class="vr-ctrl-btn" id="btnToggleFullscreen" title="Toggle Fullscreen View">
+            <span class="ctrl-icon">⛶</span> Fullscreen
+          </button>
+          <button type="button" class="vr-close-btn" onclick="closeVrTourModal()" aria-label="Close VR panoramic viewer">&times;</button>
+        </div>
+      </div>
+
+      <!-- Room Selection Bar -->
+      <div class="vr-room-nav" role="tablist" aria-label="Panoramic Room Locations">
+        <button type="button" class="vr-room-btn active" data-room="salon" role="tab" aria-selected="true">
+          🛋️ Grand Ocean Salon
+        </button>
+        <button type="button" class="vr-room-btn" data-room="kitchen" role="tab" aria-selected="false">
+          🍷 Sommelier Wine Vault
+        </button>
+        <button type="button" class="vr-room-btn" data-room="master" role="tab" aria-selected="false">
+          👑 Master Sky Sanctuary
+        </button>
+        <button type="button" class="vr-room-btn" data-room="terrace" role="tab" aria-selected="false">
+          🌿 Cantilevered Horizon Deck
+        </button>
+      </div>
+
+      <!-- Panoramic Viewport Canvas Stage -->
+      <div class="vr-viewport-stage" id="vrViewportStage" tabindex="0" role="region" aria-label="Interactive 360 degree room panorama viewport. Click and drag to look around.">
+        <!-- Panning Background Scene Layer -->
+        <div class="vr-scene-canvas" id="vrSceneCanvas">
+          <!-- Spherical Pan Backdrop with Architectural Elements -->
+          <div class="vr-pan-layer" id="vrPanLayer"></div>
+
+          <!-- Interactive Hotspot Markers -->
+          <div class="vr-hotspots-layer" id="vrHotspotsLayer">
+            <!-- Rendered dynamically for current room -->
+          </div>
+        </div>
+
+        <!-- Telemetry HUD Overlay -->
+        <div class="vr-telemetry-hud">
+          <span class="hud-item" id="vrCoordYaw">YAW: 0.0°</span>
+          <span class="hud-item" id="vrCoordPitch">PITCH: 0.0°</span>
+          <span class="hud-item" id="vrCoordFov">FOV: 75°</span>
+          <span class="hud-drag-hint">🖱️ Click &amp; Drag to explore 360° · Scroll to Zoom</span>
+        </div>
+
+        <!-- Floating Hotspot Detail Card -->
+        <div class="vr-hotspot-popover" id="vrHotspotPopover" hidden>
+          <button type="button" class="hotspot-popover-close" id="btnHotspotClose" aria-label="Close hotspot detail">&times;</button>
+          <div class="hotspot-popover-tag" id="hotspotTag">FINISH &amp; MATERIAL</div>
+          <h4 id="hotspotTitle">Bookmatched Calacatta Marble</h4>
+          <p id="hotspotDesc">Single-slab Italian Calacatta gold marble with integrated radiant floor heating and continuous vein flow.</p>
+          <div class="hotspot-meta-row">
+            <span class="meta-origin" id="hotspotOrigin">Origin: Carrara, Italy</span>
+            <span class="meta-artisan" id="hotspotArtisan">Artisan: Studio Marmi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Viewport Bottom Controls -->
+      <div class="vr-bottombar">
+        <div class="vr-zoom-group">
+          <span class="zoom-label">Zoom:</span>
+          <button type="button" class="vr-mini-btn" id="btnVrZoomIn" title="Zoom in">+</button>
+          <button type="button" class="vr-mini-btn" id="btnVrZoomOut" title="Zoom out">-</button>
+          <button type="button" class="vr-mini-btn" id="btnVrReset" title="Reset view">Reset 1:1</button>
+        </div>
+        <div class="vr-footer-status">
+          <span class="vr-status-dot"></span>
+          <span id="vrRoomStatusText">Grand Ocean Salon · 4K HDR Ambient Environment Active</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===== END Issue #419 ===== -->
 
   <script src="filters.js"></script>
   <script src="script.js"></script>

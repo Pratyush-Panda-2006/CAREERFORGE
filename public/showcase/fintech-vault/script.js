@@ -2404,3 +2404,604 @@ var FraudDetector = (function () {
     initFraudInspection();
   }
 })();
+
+/**
+ * ============================================================================
+ * Issue #407: Interactive Crypto vs Stock DCA Investment Simulator
+ * Compares recurring Dollar-Cost Averaging against lump-sum upfront investing
+ * across Bitcoin, S&P 500, and Ethereum over 1 to 5 years.
+ * ============================================================================
+ */
+(() => {
+  const ASSETS = {
+    btc: {
+      id: 'btc',
+      name: 'Bitcoin (BTC)',
+      symbol: '₿',
+      color: '#f59e0b',
+      gradStop0: 'rgba(245, 158, 11, 0.4)',
+      gradStop1: 'rgba(245, 158, 11, 0.08)',
+      annualCagr: 0.452,
+      basePrice: 65000,
+      badgeText: '+45.2% Hist. CAGR • High Volatility',
+      alphaTitle: 'DCA Volatility Smoothing Advantage (Bitcoin)',
+      alphaDesc: 'Weekly recurring purchases smoothed entry across Bitcoin market corrections, reducing peak drawdown risk by 28.4% compared to an all-in lump sum.',
+      alphaBadge: '+28.4% Volatility Smoothing',
+      priceFactor: (m) => {
+        const trend = Math.exp((0.452 / 12) * m);
+        const wave = 1 + 0.32 * Math.sin((m / 12) * Math.PI * 1.5) - 0.18 * Math.cos((m / 8) * Math.PI);
+        return trend * wave;
+      }
+    },
+    sp500: {
+      id: 'sp500',
+      name: 'S&P 500 Index (SPY)',
+      symbol: '📈',
+      color: '#10b981',
+      gradStop0: 'rgba(16, 185, 129, 0.4)',
+      gradStop1: 'rgba(16, 185, 129, 0.08)',
+      annualCagr: 0.124,
+      basePrice: 520,
+      badgeText: '+12.4% Hist. CAGR • Steady Compound',
+      alphaTitle: 'Steady Dollar-Cost Accumulation (S&P 500)',
+      alphaDesc: 'Consistent recurring index investing captures long-term corporate earnings growth while eliminating emotional market-timing stress.',
+      alphaBadge: '+12.4% Compound Pace',
+      priceFactor: (m) => {
+        const trend = Math.exp((0.124 / 12) * m);
+        const wave = 1 + 0.06 * Math.sin((m / 10) * Math.PI) - 0.04 * Math.cos((m / 6) * Math.PI);
+        return trend * wave;
+      }
+    },
+    eth: {
+      id: 'eth',
+      name: 'Ethereum (ETH)',
+      symbol: 'Ξ',
+      color: '#8b5cf6',
+      gradStop0: 'rgba(139, 92, 246, 0.4)',
+      gradStop1: 'rgba(139, 92, 246, 0.08)',
+      annualCagr: 0.386,
+      basePrice: 3400,
+      badgeText: '+38.6% Hist. CAGR • High Beta',
+      alphaTitle: 'Smart-Contract Ecosystem Compounding (Ethereum)',
+      alphaDesc: 'High-beta recurring accumulation captures decentralized protocol growth cycles with resilient cost-basis averaging.',
+      alphaBadge: '+24.1% Cost-Basis Edge',
+      priceFactor: (m) => {
+        const trend = Math.exp((0.386 / 12) * m);
+        const wave = 1 + 0.36 * Math.sin((m / 11) * Math.PI * 1.6) - 0.22 * Math.cos((m / 7) * Math.PI);
+        return trend * wave;
+      }
+    }
+  };
+
+  const FREQUENCIES = {
+    weekly: { name: 'Weekly', perYear: 52, label: '/ wk' },
+    biweekly: { name: 'Bi-Weekly', perYear: 26, label: '/ 2wk' },
+    monthly: { name: 'Monthly', perYear: 12, label: '/ mo' }
+  };
+
+  function initDcaSimulator() {
+    const dcaSection = document.getElementById('dca-simulator');
+    if (!dcaSection) return;
+
+    // Element references
+    const assetChips = dcaSection.querySelectorAll('.dca-asset-chip');
+    const stratBtns = dcaSection.querySelectorAll('.dca-strat-btn');
+    const depositInput = document.getElementById('dcaDepositInput');
+    const depositSlider = document.getElementById('dcaDepositSlider');
+    const depositDisplay = document.getElementById('dcaDepositDisplay');
+    const freqSelect = document.getElementById('dcaFrequencySelect');
+    const horizonSlider = document.getElementById('dcaHorizonSlider');
+    const horizonDisplay = document.getElementById('dcaHorizonDisplay');
+    const resetBtn = document.getElementById('dcaResetDefaultsBtn');
+
+    // Display elements
+    const portfolioValEl = document.getElementById('dcaPortfolioValue');
+    const roiSubEl = document.getElementById('dcaRoiSub');
+    const totalDepositedValEl = document.getElementById('dcaTotalDepositedValue');
+    const purchasesCountSubEl = document.getElementById('dcaPurchasesCountSub');
+    const lumpSumValEl = document.getElementById('dcaLumpSumValue');
+    const lumpRoiSubEl = document.getElementById('dcaLumpRoiSub');
+    const cashSavingsValEl = document.getElementById('dcaCashSavingsValue');
+    const cashProfitSubEl = document.getElementById('dcaCashProfitSub');
+
+    // Alpha banner
+    const alphaTitleEl = document.getElementById('dcaAlphaTitle');
+    const alphaDescEl = document.getElementById('dcaAlphaDesc');
+    const alphaBadgeEl = document.getElementById('dcaAlphaBadge');
+
+    // SVG elements
+    const svgWrapper = document.getElementById('dcaSvgWrapper');
+    const svgChart = document.getElementById('dcaSvgChart');
+    const gridGroup = document.getElementById('dcaGridGroup');
+    const principalLine = document.getElementById('dcaPrincipalLine');
+    const cashLine = document.getElementById('dcaCashLine');
+    const lumpLine = document.getElementById('dcaLumpLine');
+    const areaPath = document.getElementById('dcaAreaPath');
+    const linePath = document.getElementById('dcaLinePath');
+    const gradStop0 = document.getElementById('dcaGradStop0');
+    const gradStop1 = document.getElementById('dcaGradStop1');
+    const glowFilterColor = document.getElementById('dcaGlowColor');
+    const legendDot = document.getElementById('dcaLegendCurveDot');
+    const crosshairLine = document.getElementById('dcaCrosshairLine');
+    const focusDot = document.getElementById('dcaFocusDot');
+    const lumpDot = document.getElementById('dcaLumpDot');
+    const cashDot = document.getElementById('dcaCashDot');
+
+    // Tooltip elements
+    const tooltip = document.getElementById('dcaChartTooltip');
+    const ttMonth = document.getElementById('dcaTooltipMonth');
+    const ttDot = document.getElementById('dcaTooltipDot');
+    const ttVal = document.getElementById('dcaTooltipVal');
+    const ttLump = document.getElementById('dcaTooltipLump');
+    const ttCash = document.getElementById('dcaTooltipCash');
+    const ttContributed = document.getElementById('dcaTooltipContributed');
+
+    // Milestone table elements
+    const toggleTableBtn = document.getElementById('toggleDcaTableBtn');
+    const tableContainer = document.getElementById('dcaTableContainer');
+    const tableBody = document.getElementById('dcaTableBody');
+    const toggleArrow = document.getElementById('dcaToggleArrow');
+
+    // State
+    let selectedAsset = 'btc';
+    let selectedStrategy = 'dca';
+    let depositAmount = 250;
+    let frequencyKey = 'weekly';
+    let horizonYears = 3;
+    const cashApy = 0.045;
+    let cachedTrajectory = [];
+
+    function formatCurrency(val) {
+      return '$' + Math.round(val).toLocaleString('en-US');
+    }
+
+    function calculateData() {
+      const asset = ASSETS[selectedAsset];
+      const freq = FREQUENCIES[frequencyKey];
+      const totalMonths = horizonYears * 12;
+      const totalPeriods = horizonYears * freq.perYear;
+      const totalCapital = totalPeriods * depositAmount;
+      const periodsPerMonth = freq.perYear / 12;
+
+      const monthlyCashRate = Math.pow(1 + cashApy, 1 / 12) - 1;
+      const trajectory = [];
+
+      let dcaUnitsAccum = 0;
+      let dcaDepositedAccum = 0;
+      let cashSavingsAccum = 0;
+      const lumpUnits = totalCapital / asset.basePrice;
+
+      for (let m = 0; m <= totalMonths; m++) {
+        const factor = asset.priceFactor(m);
+        const currentPrice = asset.basePrice * factor;
+
+        if (m === 0) {
+          trajectory.push({
+            month: 0,
+            price: currentPrice,
+            deposited: 0,
+            dcaValue: 0,
+            lumpValue: totalCapital,
+            cashValue: selectedStrategy === 'lump' ? totalCapital : 0
+          });
+          continue;
+        }
+
+        // New deposits in this month
+        const periodsThisMonth = periodsPerMonth;
+        const depositThisMonth = periodsThisMonth * depositAmount;
+        dcaDepositedAccum += depositThisMonth;
+
+        // Buy units at average monthly price
+        const unitsBought = depositThisMonth / currentPrice;
+        dcaUnitsAccum += unitsBought;
+
+        const dcaVal = dcaUnitsAccum * currentPrice;
+        const lumpVal = lumpUnits * currentPrice;
+
+        // Cash compounding
+        if (selectedStrategy === 'lump') {
+          cashSavingsAccum = totalCapital * Math.pow(1 + monthlyCashRate, m);
+        } else {
+          cashSavingsAccum = (cashSavingsAccum + depositThisMonth) * (1 + monthlyCashRate);
+        }
+
+        trajectory.push({
+          month: m,
+          price: currentPrice,
+          deposited: Math.min(dcaDepositedAccum, totalCapital),
+          dcaValue: dcaVal,
+          lumpValue: lumpVal,
+          cashValue: cashSavingsAccum
+        });
+      }
+
+      cachedTrajectory = trajectory;
+      return {
+        asset,
+        freq,
+        totalMonths,
+        totalPeriods,
+        totalCapital,
+        trajectory,
+        finalDca: trajectory[totalMonths].dcaValue,
+        finalLump: trajectory[totalMonths].lumpValue,
+        finalCash: trajectory[totalMonths].cashValue
+      };
+    }
+
+    function updateMetrics(data) {
+      const { asset, freq, totalCapital, totalPeriods, finalDca, finalLump, finalCash } = data;
+
+      // Update color styling
+      gradStop0.setAttribute('stop-color', asset.color);
+      gradStop1.setAttribute('stop-color', asset.color);
+      glowFilterColor.setAttribute('flood-color', asset.color);
+      linePath.setAttribute('stroke', asset.color);
+      legendDot.style.background = asset.color;
+      focusDot.setAttribute('fill', asset.color);
+      if (ttDot) ttDot.style.background = asset.color;
+
+      // Update Summary Cards
+      portfolioValEl.textContent = formatCurrency(finalDca);
+      const dcaRoi = ((finalDca - totalCapital) / totalCapital) * 100;
+      roiSubEl.textContent = (dcaRoi >= 0 ? '+' : '') + dcaRoi.toFixed(1) + '% ROI';
+      roiSubEl.className = 'card-sub ' + (dcaRoi >= 0 ? 'text-emerald' : 'text-danger');
+
+      totalDepositedValEl.textContent = formatCurrency(totalCapital);
+      purchasesCountSubEl.textContent = totalPeriods + ' ' + freq.name.toLowerCase() + ' purchases';
+
+      lumpSumValEl.textContent = formatCurrency(finalLump);
+      const lumpRoi = ((finalLump - totalCapital) / totalCapital) * 100;
+      lumpRoiSubEl.textContent = (lumpRoi >= 0 ? '+' : '') + lumpRoi.toFixed(1) + '% Lump ROI';
+
+      cashSavingsValEl.textContent = formatCurrency(finalCash);
+      const cashProfit = finalCash - totalCapital;
+      cashProfitSubEl.textContent = (cashProfit >= 0 ? '+$' : '-$') + Math.abs(Math.round(cashProfit)).toLocaleString('en-US') + ' interest';
+
+      // Update Alpha Banner
+      alphaTitleEl.textContent = asset.alphaTitle;
+      alphaDescEl.textContent = asset.alphaDesc;
+      alphaBadgeEl.textContent = asset.alphaBadge;
+
+      // Update displays
+      depositDisplay.textContent = '$' + depositAmount + ' ' + freq.label;
+      horizonDisplay.textContent = horizonYears + (horizonYears === 1 ? ' Year' : ' Years') + ' (' + (horizonYears * 12) + ' Mos)';
+    }
+
+    function renderChart(data) {
+      const { trajectory, totalMonths } = data;
+      const width = 800;
+      const height = 360;
+      const padLeft = 70;
+      const padRight = 30;
+      const padTop = 25;
+      const padBottom = 40;
+
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      // Compute Y max
+      let maxY = 0;
+      trajectory.forEach((pt) => {
+        if (pt.dcaValue > maxY) maxY = pt.dcaValue;
+        if (pt.lumpValue > maxY) maxY = pt.lumpValue;
+        if (pt.cashValue > maxY) maxY = pt.cashValue;
+        if (pt.deposited > maxY) maxY = pt.deposited;
+      });
+      maxY = Math.max(maxY * 1.15, 1000);
+
+      const getX = (m) => padLeft + (m / totalMonths) * chartW;
+      const getY = (val) => padTop + chartH - (val / maxY) * chartH;
+
+      // Render Grid Lines safely
+      while (gridGroup.firstChild) {
+        gridGroup.removeChild(gridGroup.firstChild);
+      }
+
+      // 4 horizontal grid lines
+      const yTicks = 4;
+      for (let i = 0; i <= yTicks; i++) {
+        const val = (maxY / yTicks) * i;
+        const y = getY(val);
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', String(padLeft));
+        line.setAttribute('x2', String(width - padRight));
+        line.setAttribute('y1', String(y));
+        line.setAttribute('y2', String(y));
+        line.setAttribute('stroke', 'rgba(255, 255, 255, 0.07)');
+        line.setAttribute('stroke-width', '1');
+        gridGroup.appendChild(line);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', String(padLeft - 10));
+        text.setAttribute('y', String(y + 4));
+        text.setAttribute('text-anchor', 'end');
+        text.setAttribute('fill', '#9ca3af');
+        text.setAttribute('font-family', 'JetBrains Mono, monospace');
+        text.setAttribute('font-size', '10');
+        text.textContent = '$' + (val >= 1000 ? Math.round(val / 1000) + 'k' : Math.round(val));
+        gridGroup.appendChild(text);
+      }
+
+      // X-axis month ticks
+      const stepMonths = horizonYears <= 2 ? 6 : 12;
+      for (let m = 0; m <= totalMonths; m += stepMonths) {
+        const x = getX(m);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', String(x));
+        text.setAttribute('y', String(height - 12));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', '#9ca3af');
+        text.setAttribute('font-family', 'JetBrains Mono, monospace');
+        text.setAttribute('font-size', '10');
+        text.textContent = m === 0 ? 'Start' : 'M' + m;
+        gridGroup.appendChild(text);
+      }
+
+      // Build path strings
+      let dcaPathD = '';
+      let lumpPathD = '';
+      let cashPathD = '';
+      let principalPathD = '';
+
+      trajectory.forEach((pt, idx) => {
+        const x = getX(pt.month);
+        const yDca = getY(pt.dcaValue);
+        const yLump = getY(pt.lumpValue);
+        const yCash = getY(pt.cashValue);
+        const yPrinc = getY(pt.deposited);
+
+        const cmd = idx === 0 ? 'M ' : 'L ';
+        dcaPathD += cmd + x.toFixed(1) + ' ' + yDca.toFixed(1) + ' ';
+        lumpPathD += cmd + x.toFixed(1) + ' ' + yLump.toFixed(1) + ' ';
+        cashPathD += cmd + x.toFixed(1) + ' ' + yCash.toFixed(1) + ' ';
+        principalPathD += cmd + x.toFixed(1) + ' ' + yPrinc.toFixed(1) + ' ';
+      });
+
+      // Area path closes at bottom of chart
+      const areaPathD = dcaPathD +
+        'L ' + getX(totalMonths).toFixed(1) + ' ' + (padTop + chartH).toFixed(1) + ' ' +
+        'L ' + getX(0).toFixed(1) + ' ' + (padTop + chartH).toFixed(1) + ' Z';
+
+      areaPath.setAttribute('d', areaPathD);
+      linePath.setAttribute('d', dcaPathD);
+      lumpLine.setAttribute('d', lumpPathD);
+      cashLine.setAttribute('d', cashPathD);
+      principalLine.setAttribute('d', principalPathD);
+    }
+
+    function renderTable(data) {
+      const { trajectory, totalMonths } = data;
+      tableBody.replaceChildren();
+
+      const step = 12;
+      for (let m = step; m <= totalMonths; m += step) {
+        const pt = trajectory[m];
+        const yr = m / 12;
+        const tr = document.createElement('tr');
+
+        // Milestone
+        const tdMilestone = document.createElement('td');
+        const strong = document.createElement('strong');
+        strong.textContent = 'Year ' + yr + ' (' + m + 'm)';
+        tdMilestone.appendChild(strong);
+        tr.appendChild(tdMilestone);
+
+        // Contributed
+        const tdContributed = document.createElement('td');
+        tdContributed.textContent = formatCurrency(pt.deposited);
+        tr.appendChild(tdContributed);
+
+        // DCA Value
+        const tdDca = document.createElement('td');
+        const strongDca = document.createElement('strong');
+        strongDca.className = 'text-emerald';
+        strongDca.textContent = formatCurrency(pt.dcaValue);
+        tdDca.appendChild(strongDca);
+        tr.appendChild(tdDca);
+
+        // Lump Sum
+        const tdLump = document.createElement('td');
+        tdLump.textContent = formatCurrency(pt.lumpValue);
+        tr.appendChild(tdLump);
+
+        // Cash Savings
+        const tdCash = document.createElement('td');
+        tdCash.textContent = formatCurrency(pt.cashValue);
+        tr.appendChild(tdCash);
+
+        // DCA ROI
+        const tdRoi = document.createElement('td');
+        const roiVal = ((pt.dcaValue - pt.deposited) / (pt.deposited || 1)) * 100;
+        tdRoi.className = roiVal >= 0 ? 'text-emerald' : 'text-danger';
+        tdRoi.textContent = (roiVal >= 0 ? '+' : '') + roiVal.toFixed(1) + '%';
+        tr.appendChild(tdRoi);
+
+        // Strategy Edge
+        const tdEdge = document.createElement('td');
+        const spanEdge = document.createElement('span');
+        const diffVsCash = pt.dcaValue - pt.cashValue;
+        spanEdge.className = 'alpha-badge';
+        spanEdge.textContent = (diffVsCash >= 0 ? '+$' : '-$') + Math.abs(Math.round(diffVsCash)).toLocaleString('en-US') + ' vs Cash';
+        tdEdge.appendChild(spanEdge);
+        tr.appendChild(tdEdge);
+
+        tableBody.appendChild(tr);
+      }
+    }
+
+    function updateAll() {
+      const data = calculateData();
+      updateMetrics(data);
+      renderChart(data);
+      renderTable(data);
+    }
+
+    // Chart interactivity
+    svgWrapper.addEventListener('mousemove', (e) => {
+      if (!cachedTrajectory.length) return;
+      const rect = svgChart.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const chartFrac = (mouseX - 70) / (rect.width - 100);
+      const clampedFrac = Math.max(0, Math.min(1, chartFrac));
+      const targetMonth = Math.round(clampedFrac * (horizonYears * 12));
+
+      const pt = cachedTrajectory[targetMonth];
+      if (!pt) return;
+
+      const totalMonths = horizonYears * 12;
+      const chartW = 800 - 70 - 30;
+      const chartH = 360 - 25 - 40;
+
+      let maxY = 0;
+      cachedTrajectory.forEach((p) => {
+        if (p.dcaValue > maxY) maxY = p.dcaValue;
+        if (p.lumpValue > maxY) maxY = p.lumpValue;
+        if (p.cashValue > maxY) maxY = p.cashValue;
+      });
+      maxY = Math.max(maxY * 1.15, 1000);
+
+      const getX = (m) => 70 + (m / totalMonths) * chartW;
+      const getY = (val) => 25 + chartH - (val / maxY) * chartH;
+
+      const posX = getX(targetMonth);
+      const yDca = getY(pt.dcaValue);
+      const yLump = getY(pt.lumpValue);
+      const yCash = getY(pt.cashValue);
+
+      // Position crosshair & focus dots
+      crosshairLine.setAttribute('x1', String(posX));
+      crosshairLine.setAttribute('x2', String(posX));
+      crosshairLine.style.display = 'block';
+
+      focusDot.setAttribute('cx', String(posX));
+      focusDot.setAttribute('cy', String(yDca));
+      focusDot.style.display = 'block';
+
+      lumpDot.setAttribute('cx', String(posX));
+      lumpDot.setAttribute('cy', String(yLump));
+      lumpDot.style.display = 'block';
+
+      cashDot.setAttribute('cx', String(posX));
+      cashDot.setAttribute('cy', String(yCash));
+      cashDot.style.display = 'block';
+
+      // Update Tooltip
+      ttMonth.textContent = targetMonth === 0 ? 'Inception (Month 0)' : 'Month ' + targetMonth + ' (' + (targetMonth / 12).toFixed(1) + ' Yrs)';
+      ttVal.textContent = formatCurrency(pt.dcaValue);
+      ttLump.textContent = formatCurrency(pt.lumpValue);
+      ttCash.textContent = formatCurrency(pt.cashValue);
+      ttContributed.textContent = formatCurrency(pt.deposited);
+
+      // Tooltip position
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+      tooltip.style.left = (clientX > rect.width - 240 ? clientX - 230 : clientX + 20) + 'px';
+      tooltip.style.top = Math.max(10, clientY - 80) + 'px';
+      tooltip.style.display = 'flex';
+    });
+
+    svgWrapper.addEventListener('mouseleave', () => {
+      crosshairLine.style.display = 'none';
+      focusDot.style.display = 'none';
+      lumpDot.style.display = 'none';
+      cashDot.style.display = 'none';
+      tooltip.style.display = 'none';
+    });
+
+    // Event Listeners for controls
+    assetChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        assetChips.forEach((c) => {
+          c.classList.remove('active');
+          c.setAttribute('aria-checked', 'false');
+        });
+        chip.classList.add('active');
+        chip.setAttribute('aria-checked', 'true');
+        selectedAsset = chip.getAttribute('data-asset');
+        updateAll();
+      });
+    });
+
+    stratBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        stratBtns.forEach((b) => {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+        selectedStrategy = btn.getAttribute('data-strategy');
+        updateAll();
+      });
+    });
+
+    depositInput.addEventListener('input', () => {
+      let val = Number(depositInput.value) || 25;
+      val = Math.max(25, Math.min(5000, val));
+      depositAmount = val;
+      depositSlider.value = String(Math.min(2500, val));
+      updateAll();
+    });
+
+    depositSlider.addEventListener('input', () => {
+      depositAmount = Number(depositSlider.value);
+      depositInput.value = String(depositAmount);
+      updateAll();
+    });
+
+    freqSelect.addEventListener('change', () => {
+      frequencyKey = freqSelect.value;
+      updateAll();
+    });
+
+    horizonSlider.addEventListener('input', () => {
+      horizonYears = Number(horizonSlider.value);
+      updateAll();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      selectedAsset = 'btc';
+      selectedStrategy = 'dca';
+      depositAmount = 250;
+      frequencyKey = 'weekly';
+      horizonYears = 3;
+
+      assetChips.forEach((c) => {
+        const isBtc = c.getAttribute('data-asset') === 'btc';
+        c.classList.toggle('active', isBtc);
+        c.setAttribute('aria-checked', String(isBtc));
+      });
+
+      stratBtns.forEach((b) => {
+        const isDca = b.getAttribute('data-strategy') === 'dca';
+        b.classList.toggle('active', isDca);
+        b.setAttribute('aria-checked', String(isDca));
+      });
+
+      depositInput.value = '250';
+      depositSlider.value = '250';
+      freqSelect.value = 'weekly';
+      horizonSlider.value = '3';
+
+      updateAll();
+    });
+
+    toggleTableBtn.addEventListener('click', () => {
+      const isHidden = tableContainer.style.display === 'none';
+      tableContainer.style.display = isHidden ? 'block' : 'none';
+      toggleArrow.textContent = isHidden ? '▲' : '▼';
+    });
+
+    // Initial render
+    updateAll();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDcaSimulator);
+  } else {
+    initDcaSimulator();
+  }
+})();

@@ -144,17 +144,33 @@ X-RateLimit-Reset: 1063</code></pre>
         <h2>Dispatch Agent Task</h2>
         <p>The Agent Dispatcher endpoint submits asynchronous inference tasks to specialized multi-modal agent workers. Requests support payload validation, contextual memory attachments, and dynamic temperature overrides.</p>
         <div class="endpoint-pill post"><span class="method">POST</span> /v1/agents/dispatch</div>
-        <pre class="code-block"><code>{
-  "agent_id": "rag-worker-01",
-  "prompt": "Analyze vector embeddings for chunk #92",
-  "max_tokens": 1024,
-  "temperature": 0.2,
-  "stream": false,
-  "metadata": {
-    "tenant_id": "org_48921",
-    "cost_center": "mlops-platform"
-  }
-}</code></pre>
+
+        <!-- Multi-Language Code Snippet Converter (Issue #399) -->
+        <div class="snippet-switcher-block" data-endpoint="dispatch-agent">
+          <div class="snippet-header">
+            <div class="snippet-tabs" role="tablist" aria-label="Code language examples">
+              <button type="button" class="snippet-tab-btn active" data-lang="curl" role="tab" aria-selected="true">
+                <span class="lang-icon">⌨️</span> cURL
+              </button>
+              <button type="button" class="snippet-tab-btn" data-lang="python" role="tab" aria-selected="false">
+                <span class="lang-icon">🐍</span> Python (requests)
+              </button>
+              <button type="button" class="snippet-tab-btn" data-lang="javascript" role="tab" aria-selected="false">
+                <span class="lang-icon">⚡</span> Node.js (fetch)
+              </button>
+              <button type="button" class="snippet-tab-btn" data-lang="go" role="tab" aria-selected="false">
+                <span class="lang-icon">🔷</span> Go (net/http)
+              </button>
+            </div>
+            <button type="button" class="snippet-copy-btn" onclick="copySnippetCode(this)" title="Copy snippet to clipboard" aria-label="Copy code">
+              <span class="copy-label">📋 Copy</span>
+            </button>
+          </div>
+          <div class="snippet-body">
+            <div class="snippet-line-numbers" aria-hidden="true"></div>
+            <pre class="snippet-pre"><code class="snippet-code"></code></pre>
+          </div>
+        </div>
 
         <h3>Response Payload</h3>
         <p>Successful dispatches return an instant <code>HTTP 202 Accepted</code> confirmation along with task execution metadata and a unique stream trace ID:</p>
@@ -165,7 +181,6 @@ X-RateLimit-Reset: 1063</code></pre>
   "worker_node": "edge-us-east-4a",
   "created_at": "2026-10-25T13:30:00Z"
 }</code></pre>
-        </div>
       </section>
 
       <!-- Models & Capabilities Section -->
@@ -173,6 +188,33 @@ X-RateLimit-Reset: 1063</code></pre>
         <h2>Available Models</h2>
         <p>Query available models deployed across specialized inference clusters.</p>
         <div class="endpoint-pill get"><span class="method">GET</span> /v1/models</div>
+
+        <!-- Multi-Language Code Snippet Converter for Models -->
+        <div class="snippet-switcher-block" data-endpoint="list-models">
+          <div class="snippet-header">
+            <div class="snippet-tabs" role="tablist" aria-label="Code language examples">
+              <button type="button" class="snippet-tab-btn active" data-lang="curl" role="tab" aria-selected="true">
+                <span class="lang-icon">⌨️</span> cURL
+              </button>
+              <button type="button" class="snippet-tab-btn" data-lang="python" role="tab" aria-selected="false">
+                <span class="lang-icon">🐍</span> Python (requests)
+              </button>
+              <button type="button" class="snippet-tab-btn" data-lang="javascript" role="tab" aria-selected="false">
+                <span class="lang-icon">⚡</span> Node.js (fetch)
+              </button>
+              <button type="button" class="snippet-tab-btn" data-lang="go" role="tab" aria-selected="false">
+                <span class="lang-icon">🔷</span> Go (net/http)
+              </button>
+            </div>
+            <button type="button" class="snippet-copy-btn" onclick="copySnippetCode(this)" title="Copy snippet to clipboard" aria-label="Copy code">
+              <span class="copy-label">📋 Copy</span>
+            </button>
+          </div>
+          <div class="snippet-body">
+            <div class="snippet-line-numbers" aria-hidden="true"></div>
+            <pre class="snippet-pre"><code class="snippet-code"></code></pre>
+          </div>
+        </div>
       </section>
 
       <!-- Vector Embeddings Section -->
@@ -180,6 +222,33 @@ X-RateLimit-Reset: 1063</code></pre>
         <h2>Generate Vector Embeddings</h2>
         <p>Convert natural language inputs into dense vector representations optimized for cosine similarity indexing.</p>
         <div class="endpoint-pill post"><span class="method">POST</span> /v1/embeddings</div>
+
+        <!-- Multi-Language Code Snippet Converter for Embeddings -->
+        <div class="snippet-switcher-block" data-endpoint="create-embeddings">
+          <div class="snippet-header">
+            <div class="snippet-tabs" role="tablist" aria-label="Code language examples">
+              <button type="button" class="snippet-tab-btn active" data-lang="curl" role="tab" aria-selected="true">
+                <span class="lang-icon">⌨️</span> cURL
+              </button>
+              <button type="button" class="snippet-tab-btn" data-lang="python" role="tab" aria-selected="false">
+                <span class="lang-icon">🐍</span> Python (requests)
+              </button>
+              <button type="button" class="snippet-tab-btn" data-lang="javascript" role="tab" aria-selected="false">
+                <span class="lang-icon">⚡</span> Node.js (fetch)
+              </button>
+              <button type="button" class="snippet-tab-btn" data-lang="go" role="tab" aria-selected="false">
+                <span class="lang-icon">🔷</span> Go (net/http)
+              </button>
+            </div>
+            <button type="button" class="snippet-copy-btn" onclick="copySnippetCode(this)" title="Copy snippet to clipboard" aria-label="Copy code">
+              <span class="copy-label">📋 Copy</span>
+            </button>
+          </div>
+          <div class="snippet-body">
+            <div class="snippet-line-numbers" aria-hidden="true"></div>
+            <pre class="snippet-pre"><code class="snippet-code"></code></pre>
+          </div>
+        </div>
       </section>
 
       <!-- SSE Event Stream Section -->
@@ -988,6 +1057,9 @@ async with AsyncPrismaClient(api_key="prisma_live_...") as client:
       </div>
     </div>
   </div>
+
+  <!-- Notification Toast for Multi-Language Snippet Copy (Issue #399) -->
+  <div id="snippetToast" class="snippet-toast" role="status" aria-live="polite"></div>
 
   <script src="script.js"></script>
 </body>

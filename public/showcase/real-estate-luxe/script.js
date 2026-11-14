@@ -1367,3 +1367,500 @@ window.calculateMeasurement = calculateMeasurement;
   selectRoom('foyer');
 })();
 /* ===== END Issue #357 ===== */
+
+
+/* ===== BEGIN Issue #419: 360° Virtual Reality Panoramic Room Viewer Modal ===== */
+(function initVrPanoramicViewerModule() {
+  const ROOMS = {
+    salon: {
+      name: 'Grand Ocean Salon',
+      status: 'Grand Ocean Salon · 4K HDR Ambient Environment Active',
+      bgGradient: 'radial-gradient(ellipse at 50% 40%, rgba(30, 41, 59, 0.9) 0%, rgba(11, 17, 30, 0.98) 70%), linear-gradient(180deg, #090e1a 0%, #172554 40%, #1e1b4b 60%, #030712 100%)',
+      hotspots: [
+        {
+          id: 'hs-marble',
+          yaw: 45,
+          pitch: -8,
+          title: 'Bookmatched Calacatta Gold Marble',
+          tag: 'FINISH & MATERIAL',
+          desc: 'Single-slab Italian Calacatta gold marble with integrated radiant floor heating and continuous vein flow.',
+          origin: 'Carrara, Italy',
+          artisan: 'Studio Marmi'
+        },
+        {
+          id: 'hs-glass',
+          yaw: 180,
+          pitch: 12,
+          title: 'Switchable Smart Privacy Glazing',
+          tag: 'ARCHITECTURAL TECH',
+          desc: 'Electrochromic double-glazed acoustic glass transitioning from optically clear to 99% UV blackout via Lutron HomeWorks.',
+          origin: 'Saint-Gobain, France',
+          artisan: 'Quantum Glaze'
+        },
+        {
+          id: 'hs-fire',
+          yaw: 275,
+          pitch: -10,
+          title: '12-Foot Linear Ethanol Fireplace',
+          tag: 'LUXURY AMENITY',
+          desc: 'Custom zero-emission ventless ribbon burner encased in patinated architectural bronze.',
+          origin: 'Melbourne, Australia',
+          artisan: 'EcoSmart Studio'
+        },
+        {
+          id: 'hs-sound',
+          yaw: 330,
+          pitch: 22,
+          title: 'Directional Acoustic Transducers',
+          tag: 'AUDIO INTEGRATION',
+          desc: 'Flush-mounted invisible drywall speakers tuned specifically to the double-height volume of the salon.',
+          origin: 'Struer, Denmark',
+          artisan: 'Bang & Olufsen'
+        }
+      ]
+    },
+    kitchen: {
+      name: 'Sommelier Wine Vault & Chef Atelier',
+      status: 'Wine Vault & Atelier · Dual Climate Systems Active',
+      bgGradient: 'radial-gradient(ellipse at 50% 50%, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.98) 70%), linear-gradient(180deg, #111827 0%, #312e81 40%, #1f2937 80%, #030712 100%)',
+      hotspots: [
+        {
+          id: 'hs-cellar',
+          yaw: 90,
+          pitch: 5,
+          title: 'Sub-Zero Dual-Zone Wine Columns',
+          tag: 'CLIMATE TECH',
+          desc: 'UV-resistant glass enclosures preserving 1,400 premier cru bottles at 55°F with vibration dampening.',
+          origin: 'Madison, WI',
+          artisan: 'Sub-Zero Classic'
+        },
+        {
+          id: 'hs-range',
+          yaw: 210,
+          pitch: -6,
+          title: 'La Cornue Château 150 Range',
+          tag: 'CULINARY ART',
+          desc: 'Handcrafted gas oven in matte carbon enamel with polished brass fittings and French simmer plate.',
+          origin: 'Paris, France',
+          artisan: 'La Cornue'
+        }
+      ]
+    },
+    master: {
+      name: 'Master Sky Sanctuary',
+      status: 'Master Penthouse Suite · Coastal Sunrise Orientation',
+      bgGradient: 'radial-gradient(ellipse at 50% 45%, rgba(15, 23, 42, 0.9) 0%, rgba(2, 6, 23, 0.98) 75%), linear-gradient(180deg, #090d16 0%, #1e1b4b 35%, #0f172a 75%, #020617 100%)',
+      hotspots: [
+        {
+          id: 'hs-terrace',
+          yaw: 160,
+          pitch: 0,
+          title: 'Private Horizon Balcony Deck',
+          tag: 'OUTDOOR LIVING',
+          desc: 'Seamless threshold transition to private oceanview cantilevered terrace with integrated glass fire trough.',
+          origin: 'Malibu, CA',
+          artisan: 'Vanguard Millwork'
+        },
+        {
+          id: 'hs-tub',
+          yaw: 300,
+          pitch: -12,
+          title: 'Monolithic Fluted Soaking Tub',
+          tag: 'SPA APPOINTMENT',
+          desc: 'Sculpted from a single block of volcanic basalt, weighing 1,800 lbs with floor-mounted Dornbracht filler.',
+          origin: 'Iserlohn, Germany',
+          artisan: 'Dornbracht'
+        }
+      ]
+    },
+    terrace: {
+      name: 'Cantilevered Horizon Deck & Pool',
+      status: 'Infinity Ocean Terrace · 180° Unobstructed Pacific Exposure',
+      bgGradient: 'radial-gradient(ellipse at 50% 30%, rgba(14, 165, 233, 0.15) 0%, rgba(11, 17, 30, 0.95) 75%), linear-gradient(180deg, #0369a1 0%, #0284c7 25%, #075985 55%, #0b111e 90%)',
+      hotspots: [
+        {
+          id: 'hs-pool',
+          yaw: 190,
+          pitch: -15,
+          title: 'Glass-Bottom Cantilever Pool',
+          tag: 'STRUCTURAL FEAT',
+          desc: '4-inch acrylic cantilever projecting 16 feet past the cliff face over the breaking surf below.',
+          origin: 'Grand Junction, CO',
+          artisan: 'Reynolds Polymer'
+        },
+        {
+          id: 'hs-grill',
+          yaw: 340,
+          pitch: -4,
+          title: 'Alfresco Teppanyaki Grill Island',
+          tag: 'ENTERTAINING',
+          desc: 'Commercial-grade marine 316 stainless steel cooking center with induction wok burners.',
+          origin: 'Milan, Italy',
+          artisan: 'Officine Gullo'
+        }
+      ]
+    }
+  };
+
+  let currentRoomKey = 'salon';
+  let yaw = 0; // horizontal angle 0-360
+  let pitch = 0; // vertical angle -45 to 45
+  let fov = 75; // field of view 50-90
+  let isDragging = false;
+  let startX = 0;
+  let startY = 0;
+  let startYaw = 0;
+  let startPitch = 0;
+  let autoOrbit = false;
+  let autoOrbitFrame = null;
+
+  function getCardinalDirection(deg) {
+    const normalized = (deg % 360 + 360) % 360;
+    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const idx = Math.round(normalized / 45) % 8;
+    return `${Math.round(normalized)}° ${dirs[idx]}`;
+  }
+
+  function updateView() {
+    const panLayer = document.getElementById('vrPanLayer');
+    const coordYaw = document.getElementById('vrCoordYaw');
+    const coordPitch = document.getElementById('vrCoordPitch');
+    const coordFov = document.getElementById('vrCoordFov');
+    const compassNeedle = document.getElementById('vrCompassNeedle');
+    const headingText = document.getElementById('vrHeadingText');
+
+    if (coordYaw) coordYaw.textContent = `YAW: ${((yaw % 360 + 360) % 360).toFixed(1)}°`;
+    if (coordPitch) coordPitch.textContent = `PITCH: ${pitch.toFixed(1)}°`;
+    if (coordFov) coordFov.textContent = `FOV: ${fov}°`;
+
+    if (compassNeedle) {
+      compassNeedle.style.transform = `rotate(${-yaw}deg)`;
+    }
+    if (headingText) {
+      headingText.textContent = `Heading: ${getCardinalDirection(yaw)}`;
+    }
+
+    if (panLayer) {
+      const pxX = -((yaw % 360 + 360) % 360) * 8;
+      const pxY = pitch * 4;
+      panLayer.style.backgroundPosition = `${pxX}px ${pxY}px`;
+      panLayer.style.transform = `scale(${75 / fov})`;
+    }
+
+    renderHotspots();
+  }
+
+  function renderHotspots() {
+    const layer = document.getElementById('vrHotspotsLayer');
+    if (!layer) return;
+
+    const room = ROOMS[currentRoomKey];
+    if (!room) return;
+
+    layer.replaceChildren();
+
+    const stage = document.getElementById('vrViewportStage');
+    const width = stage ? stage.offsetWidth : 800;
+    const height = stage ? stage.offsetHeight : 500;
+
+    room.hotspots.forEach((hs) => {
+      // Calculate angular distance from current yaw
+      let diffYaw = (hs.yaw - yaw) % 360;
+      if (diffYaw > 180) diffYaw -= 360;
+      if (diffYaw < -180) diffYaw += 360;
+
+      const diffPitch = hs.pitch - pitch;
+
+      // Check if within FOV (roughly +- fov/2 horizontally and vertically)
+      const halfFovX = (fov / 2) * 1.3;
+      const halfFovY = (fov / 2) * 0.9;
+
+      if (Math.abs(diffYaw) < halfFovX && Math.abs(diffPitch) < halfFovY) {
+        const posX = width / 2 + (diffYaw / halfFovX) * (width / 2);
+        const posY = height / 2 - (diffPitch / halfFovY) * (height / 2);
+
+        const pin = document.createElement('div');
+        pin.className = 'vr-hotspot-pin';
+        pin.style.left = `${posX.toFixed(1)}px`;
+        pin.style.top = `${posY.toFixed(1)}px`;
+        pin.tabIndex = 0;
+        pin.setAttribute('role', 'button');
+        pin.setAttribute('aria-label', `Inspect ${hs.title}`);
+
+        const ring = document.createElement('span');
+        ring.className = 'hotspot-ring';
+
+        const core = document.createElement('span');
+        core.className = 'hotspot-core';
+        core.textContent = '✦';
+
+        const pill = document.createElement('span');
+        pill.className = 'hotspot-label-pill';
+        pill.textContent = hs.title;
+
+        pin.appendChild(ring);
+        pin.appendChild(core);
+        pin.appendChild(pill);
+
+        pin.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showHotspotDetail(hs);
+        });
+
+        layer.appendChild(pin);
+      }
+    });
+  }
+
+  function showHotspotDetail(hs) {
+    const popover = document.getElementById('vrHotspotPopover');
+    if (!popover) return;
+
+    const tagEl = document.getElementById('hotspotTag');
+    const titleEl = document.getElementById('hotspotTitle');
+    const descEl = document.getElementById('hotspotDesc');
+    const originEl = document.getElementById('hotspotOrigin');
+    const artisanEl = document.getElementById('hotspotArtisan');
+
+    if (tagEl) tagEl.textContent = hs.tag || 'SPECIFICATION';
+    if (titleEl) titleEl.textContent = hs.title;
+    if (descEl) descEl.textContent = hs.desc;
+    if (originEl) originEl.textContent = `Origin: ${hs.origin || 'International'}`;
+    if (artisanEl) artisanEl.textContent = `Artisan: ${hs.artisan || 'Vanguard Collection'}`;
+
+    popover.removeAttribute('hidden');
+  }
+
+  function closeHotspotDetail() {
+    const popover = document.getElementById('vrHotspotPopover');
+    if (popover) {
+      popover.setAttribute('hidden', '');
+    }
+  }
+
+  function switchRoom(roomKey) {
+    if (!ROOMS[roomKey]) return;
+    currentRoomKey = roomKey;
+    closeHotspotDetail();
+
+    const panLayer = document.getElementById('vrPanLayer');
+    const room = ROOMS[roomKey];
+    if (panLayer && room) {
+      panLayer.style.backgroundImage = room.bgGradient;
+    }
+
+    const statusEl = document.getElementById('vrRoomStatusText');
+    if (statusEl && room) {
+      statusEl.textContent = room.status;
+    }
+
+    // Update active tab button
+    document.querySelectorAll('.vr-room-btn').forEach((btn) => {
+      const isTarget = btn.getAttribute('data-room') === roomKey;
+      btn.classList.toggle('active', isTarget);
+      btn.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+    });
+
+    updateView();
+  }
+
+  function startAutoOrbit() {
+    autoOrbit = true;
+    const btnText = document.getElementById('orbitBtnText');
+    const btn = document.getElementById('btnToggleAutoOrbit');
+    if (btnText) btnText.textContent = 'Stop Orbit';
+    if (btn) btn.classList.add('active');
+
+    function step() {
+      if (!autoOrbit) return;
+      if (!isDragging) {
+        yaw = (yaw + 0.12) % 360;
+        updateView();
+      }
+      autoOrbitFrame = requestAnimationFrame(step);
+    }
+    cancelAnimationFrame(autoOrbitFrame);
+    autoOrbitFrame = requestAnimationFrame(step);
+  }
+
+  function stopAutoOrbit() {
+    autoOrbit = false;
+    cancelAnimationFrame(autoOrbitFrame);
+    const btnText = document.getElementById('orbitBtnText');
+    const btn = document.getElementById('btnToggleAutoOrbit');
+    if (btnText) btnText.textContent = 'Auto-Orbit';
+    if (btn) btn.classList.remove('active');
+  }
+
+  function toggleAutoOrbit() {
+    if (autoOrbit) {
+      stopAutoOrbit();
+    } else {
+      startAutoOrbit();
+    }
+  }
+
+  function toggleFullscreen() {
+    const container = document.getElementById('vrModalContainer');
+    if (container) {
+      container.classList.toggle('is-fullscreen');
+      updateView();
+    }
+  }
+
+  function openModal() {
+    const backdrop = document.getElementById('vrTourBackdrop');
+    const modal = document.getElementById('vrTourModal');
+    if (backdrop && modal) {
+      backdrop.classList.add('active');
+      modal.removeAttribute('hidden');
+      modal.classList.add('active');
+      switchRoom(currentRoomKey);
+      startAutoOrbit();
+    }
+  }
+
+  function closeModal() {
+    stopAutoOrbit();
+    closeHotspotDetail();
+    const backdrop = document.getElementById('vrTourBackdrop');
+    const modal = document.getElementById('vrTourModal');
+    if (backdrop && modal) {
+      backdrop.classList.remove('active');
+      modal.classList.remove('active');
+      setTimeout(() => {
+        if (!modal.classList.contains('active')) {
+          modal.setAttribute('hidden', '');
+        }
+      }, 300);
+    }
+  }
+
+  function initListeners() {
+    const stage = document.getElementById('vrViewportStage');
+    if (stage) {
+      stage.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startYaw = yaw;
+        startPitch = pitch;
+        stage.classList.add('is-dragging');
+        closeHotspotDetail();
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        yaw = (startYaw - dx * 0.25) % 360;
+        pitch = Math.max(-42, Math.min(42, startPitch + dy * 0.2));
+        updateView();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          stage.classList.remove('is-dragging');
+        }
+      });
+
+      // Touch events
+      stage.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          startYaw = yaw;
+          startPitch = pitch;
+          closeHotspotDetail();
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        const dx = e.touches[0].clientX - startX;
+        const dy = e.touches[0].clientY - startY;
+
+        yaw = (startYaw - dx * 0.3) % 360;
+        pitch = Math.max(-42, Math.min(42, startPitch + dy * 0.25));
+        updateView();
+      }, { passive: true });
+
+      window.addEventListener('touchend', () => {
+        isDragging = false;
+      });
+
+      // Wheel Zoom
+      stage.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        fov = Math.max(50, Math.min(90, fov + (e.deltaY > 0 ? 3 : -3)));
+        updateView();
+      }, { passive: false });
+    }
+
+    // Controls
+    const orbitBtn = document.getElementById('btnToggleAutoOrbit');
+    if (orbitBtn) orbitBtn.addEventListener('click', toggleAutoOrbit);
+
+    const fsBtn = document.getElementById('btnToggleFullscreen');
+    if (fsBtn) fsBtn.addEventListener('click', toggleFullscreen);
+
+    const closeHsBtn = document.getElementById('btnHotspotClose');
+    if (closeHsBtn) closeHsBtn.addEventListener('click', closeHotspotDetail);
+
+    const zoomInBtn = document.getElementById('btnVrZoomIn');
+    if (zoomInBtn) zoomInBtn.addEventListener('click', () => {
+      fov = Math.max(50, fov - 5);
+      updateView();
+    });
+
+    const zoomOutBtn = document.getElementById('btnVrZoomOut');
+    if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => {
+      fov = Math.min(90, fov + 5);
+      updateView();
+    });
+
+    const zoomResetBtn = document.getElementById('btnVrReset');
+    if (zoomResetBtn) zoomResetBtn.addEventListener('click', () => {
+      fov = 75;
+      yaw = 0;
+      pitch = 0;
+      updateView();
+    });
+
+    // Room nav buttons
+    document.querySelectorAll('.vr-room-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const roomKey = btn.getAttribute('data-room');
+        if (roomKey) switchRoom(roomKey);
+      });
+    });
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('vrTourModal');
+      if (modal && !modal.hasAttribute('hidden')) {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'ArrowLeft') { yaw = (yaw - 4) % 360; updateView(); }
+        if (e.key === 'ArrowRight') { yaw = (yaw + 4) % 360; updateView(); }
+        if (e.key === 'ArrowUp') { pitch = Math.min(42, pitch + 3); updateView(); }
+        if (e.key === 'ArrowDown') { pitch = Math.max(-42, pitch - 3); updateView(); }
+      }
+    });
+
+    window.addEventListener('resize', updateView);
+  }
+
+  window.openVrTourModal = openModal;
+  window.closeVrTourModal = closeModal;
+  window.switchVrRoom = switchRoom;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListeners);
+  } else {
+    initListeners();
+  }
+})();
+/* ===== END Issue #419: 360° Virtual Reality Panoramic Room Viewer Modal ===== */

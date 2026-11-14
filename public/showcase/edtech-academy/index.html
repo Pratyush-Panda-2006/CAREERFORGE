@@ -151,6 +151,158 @@
         </div>
       </div>
     </section>
+
+    <!-- ===== Student Coding Streak & Study Habit Tracker (Issue #403) ===== -->
+    <section class="streak-tracker-section" id="streakTracker" aria-labelledby="streakHeading">
+      <div class="streak-card">
+        <div class="streak-header">
+          <div class="streak-header-left">
+            <span class="streak-eyebrow">STUDENT HABIT &amp; PROGRESSION ENGINE</span>
+            <h2 id="streakHeading">🔥 Coding Streak &amp; Habit Tracker</h2>
+            <p class="streak-sub">
+              Build daily coding consistency, earn milestone achievement badges, and safeguard your momentum with freeze protectors.
+            </p>
+          </div>
+          <div class="streak-header-actions">
+            <button type="button" class="streak-action-btn checkin-btn" id="btnLogStudySession">
+              <span class="btn-icon">⚡</span>
+              <span id="btnLogText">Log Today's Session</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Streak Overview HUD -->
+        <div class="streak-hud-grid">
+          <!-- Flame & Current Streak -->
+          <div class="streak-hud-card current-streak-card">
+            <div class="flame-avatar-wrap">
+              <div class="flame-glow-aura" id="flameGlowAura"></div>
+              <div class="flame-icon-container" id="flameIconContainer">
+                <span class="flame-emoji" aria-hidden="true">🔥</span>
+              </div>
+            </div>
+            <div class="streak-stat-info">
+              <div class="streak-count-row">
+                <span class="streak-number" id="streakCountDisplay">14</span>
+                <span class="streak-unit-label">Day Streak</span>
+              </div>
+              <div class="streak-status-badge" id="streakStatusBadge">
+                <span class="pulse-dot"></span>
+                <span id="streakStatusLabel">ON FIRE • TOP 5% COHORT</span>
+              </div>
+              <div class="streak-submetrics">
+                <span>Personal Record: <strong id="bestStreakDisplay">21 Days</strong></span>
+                <span>• Total Study Hours: <strong id="totalHoursDisplay">48h</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Freeze Protector Tokens -->
+          <div class="streak-hud-card freeze-card">
+            <div class="card-top-row">
+              <div class="card-icon-title">
+                <span class="card-subicon">🛡️</span>
+                <h3>Streak Freeze Tokens</h3>
+              </div>
+              <span class="freeze-count-badge" id="freezeCountBadge">
+                <span id="freezeTokenCount">2</span> / 3 Available
+              </span>
+            </div>
+            <p class="freeze-desc">
+              Missed a day? Freeze tokens protect your active streak from resetting. Earn tokens every 7-day milestone.
+            </p>
+            <div class="freeze-controls-row">
+              <div class="freeze-status-indicator" id="freezeStatusIndicator">
+                <span class="freeze-crystal">❄️</span>
+                <span id="freezeStatusText">Shield: Active</span>
+              </div>
+              <button type="button" class="streak-mini-btn freeze-toggle-btn" id="btnToggleFreeze">
+                Equip Protection
+              </button>
+            </div>
+          </div>
+
+          <!-- Simulation / Dev Sandbox Controls -->
+          <div class="streak-hud-card habit-actions-card">
+            <div class="card-top-row">
+              <div class="card-icon-title">
+                <span class="card-subicon">⚙️</span>
+                <h3>Habit Simulator</h3>
+              </div>
+              <span class="sim-badge">TEST LAB</span>
+            </div>
+            <p class="freeze-desc">
+              Test edge cases: advance to tomorrow, simulate streak loss, or award milestone targets.
+            </p>
+            <div class="sim-btn-group">
+              <button type="button" class="streak-mini-btn" id="btnSimulateTomorrow" title="Simulate passing into the next day">
+                +1 Day Forward
+              </button>
+              <button type="button" class="streak-mini-btn" id="btnTriggerMilestoneTest" title="Simulate reaching 30-day milestone">
+                Simulate 30d Goal
+              </button>
+              <button type="button" class="streak-mini-btn ghost" id="btnResetStreak" title="Reset streak to initial test state">
+                Reset Demo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weekly Habit Calendar Strip -->
+        <div class="streak-calendar-wrapper">
+          <div class="calendar-header-row">
+            <h4>7-DAY STUDY CONSISTENCY MATRIX</h4>
+            <span class="calendar-meta-text" id="calendarWeekMeta">Past 7 Days • Goal: 5+ sessions/week</span>
+          </div>
+          <div class="calendar-days-row" id="calendarDaysContainer">
+            <!-- Dynamically populated 7 days -->
+          </div>
+        </div>
+
+        <!-- Milestone Badges Progression -->
+        <div class="streak-milestones-wrapper">
+          <div class="milestones-top-bar">
+            <div>
+              <h4>STREAK MILESTONE BADGES</h4>
+              <p class="milestone-desc-txt">Unlock verified engineering habit badges as your consecutive coding streak climbs.</p>
+            </div>
+            <div class="next-target-box">
+              <span class="target-lbl">Next Target:</span>
+              <span class="target-val" id="nextTargetLabel">30-Day Supernova (14/30 Days)</span>
+            </div>
+          </div>
+
+          <!-- Milestone Progress Bar -->
+          <div class="streak-prog-track" role="progressbar" aria-valuenow="46" aria-valuemin="0" aria-valuemax="100" id="streakProgressBarWrap">
+            <div class="streak-prog-fill" id="streakProgressFill" style="width: 46%;"></div>
+          </div>
+
+          <!-- Badges Grid -->
+          <div class="badges-grid" id="streakBadgesGrid">
+            <!-- Badges rendered via script -->
+          </div>
+        </div>
+
+        <!-- Motivational Quote Generator -->
+        <div class="motivational-quote-bar">
+          <div class="quote-content-col">
+            <span class="quote-glyph" aria-hidden="true">“</span>
+            <div class="quote-text-wrap">
+              <p class="quote-text" id="motivationalQuoteText">
+                Consistency beats intensity. One focused commit a day keeps knowledge decay away.
+              </p>
+              <span class="quote-author" id="motivationalQuoteAuthor">— Systems &amp; AI Academy Staff</span>
+            </div>
+          </div>
+          <button type="button" class="streak-mini-btn quote-refresh-btn" id="btnRefreshQuote">
+            ✨ New Motivation
+          </button>
+        </div>
+
+        <!-- Confetti Canvas -->
+        <canvas class="streak-confetti-canvas" id="streakConfettiCanvas"></canvas>
+      </div>
+    </section>
   </main>
 
     <!-- ===== BEGIN Issue #190: Student Testimonials ===== -->

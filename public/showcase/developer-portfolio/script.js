@@ -2367,3 +2367,273 @@ if (document.readyState === 'loading') {
 } else {
   initNeofetchTelemetryWidget();
 }
+
+
+/* ===== BEGIN Issue #397: System Architecture Topology Explorer ===== */
+(function initArchitectureTopologyExplorer() {
+  const NODES_DATA = {
+    frontend: {
+      title: 'Next.js 15 Edge SSR',
+      type: 'Frontend Edge CDN',
+      icon: '🌐',
+      pod: 'prod-frontend-edge-3a9f',
+      throughput: '18.2K QPS',
+      latency: '42 ms TTFB',
+      health: '99.99%',
+      resources: '420 MB • 12%',
+      tech: ['Next.js 15', 'Cloudflare Workers', 'V8 Isolates', 'HTTP/3', 'React 19'],
+      desc: 'Global edge rendering layer deployed across 280+ points of presence, executing zero-cold-start React Server Components and dynamic asset caching.'
+    },
+    gateway: {
+      title: 'Envoy Ingress & Auth Proxy',
+      type: 'API Gateway Mesh',
+      icon: '🛡️',
+      pod: 'prod-gateway-envoy-7c12',
+      throughput: '24.8K QPS',
+      latency: '1.4 ms P99',
+      health: '99.999%',
+      resources: '1.2 GB • 18%',
+      tech: ['Go 1.23', 'Envoy Proxy', 'eBPF Filters', 'mTLS', 'OpenTelemetry'],
+      desc: 'High-performance Envoy reverse proxy configured with custom Go filters for token bucket rate limiting, zero-trust mutual TLS, and dynamic routing.'
+    },
+    eventbus: {
+      title: 'Kafka Event Bus & Streaming',
+      type: 'Distributed Event Stream',
+      icon: '⚡',
+      pod: 'prod-kafka-cluster-node-02',
+      throughput: '125 MB/s',
+      latency: '3.2 ms P99',
+      health: '100%',
+      resources: '4.8 GB • 32%',
+      tech: ['Apache Kafka', 'Redpanda', 'Avro Registry', '12 Partitions', 'Snappy'],
+      desc: 'High-throughput append-only distributed commit log streaming audit events, telemetry streams, and asynchronous worker dispatch pipelines.'
+    },
+    cache: {
+      title: 'Redis 7.2 Distributed Cache',
+      type: 'In-Memory Cache Cluster',
+      icon: '🚀',
+      pod: 'prod-redis-primary-shards',
+      throughput: '48.6K OPS',
+      latency: '0.4 ms',
+      health: '99.995%',
+      resources: '18.4 GB • 24%',
+      tech: ['Redis 7.2', 'DragonflyDB', 'LRU Memory', 'Cluster Bus', 'Sentinel'],
+      desc: 'Sub-millisecond in-memory cache layer storing user session tokens, compiled query plans, and hot API responses with automated failover.'
+    },
+    db: {
+      title: 'PostgreSQL 16 Citus Shards',
+      type: 'Relational Distributed DB',
+      icon: '🗄️',
+      pod: 'prod-postgres-citus-shard-01',
+      throughput: '6.4K QPS',
+      latency: '2.8 ms Query',
+      health: '99.999%',
+      resources: '32 GB • 45%',
+      tech: ['PostgreSQL 16', 'Citus Sharding', 'PgBouncer', 'WAL-G', 'NVMe RAID'],
+      desc: 'Horizontally distributed relational database cluster partitioned across tenant keys with distributed ACID transactions and live WAL replication.'
+    }
+  };
+
+  let activeFilter = 'all';
+  let isBursting = false;
+  let selectedNodeKey = 'gateway'; // default inspection
+
+  // Packet animation state
+  const packetPaths = [
+    { id: 'path-fe-gw', tag: 'ingress', speed: 0.0035 },
+    { id: 'path-gw-eb', tag: 'events', speed: 0.003 },
+    { id: 'path-gw-cache', tag: 'cache', speed: 0.004 },
+    { id: 'path-cache-db', tag: 'cache', speed: 0.0035 },
+    { id: 'path-eb-db', tag: 'events', speed: 0.003 }
+  ];
+
+  const packets = [];
+  function initPackets() {
+    packetPaths.forEach((pInfo, idx) => {
+      // 2 packets per path
+      for (let i = 0; i < 2; i++) {
+        packets.push({
+          pathId: pInfo.id,
+          tag: pInfo.tag,
+          t: (i * 0.5) + (idx * 0.1),
+          baseSpeed: pInfo.speed,
+          element: null
+        });
+      }
+    });
+  }
+
+  function startPacketAnimation() {
+    const packetsGroup = document.getElementById('dataPacketsGroup');
+    if (!packetsGroup) return;
+
+    packetsGroup.innerHTML = '';
+    packets.forEach((p, i) => {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('r', '4');
+      circle.setAttribute('class', 'data-packet-dot');
+      circle.setAttribute('id', `packet-${i}`);
+      packetsGroup.appendChild(circle);
+      p.element = circle;
+    });
+
+    function loop() {
+      const multiplier = isBursting ? 2.2 : 1.0;
+
+      packets.forEach((p) => {
+        const pathEl = document.getElementById(p.pathId);
+        if (!pathEl || !p.element) return;
+
+        // Check if visible under active filter
+        const isVisible = activeFilter === 'all' || activeFilter === p.tag;
+        p.element.style.display = isVisible ? 'block' : 'none';
+
+        if (isVisible) {
+          p.t = (p.t + p.baseSpeed * multiplier) % 1;
+          const len = pathEl.getTotalLength ? pathEl.getTotalLength() : 100;
+          const pt = pathEl.getPointAtLength ? pathEl.getPointAtLength(p.t * len) : { x: 0, y: 0 };
+          p.element.setAttribute('cx', pt.x.toFixed(1));
+          p.element.setAttribute('cy', pt.y.toFixed(1));
+          if (isBursting) {
+            p.element.classList.add('fast');
+          } else {
+            p.element.classList.remove('fast');
+          }
+        }
+      });
+
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  }
+
+  function selectNode(nodeKey) {
+    selectedNodeKey = nodeKey;
+    const data = NODES_DATA[nodeKey];
+    if (!data) return;
+
+    // Highlight node in SVG
+    document.querySelectorAll('.topology-node').forEach((n) => {
+      const isTarget = n.getAttribute('data-node') === nodeKey;
+      n.classList.toggle('selected', isTarget);
+    });
+
+    // Populate and open popover
+    const popover = document.getElementById('nodeInspectPopover');
+    if (!popover) return;
+
+    const titleEl = document.getElementById('popoverNodeTitle');
+    const iconEl = document.getElementById('popoverNodeIcon');
+    const podEl = document.getElementById('popoverNodePod');
+    const throughputEl = document.getElementById('popoverMetricThroughput');
+    const latencyEl = document.getElementById('popoverMetricLatency');
+    const healthEl = document.getElementById('popoverMetricHealth');
+    const resourcesEl = document.getElementById('popoverMetricResources');
+    const chipsContainer = document.getElementById('popoverTechChips');
+    const descEl = document.getElementById('popoverDescription');
+
+    if (titleEl) titleEl.textContent = data.title;
+    if (iconEl) iconEl.textContent = data.icon;
+    if (podEl) podEl.textContent = `Pod: ${data.pod}`;
+    if (throughputEl) throughputEl.textContent = data.throughput;
+    if (latencyEl) latencyEl.textContent = data.latency;
+    if (healthEl) healthEl.textContent = data.health;
+    if (resourcesEl) resourcesEl.textContent = data.resources;
+    if (descEl) descEl.textContent = data.desc;
+
+    if (chipsContainer) {
+      chipsContainer.innerHTML = data.tech.map((t) => `<span class="tech-chip">${t}</span>`).join('');
+    }
+
+    popover.removeAttribute('hidden');
+  }
+
+  function closePopover() {
+    const popover = document.getElementById('nodeInspectPopover');
+    if (popover) {
+      popover.setAttribute('hidden', '');
+    }
+    document.querySelectorAll('.topology-node').forEach((n) => n.classList.remove('selected'));
+  }
+
+  function setPathFilter(filter) {
+    activeFilter = filter;
+    document.querySelectorAll('.arch-filter-pill').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-path') === filter);
+    });
+
+    // Update connector paths highlight / dim
+    document.querySelectorAll('.arch-connector-path').forEach((path) => {
+      if (filter === 'all') {
+        path.classList.remove('highlight', 'dimmed');
+      } else if (path.classList.contains(`path-${filter}`)) {
+        path.classList.add('highlight');
+        path.classList.remove('dimmed');
+      } else {
+        path.classList.remove('highlight');
+        path.classList.add('dimmed');
+      }
+    });
+  }
+
+  function toggleTrafficBurst() {
+    isBursting = !isBursting;
+    const btn = document.getElementById('btnBurstTraffic');
+    const badge = document.getElementById('archClusterStatusText');
+
+    if (btn) {
+      btn.classList.toggle('bursting', isBursting);
+      btn.textContent = isBursting ? '🔥 Burst Active (50K QPS)' : '⚡ Burst Traffic (2x)';
+    }
+
+    if (badge) {
+      badge.textContent = isBursting ? 'CLUSTER AT CAPACITY • 52.4K REQ/SEC BURST' : 'CLUSTER HEALTHY • 5/5 NODES ACTIVE';
+    }
+  }
+
+  function initListeners() {
+    // Click on nodes
+    document.querySelectorAll('.topology-node').forEach((node) => {
+      node.addEventListener('click', () => {
+        const key = node.getAttribute('data-node');
+        selectNode(key);
+      });
+      node.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectNode(node.getAttribute('data-node'));
+        }
+      });
+    });
+
+    // Popover close button
+    const closeBtn = document.getElementById('popoverCloseBtn');
+    if (closeBtn) closeBtn.addEventListener('click', closePopover);
+
+    // Filter pills
+    document.querySelectorAll('.arch-filter-pill').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        setPathFilter(btn.getAttribute('data-path'));
+      });
+    });
+
+    // Burst button
+    const burstBtn = document.getElementById('btnBurstTraffic');
+    if (burstBtn) burstBtn.addEventListener('click', toggleTrafficBurst);
+
+    initPackets();
+    startPacketAnimation();
+    selectNode(selectedNodeKey);
+  }
+
+  window.selectArchitectureNode = selectNode;
+  window.closeArchitecturePopover = closePopover;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListeners);
+  } else {
+    initListeners();
+  }
+})();
+/* ===== END Issue #397: System Architecture Topology Explorer ===== */

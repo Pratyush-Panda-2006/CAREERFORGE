@@ -778,6 +778,30 @@
       <p class="donation-feedback" id="donation-feedback" role="status" hidden></p>
     </div>
   </dialog>
+  <section id="ecology-simulator" class="eco-simulator" aria-labelledby="eco-title">
+    <p class="eco-kicker">TERRAINITIA / ECOLOGY LAB</p><h2 id="eco-title">Ecological Resurgence Simulator</h2>
+    <p>Explore ten illustrative years of vegetation and herbivore interaction. Flora is the resource and wildlife is its consumer in this simplified Lotka–Volterra model. Values are abundance indices, not measured species counts, hectares, or a conservation forecast.</p>
+    <form aria-label="Ecology model parameters" onsubmit="return false">
+      <label for="eco-flora">Initial flora index <output data-value="flora" for="eco-flora">65</output><input id="eco-flora" name="flora" type="range" min="0" max="150" step="1" value="65"></label>
+      <label for="eco-wildlife">Initial wildlife index <output data-value="wildlife" for="eco-wildlife">25</output><input id="eco-wildlife" name="wildlife" type="range" min="0" max="150" step="1" value="25"></label>
+      <label for="eco-growth">Flora growth α / year <output data-value="growth" for="eco-growth">0.8</output><input id="eco-growth" name="growth" type="range" min="0.1" max="1.5" step="0.1" value="0.8"></label>
+      <label for="eco-grazing">Grazing β / index / year <output data-value="grazing" for="eco-grazing">0.02</output><input id="eco-grazing" name="grazing" type="range" min="0.002" max="0.05" step="0.002" value="0.02"></label>
+      <label for="eco-conversion">Conversion δ / index / year <output data-value="conversion" for="eco-conversion">0.01</output><input id="eco-conversion" name="conversion" type="range" min="0.002" max="0.03" step="0.002" value="0.01"></label>
+      <label for="eco-mortality">Wildlife mortality γ / year <output data-value="mortality" for="eco-mortality">0.4</output><input id="eco-mortality" name="mortality" type="range" min="0.1" max="1.2" step="0.1" value="0.4"></label>
+    </form>
+    <div class="eco-actions"><button id="eco-reset" type="button">Reset scenario</button><button id="eco-balanced" type="button">Coexistence example</button></div>
+    <p role="status" aria-live="polite"></p><p id="eco-equilibrium"></p>
+    <p class="eco-legend"><span>━ Flora</span><span>┄ Wildlife</span></p>
+    <svg viewBox="0 0 600 325" role="img" aria-label="Flora and wildlife abundance trajectories over ten simulated years" aria-describedby="eco-equilibrium eco-readout"></svg>
+    <label class="eco-time" for="eco-month">Inspect year <output id="eco-year" for="eco-month">0</output><input id="eco-month" type="range" min="0" max="120" step="1" value="0" aria-describedby="eco-readout"></label>
+    <p id="eco-readout" aria-live="polite"></p>
+    <details><summary>Annual values and model assumptions</summary>
+      <div class="eco-table" tabindex="0" role="region" aria-label="Annual ecological values"><table><caption>Illustrative abundance indices; final partial year included if the solver stops early.</caption><thead><tr><th scope="col">Year</th><th scope="col">Flora</th><th scope="col">Wildlife</th></tr></thead><tbody></tbody></table></div>
+      <p>dF/dt = αF − βFW; dW/dt = δFW − γW. Rates are constant and the model omits carrying capacity, migration, weather, and human intervention. Zero populations remain absent. Classical cycles are not proof of a recovering ecosystem.</p>
+      <p>Fixed fourth-order Runge–Kutta steps of 1/240 year, sampled monthly. A trajectory outside the finite 0–1,000,000 display range stops visibly instead of clipping its values. <a href="https://cmp.phys.ufl.edu/PHZ4710/files/unit5/Lotka-Volterra.html">Model background: University of Florida biological physics</a>.</p>
+    </details>
+  </section>
+  <script type="module" src="ecology-simulator.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
