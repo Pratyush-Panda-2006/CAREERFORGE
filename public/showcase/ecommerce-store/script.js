@@ -2913,51 +2913,90 @@ window.handleReviewSubmit = handleReviewSubmit;
     if (!list) return;
     const alerts = getSavedAlerts();
 
+    list.replaceChildren();
+
     if (alerts.length === 0) {
-      list.innerHTML = '<div class="watchlist-empty-hint">No active stock alerts. Subscribe to backordered items above!</div>';
+      const emptyHint = document.createElement('div');
+      emptyHint.className = 'watchlist-empty-hint';
+      emptyHint.textContent = 'No active stock alerts. Subscribe to backordered items above!';
+      list.appendChild(emptyHint);
       return;
     }
 
-    list.innerHTML = alerts.map((item, idx) => `
-      <div class="watchlist-card" data-index="${idx}">
-        <div class="watchlist-card-left">
-          <span class="watchlist-prod-name">${escapeHtml(item.productName)} (${escapeHtml(item.variant)})</span>
-          <span class="watchlist-variant-email">✉️ ${escapeHtml(item.email)} • Added ${item.date || 'Recently'}</span>
-        </div>
-        <div class="watchlist-card-right">
-          <span class="watchlist-status-chip">Monitoring Restock</span>
-          <button type="button" class="watchlist-remove-btn" onclick="removeStockAlert(${idx})" title="Cancel this alert" aria-label="Cancel stock alert for ${escapeHtml(item.productName)}">✕</button>
-        </div>
-      </div>
-    `).join('');
-  }
+    alerts.forEach((item, idx) => {
+      const card = document.createElement('div');
+      card.className = 'watchlist-card';
+      card.setAttribute('data-index', String(idx));
 
-  function escapeHtml(str) {
-    return String(str || '').replace(/[&<>"']/g, (m) => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    })[m]);
+      const left = document.createElement('div');
+      left.className = 'watchlist-card-left';
+
+      const prodName = document.createElement('span');
+      prodName.className = 'watchlist-prod-name';
+      prodName.textContent = `${item.productName || 'Gear'} (${item.variant || 'Standard'})`;
+
+      const variantEmail = document.createElement('span');
+      variantEmail.className = 'watchlist-variant-email';
+      variantEmail.textContent = `✉️ ${item.email || ''} • Added ${item.date || 'Recently'}`;
+
+      left.appendChild(prodName);
+      left.appendChild(variantEmail);
+
+      const right = document.createElement('div');
+      right.className = 'watchlist-card-right';
+
+      const chip = document.createElement('span');
+      chip.className = 'watchlist-status-chip';
+      chip.textContent = 'Monitoring Restock';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'watchlist-remove-btn';
+      removeBtn.setAttribute('title', 'Cancel this alert');
+      removeBtn.setAttribute('aria-label', `Cancel stock alert for ${item.productName || 'item'}`);
+      removeBtn.textContent = '✕';
+      removeBtn.addEventListener('click', () => {
+        removeAlert(idx);
+      });
+
+      right.appendChild(chip);
+      right.appendChild(removeBtn);
+
+      card.appendChild(left);
+      card.appendChild(right);
+
+      list.appendChild(card);
+    });
   }
 
   function populateProductSelect(selectedId = 'p6') {
     const select = document.getElementById('stockAlertProductSelect');
     if (!select) return;
+    select.replaceChildren();
 
     if (typeof PRODUCT_CATALOG !== 'undefined') {
-      select.innerHTML = Object.keys(PRODUCT_CATALOG).map((id) => {
+      Object.keys(PRODUCT_CATALOG).forEach((id) => {
         const p = PRODUCT_CATALOG[id];
         const stockTag = p.inStock ? '(In Stock)' : '(Backorder / Sold Out)';
-        return `<option value="${id}" ${id === selectedId ? 'selected' : ''}>${p.name} ${stockTag}</option>`;
-      }).join('');
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = `${p.name} ${stockTag}`;
+        if (id === selectedId) opt.selected = true;
+        select.appendChild(opt);
+      });
     } else {
-      select.innerHTML = `
-        <option value="p6" ${selectedId === 'p6' ? 'selected' : ''}>Apex UltraWide 49" 240Hz (Backorder / Sold Out)</option>
-        <option value="p1" ${selectedId === 'p1' ? 'selected' : ''}>CyberDeck Pro Mechanical (In Stock)</option>
-        <option value="p2" ${selectedId === 'p2' ? 'selected' : ''}>AeroPulse Wireless ANC (In Stock)</option>
-      `;
+      const items = [
+        { id: 'p6', text: 'Apex UltraWide 49" 240Hz (Backorder / Sold Out)' },
+        { id: 'p1', text: 'CyberDeck Pro Mechanical (In Stock)' },
+        { id: 'p2', text: 'AeroPulse Wireless ANC (In Stock)' }
+      ];
+      items.forEach((item) => {
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = item.text;
+        if (item.id === selectedId) opt.selected = true;
+        select.appendChild(opt);
+      });
     }
   }
 
@@ -2967,6 +3006,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     const previewPrice = document.getElementById('alertProdPrice');
     const previewIcon = document.getElementById('alertProdIcon');
     if (!variantSelect) return;
+    variantSelect.replaceChildren();
 
     let p = null;
     if (typeof PRODUCT_CATALOG !== 'undefined' && PRODUCT_CATALOG[productId]) {
@@ -2982,29 +3022,45 @@ window.handleReviewSubmit = handleReviewSubmit;
         previewIcon.textContent = p.thumbs[0].icon || '🖥️';
       }
 
-      const options = [];
+      let hasOptions = false;
       if (p.colors && p.colors.length > 0) {
         p.colors.forEach((c) => {
-          options.push(`<option value="Color: ${c.name}">Color: ${c.name}</option>`);
+          const opt = document.createElement('option');
+          opt.value = `Color: ${c.name}`;
+          opt.textContent = `Color: ${c.name}`;
+          variantSelect.appendChild(opt);
+          hasOptions = true;
         });
       }
       if (p.options && p.options.length > 0) {
         p.options.forEach((o) => {
-          options.push(`<option value="Finish: ${o.name}">Finish: ${o.name}</option>`);
+          const opt = document.createElement('option');
+          opt.value = `Finish: ${o.name}`;
+          opt.textContent = `Finish: ${o.name}`;
+          variantSelect.appendChild(opt);
+          hasOptions = true;
         });
       }
-      if (options.length === 0) {
-        options.push('<option value="Standard Edition">Standard Edition</option>');
+      if (!hasOptions) {
+        const opt = document.createElement('option');
+        opt.value = 'Standard Edition';
+        opt.textContent = 'Standard Edition';
+        variantSelect.appendChild(opt);
       }
-      variantSelect.innerHTML = options.join('');
     } else {
       if (previewName) previewName.textContent = 'Apex UltraWide 49" 240Hz';
       if (previewPrice) previewPrice.textContent = '$1,199.00 • Currently Backordered';
       if (previewIcon) previewIcon.textContent = '🖥️';
-      variantSelect.innerHTML = `
-        <option value="Cosmic Black (Heavy-Duty Arm)">Cosmic Black (Heavy-Duty Arm)</option>
-        <option value="Anodized Silver (Desk Clamp)">Anodized Silver (Desk Clamp)</option>
-      `;
+
+      const opt1 = document.createElement('option');
+      opt1.value = 'Cosmic Black (Heavy-Duty Arm)';
+      opt1.textContent = 'Cosmic Black (Heavy-Duty Arm)';
+      variantSelect.appendChild(opt1);
+
+      const opt2 = document.createElement('option');
+      opt2.value = 'Anodized Silver (Desk Clamp)';
+      opt2.textContent = 'Anodized Silver (Desk Clamp)';
+      variantSelect.appendChild(opt2);
     }
   }
 
