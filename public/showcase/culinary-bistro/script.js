@@ -1967,3 +1967,433 @@ if (document.readyState === 'loading') {
 } else {
   initKitchenDisplaySystem();
 }
+
+/**
+ * ============================================================================
+ * Issue #393: Artisanal Cocktail Mixology Lab with Flavor Balance Radar Chart
+ * Computes Sweet, Bitter, Sour, and Boozy profiles dynamically and renders
+ * an interactive SVG radar chart with French craft cocktail recipe cards.
+ * ============================================================================
+ */
+(() => {
+  const SPIRITS = {
+    cognac: { id: 'cognac', name: 'Single-Barrel Cognac XO', abv: 42, icon: '🥃', sweet: 3.5, bitter: 2.0, sour: 1.0, boozy: 8.5, measure: '45ml (1.5 oz)', notes: 'Rich French oak and dried fig' },
+    gin: { id: 'gin', name: 'Wild Botanical Gin', abv: 45, icon: '🍸', sweet: 1.5, bitter: 4.5, sour: 3.0, boozy: 8.0, measure: '45ml (1.5 oz)', notes: 'Crisp juniper and alpine angelica' },
+    bourbon: { id: 'bourbon', name: 'Aged Kentucky Bourbon', abv: 47, icon: '🪵', sweet: 4.5, bitter: 3.0, sour: 1.5, boozy: 8.8, measure: '45ml (1.5 oz)', notes: 'Charred oak and caramel sweetness' },
+    vodka: { id: 'vodka', name: 'French Wheat Vodka', abv: 40, icon: '🌾', sweet: 1.0, bitter: 1.0, sour: 1.5, boozy: 7.5, measure: '45ml (1.5 oz)', notes: 'Silky smooth with neutral clean finish' }
+  };
+
+  const MODIFIERS = {
+    honey: { id: 'honey', name: 'Provencal Lavender Honey', icon: '🍯', sweet: 6.5, bitter: 0.5, sour: 0.5, boozy: 0.0, measure: '20ml (0.75 oz)', notes: 'Floral honey and velvety body' },
+    lemon: { id: 'lemon', name: 'Meyer Lemon & Bergamot', icon: '🍋', sweet: 1.0, bitter: 1.5, sour: 7.5, boozy: 0.0, measure: '20ml (0.75 oz)', notes: 'Fragrant citrus zest and sharp acid' },
+    elderflower: { id: 'elderflower', name: 'St. Germain Elderflower', icon: '🌸', sweet: 5.5, bitter: 0.5, sour: 1.0, boozy: 2.5, measure: '20ml (0.75 oz)', notes: 'White peach and blossom perfume' },
+    espresso: { id: 'espresso', name: 'Cold-Brew Espresso Extraction', icon: '☕', sweet: 1.5, bitter: 6.0, sour: 1.0, boozy: 0.0, measure: '20ml (0.75 oz)', notes: 'Dark roasted cacao and dense crema' }
+  };
+
+  const BITTERS = {
+    gentian: { id: 'gentian', name: 'Alpine Gentian & Peychaud', icon: '🌿', sweet: 0.5, bitter: 7.0, sour: 0.5, boozy: 1.0, measure: '3 dashes', notes: 'Herbaceous bitter bark and anise' },
+    orange: { id: 'orange', name: 'Blood Orange & Cardamom', icon: '🍊', sweet: 1.5, bitter: 5.0, sour: 2.5, boozy: 1.0, measure: '3 dashes', notes: 'Spiced citrus rind and cardamom' },
+    cacao: { id: 'cacao', name: 'Roasted Cacao & Vanilla', icon: '🍫', sweet: 2.5, bitter: 4.5, sour: 0.5, boozy: 1.0, measure: '3 dashes', notes: 'Bitter dark chocolate and warm bean' }
+  };
+
+  const PRESETS = {
+    'parisian-boulevardier': {
+      spirit: 'cognac',
+      modifiers: ['honey'],
+      bitters: 'gentian',
+      name: 'The Parisian Boulevardier',
+      glass: '🥃',
+      category: 'Aristocratic Aperitif • 31% ABV',
+      notes: 'An aristocratic harmony of oak-aged Cognac XO kissed with wild lavender honey and anchored by herbaceous Alpine gentian bitters.'
+    },
+    'botanical-bergamot-fizz': {
+      spirit: 'gin',
+      modifiers: ['lemon', 'elderflower'],
+      bitters: 'orange',
+      name: 'Botanical Bergamot Bloom',
+      glass: '🍸',
+      category: 'Fragrant French Fizz • 24% ABV',
+      notes: 'Vibrant wild gin lifted with fresh Meyer lemon, elderflower perfume, and aromatic cardamom citrus mist.'
+    },
+    'smoked-bourbon-old-fashioned': {
+      spirit: 'bourbon',
+      modifiers: ['honey'],
+      bitters: 'cacao',
+      name: 'Smoked Cedar Reserve',
+      glass: '🥃',
+      category: 'Deep Evening Sipper • 35% ABV',
+      notes: 'Rich charred bourbon sweetened with raw honey and rounded by warm roasted cacao and spiced vanilla bitters.'
+    },
+    'espresso-velvet-digestif': {
+      spirit: 'vodka',
+      modifiers: ['espresso', 'honey'],
+      bitters: 'cacao',
+      name: 'Espresso Noir Velvet',
+      glass: '🍸',
+      category: 'Midnight Digestif • 26% ABV',
+      notes: 'Velvety wheat vodka layered with cold-brew espresso concentration and rich Venezuelan cacao.'
+    }
+  };
+
+  function initMixologyLab() {
+    const labSection = document.getElementById('mixologyLab');
+    if (!labSection) return;
+
+    // Elements
+    const presetBtns = labSection.querySelectorAll('.mix-preset-btn');
+    const spiritPills = labSection.querySelectorAll('.ing-pill[data-type="spirit"]');
+    const modifierPills = labSection.querySelectorAll('.ing-pill[data-type="modifier"]');
+    const bittersPills = labSection.querySelectorAll('.ing-pill[data-type="bitters"]');
+
+    // Radar SVG elements
+    const radarGrid = document.getElementById('mixRadarGrid');
+    const radarPolygon = document.getElementById('mixRadarPolygon');
+    const radarPoints = document.getElementById('mixRadarPoints');
+    const radarLabels = document.getElementById('mixRadarLabels');
+
+    // Displays
+    const balanceTag = document.getElementById('mixologyBalanceTag');
+    const valSweet = document.getElementById('valSweet');
+    const valBitter = document.getElementById('valBitter');
+    const valSour = document.getElementById('valSour');
+    const valBoozy = document.getElementById('valBoozy');
+
+    // Recipe Card
+    const glassIcon = document.getElementById('recipeGlassIcon');
+    const cocktailName = document.getElementById('recipeCocktailName');
+    const categoryEl = document.getElementById('recipeCategory');
+    const tastingNotes = document.getElementById('recipeTastingNotes');
+    const pourList = document.getElementById('recipePourList');
+    const shakeBtn = document.getElementById('btnMixShake');
+    const resetBtn = document.getElementById('btnMixReset');
+    const toast = document.getElementById('mixToast');
+
+    // Lab State
+    let selectedSpirit = 'cognac';
+    let selectedModifiers = ['honey'];
+    let selectedBitters = 'gentian';
+
+    // SVG Geometry
+    const CX = 170;
+    const CY = 170;
+    const MAX_R = 120;
+
+    // 4 Axes: [Key, Label, Angle (Radians)]
+    const AXES = [
+      { key: 'sweet', label: 'Sweetness', angle: -Math.PI / 2 }, // Top
+      { key: 'bitter', label: 'Bitterness', angle: 0 },          // Right
+      { key: 'sour', label: 'Acidity', angle: Math.PI / 2 },     // Bottom
+      { key: 'boozy', label: 'Spirit ABV', angle: Math.PI }      // Left
+    ];
+
+    function drawRadarBaseGrid() {
+      radarGrid.replaceChildren();
+      radarLabels.replaceChildren();
+
+      // Draw concentric guide circles at 25%, 50%, 75%, 100%
+      const levels = [0.25, 0.5, 0.75, 1.0];
+      levels.forEach((lvl) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', String(CX));
+        circle.setAttribute('cy', String(CY));
+        circle.setAttribute('r', String(MAX_R * lvl));
+        circle.setAttribute('fill', lvl === 1.0 ? 'rgba(0,0,0,0.2)' : 'none');
+        circle.setAttribute('stroke', 'rgba(212, 175, 55, ' + (lvl === 1.0 ? '0.3' : '0.12') + ')');
+        circle.setAttribute('stroke-dasharray', lvl === 1.0 ? 'none' : '3 3');
+        radarGrid.appendChild(circle);
+      });
+
+      // Draw cross-axis lines and labels
+      AXES.forEach((axis) => {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', String(CX));
+        line.setAttribute('y1', String(CY));
+        const endX = CX + Math.cos(axis.angle) * MAX_R;
+        const endY = CY + Math.sin(axis.angle) * MAX_R;
+        line.setAttribute('x2', String(endX));
+        line.setAttribute('y2', String(endY));
+        line.setAttribute('stroke', 'rgba(212, 175, 55, 0.25)');
+        line.setAttribute('stroke-width', '1.5');
+        radarGrid.appendChild(line);
+
+        // Axis Label text
+        const labelX = CX + Math.cos(axis.angle) * (MAX_R + 22);
+        const labelY = CY + Math.sin(axis.angle) * (MAX_R + 18);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', String(labelX));
+        text.setAttribute('y', String(labelY));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'central');
+        text.setAttribute('fill', '#d4af37');
+        text.setAttribute('font-family', 'Plus Jakarta Sans, sans-serif');
+        text.setAttribute('font-size', '11');
+        text.setAttribute('font-weight', '700');
+        text.setAttribute('letter-spacing', '0.5');
+        text.textContent = axis.label.toUpperCase();
+        radarLabels.appendChild(text);
+      });
+    }
+
+    function calculateFlavorProfile() {
+      const spirit = SPIRITS[selectedSpirit];
+      const bitters = BITTERS[selectedBitters];
+      const mods = selectedModifiers.map((id) => MODIFIERS[id]).filter(Boolean);
+
+      let totalSweet = spirit.sweet + bitters.sweet;
+      let totalBitter = spirit.bitter + bitters.bitter;
+      let totalSour = spirit.sour + bitters.sour;
+      let totalBoozy = spirit.boozy + bitters.boozy;
+
+      mods.forEach((m) => {
+        totalSweet += m.sweet;
+        totalBitter += m.bitter;
+        totalSour += m.sour;
+        totalBoozy += m.boozy;
+      });
+
+      // Clamp metrics 1.0 to 10.0
+      const sweet = Math.min(10.0, Math.max(1.0, totalSweet));
+      const bitter = Math.min(10.0, Math.max(1.0, totalBitter));
+      const sour = Math.min(10.0, Math.max(1.0, totalSour));
+      const boozy = Math.min(10.0, Math.max(1.0, totalBoozy));
+
+      return { sweet, bitter, sour, boozy, spirit, bitters, mods };
+    }
+
+    function updateRadarChart(metrics) {
+      const values = {
+        sweet: metrics.sweet,
+        bitter: metrics.bitter,
+        sour: metrics.sour,
+        boozy: metrics.boozy
+      };
+
+      // Numeric Displays
+      valSweet.textContent = metrics.sweet.toFixed(1);
+      valBitter.textContent = metrics.bitter.toFixed(1);
+      valSour.textContent = metrics.sour.toFixed(1);
+      valBoozy.textContent = metrics.boozy.toFixed(1);
+
+      // Sensory Balance Tag
+      if (metrics.bitter >= 6.5 && metrics.boozy >= 7.5) {
+        balanceTag.textContent = 'Spirit-Forward & Bittersweet';
+      } else if (metrics.sour >= 5.5) {
+        balanceTag.textContent = 'Bright & Citrus-Refreshed';
+      } else if (metrics.sweet >= 6.0) {
+        balanceTag.textContent = 'Velvety & Dessert-Aromatic';
+      } else {
+        balanceTag.textContent = 'Harmonious Terroir Blend';
+      }
+
+      // Calculate Polygon points
+      const points = [];
+      radarPoints.replaceChildren();
+
+      AXES.forEach((axis) => {
+        const val = values[axis.key];
+        const r = (val / 10.0) * MAX_R;
+        const x = CX + Math.cos(axis.angle) * r;
+        const y = CY + Math.sin(axis.angle) * r;
+        points.push(x.toFixed(1) + ',' + y.toFixed(1));
+
+        // Anchor dot on vertex
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x.toFixed(1));
+        circle.setAttribute('cy', y.toFixed(1));
+        circle.setAttribute('r', '4.5');
+        circle.setAttribute('fill', '#d4af37');
+        circle.setAttribute('stroke', '#ffffff');
+        circle.setAttribute('stroke-width', '1.5');
+        radarPoints.appendChild(circle);
+      });
+
+      radarPolygon.setAttribute('points', points.join(' '));
+    }
+
+    function updateRecipeCard(profile) {
+      const { spirit, bitters, mods } = profile;
+
+      // Check if matches preset
+      let matchedPreset = Object.values(PRESETS).find((p) => {
+        if (p.spirit !== spirit.id || p.bitters !== bitters.id) return false;
+        if (p.modifiers.length !== mods.length) return false;
+        return p.modifiers.every((m) => mods.some((mod) => mod.id === m));
+      });
+
+      if (matchedPreset) {
+        cocktailName.textContent = matchedPreset.name;
+        glassIcon.textContent = matchedPreset.glass;
+        categoryEl.textContent = matchedPreset.category;
+        tastingNotes.textContent = matchedPreset.notes;
+      } else {
+        // Dynamic Bespoke Cocktail Name
+        const nameAdj = profile.sour > 5 ? 'L’Agrume' : profile.bitter > 6 ? 'Le Noir' : 'L’Élixir';
+        cocktailName.textContent = nameAdj + ' ' + spirit.name.split(' ')[1] + ' Bespoke';
+        glassIcon.textContent = spirit.icon;
+        categoryEl.textContent = 'Custom Bistro Creation • ~28% ABV';
+        tastingNotes.textContent = `A customized artisanal creation marrying ${spirit.name} with ${mods.map((m) => m.name).join(' and ')}, accented by ${bitters.name}.`;
+      }
+
+      // Render Pour List (Safe DOM creation)
+      pourList.replaceChildren();
+
+      const items = [
+        { name: spirit.name, measure: spirit.measure, icon: spirit.icon },
+        ...mods.map((m) => ({ name: m.name, measure: m.measure, icon: m.icon })),
+        { name: bitters.name, measure: bitters.measure, icon: bitters.icon }
+      ];
+
+      items.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'pour-row';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = item.icon + ' ' + item.name;
+        row.appendChild(nameSpan);
+
+        const measSpan = document.createElement('span');
+        measSpan.className = 'pour-measure';
+        measSpan.textContent = item.measure;
+        row.appendChild(measSpan);
+
+        pourList.appendChild(row);
+      });
+    }
+
+    function updateAll() {
+      const profile = calculateFlavorProfile();
+      updateRadarChart(profile);
+      updateRecipeCard(profile);
+    }
+
+    // Event Listeners for Spirit Pills (Single choice)
+    spiritPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        spiritPills.forEach((p) => {
+          p.classList.remove('active');
+          p.setAttribute('aria-checked', 'false');
+        });
+        pill.classList.add('active');
+        pill.setAttribute('aria-checked', 'true');
+        selectedSpirit = pill.getAttribute('data-id');
+        presetBtns.forEach((b) => b.classList.remove('active'));
+        updateAll();
+      });
+    });
+
+    // Event Listeners for Modifier Pills (Up to 2 choices)
+    modifierPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const id = pill.getAttribute('data-id');
+        const isSelected = selectedModifiers.includes(id);
+
+        if (isSelected) {
+          if (selectedModifiers.length > 1) {
+            selectedModifiers = selectedModifiers.filter((m) => m !== id);
+            pill.classList.remove('active');
+            pill.setAttribute('aria-pressed', 'false');
+          }
+        } else {
+          if (selectedModifiers.length >= 2) {
+            const removedId = selectedModifiers.shift();
+            const removedPill = labSection.querySelector(`.ing-pill[data-id="${removedId}"]`);
+            if (removedPill) {
+              removedPill.classList.remove('active');
+              removedPill.setAttribute('aria-pressed', 'false');
+            }
+          }
+          selectedModifiers.push(id);
+          pill.classList.add('active');
+          pill.setAttribute('aria-pressed', 'true');
+        }
+        presetBtns.forEach((b) => b.classList.remove('active'));
+        updateAll();
+      });
+    });
+
+    // Event Listeners for Bitters Pills (Single choice)
+    bittersPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        bittersPills.forEach((p) => {
+          p.classList.remove('active');
+          p.setAttribute('aria-checked', 'false');
+        });
+        pill.classList.add('active');
+        pill.setAttribute('aria-checked', 'true');
+        selectedBitters = pill.getAttribute('data-id');
+        presetBtns.forEach((b) => b.classList.remove('active'));
+        updateAll();
+      });
+    });
+
+    // Event Listeners for Presets
+    presetBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const presetKey = btn.getAttribute('data-preset');
+        const p = PRESETS[presetKey];
+        if (!p) return;
+
+        selectedSpirit = p.spirit;
+        selectedModifiers = [...p.modifiers];
+        selectedBitters = p.bitters;
+
+        // Sync pill UI states
+        spiritPills.forEach((pill) => {
+          const match = pill.getAttribute('data-id') === selectedSpirit;
+          pill.classList.toggle('active', match);
+          pill.setAttribute('aria-checked', String(match));
+        });
+
+        modifierPills.forEach((pill) => {
+          const match = selectedModifiers.includes(pill.getAttribute('data-id'));
+          pill.classList.toggle('active', match);
+          pill.setAttribute('aria-pressed', String(match));
+        });
+
+        bittersPills.forEach((pill) => {
+          const match = pill.getAttribute('data-id') === selectedBitters;
+          pill.classList.toggle('active', match);
+          pill.setAttribute('aria-checked', String(match));
+        });
+
+        updateAll();
+      });
+    });
+
+    // Shake & Pour Action
+    shakeBtn.addEventListener('click', () => {
+      const card = document.getElementById('mixRecipeCard');
+      card.style.transform = 'scale(0.98)';
+      shakeBtn.disabled = true;
+
+      setTimeout(() => {
+        card.style.transform = '';
+        shakeBtn.disabled = false;
+        toast.hidden = false;
+        toast.textContent = `🍸 Poured & chilled into crystal glass! "${cocktailName.textContent}" served.`;
+        setTimeout(() => {
+          toast.hidden = true;
+        }, 3500);
+      }, 300);
+    });
+
+    // Reset Lab
+    resetBtn.addEventListener('click', () => {
+      const firstPreset = presetBtns[0];
+      if (firstPreset) firstPreset.click();
+    });
+
+    // Initialize base SVG grid and render
+    drawRadarBaseGrid();
+    updateAll();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMixologyLab);
+  } else {
+    initMixologyLab();
+  }
+})();
+
