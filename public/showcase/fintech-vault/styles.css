@@ -3388,6 +3388,415 @@ body {
   }
 }
 
+/* --- Debt elimination planner --- */
+.debt-planner-section {
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.045), transparent 68%);
+}
+
+.debt-planner-section .engine-container {
+  max-width: 1160px;
+}
+
+.debt-input-heading,
+.debt-planner-actions,
+.debt-chart-heading,
+.debt-result-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.debt-input-heading {
+  margin-bottom: 16px;
+}
+
+.debt-input-heading h3,
+.debt-chart-heading h3 {
+  font-size: 1.15rem;
+  color: #f8fafc;
+}
+
+.debt-input-heading p,
+.debt-chart-heading p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.debt-account-list {
+  display: grid;
+  gap: 12px;
+}
+
+.debt-account-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.5fr) repeat(3, minmax(115px, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.debt-account-row label,
+.debt-extra-field {
+  display: grid;
+  gap: 7px;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.debt-account-row input,
+.debt-extra-field input {
+  min-width: 0;
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(4, 10, 20, 0.8);
+  color: #f8fafc;
+  font: inherit;
+}
+
+.debt-account-row input:focus,
+.debt-extra-field input:focus {
+  outline: 2px solid rgba(52, 211, 153, 0.6);
+  outline-offset: 1px;
+}
+
+.debt-secondary-btn,
+.debt-remove-btn {
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--emerald-light);
+  padding: 9px 13px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.debt-remove-btn {
+  border-color: rgba(248, 113, 113, 0.28);
+  color: #fca5a5;
+  padding: 9px 10px;
+}
+
+.debt-secondary-btn:disabled,
+.debt-remove-btn:disabled,
+.debt-planner-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.debt-planner-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.debt-extra-field {
+  width: min(250px, 100%);
+}
+
+.debt-planner-actions .btn-primary {
+  align-self: end;
+  min-height: 42px;
+}
+
+.debt-planner-error {
+  margin-top: 14px;
+  padding: 11px 14px;
+  border: 1px solid rgba(248, 113, 113, 0.36);
+  border-radius: 9px;
+  background: rgba(127, 29, 29, 0.18);
+  color: #fecaca;
+}
+
+.debt-results {
+  display: grid;
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.debt-results[hidden] {
+  display: none;
+}
+
+.debt-comparison-callout {
+  padding: 14px 18px;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.09);
+  color: #a7f3d0;
+  font-weight: 700;
+}
+
+.debt-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.debt-result-card,
+.debt-chart-card {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--card-bg);
+}
+
+.snowball-card {
+  border-top: 3px solid var(--cyan-light);
+}
+
+.avalanche-card {
+  border-top: 3px solid var(--emerald-light);
+}
+
+.debt-result-heading {
+  align-items: flex-start;
+}
+
+.debt-result-heading h3 {
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.debt-result-heading p {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.debt-date-box {
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+
+.debt-date-box span,
+.debt-result-metrics span {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.debt-free-date {
+  color: var(--emerald-light);
+  font-size: 0.98rem;
+}
+
+.debt-result-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.debt-result-metrics div {
+  display: grid;
+  gap: 4px;
+}
+
+.debt-result-metrics strong {
+  color: #f8fafc;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+}
+
+.debt-result-card h4 {
+  margin-bottom: 9px;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.debt-milestones {
+  display: grid;
+  gap: 7px;
+  list-style: none;
+}
+
+.debt-milestones li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.debt-milestones strong {
+  color: #e2e8f0;
+  text-align: right;
+}
+
+.debt-chart-heading {
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.debt-chart-legend {
+  display: flex;
+  gap: 14px;
+  color: #cbd5e1;
+  font-size: 0.78rem;
+}
+
+.debt-chart-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.debt-chart-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.snowball-dot {
+  background: var(--cyan-light);
+}
+
+.avalanche-dot {
+  background: var(--emerald-light);
+}
+
+.debt-chart-wrap {
+  width: 100%;
+  overflow: hidden;
+}
+
+.debt-chart-wrap svg {
+  display: block;
+  width: 100%;
+  min-width: 450px;
+  height: auto;
+}
+
+.debt-chart-gridline {
+  stroke: rgba(148, 163, 184, 0.17);
+  stroke-width: 1;
+}
+
+.debt-chart-label {
+  fill: #94a3b8;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+}
+
+.debt-snowball-line,
+.debt-avalanche-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.debt-snowball-line {
+  stroke: var(--cyan-light);
+}
+
+.debt-avalanche-line {
+  stroke: var(--emerald-light);
+}
+
+.debt-disclaimer {
+  margin-top: 8px;
+  color: var(--text-dim);
+  font-size: 0.76rem;
+}
+
+@media (max-width: 900px) {
+  .debt-account-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .debt-remove-btn {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 620px) {
+  .debt-result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .debt-result-heading,
+  .debt-chart-heading {
+    flex-direction: column;
+  }
+
+  .debt-date-box {
+    text-align: left;
+  }
+
+  .debt-result-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .debt-planner-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .debt-extra-field {
+    width: 100%;
+  }
+}
+
+@media print {
+  body.print-debt-plan * {
+    visibility: hidden !important;
+  }
+
+  body.print-debt-plan #debt-planner,
+  body.print-debt-plan #debt-planner * {
+    visibility: visible !important;
+  }
+
+  body.print-debt-plan #debt-planner {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    background: #fff !important;
+    color: #111827 !important;
+  }
+
+  body.print-debt-plan #debtPlannerForm {
+    display: none !important;
+  }
+
+  body.print-debt-plan .debt-result-card,
+  body.print-debt-plan .debt-chart-card {
+    break-inside: avoid;
+    background: #fff !important;
+    color: #111827 !important;
+  }
+
+  body.print-debt-plan .debt-result-heading h3,
+  body.print-debt-plan .debt-result-metrics strong,
+  body.print-debt-plan .debt-milestones strong,
+  body.print-debt-plan .debt-chart-heading h3 {
+    color: #111827 !important;
+  }
+
+  body.print-debt-plan .debt-disclaimer,
+  body.print-debt-plan .debt-result-heading p,
+  body.print-debt-plan .debt-result-metrics span,
+  body.print-debt-plan .debt-milestones li,
+  body.print-debt-plan .debt-chart-heading p {
+    color: #475569 !important;
+  }
+}
 /* ==========================================================
    Issue #407: Crypto vs Stock DCA Investment Simulator Styles
    ========================================================== */
@@ -3767,4 +4176,3 @@ body {
     align-items: flex-start;
   }
 }
-
