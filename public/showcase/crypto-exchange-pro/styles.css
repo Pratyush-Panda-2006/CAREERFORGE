@@ -818,3 +818,22 @@ body {
   .token-market-table th, .token-market-table td { padding: 12px 6px; font-size: .73rem; }
   .token-market-table td:nth-child(2), .token-market-table thead th:nth-child(2) { display: none; }
 }
+/* Local simulated stream; kept separate from paper-order execution history. */
+.stream-connection { display:flex; flex-direction:column; gap:6px; max-width:100%; font:12px 'JetBrains Mono',monospace; }
+#stream-status { color:#fbbf24; }
+#stream-status::before { content:'● '; }
+#stream-status[data-state="connected"] { color:#4ade80; }
+#stream-status[data-state="stopped"], #stream-status[data-state="disconnected"] { color:#fda4af; }
+#stream-stats { color:#cbd5e1; font-size:11px; }
+.stream-lab { padding:22px; margin:24px 0; background:#0f172a; color:#e2e8f0; border:1px solid #334155; border-radius:14px; }
+.stream-lab h2 { font-size:20px; margin-bottom:10px; }
+.stream-lab h3 { font-size:14px; margin:18px 0 10px; }
+.stream-lab p { font-size:13px; line-height:1.7; margin:10px 0; }
+.stream-lab button { padding:10px 14px; margin:4px; color:#e2e8f0; background:#1e293b; border:1px solid #64748b; border-radius:6px; cursor:pointer; }
+.stream-lab button:disabled { opacity:.5; cursor:default; }
+.stream-lab button:focus-visible { outline:3px solid #22d3ee; outline-offset:3px; }
+#stream-tape { font:12px/1.8 'JetBrains Mono',monospace; list-style:none; overflow-wrap:anywhere; padding:0; min-height:108px; }
+@keyframes stream-tick { 50% { opacity:.5; } }
+.stream-tick { animation:stream-tick .3s ease; }
+@media (prefers-reduced-motion:reduce) { .stream-tick { animation:none; } }
+@media (max-width:600px) { .navbar { flex-wrap:wrap; gap:12px; } .stream-lab { padding:16px; } }

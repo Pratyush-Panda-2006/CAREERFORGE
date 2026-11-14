@@ -1,4 +1,5 @@
 import { MatchingEngine } from './matching-engine.js';
+import { TickerStream } from './ticker-stream.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('VortexDEX Exchange Pro engine ready');
@@ -48,9 +49,9 @@ function initTokenDiscovery() {
 }
 
 /* ------------------------------------------------------------------
-   Mock market engine. Everything is simulated: a seeded PRNG drives the
-   candle history and the once-per-second live ticks, so the same pair and
-   interval always start from the same history.
+   Mock market engine. Seeded historical candles end at the latest simulated
+   stream price. Live packets use geometric Brownian price steps; no real
+   market connection is made.
 ------------------------------------------------------------------- */
 
 const PAIRS = {
@@ -189,8 +190,10 @@ function initMarket() {
   let lastResult = 'Submit a paper order to try matching against the displayed liquidity.';
   let fills = [];
   let quotesPaused = false;
+  const stream = new TickerStream(PAIRS);
   document.getElementById('paper-pause')?.addEventListener('click', event => {
     quotesPaused = !quotesPaused;
+    if (quotesPaused) stream.stop(); else stream.start();
     event.currentTarget.setAttribute('aria-pressed', String(quotesPaused));
     event.currentTarget.textContent = quotesPaused ? 'Resume simulated quotes' : 'Pause simulated quotes';
   });
@@ -397,14 +400,12 @@ function initMarket() {
   }
 
   // ---- live tick: runs once per second -------------------------------
-  function tickEngines() {
+  function tickEngines(packet) {
     if (quotesPaused) return;
     state.tick++;
     Object.keys(PAIRS).forEach((key) => {
       const e = engines[key];
-      const p = PAIRS[key];
-      const step = noise(e.rng) * p.vol * 0.9;
-      e.price = Math.max(e.price * (1 + step), 0.01);
+      e.price = packet.markets[key].price;
     });
 
     const price = engines[state.pair].price;
@@ -678,7 +679,42 @@ function initMarket() {
   renderAll();
   announce();
 
-  setInterval(() => { if (!document.hidden) tickEngines(); }, 1000);
+  const connection = document.getElementById('stream-status');
+  const stats = document.getElementById('stream-stats');
+  const tape = document.getElementById('stream-tape');
+  const outage = document.getElementById('stream-outage');
+  const drop = document.getElementById('stream-drop');
+  stream.on('status', info => {
+    connection.dataset.state = info.state;
+    connection.textContent = `SIMULATED FEED · ${info.state.toUpperCase()}`
+      + (info.delay ? ` · retry ${info.attempt} in ${info.delay / 1000}s` : '');
+    outage.disabled = drop.disabled = info.state !== 'connected';
+    if (info.state !== 'connected') stats.textContent = 'Quotes are stale while the feed is stopped or reconnecting.';
+  });
+  stream.on('drop', sequence => { stats.textContent = `Packet ${sequence} dropped. Recovering the full snapshot on the next delivery…`; });
+  stream.on('packet', packet => {
+    tickEngines(packet);
+    stats.textContent = `Simulated latency ${packet.latency ? `${packet.latency}ms` : '— (snapshot)'} · sequence ${packet.sequence} · dropped ${packet.dropped} · recovered ${packet.recovered}`;
+    connection.classList.remove('stream-tick');
+    // Reapply on the next rendered frame so each delivered packet pulses once.
+    requestAnimationFrame(() => connection.classList.add('stream-tick'));
+    tape.replaceChildren();
+    const market = packet.markets[state.pair];
+    market.trades.slice(0, 5).forEach(trade => {
+      const row = document.createElement('li');
+      row.textContent = `#${trade.id} · ${PAIRS[state.pair].label} · ${trade.side.toUpperCase()} ${trade.quantity.toFixed(4)} @ $${formatPrice(trade.price, 2)}`;
+      tape.append(row);
+    });
+    if (!market.trades.length) tape.textContent = 'Waiting for simulated executions…';
+  });
+  outage.addEventListener('click', () => stream.outage());
+  drop.addEventListener('click', () => { stream.dropNext = true; stats.textContent = 'Next packet will be dropped; snapshot recovery follows automatically.'; });
+  const suspend = () => stream.stop();
+  const resume = () => { if (!quotesPaused && !document.hidden) stream.start(); };
+  document.addEventListener('visibilitychange', () => document.hidden ? suspend() : resume());
+  window.addEventListener('pagehide', suspend);
+  window.addEventListener('pageshow', resume);
+  resume();
 }
 
 /* ===============================================================
