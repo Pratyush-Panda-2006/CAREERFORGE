@@ -2866,3 +2866,348 @@ window.handleReviewSubmit = handleReviewSubmit;
   document.addEventListener('DOMContentLoaded', initComparisonMatrix);
 })();
 /* ===== END Issue #283 & #433 ===== */
+
+
+/* ===== BEGIN Issue #401: Product Stock Inventory Alert Notification Modal ===== */
+(function initStockAlertModule() {
+  const STORAGE_KEY = 'cyber_gear_stock_alerts';
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function getSavedAlerts() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveAlerts(alerts) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(alerts));
+    } catch {
+      // storage quota or private browsing
+    }
+    updateBadge();
+  }
+
+  function updateBadge() {
+    const alerts = getSavedAlerts();
+    const badge = document.getElementById('stockAlertsBadge');
+    if (badge) {
+      if (alerts.length > 0) {
+        badge.textContent = alerts.length;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+    const countBadge = document.getElementById('watchlistCountBadge');
+    if (countBadge) {
+      countBadge.textContent = `${alerts.length} Active`;
+    }
+  }
+
+  function renderWatchlist() {
+    const list = document.getElementById('watchlistItemsList');
+    if (!list) return;
+    const alerts = getSavedAlerts();
+
+    if (alerts.length === 0) {
+      list.innerHTML = '<div class="watchlist-empty-hint">No active stock alerts. Subscribe to backordered items above!</div>';
+      return;
+    }
+
+    list.innerHTML = alerts.map((item, idx) => `
+      <div class="watchlist-card" data-index="${idx}">
+        <div class="watchlist-card-left">
+          <span class="watchlist-prod-name">${escapeHtml(item.productName)} (${escapeHtml(item.variant)})</span>
+          <span class="watchlist-variant-email">✉️ ${escapeHtml(item.email)} • Added ${item.date || 'Recently'}</span>
+        </div>
+        <div class="watchlist-card-right">
+          <span class="watchlist-status-chip">Monitoring Restock</span>
+          <button type="button" class="watchlist-remove-btn" onclick="removeStockAlert(${idx})" title="Cancel this alert" aria-label="Cancel stock alert for ${escapeHtml(item.productName)}">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[m]);
+  }
+
+  function populateProductSelect(selectedId = 'p6') {
+    const select = document.getElementById('stockAlertProductSelect');
+    if (!select) return;
+
+    if (typeof PRODUCT_CATALOG !== 'undefined') {
+      select.innerHTML = Object.keys(PRODUCT_CATALOG).map((id) => {
+        const p = PRODUCT_CATALOG[id];
+        const stockTag = p.inStock ? '(In Stock)' : '(Backorder / Sold Out)';
+        return `<option value="${id}" ${id === selectedId ? 'selected' : ''}>${p.name} ${stockTag}</option>`;
+      }).join('');
+    } else {
+      select.innerHTML = `
+        <option value="p6" ${selectedId === 'p6' ? 'selected' : ''}>Apex UltraWide 49" 240Hz (Backorder / Sold Out)</option>
+        <option value="p1" ${selectedId === 'p1' ? 'selected' : ''}>CyberDeck Pro Mechanical (In Stock)</option>
+        <option value="p2" ${selectedId === 'p2' ? 'selected' : ''}>AeroPulse Wireless ANC (In Stock)</option>
+      `;
+    }
+  }
+
+  function populateVariants(productId) {
+    const variantSelect = document.getElementById('stockAlertVariantSelect');
+    const previewName = document.getElementById('alertProdName');
+    const previewPrice = document.getElementById('alertProdPrice');
+    const previewIcon = document.getElementById('alertProdIcon');
+    if (!variantSelect) return;
+
+    let p = null;
+    if (typeof PRODUCT_CATALOG !== 'undefined' && PRODUCT_CATALOG[productId]) {
+      p = PRODUCT_CATALOG[productId];
+    }
+
+    if (p) {
+      if (previewName) previewName.textContent = p.name;
+      if (previewPrice) {
+        previewPrice.textContent = `$${p.price.toFixed(2)} • ${p.inStock ? 'In Stock (Variants Available)' : 'Currently Backordered'}`;
+      }
+      if (previewIcon && p.thumbs && p.thumbs[0]) {
+        previewIcon.textContent = p.thumbs[0].icon || '🖥️';
+      }
+
+      const options = [];
+      if (p.colors && p.colors.length > 0) {
+        p.colors.forEach((c) => {
+          options.push(`<option value="Color: ${c.name}">Color: ${c.name}</option>`);
+        });
+      }
+      if (p.options && p.options.length > 0) {
+        p.options.forEach((o) => {
+          options.push(`<option value="Finish: ${o.name}">Finish: ${o.name}</option>`);
+        });
+      }
+      if (options.length === 0) {
+        options.push('<option value="Standard Edition">Standard Edition</option>');
+      }
+      variantSelect.innerHTML = options.join('');
+    } else {
+      if (previewName) previewName.textContent = 'Apex UltraWide 49" 240Hz';
+      if (previewPrice) previewPrice.textContent = '$1,199.00 • Currently Backordered';
+      if (previewIcon) previewIcon.textContent = '🖥️';
+      variantSelect.innerHTML = `
+        <option value="Cosmic Black (Heavy-Duty Arm)">Cosmic Black (Heavy-Duty Arm)</option>
+        <option value="Anodized Silver (Desk Clamp)">Anodized Silver (Desk Clamp)</option>
+      `;
+    }
+  }
+
+  function validateEmail() {
+    const input = document.getElementById('stockAlertEmail');
+    const wrap = input ? input.closest('.input-with-icon-wrap') : null;
+    const statusText = document.getElementById('emailValidationStatus');
+    const errorHint = document.getElementById('stockAlertEmailError');
+    const icon = document.getElementById('emailInputStateIcon');
+    if (!input) return false;
+
+    const val = input.value.trim();
+    if (!val) {
+      if (wrap) {
+        wrap.classList.remove('is-valid', 'is-invalid');
+      }
+      if (statusText) {
+        statusText.textContent = 'Format: user@domain.com';
+        statusText.className = 'validation-status-text';
+      }
+      if (errorHint) errorHint.style.display = 'none';
+      if (icon) icon.textContent = '✉️';
+      return false;
+    }
+
+    const isValid = EMAIL_REGEX.test(val);
+    if (isValid) {
+      if (wrap) {
+        wrap.classList.add('is-valid');
+        wrap.classList.remove('is-invalid');
+      }
+      if (statusText) {
+        statusText.textContent = 'Valid Email Format ✓';
+        statusText.className = 'validation-status-text valid';
+      }
+      if (errorHint) errorHint.style.display = 'none';
+      if (icon) icon.textContent = '✅';
+    } else {
+      if (wrap) {
+        wrap.classList.add('is-invalid');
+        wrap.classList.remove('is-valid');
+      }
+      if (statusText) {
+        statusText.textContent = 'Invalid Email Format ✕';
+        statusText.className = 'validation-status-text invalid';
+      }
+      if (errorHint) errorHint.style.display = 'block';
+      if (icon) icon.textContent = '⚠️';
+    }
+    return isValid;
+  }
+
+  function openModal(productId = 'p6') {
+    populateProductSelect(productId);
+    populateVariants(productId);
+
+    const emailInput = document.getElementById('stockAlertEmail');
+    if (emailInput && !emailInput.value) {
+      try {
+        const lastEmail = localStorage.getItem('cyber_gear_last_alert_email');
+        if (lastEmail) emailInput.value = lastEmail;
+      } catch {
+        // ignore
+      }
+    }
+    validateEmail();
+    renderWatchlist();
+    updateBadge();
+
+    const backdrop = document.getElementById('stockAlertBackdrop');
+    const modal = document.getElementById('stockAlertModal');
+    if (backdrop && modal) {
+      backdrop.classList.add('active');
+      modal.removeAttribute('hidden');
+      modal.classList.add('active');
+      if (emailInput) emailInput.focus();
+    }
+  }
+
+  function closeModal() {
+    const backdrop = document.getElementById('stockAlertBackdrop');
+    const modal = document.getElementById('stockAlertModal');
+    if (backdrop && modal) {
+      backdrop.classList.remove('active');
+      modal.classList.remove('active');
+      setTimeout(() => {
+        if (!modal.classList.contains('active')) {
+          modal.setAttribute('hidden', '');
+        }
+      }, 300);
+    }
+  }
+
+  function handleSubmit(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!validateEmail()) {
+      const emailInput = document.getElementById('stockAlertEmail');
+      if (emailInput) emailInput.focus();
+      return;
+    }
+
+    const prodSelect = document.getElementById('stockAlertProductSelect');
+    const variantSelect = document.getElementById('stockAlertVariantSelect');
+    const emailInput = document.getElementById('stockAlertEmail');
+    const priorityDrop = document.getElementById('prefPriorityDrop');
+
+    const productId = prodSelect ? prodSelect.value : 'p6';
+    let prodName = 'Hardware Gear';
+    if (typeof PRODUCT_CATALOG !== 'undefined' && PRODUCT_CATALOG[productId]) {
+      prodName = PRODUCT_CATALOG[productId].name;
+    } else if (prodSelect && prodSelect.selectedOptions && prodSelect.selectedOptions[0]) {
+      prodName = prodSelect.selectedOptions[0].text.split('(')[0].trim();
+    }
+
+    const variant = variantSelect ? variantSelect.value : 'Standard';
+    const email = emailInput ? emailInput.value.trim() : '';
+    const priority = priorityDrop ? priorityDrop.checked : true;
+
+    const newAlert = {
+      id: `alert_${Date.now()}`,
+      productId: productId,
+      productName: prodName,
+      variant: variant,
+      email: email,
+      priority: priority,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    };
+
+    const alerts = getSavedAlerts();
+    // Check if already subscribed to this product + variant + email
+    const exists = alerts.some((a) => a.productId === productId && a.variant === variant && a.email.toLowerCase() === email.toLowerCase());
+
+    if (!exists) {
+      alerts.unshift(newAlert);
+      saveAlerts(alerts);
+    }
+
+    try {
+      localStorage.setItem('cyber_gear_last_alert_email', email);
+    } catch {
+      // ignore
+    }
+
+    renderWatchlist();
+    updateBadge();
+
+    const toastMsg = `🔔 Restock alert subscribed for ${prodName} (${variant})! Dispatch set to ${email}.`;
+    if (typeof showToast === 'function') {
+      showToast(toastMsg);
+    } else {
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.textContent = toastMsg;
+        toast.className = 'toast show';
+        setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3500);
+      }
+    }
+
+    // Close after short pause
+    setTimeout(() => {
+      closeModal();
+    }, 700);
+  }
+
+  function removeAlert(index) {
+    const alerts = getSavedAlerts();
+    if (index >= 0 && index < alerts.length) {
+      const removed = alerts.splice(index, 1)[0];
+      saveAlerts(alerts);
+      renderWatchlist();
+      updateBadge();
+      if (typeof showToast === 'function') {
+        showToast(`Stock alert for ${removed.productName} removed.`);
+      }
+    }
+  }
+
+  // Bind global helpers
+  window.openStockAlertModal = openModal;
+  window.closeStockAlertModal = closeModal;
+  window.handleStockAlertSubmit = handleSubmit;
+  window.removeStockAlert = removeAlert;
+  window.handleAlertProductChange = function(productId) {
+    populateVariants(productId);
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const emailInput = document.getElementById('stockAlertEmail');
+    if (emailInput) {
+      emailInput.addEventListener('input', validateEmail);
+      emailInput.addEventListener('blur', validateEmail);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('stockAlertModal');
+        if (modal && modal.classList.contains('active')) {
+          closeModal();
+        }
+      }
+    });
+
+    updateBadge();
+  });
+})();
+/* ===== END Issue #401: Product Stock Inventory Alert Notification Modal ===== */
