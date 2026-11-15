@@ -1,4 +1,4 @@
-// Cart state dictionary: { [id]: { name, price, qty, img } }
+﻿// Cart state dictionary: { [id]: { name, price, qty, img } }
 const cart = {};
 
 // Promo coupon engine. type "percent" takes value off the subtotal,
@@ -15,11 +15,11 @@ let appliedCoupon = null;
 // Multi-currency exchange rate tables and locale configurations
 const CURRENCIES = {
   USD: { code: 'USD', symbol: '$', rate: 1.0, locale: 'en-US', digits: 2 },
-  EUR: { code: 'EUR', symbol: '€', rate: 0.92, locale: 'de-DE', digits: 2 },
-  GBP: { code: 'GBP', symbol: '£', rate: 0.78, locale: 'en-GB', digits: 2 },
-  JPY: { code: 'JPY', symbol: '¥', rate: 152.0, locale: 'ja-JP', digits: 0 },
+  EUR: { code: 'EUR', symbol: 'â‚¬', rate: 0.92, locale: 'de-DE', digits: 2 },
+  GBP: { code: 'GBP', symbol: 'Â£', rate: 0.78, locale: 'en-GB', digits: 2 },
+  JPY: { code: 'JPY', symbol: 'Â¥', rate: 152.0, locale: 'ja-JP', digits: 0 },
   CAD: { code: 'CAD', symbol: 'CA$', rate: 1.38, locale: 'en-CA', digits: 2 },
-  INR: { code: 'INR', symbol: '₹', rate: 83.5, locale: 'en-IN', digits: 2 },
+  INR: { code: 'INR', symbol: 'â‚¹', rate: 83.5, locale: 'en-IN', digits: 2 },
   AUD: { code: 'AUD', symbol: 'A$', rate: 1.52, locale: 'en-AU', digits: 2 }
 };
 const CURRENCY_STORAGE_KEY = 'nexus_currency_preference';
@@ -213,10 +213,10 @@ function renderCart() {
       // Revert to original Add to Cart button
       let name = 'Product';
       let price = 0;
-      let img = '📦';
-      if (id === 'p1') { name = 'CyberDeck Pro Mechanical'; price = 249.00; img = '⌨️'; }
-      if (id === 'p2') { name = 'Acoustic Pulse ANC Headset'; price = 199.00; img = '🎧'; }
-      if (id === 'p3') { name = 'Horizon 32 Curved OLED'; price = 899.00; img = '🖥️'; }
+      let img = 'ðŸ“¦';
+      if (id === 'p1') { name = 'CyberDeck Pro Mechanical'; price = 249.00; img = 'âŒ¨ï¸'; }
+      if (id === 'p2') { name = 'Acoustic Pulse ANC Headset'; price = 199.00; img = 'ðŸŽ§'; }
+      if (id === 'p3') { name = 'Horizon 32 Curved OLED'; price = 899.00; img = 'ðŸ–¥ï¸'; }
 
       container.innerHTML = `
         <button class="add-btn" onclick="addToCart('${id}', '${name}', ${price}, '${img}')">Add to Cart</button>
@@ -252,7 +252,7 @@ function renderCart() {
           <span class="cart-item-icon">${item.img}</span>
           <div class="cart-item-details">
             <h4>${item.name}</h4>
-            <div class="price-sub">${formatMoney(item.price * item.qty)} (${formatMoney(item.price)} × ${item.qty})</div>
+            <div class="price-sub">${formatMoney(item.price * item.qty)} (${formatMoney(item.price)} Ã— ${item.qty})</div>
           </div>
         </div>
         <div class="qty-controls">
@@ -320,10 +320,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Wireless split ergonomic keyboard engineered with hot-swappable sockets, south-facing RGB matrix, customizable OLED telemetry screen, and CNC anodized aluminum chassis.',
     thumbs: [
-      { icon: '⌨️', label: 'Front Split', title: 'Ergonomic Split Layout' },
-      { icon: '🖲️', label: '7° Tent', title: 'Integrated Tent Stand' },
-      { icon: '🔌', label: 'PCB Matrix', title: 'Hot-Swap Sockets' },
-      { icon: '📦', label: 'Unboxing', title: 'Braided Cable & Case' }
+      { icon: 'âŒ¨ï¸', label: 'Front Split', title: 'Ergonomic Split Layout' },
+      { icon: 'ðŸ–²ï¸', label: '7Â° Tent', title: 'Integrated Tent Stand' },
+      { icon: 'ðŸ”Œ', label: 'PCB Matrix', title: 'Hot-Swap Sockets' },
+      { icon: 'ðŸ“¦', label: 'Unboxing', title: 'Braided Cable & Case' }
     ],
     colors: [
       { id: 'black', name: 'Stealth Matte Black', hex: '#18181b' },
@@ -339,10 +339,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '⚡', text: 'Tri-Mode: 2.4G / BT 5.2 / USB-C' },
-      { icon: '🔋', text: '4,000 mAh Li-ion (200 hrs)' },
-      { icon: '⚙️', text: 'QMK & VIA Fully Programmable' },
-      { icon: '🛡️', text: 'Poron Gasket Acoustic Mount' }
+      { icon: 'âš¡', text: 'Tri-Mode: 2.4G / BT 5.2 / USB-C' },
+      { icon: 'ðŸ”‹', text: '4,000 mAh Li-ion (200 hrs)' },
+      { icon: 'âš™ï¸', text: 'QMK & VIA Fully Programmable' },
+      { icon: 'ðŸ›¡ï¸', text: 'Poron Gasket Acoustic Mount' }
     ]
   },
   p2: {
@@ -364,10 +364,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'low-stock',
     desc: 'Audiophile active noise-canceling studio headphones with ultra-low latency lossy spatial audio, custom 50mm beryllium biocellulose drivers, and broadcast-grade microphone.',
     thumbs: [
-      { icon: '🎧', label: 'Studio Front', title: 'Studio Acoustic Profile' },
-      { icon: '🎒', label: 'Folded', title: 'Foldable Travel Shell' },
-      { icon: '🔊', label: 'Beryllium', title: '50mm Drivers' },
-      { icon: '🎙️', label: 'Broadcast', title: 'Detachable Boom Mic' }
+      { icon: 'ðŸŽ§', label: 'Studio Front', title: 'Studio Acoustic Profile' },
+      { icon: 'ðŸŽ’', label: 'Folded', title: 'Foldable Travel Shell' },
+      { icon: 'ðŸ”Š', label: 'Beryllium', title: '50mm Drivers' },
+      { icon: 'ðŸŽ™ï¸', label: 'Broadcast', title: 'Detachable Boom Mic' }
     ],
     colors: [
       { id: 'black', name: 'Midnight Onyx Black', hex: '#0f172a' },
@@ -383,10 +383,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🔇', text: '40dB Hybrid Active Noise Cancel' },
-      { icon: '⏱️', text: '55-Hour Continuous Playback' },
-      { icon: '📶', text: 'Lossless 2.4GHz + Dual BT 5.3' },
-      { icon: '🎛️', text: 'Built-in 32-bit Quad DAC' }
+      { icon: 'ðŸ”‡', text: '40dB Hybrid Active Noise Cancel' },
+      { icon: 'â±ï¸', text: '55-Hour Continuous Playback' },
+      { icon: 'ðŸ“¶', text: 'Lossless 2.4GHz + Dual BT 5.3' },
+      { icon: 'ðŸŽ›ï¸', text: 'Built-in 32-bit Quad DAC' }
     ]
   },
   p3: {
@@ -408,10 +408,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Immersive 1800R curved 4K UHD Quantum-Dot OLED display calibrated with 240Hz refresh rate, 0.03ms response time, 99% DCI-P3 gamut, and 90W USB-C single-cable dock.',
     thumbs: [
-      { icon: '🖥️', label: '1800R Front', title: 'Panoramic 1800R Curve' },
-      { icon: '✨', label: 'Aura Halo', title: 'Ambient RGB Backlight' },
-      { icon: '📐', label: '4.5mm Slim', title: 'Razor-Thin OLED Panel' },
-      { icon: '⚡', label: '90W Hub', title: 'Single-Cable USB-C Hub' }
+      { icon: 'ðŸ–¥ï¸', label: '1800R Front', title: 'Panoramic 1800R Curve' },
+      { icon: 'âœ¨', label: 'Aura Halo', title: 'Ambient RGB Backlight' },
+      { icon: 'ðŸ“', label: '4.5mm Slim', title: 'Razor-Thin OLED Panel' },
+      { icon: 'âš¡', label: '90W Hub', title: 'Single-Cable USB-C Hub' }
     ],
     colors: [
       { id: 'silver', name: 'Space Gray Titanium', hex: '#94a3b8' },
@@ -425,10 +425,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🎯', text: '3840 x 2160 UHD @ 240Hz' },
-      { icon: '⚡', text: '0.03ms (GtG) Pixel Response' },
-      { icon: '🎨', text: '99% DCI-P3 & Delta E < 1' },
-      { icon: '🔌', text: '90W USB-C + Dual HDMI 2.1' }
+      { icon: 'ðŸŽ¯', text: '3840 x 2160 UHD @ 240Hz' },
+      { icon: 'âš¡', text: '0.03ms (GtG) Pixel Response' },
+      { icon: 'ðŸŽ¨', text: '99% DCI-P3 & Delta E < 1' },
+      { icon: 'ðŸ”Œ', text: '90W USB-C + Dual HDMI 2.1' }
     ]
   },
   p4: {
@@ -450,10 +450,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Ultra-thin mechanical keyboard with low-profile optical switches, PBT shine-through keycaps, and CNC aluminum chassis.',
     thumbs: [
-      { icon: '⌨️', label: 'Top View', title: '65% Compact Layout' },
-      { icon: '📐', label: 'Side Profile', title: '12mm Thin Chassis' },
-      { icon: '🔋', label: 'Battery', title: '120h Bluetooth Endurance' },
-      { icon: '📦', label: 'Travel Case', title: 'Magnetic Travel Sleeve' }
+      { icon: 'âŒ¨ï¸', label: 'Top View', title: '65% Compact Layout' },
+      { icon: 'ðŸ“', label: 'Side Profile', title: '12mm Thin Chassis' },
+      { icon: 'ðŸ”‹', label: 'Battery', title: '120h Bluetooth Endurance' },
+      { icon: 'ðŸ“¦', label: 'Travel Case', title: 'Magnetic Travel Sleeve' }
     ],
     colors: [
       { id: 'black', name: 'Stealth Black', hex: '#18181b' },
@@ -467,10 +467,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '⚡', text: 'Bluetooth 5.3 Low-Latency' },
-      { icon: '🔋', text: '120h Operating Time' },
-      { icon: '🪶', text: 'Ultra-slim 12mm Profile' },
-      { icon: '🛡️', text: 'CNC Anodized Aluminum Top' }
+      { icon: 'âš¡', text: 'Bluetooth 5.3 Low-Latency' },
+      { icon: 'ðŸ”‹', text: '120h Operating Time' },
+      { icon: 'ðŸª¶', text: 'Ultra-slim 12mm Profile' },
+      { icon: 'ðŸ›¡ï¸', text: 'CNC Anodized Aluminum Top' }
     ]
   },
   p5: {
@@ -492,10 +492,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Active bi-amplified studio reference speakers with DSP room correction and balanced TRS inputs.',
     thumbs: [
-      { icon: '🔊', label: 'Pair Front', title: 'Dual Bi-Amp Monoliths' },
-      { icon: '🎛️', label: 'Back DSP', title: 'Room Acoustics Equalizer' },
-      { icon: '🔌', label: 'Balanced I/O', title: 'XLR & TRS Balanced In' },
-      { icon: '📦', label: 'Isolation', title: 'Acoustic Foam Decouplers' }
+      { icon: 'ðŸ”Š', label: 'Pair Front', title: 'Dual Bi-Amp Monoliths' },
+      { icon: 'ðŸŽ›ï¸', label: 'Back DSP', title: 'Room Acoustics Equalizer' },
+      { icon: 'ðŸ”Œ', label: 'Balanced I/O', title: 'XLR & TRS Balanced In' },
+      { icon: 'ðŸ“¦', label: 'Isolation', title: 'Acoustic Foam Decouplers' }
     ],
     colors: [
       { id: 'black', name: 'Matte Studio Charcoal', hex: '#18181b' },
@@ -509,10 +509,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🔊', text: '100W Class-D Bi-Amplified' },
-      { icon: '📈', text: '38Hz – 24kHz Flat Response' },
-      { icon: '🎛️', text: 'Integrated 32-bit DSP Room EQ' },
-      { icon: '🔌', text: 'XLR, 1/4" TRS & USB-C DAC' }
+      { icon: 'ðŸ”Š', text: '100W Class-D Bi-Amplified' },
+      { icon: 'ðŸ“ˆ', text: '38Hz â€“ 24kHz Flat Response' },
+      { icon: 'ðŸŽ›ï¸', text: 'Integrated 32-bit DSP Room EQ' },
+      { icon: 'ðŸ”Œ', text: 'XLR, 1/4" TRS & USB-C DAC' }
     ]
   },
   p6: {
@@ -534,10 +534,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'low-stock',
     desc: 'Super ultrawide 32:9 dual QHD curved monitor with 1000R curvature and built-in KVM switch.',
     thumbs: [
-      { icon: '🖥️', label: 'Panoramic 32:9', title: 'Dual 1440p Workspace' },
-      { icon: '🔄', label: 'KVM Hub', title: 'Dual PC Control Matrix' },
-      { icon: '🌈', label: 'Mini-LED HDR', title: 'HDR 1000 Zone Dimming' },
-      { icon: '📦', label: 'Heavy Arm', title: 'Integrated Heavy-Duty Stand' }
+      { icon: 'ðŸ–¥ï¸', label: 'Panoramic 32:9', title: 'Dual 1440p Workspace' },
+      { icon: 'ðŸ”„', label: 'KVM Hub', title: 'Dual PC Control Matrix' },
+      { icon: 'ðŸŒˆ', label: 'Mini-LED HDR', title: 'HDR 1000 Zone Dimming' },
+      { icon: 'ðŸ“¦', label: 'Heavy Arm', title: 'Integrated Heavy-Duty Stand' }
     ],
     colors: [
       { id: 'black', name: 'Cosmic Black', hex: '#020617' },
@@ -551,10 +551,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🎯', text: '5120 x 1440 Dual QHD @ 240Hz' },
-      { icon: '⚡', text: '0.03ms GtG Response Time' },
-      { icon: '🔄', text: 'Integrated USB-C KVM Switch' },
-      { icon: '✨', text: 'Quantum Dot Mini-LED 1000 nits' }
+      { icon: 'ðŸŽ¯', text: '5120 x 1440 Dual QHD @ 240Hz' },
+      { icon: 'âš¡', text: '0.03ms GtG Response Time' },
+      { icon: 'ðŸ”„', text: 'Integrated USB-C KVM Switch' },
+      { icon: 'âœ¨', text: 'Quantum Dot Mini-LED 1000 nits' }
     ]
   },
   p7: {
@@ -576,10 +576,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: '24-bit 192kHz broadcast condenser microphone with dual polar patterns and metal boom arm.',
     thumbs: [
-      { icon: '🎙️', label: 'Capsule Front', title: '25mm Gold-Sputtered Capsule' },
-      { icon: '🦾', label: 'Boom Arm', title: 'Gas-Spring Low Profile Arm' },
-      { icon: '🔇', label: 'Tap Mute', title: 'Capacitive Tap-to-Mute' },
-      { icon: '📦', label: 'Full Kit', title: 'Shockmount & Pop Filter' }
+      { icon: 'ðŸŽ™ï¸', label: 'Capsule Front', title: '25mm Gold-Sputtered Capsule' },
+      { icon: 'ðŸ¦¾', label: 'Boom Arm', title: 'Gas-Spring Low Profile Arm' },
+      { icon: 'ðŸ”‡', label: 'Tap Mute', title: 'Capacitive Tap-to-Mute' },
+      { icon: 'ðŸ“¦', label: 'Full Kit', title: 'Shockmount & Pop Filter' }
     ],
     colors: [
       { id: 'black', name: 'Matte Cast Black', hex: '#18181b' },
@@ -593,10 +593,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🎙️', text: '24-bit / 192kHz Studio Recording' },
-      { icon: '🎯', text: 'Cardioid & Omnidirectional Modes' },
-      { icon: '🎧', text: 'Zero-Latency 3.5mm Headphone Jack' },
-      { icon: '🔌', text: 'Plug & Play USB-C Bus Powered' }
+      { icon: 'ðŸŽ™ï¸', text: '24-bit / 192kHz Studio Recording' },
+      { icon: 'ðŸŽ¯', text: 'Cardioid & Omnidirectional Modes' },
+      { icon: 'ðŸŽ§', text: 'Zero-Latency 3.5mm Headphone Jack' },
+      { icon: 'ðŸ”Œ', text: 'Plug & Play USB-C Bus Powered' }
     ]
   },
   p8: {
@@ -618,10 +618,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Ergonomic Alice layout keyboard with rotary media knob, brass counterweight, and gasket mount.',
     thumbs: [
-      { icon: '⌨️', label: 'Split Angle', title: 'Natural Wrist Ergonomics' },
-      { icon: '🎛️', label: 'Rotary Knob', title: 'CNC Aluminum Volume Dial' },
-      { icon: '🪙', label: 'Brass Weight', title: '2.4kg Solid Brass Base' },
-      { icon: '📦', label: 'Carrying Case', title: 'Custom Hard EVA Case' }
+      { icon: 'âŒ¨ï¸', label: 'Split Angle', title: 'Natural Wrist Ergonomics' },
+      { icon: 'ðŸŽ›ï¸', label: 'Rotary Knob', title: 'CNC Aluminum Volume Dial' },
+      { icon: 'ðŸª™', label: 'Brass Weight', title: '2.4kg Solid Brass Base' },
+      { icon: 'ðŸ“¦', label: 'Carrying Case', title: 'Custom Hard EVA Case' }
     ],
     colors: [
       { id: 'violet', name: 'Nebula Violet', hex: '#7c3aed' },
@@ -637,10 +637,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '⚡', text: 'Tri-Mode: 2.4GHz / BT 5.1 / USB-C' },
-      { icon: '🪙', text: '2.4kg CNC Brass Weighted Case' },
-      { icon: '🎛️', text: 'Programmable Rotary Media Dial' },
-      { icon: '⚙️', text: 'VIA / QMK Full Key Remapping' }
+      { icon: 'âš¡', text: 'Tri-Mode: 2.4GHz / BT 5.1 / USB-C' },
+      { icon: 'ðŸª™', text: '2.4kg CNC Brass Weighted Case' },
+      { icon: 'ðŸŽ›ï¸', text: 'Programmable Rotary Media Dial' },
+      { icon: 'âš™ï¸', text: 'VIA / QMK Full Key Remapping' }
     ]
   }
 };
@@ -870,7 +870,7 @@ function renderActiveChips() {
 
   if (facetState.minRating > 0) {
     chips.push({
-      label: `★ ${facetState.minRating}+ Rating`,
+      label: `â˜… ${facetState.minRating}+ Rating`,
       type: 'rating',
       action: () => {
         facetState.minRating = 0;
@@ -906,7 +906,7 @@ function renderActiveChips() {
   chips.forEach(chip => {
     const chipEl = document.createElement('div');
     chipEl.className = 'filter-chip';
-    chipEl.innerHTML = `<span>${chip.label}</span><button type="button" class="chip-remove" aria-label="Remove filter ${chip.label}">✕</button>`;
+    chipEl.innerHTML = `<span>${chip.label}</span><button type="button" class="chip-remove" aria-label="Remove filter ${chip.label}">âœ•</button>`;
     chipEl.querySelector('.chip-remove').addEventListener('click', chip.action);
     container.appendChild(chipEl);
   });
@@ -1478,7 +1478,7 @@ function addQuickViewToCart() {
   const btn = document.getElementById('qvAddToCartBtn');
   if (btn) {
     const originalContent = btn.innerHTML;
-    btn.innerHTML = '<span>✓ Added to Cart!</span>';
+    btn.innerHTML = '<span>âœ“ Added to Cart!</span>';
     btn.style.backgroundColor = '#22c55e';
     setTimeout(() => {
       btn.innerHTML = originalContent;
@@ -1687,7 +1687,7 @@ function getInitials(name) {
 
 function renderStarString(rating) {
   const full = Math.min(5, Math.max(0, Math.round(rating)));
-  return '★'.repeat(full) + '☆'.repeat(5 - full);
+  return 'â˜…'.repeat(full) + 'â˜†'.repeat(5 - full);
 }
 
 function calculateAnalytics(reviewsList) {
@@ -1771,7 +1771,7 @@ function updateAnalyticsCard() {
       row.setAttribute('tabindex', '0');
       row.setAttribute('aria-label', `Filter by ${star} star reviews, currently ${cnt} reviews (${pct}%)`);
       row.innerHTML = `
-        <span class="breakdown-star-label">${star} <span class="star-icon">★</span></span>
+        <span class="breakdown-star-label">${star} <span class="star-icon">â˜…</span></span>
         <div class="breakdown-track">
           <div class="breakdown-fill" style="width: ${pct}%"></div>
         </div>
@@ -1865,7 +1865,7 @@ function renderReviewsFeed() {
       if (reviewsState.searchTerm.trim() !== '') {
         filtersDesc.push(`Keyword "${reviewsState.searchTerm}"`);
       }
-      bannerText.textContent = `Filtering by: ${filtersDesc.join(' · ')} (${list.length} results)`;
+      bannerText.textContent = `Filtering by: ${filtersDesc.join(' Â· ')} (${list.length} results)`;
       banner.hidden = false;
     } else {
       banner.hidden = true;
@@ -1905,7 +1905,7 @@ function renderReviewsFeed() {
               <div class="reviewer-meta">
                 <div class="reviewer-name-row">
                   <span class="reviewer-name">${safeAuthor}</span>
-                  ${rev.verified ? '<span class="verified-badge"><span aria-hidden="true">✓</span> Verified Buyer</span>' : ''}
+                  ${rev.verified ? '<span class="verified-badge"><span aria-hidden="true">âœ“</span> Verified Buyer</span>' : ''}
                 </div>
                 ${safeRole ? `<span class="reviewer-role">${safeRole}</span>` : ''}
               </div>
@@ -1921,7 +1921,7 @@ function renderReviewsFeed() {
           <footer class="review-card-footer">
             <span>Was this telemetry helpful to you?</span>
             <button type="button" class="helpful-btn ${rev.userVoted ? 'voted' : ''}" onclick="voteReviewHelpful('${rev.id}')" aria-label="Mark review as helpful, currently ${rev.helpfulCount}">
-              <span>👍 Helpful</span>
+              <span>ðŸ‘ Helpful</span>
               <span class="helpful-count">(${rev.helpfulCount})</span>
             </button>
           </footer>
@@ -2052,11 +2052,11 @@ function closeWriteReviewModal() {
 }
 
 const RATING_DESCRIPTIONS = {
-  1: '1 / 5 — Poor (Needs Improvement)',
-  2: '2 / 5 — Fair (Below Expectation)',
-  3: '3 / 5 — Average (Adequate)',
-  4: '4 / 5 — Very Good (Recommended)',
-  5: '5 / 5 — Exceptional (Highly Recommended)'
+  1: '1 / 5 â€” Poor (Needs Improvement)',
+  2: '2 / 5 â€” Fair (Below Expectation)',
+  3: '3 / 5 â€” Average (Adequate)',
+  4: '4 / 5 â€” Very Good (Recommended)',
+  5: '5 / 5 â€” Exceptional (Highly Recommended)'
 };
 
 function setPickerRating(val) {
@@ -2458,7 +2458,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p1: {
       id: 'p1',
       name: 'CyberDeck Pro Mechanical',
-      img: '⌨️',
+      img: 'âŒ¨ï¸',
       price: 249.00,
       rating: 4.9,
       inStock: true,
@@ -2466,7 +2466,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$249.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.9 / 5.0 (72 reviews)',
+        'User Rating': 'â˜… 4.9 / 5.0 (72 reviews)',
         'Processor / Core': 'ARM Cortex-M4F 120MHz (QMK/VIA)',
         'Battery Life': '140 Hours (RGB Off) / 45 Hours (RGB On)',
         'Connectivity': 'Tri-Mode: 2.4GHz + Bluetooth 5.3 + USB-C',
@@ -2477,7 +2477,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p2: {
       id: 'p2',
       name: 'Acoustic Pulse ANC Headset',
-      img: '🎧',
+      img: 'ðŸŽ§',
       price: 199.00,
       rating: 4.8,
       inStock: true,
@@ -2485,7 +2485,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$199.00',
         'Availability': 'Only 3 Left',
-        'User Rating': '★ 4.8 / 5.0 (46 reviews)',
+        'User Rating': 'â˜… 4.8 / 5.0 (46 reviews)',
         'Processor / Core': 'Dual-Core 32-bit DSP + ANC Neural Engine',
         'Battery Life': '60 Hours (ANC On) / 100 Hours (ANC Off)',
         'Connectivity': 'Wireless 2.4GHz + Bluetooth 5.3 + 3.5mm',
@@ -2496,7 +2496,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p3: {
       id: 'p3',
       name: 'Horizon 32" Curved OLED',
-      img: '🖥️',
+      img: 'ðŸ–¥ï¸',
       price: 899.00,
       rating: 4.9,
       inStock: true,
@@ -2504,7 +2504,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$899.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.9 / 5.0 (30 reviews)',
+        'User Rating': 'â˜… 4.9 / 5.0 (30 reviews)',
         'Processor / Core': 'Quantum QD Neo Display Engine (240Hz)',
         'Battery Life': 'AC Powered (120W PSU, 0.5W Standby)',
         'Connectivity': '2x HDMI 2.1 + 1x DP 2.1 + USB-C PD 90W',
@@ -2515,7 +2515,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p4: {
       id: 'p4',
       name: 'Nexus Neo 65% Low-Profile',
-      img: '⌨️',
+      img: 'âŒ¨ï¸',
       price: 149.00,
       rating: 4.7,
       inStock: true,
@@ -2523,7 +2523,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$149.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.7 / 5.0 (54 reviews)',
+        'User Rating': 'â˜… 4.7 / 5.0 (54 reviews)',
         'Processor / Core': 'Nordic nRF52840 Ultra-Low-Power SoC',
         'Battery Life': '120 Hours Continuous Wireless',
         'Connectivity': 'Bluetooth 5.3 + USB-C Wired',
@@ -2534,7 +2534,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p5: {
       id: 'p5',
       name: 'Vortex Reference Studio Monitors',
-      img: '🔊',
+      img: 'ðŸ”Š',
       price: 349.00,
       rating: 4.6,
       inStock: true,
@@ -2542,7 +2542,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$349.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.6 / 5.0 (28 reviews)',
+        'User Rating': 'â˜… 4.6 / 5.0 (28 reviews)',
         'Processor / Core': 'Dual Class-D Bi-Amp + Room Correction DSP',
         'Battery Life': 'AC Studio Mains (2x 90W RMS)',
         'Connectivity': 'Balanced TRS + RCA + Optical S/PDIF',
@@ -2553,7 +2553,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p6: {
       id: 'p6',
       name: 'Apex UltraWide 49" 240Hz',
-      img: '🖥️',
+      img: 'ðŸ–¥ï¸',
       price: 1199.00,
       rating: 4.9,
       inStock: false,
@@ -2561,7 +2561,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$1,199.00',
         'Availability': 'Backorder',
-        'User Rating': '★ 4.9 / 5.0 (19 reviews)',
+        'User Rating': 'â˜… 4.9 / 5.0 (19 reviews)',
         'Processor / Core': 'Dual-Engine 5120x1440 240Hz KVM Controller',
         'Battery Life': 'AC Powered (Internal 240W PSU, USB-C PD)',
         'Connectivity': 'USB-C 96W + Dual HDMI 2.1 + DP 2.1 + KVM',
@@ -2572,7 +2572,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p7: {
       id: 'p7',
       name: 'HyperStream Studio Mic & Arm',
-      img: '🎙️',
+      img: 'ðŸŽ™ï¸',
       price: 179.00,
       rating: 4.5,
       inStock: true,
@@ -2580,7 +2580,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$179.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.5 / 5.0 (39 reviews)',
+        'User Rating': 'â˜… 4.5 / 5.0 (39 reviews)',
         'Processor / Core': '24-Bit / 192kHz Broadcast ADC + FET Preamp',
         'Battery Life': 'USB-C Bus Powered (Zero Battery Required)',
         'Connectivity': 'USB-C + 3.5mm Zero-Latency Monitor Out',
@@ -2591,7 +2591,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p8: {
       id: 'p8',
       name: 'Keychronix Ergo Alice Custom',
-      img: '⌨️',
+      img: 'âŒ¨ï¸',
       price: 289.00,
       rating: 4.8,
       inStock: true,
@@ -2599,7 +2599,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$289.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.8 / 5.0 (33 reviews)',
+        'User Rating': 'â˜… 4.8 / 5.0 (33 reviews)',
         'Processor / Core': 'STM32F402 + Gasket Poron Acoustic Matrix',
         'Battery Life': '180 Hours (4,000mAh Li-Po)',
         'Connectivity': 'Tri-Mode: 2.4GHz + BT 5.3 + USB-C',
@@ -2668,7 +2668,7 @@ window.handleReviewSubmit = handleReviewSubmit;
           compareBarThumbs.innerHTML = comparisonList
             .map((id) => {
               const p = PRODUCT_SPECS[id];
-              return `<span class="compare-thumb-pill" title="${p ? p.name : id}">${p ? p.img : '📦'}</span>`;
+              return `<span class="compare-thumb-pill" title="${p ? p.name : id}">${p ? p.img : 'ðŸ“¦'}</span>`;
             })
             .join('');
         }
@@ -2937,7 +2937,7 @@ window.handleReviewSubmit = handleReviewSubmit;
 
       const variantEmail = document.createElement('span');
       variantEmail.className = 'watchlist-variant-email';
-      variantEmail.textContent = `✉️ ${item.email || ''} • Added ${item.date || 'Recently'}`;
+      variantEmail.textContent = `âœ‰ï¸ ${item.email || ''} â€¢ Added ${item.date || 'Recently'}`;
 
       left.appendChild(prodName);
       left.appendChild(variantEmail);
@@ -2954,7 +2954,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       removeBtn.className = 'watchlist-remove-btn';
       removeBtn.setAttribute('title', 'Cancel this alert');
       removeBtn.setAttribute('aria-label', `Cancel stock alert for ${item.productName || 'item'}`);
-      removeBtn.textContent = '✕';
+      removeBtn.textContent = 'âœ•';
       removeBtn.addEventListener('click', () => {
         removeAlert(idx);
       });
@@ -3016,10 +3016,10 @@ window.handleReviewSubmit = handleReviewSubmit;
     if (p) {
       if (previewName) previewName.textContent = p.name;
       if (previewPrice) {
-        previewPrice.textContent = `$${p.price.toFixed(2)} • ${p.inStock ? 'In Stock (Variants Available)' : 'Currently Backordered'}`;
+        previewPrice.textContent = `$${p.price.toFixed(2)} â€¢ ${p.inStock ? 'In Stock (Variants Available)' : 'Currently Backordered'}`;
       }
       if (previewIcon && p.thumbs && p.thumbs[0]) {
-        previewIcon.textContent = p.thumbs[0].icon || '🖥️';
+        previewIcon.textContent = p.thumbs[0].icon || 'ðŸ–¥ï¸';
       }
 
       let hasOptions = false;
@@ -3049,8 +3049,8 @@ window.handleReviewSubmit = handleReviewSubmit;
       }
     } else {
       if (previewName) previewName.textContent = 'Apex UltraWide 49" 240Hz';
-      if (previewPrice) previewPrice.textContent = '$1,199.00 • Currently Backordered';
-      if (previewIcon) previewIcon.textContent = '🖥️';
+      if (previewPrice) previewPrice.textContent = '$1,199.00 â€¢ Currently Backordered';
+      if (previewIcon) previewIcon.textContent = 'ðŸ–¥ï¸';
 
       const opt1 = document.createElement('option');
       opt1.value = 'Cosmic Black (Heavy-Duty Arm)';
@@ -3082,7 +3082,7 @@ window.handleReviewSubmit = handleReviewSubmit;
         statusText.className = 'validation-status-text';
       }
       if (errorHint) errorHint.style.display = 'none';
-      if (icon) icon.textContent = '✉️';
+      if (icon) icon.textContent = 'âœ‰ï¸';
       return false;
     }
 
@@ -3093,22 +3093,22 @@ window.handleReviewSubmit = handleReviewSubmit;
         wrap.classList.remove('is-invalid');
       }
       if (statusText) {
-        statusText.textContent = 'Valid Email Format ✓';
+        statusText.textContent = 'Valid Email Format âœ“';
         statusText.className = 'validation-status-text valid';
       }
       if (errorHint) errorHint.style.display = 'none';
-      if (icon) icon.textContent = '✅';
+      if (icon) icon.textContent = 'âœ…';
     } else {
       if (wrap) {
         wrap.classList.add('is-invalid');
         wrap.classList.remove('is-valid');
       }
       if (statusText) {
-        statusText.textContent = 'Invalid Email Format ✕';
+        statusText.textContent = 'Invalid Email Format âœ•';
         statusText.className = 'validation-status-text invalid';
       }
       if (errorHint) errorHint.style.display = 'block';
-      if (icon) icon.textContent = '⚠️';
+      if (icon) icon.textContent = 'âš ï¸';
     }
     return isValid;
   }
@@ -3207,7 +3207,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     renderWatchlist();
     updateBadge();
 
-    const toastMsg = `🔔 Restock alert subscribed for ${prodName} (${variant})! Dispatch set to ${email}.`;
+    const toastMsg = `ðŸ”” Restock alert subscribed for ${prodName} (${variant})! Dispatch set to ${email}.`;
     if (typeof showToast === 'function') {
       showToast(toastMsg);
     } else {
@@ -3267,3 +3267,230 @@ window.handleReviewSubmit = handleReviewSubmit;
   });
 })();
 /* ===== END Issue #401: Product Stock Inventory Alert Notification Modal ===== */
+
+
+// ===== Issue #338: Recently Viewed Items Carousel with localStorage Sync =====
+(function initRecentlyViewedCarousel() {
+  if (typeof document === 'undefined') return;
+
+  const STORAGE_KEY = 'cf_ecommerce_recently_viewed';
+  const MAX_ITEMS = 6;
+  const DEFAULT_ITEMS = ['p1', 'p2', 'p3', 'p6'];
+
+  function getHistory() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+    return [...DEFAULT_ITEMS];
+  }
+
+  function saveHistory(list) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch {
+      // Storage unavailable or disabled
+    }
+  }
+
+  function recordView(productId) {
+    if (!productId || typeof PRODUCT_CATALOG === 'undefined' || !PRODUCT_CATALOG[productId]) return;
+
+    let history = getHistory();
+    history = history.filter((id) => id !== productId);
+    history.unshift(productId);
+    if (history.length > MAX_ITEMS) {
+      history = history.slice(0, MAX_ITEMS);
+    }
+    saveHistory(history);
+    render();
+  }
+
+  function clearHistory() {
+    saveHistory([]);
+    render();
+    if (typeof showToast === 'function') {
+      showToast('Recently viewed browsing history cleared.');
+    }
+  }
+
+  function render() {
+    const carousel = document.getElementById('recentlyViewedCarousel');
+    if (!carousel) return;
+
+    carousel.replaceChildren();
+
+    const history = getHistory();
+    const validProducts = history
+      .map((id) => (typeof PRODUCT_CATALOG !== 'undefined' ? PRODUCT_CATALOG[id] : null))
+      .filter(Boolean);
+
+    if (validProducts.length === 0) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'rv-empty-state';
+      emptyDiv.textContent = 'No recently viewed items. Browse our developer workstation gear above!';
+      carousel.appendChild(emptyDiv);
+      return;
+    }
+
+    validProducts.forEach((p) => {
+      const card = document.createElement('article');
+      card.className = 'rv-card';
+      card.setAttribute('data-product-id', p.id);
+
+      // Thumbnail
+      const thumbWrap = document.createElement('div');
+      thumbWrap.className = 'rv-thumb-wrap';
+      const icon = (p.thumbs && p.thumbs[0] && p.thumbs[0].icon) ? p.thumbs[0].icon : '📦';
+      thumbWrap.textContent = icon;
+      thumbWrap.addEventListener('click', () => {
+        if (typeof openQuickView === 'function') {
+          openQuickView(p.id);
+        }
+      });
+
+      if (p.badge) {
+        const badge = document.createElement('span');
+        badge.className = 'rv-badge-pill';
+        badge.textContent = p.badge;
+        thumbWrap.appendChild(badge);
+      }
+
+      // Info
+      const info = document.createElement('div');
+      info.className = 'rv-card-info';
+
+      const cat = document.createElement('span');
+      cat.className = 'rv-category';
+      cat.textContent = p.categoryLabel || p.category || 'GEAR';
+
+      const name = document.createElement('h4');
+      name.className = 'rv-name';
+      name.textContent = p.name;
+      name.title = p.name;
+      name.addEventListener('click', () => {
+        if (typeof openQuickView === 'function') {
+          openQuickView(p.id);
+        }
+      });
+
+      const priceRow = document.createElement('div');
+      priceRow.className = 'rv-price-row';
+
+      const price = document.createElement('span');
+      price.className = 'rv-price';
+      price.textContent = '$' + p.price.toFixed(2);
+
+      const rating = document.createElement('span');
+      rating.className = 'rv-rating';
+      rating.textContent = '★ ' + (p.rating || 4.8);
+
+      priceRow.appendChild(price);
+      priceRow.appendChild(rating);
+
+      info.appendChild(cat);
+      info.appendChild(name);
+      info.appendChild(priceRow);
+
+      // Actions row
+      const actions = document.createElement('div');
+      actions.className = 'rv-actions-row';
+
+      const btnInspect = document.createElement('button');
+      btnInspect.type = 'button';
+      btnInspect.className = 'btn-rv-inspect';
+      btnInspect.textContent = 'Quick View';
+      btnInspect.addEventListener('click', () => {
+        if (typeof openQuickView === 'function') {
+          openQuickView(p.id);
+        }
+      });
+
+      const btnAdd = document.createElement('button');
+      btnAdd.type = 'button';
+      btnAdd.className = 'btn-rv-add';
+      btnAdd.textContent = '+ Add to Cart';
+      btnAdd.addEventListener('click', () => {
+        if (typeof addToCart === 'function') {
+          const itemImg = (p.thumbs && p.thumbs[0] && p.thumbs[0].icon) ? p.thumbs[0].icon : '📦';
+          addToCart(p.id, p.name, p.price, itemImg);
+        }
+      });
+
+      actions.appendChild(btnInspect);
+      actions.appendChild(btnAdd);
+
+      card.appendChild(thumbWrap);
+      card.appendChild(info);
+      card.appendChild(actions);
+
+      carousel.appendChild(card);
+    });
+  }
+
+  function setup() {
+    const root = document.getElementById('recentlyViewedSection');
+    if (!root) return;
+
+    const btnLeft = document.getElementById('btnRvScrollLeft');
+    const btnRight = document.getElementById('btnRvScrollRight');
+    const btnClear = document.getElementById('btnRvClearHistory');
+    const carousel = document.getElementById('recentlyViewedCarousel');
+
+    if (btnLeft && carousel) {
+      btnLeft.addEventListener('click', () => {
+        carousel.scrollBy({ left: -260, behavior: 'smooth' });
+      });
+    }
+
+    if (btnRight && carousel) {
+      btnRight.addEventListener('click', () => {
+        carousel.scrollBy({ left: 260, behavior: 'smooth' });
+      });
+    }
+
+    if (btnClear) {
+      btnClear.addEventListener('click', clearHistory);
+    }
+
+    // Wrap window.openQuickView to record view
+    if (typeof window.openQuickView === 'function') {
+      const origQuickView = window.openQuickView;
+      window.openQuickView = function(productId) {
+        recordView(productId);
+        return origQuickView.apply(this, arguments);
+      };
+    }
+
+    // Attach click listeners to catalog cards to capture views
+    const productsGrid = document.getElementById('productsGrid');
+    if (productsGrid) {
+      productsGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-product-id], .product-card');
+        if (card) {
+          const pid = card.getAttribute('data-product-id') || card.getAttribute('data-id');
+          if (pid) recordView(pid);
+        }
+      });
+    }
+
+    // Expose helper globally
+    window.recordRecentlyViewedProduct = recordView;
+
+    // Initial render
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
