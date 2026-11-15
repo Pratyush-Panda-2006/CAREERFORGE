@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
   console.log('Pulse Wave Festival Hub loaded');
   initFestivalCountdown();
   initFestivalWeather();
@@ -102,15 +102,15 @@ function initStageFilters() {
 const ITINERARY_STORAGE_KEY = 'pulsewave_itinerary_v1';
 
 const ARTIST_SCHEDULE_DATA = {
-  'aura-matrix': { id: 'aura-matrix', name: 'AURA MATRIX', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-24', dayLabel: 'Day 01 · Oct 24', start: '19:30', end: '21:20', genre: 'Electro House & Laser Show' },
-  'neon-apex': { id: 'neon-apex', name: 'NEON APEX', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-24', dayLabel: 'Day 01 · Oct 24', start: '21:00', end: '22:30', genre: 'Cyberpunk Synthwave' },
-  'sub-zero': { id: 'sub-zero', name: 'SUB ZERO BASS', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-24', dayLabel: 'Day 01 · Oct 24', start: '23:00', end: '24:30', genre: 'Sub-Bass Riddim & Dubstep' },
-  'neural-collider': { id: 'neural-collider', name: 'NEURAL COLLIDER', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-25', dayLabel: 'Day 02 · Oct 25', start: '20:45', end: '22:15', genre: 'Neurofunk Drum & Bass' },
-  'synth-pulse': { id: 'synth-pulse', name: 'SYNTH PULSE', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-25', dayLabel: 'Day 02 · Oct 25', start: '21:15', end: '22:45', genre: 'Analog Modular & Chiptune' },
-  'cyber-kinetic': { id: 'cyber-kinetic', name: 'CYBER KINETIC', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-25', dayLabel: 'Day 02 · Oct 25', start: '22:30', end: '24:00', genre: 'Melodic Techno Live' },
-  'solar-flare': { id: 'solar-flare', name: 'SOLAR FLARE', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-26', dayLabel: 'Day 03 · Oct 26', start: '20:00', end: '21:45', genre: 'Progressive Trance' },
-  'quantum-drop': { id: 'quantum-drop', name: 'QUANTUM DROP', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-26', dayLabel: 'Day 03 · Oct 26', start: '21:30', end: '23:00', genre: 'Future Bass & Cyber Trap' },
-  'hex-void': { id: 'hex-void', name: 'HEX VOID', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-26', dayLabel: 'Day 03 · Oct 26', start: '22:45', end: '24:15', genre: 'Industrial Darkwave EBM' }
+  'aura-matrix': { id: 'aura-matrix', name: 'AURA MATRIX', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-24', dayLabel: 'Day 01 Â· Oct 24', start: '19:30', end: '21:20', genre: 'Electro House & Laser Show' },
+  'neon-apex': { id: 'neon-apex', name: 'NEON APEX', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-24', dayLabel: 'Day 01 Â· Oct 24', start: '21:00', end: '22:30', genre: 'Cyberpunk Synthwave' },
+  'sub-zero': { id: 'sub-zero', name: 'SUB ZERO BASS', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-24', dayLabel: 'Day 01 Â· Oct 24', start: '23:00', end: '24:30', genre: 'Sub-Bass Riddim & Dubstep' },
+  'neural-collider': { id: 'neural-collider', name: 'NEURAL COLLIDER', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-25', dayLabel: 'Day 02 Â· Oct 25', start: '20:45', end: '22:15', genre: 'Neurofunk Drum & Bass' },
+  'synth-pulse': { id: 'synth-pulse', name: 'SYNTH PULSE', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-25', dayLabel: 'Day 02 Â· Oct 25', start: '21:15', end: '22:45', genre: 'Analog Modular & Chiptune' },
+  'cyber-kinetic': { id: 'cyber-kinetic', name: 'CYBER KINETIC', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-25', dayLabel: 'Day 02 Â· Oct 25', start: '22:30', end: '24:00', genre: 'Melodic Techno Live' },
+  'solar-flare': { id: 'solar-flare', name: 'SOLAR FLARE', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-26', dayLabel: 'Day 03 Â· Oct 26', start: '20:00', end: '21:45', genre: 'Progressive Trance' },
+  'quantum-drop': { id: 'quantum-drop', name: 'QUANTUM DROP', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-26', dayLabel: 'Day 03 Â· Oct 26', start: '21:30', end: '23:00', genre: 'Future Bass & Cyber Trap' },
+  'hex-void': { id: 'hex-void', name: 'HEX VOID', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-26', dayLabel: 'Day 03 Â· Oct 26', start: '22:45', end: '24:15', genre: 'Industrial Darkwave EBM' }
 };
 
 function timeStrToMins(hhmm) {
@@ -182,9 +182,9 @@ function generateItineraryICS(items) {
       `DTSTAMP:${dtstamp}`,
       `DTSTART;TZID=Asia/Tokyo:${toIcsTimestamp(item.day, item.start)}`,
       `DTEND;TZID=Asia/Tokyo:${toIcsTimestamp(item.day, item.end)}`,
-      `SUMMARY:${item.name} — ${item.stageLabel}`,
+      `SUMMARY:${item.name} â€” ${item.stageLabel}`,
       `LOCATION:${item.stageLabel}, Tokyo Cyber Dome`,
-      `DESCRIPTION:${item.genre} (${formatDisplayTime(item.start)}–${formatDisplayTime(item.end)})`,
+      `DESCRIPTION:${item.genre} (${formatDisplayTime(item.start)}â€“${formatDisplayTime(item.end)})`,
       'END:VEVENT'
     );
   });
@@ -243,13 +243,13 @@ function initScheduleTabs() {
         heartBtn.classList.toggle('is-favorite', isSaved);
         heartBtn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
         const sp = heartBtn.querySelector('span');
-        if (sp) sp.textContent = isSaved ? '♥' : '♡';
+        if (sp) sp.textContent = isSaved ? 'â™¥' : 'â™¡';
       }
       const starBtn = card.querySelector('.itinerary-star-btn');
       if (starBtn) {
         starBtn.classList.toggle('is-bookmarked', isSaved);
         starBtn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
-        starBtn.textContent = isSaved ? '★' : '☆';
+        starBtn.textContent = isSaved ? 'â˜…' : 'â˜†';
       }
     });
   }
@@ -270,7 +270,7 @@ function initScheduleTabs() {
 
     if (itinConflictBadge) {
       itinConflictBadge.hidden = conflicts.length === 0;
-      itinConflictBadge.textContent = `${conflicts.length} ⚠`;
+      itinConflictBadge.textContent = `${conflicts.length} âš `;
     }
 
     if (!container) return;
@@ -283,7 +283,7 @@ function initScheduleTabs() {
         conflictList.innerHTML = conflicts
           .map(
             (c) =>
-              `<li><strong>${c.dayLabel}:</strong> ${c.first.name} (${c.first.stageLabel}, ${formatDisplayTime(c.first.start)}–${formatDisplayTime(c.first.end)}) overlaps <strong>${c.second.name}</strong> (${c.second.stageLabel}, ${formatDisplayTime(c.second.start)}–${formatDisplayTime(c.second.end)}) by <strong>${c.overlapMinutes} min</strong></li>`
+              `<li><strong>${c.dayLabel}:</strong> ${c.first.name} (${c.first.stageLabel}, ${formatDisplayTime(c.first.start)}â€“${formatDisplayTime(c.first.end)}) overlaps <strong>${c.second.name}</strong> (${c.second.stageLabel}, ${formatDisplayTime(c.second.start)}â€“${formatDisplayTime(c.second.end)}) by <strong>${c.overlapMinutes} min</strong></li>`
           )
           .join('');
       } else {
@@ -298,7 +298,7 @@ function initScheduleTabs() {
       container.innerHTML = `
         <div class="itinerary-empty-box">
           <h4>No Sets Bookmarked ${activeDayFilter === 'all' ? 'Yet' : 'For This Day'}</h4>
-          <p>Tap the ★ bookmark icon on any artist card or click "⚡ Load Sample Lineup" above to preview chronological stage tracking &amp; conflict detection.</p>
+          <p>Tap the â˜… bookmark icon on any artist card or click "âš¡ Load Sample Lineup" above to preview chronological stage tracking &amp; conflict detection.</p>
         </div>
       `;
       return;
@@ -324,10 +324,10 @@ function initScheduleTabs() {
                 <div class="timeline-bar ${item.stage} ${isConf ? 'has-conflict' : ''}" style="left: ${leftPct.toFixed(1)}%; width: ${widthPct.toFixed(1)}%;">
                   <div class="timeline-bar-info">
                     <strong>${item.name}</strong>
-                    <span>${item.stageLabel} · ${formatDisplayTime(item.start)}–${formatDisplayTime(item.end)}</span>
+                    <span>${item.stageLabel} Â· ${formatDisplayTime(item.start)}â€“${formatDisplayTime(item.end)}</span>
                   </div>
                   <div class="timeline-bar-right">
-                    ${isConf ? '<span class="timeline-conflict-chip">⚠ CONFLICT</span>' : ''}
+                    ${isConf ? '<span class="timeline-conflict-chip">âš  CONFLICT</span>' : ''}
                     <button type="button" class="timeline-remove-btn" data-remove-artist="${item.id}" aria-label="Remove ${item.name} from itinerary">&times;</button>
                   </div>
                 </div>
@@ -339,8 +339,8 @@ function initScheduleTabs() {
         return `
           <div class="itinerary-day-group">
             <div class="itinerary-day-title">
-              <span>${daySets[0].dayLabel} · ${daySets.length} Set${daySets.length === 1 ? '' : 's'}</span>
-              <span>${dayConflicts > 0 ? '⚠️ Overlap Alert' : '✓ Clear'}</span>
+              <span>${daySets[0].dayLabel} Â· ${daySets.length} Set${daySets.length === 1 ? '' : 's'}</span>
+              <span>${dayConflicts > 0 ? 'âš ï¸ Overlap Alert' : 'âœ“ Clear'}</span>
             </div>
             <div class="timeline-ruler" aria-hidden="true">
               <span>18:00</span><span>19:00</span><span>20:00</span><span>21:00</span><span>22:00</span><span>23:00</span><span>00:00+</span>
@@ -647,19 +647,19 @@ function initFestivalWeather() {
 
   const forecast = [
     {
-      icon: '☀️',
+      icon: 'â˜€ï¸',
       condition: 'Sunny',
       description: 'Clear skies expected throughout the festival day. Perfect conditions for outdoor performances.',
       sunset: '17:00 JST'
     },
     {
-      icon: '🌧️',
+      icon: 'ðŸŒ§ï¸',
       condition: 'Light Rain',
       description: 'Occasional light rainfall expected. Festival attendees should consider carrying rain protection.',
       sunset: '16:59 JST'
     },
     {
-      icon: '🌙',
+      icon: 'ðŸŒ™',
       condition: 'Clear Night',
       description: 'A mostly clear evening with comfortable temperatures for the final festival performances.',
       sunset: '16:58 JST'
@@ -769,7 +769,7 @@ function initFestivalWeather() {
   var openId = null;
   var openTrigger = null;
 
-  // Headliners come from the lineup cards: "Main Stage • Oct 24 • 21:00".
+  // Headliners come from the lineup cards: "Main Stage â€¢ Oct 24 â€¢ 21:00".
   function headlinersFor(stageId) {
     var out = [];
     var cards = document.querySelectorAll('.artist-card[data-stage="' + stageId + '"]');
@@ -778,7 +778,7 @@ function initFestivalWeather() {
       var d = card.querySelector('.artist-details');
       var g = card.querySelector('.artist-genre');
       if (!h || !d) return;
-      var parts = d.textContent.split('•').map(function (p) { return p.trim(); });
+      var parts = d.textContent.split('â€¢').map(function (p) { return p.trim(); });
       if (parts.length < 3) return;
       out.push({ day: parts[1], time: parts[2], artist: h.textContent.trim(), genre: g ? g.textContent.trim() : '', headliner: true });
     });
@@ -1529,10 +1529,10 @@ function initMeetupLocator() {
   const CENTER_LNG = -118.4981;
 
   const TYPE_META = {
-    camp: { label: 'Camp Tent', emoji: '⛺', color: '#a855f7' },
-    hydration: { label: 'Hydration Station', emoji: '💧', color: '#06b6d4' },
-    totem: { label: 'Meeting Totem', emoji: '🚩', color: '#ec4899' },
-    food: { label: 'Food Rendezvous', emoji: '🍔', color: '#f59e0b' }
+    camp: { label: 'Camp Tent', emoji: 'â›º', color: '#a855f7' },
+    hydration: { label: 'Hydration Station', emoji: 'ðŸ’§', color: '#06b6d4' },
+    totem: { label: 'Meeting Totem', emoji: 'ðŸš©', color: '#ec4899' },
+    food: { label: 'Food Rendezvous', emoji: 'ðŸ”', color: '#f59e0b' }
   };
 
   const modeStagesBtn = document.getElementById('btn-mode-stages');
@@ -1581,7 +1581,7 @@ function initMeetupLocator() {
       if (Array.isArray(parsed) && parsed.length > 0) {
         waypoints = parsed;
         saveWaypoints();
-        showToast('Shared squad meetup waypoints loaded! 📍');
+        showToast('Shared squad meetup waypoints loaded! ðŸ“');
       }
     } catch {
       // invalid hash, ignore
@@ -1628,7 +1628,7 @@ function initMeetupLocator() {
       distMeters,
       deg,
       dirName,
-      coordsStr: `${lat}° N, ${lng}° W`
+      coordsStr: `${lat}Â° N, ${lng}Â° W`
     };
   }
 
@@ -1671,7 +1671,7 @@ function initMeetupLocator() {
         <strong class="mc-name">${escapeHtml(wp.name)}</strong>
         <div class="mc-meta">
           <span>${telem.coordsStr}</span>
-          <span>🧭 ${telem.deg}° ${telem.dirName}</span>
+          <span>ðŸ§­ ${telem.deg}Â° ${telem.dirName}</span>
         </div>
       `;
       cardEl.addEventListener('click', () => {
@@ -1697,7 +1697,7 @@ function initMeetupLocator() {
     if (popTitle) popTitle.textContent = wp.name;
     if (popCoords) popCoords.textContent = telem.coordsStr;
     if (popDistance) popDistance.textContent = `${telem.distMeters} meters from Info Hub`;
-    if (popBearing) popBearing.textContent = `${String(telem.deg).padStart(3, '0')}° ${telem.dirName}`;
+    if (popBearing) popBearing.textContent = `${String(telem.deg).padStart(3, '0')}Â° ${telem.dirName}`;
     if (popNeedle) popNeedle.style.transform = `rotate(${telem.deg}deg)`;
 
     if (popover) popover.hidden = false;
@@ -1719,7 +1719,7 @@ function initMeetupLocator() {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareUrl);
       }
-      showToast('Waypoint share link copied to clipboard! 📋');
+      showToast('Waypoint share link copied to clipboard! ðŸ“‹');
     });
   }
 
@@ -1792,7 +1792,7 @@ function initMeetupLocator() {
     saveWaypoints();
     renderWaypoints();
     openPinDetails(newPin);
-    showToast(`Dropped ${meta.label} pin! 📍`);
+    showToast(`Dropped ${meta.label} pin! ðŸ“`);
   });
 
   // Load Sample Squad Pins
@@ -1821,7 +1821,7 @@ function initMeetupLocator() {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareUrl);
       }
-      showToast('Full squad map link copied to clipboard! 🔗');
+      showToast('Full squad map link copied to clipboard! ðŸ”—');
     });
   }
 
@@ -1840,3 +1840,369 @@ function initMeetupLocator() {
 }
 
 
+
+
+// ===== Issue #342: Soundstage Crowd Density Meter & Real-Time Heat Alerts =====
+(function initCrowdDensityMeter() {
+  if (typeof document === 'undefined') return;
+
+  function setup() {
+    const root = document.getElementById('stage-crowd-density-meter');
+    if (!root) return;
+
+    const stages = {
+      cyber: {
+        id: 'cyber',
+        name: 'Main Cyber Stage',
+        maxCap: 12000,
+        pct: 92,
+        baseDb: 104,
+        altTarget: 'oasis',
+        altName: 'Neon Oasis'
+      },
+      oasis: {
+        id: 'oasis',
+        name: 'Neon Oasis',
+        maxCap: 7500,
+        pct: 45,
+        baseDb: 91,
+        altTarget: 'vault',
+        altName: 'Underground Vault'
+      },
+      vault: {
+        id: 'vault',
+        name: 'Underground Vault',
+        maxCap: 4500,
+        pct: 76,
+        baseDb: 99,
+        altTarget: 'oasis',
+        altName: 'Neon Oasis'
+      }
+    };
+
+    let simActive = true;
+    let simInterval = null;
+
+    // Elements
+    const btnToggleSim = document.getElementById('btnToggleSim');
+    const simToggleText = document.getElementById('simToggleText');
+    const btnSimSurge = document.getElementById('btnSimSurge');
+    const btnNormalize = document.getElementById('btnNormalizeFlow');
+
+    const totalVenueLoadEl = document.getElementById('totalVenueLoad');
+    const totalHeadcountEl = document.getElementById('totalHeadcount');
+    const activeSurgeCountEl = document.getElementById('activeSurgeCount');
+    const advisoryTimestampEl = document.getElementById('advisoryTimestamp');
+    const advisoryLogList = document.getElementById('advisoryLogList');
+
+    function formatTime(d) {
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return '[' + hh + ':' + mm + ']';
+    }
+
+    function addLogEntry(msg, type) {
+      if (!advisoryLogList) return;
+      const li = document.createElement('li');
+      li.className = 'log-item' + (type === 'surge' ? ' surge-item' : type === 'ok' ? ' ok-item' : '');
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'log-time';
+      timeSpan.textContent = formatTime(new Date());
+
+      const msgSpan = document.createElement('span');
+      msgSpan.className = 'log-msg';
+      msgSpan.textContent = msg;
+
+      li.appendChild(timeSpan);
+      li.appendChild(msgSpan);
+
+      advisoryLogList.insertBefore(li, advisoryLogList.firstChild);
+      while (advisoryLogList.children.length > 5) {
+        advisoryLogList.removeChild(advisoryLogList.lastChild);
+      }
+
+      if (advisoryTimestampEl) {
+        advisoryTimestampEl.textContent = 'Updated just now';
+      }
+    }
+
+    function updateStageUI(st) {
+      const card = document.getElementById('card-stage-' + st.id);
+      const badge = document.getElementById('badge-' + st.id);
+      const pctEl = document.getElementById('pct-' + st.id);
+      const bar = document.getElementById('bar-' + st.id);
+      const headcountEl = document.getElementById('headcount-' + st.id);
+      const dbEl = document.getElementById('db-' + st.id);
+      const safetyEl = document.getElementById('safety-' + st.id);
+      const slider = document.getElementById('slider-' + st.id);
+      const recBox = document.getElementById('rec-' + st.id);
+
+      const headcount = Math.round((st.pct / 100) * st.maxCap);
+      const liveDb = Math.round(st.baseDb + ((st.pct - 50) * 0.12));
+
+      if (pctEl) pctEl.textContent = st.pct + '%';
+      if (bar) {
+        bar.style.width = st.pct + '%';
+        bar.className = 'density-bar-fill';
+      }
+      if (headcountEl) headcountEl.textContent = headcount.toLocaleString('en-US') + ' / ' + st.maxCap.toLocaleString('en-US');
+      if (dbEl) dbEl.textContent = liveDb + ' dB';
+      if (slider && parseInt(slider.value, 10) !== st.pct) {
+        slider.value = String(st.pct);
+      }
+
+      if (card) card.classList.remove('surge-active');
+      if (badge) badge.className = 'density-status-tag';
+
+      // Categorize flow states
+      if (st.pct >= 90) {
+        if (card) card.classList.add('surge-active');
+        if (badge) {
+          badge.classList.add('status-surge');
+          badge.textContent = '⚠️ SURGE ALERT';
+        }
+        if (bar) bar.classList.add('fill-surge');
+        if (safetyEl) {
+          safetyEl.className = 'stat-val red-text';
+          safetyEl.textContent = 'Restricted';
+        }
+
+        // Alternate stage recommendation
+        if (recBox) {
+          recBox.className = 'stage-recommendation-box alert-box';
+          recBox.replaceChildren();
+
+          const icon = document.createElement('div');
+          icon.className = 'rec-icon';
+          icon.textContent = '⚠️';
+
+          const content = document.createElement('div');
+          content.className = 'rec-content';
+
+          const strong = document.createElement('strong');
+          strong.textContent = 'Crowd Diversion Alert: ';
+
+          const spanMsg = document.createElement('span');
+          spanMsg.textContent = 'Critical bottlenecks detected! Redirect toward ';
+
+          const divertBtn = document.createElement('button');
+          divertBtn.type = 'button';
+          divertBtn.className = 'btn-rec-divert';
+          divertBtn.setAttribute('data-target', st.altTarget);
+          divertBtn.textContent = st.altName + ' (' + stages[st.altTarget].pct + '% load • 3 min walk)';
+          divertBtn.addEventListener('click', () => {
+            const targetCard = document.getElementById('card-stage-' + st.altTarget);
+            if (targetCard) targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+
+          content.appendChild(strong);
+          content.appendChild(spanMsg);
+          content.appendChild(divertBtn);
+
+          recBox.appendChild(icon);
+          recBox.appendChild(content);
+        }
+      } else if (st.pct >= 70) {
+        if (badge) {
+          badge.classList.add('status-busy');
+          badge.textContent = 'BUSY';
+        }
+        if (bar) bar.classList.add('fill-busy');
+        if (safetyEl) {
+          safetyEl.className = 'stat-val amber-text';
+          safetyEl.textContent = 'Moderate';
+        }
+
+        if (recBox) {
+          recBox.className = 'stage-recommendation-box warn-box';
+          recBox.replaceChildren();
+
+          const icon = document.createElement('div');
+          icon.className = 'rec-icon';
+          icon.textContent = '⚡';
+
+          const content = document.createElement('div');
+          content.className = 'rec-content';
+
+          const strong = document.createElement('strong');
+          strong.textContent = 'Moderate Flow: ';
+
+          const spanMsg = document.createElement('span');
+          spanMsg.textContent = 'Gate queues ~4 mins. Side aisles unobstructed.';
+
+          content.appendChild(strong);
+          content.appendChild(spanMsg);
+          recBox.appendChild(icon);
+          recBox.appendChild(content);
+        }
+      } else {
+        if (badge) {
+          badge.classList.add('status-comfortable');
+          badge.textContent = 'COMFORTABLE';
+        }
+        if (bar) bar.classList.add('fill-comfortable');
+        if (safetyEl) {
+          safetyEl.className = 'stat-val green-text';
+          safetyEl.textContent = 'Optimal';
+        }
+
+        if (recBox) {
+          recBox.className = 'stage-recommendation-box clear-box';
+          recBox.replaceChildren();
+
+          const icon = document.createElement('div');
+          icon.className = 'rec-icon';
+          icon.textContent = '✨';
+
+          const content = document.createElement('div');
+          content.className = 'rec-content';
+
+          const strong = document.createElement('strong');
+          strong.textContent = 'Optimal Zone: ';
+
+          const spanMsg = document.createElement('span');
+          spanMsg.textContent = 'Excellent acoustic fidelity and free bar access. Sanctuary zone.';
+
+          content.appendChild(strong);
+          content.appendChild(spanMsg);
+          recBox.appendChild(icon);
+          recBox.appendChild(content);
+        }
+      }
+    }
+
+    function updateVenueTotals() {
+      let totalOccupants = 0;
+      let totalCapacity = 0;
+      let surgeCount = 0;
+
+      Object.values(stages).forEach((st) => {
+        const occ = Math.round((st.pct / 100) * st.maxCap);
+        totalOccupants += occ;
+        totalCapacity += st.maxCap;
+        if (st.pct >= 90) surgeCount++;
+        updateStageUI(st);
+      });
+
+      const overallPct = Math.round((totalOccupants / totalCapacity) * 100);
+
+      if (totalVenueLoadEl) totalVenueLoadEl.textContent = overallPct + '%';
+      if (totalHeadcountEl) {
+        totalHeadcountEl.textContent = totalOccupants.toLocaleString('en-US') + ' / ' + totalCapacity.toLocaleString('en-US');
+      }
+
+      if (activeSurgeCountEl) {
+        if (surgeCount > 0) {
+          activeSurgeCountEl.textContent = surgeCount + ' Stage' + (surgeCount > 1 ? 's' : '') + ' at Peak';
+          activeSurgeCountEl.className = 'tel-val alert-val';
+        } else {
+          activeSurgeCountEl.textContent = 'None • All Flow Clear';
+          activeSurgeCountEl.className = 'tel-val green-val';
+        }
+      }
+    }
+
+    // Step simulation tick
+    function simTick() {
+      if (!simActive) return;
+
+      Object.values(stages).forEach((st) => {
+        const delta = Math.floor(Math.random() * 5) - 2; // -2 to +2
+        st.pct = Math.max(15, Math.min(98, st.pct + delta));
+      });
+
+      updateVenueTotals();
+    }
+
+    function startSim() {
+      if (simInterval) clearInterval(simInterval);
+      simInterval = setInterval(simTick, 3500);
+      simActive = true;
+      if (btnToggleSim) {
+        btnToggleSim.classList.add('active');
+        btnToggleSim.setAttribute('aria-pressed', 'true');
+      }
+      if (simToggleText) simToggleText.textContent = 'Live Pulse: ON';
+    }
+
+    function pauseSim() {
+      if (simInterval) {
+        clearInterval(simInterval);
+        simInterval = null;
+      }
+      simActive = false;
+      if (btnToggleSim) {
+        btnToggleSim.classList.remove('active');
+        btnToggleSim.setAttribute('aria-pressed', 'false');
+      }
+      if (simToggleText) simToggleText.textContent = 'Live Pulse: PAUSED';
+    }
+
+    // Event listeners
+    if (btnToggleSim) {
+      btnToggleSim.addEventListener('click', () => {
+        if (simActive) {
+          pauseSim();
+          addLogEntry('Sensor pulse stream paused by operator.', 'info');
+        } else {
+          startSim();
+          addLogEntry('Sensor pulse stream resumed (100Hz IoT mesh).', 'ok');
+        }
+      });
+    }
+
+    if (btnSimSurge) {
+      btnSimSurge.addEventListener('click', () => {
+        pauseSim();
+        stages.cyber.pct = 97;
+        stages.vault.pct = 88;
+        stages.oasis.pct = 40;
+        updateVenueTotals();
+        addLogEntry('🚨 PEAK SURGE RUSH SIMULATED: Cyber Stage at 97% capacity! Diversion active.', 'surge');
+      });
+    }
+
+    if (btnNormalize) {
+      btnNormalize.addEventListener('click', () => {
+        pauseSim();
+        stages.cyber.pct = 54;
+        stages.vault.pct = 58;
+        stages.oasis.pct = 52;
+        updateVenueTotals();
+        addLogEntry('✅ Venue flow normalized across all soundstages.', 'ok');
+      });
+    }
+
+    // Stage Range Sliders
+    Object.keys(stages).forEach((stageId) => {
+      const slider = document.getElementById('slider-' + stageId);
+      if (slider) {
+        slider.addEventListener('input', (e) => {
+          pauseSim();
+          stages[stageId].pct = parseInt(e.target.value, 10) || 50;
+          updateVenueTotals();
+        });
+      }
+    });
+
+    // Wire existing detour buttons
+    root.querySelectorAll('.btn-rec-divert').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const targetCard = document.getElementById('card-stage-' + targetId);
+        if (targetCard) targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+
+    // Initial render & start timer
+    updateVenueTotals();
+    startSim();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
