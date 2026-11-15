@@ -41,6 +41,7 @@
         <div class="section-title">ADVANCED & SDks</div>
         <a href="#sdk-quickstart" class="nav-link">Client SDKs</a>
         <a href="#error-codes" class="nav-link">Error Handling</a>
+        <a href="#webhook-simulator" class="nav-link">Webhook Simulator</a>
       </nav>
 
       <div class="sidebar-footer">
@@ -1009,6 +1010,104 @@ async with AsyncPrismaClient(api_key="prisma_live_...") as client:
   "retry_after_seconds": 3
 }</code></pre>
       </section>
+
+      <!-- ===== START Issue #336: Interactive API Webhook Simulator & Signature Verification ===== -->
+      <section id="webhook-simulator" class="doc-section webhook-sim-section" aria-labelledby="webhookSimTitle">
+        <div class="meta-row">
+          <span class="badge">DEVELOPER TOOLS &bull; ISSUE #336</span>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3);">HMAC-SHA256 SIGNED</span>
+        </div>
+
+        <h2 id="webhookSimTitle">Interactive API Webhook Simulator &amp; Signature Verification</h2>
+        <p class="lead">
+          Test and debug outbound webhook deliveries in a secure playground. Select event triggers (e.g. <code>user.created</code>, <code>invoice.paid</code>, <code>payment.failed</code>), view simulated cryptographic HMAC-SHA256 signature headers, inspect JSON payloads, and test live mock delivery dispatches with millisecond latency telemetry.
+        </p>
+
+        <!-- Webhook Simulator Container -->
+        <div class="webhook-sim-card">
+          <!-- Configuration Bar -->
+          <div class="sim-config-grid">
+            <div class="sim-field-group">
+              <label for="webhookEventSelect">Webhook Event Trigger <span class="req">*</span></label>
+              <select id="webhookEventSelect" class="sim-select" aria-label="Select webhook event trigger">
+                <option value="user.created" selected>user.created — New user account registered</option>
+                <option value="invoice.paid">invoice.paid — Billing invoice payment settled</option>
+                <option value="payment.failed">payment.failed — Card payment charge declined</option>
+                <option value="deployment.succeeded">deployment.succeeded — Production pipeline release active</option>
+                <option value="refund.processed">refund.processed — Credit refund issued to merchant</option>
+              </select>
+            </div>
+
+            <div class="sim-field-group">
+              <label for="webhookEndpointInput">Target Destination Endpoint URL</label>
+              <input type="url" id="webhookEndpointInput" class="sim-input" value="https://api.merchant.io/v1/webhooks/listener" placeholder="https://your-domain.com/webhooks" aria-label="Webhook destination URL">
+            </div>
+
+            <div class="sim-field-group">
+              <div class="secret-label-row">
+                <label for="webhookSecretInput">Signing Secret (HMAC-SHA256)</label>
+                <button type="button" class="btn-text-regen" id="btnRegenSecret" title="Regenerate random signing secret">↺ Randomize</button>
+              </div>
+              <input type="text" id="webhookSecretInput" class="sim-input font-mono" value="whsec_8f9c2a4e1b7d5093e6c0b38a71d4f29e" aria-label="Webhook signing secret">
+            </div>
+          </div>
+
+          <!-- Tabs: HTTP Headers vs JSON Payload -->
+          <div class="sim-tabs-header">
+            <div class="sim-tabs-left" role="tablist" aria-label="Webhook inspection views">
+              <button type="button" class="sim-tab-btn active" id="tabBtnHeaders" role="tab" aria-selected="true" aria-controls="viewHeaders">
+                HTTP Headers &amp; Signature
+              </button>
+              <button type="button" class="sim-tab-btn" id="tabBtnPayload" role="tab" aria-selected="false" aria-controls="viewPayload">
+                JSON Event Payload
+              </button>
+            </div>
+            <div class="sim-tabs-actions">
+              <button type="button" class="btn-sim-copy" id="btnCopyWebhookData">
+                <span class="copy-icon">📋</span> <span id="copyWebhookLabel">Copy Headers</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Code Preview Display Box -->
+          <div class="sim-code-preview-box">
+            <!-- Headers View -->
+            <div class="sim-view-pane" id="viewHeaders" role="tabpanel" aria-labelledby="tabBtnHeaders">
+              <pre class="sim-code-block"><code id="codeHeadersDisplay"><!-- Dynamically populated --></code></pre>
+            </div>
+
+            <!-- Payload View -->
+            <div class="sim-view-pane" id="viewPayload" role="tabpanel" aria-labelledby="tabBtnPayload" hidden>
+              <pre class="sim-code-block"><code id="codePayloadDisplay"><!-- Dynamically populated --></code></pre>
+            </div>
+          </div>
+
+          <!-- Dispatch Controls & Response Status -->
+          <div class="sim-dispatch-bar">
+            <div class="dispatch-left">
+              <button type="button" class="btn-dispatch-test" id="btnDispatchWebhook">
+                <span class="dispatch-icon">🚀</span> Test Mock Webhook Delivery
+              </button>
+              <span class="sim-delivery-status" id="simDeliveryStatus" role="status" hidden>
+                <!-- Populated upon dispatch -->
+              </span>
+            </div>
+            <div class="dispatch-right">
+              <span class="sim-meta-spec">RFC 2104 HMAC-SHA256 Standard</span>
+            </div>
+          </div>
+
+          <!-- Response ACK Log Panel -->
+          <div class="sim-response-panel" id="simResponsePanel" hidden>
+            <div class="response-panel-head">
+              <span class="response-kicker">MOCK RECEIVER HTTP ACKNOWLEDGEMENT</span>
+              <span class="response-code-pill" id="responseCodePill">HTTP 200 OK</span>
+            </div>
+            <pre class="sim-ack-code"><code id="responseAckDisplay"></code></pre>
+          </div>
+        </div>
+      </section>
+      <!-- ===== END Issue #336 ===== -->
 
       <!-- Article Footer -->
       <footer class="doc-footer">
