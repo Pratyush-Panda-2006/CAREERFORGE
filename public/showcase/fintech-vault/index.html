@@ -1238,6 +1238,163 @@
   </section>
   <!-- ===== Crypto vs Stock DCA Investment Simulator END ===== -->
 
+  <!-- ===== BEGIN Issue #344: Interactive Loan Amortization Schedule Calculator & Extra Payment Comparison ===== -->
+  <section class="engine-section loan-amort-section" id="loan-amortization-calculator" aria-labelledby="loanCalcTitle">
+    <div class="engine-header">
+      <div class="tag-pill">// DEBT PAYOFF ACCELERATOR</div>
+      <h2 id="loanCalcTitle">LOAN AMORTIZATION &amp; EXTRA PRINCIPAL CALCULATOR</h2>
+      <p class="section-lead">
+        Model institutional mortgage and term loan amortization. Simulate additional monthly principal curtailment to compute total interest saved, accelerated debt-free horizons, and yearly balance schedules.
+      </p>
+    </div>
+
+    <!-- Loan Presets Strip -->
+    <div class="loan-presets-strip">
+      <span class="loan-presets-label">Load Financing Benchmark:</span>
+      <div class="loan-presets-buttons" role="group" aria-label="Financing Benchmark Presets">
+        <button type="button" class="btn-loan-preset active" data-amount="750000" data-rate="6.5" data-years="30" data-extra="300">
+          🏡 Jumbo Mortgage ($750k • 6.5% • 30Y • +$300/mo)
+        </button>
+        <button type="button" class="btn-loan-preset" data-amount="1250000" data-rate="7.2" data-years="15" data-extra="1000">
+          🏢 Commercial Facility ($1.25M • 7.2% • 15Y • +$1k/mo)
+        </button>
+        <button type="button" class="btn-loan-preset" data-amount="120000" data-rate="8.5" data-years="10" data-extra="150">
+          💼 Executive Term Loan ($120k • 8.5% • 10Y • +$150/mo)
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Grid: Left = Sliders & Term Selector, Right = Summary KPI Cards & Comparison -->
+    <div class="loan-workspace-grid">
+      <!-- Input Parameters Card -->
+      <div class="loan-card inputs-card">
+        <div class="loan-card-head">
+          <h3>Loan Parameters &amp; Curtailment</h3>
+          <span class="loan-status-tag" id="loanRateBadge">6.50% APR</span>
+        </div>
+
+        <!-- Loan Amount -->
+        <div class="loan-field">
+          <div class="field-label-row">
+            <label for="loanAmountInput">Principal Loan Amount</label>
+            <span class="field-val" id="loanAmountVal">$750,000</span>
+          </div>
+          <input type="range" id="loanAmountSlider" class="loan-slider" min="25000" max="2500000" step="25000" value="750000" />
+          <input type="number" id="loanAmountInput" class="loan-num-input" min="1000" max="10000000" step="5000" value="750000" />
+        </div>
+
+        <!-- Interest Rate -->
+        <div class="loan-field">
+          <div class="field-label-row">
+            <label for="loanRateInput">Annual Interest Rate (%)</label>
+            <span class="field-val" id="loanRateVal">6.50%</span>
+          </div>
+          <input type="range" id="loanRateSlider" class="loan-slider" min="2.0" max="15.0" step="0.1" value="6.5" />
+          <input type="number" id="loanRateInput" class="loan-num-input" min="0.5" max="25.0" step="0.05" value="6.5" />
+        </div>
+
+        <!-- Term Toggle (10, 15, 30 Years) -->
+        <div class="loan-field">
+          <label>Loan Amortization Term</label>
+          <div class="loan-term-toggles" role="group" aria-label="Loan Term Selection">
+            <button type="button" class="btn-term-toggle" data-term="10">10 Years</button>
+            <button type="button" class="btn-term-toggle" data-term="15">15 Years</button>
+            <button type="button" class="btn-term-toggle active" data-term="30">30 Years</button>
+          </div>
+        </div>
+
+        <!-- Extra Monthly Payment -->
+        <div class="loan-field highlight-field">
+          <div class="field-label-row">
+            <label for="extraPaymentInput">Extra Monthly Principal Curtailment</label>
+            <span class="field-val extra-val" id="extraPaymentVal">+$300 / mo</span>
+          </div>
+          <input type="range" id="extraPaymentSlider" class="loan-slider extra-slider" min="0" max="3000" step="50" value="300" />
+          <input type="number" id="extraPaymentInput" class="loan-num-input" min="0" max="25000" step="50" value="300" />
+          <small class="field-hint">Applied directly toward reducing loan principal balance every month.</small>
+        </div>
+      </div>
+
+      <!-- Comparison KPI & Savings Card -->
+      <div class="loan-card summary-card">
+        <div class="loan-card-head">
+          <h3>Payoff Speed &amp; Wealth Preservation</h3>
+          <span class="savings-chip" id="interestSavingsChip">+$114,842 Interest Saved</span>
+        </div>
+
+        <div class="loan-kpis-grid">
+          <div class="loan-kpi-box">
+            <span class="kpi-label">Baseline Monthly P&amp;I</span>
+            <strong class="kpi-val" id="kpiBaseMonthly">$4,740</strong>
+            <small class="kpi-sub" id="kpiEffectiveMonthly">Total Outlay: $5,040 / mo</small>
+          </div>
+
+          <div class="loan-kpi-box highlight-emerald">
+            <span class="kpi-label">Accelerated Payoff Timeline</span>
+            <strong class="kpi-val emerald" id="kpiPayoffYears">25.3 Years</strong>
+            <small class="kpi-sub" id="kpiTimeShortened">⚡ 4 Years 8 Months Early</small>
+          </div>
+
+          <div class="loan-kpi-box">
+            <span class="kpi-label">Baseline Total Interest</span>
+            <strong class="kpi-val" id="kpiBaseTotalInterest">$956,664</strong>
+            <small class="kpi-sub">Total of 360 payments</small>
+          </div>
+
+          <div class="loan-kpi-box highlight-gold">
+            <span class="kpi-label">Total Accelerated Interest</span>
+            <strong class="kpi-val gold" id="kpiAccelTotalInterest">$841,822</strong>
+            <small class="kpi-sub" id="kpiTotalPrincipalPaid">Principal: $750,000</small>
+          </div>
+        </div>
+
+        <!-- Visual Comparison Progress Bar -->
+        <div class="payoff-progress-box">
+          <div class="progress-labels">
+            <span>Payoff Duration Comparison:</span>
+            <strong id="progressCompareLabel">25.3 Years (Accelerated) vs 30.0 Years (Standard)</strong>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressBarFill" style="width: 84.3%;"></div>
+          </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="loan-actions-row">
+          <button type="button" class="btn-loan-copy" id="btnCopyLoanMemo">Copy Underwriting Memo 📋</button>
+          <button type="button" class="btn-loan-download" id="btnDownloadAmortJson">Export Schedule (.JSON) ↓</button>
+        </div>
+        <div id="loanToast" class="loan-toast" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- Yearly Amortization Schedule Table -->
+    <div class="amort-table-container">
+      <div class="amort-table-header">
+        <h4>Year-by-Year Amortization Schedule (Accelerated Trajectory)</h4>
+        <span class="schedule-badge" id="scheduleBadge">30-Year Trajectory</span>
+      </div>
+      <div class="table-scroll-wrapper">
+        <table class="amort-schedule-table">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Starting Principal</th>
+              <th>Principal Paid</th>
+              <th>Interest Paid</th>
+              <th>Total Annual Outlay</th>
+              <th>Ending Balance</th>
+            </tr>
+          </thead>
+          <tbody id="loanAmortTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #344 ===== -->
+
   <footer class="footer">
     <div class="footer-content">
       <div class="brand">💎 APEXVAULT</div>
