@@ -464,6 +464,189 @@
     <p role="status" aria-live="polite"></p>
   </section>
 
+  <!-- ===== BEGIN Issue #387: Voice Pitch-Shift & Robotic Modulation Filter Laboratory ===== -->
+  <section class="modulation-lab-section" id="modulationLab" aria-labelledby="modLabTitle">
+    <div class="mod-lab-header">
+      <div class="badge">🎛️ REAL-TIME DSP LABORATORY // WEB AUDIO API</div>
+      <h2 id="modLabTitle">Voice Pitch-Shift &amp; Robotic Modulation Rack</h2>
+      <p>Transform speech waveforms in real time. Route vocal clips through a modular hardware rack of Biquad filters, LFO ring modulators, pitch transposer, and spatial delay nodes.</p>
+    </div>
+
+    <!-- Modulation Presets Bar -->
+    <div class="mod-presets-bar">
+      <span class="mod-presets-label">DSP Effect Presets:</span>
+      <div class="mod-presets-grid" role="group" aria-label="DSP Voice Effect Presets">
+        <button type="button" class="mod-preset-btn active" data-preset="cyborg">
+          <span class="preset-icon">🤖</span>
+          <div class="preset-info">
+            <strong>Cyber Cyborg</strong>
+            <small>Ring Mod + Bitcrush + Metallic</small>
+          </div>
+        </button>
+        <button type="button" class="mod-preset-btn" data-preset="helium">
+          <span class="preset-icon">🚀</span>
+          <div class="preset-info">
+            <strong>Helium Shift</strong>
+            <small>+12 Semitones • Formant Boost</small>
+          </div>
+        </button>
+        <button type="button" class="mod-preset-btn" data-preset="radio">
+          <span class="preset-icon">📻</span>
+          <div class="preset-info">
+            <strong>Deep Radio Bass</strong>
+            <small>-7 Semitones • Warm 80Hz Res</small>
+          </div>
+        </button>
+        <button type="button" class="mod-preset-btn" data-preset="cathedral">
+          <span class="preset-icon">🏛️</span>
+          <div class="preset-info">
+            <strong>Cathedral Reverb</strong>
+            <small>Long Spatial Tail • 450ms Delay</small>
+          </div>
+        </button>
+        <button type="button" class="mod-preset-btn" data-preset="clean">
+          <span class="preset-icon">🎙️</span>
+          <div class="preset-info">
+            <strong>Clean Bypass</strong>
+            <small>Dry Direct Signal (100%)</small>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Hardware Rack Chassis -->
+    <div class="mod-rack-chassis">
+      <!-- Rack Top Screw Bar & LED Indicators -->
+      <div class="rack-top-strip">
+        <div class="rack-mount-hole"></div>
+        <div class="rack-unit-label">SONORA DSP-4000 // MODULAR VOCAL PROCESSOR</div>
+        <div class="rack-leds">
+          <span class="led-indicator active" id="ledPower"><i class="led-dot green"></i> POWER</span>
+          <span class="led-indicator active" id="ledDsp"><i class="led-dot cyan"></i> DSP ACTIVE</span>
+          <span class="led-indicator" id="ledClip"><i class="led-dot red"></i> PEAK CLIP</span>
+        </div>
+        <div class="rack-mount-hole"></div>
+      </div>
+
+      <!-- Rack Modules Grid -->
+      <div class="rack-modules-grid">
+        <!-- Module 1: Pitch & Formant -->
+        <div class="rack-module">
+          <div class="module-header">
+            <span class="module-title">MODULE 01: PITCH &amp; FREQUENCY</span>
+            <span class="module-tag">TRANSPOSE</span>
+          </div>
+          <div class="module-controls">
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modPitchSlider">Pitch Shift (Semitones)</label>
+                <span class="control-badge" id="modPitchVal">+0 st</span>
+              </div>
+              <input type="range" id="modPitchSlider" class="rack-slider" min="-12" max="12" step="1" value="0" />
+              <div class="slider-marks"><span>-12 st</span><span>0 (Normal)</span><span>+12 st</span></div>
+            </div>
+
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modCutoffSlider">Biquad Cutoff Filter</label>
+                <span class="control-badge" id="modCutoffVal">3,200 Hz</span>
+              </div>
+              <input type="range" id="modCutoffSlider" class="rack-slider" min="200" max="8000" step="100" value="3200" />
+              <div class="slider-marks"><span>200 Hz</span><span>Bandpass</span><span>8 kHz</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module 2: Ring Modulation & Robotic Saturation -->
+        <div class="rack-module">
+          <div class="module-header">
+            <span class="module-title">MODULE 02: ROBOTIC MODULATOR</span>
+            <span class="module-tag">LFO CARRIER</span>
+          </div>
+          <div class="module-controls">
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modCarrierSlider">Carrier LFO Frequency</label>
+                <span class="control-badge" id="modCarrierVal">45 Hz</span>
+              </div>
+              <input type="range" id="modCarrierSlider" class="rack-slider" min="10" max="400" step="5" value="45" />
+              <div class="slider-marks"><span>10 Hz</span><span>Sub-Audio</span><span>400 Hz</span></div>
+            </div>
+
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modCrushSlider">Cyborg Bitcrush &amp; Drive</label>
+                <span class="control-badge" id="modCrushVal">4.5 Drive</span>
+              </div>
+              <input type="range" id="modCrushSlider" class="rack-slider" min="0" max="10" step="0.5" value="4.5" />
+              <div class="slider-marks"><span>Clean</span><span>Warm Sat</span><span>Hard Clip</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module 3: Spatial Echo & Reverb Mix -->
+        <div class="rack-module">
+          <div class="module-header">
+            <span class="module-title">MODULE 03: SPATIAL DELAY &amp; MIX</span>
+            <span class="module-tag">TIME DOMAIN</span>
+          </div>
+          <div class="module-controls">
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modDelaySlider">Feedback Delay Time</label>
+                <span class="control-badge" id="modDelayVal">180 ms</span>
+              </div>
+              <input type="range" id="modDelaySlider" class="rack-slider" min="0" max="800" step="20" value="180" />
+              <div class="slider-marks"><span>0 ms</span><span>Slapback</span><span>800 ms</span></div>
+            </div>
+
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modWetDrySlider">Wet / Dry DSP Blend</label>
+                <span class="control-badge" id="modWetDryVal">65% Wet</span>
+              </div>
+              <input type="range" id="modWetDrySlider" class="rack-slider" min="0" max="100" step="5" value="65" />
+              <div class="slider-marks"><span>0% Dry</span><span>50% Mix</span><span>100% Wet</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualizer & Audition Control Panel -->
+      <div class="rack-footer-panel">
+        <!-- Live DSP Waveform Canvas -->
+        <div class="mod-visualizer-wrap">
+          <div class="vis-header-row">
+            <span class="vis-tag">REAL-TIME DSP OSCILLOSCOPE MONITOR</span>
+            <span class="vis-fps" id="visFpsDisplay">60 FPS • 44.1 kHz</span>
+          </div>
+          <canvas id="modOscilloscopeCanvas" width="560" height="90" aria-label="Real-time audio modulation oscilloscope"></canvas>
+        </div>
+
+        <!-- Audition Actions & Voice Sample Source -->
+        <div class="mod-actions-col">
+          <div class="sample-source-select-wrap">
+            <label for="modSamplePhraseSelect">Audition Audio Phrase:</label>
+            <select id="modSamplePhraseSelect" class="mod-select">
+              <option value="cyborg">"Neural voice synthesis online. Autonomous threat prevention engaged."</option>
+              <option value="station">"Welcome aboard the orbital station. Docking clamps secured."</option>
+              <option value="countdown">"T-minus ten seconds to orbital thruster ignition. Stand by."</option>
+            </select>
+          </div>
+
+          <div class="mod-btn-row">
+            <button type="button" class="btn-mod-audition" id="btnModAudition">
+              <span class="btn-play-icon" id="modPlayIcon">▶</span>
+              <span id="modPlayText">Audition Modulated Voice</span>
+            </button>
+            <button type="button" class="btn-mod-reset" id="btnModReset">Reset Rack</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #387 ===== -->
+
   <!-- Multi-Track Audio Timeline Editor (DAW) -->
   <section class="daw-section" id="daw-timeline" aria-labelledby="daw-title">
     <div class="daw-header">
