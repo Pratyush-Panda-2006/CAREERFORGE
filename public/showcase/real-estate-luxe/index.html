@@ -402,6 +402,164 @@
     </div>
   </section>
 
+  <!-- ===== BEGIN Issue #356: Interactive Property Investment ROI & Cap Rate Calculator ===== -->
+  <section class="calculator-section roi-cap-rate-section" id="investment-calculator" aria-labelledby="roiCalcTitle">
+    <div class="calc-container">
+      <div class="calc-header">
+        <div class="gold-tag">PORTFOLIO YIELD &amp; ASSET VALUATION</div>
+        <h2 id="roiCalcTitle">Luxury Property Investment ROI &amp; Cap Rate Calculator</h2>
+        <p>Model institutional capitalization rates, gross rental yield, operating expenses, and cash-on-cash return for high-yield luxury estates.</p>
+      </div>
+
+      <!-- Quick Preset Selection Chips -->
+      <div class="roi-estate-selector">
+        <span class="selector-label">Model Acquisition Target:</span>
+        <div class="quick-price-chips" role="group" aria-label="Quick Select Estate">
+          <button type="button" class="chip active" id="roiChipMalibu" data-price="14500000" data-rent="68000" data-mgmt="8" data-vacancy="5">
+            🏖️ Malibu Clifftop ($14.5M • $68k/mo)
+          </button>
+          <button type="button" class="chip" id="roiChipTribeca" data-price="22000000" data-rent="95000" data-mgmt="7" data-vacancy="4">
+            🏙️ Tribeca Sky Penthouse ($22M • $95k/mo)
+          </button>
+          <button type="button" class="chip" id="roiChipAspen" data-price="35000000" data-rent="160000" data-mgmt="9" data-vacancy="6">
+            🏔️ Aspen Mountain Chalet ($35M • $160k/mo)
+          </button>
+        </div>
+      </div>
+
+      <div class="calc-grid roi-calc-grid">
+        <!-- Input Parameters Card -->
+        <div class="calc-card inputs-card">
+          <div class="card-title-wrap">
+            <span class="card-num">01</span>
+            <h3>Acquisition &amp; Operating Inputs</h3>
+          </div>
+
+          <!-- Purchase Price -->
+          <div class="input-field-group">
+            <div class="label-row">
+              <label for="roiPriceInput">Acquisition Purchase Price</label>
+              <span class="val-display" id="roiPriceBadge">$14,500,000</span>
+            </div>
+            <div class="currency-input-wrap">
+              <span class="curr-sign">$</span>
+              <input type="number" id="roiPriceInput" min="500000" max="100000000" step="100000" value="14500000" class="num-input" />
+            </div>
+          </div>
+
+          <!-- Expected Monthly Rent -->
+          <div class="input-field-group">
+            <div class="label-row">
+              <label for="roiMonthlyRentInput">Expected Monthly Rental Income</label>
+              <span class="val-display" id="roiRentBadge">$68,000 / mo</span>
+            </div>
+            <div class="currency-input-wrap">
+              <span class="curr-sign">$</span>
+              <input type="number" id="roiMonthlyRentInput" min="5000" max="500000" step="1000" value="68000" class="num-input" />
+            </div>
+          </div>
+
+          <!-- Sliders Grid for Operating Expenses -->
+          <div class="roi-sliders-grid">
+            <div class="slider-field">
+              <div class="label-row">
+                <label for="roiMgmtSlider">Property Management Fee</label>
+                <span class="val-display" id="roiMgmtBadge">8.0%</span>
+              </div>
+              <input type="range" id="roiMgmtSlider" min="0" max="15" step="0.5" value="8" class="range-slider" />
+              <div class="slider-ticks"><span>Self-Managed (0%)</span><span>Standard (8%)</span><span>Full Luxury (15%)</span></div>
+            </div>
+
+            <div class="slider-field">
+              <div class="label-row">
+                <label for="roiVacancySlider">Estimated Vacancy Allowance</label>
+                <span class="val-display" id="roiVacancyBadge">5.0%</span>
+              </div>
+              <input type="range" id="roiVacancySlider" min="1" max="15" step="0.5" value="5" class="range-slider" />
+              <div class="slider-ticks"><span>1% (Minimal)</span><span>5% (Prime)</span><span>15% (Seasonal)</span></div>
+            </div>
+
+            <div class="slider-field">
+              <div class="label-row">
+                <label for="roiTaxInsSlider">Annual Property Tax &amp; Insurance</label>
+                <span class="val-display" id="roiTaxInsBadge">1.2%</span>
+              </div>
+              <input type="range" id="roiTaxInsSlider" min="0.5" max="3.0" step="0.1" value="1.2" class="range-slider" />
+              <div class="slider-ticks"><span>0.5% (Low)</span><span>1.2% (Avg)</span><span>3.0% (High)</span></div>
+            </div>
+
+            <div class="slider-field">
+              <div class="label-row">
+                <label for="roiDownPaymentSlider">Financing Down Payment</label>
+                <span class="val-display" id="roiDownPaymentBadge">35% ($5,075,000)</span>
+              </div>
+              <input type="range" id="roiDownPaymentSlider" min="10" max="100" step="5" value="35" class="range-slider" />
+              <div class="slider-ticks"><span>10% (Leveraged)</span><span>35% (Institutional)</span><span>100% (All-Cash)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output KPI Summary & Grade -->
+        <div class="calc-card results-card roi-results-card">
+          <div class="card-title-wrap">
+            <span class="card-num">02</span>
+            <h3>Investment Yield Performance</h3>
+          </div>
+
+          <!-- Highlight KPI Cards -->
+          <div class="roi-kpis-grid">
+            <div class="roi-kpi-block highlight">
+              <div class="kpi-label">Capitalization Rate (Cap Rate)</div>
+              <div class="kpi-value" id="kpiCapRate">5.12%</div>
+              <div class="investment-grade-badge" id="kpiGradeBadge">💎 Prime Trophy Asset</div>
+            </div>
+
+            <div class="roi-kpi-block">
+              <div class="kpi-label">Gross Rental Yield</div>
+              <div class="kpi-value" id="kpiGrossYield">5.63%</div>
+              <div class="kpi-subtext" id="kpiAnnualGrossRent">$816,000 / yr</div>
+            </div>
+
+            <div class="roi-kpi-block">
+              <div class="kpi-label">Net Operating Income (NOI)</div>
+              <div class="kpi-value" id="kpiNoi">$742,400</div>
+              <div class="kpi-subtext" id="kpiMonthlyNoi">$61,867 / mo</div>
+            </div>
+
+            <div class="roi-kpi-block">
+              <div class="kpi-label">Cash-on-Cash Return</div>
+              <div class="kpi-value" id="kpiCashOnCash">6.84%</div>
+              <div class="kpi-subtext" id="kpiNetCashFlow">Pre-Tax Cash: $347,130/yr</div>
+            </div>
+          </div>
+
+          <!-- Itemized Financial Breakdown Table -->
+          <div class="roi-breakdown-box">
+            <div class="breakdown-header">ANNUAL FINANCIAL CASH FLOW STATEMENT</div>
+            <div class="breakdown-rows">
+              <div class="b-row"><span>Gross Scheduled Rental Income (GSI)</span><strong id="rowGrossRent">$816,000</strong></div>
+              <div class="b-row sub"><span>Less: Vacancy &amp; Credit Loss</span><strong class="neg" id="rowVacancy">-$40,800</strong></div>
+              <div class="b-row total"><span>Effective Gross Income (EGI)</span><strong id="rowEgi">$775,200</strong></div>
+              <div class="b-row sub"><span>Less: Property Management Fee</span><strong class="neg" id="rowMgmt">-$62,016</strong></div>
+              <div class="b-row sub"><span>Less: Property Tax &amp; Insurance</span><strong class="neg" id="rowTaxIns">-$174,000</strong></div>
+              <div class="b-row sub"><span>Less: Capital Reserves &amp; Maintenance</span><strong class="neg" id="rowReserves">-$58,000</strong></div>
+              <div class="b-row total highlight"><span>Net Operating Income (NOI)</span><strong id="rowNoi">$481,184</strong></div>
+              <div class="b-row sub"><span>Less: Annual Mortgage Debt Service</span><strong class="neg" id="rowDebtService">-$398,240</strong></div>
+              <div class="b-row total pre-tax"><span>Net Pre-Tax Cash Flow</span><strong id="rowNetCashFlow">$82,944 / yr</strong></div>
+            </div>
+          </div>
+
+          <div class="roi-action-bar">
+            <button type="button" class="btn-roi-copy" id="btnCopyRoiMemo">Copy Investment Memo 📋</button>
+            <button type="button" class="btn-roi-download" id="btnDownloadRoiJson">Export Underwriting Brief (.JSON) ↓</button>
+          </div>
+          <div id="roiToast" class="roi-toast" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #356 ===== -->
+
   <!-- ===== BEGIN Issue #357: Interactive 2D Architectural Estate Floor Plan & Sunlight Simulator ===== -->
   <section class="floorplan-section" id="estate-floorplan-section" aria-labelledby="floorplan-title">
     <div class="floorplan-container">
