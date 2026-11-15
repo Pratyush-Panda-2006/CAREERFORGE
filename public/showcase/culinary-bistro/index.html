@@ -942,6 +942,148 @@
   </section>
   <!-- ===== END Issue #393 ===== -->
 
+  <!-- ===== START Issue #330: Seasonal Tasting Menu Wine Pairing Course Selector ===== -->
+  <section class="seasonal-pairing-section" id="seasonalTastingMenu" aria-labelledby="seasonalTastingTitle">
+    <div class="pairing-container">
+      <!-- Section Header -->
+      <div class="pairing-header">
+        <div class="pairing-badge">CHEF &amp; SOMMELIER DEGUSTATION &bull; ISSUE #330</div>
+        <h2 id="seasonalTastingTitle" class="pairing-title">Seasonal 5-Course Tasting Menu &amp; Wine Pairing Explorer</h2>
+        <p class="pairing-subtitle">
+          Immerse yourself in our autumn terroir degustation. Customize wine pairings for each course between our Classic Sommelier Selection and Rare Vintage Reserve, preview sensory tasting notes, and track real-time dining totals.
+        </p>
+      </div>
+
+      <!-- Global Tier & Preset Controls -->
+      <div class="pairing-toolbar">
+        <div class="toolbar-left">
+          <span class="toolbar-label">Quick Pairing Tier:</span>
+          <div class="tier-pill-group" role="group" aria-label="Global wine pairing tier presets">
+            <button type="button" class="tier-preset-btn" data-preset="none" id="btnPresetNone">No Wine ($0)</button>
+            <button type="button" class="tier-preset-btn active" data-preset="classic" id="btnPresetClassic">Classic Sommelier (+$144)</button>
+            <button type="button" class="tier-preset-btn" data-preset="rare" id="btnPresetRare">Rare Vintage Reserve (+$855)</button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <div class="pairing-party-selector">
+            <label for="pairingPartySelect">Party Size:</label>
+            <select id="pairingPartySelect" class="pairing-party-input" aria-label="Select party size">
+              <option value="1">1 Guest</option>
+              <option value="2" selected>2 Guests</option>
+              <option value="4">4 Guests</option>
+              <option value="6">6 Guests</option>
+              <option value="8">8 Guests</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content: Course Cards and Surcharge Summary -->
+      <div class="pairing-layout">
+        <!-- 5 Courses Container -->
+        <div class="courses-list" id="tastingCoursesContainer" role="region" aria-label="5 tasting courses">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+        <!-- Sticky Surcharge & Dining Total Tally Card -->
+        <aside class="tally-sidebar" aria-label="Menu surcharge and billing summary">
+          <div class="tally-card" id="pairingTallyCard">
+            <div class="tally-card-head">
+              <span class="tally-kicker">DEGUSTATION SUMMARY</span>
+              <h3 class="tally-title">Dining &amp; Cellar Tally</h3>
+            </div>
+
+            <div class="tally-line">
+              <span class="tally-label">5-Course Tasting Base ($185 &times; <span id="tallyGuestCount">2</span>)</span>
+              <span class="tally-value" id="tallyBaseTotal">$370.00</span>
+            </div>
+
+            <div class="tally-line">
+              <span class="tally-label">Sommelier Pairing Surcharge</span>
+              <span class="tally-value surcharge-val" id="tallyPairingSurcharge">+$288.00</span>
+            </div>
+
+            <div class="tally-breakdown-box" id="tallyCourseBreakdown">
+              <!-- Breakdown per course injected dynamically -->
+            </div>
+
+            <div class="tally-line tally-subtotal">
+              <span class="tally-label">Subtotal</span>
+              <span class="tally-value" id="tallySubtotal">$658.00</span>
+            </div>
+
+            <div class="tally-line">
+              <span class="tally-label">Sommelier Hospitality &amp; Service (20%)</span>
+              <span class="tally-value" id="tallyGratuity">$131.60</span>
+            </div>
+
+            <div class="tally-divider"></div>
+
+            <div class="tally-line tally-grand-total">
+              <div>
+                <div class="tally-grand-label">Grand Total</div>
+                <small class="tally-per-guest" id="tallyPerGuest">($394.80 / guest)</small>
+              </div>
+              <div class="tally-grand-amount" id="tallyGrandTotal">$789.60</div>
+            </div>
+
+            <button type="button" class="btn-confirm-pairing" id="btnConfirmPairings">
+              Confirm Tasting &amp; Pairing Selection
+            </button>
+
+            <div class="tally-feedback" id="tallyConfirmNotice" role="status" hidden>
+              &check; Tasting reservation preferences updated with cellar pairings!
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Popover / Dialog for Sommelier Sensory Notes -->
+    <div class="somm-notes-popover" id="sommNotesPopover" role="dialog" aria-modal="false" aria-labelledby="popoverTitle" hidden>
+      <div class="popover-arrow"></div>
+      <div class="popover-header">
+        <div>
+          <span class="popover-tier" id="popoverTier">CLASSIC SOMMELIER</span>
+          <h4 class="popover-title" id="popoverTitle">Wine Title</h4>
+        </div>
+        <button type="button" class="popover-close-btn" id="btnClosePopover" aria-label="Close tasting notes">&times;</button>
+      </div>
+      <div class="popover-body">
+        <div class="popover-appellation" id="popoverAppellation">Appellation &bull; Vintage</div>
+        <p class="popover-desc" id="popoverDesc">Sensory tasting notes...</p>
+        <div class="popover-gauges">
+          <div class="gauge-item">
+            <div class="gauge-label">
+              <span>Tannins</span>
+              <strong id="popoverTanninVal">2 / 5</strong>
+            </div>
+            <div class="gauge-track"><div class="gauge-fill" id="popoverTanninBar" style="width: 40%"></div></div>
+          </div>
+          <div class="gauge-item">
+            <div class="gauge-label">
+              <span>Acidity</span>
+              <strong id="popoverAcidityVal">4 / 5</strong>
+            </div>
+            <div class="gauge-track"><div class="gauge-fill" id="popoverAcidityBar" style="width: 80%"></div></div>
+          </div>
+          <div class="gauge-item">
+            <div class="gauge-label">
+              <span>Finish</span>
+              <strong id="popoverFinishVal">45s Long</strong>
+            </div>
+            <div class="gauge-track"><div class="gauge-fill" id="popoverFinishBar" style="width: 90%"></div></div>
+          </div>
+        </div>
+        <div class="popover-footer">
+          <span class="popover-serve-temp" id="popoverServingTemp">Serving Temp: 10&deg;C</span>
+          <span class="popover-surcharge" id="popoverSurcharge">+$24 / guest</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #330 ===== -->
+
   <!-- Sommelier Wine Pairing & Flavor Radar Modal (Issue #445) -->
   <div class="sommelier-modal-backdrop" id="sommelierModalBackdrop" hidden>
     <div class="sommelier-drawer" id="sommelierDrawer" role="dialog" aria-modal="true" aria-labelledby="sommelierDrawerTitle">

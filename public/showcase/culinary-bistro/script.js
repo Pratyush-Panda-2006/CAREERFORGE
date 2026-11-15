@@ -2397,3 +2397,619 @@ if (document.readyState === 'loading') {
   }
 })();
 
+/* ==========================================================================
+   Issue #330: Seasonal Tasting Menu Wine Pairing Explorer
+   ========================================================================== */
+(function() {
+  'use strict';
+
+  const BASE_PRICE_PER_GUEST = 185.00;
+  const SERVICE_RATE = 0.20;
+
+  const COURSES = [
+    {
+      id: 'course-1',
+      order: 'Course I',
+      title: 'Hokkaido Scallop Crudo',
+      sub: 'Crudo & Amuse-Bouche',
+      desc: 'Thinly sliced Hokkaido scallop dressed with yuzu pearls, royal Oscietra caviar, and cold-pressed shiso oil.',
+      pairings: {
+        none: {
+          id: 'c1-none',
+          tier: 'none',
+          tierLabel: 'No Wine',
+          title: 'Filtered Artesian Mineral Water',
+          appellation: 'House Still / Sparkling Springs',
+          desc: 'Refreshing chilled palate cleanser with crisp effervescence.',
+          tannins: 0,
+          acidity: 1,
+          finish: '5s Clean',
+          temp: '4°C',
+          surcharge: 0,
+          icon: '💧'
+        },
+        classic: {
+          id: 'c1-classic',
+          tier: 'classic',
+          tierLabel: 'Classic Sommelier',
+          title: '2020 Domaine Huet Vouvray Sec "Le Haut-Lieu"',
+          appellation: 'AOC Vouvray, Loire Valley, France',
+          desc: 'Crisp green apple, quince, crushed flint minerality with razor-sharp Chenin Blanc acidity that electrifies the sweet scallop brine.',
+          tannins: 1,
+          acidity: 5,
+          finish: '40s Crisp Mineral',
+          temp: '9°C',
+          surcharge: 24,
+          icon: '🥂'
+        },
+        rare: {
+          id: 'c1-rare',
+          tier: 'rare',
+          tierLabel: 'Rare Vintage Reserve',
+          title: '2012 Krug Clos d\'Ambonnay Champagne Brut',
+          appellation: 'Grand Cru Champagne, France',
+          desc: 'Iconic single-walled Pinot Noir vineyard champagne. Toasted brioche, hazelnut praline, and micro-bubble saline tension of legendary depth.',
+          tannins: 2,
+          acidity: 5,
+          finish: '60s Persistent Brioche',
+          temp: '10°C',
+          surcharge: 85,
+          icon: '🍾'
+        }
+      }
+    },
+    {
+      id: 'course-2',
+      order: 'Course II',
+      title: 'Hudson Valley Foie Gras Torchon',
+      sub: 'Warm Appetizer',
+      desc: 'Velvety torchon of foie gras, mission fig and port reduction, smoked fleur de sel, served with warm toasted milk brioche.',
+      pairings: {
+        none: {
+          id: 'c2-none',
+          tier: 'none',
+          tierLabel: 'No Wine',
+          title: 'Infused Spiced Fig & Rooibos Tea',
+          appellation: 'Artisanal Herbal Brew',
+          desc: 'Earthy warm rooibos infused with dried mission figs and orange peel.',
+          tannins: 1,
+          acidity: 2,
+          finish: '10s Soft Warmth',
+          temp: '65°C',
+          surcharge: 0,
+          icon: '🍵'
+        },
+        classic: {
+          id: 'c2-classic',
+          tier: 'classic',
+          tierLabel: 'Classic Sommelier',
+          title: '2018 Château d\'Yquem 1er Cru Supérieur Sauternes',
+          appellation: 'AOC Sauternes, Bordeaux, France',
+          desc: 'Candied apricot, honeysuckle, saffron, and botrytis orange peel balanced with vibrant citrus tension that cuts through rich foie gras.',
+          tannins: 1,
+          acidity: 4,
+          finish: '55s Honeycomb & Citrus',
+          temp: '11°C',
+          surcharge: 38,
+          icon: '🍯'
+        },
+        rare: {
+          id: 'c2-rare',
+          tier: 'rare',
+          tierLabel: 'Rare Vintage Reserve',
+          title: '2001 Château Guiraud 1er Cru Classé Sauternes',
+          appellation: 'AOC Sauternes, Bordeaux (23-Year Library Cellar)',
+          desc: 'A benchmark vintage displaying molten honeycomb, roasted macadamia, and caramelized Seville marmalade with sublime acidity.',
+          tannins: 2,
+          acidity: 4,
+          finish: '70s Golden Caramel',
+          temp: '12°C',
+          surcharge: 110,
+          icon: '🏆'
+        }
+      }
+    },
+    {
+      id: 'course-3',
+      order: 'Course III',
+      title: 'Butter-Poached Brittany Blue Lobster',
+      sub: 'Seafood Entrée',
+      desc: 'Gently poached lobster tail in cultured seaweed butter, caramelized leek fondue, and bouillabaisse saffron emulsion.',
+      pairings: {
+        none: {
+          id: 'c3-none',
+          tier: 'none',
+          tierLabel: 'No Wine',
+          title: 'Sparkling Yuzu & Bergamot Soda',
+          appellation: 'House Citrus Tonic',
+          desc: 'Fine effervescence with aromatic bergamot oils and Japanese yuzu citrus.',
+          tannins: 0,
+          acidity: 4,
+          finish: '10s Citrus Zest',
+          temp: '5°C',
+          surcharge: 0,
+          icon: '🍋'
+        },
+        classic: {
+          id: 'c3-classic',
+          tier: 'classic',
+          tierLabel: 'Classic Sommelier',
+          title: '2020 Domaine Leflaive Puligny-Montrachet',
+          appellation: 'AOC Puligny-Montrachet, Côte de Beaune, Burgundy',
+          desc: 'Pure limestone chalk, white peach blossom, and delicate toasted brioche seamlessly integrated with rich lobster emulsion.',
+          tannins: 1,
+          acidity: 4,
+          finish: '50s Mineral Blossom',
+          temp: '12°C',
+          surcharge: 45,
+          icon: '🍷'
+        },
+        rare: {
+          id: 'c3-rare',
+          tier: 'rare',
+          tierLabel: 'Rare Vintage Reserve',
+          title: '2015 Domaine de la Romanée-Conti Montrachet Grand Cru',
+          appellation: 'Grand Cru Montrachet, Burgundy, France',
+          desc: 'The pinnacle of white Burgundy. Ornate layers of crushed hazelnut, white truffle, poached pear, and limitless energetic mineral drive.',
+          tannins: 2,
+          acidity: 5,
+          finish: '90s Ethereal Silk',
+          temp: '13°C',
+          surcharge: 240,
+          icon: '👑'
+        }
+      }
+    },
+    {
+      id: 'course-4',
+      order: 'Course IV',
+      title: 'A5 Miyazaki Wagyu Ribcap',
+      sub: 'Main Meat Entrée',
+      desc: 'Charcoal-seared Japanese A5 Wagyu ribcap with Périgord black winter truffle pomme purée and 48-hour bone marrow demi-glace.',
+      pairings: {
+        none: {
+          id: 'c4-none',
+          tier: 'none',
+          tierLabel: 'No Wine',
+          title: 'Smoked Tart Cherry & Juniper Cordial',
+          appellation: 'House Botanical Elixir',
+          desc: 'De-alcoholized tart Morello cherry with roasted pine and smoked juniper notes.',
+          tannins: 2,
+          acidity: 3,
+          finish: '15s Berry Tannin',
+          temp: '14°C',
+          surcharge: 0,
+          icon: '🍒'
+        },
+        classic: {
+          id: 'c4-classic',
+          tier: 'classic',
+          tierLabel: 'Classic Sommelier',
+          title: '2017 Tenuta San Guido Sassicaia Bolgheri',
+          appellation: 'DOC Bolgheri Sassicaia, Tuscany, Italy',
+          desc: 'Cabernet Sauvignon with intense blackcurrant, wild cedarwood, crushed tobacco, and structured aristocratic tannins matching marbled wagyu.',
+          tannins: 4,
+          acidity: 4,
+          finish: '60s Cedar & Espresso',
+          temp: '16°C',
+          surcharge: 55,
+          icon: '🍷'
+        },
+        rare: {
+          id: 'c4-rare',
+          tier: 'rare',
+          tierLabel: 'Rare Vintage Reserve',
+          title: '2010 Château Margaux 1er Grand Cru Classé',
+          appellation: 'AOC Margaux, Bordeaux, France',
+          desc: 'Sensational vintage. Perfumed violets, black cassis, cigar box spice, and cashmere tannins delivering supreme elegance alongside black truffle.',
+          tannins: 5,
+          acidity: 4,
+          finish: '80s Velvety Violet',
+          temp: '17°C',
+          surcharge: 290,
+          icon: '🌟'
+        }
+      }
+    },
+    {
+      id: 'course-5',
+      order: 'Course V',
+      title: 'Valrhona Grand Cru Dark Chocolate Sphere',
+      sub: 'Dessert & Mignardises',
+      desc: 'Warm smoked sea salt bourbon caramel poured over 70% Guanaja chocolate sphere, roasted cocoa nib tuile, and Madagascar vanilla bean cream.',
+      pairings: {
+        none: {
+          id: 'c5-none',
+          tier: 'none',
+          tierLabel: 'No Wine',
+          title: 'Single-Estate Ethiopian Yirgacheffe Pour-Over',
+          appellation: 'Specialty Coffee Reserve',
+          desc: 'Light-roast coffee with jasmine, bergamot, and dried dark stone fruit notes.',
+          tannins: 1,
+          acidity: 3,
+          finish: '20s Cocoa Floral',
+          temp: '68°C',
+          surcharge: 0,
+          icon: '☕'
+        },
+        classic: {
+          id: 'c5-classic',
+          tier: 'classic',
+          tierLabel: 'Classic Sommelier',
+          title: 'Taylor Fladgate 20-Year-Old Tawny Port',
+          appellation: 'DOC Douro, Portugal',
+          desc: 'Rich walnut, dried plum, butterscotch, and spicy oak aroma that harmonizes effortlessly with bitter chocolate and salted caramel.',
+          tannins: 3,
+          acidity: 3,
+          finish: '45s Walnut & Caramel',
+          temp: '15°C',
+          surcharge: 22,
+          icon: '🍷'
+        },
+        rare: {
+          id: 'c5-rare',
+          tier: 'rare',
+          tierLabel: 'Rare Vintage Reserve',
+          title: '1977 Quinta do Noval Vintage Port',
+          appellation: 'DOC Douro, Portugal (Historic 1977 Declaration)',
+          desc: 'Legendary declaration vintage. Molten dark raisins, cocoa bean, mahogany cedar, and infinite richness with seamless spirit integration.',
+          tannins: 4,
+          acidity: 4,
+          finish: '75s Vintage Mahogany',
+          temp: '16°C',
+          surcharge: 130,
+          icon: '🏺'
+        }
+      }
+    }
+  ];
+
+  // State
+  const selectedTiers = {
+    'course-1': 'classic',
+    'course-2': 'classic',
+    'course-3': 'classic',
+    'course-4': 'classic',
+    'course-5': 'classic'
+  };
+
+  let partySize = 2;
+
+  function initSeasonalTastingMenuExplorer() {
+    const root = document.getElementById('seasonalTastingMenu');
+    if (!root) return;
+
+    const container = document.getElementById('tastingCoursesContainer');
+    const partySelect = document.getElementById('pairingPartySelect');
+    const popover = document.getElementById('sommNotesPopover');
+    const closePopoverBtn = document.getElementById('btnClosePopover');
+    const confirmBtn = document.getElementById('btnConfirmPairings');
+    const confirmNotice = document.getElementById('tallyConfirmNotice');
+
+    if (!container) return;
+
+    // Party size listener
+    if (partySelect) {
+      partySelect.addEventListener('change', (e) => {
+        partySize = parseInt(e.target.value, 10) || 2;
+        updateTally();
+      });
+    }
+
+    // Preset buttons
+    const btnPresetNone = document.getElementById('btnPresetNone');
+    const btnPresetClassic = document.getElementById('btnPresetClassic');
+    const btnPresetRare = document.getElementById('btnPresetRare');
+    const presetBtns = [btnPresetNone, btnPresetClassic, btnPresetRare].filter(Boolean);
+
+    function applyGlobalPreset(presetKey) {
+      COURSES.forEach((c) => {
+        selectedTiers[c.id] = presetKey;
+      });
+      presetBtns.forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-preset') === presetKey);
+      });
+      renderCourses();
+      updateTally();
+    }
+
+    if (btnPresetNone) btnPresetNone.addEventListener('click', () => applyGlobalPreset('none'));
+    if (btnPresetClassic) btnPresetClassic.addEventListener('click', () => applyGlobalPreset('classic'));
+    if (btnPresetRare) btnPresetRare.addEventListener('click', () => applyGlobalPreset('rare'));
+
+    // Close Popover listener
+    if (closePopoverBtn && popover) {
+      closePopoverBtn.addEventListener('click', () => {
+        popover.hidden = true;
+      });
+    }
+
+    // Dismiss popover on outside click
+    document.addEventListener('click', (e) => {
+      if (popover && !popover.hidden) {
+        if (!popover.contains(e.target) && !e.target.closest('.btn-open-notes')) {
+          popover.hidden = true;
+        }
+      }
+    });
+
+    // Confirm button listener
+    if (confirmBtn && confirmNotice) {
+      confirmBtn.addEventListener('click', () => {
+        confirmNotice.hidden = false;
+        confirmNotice.textContent = `✓ Reservation preferences saved: 5-Course Autumn Degustation for ${partySize} guests with custom cellar pairings.`;
+        setTimeout(() => {
+          confirmNotice.hidden = true;
+        }, 5000);
+      });
+    }
+
+    // Render course cards with safe DOM methods
+    function renderCourses() {
+      container.replaceChildren();
+
+      COURSES.forEach((course) => {
+        const card = document.createElement('article');
+        card.className = 'course-card';
+        card.setAttribute('data-course-id', course.id);
+
+        // Header
+        const head = document.createElement('div');
+        head.className = 'course-card-head';
+
+        const titleCol = document.createElement('div');
+        const meta = document.createElement('div');
+        meta.className = 'course-meta';
+
+        const orderPill = document.createElement('span');
+        orderPill.className = 'course-order-pill';
+        orderPill.textContent = course.order;
+
+        const subSpan = document.createElement('span');
+        subSpan.className = 'course-sub-label';
+        subSpan.style.fontSize = '0.8rem';
+        subSpan.style.color = '#9ca3af';
+        subSpan.textContent = course.sub;
+
+        meta.appendChild(orderPill);
+        meta.appendChild(subSpan);
+
+        const dishTitle = document.createElement('h3');
+        dishTitle.className = 'course-dish-name';
+        dishTitle.textContent = course.title;
+
+        titleCol.appendChild(meta);
+        titleCol.appendChild(dishTitle);
+        head.appendChild(titleCol);
+
+        // Description
+        const descP = document.createElement('p');
+        descP.className = 'course-dish-desc';
+        descP.textContent = course.desc;
+
+        // Pairing Controls (pills)
+        const controls = document.createElement('div');
+        controls.className = 'course-pairing-controls';
+
+        const tierLbl = document.createElement('span');
+        tierLbl.className = 'course-tier-label';
+        tierLbl.textContent = 'Pairing Option';
+        controls.appendChild(tierLbl);
+
+        const pillGroup = document.createElement('div');
+        pillGroup.className = 'course-pill-toggles';
+
+        const currentTier = selectedTiers[course.id] || 'classic';
+
+        ['none', 'classic', 'rare'].forEach((tierKey) => {
+          const wine = course.pairings[tierKey];
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          pill.className = 'pairing-choice-pill' + (currentTier === tierKey ? ' selected' : '');
+          pill.setAttribute('data-tier', tierKey);
+          pill.setAttribute('aria-pressed', currentTier === tierKey ? 'true' : 'false');
+
+          const iconSpan = document.createElement('span');
+          iconSpan.textContent = wine.icon;
+          const labelSpan = document.createElement('span');
+          labelSpan.textContent = wine.tierLabel;
+
+          const priceSpan = document.createElement('span');
+          priceSpan.className = 'choice-price';
+          priceSpan.textContent = wine.surcharge === 0 ? '($0)' : `(+$${wine.surcharge})`;
+
+          pill.appendChild(iconSpan);
+          pill.appendChild(labelSpan);
+          pill.appendChild(priceSpan);
+
+          pill.addEventListener('click', () => {
+            selectedTiers[course.id] = tierKey;
+            checkPresetStatus();
+            renderCourses();
+            updateTally();
+          });
+
+          pillGroup.appendChild(pill);
+        });
+        controls.appendChild(pillGroup);
+
+        // Active wine highlight box
+        const activeWine = course.pairings[currentTier];
+        const wineBox = document.createElement('div');
+        wineBox.className = 'active-wine-box';
+
+        const wineInfo = document.createElement('div');
+        wineInfo.className = 'wine-box-info';
+
+        const wineIcon = document.createElement('div');
+        wineIcon.className = 'wine-icon-badge';
+        wineIcon.textContent = activeWine.icon;
+
+        const nameCol = document.createElement('div');
+        nameCol.className = 'wine-name-appellation';
+
+        const wineName = document.createElement('strong');
+        wineName.className = 'active-wine-name';
+        wineName.textContent = activeWine.title;
+
+        const wineApp = document.createElement('span');
+        wineApp.className = 'active-wine-appellation';
+        wineApp.textContent = `${activeWine.appellation} • ${activeWine.surcharge === 0 ? 'Included' : '+$' + activeWine.surcharge + ' surcharge'}`;
+
+        nameCol.appendChild(wineName);
+        nameCol.appendChild(wineApp);
+
+        wineInfo.appendChild(wineIcon);
+        wineInfo.appendChild(nameCol);
+
+        const actionsCol = document.createElement('div');
+        actionsCol.className = 'wine-box-actions';
+
+        const notesBtn = document.createElement('button');
+        notesBtn.type = 'button';
+        notesBtn.className = 'btn-open-notes';
+        notesBtn.textContent = '🍷 Tasting Notes';
+        notesBtn.setAttribute('title', 'View Sommelier Profile');
+        notesBtn.addEventListener('click', (e) => {
+          showPopover(activeWine, e.currentTarget);
+        });
+
+        actionsCol.appendChild(notesBtn);
+
+        wineBox.appendChild(wineInfo);
+        wineBox.appendChild(actionsCol);
+
+        card.appendChild(head);
+        card.appendChild(descP);
+        card.appendChild(controls);
+        card.appendChild(wineBox);
+
+        container.appendChild(card);
+      });
+    }
+
+    function checkPresetStatus() {
+      const values = Object.values(selectedTiers);
+      const allSame = values.every((v) => v === values[0]);
+      presetBtns.forEach((btn) => {
+        const p = btn.getAttribute('data-preset');
+        btn.classList.toggle('active', allSame && values[0] === p);
+      });
+    }
+
+    function showPopover(wine, targetEl) {
+      if (!popover) return;
+
+      const titleEl = document.getElementById('popoverTitle');
+      const tierEl = document.getElementById('popoverTier');
+      const appEl = document.getElementById('popoverAppellation');
+      const descEl = document.getElementById('popoverDesc');
+      const tanninVal = document.getElementById('popoverTanninVal');
+      const tanninBar = document.getElementById('popoverTanninBar');
+      const acidVal = document.getElementById('popoverAcidityVal');
+      const acidBar = document.getElementById('popoverAcidityBar');
+      const finishVal = document.getElementById('popoverFinishVal');
+      const finishBar = document.getElementById('popoverFinishBar');
+      const tempEl = document.getElementById('popoverServingTemp');
+      const surchargeEl = document.getElementById('popoverSurcharge');
+
+      if (titleEl) titleEl.textContent = wine.title;
+      if (tierEl) tierEl.textContent = wine.tierLabel.toUpperCase();
+      if (appEl) appEl.textContent = wine.appellation;
+      if (descEl) descEl.textContent = wine.desc;
+      if (tanninVal) tanninVal.textContent = `${wine.tannins} / 5`;
+      if (tanninBar) tanninBar.style.width = `${wine.tannins * 20}%`;
+      if (acidVal) acidVal.textContent = `${wine.acidity} / 5`;
+      if (acidBar) acidBar.style.width = `${wine.acidity * 20}%`;
+      if (finishVal) finishVal.textContent = wine.finish;
+      if (finishBar) finishBar.style.width = '85%';
+      if (tempEl) tempEl.textContent = `Serving Temp: ${wine.temp}`;
+      if (surchargeEl) surchargeEl.textContent = wine.surcharge === 0 ? 'Included ($0)' : `+$${wine.surcharge} / guest`;
+
+      // Position near target
+      const rect = targetEl.getBoundingClientRect();
+      const popoverWidth = 320;
+      let left = rect.left - popoverWidth - 12;
+      let top = rect.top;
+
+      if (left < 10) {
+        left = rect.right + 12;
+      }
+      if (left + popoverWidth > window.innerWidth - 10) {
+        left = window.innerWidth - popoverWidth - 10;
+      }
+      if (top + 340 > window.innerHeight) {
+        top = Math.max(10, window.innerHeight - 360);
+      }
+
+      popover.style.left = `${Math.max(10, left)}px`;
+      popover.style.top = `${Math.max(10, top)}px`;
+      popover.hidden = false;
+    }
+
+    function updateTally() {
+      const tallyGuestCount = document.getElementById('tallyGuestCount');
+      const tallyBaseTotal = document.getElementById('tallyBaseTotal');
+      const tallyPairingSurcharge = document.getElementById('tallyPairingSurcharge');
+      const tallyBreakdown = document.getElementById('tallyCourseBreakdown');
+      const tallySubtotal = document.getElementById('tallySubtotal');
+      const tallyGratuity = document.getElementById('tallyGratuity');
+      const tallyGrandTotal = document.getElementById('tallyGrandTotal');
+      const tallyPerGuest = document.getElementById('tallyPerGuest');
+
+      const baseTotal = BASE_PRICE_PER_GUEST * partySize;
+      let surchargePerGuest = 0;
+
+      if (tallyBreakdown) tallyBreakdown.replaceChildren();
+
+      COURSES.forEach((course) => {
+        const tier = selectedTiers[course.id] || 'classic';
+        const wine = course.pairings[tier];
+        surchargePerGuest += wine.surcharge;
+
+        if (tallyBreakdown) {
+          const row = document.createElement('div');
+          row.className = 'tally-course-item';
+
+          const leftSpan = document.createElement('span');
+          leftSpan.className = 'course-wine-tag';
+          leftSpan.textContent = `${course.order}: ${wine.tierLabel}`;
+
+          const rightSpan = document.createElement('span');
+          rightSpan.className = 'course-wine-cost';
+          rightSpan.textContent = wine.surcharge === 0 ? '$0' : `+$${wine.surcharge * partySize}`;
+
+          row.appendChild(leftSpan);
+          row.appendChild(rightSpan);
+          tallyBreakdown.appendChild(row);
+        }
+      });
+
+      const totalSurcharge = surchargePerGuest * partySize;
+      const subtotal = baseTotal + totalSurcharge;
+      const gratuity = subtotal * SERVICE_RATE;
+      const grandTotal = subtotal + gratuity;
+      const perGuestGrand = grandTotal / partySize;
+
+      if (tallyGuestCount) tallyGuestCount.textContent = String(partySize);
+      if (tallyBaseTotal) tallyBaseTotal.textContent = `$${baseTotal.toFixed(2)}`;
+      if (tallyPairingSurcharge) tallyPairingSurcharge.textContent = `+$${totalSurcharge.toFixed(2)}`;
+      if (tallySubtotal) tallySubtotal.textContent = `$${subtotal.toFixed(2)}`;
+      if (tallyGratuity) tallyGratuity.textContent = `$${gratuity.toFixed(2)}`;
+      if (tallyGrandTotal) tallyGrandTotal.textContent = `$${grandTotal.toFixed(2)}`;
+      if (tallyPerGuest) tallyPerGuest.textContent = `($${perGuestGrand.toFixed(2)} / guest)`;
+    }
+
+    // Initial render
+    renderCourses();
+    updateTally();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSeasonalTastingMenuExplorer);
+  } else {
+    initSeasonalTastingMenuExplorer();
+  }
+})();
+
+
