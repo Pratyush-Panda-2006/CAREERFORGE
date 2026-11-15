@@ -17,6 +17,7 @@
     <button type="button" class="reserve-btn" id="reserveBtn" onclick="reserveTable()" aria-haspopup="dialog" aria-controls="reservationModal">Reserve a Table</button>
     <button type="button" class="order-btn order-hero" id="orderOnline">Order Online</button>
     <button type="button" class="order-btn kds-hero-btn" id="openKdsBtn" aria-haspopup="dialog" aria-controls="kdsModal">🧑‍🍳 Kitchen Display (KDS)</button>
+    <a href="#mixologyLab" class="order-btn mixology-hero-btn">🍸 Mixology Lab</a>
   </header>
 
   <main className="menu-section" id="menu">
@@ -721,6 +722,225 @@
     </div>
   </div>
 
+
+  <!-- ===== BEGIN Issue #393: Artisanal Cocktail Mixology Lab with Flavor Balance Radar Chart ===== -->
+  <section class="mixology-section" id="mixologyLab" aria-labelledby="mixologyTitle">
+    <div class="mixology-container">
+      <div class="mixology-header">
+        <div class="mixology-kicker">ATELIER DE MIXOLOGIE ARTISANALE • COCKTAIL LABORATORY</div>
+        <h2 id="mixologyTitle">Artisanal Cocktail Mixology Lab</h2>
+        <p class="mixology-subtitle">
+          Calibrate bespoke aperitifs with Michelin-grade precision. Curate artisanal spirit bases, French botanical infusions, and small-batch bitters while visualizing the live 4-axis <strong>Sweet, Bitter, Sour &amp; Boozy</strong> flavor balance radar chart.
+        </p>
+      </div>
+
+      <!-- Quick Recipe Presets Bar -->
+      <div class="mixology-presets-bar">
+        <span class="presets-label">Signature Creations:</span>
+        <div class="presets-btn-group" role="group" aria-label="Signature Cocktail Presets">
+          <button type="button" class="mix-preset-btn active" data-preset="parisian-boulevardier">The Parisian Boulevardier (Cognac &amp; Gentian)</button>
+          <button type="button" class="mix-preset-btn" data-preset="botanical-bergamot-fizz">Botanical Bergamot Bloom (Gin &amp; Citrus)</button>
+          <button type="button" class="mix-preset-btn" data-preset="smoked-bourbon-old-fashioned">Smoked Cedar Reserve (Bourbon &amp; Cacao)</button>
+          <button type="button" class="mix-preset-btn" data-preset="espresso-velvet-digestif">Espresso Noir Velvet (Vodka &amp; Cold Brew)</button>
+        </div>
+      </div>
+
+      <!-- Main Lab Grid: Controls on Left, Radar & Recipe Card on Right -->
+      <div class="mixology-grid">
+        <!-- Controls Column -->
+        <div class="mix-controls-column">
+          <!-- Ingredient Step 1: Spirit Base -->
+          <div class="mix-step-group">
+            <div class="step-header">
+              <span class="step-num">01</span>
+              <div>
+                <h3 class="step-title">Select Spirit Base</h3>
+                <span class="step-sub">Select 1 primary spirit foundation (45ml / 1.5 oz)</span>
+              </div>
+            </div>
+            <div class="ingredients-pills-grid" id="spiritPillsGrid" role="radiogroup" aria-label="Spirit Base Selection">
+              <button type="button" class="ing-pill active" data-type="spirit" data-id="cognac" role="radio" aria-checked="true">
+                <span class="ing-icon">🥃</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">Single-Barrel Cognac XO</strong>
+                  <small class="ing-notes">Rich oak, dried fig, vanillin • 42% ABV</small>
+                </div>
+              </button>
+              <button type="button" class="ing-pill" data-type="spirit" data-id="gin" role="radio" aria-checked="false">
+                <span class="ing-icon">🍸</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">Wild Botanical Gin</strong>
+                  <small class="ing-notes">Juniper, coriander, angelica root • 45% ABV</small>
+                </div>
+              </button>
+              <button type="button" class="ing-pill" data-type="spirit" data-id="bourbon" role="radio" aria-checked="false">
+                <span class="ing-icon">🪵</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">Aged Kentucky Bourbon</strong>
+                  <small class="ing-notes">Charred oak, caramelized honey • 47% ABV</small>
+                </div>
+              </button>
+              <button type="button" class="ing-pill" data-type="spirit" data-id="vodka" role="radio" aria-checked="false">
+                <span class="ing-icon">🌾</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">French Wheat Vodka</strong>
+                  <small class="ing-notes">Silky texture, neutral clean finish • 40% ABV</small>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Ingredient Step 2: Infusions & Modifiers -->
+          <div class="mix-step-group">
+            <div class="step-header">
+              <span class="step-num">02</span>
+              <div>
+                <h3 class="step-title">Botanical Infusions &amp; Modifiers</h3>
+                <span class="step-sub">Select up to 2 artisanal flavor modifiers (20ml)</span>
+              </div>
+            </div>
+            <div class="ingredients-pills-grid" id="modifierPillsGrid" role="group" aria-label="Botanical Infusion Selection">
+              <button type="button" class="ing-pill active" data-type="modifier" data-id="honey" aria-pressed="true">
+                <span class="ing-icon">🍯</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">Provencal Lavender Honey</strong>
+                  <small class="ing-notes">Floral sweetness, velvety mouthfeel</small>
+                </div>
+              </button>
+              <button type="button" class="ing-pill" data-type="modifier" data-id="lemon" aria-pressed="false">
+                <span class="ing-icon">🍋</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">Meyer Lemon &amp; Bergamot</strong>
+                  <small class="ing-notes">Vibrant citrus acidity, fragrant zest</small>
+                </div>
+              </button>
+              <button type="button" class="ing-pill" data-type="modifier" data-id="elderflower" aria-pressed="false">
+                <span class="ing-icon">🌸</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">St. Germain Elderflower</strong>
+                  <small class="ing-notes">Subtle lychee, pear, white blossom</small>
+                </div>
+              </button>
+              <button type="button" class="ing-pill" data-type="modifier" data-id="espresso" aria-pressed="false">
+                <span class="ing-icon">☕</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">Cold-Brew Espresso Extraction</strong>
+                  <small class="ing-notes">Dark roast cacao, roasted crema</small>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Ingredient Step 3: Aromatic Bitters -->
+          <div class="mix-step-group">
+            <div class="step-header">
+              <span class="step-num">03</span>
+              <div>
+                <h3 class="step-title">Aromatic Bitters &amp; Tinctures</h3>
+                <span class="step-sub">Select 1 bespoke bitter tincture (3 dashes)</span>
+              </div>
+            </div>
+            <div class="ingredients-pills-grid" id="bittersPillsGrid" role="radiogroup" aria-label="Bitters Selection">
+              <button type="button" class="ing-pill active" data-type="bitters" data-id="gentian" role="radio" aria-checked="true">
+                <span class="ing-icon">🌿</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">Alpine Gentian &amp; Peychaud</strong>
+                  <small class="ing-notes">Complex herbal bitterness, anise finish</small>
+                </div>
+              </button>
+              <button type="button" class="ing-pill" data-type="bitters" data-id="orange" role="radio" aria-checked="false">
+                <span class="ing-icon">🍊</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">Blood Orange &amp; Cardamom</strong>
+                  <small class="ing-notes">Warm spice, candied citrus rind</small>
+                </div>
+              </button>
+              <button type="button" class="ing-pill" data-type="bitters" data-id="cacao" role="radio" aria-checked="false">
+                <span class="ing-icon">🍫</span>
+                <div class="ing-meta">
+                  <strong class="ing-name">Roasted Cacao &amp; Vanilla</strong>
+                  <small class="ing-notes">Rich dark chocolate, subtle smoke</small>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Radar & Recipe Column -->
+        <div class="mix-visual-column">
+          <!-- Interactive SVG Radar Chart Card -->
+          <div class="mix-radar-card">
+            <div class="radar-card-topline">
+              <span class="radar-badge">LIVE SENSORY BALANCE</span>
+              <span class="radar-state-tag" id="mixologyBalanceTag">Spirit-Forward &amp; Bittersweet</span>
+            </div>
+
+            <!-- SVG 4-Axis Radar Chart (Sweet, Bitter, Sour, Boozy) -->
+            <div class="radar-svg-stage">
+              <svg id="cocktailRadarSvg" viewBox="0 0 340 340" role="img" aria-label="4-Axis Cocktail Flavor Balance Radar Chart">
+                <!-- Concentric Circular Grids -->
+                <g id="mixRadarGrid"></g>
+                <!-- Radar Polygon Area -->
+                <polygon id="mixRadarPolygon" class="mix-radar-polygon" points=""></polygon>
+                <!-- Anchor Dots -->
+                <g id="mixRadarPoints"></g>
+                <!-- Axis Text Labels -->
+                <g id="mixRadarLabels"></g>
+              </svg>
+            </div>
+
+            <!-- Real-time 4-Axis Metric Chips -->
+            <div class="radar-metrics-row" id="mixMetricsRow">
+              <div class="mix-stat-chip sweet">
+                <span class="stat-name">Sweet</span>
+                <strong class="stat-val" id="valSweet">6.2</strong>
+              </div>
+              <div class="mix-stat-chip bitter">
+                <span class="stat-name">Bitter</span>
+                <strong class="stat-val" id="valBitter">7.4</strong>
+              </div>
+              <div class="mix-stat-chip sour">
+                <span class="stat-name">Sour</span>
+                <strong class="stat-val" id="valSour">3.1</strong>
+              </div>
+              <div class="mix-stat-chip boozy">
+                <span class="stat-name">Boozy</span>
+                <strong class="stat-val" id="valBoozy">8.5</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cocktail Recipe Card Preview -->
+          <div class="mix-recipe-card" id="mixRecipeCard">
+            <div class="recipe-card-header">
+              <span class="recipe-glass-icon" id="recipeGlassIcon">🍸</span>
+              <div>
+                <h4 class="recipe-cocktail-name" id="recipeCocktailName">The Parisian Boulevardier</h4>
+                <span class="recipe-category" id="recipeCategory">Artisanal Aperitif • 31% ABV</span>
+              </div>
+            </div>
+
+            <p class="recipe-tasting-notes" id="recipeTastingNotes">
+              An aristocratic harmony of oak-aged Cognac XO kissed with wild lavender honey and anchored by herbaceous Alpine gentian bitters.
+            </p>
+
+            <div class="recipe-pour-list" id="recipePourList">
+              <!-- Rendered safely via JS -->
+            </div>
+
+            <div class="recipe-actions">
+              <button type="button" class="btn-mix-shake" id="btnMixShake">
+                <span>🍸 Shake &amp; Pour</span>
+              </button>
+              <button type="button" class="btn-mix-reset" id="btnMixReset">Reset Lab</button>
+            </div>
+            <div class="mix-toast" id="mixToast" role="status" aria-live="polite" hidden></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #393 ===== -->
 
   <!-- Sommelier Wine Pairing & Flavor Radar Modal (Issue #445) -->
   <div class="sommelier-modal-backdrop" id="sommelierModalBackdrop" hidden>

@@ -1426,3 +1426,428 @@ function renderAnalysis(pw) {
   document.addEventListener('DOMContentLoaded', init2faSimulator);
 })();
 /* ===== END issue #277 ===== */
+
+/* ==========================================================
+   Issue #395: SSL/TLS Certificate Inspector & Cipher Suite Analyzer
+   ========================================================== */
+(() => {
+  const PRESET_DOMAINS = {
+    'sentinel.defense.org': {
+      domain: 'sentinel.defense.org',
+      grade: 'A+',
+      status: 'SECURE & TRUSTED',
+      statusClass: 'status-secure',
+      tlsProtocol: 'TLS 1.3 (RFC 8446) / ALPN: h2, h3',
+      keyExchange: 'X25519 (ECDHE, 256-bit) • PFS',
+      signature: 'ECDSA with SHA-384',
+      validityDays: 284,
+      validUntil: 'Nov 24, 2027',
+      subjectCn: 'sentinel.defense.org',
+      serialNumber: '03:F9:8A:7B:1C:44:E2:09:A6',
+      vulnTitle: 'Zero Vulnerabilities Detected',
+      vulnDesc: 'Handshake strictly mandates modern AEAD ciphers with Ephemeral Diffie-Hellman forward secrecy. Deprecated CBC and TLS 1.0/1.1 are actively blocked.',
+      vulnClass: 'safe',
+      vulnIcon: '🛡️',
+      chain: [
+        { level: 'End-Entity', cn: 'sentinel.defense.org', org: 'Sentinel Cyber Defense Ltd', valid: 'Valid until Nov 2027', serial: '03:F9:8A:7B:1C:44:E2:09:A6' },
+        { level: 'Intermediate CA', cn: 'Sentinel Global Cyber Trust Intermediate CA G3', org: 'Sentinel Trust Network', valid: 'Valid until 2032', serial: '0A:88:E1:92:44:B0:12:F1' },
+        { level: 'Root CA', cn: 'DigiCert Global Root G2', org: 'DigiCert Inc', valid: 'Valid until 2038', serial: '08:3B:E0:56:90:42:46:B1:A1' }
+      ],
+      ciphers: [
+        { name: 'TLS_AES_256_GCM_SHA384', proto: 'TLS 1.3', kx: 'ECDHE (X25519)', enc: 'AES-256-GCM (AEAD)', rating: 'Recommended', ratingClass: 'badge-strong' },
+        { name: 'TLS_CHACHA20_POLY1305_SHA256', proto: 'TLS 1.3', kx: 'ECDHE (X25519)', enc: 'ChaCha20-Poly1305 (AEAD)', rating: 'Recommended', ratingClass: 'badge-strong' },
+        { name: 'TLS_AES_128_GCM_SHA256', proto: 'TLS 1.3', kx: 'ECDHE (X25519)', enc: 'AES-128-GCM (AEAD)', rating: 'Recommended', ratingClass: 'badge-strong' },
+        { name: 'ECDHE-ECDSA-AES256-GCM-SHA384', proto: 'TLS 1.2', kx: 'ECDHE (P-384)', enc: 'AES-256-GCM', rating: 'Recommended', ratingClass: 'badge-strong' }
+      ],
+      ctLogs: [
+        { op: 'Google Argon 2026', time: '2026-03-12 14:22:01 UTC' },
+        { op: 'Cloudflare Nimbus 2026', time: '2026-03-12 14:22:03 UTC' },
+        { op: 'DigiCert Yeti 2026', time: '2026-03-12 14:22:04 UTC' }
+      ],
+      features: [
+        { icon: '🔒', name: 'HSTS Preloaded (max-age=63072000)' },
+        { icon: '⚡', name: 'OCSP Must-Staple Enabled' },
+        { icon: '🛡️', name: '0-RTT Anti-Replay Mitigation' },
+        { icon: '🔑', name: 'Perfect Forward Secrecy (PFS)' }
+      ]
+    },
+    'api.crypto-vault.io': {
+      domain: 'api.crypto-vault.io',
+      grade: 'A',
+      status: 'SECURE & TRUSTED',
+      statusClass: 'status-secure',
+      tlsProtocol: 'TLS 1.3 & TLS 1.2 (Dual-Stack)',
+      keyExchange: 'SecP384r1 (ECDHE, 384-bit) • PFS',
+      signature: 'RSA with SHA-256 (3072-bit)',
+      validityDays: 68,
+      validUntil: 'Jan 21, 2027',
+      subjectCn: 'api.crypto-vault.io',
+      serialNumber: '04:1A:92:DF:3C:99:A1:72:01',
+      vulnTitle: 'Strong Security Profile',
+      vulnDesc: 'Supports modern forward secrecy with TLS 1.3 preference. TLS 1.2 fallback allowed with AEAD suites only.',
+      vulnClass: 'safe',
+      vulnIcon: '🛡️',
+      chain: [
+        { level: 'End-Entity', cn: 'api.crypto-vault.io', org: 'CryptoVault Infrastructure Inc', valid: 'Valid until Jan 2027', serial: '04:1A:92:DF:3C:99:A1:72:01' },
+        { level: 'Intermediate CA', cn: "Let's Encrypt Authority E6", org: 'Internet Security Research Group', valid: 'Valid until 2028', serial: '0E:71:00:23:4C:D8:1A:99' },
+        { level: 'Root CA', cn: 'ISRG Root X2', org: 'Internet Security Research Group', valid: 'Valid until 2035', serial: '40:01:77:21:37:D4:E9:42' }
+      ],
+      ciphers: [
+        { name: 'TLS_AES_256_GCM_SHA384', proto: 'TLS 1.3', kx: 'ECDHE (P-384)', enc: 'AES-256-GCM (AEAD)', rating: 'Recommended', ratingClass: 'badge-strong' },
+        { name: 'TLS_AES_128_GCM_SHA256', proto: 'TLS 1.3', kx: 'ECDHE (X25519)', enc: 'AES-128-GCM (AEAD)', rating: 'Recommended', ratingClass: 'badge-strong' },
+        { name: 'ECDHE-RSA-AES256-GCM-SHA384', proto: 'TLS 1.2', kx: 'ECDHE (RSA-3072)', enc: 'AES-256-GCM', rating: 'Recommended', ratingClass: 'badge-strong' },
+        { name: 'ECDHE-RSA-AES128-GCM-SHA256', proto: 'TLS 1.2', kx: 'ECDHE (RSA-3072)', enc: 'AES-128-GCM', rating: 'Recommended', ratingClass: 'badge-strong' }
+      ],
+      ctLogs: [
+        { op: 'Google Daedalus', time: '2026-10-14 09:15:32 UTC' },
+        { op: 'Sectigo Mammoth', time: '2026-10-14 09:15:35 UTC' }
+      ],
+      features: [
+        { icon: '🔒', name: 'HSTS Enabled (31536000s)' },
+        { icon: '⚡', name: 'OCSP Stapling Active' },
+        { icon: '🔑', name: 'Forward Secrecy Guaranteed' },
+        { icon: '🌐', name: 'ALPN: HTTP/2 (h2)' }
+      ]
+    },
+    'legacy-portal.internal': {
+      domain: 'legacy-portal.internal',
+      grade: 'C',
+      status: 'LEGACY WARNING',
+      statusClass: 'status-warn',
+      tlsProtocol: 'TLS 1.2 & TLS 1.1 (Deprecated)',
+      keyExchange: 'RSA (Static 2048-bit) • No PFS',
+      signature: 'RSA with SHA-1 (Deprecated)',
+      validityDays: 14,
+      validUntil: 'Nov 28, 2026',
+      subjectCn: 'legacy-portal.internal',
+      serialNumber: '02:EE:99:11:44:00:23:7A',
+      vulnTitle: 'Vulnerabilities: CBC Padding & No PFS',
+      vulnDesc: 'Legacy CBC-mode ciphers exposed to timing side-channels (Lucky13 / POODLE-TLS). Static RSA key exchange lacks forward secrecy.',
+      vulnClass: 'warn',
+      vulnIcon: '⚠️',
+      chain: [
+        { level: 'End-Entity', cn: 'legacy-portal.internal', org: 'Enterprise Legacy Services', valid: 'Expires in 14 days', serial: '02:EE:99:11:44:00:23:7A' },
+        { level: 'Intermediate CA', cn: 'Corp Enterprise Issuing CA', org: 'Corporate IT', valid: 'Valid until 2027', serial: '01:77:22:90:33:FF:11:AA' },
+        { level: 'Root CA', cn: 'Corp Enterprise Internal Root', org: 'Corporate IT', valid: 'Valid until 2029', serial: '00:99:88:77:66:55:44:33' }
+      ],
+      ciphers: [
+        { name: 'TLS_RSA_WITH_AES_256_CBC_SHA', proto: 'TLS 1.2', kx: 'RSA Static (No PFS)', enc: 'AES-256-CBC (Vulnerable)', rating: 'Legacy CBC', ratingClass: 'badge-warn' },
+        { name: 'TLS_RSA_WITH_AES_128_CBC_SHA', proto: 'TLS 1.1', kx: 'RSA Static (No PFS)', enc: 'AES-128-CBC (Vulnerable)', rating: 'Legacy CBC', ratingClass: 'badge-warn' },
+        { name: 'TLS_RSA_WITH_3DES_EDE_CBC_SHA', proto: 'TLS 1.0', kx: 'RSA Static (No PFS)', enc: '3DES-CBC (Sweet32)', rating: 'Insecure', ratingClass: 'badge-insecure' }
+      ],
+      ctLogs: [
+        { op: 'Internal CA Audits', time: '2025-11-28 08:00:00 UTC' }
+      ],
+      features: [
+        { icon: '⚠️', name: 'HSTS Disabled' },
+        { icon: '⚠️', name: 'SHA-1 Signature Hash' },
+        { icon: '❌', name: 'No Forward Secrecy' },
+        { icon: '⚠️', name: 'CBC Mode Ciphers Active' }
+      ]
+    },
+    'expired-corp.net': {
+      domain: 'expired-corp.net',
+      grade: 'F',
+      status: 'EXPIRED & UNTRUSTED',
+      statusClass: 'status-danger',
+      tlsProtocol: 'TLS 1.0 (Obsolete)',
+      keyExchange: 'RSA 1024-bit (Broken)',
+      signature: 'MD5 / SHA-1 (Insecure)',
+      validityDays: -42,
+      validUntil: 'Oct 3, 2026 (Expired)',
+      subjectCn: 'expired-corp.net',
+      serialNumber: '00:DE:AD:BE:EF:01:23:45',
+      vulnTitle: 'CRITICAL: Certificate Expired & Revoked',
+      vulnDesc: 'Browser trust chain invalid. Cryptographic certificate expired 42 days ago. TLS 1.0 handshake vulnerable to BEAST and downgrade attacks.',
+      vulnClass: 'danger',
+      vulnIcon: '🚨',
+      chain: [
+        { level: 'End-Entity', cn: 'expired-corp.net', org: 'Defunct Entity Inc', valid: 'EXPIRED (Oct 3, 2026)', serial: '00:DE:AD:BE:EF:01:23:45' },
+        { level: 'Intermediate CA', cn: 'Untrusted Legacy Sub-CA', org: 'Untrusted CA', valid: 'Revoked', serial: 'FF:EE:DD:CC:BB:AA:00:11' },
+        { level: 'Root CA', cn: 'Legacy Root Authority 2005', org: 'Untrusted Root', valid: 'Expired', serial: '11:22:33:44:55:66:77:88' }
+      ],
+      ciphers: [
+        { name: 'TLS_RSA_WITH_RC4_128_MD5', proto: 'TLS 1.0', kx: 'RSA Static', enc: 'RC4 Stream (Broken)', rating: 'Insecure', ratingClass: 'badge-insecure' },
+        { name: 'TLS_RSA_WITH_3DES_EDE_CBC_SHA', proto: 'TLS 1.0', kx: 'RSA Static', enc: '3DES (Sweet32)', rating: 'Insecure', ratingClass: 'badge-insecure' }
+      ],
+      ctLogs: [
+        { op: 'CT Log Entry Revoked', time: '2026-10-04 00:00:00 UTC' }
+      ],
+      features: [
+        { icon: '❌', name: 'Certificate Expired' },
+        { icon: '❌', name: 'Revocation Check Failed' },
+        { icon: '❌', name: 'Weak 1024-bit RSA Key' },
+        { icon: '❌', name: 'Insecure Protocol (TLS 1.0)' }
+      ]
+    }
+  };
+
+  function generateCustomDomainReport(domain) {
+    const cleanDomain = domain.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    if (PRESET_DOMAINS[cleanDomain]) return PRESET_DOMAINS[cleanDomain];
+
+    // Procedural generation based on string hash
+    let hash = 0;
+    for (let i = 0; i < cleanDomain.length; i++) {
+      hash = (hash << 5) - hash + cleanDomain.charCodeAt(i);
+      hash |= 0;
+    }
+    const absHash = Math.abs(hash);
+    const daysLeft = 60 + (absHash % 300);
+
+    return {
+      domain: cleanDomain,
+      grade: 'A',
+      status: 'SECURE & TRUSTED',
+      statusClass: 'status-secure',
+      tlsProtocol: 'TLS 1.3 (RFC 8446) / ALPN: h2',
+      keyExchange: 'ECDHE (X25519, 256-bit) • PFS',
+      signature: 'ECDSA with SHA-256',
+      validityDays: daysLeft,
+      validUntil: 'In ' + daysLeft + ' days',
+      subjectCn: cleanDomain,
+      serialNumber: '04:' + (absHash % 99).toString(16).padStart(2, '0') + ':B8:12:44:A9',
+      vulnTitle: 'Zero High-Risk Vulnerabilities',
+      vulnDesc: 'Simulated handshake confirms strict AEAD cipher suites and valid trust chain with Certificate Transparency inclusion.',
+      vulnClass: 'safe',
+      vulnIcon: '🛡️',
+      chain: [
+        { level: 'End-Entity', cn: cleanDomain, org: cleanDomain + ' Security', valid: 'Valid for ' + daysLeft + ' days', serial: '04:' + (absHash % 99).toString(16) },
+        { level: 'Intermediate CA', cn: 'Global Trust Authority G4', org: 'Global Trust Inc', valid: 'Valid until 2030', serial: '09:EE:41:88' },
+        { level: 'Root CA', cn: 'Global Root Trust CA 2026', org: 'Global Root PKI', valid: 'Valid until 2038', serial: '01:00:8A:BC' }
+      ],
+      ciphers: [
+        { name: 'TLS_AES_256_GCM_SHA384', proto: 'TLS 1.3', kx: 'ECDHE (X25519)', enc: 'AES-256-GCM (AEAD)', rating: 'Recommended', ratingClass: 'badge-strong' },
+        { name: 'TLS_CHACHA20_POLY1305_SHA256', proto: 'TLS 1.3', kx: 'ECDHE (X25519)', enc: 'ChaCha20-Poly1305 (AEAD)', rating: 'Recommended', ratingClass: 'badge-strong' },
+        { name: 'TLS_AES_128_GCM_SHA256', proto: 'TLS 1.3', kx: 'ECDHE (X25519)', enc: 'AES-128-GCM (AEAD)', rating: 'Recommended', ratingClass: 'badge-strong' }
+      ],
+      ctLogs: [
+        { op: 'Google Argon Log', time: '2026-04-01 10:00:00 UTC' },
+        { op: 'Cloudflare Nimbus', time: '2026-04-01 10:00:02 UTC' }
+      ],
+      features: [
+        { icon: '🔒', name: 'HSTS Enabled' },
+        { icon: '⚡', name: 'OCSP Stapling Active' },
+        { icon: '🔑', name: 'Forward Secrecy (PFS)' },
+        { icon: '🌐', name: 'ALPN: HTTP/2' }
+      ]
+    };
+  }
+
+  function initSslInspector() {
+    const section = document.getElementById('sslInspector');
+    if (!section) return;
+
+    const presetBtns = section.querySelectorAll('.ssl-preset-btn');
+    const searchForm = document.getElementById('sslSearchForm');
+    const domainInput = document.getElementById('sslDomainInput');
+    const spinner = document.getElementById('sslSpinner');
+    const btnText = document.getElementById('sslBtnText');
+
+    // Display elements
+    const statusPill = document.getElementById('sslStatusPill');
+    const statusText = document.getElementById('sslStatusText');
+    const gradeCircle = document.getElementById('sslGradeCircle');
+    const gradeLetter = document.getElementById('sslGradeLetter');
+    const subjectCn = document.getElementById('sslSubjectCn');
+    const tlsProtocol = document.getElementById('sslTlsProtocol');
+    const keyExchange = document.getElementById('sslKeyExchange');
+    const expiryCountdown = document.getElementById('sslExpiryCountdown');
+
+    const vulnBanner = document.getElementById('sslVulnBanner');
+    const vulnIcon = document.getElementById('sslVulnIcon');
+    const vulnTitle = document.getElementById('sslVulnTitle');
+    const vulnDesc = document.getElementById('sslVulnDesc');
+
+    const chainTree = document.getElementById('sslChainTree');
+    const ciphersBody = document.getElementById('sslCiphersBody');
+    const ctLogsList = document.getElementById('sslCtLogsList');
+    const featuresGrid = document.getElementById('sslFeaturesGrid');
+
+    function renderReport(report) {
+      // Status Pill
+      statusText.textContent = report.status;
+      statusPill.className = 'ssl-status-pill ' + (report.statusClass === 'status-danger' ? 'status-danger' : report.statusClass === 'status-warn' ? 'status-warn' : '');
+
+      // Grade circle
+      gradeCircle.setAttribute('data-grade', report.grade);
+      gradeLetter.textContent = report.grade;
+
+      // Summary metrics
+      subjectCn.textContent = report.subjectCn;
+      tlsProtocol.textContent = report.tlsProtocol;
+      keyExchange.textContent = report.keyExchange;
+
+      if (report.validityDays > 0) {
+        expiryCountdown.textContent = report.validityDays + ' Days Remaining • ' + report.validUntil;
+        expiryCountdown.className = 'ssl-m-val text-emerald';
+      } else {
+        expiryCountdown.textContent = 'EXPIRED (' + report.validUntil + ')';
+        expiryCountdown.className = 'ssl-m-val text-danger';
+      }
+
+      // Vuln Banner
+      vulnIcon.textContent = report.vulnIcon;
+      vulnTitle.textContent = report.vulnTitle;
+      vulnDesc.textContent = report.vulnDesc;
+      vulnBanner.className = 'ssl-vuln-banner ' + report.vulnClass;
+
+      // X.509 Chain Tree (Safe DOM creation)
+      chainTree.replaceChildren();
+      report.chain.forEach((node) => {
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'chain-node';
+
+        const badge = document.createElement('span');
+        badge.className = 'chain-node-badge';
+        badge.textContent = node.level;
+        nodeEl.appendChild(badge);
+
+        const content = document.createElement('div');
+        content.className = 'chain-node-content';
+
+        const cnEl = document.createElement('span');
+        cnEl.className = 'chain-cn';
+        cnEl.textContent = node.cn;
+        content.appendChild(cnEl);
+
+        const metaRow = document.createElement('div');
+        metaRow.className = 'chain-meta-row';
+
+        const orgSpan = document.createElement('span');
+        orgSpan.textContent = 'Org: ' + node.org;
+        metaRow.appendChild(orgSpan);
+
+        const validSpan = document.createElement('span');
+        validSpan.textContent = 'Validity: ' + node.valid;
+        metaRow.appendChild(validSpan);
+
+        const serialSpan = document.createElement('span');
+        serialSpan.textContent = 'Serial: ' + node.serial;
+        metaRow.appendChild(serialSpan);
+
+        content.appendChild(metaRow);
+        nodeEl.appendChild(content);
+        chainTree.appendChild(nodeEl);
+      });
+
+      // Cipher Suite Table (Safe DOM creation)
+      ciphersBody.replaceChildren();
+      report.ciphers.forEach((cipher) => {
+        const tr = document.createElement('tr');
+
+        const tdName = document.createElement('td');
+        const codeName = document.createElement('code');
+        codeName.textContent = cipher.name;
+        tdName.appendChild(codeName);
+        tr.appendChild(tdName);
+
+        const tdProto = document.createElement('td');
+        tdProto.textContent = cipher.proto;
+        tr.appendChild(tdProto);
+
+        const tdKx = document.createElement('td');
+        tdKx.textContent = cipher.kx;
+        tr.appendChild(tdKx);
+
+        const tdEnc = document.createElement('td');
+        tdEnc.textContent = cipher.enc;
+        tr.appendChild(tdEnc);
+
+        const tdRating = document.createElement('td');
+        const spanRating = document.createElement('span');
+        spanRating.className = 'cipher-badge ' + cipher.ratingClass;
+        spanRating.textContent = cipher.rating;
+        tdRating.appendChild(spanRating);
+        tr.appendChild(tdRating);
+
+        ciphersBody.appendChild(tr);
+      });
+
+      // CT Logs List (Safe DOM creation)
+      ctLogsList.replaceChildren();
+      report.ctLogs.forEach((log) => {
+        const li = document.createElement('li');
+        li.className = 'ct-log-item';
+
+        const opSpan = document.createElement('span');
+        opSpan.className = 'ct-log-op';
+        opSpan.textContent = log.op;
+        li.appendChild(opSpan);
+
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'ct-log-time';
+        timeSpan.textContent = log.time;
+        li.appendChild(timeSpan);
+
+        ctLogsList.appendChild(li);
+      });
+
+      // Features Grid (Safe DOM creation)
+      featuresGrid.replaceChildren();
+      report.features.forEach((feat) => {
+        const item = document.createElement('div');
+        item.className = 'ct-flag-item';
+
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'ct-flag-icon';
+        iconSpan.textContent = feat.icon;
+        item.appendChild(iconSpan);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = feat.name;
+        item.appendChild(nameSpan);
+
+        featuresGrid.appendChild(item);
+      });
+    }
+
+    function runInspection(domain) {
+      if (spinner && btnText) {
+        spinner.hidden = false;
+        btnText.textContent = 'Handshaking...';
+      }
+
+      setTimeout(() => {
+        if (spinner && btnText) {
+          spinner.hidden = true;
+          btnText.textContent = 'Inspect TLS Handshake';
+        }
+        const report = generateCustomDomainReport(domain);
+        renderReport(report);
+      }, 250);
+    }
+
+    // Event listeners for domain presets
+    presetBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const targetDomain = btn.getAttribute('data-domain');
+        domainInput.value = targetDomain;
+        runInspection(targetDomain);
+      });
+    });
+
+    // Search form submit
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = domainInput.value.trim();
+      if (!val) return;
+      presetBtns.forEach((b) => {
+        b.classList.toggle('active', b.getAttribute('data-domain') === val);
+      });
+      runInspection(val);
+    });
+
+    // Initial render with default domain
+    renderReport(PRESET_DOMAINS['sentinel.defense.org']);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSslInspector);
+  } else {
+    initSslInspector();
+  }
+})();
+

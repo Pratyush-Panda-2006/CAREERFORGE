@@ -12,6 +12,11 @@
 <body>
   <header class="navbar">
     <div class="brand">⚡ VORTEX DEX</div>
+    <div class="nav-links">
+      <a href="#swapSection" class="nav-link">Instant Swap</a>
+      <a href="#portfolioRebalancer" class="nav-link">Rebalancer</a>
+      <a href="#market-title" class="nav-link">Orderbook</a>
+    </div>
     <div class="status">● ORDERBOOK ENGINE: MATCHING (0.4ms)</div>
   </header>
 
@@ -209,6 +214,206 @@
     </div>
   </section>
   <!-- ===== END Quick Swap Order Execution Panel ===== -->
+
+  <!-- ===== BEGIN Issue #391: Interactive Portfolio Allocation Rebalancer ===== -->
+  <section class="rebalance-section" id="portfolioRebalancer" aria-labelledby="rebalanceTitle">
+    <div class="rebalance-container">
+      <div class="rebalance-head">
+        <div>
+          <span class="swap-tag">// QUANTITATIVE ASSET MANAGEMENT // TARGET WEIGHT BALANCER</span>
+          <h2 id="rebalanceTitle">Crypto Portfolio Allocation Rebalancer</h2>
+          <p class="rebalance-sub">Define target weights for core holdings, detect allocation drift, calculate compensatory trade batches, and execute portfolio rebalancing with minimal slippage.</p>
+        </div>
+      </div>
+
+      <!-- Quick Strategy Presets -->
+      <div class="rebalance-presets-bar">
+        <span class="presets-title">Strategy Presets:</span>
+        <div class="presets-pills" role="group" aria-label="Portfolio Strategy Presets">
+          <button type="button" class="preset-pill active" data-btc="50" data-eth="30" data-sol="20">
+            <strong>Balanced Blue-Chip</strong>
+            <small>50% BTC • 30% ETH • 20% SOL</small>
+          </button>
+          <button type="button" class="preset-pill" data-btc="25" data-eth="55" data-sol="20">
+            <strong>Ethereum Ecosystem</strong>
+            <small>25% BTC • 55% ETH • 20% SOL</small>
+          </button>
+          <button type="button" class="preset-pill" data-btc="30" data-eth="25" data-sol="45">
+            <strong>High-Beta Solana</strong>
+            <small>30% BTC • 25% ETH • 45% SOL</small>
+          </button>
+          <button type="button" class="preset-pill" data-btc="34" data-eth="33" data-sol="33">
+            <strong>Equal Weight</strong>
+            <small>34% BTC • 33% ETH • 33% SOL</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Rebalancing Dual-Column Grid -->
+      <div class="rebalance-grid">
+        <!-- Left Column: Portfolio Settings & Target Sliders -->
+        <div class="rebalance-card controls-card">
+          <div class="card-topline">
+            <h3 class="card-heading">Target Allocation Weights</h3>
+            <span class="portfolio-val-badge">Total Portfolio: <strong id="rebalanceTotalPortfolio">$100,000.00</strong></span>
+          </div>
+
+          <!-- Total Allocation Sum Indicator -->
+          <div class="allocation-sum-bar">
+            <span>Total Target Allocation:</span>
+            <strong class="sum-tag green" id="allocationSumTag">100% (Balanced)</strong>
+          </div>
+
+          <!-- Slider 1: Bitcoin (BTC) -->
+          <div class="weight-slider-group">
+            <div class="slider-header">
+              <span class="asset-label"><span class="token-dot btc-dot"></span> Bitcoin (BTC)</span>
+              <div class="slider-readout">
+                <span class="current-txt">Current: <strong id="currentBtcPct">58.4%</strong></span>
+                <span class="target-txt">Target: <strong class="hl-cyan" id="targetBtcDisplay">50%</strong></span>
+              </div>
+            </div>
+            <input type="range" id="sliderBtcWeight" class="rebalance-slider" min="0" max="100" step="1" value="50" aria-label="BTC Target Weight Percentage" />
+            <div class="slider-bounds"><span>0%</span><span>50%</span><span>100%</span></div>
+          </div>
+
+          <!-- Slider 2: Ethereum (ETH) -->
+          <div class="weight-slider-group">
+            <div class="slider-header">
+              <span class="asset-label"><span class="token-dot eth-dot"></span> Ethereum (ETH)</span>
+              <div class="slider-readout">
+                <span class="current-txt">Current: <strong id="currentEthPct">21.8%</strong></span>
+                <span class="target-txt">Target: <strong class="hl-cyan" id="targetEthDisplay">30%</strong></span>
+              </div>
+            </div>
+            <input type="range" id="sliderEthWeight" class="rebalance-slider" min="0" max="100" step="1" value="30" aria-label="ETH Target Weight Percentage" />
+            <div class="slider-bounds"><span>0%</span><span>50%</span><span>100%</span></div>
+          </div>
+
+          <!-- Slider 3: Solana (SOL) -->
+          <div class="weight-slider-group">
+            <div class="slider-header">
+              <span class="asset-label"><span class="token-dot sol-dot"></span> Solana (SOL)</span>
+              <div class="slider-readout">
+                <span class="current-txt">Current: <strong id="currentSolPct">19.8%</strong></span>
+                <span class="target-txt">Target: <strong class="hl-cyan" id="targetSolDisplay">20%</strong></span>
+              </div>
+            </div>
+            <input type="range" id="sliderSolWeight" class="rebalance-slider" min="0" max="100" step="1" value="20" aria-label="SOL Target Weight Percentage" />
+            <div class="slider-bounds"><span>0%</span><span>50%</span><span>100%</span></div>
+          </div>
+
+          <!-- Drift Alert Callout Banner -->
+          <div class="drift-alert-banner" id="driftAlertBanner">
+            <span class="alert-icon" id="driftAlertIcon">⚠️</span>
+            <div class="alert-text">
+              <strong id="driftAlertTitle">Portfolio Drift Detected (&gt; 5.0%)</strong>
+              <p id="driftAlertDesc">Bitcoin has drifted +8.4% above target while Ethereum is underweight by -8.2%. Rebalancing is recommended to realign risk parameters.</p>
+            </div>
+          </div>
+
+          <!-- Execution Settings Row -->
+          <div class="rebalance-meta-row">
+            <div class="meta-field">
+              <label for="rebalanceSlippage">Slippage Tolerance</label>
+              <select id="rebalanceSlippage" class="rebalance-select">
+                <option value="0.1">0.1% (Tight)</option>
+                <option value="0.5" selected>0.5% (Standard)</option>
+                <option value="1.0">1.0% (Fast)</option>
+              </select>
+            </div>
+            <div class="meta-field">
+              <span class="meta-label">Est. Rebalance Fee</span>
+              <strong class="meta-val green" id="rebalanceFeeEst">$0.00 (Waived)</strong>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button type="button" class="btn-execute-rebalance" id="btnExecuteRebalance">
+            <span>⚡ Execute Automated Rebalance</span>
+          </button>
+        </div>
+
+        <!-- Right Column: Visual Allocation Split & Compensatory Orders Table -->
+        <div class="rebalance-card visual-card">
+          <div class="card-topline">
+            <h3 class="card-heading">Visual Asset Allocation Comparison</h3>
+            <span class="card-sub">Current vs Target Weights</span>
+          </div>
+
+          <!-- Comparison Segmented Split Bars -->
+          <div class="split-bars-container">
+            <div class="split-bar-group">
+              <div class="bar-label-row">
+                <span>Current Allocation</span>
+                <span class="mono-dim">Live Balances</span>
+              </div>
+              <div class="segmented-bar" id="currentSplitBar">
+                <div class="segment seg-btc" id="curSegBtc" style="width: 58.4%;" title="BTC: 58.4%"><span>BTC 58%</span></div>
+                <div class="segment seg-eth" id="curSegEth" style="width: 21.8%;" title="ETH: 21.8%"><span>ETH 22%</span></div>
+                <div class="segment seg-sol" id="curSegSol" style="width: 19.8%;" title="SOL: 19.8%"><span>SOL 20%</span></div>
+              </div>
+            </div>
+
+            <div class="split-bar-group">
+              <div class="bar-label-row">
+                <span>Target Allocation</span>
+                <span class="mono-dim" id="targetSumDisplay">100% Total</span>
+              </div>
+              <div class="segmented-bar" id="targetSplitBar">
+                <div class="segment seg-btc" id="tarSegBtc" style="width: 50%;" title="BTC: 50%"><span>BTC 50%</span></div>
+                <div class="segment seg-eth" id="tarSegEth" style="width: 30%;" title="ETH: 30%"><span>ETH 30%</span></div>
+                <div class="segment seg-sol" id="tarSegSol" style="width: 20%;" title="SOL: 20%"><span>SOL 20%</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compensatory Trade Orders Table -->
+          <div class="orders-table-wrapper">
+            <div class="table-title-row">
+              <h4>Compensatory Trade Execution Orders</h4>
+              <span class="orders-count" id="ordersCountBadge">2 Orders Required</span>
+            </div>
+
+            <table class="rebalance-table" id="rebalanceOrdersTable">
+              <thead>
+                <tr>
+                  <th scope="col">Asset</th>
+                  <th scope="col">Current Weight</th>
+                  <th scope="col">Target Weight</th>
+                  <th scope="col">Allocation Drift</th>
+                  <th scope="col">Required Trade Action</th>
+                </tr>
+              </thead>
+              <tbody id="rebalanceOrdersBody">
+                <!-- Rendered dynamically & safely via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Post-Rebalance Summary Stats -->
+          <div class="rebalance-metrics-grid">
+            <div class="stat-box">
+              <span class="stat-lbl">Total Volume to Rebalance</span>
+              <strong class="stat-val" id="totalRebalanceVol">$8,400.00</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-lbl">Max Absolute Drift</span>
+              <strong class="stat-val hl-warn" id="maxDriftDisplay">8.4%</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-lbl">Net Variance Post-Execution</span>
+              <strong class="stat-val text-emerald">&lt; 0.01%</strong>
+            </div>
+          </div>
+
+          <!-- Rebalance Toast Feedback -->
+          <div class="rebalance-toast" id="rebalanceToast" role="status" aria-live="polite" hidden></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #391 ===== -->
 
   <section class="token-discovery market" aria-labelledby="token-market-title">
     <div class="token-discovery-head">
