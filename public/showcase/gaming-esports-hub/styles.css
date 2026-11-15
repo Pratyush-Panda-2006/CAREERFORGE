@@ -4445,3 +4445,512 @@ body {
   line-height: 1.4;
 }
 /* ===== END Issue #409: Esports Tournament Match Replay Video Chapter Navigator ===== */
+
+/* ==========================================================================
+   Issue #346: Pro Player Crosshair & Sensitivity Converter
+   ========================================================================== */
+.crosshair-lab-section {
+  padding: 80px 24px;
+  background: radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.08) 0%, transparent 45%),
+              radial-gradient(circle at 90% 80%, rgba(255, 0, 127, 0.08) 0%, transparent 45%),
+              #070a13;
+  border-top: 1px solid rgba(0, 242, 254, 0.25);
+  border-bottom: 1px solid rgba(0, 242, 254, 0.25);
+  color: #f1f5f9;
+}
+
+.crosshair-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.crosshair-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.crosshair-kicker {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  border-radius: 9999px;
+  color: #00f2fe;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+
+.crosshair-header h2 {
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.crosshair-subtitle {
+  font-size: 0.96rem;
+  color: #94a3b8;
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Pro Presets Strip */
+.pro-presets-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 20px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  margin-bottom: 28px;
+}
+
+.presets-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #00f2fe;
+}
+
+.pro-presets-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-pro-preset {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pro-preset:hover {
+  background: rgba(0, 242, 254, 0.12);
+  border-color: rgba(0, 242, 254, 0.35);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-pro-preset.active {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.25), rgba(255, 0, 127, 0.2));
+  border-color: #00f2fe;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(0, 242, 254, 0.3);
+}
+
+.pro-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #00f2fe;
+}
+
+.btn-pro-preset small {
+  color: #94a3b8;
+}
+
+/* Main Grid */
+.crosshair-lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 24px;
+}
+
+.aim-card {
+  background: rgba(11, 18, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+.aim-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.aim-card-header h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.aim-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+/* Sensitivity Inputs */
+.sens-inputs-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.aim-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aim-input-group label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.aim-select, .aim-num-input {
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #090e17;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+  font-size: 0.84rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.aim-select:focus, .aim-num-input:focus {
+  border-color: #00f2fe;
+}
+
+/* Conversion Table */
+.sens-conversion-table {
+  background: #060911;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-head-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.table-data-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  transition: background 0.15s ease;
+}
+
+.table-data-row:last-child {
+  border-bottom: none;
+}
+
+.table-data-row.highlight {
+  background: rgba(0, 242, 254, 0.06);
+  border-left: 3px solid #00f2fe;
+}
+
+.game-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.val-dot { background: #ff4655; }
+.cs-dot { background: #de9b35; }
+.apex-dot { background: #da292a; }
+.ow-dot { background: #f99e1a; }
+
+.target-sens {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.target-edpi {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #00f2fe;
+}
+
+/* Live Reticle Stage */
+.crosshair-viewport-stage {
+  height: 220px;
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-backdrop {
+  position: absolute;
+  inset: 0;
+  transition: background 0.3s ease;
+}
+
+.backdrop-ascent {
+  background: radial-gradient(circle at center, #1b382b 0%, #0d1e16 65%, #050b08 100%);
+}
+
+.backdrop-dust {
+  background: radial-gradient(circle at center, #423018 0%, #241a0d 65%, #0c0803 100%);
+}
+
+.backdrop-dark {
+  background: radial-gradient(circle at center, #111827 0%, #0b0f19 65%, #020617 100%);
+}
+
+.target-bullseye {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at center, transparent 38px, rgba(255, 255, 255, 0.04) 39px, rgba(255, 255, 255, 0.04) 40px, transparent 41px),
+    radial-gradient(circle at center, transparent 78px, rgba(255, 255, 255, 0.03) 79px, rgba(255, 255, 255, 0.03) 80px, transparent 81px);
+}
+
+.svg-crosshair {
+  position: relative;
+  z-index: 5;
+  transition: transform 0.08s ease;
+}
+
+.svg-crosshair.firing {
+  transform: scale(1.35);
+}
+
+.backdrop-switcher {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 6;
+}
+
+.btn-bg-toggle {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-bg-toggle.active {
+  background: rgba(0, 242, 254, 0.25);
+  border-color: #00f2fe;
+  color: #ffffff;
+}
+
+.btn-fire-pulse {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.btn-fire-pulse:active {
+  transform: scale(0.95);
+}
+
+/* Reticle Controls Grid */
+.reticle-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.control-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slider-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+}
+
+.slider-label-row span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #00f2fe;
+}
+
+.aim-select-sm {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #090e17;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.aim-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.aim-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00f2fe;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 242, 254, 0.6);
+}
+
+/* Reticle Code Strip */
+.reticle-code-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.code-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.reticle-code-input {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: #060911;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #38bdf8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  outline: none;
+}
+
+.btn-copy-code {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00f2fe, #4facfe);
+  color: #070a13;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.btn-copy-code:hover {
+  background: linear-gradient(135deg, #38bdf8, #00f2fe);
+  transform: translateY(-1px);
+}
+
+.aim-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #09121d;
+  border: 1px solid #00f2fe;
+  color: #f8fafc;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+
+.aim-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 900px) {
+  .crosshair-lab-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .sens-inputs-row {
+    grid-template-columns: 1fr;
+  }
+  .reticle-controls-grid {
+    grid-template-columns: 1fr;
+  }
+}
