@@ -34,6 +34,7 @@
     <div class="hero-actions-group">
       <button class="btn-glitch" onclick="watchStream()">🔴 Watch Live Stream</button>
       <button class="btn-twitch-chat" onclick="openTwitchStreamModal(true)">💬 Open Live Chat</button>
+      <button type="button" class="btn-vod-replay" id="btnOpenReplayModal" onclick="openMatchReplayModal()">🎬 Match Replay &amp; Chapters</button>
     </div>
   </header>
 
@@ -922,6 +923,127 @@
     </div>
   </div>
   <!-- ===== END Issue #196 ===== -->
+
+  <!-- ===== BEGIN Issue #409: Esports Tournament Match Replay Video Chapter Navigator ===== -->
+  <div id="matchReplayBackdrop" class="replay-modal-backdrop" onclick="closeMatchReplayModal()"></div>
+  <div id="matchReplayModal" class="replay-modal" role="dialog" aria-modal="true" aria-labelledby="replayModalTitle" hidden>
+    <div class="replay-modal-container">
+      <!-- Modal Header -->
+      <div class="replay-modal-header">
+        <div class="replay-header-info">
+          <div class="replay-tag">// VOD REPLAY ARCHIVE</div>
+          <h2 id="replayModalTitle">🏆 GRAND FINALS · GAME 5 (DECIDER) — SENTINELS vs FNATIC</h2>
+          <span class="replay-sub-meta">Map: Lotus · Tournament Patch 9.08 · Best of 5 Series Decider</span>
+        </div>
+        <div class="replay-header-right">
+          <span class="replay-quality-chip">4K 60FPS</span>
+          <button type="button" class="replay-close-btn" onclick="closeMatchReplayModal()" aria-label="Close match replay">&times;</button>
+        </div>
+      </div>
+
+      <!-- Main Video Screen Stage -->
+      <div class="replay-video-stage" id="replayVideoStage">
+        <!-- Animated Game Canvas Backdrop -->
+        <canvas class="replay-canvas" id="replayCanvas" width="960" height="500"></canvas>
+
+        <!-- Top HUD Score Overlay -->
+        <div class="replay-hud-overlay">
+          <div class="hud-team team-sen">
+            <span class="hud-team-badge">SEN</span>
+            <span class="hud-score" id="replayScoreSen">13</span>
+          </div>
+          <div class="hud-center-clock">
+            <span class="hud-round-label" id="replayRoundLabel">ROUND 24 · OVERTIME</span>
+            <span class="hud-game-timer" id="replayGameTimer">32:15</span>
+          </div>
+          <div class="hud-team team-fnc">
+            <span class="hud-score" id="replayScoreFnc">11</span>
+            <span class="hud-team-badge">FNC</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Kill Feed Toast Overlay -->
+        <div class="replay-killfeed" id="replayKillfeed">
+          <!-- Dynamically populated kill events -->
+        </div>
+
+        <!-- Big Center Play/Pause Button Overlay -->
+        <button type="button" class="replay-big-play-btn" id="btnReplayBigPlay" aria-label="Play or pause match replay">
+          <span class="play-icon" id="bigPlayIcon">▶</span>
+        </button>
+
+        <!-- Active Chapter Title Callout -->
+        <div class="replay-chapter-callout" id="replayChapterCallout">
+          <span class="callout-icon" id="calloutIcon">⚡</span>
+          <div class="callout-text">
+            <strong id="calloutTitle">Baron Nashor Steal</strong>
+            <span id="calloutDesc">SEN zekken snipes Baron through pit wall with Operator</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chapter Timeline Scrubber Bar -->
+      <div class="replay-scrubber-wrapper">
+        <!-- Floating Hover Tooltip -->
+        <div class="scrubber-tooltip" id="scrubberTooltip" hidden>
+          <span class="tt-time" id="ttTime">21:10</span>
+          <span class="tt-title" id="ttTitle">Baron Steal</span>
+        </div>
+
+        <div class="scrubber-timeline-track" id="scrubberTrack" role="slider" aria-label="Match replay chapter timeline" aria-valuemin="0" aria-valuemax="2120" aria-valuenow="1935">
+          <div class="scrubber-buffer-bar"></div>
+          <div class="scrubber-progress-fill" id="scrubberProgressFill" style="width: 91%;"></div>
+          <div class="scrubber-playhead" id="scrubberPlayhead" style="left: 91%;"></div>
+
+          <!-- Chapter Markers Layer -->
+          <div class="scrubber-markers-layer" id="scrubberMarkersLayer">
+            <!-- Rendered dynamically from chapter events data -->
+          </div>
+        </div>
+
+        <!-- Time Label Row & Playback Bar -->
+        <div class="replay-controls-row">
+          <div class="controls-left">
+            <button type="button" class="replay-ctrl-btn" id="btnReplayPlayPause" title="Play / Pause">
+              <span id="ctrlPlayIcon">▶</span>
+            </button>
+            <div class="replay-time-display">
+              <strong id="replayCurrentTimeStr">32:15</strong>
+              <span class="time-sep">/</span>
+              <span id="replayTotalTimeStr">35:20</span>
+            </div>
+            <div class="replay-speed-selector">
+              <select id="replaySpeedSelect" class="replay-speed-select" aria-label="Playback speed">
+                <option value="0.5">0.5×</option>
+                <option value="1.0" selected>1.0×</option>
+                <option value="1.5">1.5×</option>
+                <option value="2.0">2.0×</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="controls-right">
+            <span class="active-chapter-indicator" id="activeChapterIndicator">Chapter 5 of 5: Base Push &amp; GG</span>
+            <button type="button" class="replay-ctrl-btn" id="btnReplayRestart" title="Restart from beginning">
+              ↺ 00:00
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chapter Highlights List Tray -->
+      <div class="replay-chapters-tray">
+        <div class="tray-header">
+          <h4>KEY MATCH CHAPTER HIGHLIGHTS</h4>
+          <span class="tray-sub">Click any timeline chapter to jump playhead directly to critical round moments</span>
+        </div>
+        <div class="chapters-grid" id="replayChaptersGrid">
+          <!-- Populated from CHAPTER_DATA -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===== END Issue #409 ===== -->
 
   <section id="tactical-simulator" class="tactical-simulator" aria-labelledby="tactical-title">
     <p class="tactical-kicker">TACTICAL LAB / SYNTHETIC MATCH</p>

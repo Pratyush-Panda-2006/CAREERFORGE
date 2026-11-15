@@ -3304,3 +3304,412 @@ details[open] .facet-chevron {
   border: 0;
 }
 /* ===== END Issue #339 ===== */
+
+
+/* ===== BEGIN Issue #401: Product Stock Inventory Alert Notification Modal ===== */
+.catalog-stock-alert-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: all 0.2s ease;
+}
+
+.catalog-stock-alert-trigger:hover {
+  background: rgba(245, 158, 11, 0.22);
+  transform: translateY(-1px);
+}
+
+.stock-alerts-badge {
+  background: #f59e0b;
+  color: #0f172a;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 1px 6px;
+}
+
+.notify-stock-btn {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(234, 88, 12, 0.35) 100%);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notify-stock-btn:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  transform: translateY(-2px);
+}
+
+.stock-alert-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 15, 25, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.stock-alert-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.stock-alert-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: min(560px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 20px;
+  padding: 32px 28px;
+  z-index: 1000;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(245, 158, 11, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stock-alert-modal.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.stock-alert-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-size: 1.4rem;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.stock-alert-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.stock-alert-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.stock-alert-bell-wrap {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stock-alert-bell-icon {
+  font-size: 2.2rem;
+  display: inline-block;
+  transform-origin: top center;
+  animation: bellSwing 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.6));
+}
+
+@keyframes bellSwing {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(18deg); }
+  30% { transform: rotate(-16deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-8deg); }
+  75% { transform: rotate(0deg); }
+}
+
+.stock-alert-bell-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, transparent 70%);
+  animation: bellPulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes bellPulseGlow {
+  0%, 100% { transform: scale(0.9); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 0.9; }
+}
+
+.stock-alert-header h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 6px 0 8px;
+}
+
+.stock-alert-desc {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.alert-product-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.alert-prod-icon {
+  font-size: 1.8rem;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-prod-meta strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #f1f5f9;
+}
+
+.alert-prod-meta span {
+  font-size: 0.78rem;
+  color: #f59e0b;
+}
+
+.form-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.validation-status-text {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-family: monospace;
+}
+
+.validation-status-text.valid {
+  color: #4ade80;
+}
+
+.validation-status-text.invalid {
+  color: #f87171;
+}
+
+.input-with-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon-wrap input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.input-with-icon-wrap.is-valid input {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.25);
+}
+
+.input-with-icon-wrap.is-invalid input {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+}
+
+.input-state-icon {
+  position: absolute;
+  right: 12px;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.field-error-hint {
+  font-size: 0.75rem;
+  color: #f87171;
+  margin-top: 4px;
+}
+
+.alert-pref-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0 24px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.alert-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.btn-submit-alert {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-submit-alert:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.6);
+}
+
+/* Active Watchlist Section inside modal */
+.active-watchlist-section {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.watchlist-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.watchlist-section-header h4 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #94a3b8;
+}
+
+.watchlist-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.watchlist-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.watchlist-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+}
+
+.watchlist-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.watchlist-prod-name {
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+.watchlist-variant-email {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.watchlist-card-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.watchlist-status-chip {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.watchlist-remove-btn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.watchlist-remove-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.watchlist-empty-hint {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-align: center;
+  padding: 12px 0;
+}
+/* ===== END Issue #401: Product Stock Inventory Alert Notification Modal ===== */

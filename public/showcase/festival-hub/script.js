@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTicketCalculator();
   initPackingChecklist();
   initCyberSoundboard();
+  initMeetupLocator();
 });
 
 // ---------------------------------------------------------------
@@ -1517,6 +1518,325 @@ function initCyberSoundboard() {
       }
     });
   }
+}
+
+// ===============================================================
+// Issue #405: Festival Friend Group Meetup Locator
+// ===============================================================
+function initMeetupLocator() {
+  const STORAGE_KEY = 'cyberfest-meetup-waypoints';
+  const CENTER_LAT = 34.0152;
+  const CENTER_LNG = -118.4981;
+
+  const TYPE_META = {
+    camp: { label: 'Camp Tent', emoji: '⛺', color: '#a855f7' },
+    hydration: { label: 'Hydration Station', emoji: '💧', color: '#06b6d4' },
+    totem: { label: 'Meeting Totem', emoji: '🚩', color: '#ec4899' },
+    food: { label: 'Food Rendezvous', emoji: '🍔', color: '#f59e0b' }
+  };
+
+  const modeStagesBtn = document.getElementById('btn-mode-stages');
+  const modeMeetupBtn = document.getElementById('btn-mode-meetup');
+  const pinPalette = document.getElementById('ml-pin-palette');
+  const pinsLayer = document.getElementById('ml-pins-layer');
+  const vmFrame = document.getElementById('vm-frame');
+  const vmMap = document.getElementById('vm-map');
+  const popover = document.getElementById('ml-popover');
+  const popClose = document.getElementById('ml-pop-close');
+  const popBadge = document.getElementById('ml-pop-type-badge');
+  const popTitle = document.getElementById('ml-pop-title');
+  const popCoords = document.getElementById('ml-pop-coords');
+  const popDistance = document.getElementById('ml-pop-distance');
+  const popBearing = document.getElementById('ml-pop-bearing');
+  const popNeedle = document.getElementById('ml-pop-compass-needle');
+  const btnCopyPin = document.getElementById('btn-copy-pin-url');
+  const btnDeletePin = document.getElementById('btn-delete-pin');
+  const cardsGrid = document.getElementById('meetup-cards-grid');
+  const countBadge = document.getElementById('meetup-count-badge');
+  const btnLoadSample = document.getElementById('btn-load-sample-pins');
+  const btnShareAll = document.getElementById('btn-share-all-pins');
+  const btnClearPins = document.getElementById('btn-clear-pins');
+  const toastEl = document.getElementById('ml-toast');
+
+  if (!vmFrame || !vmMap || !pinsLayer) return;
+
+  let isMeetupMode = false;
+  let activePinType = 'camp';
+  let waypoints = [];
+  let selectedPinId = null;
+
+  // Restore waypoints
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) waypoints = JSON.parse(raw);
+  } catch {
+    waypoints = [];
+  }
+
+  // Parse hash URL if present e.g. #meetup=...
+  if (window.location.hash.startsWith('#meetup=')) {
+    try {
+      const dataStr = decodeURIComponent(window.location.hash.slice(8));
+      const parsed = JSON.parse(dataStr);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        waypoints = parsed;
+        saveWaypoints();
+        showToast('Shared squad meetup waypoints loaded! 📍');
+      }
+    } catch {
+      // invalid hash, ignore
+    }
+  }
+
+  function saveWaypoints() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(waypoints));
+    } catch {
+      // storage unavailable
+    }
+  }
+
+  function showToast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    clearTimeout(toastEl._timer);
+    toastEl._timer = setTimeout(() => { toastEl.hidden = true; }, 2600);
+  }
+
+  function calculateTelemetry(xPct, yPct) {
+    // Center is 50% x, 52% y
+    const dx = (xPct - 50); // east(+) or west(-)
+    const dy = (yPct - 52); // south(+) or north(-)
+
+    // approx 5.5 meters per percent
+    const distMeters = Math.round(Math.hypot(dx, dy) * 5.5);
+
+    // Compass bearing angle (0 = North, 90 = East, 180 = South, 270 = West)
+    const angleRad = Math.atan2(dx, -dy);
+    let deg = Math.round((angleRad * 180 / Math.PI + 360) % 360);
+
+    const COMPASS_POINTS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    const dirIdx = Math.round(deg / 22.5) % 16;
+    const dirName = COMPASS_POINTS[dirIdx];
+
+    // Latitude & Longitude translation (~0.00005 deg per 5m)
+    const lat = (CENTER_LAT - dy * 0.00005).toFixed(4);
+    const lng = (CENTER_LNG + dx * 0.00005).toFixed(4);
+
+    return {
+      distMeters,
+      deg,
+      dirName,
+      coordsStr: `${lat}° N, ${lng}° W`
+    };
+  }
+
+  function renderWaypoints() {
+    pinsLayer.innerHTML = '';
+    cardsGrid.innerHTML = '';
+    if (countBadge) countBadge.textContent = String(waypoints.length);
+
+    waypoints.forEach((wp) => {
+      const meta = TYPE_META[wp.type] || TYPE_META.camp;
+      const telem = calculateTelemetry(wp.xPct, wp.yPct);
+
+      // Map Pin
+      const pinEl = document.createElement('div');
+      pinEl.className = 'ml-waypoint-pin';
+      pinEl.style.left = `${wp.xPct}%`;
+      pinEl.style.top = `${wp.yPct}%`;
+      pinEl.innerHTML = `
+        <div class="ml-beacon-ring" style="border-color: ${meta.color}"></div>
+        <div class="ml-pin-head" style="border-color: ${meta.color}; box-shadow: 0 0 14px ${meta.color}">
+          <span>${meta.emoji}</span>
+        </div>
+        <span class="ml-pin-label">${escapeHtml(wp.name)}</span>
+      `;
+
+      pinEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openPinDetails(wp);
+      });
+      pinsLayer.appendChild(pinEl);
+
+      // Tray Card
+      const cardEl = document.createElement('article');
+      cardEl.className = 'meetup-card';
+      cardEl.innerHTML = `
+        <div class="mc-top">
+          <span class="mc-badge" style="color: ${meta.color}">${meta.emoji} ${meta.label}</span>
+          <span class="mc-dist">${telem.distMeters}m</span>
+        </div>
+        <strong class="mc-name">${escapeHtml(wp.name)}</strong>
+        <div class="mc-meta">
+          <span>${telem.coordsStr}</span>
+          <span>🧭 ${telem.deg}° ${telem.dirName}</span>
+        </div>
+      `;
+      cardEl.addEventListener('click', () => {
+        openPinDetails(wp);
+      });
+      cardsGrid.appendChild(cardEl);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  }
+
+  function openPinDetails(wp) {
+    selectedPinId = wp.id;
+    const meta = TYPE_META[wp.type] || TYPE_META.camp;
+    const telem = calculateTelemetry(wp.xPct, wp.yPct);
+
+    if (popBadge) {
+      popBadge.textContent = `${meta.emoji} ${meta.label.toUpperCase()}`;
+      popBadge.style.color = meta.color;
+    }
+    if (popTitle) popTitle.textContent = wp.name;
+    if (popCoords) popCoords.textContent = telem.coordsStr;
+    if (popDistance) popDistance.textContent = `${telem.distMeters} meters from Info Hub`;
+    if (popBearing) popBearing.textContent = `${String(telem.deg).padStart(3, '0')}° ${telem.dirName}`;
+    if (popNeedle) popNeedle.style.transform = `rotate(${telem.deg}deg)`;
+
+    if (popover) popover.hidden = false;
+  }
+
+  function closePinDetails() {
+    selectedPinId = null;
+    if (popover) popover.hidden = true;
+  }
+
+  if (popClose) popClose.addEventListener('click', closePinDetails);
+
+  // Copy Single Pin URL
+  if (btnCopyPin) {
+    btnCopyPin.addEventListener('click', () => {
+      const wp = waypoints.find(p => p.id === selectedPinId);
+      if (!wp) return;
+      const shareUrl = `${window.location.origin}${window.location.pathname}#meetup=${encodeURIComponent(JSON.stringify([wp]))}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl);
+      }
+      showToast('Waypoint share link copied to clipboard! 📋');
+    });
+  }
+
+  // Delete Pin
+  if (btnDeletePin) {
+    btnDeletePin.addEventListener('click', () => {
+      waypoints = waypoints.filter(p => p.id !== selectedPinId);
+      saveWaypoints();
+      closePinDetails();
+      renderWaypoints();
+      showToast('Waypoint pin removed.');
+    });
+  }
+
+  // Toggle Modes
+  if (modeStagesBtn && modeMeetupBtn) {
+    modeStagesBtn.addEventListener('click', () => {
+      isMeetupMode = false;
+      modeStagesBtn.classList.add('active');
+      modeStagesBtn.setAttribute('aria-pressed', 'true');
+      modeMeetupBtn.classList.remove('active');
+      modeMeetupBtn.setAttribute('aria-pressed', 'false');
+      if (pinPalette) pinPalette.hidden = true;
+      vmFrame.classList.remove('meetup-mode');
+      closePinDetails();
+    });
+
+    modeMeetupBtn.addEventListener('click', () => {
+      isMeetupMode = true;
+      modeMeetupBtn.classList.add('active');
+      modeMeetupBtn.setAttribute('aria-pressed', 'true');
+      modeStagesBtn.classList.remove('active');
+      modeStagesBtn.setAttribute('aria-pressed', 'false');
+      if (pinPalette) pinPalette.hidden = false;
+      vmFrame.classList.add('meetup-mode');
+    });
+  }
+
+  // Select Pin Type
+  document.querySelectorAll('.ml-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ml-type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activePinType = btn.dataset.type || 'camp';
+    });
+  });
+
+  // Map Click -> Drop Pin
+  vmMap.addEventListener('click', (e) => {
+    if (!isMeetupMode) return;
+    if (e.target.closest('.ml-waypoint-pin') || e.target.closest('.vm-pin')) return;
+
+    const rect = vmMap.getBoundingClientRect();
+    const xPct = Math.round(((e.clientX - rect.left) / rect.width) * 1000) / 10;
+    const yPct = Math.round(((e.clientY - rect.top) / rect.height) * 1000) / 10;
+
+    const meta = TYPE_META[activePinType] || TYPE_META.camp;
+    const defaultName = `${meta.label} Point #${waypoints.length + 1}`;
+
+    const newPin = {
+      id: 'pin-' + Date.now(),
+      name: defaultName,
+      type: activePinType,
+      xPct: Math.max(3, Math.min(97, xPct)),
+      yPct: Math.max(3, Math.min(97, yPct)),
+      timestamp: Date.now()
+    };
+
+    waypoints.push(newPin);
+    saveWaypoints();
+    renderWaypoints();
+    openPinDetails(newPin);
+    showToast(`Dropped ${meta.label} pin! 📍`);
+  });
+
+  // Load Sample Squad Pins
+  if (btnLoadSample) {
+    btnLoadSample.addEventListener('click', () => {
+      waypoints = [
+        { id: 'sample-1', name: 'Squad Camp Oasis', type: 'camp', xPct: 22.4, yPct: 24.8, timestamp: Date.now() },
+        { id: 'sample-2', name: 'Neon Totem Pole B', type: 'totem', xPct: 52.1, yPct: 38.6, timestamp: Date.now() },
+        { id: 'sample-3', name: 'Midnight Hydration Bar', type: 'hydration', xPct: 76.5, yPct: 44.2, timestamp: Date.now() },
+        { id: 'sample-4', name: 'Artisan Taco Hub', type: 'food', xPct: 28.6, yPct: 80.4, timestamp: Date.now() }
+      ];
+      saveWaypoints();
+      renderWaypoints();
+      showToast('Loaded 4 festival squad waypoints!');
+    });
+  }
+
+  // Share All Pins URL
+  if (btnShareAll) {
+    btnShareAll.addEventListener('click', () => {
+      if (waypoints.length === 0) {
+        showToast('Drop at least 1 pin or load sample pins first!');
+        return;
+      }
+      const shareUrl = `${window.location.origin}${window.location.pathname}#meetup=${encodeURIComponent(JSON.stringify(waypoints))}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl);
+      }
+      showToast('Full squad map link copied to clipboard! 🔗');
+    });
+  }
+
+  // Clear All Pins
+  if (btnClearPins) {
+    btnClearPins.addEventListener('click', () => {
+      waypoints = [];
+      saveWaypoints();
+      closePinDetails();
+      renderWaypoints();
+      showToast('All meetup pins cleared.');
+    });
+  }
+
+  renderWaypoints();
 }
 
 

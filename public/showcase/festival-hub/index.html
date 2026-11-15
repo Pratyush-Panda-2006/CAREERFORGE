@@ -332,6 +332,25 @@
     <h2 id="venue-map-title">VENUE MAP</h2>
     <p class="venue-map-intro">Find your way around the Cyber Dome. Tap a pin to see who plays on that stage and when.</p>
 
+    <!-- ===== BEGIN Issue #405: Friend Group Meetup Locator Toolbar ===== -->
+    <div class="meetup-locator-bar" id="meetup-locator-bar">
+      <div class="ml-controls-left">
+        <span class="ml-tag">📍 SQUAD MEETUP LOCATOR</span>
+        <div class="ml-mode-switch" role="group" aria-label="Venue Map Interaction Mode">
+          <button type="button" class="ml-mode-btn active" id="btn-mode-stages" aria-pressed="true">Stages View</button>
+          <button type="button" class="ml-mode-btn" id="btn-mode-meetup" aria-pressed="false">📍 Friend Pin Drop Mode</button>
+        </div>
+      </div>
+      <div class="ml-pin-palette" id="ml-pin-palette" hidden>
+        <span class="ml-hint">Tap map to drop:</span>
+        <button type="button" class="ml-type-btn active" data-type="camp" title="Camp Tent Pin"><span class="ml-emoji">⛺</span> Camp Tent</button>
+        <button type="button" class="ml-type-btn" data-type="hydration" title="Hydration Station Pin"><span class="ml-emoji">💧</span> Hydration</button>
+        <button type="button" class="ml-type-btn" data-type="totem" title="Meeting Pole / Totem Pin"><span class="ml-emoji">🚩</span> Meeting Totem</button>
+        <button type="button" class="ml-type-btn" data-type="food" title="Food / Drinks Rendezvous Pin"><span class="ml-emoji">🍔</span> Food Hub</button>
+      </div>
+    </div>
+    <!-- ===== END Issue #405 Toolbar ===== -->
+
     <div class="vm-frame" id="vm-frame">
       <div class="vm-map" id="vm-map">
         <svg class="vm-svg" viewBox="0 0 800 480" aria-hidden="true" focusable="false">
@@ -413,6 +432,9 @@
           <span class="vm-pin-num" aria-hidden="true">4</span>
           <span class="vm-pin-label">Chill Oasis</span>
         </button>
+
+        <!-- Dynamic Meetup Pins Layer -->
+        <div class="ml-pins-layer" id="ml-pins-layer" aria-label="Custom friend meetup waypoints"></div>
       </div>
 
       <div class="vm-popover" id="vm-popover" role="dialog" aria-labelledby="vm-pop-title" tabindex="-1" hidden>
@@ -425,6 +447,34 @@
         <ul class="vm-pop-sets" id="vm-pop-sets" aria-live="polite"></ul>
         <button type="button" class="vm-pop-filter" id="vm-pop-filter">See this stage in the lineup</button>
       </div>
+
+      <!-- Friend Pin Detail Popover -->
+      <div class="ml-popover" id="ml-popover" role="dialog" aria-labelledby="ml-pop-title" tabindex="-1" hidden>
+        <button type="button" class="ml-pop-close" id="ml-pop-close" aria-label="Close waypoint details">&times;</button>
+        <div class="ml-pop-badge" id="ml-pop-type-badge">⛺ CAMP TENT</div>
+        <h3 class="ml-pop-title" id="ml-pop-title">Squad Camp Alpha</h3>
+        <div class="ml-telemetry-grid">
+          <div class="ml-tel-item">
+            <span class="ml-tel-k">GPS COORDINATES</span>
+            <code class="ml-tel-v" id="ml-pop-coords">34.0152° N, 118.4981° W</code>
+          </div>
+          <div class="ml-tel-item">
+            <span class="ml-tel-k">DISTANCE FROM INFO</span>
+            <strong class="ml-tel-v" id="ml-pop-distance">145 meters</strong>
+          </div>
+          <div class="ml-tel-item">
+            <span class="ml-tel-k">COMPASS BEARING</span>
+            <div class="ml-compass-row">
+              <span class="ml-compass-needle" id="ml-pop-compass-needle" aria-hidden="true">⬆</span>
+              <strong class="ml-tel-v" id="ml-pop-bearing">072° ENE</strong>
+            </div>
+          </div>
+        </div>
+        <div class="ml-pop-actions">
+          <button type="button" class="btn-ml-copy" id="btn-copy-pin-url">📋 Copy Pin Share Link</button>
+          <button type="button" class="btn-ml-delete" id="btn-delete-pin">🗑️ Remove Pin</button>
+        </div>
+      </div>
     </div>
 
     <ul class="vm-legend" aria-label="Stages">
@@ -433,8 +483,27 @@
       <li><button type="button" class="vm-chip" data-stage="bass-vault" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover"><span class="vm-chip-num" aria-hidden="true">3</span> Bass Vault</button></li>
       <li><button type="button" class="vm-chip" data-stage="chill-oasis" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover"><span class="vm-chip-num" aria-hidden="true">4</span> Chill Oasis</button></li>
     </ul>
+
+    <!-- ===== Friend Meetup Waypoints Tray (Issue #405) ===== -->
+    <div class="meetup-tray" id="meetup-tray" aria-label="Squad Meetup Waypoints">
+      <div class="meetup-tray-header">
+        <div class="mth-left">
+          <h3>Squad Meetup Waypoints (<span id="meetup-count-badge">0</span>)</h3>
+          <p>Drop custom GPS pins on the map to coordinate with friends. Generates shareable location links with compass bearing &amp; distance.</p>
+        </div>
+        <div class="mth-actions">
+          <button type="button" class="btn-ml-action" id="btn-load-sample-pins">Load Sample Squad Pins</button>
+          <button type="button" class="btn-ml-action btn-share-squad" id="btn-share-all-pins">🔗 Share Squad Map URL</button>
+          <button type="button" class="btn-ml-clear" id="btn-clear-pins" title="Clear all dropped pins">Clear All</button>
+        </div>
+      </div>
+      <div class="meetup-cards-grid" id="meetup-cards-grid">
+        <!-- Dynamically rendered meetup waypoint cards -->
+      </div>
+      <div class="ml-toast" id="ml-toast" role="status" aria-live="polite" hidden></div>
+    </div>
   </section>
-  <!-- END issue #193 -->
+  <!-- END issue #193 / #405 -->
 
   <!-- Festival Survival Packing Checklist (Issue #287) -->
   <section class="packing-checklist-section" id="packing-checklist" aria-labelledby="packing-title">

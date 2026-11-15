@@ -2227,3 +2227,465 @@ if (document.readyState === 'loading') {
   }
 })();
 
+
+
+/* ===== BEGIN Issue #409: Esports Tournament Match Replay Video Chapter Navigator ===== */
+(function initMatchReplayModule() {
+  const TOTAL_DURATION = 2120; // 35 minutes 20 seconds
+
+  const CHAPTERS = [
+    {
+      id: 'ch-first-blood',
+      time: 195, // 03:15
+      timeStr: '03:15',
+      icon: '🩸',
+      type: 'FIRST BLOOD',
+      title: 'First Blood at A-Site',
+      desc: 'SEN TenZ locks down opening duel against FNC Chronicle with a surgical Operator headshot.',
+      scoreSen: 1,
+      scoreFnc: 0,
+      round: 'ROUND 1 · PISTOL OPENER',
+      kill: 'SEN TenZ [Operator] ➔ FNC Chronicle'
+    },
+    {
+      id: 'ch-dragon-steal',
+      time: 760, // 12:40
+      timeStr: '12:40',
+      icon: '🐉',
+      type: 'OBJECTIVE STEAL',
+      title: 'Infernal Drake Snatch',
+      desc: 'FNC Bo flashes blind into the pit to smite the Infernal Drake away from Sentinels at 200 HP.',
+      scoreSen: 6,
+      scoreFnc: 5,
+      round: 'ROUND 11 · CONTESTED PIT',
+      kill: 'FNC Bo [Smite] ➔ Infernal Dragon'
+    },
+    {
+      id: 'ch-baron-steal',
+      time: 1270, // 21:10
+      timeStr: '21:10',
+      icon: '⚡',
+      type: 'BARON STEAL',
+      title: 'Baron Nashor Steal',
+      desc: 'SEN zekken snipes Baron Nashor through the pit wall with Hunter\'s Fury, flipping the momentum.',
+      scoreSen: 10,
+      scoreFnc: 9,
+      round: 'ROUND 18 · BARON SIEGE',
+      kill: 'SEN zekken [Hunter\'s Fury] ➔ Baron Nashor'
+    },
+    {
+      id: 'ch-teamfight-ace',
+      time: 1655, // 27:35
+      timeStr: '27:35',
+      icon: '💀',
+      type: 'TEAMFIGHT ACE',
+      title: 'Clean 5-0 Teamfight Ace',
+      desc: 'Sentinels execute a textbook pincer flank, eliminating all 5 Fnatic players without losing a single member.',
+      scoreSen: 12,
+      scoreFnc: 11,
+      round: 'ROUND 22 · MATCH POINT',
+      kill: 'SEN Sacy [ACE!] ➔ FNC Team Wipe'
+    },
+    {
+      id: 'ch-base-push',
+      time: 1935, // 32:15
+      timeStr: '32:15',
+      icon: '🏰',
+      type: 'BASE PUSH & GG',
+      title: 'Final Base Push & Championship GG',
+      desc: 'Sentinels overwhelm Fnatic\'s final nexus defense to secure the Game 5 victory and the Global Trophy!',
+      scoreSen: 13,
+      scoreFnc: 11,
+      round: 'ROUND 24 · OVERTIME DECIDER',
+      kill: 'SEN johnqt [Defuse Denied] ➔ Victory'
+    }
+  ];
+
+  let currentTime = 1935; // default to final chapter
+  let isPlaying = false;
+  let playbackSpeed = 1.0;
+  let playInterval = null;
+  let animCanvasId = null;
+
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function getActiveChapter(time) {
+    let active = CHAPTERS[0];
+    for (const ch of CHAPTERS) {
+      if (time >= ch.time) {
+        active = ch;
+      }
+    }
+    return active;
+  }
+
+  function updateScrubber() {
+    const fill = document.getElementById('scrubberProgressFill');
+    const playhead = document.getElementById('scrubberPlayhead');
+    const timeDisplay = document.getElementById('replayCurrentTimeStr');
+    const track = document.getElementById('scrubberTrack');
+    const timerEl = document.getElementById('replayGameTimer');
+
+    const pct = Math.min(100, Math.max(0, (currentTime / TOTAL_DURATION) * 100));
+
+    if (fill) fill.style.width = `${pct}%`;
+    if (playhead) playhead.style.left = `${pct}%`;
+    if (timeDisplay) timeDisplay.textContent = formatTime(currentTime);
+    if (timerEl) timerEl.textContent = formatTime(currentTime);
+    if (track) track.setAttribute('aria-valuenow', String(Math.round(currentTime)));
+
+    const activeCh = getActiveChapter(currentTime);
+    updateChapterCallout(activeCh);
+    updateHUD(activeCh);
+
+    // Update marker active states
+    document.querySelectorAll('.scrubber-marker-pin').forEach((pin) => {
+      const pinId = pin.getAttribute('data-id');
+      pin.classList.toggle('active', pinId === activeCh.id);
+    });
+
+    // Update chapter cards active states
+    document.querySelectorAll('.chapter-card').forEach((card) => {
+      const cardId = card.getAttribute('data-id');
+      card.classList.toggle('active', cardId === activeCh.id);
+    });
+
+    const indicator = document.getElementById('activeChapterIndicator');
+    if (indicator) {
+      const idx = CHAPTERS.findIndex((c) => c.id === activeCh.id);
+      indicator.textContent = `Chapter ${idx + 1} of ${CHAPTERS.length}: ${activeCh.title}`;
+    }
+  }
+
+  function updateHUD(ch) {
+    const scoreSen = document.getElementById('replayScoreSen');
+    const scoreFnc = document.getElementById('replayScoreFnc');
+    const roundLabel = document.getElementById('replayRoundLabel');
+
+    if (scoreSen) scoreSen.textContent = ch.scoreSen;
+    if (scoreFnc) scoreFnc.textContent = ch.scoreFnc;
+    if (roundLabel) roundLabel.textContent = ch.round;
+  }
+
+  function updateChapterCallout(ch) {
+    const icon = document.getElementById('calloutIcon');
+    const title = document.getElementById('calloutTitle');
+    const desc = document.getElementById('calloutDesc');
+
+    if (icon) icon.textContent = ch.icon;
+    if (title) title.textContent = ch.title;
+    if (desc) desc.textContent = ch.desc;
+  }
+
+  function jumpToChapter(chapterId) {
+    const ch = CHAPTERS.find((c) => c.id === chapterId);
+    if (!ch) return;
+
+    currentTime = ch.time;
+    updateScrubber();
+    flashKillfeed(ch.kill);
+  }
+
+  function flashKillfeed(killText) {
+    const feed = document.getElementById('replayKillfeed');
+    if (!feed || !killText) return;
+
+    const item = document.createElement('div');
+    item.className = 'killfeed-item';
+    item.textContent = killText;
+    feed.replaceChildren(item);
+
+    setTimeout(() => {
+      if (item.parentElement === feed) {
+        item.style.opacity = '0';
+        item.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => item.remove(), 500);
+      }
+    }, 4000);
+  }
+
+  function renderMarkers() {
+    const layer = document.getElementById('scrubberMarkersLayer');
+    if (!layer) return;
+
+    layer.replaceChildren();
+
+    CHAPTERS.forEach((ch) => {
+      const pct = (ch.time / TOTAL_DURATION) * 100;
+      const marker = document.createElement('div');
+      marker.className = 'scrubber-marker-pin';
+      marker.setAttribute('data-id', ch.id);
+      marker.style.left = `${pct}%`;
+      marker.title = `${ch.timeStr} — ${ch.title}`;
+      marker.textContent = ch.icon;
+
+      marker.addEventListener('click', (e) => {
+        e.stopPropagation();
+        jumpToChapter(ch.id);
+      });
+
+      marker.addEventListener('mouseenter', () => {
+        showTooltip(pct, ch.timeStr, ch.title);
+      });
+
+      marker.addEventListener('mouseleave', hideTooltip);
+
+      layer.appendChild(marker);
+    });
+  }
+
+  function renderChaptersGrid() {
+    const grid = document.getElementById('replayChaptersGrid');
+    if (!grid) return;
+
+    grid.replaceChildren();
+
+    CHAPTERS.forEach((ch) => {
+      const card = document.createElement('div');
+      card.className = 'chapter-card';
+      card.setAttribute('data-id', ch.id);
+
+      const top = document.createElement('div');
+      top.className = 'chapter-card-top';
+
+      const timePill = document.createElement('span');
+      timePill.className = 'chapter-time-pill';
+      timePill.textContent = ch.timeStr;
+
+      const typeBadge = document.createElement('span');
+      typeBadge.className = 'chapter-type-badge';
+      typeBadge.textContent = ch.type;
+
+      top.appendChild(timePill);
+      top.appendChild(typeBadge);
+
+      const title = document.createElement('div');
+      title.className = 'chapter-title';
+      title.textContent = `${ch.icon} ${ch.title}`;
+
+      const desc = document.createElement('p');
+      desc.className = 'chapter-desc';
+      desc.textContent = ch.desc;
+
+      card.appendChild(top);
+      card.appendChild(title);
+      card.appendChild(desc);
+
+      card.addEventListener('click', () => {
+        jumpToChapter(ch.id);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  function showTooltip(pct, timeStr, titleStr) {
+    const tt = document.getElementById('scrubberTooltip');
+    const ttTime = document.getElementById('ttTime');
+    const ttTitle = document.getElementById('ttTitle');
+    if (!tt) return;
+
+    tt.style.left = `${pct}%`;
+    if (ttTime) ttTime.textContent = timeStr;
+    if (ttTitle) ttTitle.textContent = titleStr;
+    tt.removeAttribute('hidden');
+  }
+
+  function hideTooltip() {
+    const tt = document.getElementById('scrubberTooltip');
+    if (tt) tt.setAttribute('hidden', '');
+  }
+
+  function togglePlay() {
+    isPlaying = !isPlaying;
+    const bigBtn = document.getElementById('btnReplayBigPlay');
+    const bigIcon = document.getElementById('bigPlayIcon');
+    const ctrlIcon = document.getElementById('ctrlPlayIcon');
+
+    if (isPlaying) {
+      if (bigBtn) bigBtn.classList.add('playing');
+      if (bigIcon) bigIcon.textContent = '❚❚';
+      if (ctrlIcon) ctrlIcon.textContent = '❚❚';
+
+      clearInterval(playInterval);
+      playInterval = setInterval(() => {
+        if (currentTime >= TOTAL_DURATION) {
+          currentTime = 0;
+        }
+        currentTime += 1 * playbackSpeed;
+        updateScrubber();
+      }, 1000);
+    } else {
+      if (bigBtn) bigBtn.classList.remove('playing');
+      if (bigIcon) bigIcon.textContent = '▶';
+      if (ctrlIcon) ctrlIcon.textContent = '▶';
+      clearInterval(playInterval);
+    }
+  }
+
+  function startCanvasAnimation() {
+    const canvas = document.getElementById('replayCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let tick = 0;
+    function render() {
+      tick += 0.04;
+      ctx.fillStyle = '#060a17';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Cyber Grid
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+      ctx.lineWidth = 1;
+      const step = 40;
+      for (let x = 0; x < canvas.width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Tactical Map Nodes
+      const hero1X = 260 + Math.sin(tick) * 45;
+      const hero1Y = 220 + Math.cos(tick) * 25;
+      const hero2X = 640 - Math.sin(tick * 0.8) * 45;
+      const hero2Y = 250 - Math.cos(tick * 0.8) * 30;
+
+      // Hero A pulse
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(hero1X, hero1Y, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hero B pulse
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.arc(hero2X, hero2Y, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Laser projectile beam
+      if (Math.sin(tick * 2) > 0.3) {
+        ctx.strokeStyle = 'rgba(236, 72, 153, 0.7)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(hero1X, hero1Y);
+        ctx.lineTo(hero2X, hero2Y);
+        ctx.stroke();
+      }
+
+      animCanvasId = requestAnimationFrame(render);
+    }
+
+    cancelAnimationFrame(animCanvasId);
+    animCanvasId = requestAnimationFrame(render);
+  }
+
+  function openModal() {
+    const backdrop = document.getElementById('matchReplayBackdrop');
+    const modal = document.getElementById('matchReplayModal');
+    if (backdrop && modal) {
+      backdrop.classList.add('active');
+      modal.removeAttribute('hidden');
+      modal.classList.add('active');
+      renderMarkers();
+      renderChaptersGrid();
+      updateScrubber();
+      startCanvasAnimation();
+    }
+  }
+
+  function closeModal() {
+    isPlaying = false;
+    clearInterval(playInterval);
+    cancelAnimationFrame(animCanvasId);
+
+    const backdrop = document.getElementById('matchReplayBackdrop');
+    const modal = document.getElementById('matchReplayModal');
+    if (backdrop && modal) {
+      backdrop.classList.remove('active');
+      modal.classList.remove('active');
+      setTimeout(() => {
+        if (!modal.classList.contains('active')) {
+          modal.setAttribute('hidden', '');
+        }
+      }, 300);
+    }
+  }
+
+  function initListeners() {
+    const bigPlayBtn = document.getElementById('btnReplayBigPlay');
+    if (bigPlayBtn) bigPlayBtn.addEventListener('click', togglePlay);
+
+    const ctrlPlayBtn = document.getElementById('btnReplayPlayPause');
+    if (ctrlPlayBtn) ctrlPlayBtn.addEventListener('click', togglePlay);
+
+    const restartBtn = document.getElementById('btnReplayRestart');
+    if (restartBtn) restartBtn.addEventListener('click', () => {
+      currentTime = 0;
+      updateScrubber();
+    });
+
+    const speedSelect = document.getElementById('replaySpeedSelect');
+    if (speedSelect) {
+      speedSelect.addEventListener('change', (e) => {
+        playbackSpeed = parseFloat(e.target.value) || 1.0;
+        if (isPlaying) {
+          togglePlay();
+          togglePlay();
+        }
+      });
+    }
+
+    const track = document.getElementById('scrubberTrack');
+    if (track) {
+      track.addEventListener('click', (e) => {
+        const rect = track.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        currentTime = ratio * TOTAL_DURATION;
+        updateScrubber();
+      });
+
+      track.addEventListener('mousemove', (e) => {
+        const rect = track.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const hoverTime = ratio * TOTAL_DURATION;
+        const ch = getActiveChapter(hoverTime);
+        showTooltip(ratio * 100, formatTime(hoverTime), ch ? ch.title : 'Playback');
+      });
+
+      track.addEventListener('mouseleave', hideTooltip);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('matchReplayModal');
+      if (modal && !modal.hasAttribute('hidden')) {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === ' ' || e.key === 'k') { e.preventDefault(); togglePlay(); }
+        if (e.key === 'ArrowLeft') { currentTime = Math.max(0, currentTime - 10); updateScrubber(); }
+        if (e.key === 'ArrowRight') { currentTime = Math.min(TOTAL_DURATION, currentTime + 10); updateScrubber(); }
+      }
+    });
+  }
+
+  window.openMatchReplayModal = openModal;
+  window.closeMatchReplayModal = closeModal;
+  window.jumpToReplayChapter = jumpToChapter;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListeners);
+  } else {
+    initListeners();
+  }
+})();
+/* ===== END Issue #409: Esports Tournament Match Replay Video Chapter Navigator ===== */
