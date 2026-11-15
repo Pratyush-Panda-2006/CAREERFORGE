@@ -1,4 +1,4 @@
-/* Reveal each specification once; the final text remains available without JS. */
+﻿/* Reveal each specification once; the final text remains available without JS. */
 (function () {
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const numbers = document.querySelectorAll('.spec-number');
@@ -458,8 +458,8 @@ window.reserveHypercar = function reserveHypercar() {
     els.power.textContent = fmt(r.powerKw) + ' kW';
     els.speedOut.textContent = state.mph + ' mph';
     els.speed.setAttribute('aria-valuetext', state.mph + ' miles per hour');
-    els.formula.textContent = 'Drag = 0.5 × ' + AIR_DENSITY + ' kg/m³ × (' + r.v.toFixed(1) + ' m/s)² × ' +
-      s.cd.toFixed(2) + ' × ' + FRONTAL_AREA.toFixed(1) + ' m² = ' + fmt(r.dragN) + ' N';
+    els.formula.textContent = 'Drag = 0.5 Ã— ' + AIR_DENSITY + ' kg/mÂ³ Ã— (' + r.v.toFixed(1) + ' m/s)Â² Ã— ' +
+      s.cd.toFixed(2) + ' Ã— ' + FRONTAL_AREA.toFixed(1) + ' mÂ² = ' + fmt(r.dragN) + ' N';
     if (state.key === DEFAULT_STATE) {
       els.delta.textContent = 'Baseline setup: wing retracted.';
     } else {
@@ -532,8 +532,8 @@ window.reserveHypercar = function reserveHypercar() {
     els.speed.min = SPEED_MIN;
     els.speed.max = SPEED_MAX;
     els.speed.value = SPEED_DEFAULT;
-    els.note.textContent = 'Approximate demo model: air density ' + AIR_DENSITY + ' kg/m³, frontal area ' + FRONTAL_AREA.toFixed(1) +
-      ' m², and the Cd / downforce coefficients are made-up values chosen for illustration.';
+    els.note.textContent = 'Approximate demo model: air density ' + AIR_DENSITY + ' kg/mÂ³, frontal area ' + FRONTAL_AREA.toFixed(1) +
+      ' mÂ², and the Cd / downforce coefficients are made-up values chosen for illustration.';
 
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     els.canvas.width = W * dpr;
@@ -557,7 +557,7 @@ window.reserveHypercar = function reserveHypercar() {
 })();
 /* ===== Virtual Wind Tunnel (issue #99) END ===== */
 
-/* ===== 360° Vehicle Colorway & Wheel Configurator (issue #51) START ===== */
+/* ===== 360Â° Vehicle Colorway & Wheel Configurator (issue #51) START ===== */
 (function () {
   'use strict';
 
@@ -688,10 +688,10 @@ window.reserveHypercar = function reserveHypercar() {
   ];
 
   var ANGLES = [
-    { deg: 0,   id: 'front',   label: '000° // FRONT 3/4' },
-    { deg: 90,  id: 'side',    label: '090° // SIDE AERO' },
-    { deg: 180, id: 'rear',    label: '180° // REAR DIFFUSER' },
-    { deg: 270, id: 'top',     label: '270° // TOP AERO' }
+    { deg: 0,   id: 'front',   label: '000Â° // FRONT 3/4' },
+    { deg: 90,  id: 'side',    label: '090Â° // SIDE AERO' },
+    { deg: 180, id: 'rear',    label: '180Â° // REAR DIFFUSER' },
+    { deg: 270, id: 'top',     label: '270Â° // TOP AERO' }
   ];
 
   var state = {
@@ -853,7 +853,7 @@ window.reserveHypercar = function reserveHypercar() {
     '</defs>';
 
     if (presetAngle === 0) {
-      // ===== 000° FRONT 3/4 PERSPECTIVE =====
+      // ===== 000Â° FRONT 3/4 PERSPECTIVE =====
       return '<svg viewBox="0 0 840 380" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         svgDefs +
         // Ground Shadow
@@ -890,7 +890,7 @@ window.reserveHypercar = function reserveHypercar() {
         '<text x="430" y="308" fill="#9ca3af" font-size="7" font-family="Orbitron" font-weight="900" text-anchor="middle" letter-spacing="3">APEX ZERO // 1900 HP</text>' +
       '</svg>';
     } else if (presetAngle === 90) {
-      // ===== 090° SIDE AERO SILHOUETTE =====
+      // ===== 090Â° SIDE AERO SILHOUETTE =====
       return '<svg viewBox="0 0 840 340" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         svgDefs +
         // Shadow
@@ -921,7 +921,7 @@ window.reserveHypercar = function reserveHypercar() {
         '</g>' +
       '</svg>';
     } else if (presetAngle === 180) {
-      // ===== 180° REAR DIFFUSER & TAIL =====
+      // ===== 180Â° REAR DIFFUSER & TAIL =====
       return '<svg viewBox="0 0 840 380" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         svgDefs +
         // Shadow
@@ -956,7 +956,7 @@ window.reserveHypercar = function reserveHypercar() {
         '<rect x="650" y="270" width="45" height="52" rx="4" fill="#18181b" stroke="#27272a" stroke-width="2"/>' +
       '</svg>';
     } else {
-      // ===== 270° TOP DOWN COCKPIT =====
+      // ===== 270Â° TOP DOWN COCKPIT =====
       return '<svg viewBox="0 0 840 400" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         svgDefs +
         // Shadow
@@ -1037,7 +1037,7 @@ window.reserveHypercar = function reserveHypercar() {
     });
 
     // Update Azimuth Slider Readout
-    if (dom.sliderDeg) dom.sliderDeg.textContent = state.angle + '°';
+    if (dom.sliderDeg) dom.sliderDeg.textContent = state.angle + 'Â°';
     if (dom.slider && Number(dom.slider.value) !== state.angle) {
       dom.slider.value = state.angle;
     }
@@ -1082,7 +1082,7 @@ window.reserveHypercar = function reserveHypercar() {
       ];
       if (state.trackAero) specs.push('Track Aero Pack');
       if (state.matrixLed) specs.push('Cyber Matrix LED');
-      dom.summaryText.textContent = specs.join(' • ');
+      dom.summaryText.textContent = specs.join(' â€¢ ');
     }
 
     // Persist
@@ -1341,7 +1341,7 @@ window.reserveHypercar = function reserveHypercar() {
         var url = window.location.origin + window.location.pathname + '#color=' + state.color + '&wheel=' + state.wheel + '&angle=' + state.angle;
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(url).then(function () {
-            showToast('✓ Bespoke build URL copied to clipboard!');
+            showToast('âœ“ Bespoke build URL copied to clipboard!');
           }).catch(function () {
             showToast('Build URL: ' + url);
           });
@@ -1365,7 +1365,7 @@ window.reserveHypercar = function reserveHypercar() {
 
   document.addEventListener('DOMContentLoaded', init);
 })();
-/* ===== 360° Vehicle Colorway & Wheel Configurator (issue #51) END ===== */
+/* ===== 360Â° Vehicle Colorway & Wheel Configurator (issue #51) END ===== */
 
 
 /* ===== Launch Control 0-60 Acceleration Simulation & Live G-Meter (Issue #177) START ===== */
@@ -1438,7 +1438,7 @@ window.reserveHypercar = function reserveHypercar() {
 
       // Reset DOM displays
       if (speedEl) speedEl.textContent = '0';
-      if (rpmEl) rpmEl.textContent = '0 RPM • 1ST GEAR';
+      if (rpmEl) rpmEl.textContent = '0 RPM â€¢ 1ST GEAR';
       if (speedArc) speedArc.style.strokeDashoffset = ARC_CIRCUMFERENCE;
       if (kwOutputEl) kwOutputEl.textContent = '0 kW (0 HP)';
       if (peakMphEl) peakMphEl.textContent = '0.0 MPH';
@@ -1467,7 +1467,7 @@ window.reserveHypercar = function reserveHypercar() {
 
       if (launchBtn) {
         launchBtn.classList.remove('is-active');
-        launchBtn.innerHTML = '<span class="btn-icon">⚡</span><span class="btn-text">LAUNCH HYPERCAR</span>';
+        launchBtn.innerHTML = '<span class="btn-icon">âš¡</span><span class="btn-text">LAUNCH HYPERCAR</span>';
       }
 
       setConsole('[LAUNCH CONTROL ARMED]: Press Launch Hypercar to initiate staging sequence.');
@@ -1478,7 +1478,7 @@ window.reserveHypercar = function reserveHypercar() {
       state.phase = 'staging';
 
       if (launchBtn) {
-        launchBtn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-text">STAGING BOOST...</span>';
+        launchBtn.innerHTML = '<span class="btn-icon">â³</span><span class="btn-text">STAGING BOOST...</span>';
       }
 
       setConsole('[STAGING TREE]: Pre-stage armed. Inverter capacitance charging...');
@@ -1502,7 +1502,7 @@ window.reserveHypercar = function reserveHypercar() {
         setConsole('[LAUNCH INITIATED]: MAXIMUM ACCELERATION! ALL-WHEEL VECTOR ACTIVE.');
         if (launchBtn) {
           launchBtn.classList.add('is-active');
-          launchBtn.innerHTML = '<span class="btn-icon">🚀</span><span class="btn-text">ACCELERATING...</span>';
+          launchBtn.innerHTML = '<span class="btn-icon">ðŸš€</span><span class="btn-text">ACCELERATING...</span>';
         }
         beginAccelerationPhysics();
       }, 1050);
@@ -1553,7 +1553,7 @@ window.reserveHypercar = function reserveHypercar() {
 
         // RPM calculation (Direct drive electric trans, ~0-18,000 RPM)
         var rpm = Math.floor((speed / MAX_SPEED) * 18500);
-        if (rpmEl) rpmEl.textContent = rpm.toLocaleString() + ' RPM • ' + (speed > 55 ? 'DIRECT DRIVE' : '1ST GEAR');
+        if (rpmEl) rpmEl.textContent = rpm.toLocaleString() + ' RPM â€¢ ' + (speed > 55 ? 'DIRECT DRIVE' : '1ST GEAR');
 
         // Speedometer SVG arc
         var fraction = Math.min(1.0, speed / 120.0);
@@ -1608,10 +1608,10 @@ window.reserveHypercar = function reserveHypercar() {
         // Completion condition (~3.0 seconds after 100+ mph run)
         if (elapsed >= 3.0) {
           state.phase = 'completed';
-          setConsole('🏆 [SIMULATION COMPLETED]: 0–60 MPH officially clocked in ' + (msItems.ms60.valEl ? msItems.ms60.valEl.textContent : '1.74s') + ' with peak ' + state.maxG.toFixed(2) + ' G!');
+          setConsole('ðŸ† [SIMULATION COMPLETED]: 0â€“60 MPH officially clocked in ' + (msItems.ms60.valEl ? msItems.ms60.valEl.textContent : '1.74s') + ' with peak ' + state.maxG.toFixed(2) + ' G!');
           if (launchBtn) {
             launchBtn.classList.remove('is-active');
-            launchBtn.innerHTML = '<span class="btn-icon">⚡</span><span class="btn-text">RE-LAUNCH HYPERCAR</span>';
+            launchBtn.innerHTML = '<span class="btn-icon">âš¡</span><span class="btn-text">RE-LAUNCH HYPERCAR</span>';
           }
           return;
         }
@@ -1651,7 +1651,7 @@ window.reserveHypercar = function reserveHypercar() {
   'use strict';
 
   var PACK_CAPACITY_KWH = 130; // 130 kWh Solid-State Hyper-Cell Battery
-  var BASE_RANGE_MILES = 385;  // Baseline EPA range at 21°C in Ludicrous Cruise on Flat Terrain
+  var BASE_RANGE_MILES = 385;  // Baseline EPA range at 21Â°C in Ludicrous Cruise on Flat Terrain
   var GAUGE_CIRCUMFERENCE = 385;
 
   var MODES = {
@@ -1662,15 +1662,15 @@ window.reserveHypercar = function reserveHypercar() {
 
   var TERRAINS = {
     flat: { name: 'Flat Highway', rangeMult: 1.00, regenKwhBase: 0, regenPct: 0, desc: 'Zero incline, nominal rolling resistance' },
-    rolling: { name: 'Rolling Hills', rangeMult: 0.94, regenKwhBase: 8.4, regenPct: 6.5, desc: '±3% elevation changes, 12% kinetic recovery' },
-    mountain: { name: 'Alpine Pass', rangeMult: 0.81, regenKwhBase: 16.5, regenPct: 14.8, desc: '±8% steep mountain grade, heavy downhill regen' }
+    rolling: { name: 'Rolling Hills', rangeMult: 0.94, regenKwhBase: 8.4, regenPct: 6.5, desc: 'Â±3% elevation changes, 12% kinetic recovery' },
+    mountain: { name: 'Alpine Pass', rangeMult: 0.81, regenKwhBase: 16.5, regenPct: 14.8, desc: 'Â±8% steep mountain grade, heavy downhill regen' }
   };
 
   function computeRangePhysics(tempC, modeKey, terrainKey, tripDistanceMiles) {
     var mode = MODES[modeKey] || MODES.cruise;
     var terrain = TERRAINS[terrainKey] || TERRAINS.flat;
 
-    // Temperature efficiency curve (optimal 20°C - 24°C)
+    // Temperature efficiency curve (optimal 20Â°C - 24Â°C)
     var tempEfficiency = 1.0;
     var hvacKw = 1.2;
     var tempAdvice = '';
@@ -1781,7 +1781,7 @@ window.reserveHypercar = function reserveHypercar() {
     function updateUI() {
       var tempC = parseInt(tempSlider.value, 10);
       var tempF = Math.round((tempC * 9 / 5) + 32);
-      tempValOut.textContent = tempC + '°C (' + tempF + '°F)';
+      tempValOut.textContent = tempC + 'Â°C (' + tempF + 'Â°F)';
 
       var distMiles = parseInt(distSlider.value, 10);
       var distKm = Math.round(distMiles * 1.60934);
@@ -1841,7 +1841,7 @@ window.reserveHypercar = function reserveHypercar() {
         } else {
           routeBanner.className = 'range-route-banner warning';
           var deficit = distMiles - res.totalRange;
-          routeBannerText.textContent = '⚠️ Insufficient single-charge range! 350kW DC Fast Charge stop required ' + deficit + ' miles before destination.';
+          routeBannerText.textContent = 'âš ï¸ Insufficient single-charge range! 350kW DC Fast Charge stop required ' + deficit + ' miles before destination.';
         }
       }
     }
@@ -2048,7 +2048,7 @@ window.reserveHypercar = function reserveHypercar() {
       telSocReplenish.textContent = `+${p.socGain.toFixed(2)}% SoC`;
       telExtendedRange.textContent = `+${p.cityMiles.toFixed(1)} Miles`;
       telBrakeWearSaved.textContent = `${p.wearRelief.toFixed(1)}% Reduction`;
-      telRotorTemp.textContent = `Rotor Temp: ${p.rotorTemp}°C vs 640°C`;
+      telRotorTemp.textContent = `Rotor Temp: ${p.rotorTemp}Â°C vs 640Â°C`;
 
       // Mode Status Chip
       if (currentModeKey === 'off') {
@@ -2144,3 +2144,235 @@ window.reserveHypercar = function reserveHypercar() {
   }
 })();
 
+
+
+// ===== Issue #326: Active Aerodynamic Wing & Spoiler Telemetry Visualizer =====
+(function initActiveAeroTelemetry() {
+  if (typeof document === 'undefined') return;
+
+  function setup() {
+    const root = document.getElementById('activeWingTelemetry');
+    if (!root) return;
+
+    // Elements
+    const wingGroup = document.getElementById('airfoilWingGroup');
+    const downforceVector = document.getElementById('downforceVector');
+    const aeroModeTag = document.getElementById('aeroActiveMode');
+    const readoutAoa = document.getElementById('readoutAoa');
+    const readoutSpeed = document.getElementById('readoutSpeed');
+    const readoutFlowStatus = document.getElementById('readoutFlowStatus');
+
+    const angleSlider = document.getElementById('wingAngleSlider');
+    const angleVal = document.getElementById('wingAngleVal');
+    const speedSlider = document.getElementById('wingSpeedSlider');
+    const speedVal = document.getElementById('wingSpeedVal');
+
+    const kpiDownforceKg = document.getElementById('kpiDownforceKg');
+    const kpiDownforceN = document.getElementById('kpiDownforceN');
+    const kpiCd = document.getElementById('kpiCd');
+    const kpiDragPenalty = document.getElementById('kpiDragPenalty');
+    const kpiDragN = document.getElementById('kpiDragN');
+    const kpiDragPower = document.getElementById('kpiDragPower');
+    const kpiGripMultiplier = document.getElementById('kpiGripMultiplier');
+    const kpiGripSub = document.getElementById('kpiGripSub');
+
+    const presetBtns = root.querySelectorAll('.btn-aero-preset');
+    const btnDrs = document.getElementById('btnDeployDrs');
+    const btnAirbrake = document.getElementById('btnDeployAirbrake');
+    const btnCopy = document.getElementById('btnCopyAero');
+
+    // Streamline SVG paths
+    const s1 = document.getElementById('streamline1');
+    const s2 = document.getElementById('streamline2');
+    const s3 = document.getElementById('streamline3');
+    const s4 = document.getElementById('streamline4');
+    const s5 = document.getElementById('streamline5');
+
+    function calculate() {
+      const alpha = parseFloat(angleSlider.value) || 0;
+      const speedKmh = parseFloat(speedSlider.value) || 200;
+      const v = speedKmh / 3.6; // m/s
+      const rho = 1.225; // kg/m^3
+      const wingArea = 1.65; // m^2
+      const frontalArea = 2.15; // m^2
+      const baseCd = 0.31;
+      const vehicleMassKg = 1620;
+
+      // Lift & Drag Coefficients
+      let Cl = 0;
+      let flowStatus = 'Attached Laminar';
+      let flowClass = 'green-text';
+
+      if (alpha <= 28) {
+        Cl = 0.18 + (0.052 * alpha) - (0.00035 * Math.pow(alpha, 2));
+      } else if (alpha <= 35) {
+        Cl = 1.48 - (0.012 * (alpha - 28));
+        flowStatus = 'Separation Inception';
+        flowClass = 'amber-text';
+      } else {
+        Cl = 1.40 - (0.02 * (alpha - 35));
+        flowStatus = 'Full Airbrake Stall';
+        flowClass = 'red-text';
+      }
+
+      const deltaCd = (0.00032 * Math.pow(alpha, 2)) + (0.0035 * alpha);
+      const totalCd = baseCd + deltaCd;
+
+      // Forces
+      const q = 0.5 * rho * Math.pow(v, 2); // Dynamic pressure Pa
+      const downforceN = Math.round(q * wingArea * Cl);
+      const downforceKg = Math.round(downforceN / 9.80665);
+
+      const dragN = Math.round(q * frontalArea * totalCd);
+      const dragKw = Math.round((dragN * v) / 1000);
+
+      // Grip and G force
+      const normalLoadRatio = 1.0 + (downforceKg / vehicleMassKg);
+      const lateralG = (1.30 * Math.pow(normalLoadRatio, 0.65)).toFixed(2);
+      const deltaG = (lateralG - 1.30).toFixed(2);
+
+      // Mode identification
+      let modeText = 'BALANCED APEX';
+      if (alpha <= 3) modeText = 'DRS LOW DRAG';
+      else if (alpha > 35) modeText = 'AIRBRAKE RETARD';
+      else if (alpha > 22) modeText = 'HIGH DOWNFORCE';
+
+      // Update UI elements
+      if (angleVal) angleVal.textContent = alpha + '°';
+      if (speedVal) speedVal.textContent = speedKmh + ' km/h';
+
+      if (readoutAoa) readoutAoa.textContent = alpha.toFixed(1) + '°';
+      if (readoutSpeed) readoutSpeed.textContent = speedKmh + ' km/h';
+      if (readoutFlowStatus) {
+        readoutFlowStatus.textContent = flowStatus;
+        readoutFlowStatus.className = flowClass;
+      }
+      if (aeroModeTag) aeroModeTag.textContent = modeText;
+
+      if (kpiDownforceKg) kpiDownforceKg.textContent = downforceKg.toLocaleString('en-US');
+      if (kpiDownforceN) kpiDownforceN.textContent = downforceN.toLocaleString('en-US') + ' N vertical load';
+
+      if (kpiCd) kpiCd.textContent = totalCd.toFixed(2);
+      const cdPctOverDrs = Math.round((deltaCd / baseCd) * 100);
+      if (kpiDragPenalty) kpiDragPenalty.textContent = '+' + cdPctOverDrs + '% over DRS baseline';
+
+      if (kpiDragN) kpiDragN.textContent = dragN.toLocaleString('en-US');
+      if (kpiDragPower) kpiDragPower.textContent = dragKw.toLocaleString('en-US') + ' kW absorbed at ' + speedKmh + ' km/h';
+
+      if (kpiGripMultiplier) kpiGripMultiplier.textContent = lateralG;
+      if (kpiGripSub) kpiGripSub.textContent = '+' + deltaG + 'G tire normal load boost';
+
+      // Update SVG transforms
+      if (wingGroup) {
+        wingGroup.setAttribute('transform', 'translate(300, 150) rotate(' + alpha + ')');
+      }
+
+      // Scale downforce arrow
+      if (downforceVector) {
+        const arrowLength = Math.max(30, Math.min(110, 30 + (downforceKg / 10)));
+        const line = downforceVector.querySelector('line');
+        const poly = downforceVector.querySelector('polygon');
+        if (line) line.setAttribute('y2', String(arrowLength));
+        if (poly) poly.setAttribute('points', '-8,' + arrowLength + ' 8,' + arrowLength + ' 0,' + (arrowLength + 14));
+      }
+
+      // Deflect streamlines based on angle of attack
+      const dy = alpha * 1.5;
+      if (s1) s1.setAttribute('d', 'M 20,70 Q 250,' + (65 - dy * 0.4) + ' 580,' + (75 + dy * 0.5));
+      if (s2) s2.setAttribute('d', 'M 20,110 Q 250,' + (105 - dy * 0.6) + ' 580,' + (120 + dy * 0.8));
+      if (s3) s3.setAttribute('d', 'M 20,150 Q 250,' + (150 - dy * 0.2) + ' 580,' + (170 + dy * 1.2));
+      if (s4) s4.setAttribute('d', 'M 20,190 Q 250,' + (195 + dy * 0.3) + ' 580,' + (225 + dy * 1.5));
+      if (s5) s5.setAttribute('d', 'M 20,230 Q 250,' + (240 + dy * 0.4) + ' 580,' + (265 + dy * 1.6));
+
+      return {
+        angleDeg: alpha,
+        speedKmh: speedKmh,
+        downforceKg: downforceKg,
+        downforceN: downforceN,
+        cd: totalCd,
+        dragN: dragN,
+        dragPowerKw: dragKw,
+        lateralG: parseFloat(lateralG),
+        flowMode: modeText
+      };
+    }
+
+    angleSlider.addEventListener('input', () => {
+      presetBtns.forEach((b) => b.classList.remove('active'));
+      calculate();
+    });
+
+    speedSlider.addEventListener('input', calculate);
+
+    // Presets
+    presetBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const ang = parseFloat(btn.getAttribute('data-angle')) || 0;
+        const spd = parseFloat(btn.getAttribute('data-speed')) || 200;
+
+        angleSlider.value = String(ang);
+        speedSlider.value = String(spd);
+        calculate();
+      });
+    });
+
+    if (btnDrs) {
+      btnDrs.addEventListener('click', () => {
+        presetBtns.forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-angle') === '0');
+        });
+        angleSlider.value = '0';
+        speedSlider.value = '330';
+        calculate();
+      });
+    }
+
+    if (btnAirbrake) {
+      btnAirbrake.addEventListener('click', () => {
+        presetBtns.forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-angle') === '45');
+        });
+        angleSlider.value = '45';
+        calculate();
+      });
+    }
+
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => {
+        const res = calculate();
+        const text = [
+          'APEX HYPERCAR // ACTIVE AERO TELEMETRY SNAPSHOT',
+          '-----------------------------------------------',
+          'Wing Attack Angle:     ' + res.angleDeg + '°',
+          'Vehicle Velocity:      ' + res.speedKmh + ' km/h',
+          'Aerodynamic Downforce: ' + res.downforceKg + ' kg (' + res.downforceN + ' N)',
+          'Total Drag (Cd):       ' + res.cd.toFixed(2) + ' (' + res.dragN + ' N)',
+          'Drag Power Absorbed:   ' + res.dragPowerKw + ' kW',
+          'Cornering Lateral G:   ' + res.lateralG + ' G',
+          'Aerodynamic Profile:   ' + res.flowMode
+        ].join('\n');
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            const orig = btnCopy.textContent;
+            btnCopy.textContent = '✓ Copied!';
+            setTimeout(() => {
+              btnCopy.textContent = orig;
+            }, 1800);
+          });
+        }
+      });
+    }
+
+    calculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
