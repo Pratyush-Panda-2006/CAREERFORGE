@@ -2933,3 +2933,449 @@ exportCalendarBtn.addEventListener('click', () => {
   }
 })();
 
+
+
+/* ===== BEGIN Issue #403: Student Coding Streak & Study Habit Tracker ===== */
+(function initCodingStreakModule() {
+  const STORAGE_KEY = 'synapse_coding_streak_state';
+
+  const MILESTONES = [
+    { id: '3d', target: 3, name: '3-Day Spark', icon: '🥉', desc: 'Completed 3 consecutive study sessions' },
+    { id: '7d', target: 7, name: '7-Day Blaze', icon: '🥈', desc: 'Finished full 7-day coding sprint' },
+    { id: '14d', target: 14, name: '14-Day Inferno', icon: '🥇', desc: 'Completed 2 weeks systems immersion' },
+    { id: '30d', target: 30, name: '30-Day Supernova', icon: '💎', desc: '1 month continuous daily engineering' },
+    { id: '100d', target: 100, name: '100-Day Legend', icon: '👑', desc: 'Top 1% elite open source contributor' }
+  ];
+
+  const MOTIVATIONAL_QUOTES = [
+    { text: 'Consistency beats intensity. One focused commit a day keeps knowledge decay away.', author: 'Systems & AI Academy Staff' },
+    { text: 'Small daily improvements over time lead to stunning architectural mastery.', author: 'Robin Sharma' },
+    { text: 'The secret to system engineering is in the daily reps, not the occasional hackathon sprint.', author: 'Software Craftsmanship Manifesto' },
+    { text: 'Code is like humor. When you have to explain it, it is bad. Make clean practice habitual.', author: 'Cory House' },
+    { text: 'You do not rise to the level of your goals. You fall to the level of your daily routines.', author: 'James Clear' },
+    { text: 'First make it work, then make it right, then make it fast — every single day.', author: 'Kent Beck' }
+  ];
+
+  function getTodayKey(offsetDays = 0) {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    return d.toISOString().split('T')[0];
+  }
+
+  function getDefaultState() {
+    const today = getTodayKey();
+    const history = {};
+    // Populate the past 6 days as completed
+    for (let i = 6; i >= 1; i--) {
+      const dKey = getTodayKey(-i);
+      history[dKey] = { status: 'completed', hours: 1.5 };
+    }
+    // Today is initially marked completed for the 14-day streak demo
+    history[today] = { status: 'completed', hours: 2.0 };
+
+    return {
+      streak: 14,
+      bestStreak: 21,
+      totalHours: 48,
+      freezeTokens: 2,
+      freezeEquipped: true,
+      lastCheckInDate: today,
+      history: history,
+      unlockedMilestones: ['3d', '7d', '14d'],
+      simOffsetDays: 0
+    };
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed.streak === 'number') {
+          return parsed;
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return getDefaultState();
+  }
+
+  function saveState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // storage error ignored
+    }
+  }
+
+  let state = loadState();
+  let currentQuoteIndex = 0;
+
+  function showToast(message, type = 'info') {
+    const container = document.getElementById('edtechToastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `edtech-toast toast-${type}`;
+    toast.style.cssText = `
+      background: ${type === 'success' ? '#059669' : (type === 'freeze' ? '#0284c7' : '#4f46e5')};
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+      animation: fadeIn 0.3s ease;
+    `;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.4s ease';
+      setTimeout(() => toast.remove(), 400);
+    }, 3200);
+  }
+
+  function triggerConfetti() {
+    const canvas = document.getElementById('streakConfettiCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = canvas.parentElement.offsetWidth || 800;
+    canvas.height = canvas.parentElement.offsetHeight || 500;
+
+    const particles = [];
+    const colors = ['#f59e0b', '#ec4899', '#8b5cf6', '#38bdf8', '#34d399', '#fef08a'];
+
+    for (let i = 0; i < 90; i++) {
+      particles.push({
+        x: canvas.width / 2 + (Math.random() - 0.5) * 120,
+        y: canvas.height * 0.45,
+        vx: (Math.random() - 0.5) * 14,
+        vy: -Math.random() * 12 - 4,
+        size: Math.random() * 7 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        vRot: (Math.random() - 0.5) * 10,
+        alpha: 1
+      });
+    }
+
+    let frameId;
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = 0;
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.38; // gravity
+        p.vx *= 0.98;
+        p.rotation += p.vRot;
+        p.alpha -= 0.012;
+
+        if (p.alpha > 0) {
+          alive++;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+          ctx.restore();
+        }
+      });
+
+      if (alive > 0) {
+        frameId = requestAnimationFrame(render);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        cancelAnimationFrame(frameId);
+      }
+    }
+    render();
+  }
+
+  function renderCalendar() {
+    const container = document.getElementById('calendarDaysContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const simOffset = state.simOffsetDays || 0;
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() + simOffset - i);
+      const dKey = d.toISOString().split('T')[0];
+      const isToday = i === 0;
+
+      const record = state.history[dKey];
+      let status = 'missed';
+      let icon = '—';
+
+      if (record) {
+        if (record.status === 'completed') {
+          status = 'completed';
+          icon = '🔥';
+        } else if (record.status === 'frozen') {
+          status = 'frozen';
+          icon = '❄️';
+        }
+      } else if (isToday) {
+        status = 'today-pending';
+        icon = '⚡';
+      }
+
+      const node = document.createElement('div');
+      node.className = `calendar-day-node status-${status} ${isToday ? 'is-today' : ''}`;
+      node.innerHTML = `
+        <span class="day-name">${dayNames[d.getDay()]}</span>
+        <div class="day-circle" title="${dKey}: ${status}">
+          <span>${icon}</span>
+        </div>
+        <span class="day-date">${d.getDate()}</span>
+        <span class="day-tag">${isToday ? 'Today' : (status === 'completed' ? 'Done' : (status === 'frozen' ? 'Frozen' : 'Rest'))}</span>
+      `;
+      container.appendChild(node);
+    }
+  }
+
+  function renderMilestones() {
+    const grid = document.getElementById('streakBadgesGrid');
+    const progFill = document.getElementById('streakProgressFill');
+    const targetLabel = document.getElementById('nextTargetLabel');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    // Find next locked milestone
+    let nextMilestone = null;
+    let prevTarget = 0;
+    for (const m of MILESTONES) {
+      if (state.streak < m.target) {
+        nextMilestone = m;
+        break;
+      }
+      prevTarget = m.target;
+    }
+
+    if (nextMilestone) {
+      const pct = Math.min(100, Math.max(0, Math.round(((state.streak - prevTarget) / (nextMilestone.target - prevTarget)) * 100)));
+      if (progFill) progFill.style.width = `${pct}%`;
+      if (targetLabel) {
+        targetLabel.textContent = `${nextMilestone.name} (${state.streak}/${nextMilestone.target} Days • ${pct}%)`;
+      }
+    } else {
+      if (progFill) progFill.style.width = '100%';
+      if (targetLabel) targetLabel.textContent = 'All Milestones Mastered! 🏆 (100+ Days)';
+    }
+
+    MILESTONES.forEach((m) => {
+      const isUnlocked = state.streak >= m.target;
+      const item = document.createElement('div');
+      item.className = `badge-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+      item.innerHTML = `
+        <div class="badge-icon">${m.icon}</div>
+        <div class="badge-name">${m.name}</div>
+        <div class="badge-target">${m.target} Days</div>
+        <span class="badge-status-pill ${isUnlocked ? 'unlocked' : 'locked'}">
+          ${isUnlocked ? 'Unlocked' : 'Locked'}
+        </span>
+      `;
+      item.title = `${m.name}: ${m.desc}`;
+      grid.appendChild(item);
+    });
+  }
+
+  function updateHUD() {
+    const streakCount = document.getElementById('streakCountDisplay');
+    const bestStreak = document.getElementById('bestStreakDisplay');
+    const totalHours = document.getElementById('totalHoursDisplay');
+    const freezeCount = document.getElementById('freezeTokenCount');
+    const freezeStatusText = document.getElementById('freezeStatusText');
+    const freezeBtn = document.getElementById('btnToggleFreeze');
+    const logBtn = document.getElementById('btnLogStudySession');
+    const logText = document.getElementById('btnLogText');
+    const statusLabel = document.getElementById('streakStatusLabel');
+
+    if (streakCount) streakCount.textContent = state.streak;
+    if (bestStreak) bestStreak.textContent = `${state.bestStreak} Days`;
+    if (totalHours) totalHours.textContent = `${state.totalHours}h`;
+    if (freezeCount) freezeCount.textContent = state.freezeTokens;
+
+    if (freezeBtn && freezeStatusText) {
+      if (state.freezeEquipped) {
+        freezeStatusText.textContent = 'Shield: Active (Protected)';
+        freezeBtn.textContent = 'Unequip Freeze';
+        freezeBtn.classList.add('active');
+      } else {
+        freezeStatusText.textContent = state.freezeTokens > 0 ? 'Shield: Inactive' : 'No Tokens Available';
+        freezeBtn.textContent = 'Equip Protection';
+        freezeBtn.classList.remove('active');
+      }
+    }
+
+    // Check if current day is checked in
+    const simOffset = state.simOffsetDays || 0;
+    const currentSimDayKey = getTodayKey(simOffset);
+    const todayRecord = state.history[currentSimDayKey];
+
+    if (logBtn && logText) {
+      if (todayRecord && todayRecord.status === 'completed') {
+        logBtn.classList.add('already-checked');
+        logText.textContent = "Today's Study Logged ✓";
+      } else {
+        logBtn.classList.remove('already-checked');
+        logText.textContent = "Log Today's Session";
+      }
+    }
+
+    if (statusLabel) {
+      if (state.streak >= 30) {
+        statusLabel.textContent = 'SUPERNOVA • TOP 1% COHORT';
+      } else if (state.streak >= 14) {
+        statusLabel.textContent = 'ON FIRE • TOP 5% COHORT';
+      } else if (state.streak >= 7) {
+        statusLabel.textContent = 'BLAZING • WEEK 1 COMPLETED';
+      } else {
+        statusLabel.textContent = 'WARMING UP • KEEP BUILDING';
+      }
+    }
+
+    renderCalendar();
+    renderMilestones();
+  }
+
+  function handleLogSession() {
+    const simOffset = state.simOffsetDays || 0;
+    const currentSimDayKey = getTodayKey(simOffset);
+
+    if (state.history[currentSimDayKey] && state.history[currentSimDayKey].status === 'completed') {
+      showToast('Daily study already logged! Great work sticking to your routine.', 'info');
+      triggerConfetti();
+      return;
+    }
+
+    state.streak += 1;
+    if (state.streak > state.bestStreak) {
+      state.bestStreak = state.streak;
+    }
+    state.totalHours += 2;
+    state.history[currentSimDayKey] = { status: 'completed', hours: 2.0 };
+    state.lastCheckInDate = currentSimDayKey;
+
+    // Check for milestone rewards
+    MILESTONES.forEach((m) => {
+      if (state.streak >= m.target && !state.unlockedMilestones.includes(m.id)) {
+        state.unlockedMilestones.push(m.id);
+        state.freezeTokens = Math.min(3, state.freezeTokens + 1);
+        showToast(`🎉 Milestone Unlocked: ${m.name}! Earned +1 Freeze Token!`, 'success');
+      }
+    });
+
+    saveState(state);
+    updateHUD();
+    triggerConfetti();
+    showToast(`🔥 Streak increased to ${state.streak} Days! Session logged.`, 'success');
+  }
+
+  function handleToggleFreeze() {
+    if (state.freezeEquipped) {
+      state.freezeEquipped = false;
+      showToast('Streak Freeze unequipped. Shield inactive.', 'info');
+    } else {
+      if (state.freezeTokens <= 0) {
+        showToast('No freeze tokens left! Reach 7-day milestones to earn more.', 'info');
+        return;
+      }
+      state.freezeEquipped = true;
+      showToast('❄️ Streak Freeze equipped! Tomorrow is protected.', 'freeze');
+    }
+    saveState(state);
+    updateHUD();
+  }
+
+  function handleSimulateTomorrow() {
+    state.simOffsetDays = (state.simOffsetDays || 0) + 1;
+
+    // If previous day was not completed:
+    const prevDayKey = getTodayKey(state.simOffsetDays - 1);
+    if (!state.history[prevDayKey] || state.history[prevDayKey].status !== 'completed') {
+      if (state.freezeEquipped && state.freezeTokens > 0) {
+        state.freezeTokens -= 1;
+        state.freezeEquipped = false;
+        state.history[prevDayKey] = { status: 'frozen', hours: 0 };
+        showToast(`❄️ Missed yesterday! Streak Freeze consumed (1 token used, ${state.freezeTokens} remain). Streak preserved!`, 'freeze');
+      } else {
+        state.streak = 0;
+        state.history[prevDayKey] = { status: 'missed', hours: 0 };
+        showToast('Missed study day without freeze shield! Streak reset to 0.', 'info');
+      }
+    }
+
+    saveState(state);
+    updateHUD();
+  }
+
+  function handleMilestoneTest() {
+    state.streak = 30;
+    if (state.streak > state.bestStreak) state.bestStreak = 30;
+    state.unlockedMilestones = ['3d', '7d', '14d', '30d'];
+    state.totalHours = 75;
+    saveState(state);
+    updateHUD();
+    triggerConfetti();
+    showToast('💎 Simulated 30-Day Supernova Milestone unlock!', 'success');
+  }
+
+  function handleResetStreak() {
+    state = getDefaultState();
+    saveState(state);
+    updateHUD();
+    showToast('Streak tracker reset to 14-day default demo state.', 'info');
+  }
+
+  function displayQuote(index) {
+    const quote = MOTIVATIONAL_QUOTES[index % MOTIVATIONAL_QUOTES.length];
+    const textEl = document.getElementById('motivationalQuoteText');
+    const authorEl = document.getElementById('motivationalQuoteAuthor');
+    if (textEl && authorEl) {
+      textEl.textContent = quote.text;
+      authorEl.textContent = `— ${quote.author}`;
+    }
+  }
+
+  function initListeners() {
+    const logBtn = document.getElementById('btnLogStudySession');
+    const freezeBtn = document.getElementById('btnToggleFreeze');
+    const simTomorrowBtn = document.getElementById('btnSimulateTomorrow');
+    const testMilestoneBtn = document.getElementById('btnTriggerMilestoneTest');
+    const resetBtn = document.getElementById('btnResetStreak');
+    const refreshQuoteBtn = document.getElementById('btnRefreshQuote');
+
+    if (logBtn) logBtn.addEventListener('click', handleLogSession);
+    if (freezeBtn) freezeBtn.addEventListener('click', handleToggleFreeze);
+    if (simTomorrowBtn) simTomorrowBtn.addEventListener('click', handleSimulateTomorrow);
+    if (testMilestoneBtn) testMilestoneBtn.addEventListener('click', handleMilestoneTest);
+    if (resetBtn) resetBtn.addEventListener('click', handleResetStreak);
+
+    if (refreshQuoteBtn) {
+      refreshQuoteBtn.addEventListener('click', () => {
+        currentQuoteIndex = (currentQuoteIndex + 1) % MOTIVATIONAL_QUOTES.length;
+        displayQuote(currentQuoteIndex);
+      });
+    }
+
+    updateHUD();
+    displayQuote(currentQuoteIndex);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListeners);
+  } else {
+    initListeners();
+  }
+})();
+/* ===== END Issue #403: Student Coding Streak & Study Habit Tracker ===== */

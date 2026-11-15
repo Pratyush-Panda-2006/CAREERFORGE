@@ -238,6 +238,10 @@
             Showing <strong id="visibleProductsCount">8</strong> of <span id="totalProductsCount">8</span> items
           </div>
           <div class="catalog-sort-wrap">
+            <button type="button" class="catalog-stock-alert-trigger" onclick="openStockAlertModal()" aria-label="Open Inventory Stock Alerts Watchlist">
+              <span>🔔 Stock Alerts</span>
+              <span class="stock-alerts-badge" id="stockAlertsBadge" style="display: none;">0</span>
+            </button>
             <label for="catalogSortSelect" class="sort-label">Sort By:</label>
             <select id="catalogSortSelect" class="catalog-sort-select" onchange="handleCatalogSort(this.value)">
               <option value="featured">Featured / Best Match</option>
@@ -425,7 +429,7 @@
                 </label>
                 <button type="button" class="quick-view-btn" onclick="openQuickView('p6')" aria-label="Quick view Apex UltraWide 49&quot; 240Hz">Quick View 👁️</button>
                 <div class="action-container" id="action-p6">
-                  <button class="add-btn" onclick="addToCart('p6', 'Apex UltraWide 49&quot; 240Hz', 1199.00, '🖥️')">Add to Cart</button>
+                  <button type="button" class="notify-stock-btn" onclick="openStockAlertModal('p6')">🔔 Notify Me</button>
                 </div>
               </div>
             </div>
@@ -896,6 +900,103 @@
     </section>
   </div>
   <!-- ===== END Issue #283 & #433 ===== -->
+
+  <!-- ===== BEGIN Issue #401: Product Stock Inventory Alert Notification Modal ===== -->
+  <div id="stockAlertBackdrop" class="stock-alert-backdrop" onclick="closeStockAlertModal()"></div>
+  <div id="stockAlertModal" class="stock-alert-modal" role="dialog" aria-modal="true" aria-labelledby="stockAlertTitle" hidden>
+    <button type="button" class="stock-alert-close" onclick="closeStockAlertModal()" aria-label="Close inventory alert dialog">&times;</button>
+    <div class="stock-alert-header">
+      <div class="stock-alert-bell-wrap">
+        <span class="stock-alert-bell-icon">🔔</span>
+        <span class="stock-alert-bell-pulse"></span>
+      </div>
+      <div class="hero-tag">// RESTOCK TELEMETRY</div>
+      <h3 id="stockAlertTitle">Notify Me When Available</h3>
+      <p class="stock-alert-desc">
+        Never miss an inventory drop. We will ping your email the instant backordered models and custom variants arrive in the warehouse.
+      </p>
+    </div>
+
+    <form id="stockAlertForm" class="stock-alert-form" onsubmit="handleStockAlertSubmit(event)">
+      <!-- Selected Product Info Card -->
+      <div class="alert-product-preview-card" id="alertProductPreviewCard">
+        <div class="alert-prod-icon" id="alertProdIcon">🖥️</div>
+        <div class="alert-prod-meta">
+          <strong id="alertProdName">Apex UltraWide 49" 240Hz</strong>
+          <span id="alertProdPrice">$1,199.00 • Currently Backordered</span>
+        </div>
+      </div>
+
+      <!-- Product Selector (for direct modal open) -->
+      <div class="form-group">
+        <label for="stockAlertProductSelect">Product Specification</label>
+        <select id="stockAlertProductSelect" class="form-select" onchange="handleAlertProductChange(this.value)">
+          <!-- Options populated via script -->
+        </select>
+      </div>
+
+      <!-- Variant Selection Dropdown / Color Option -->
+      <div class="form-group">
+        <label for="stockAlertVariantSelect">Variant / Hardware Finish</label>
+        <select id="stockAlertVariantSelect" class="form-select" required>
+          <!-- Options populated dynamically -->
+        </select>
+      </div>
+
+      <!-- Email Address Field with Live Validation -->
+      <div class="form-group">
+        <div class="form-label-row">
+          <label for="stockAlertEmail">Notification Email</label>
+          <span class="validation-status-text" id="emailValidationStatus">Format: user@domain.com</span>
+        </div>
+        <div class="input-with-icon-wrap">
+          <input
+            type="email"
+            id="stockAlertEmail"
+            class="form-input"
+            placeholder="developer@workstation.io"
+            autocomplete="email"
+            required
+          />
+          <span class="input-state-icon" id="emailInputStateIcon">✉️</span>
+        </div>
+        <div class="field-error-hint" id="stockAlertEmailError" style="display: none;">
+          Please enter a valid email address (e.g. name@domain.com).
+        </div>
+      </div>
+
+      <!-- Notification Preferences Checkboxes -->
+      <div class="alert-pref-row">
+        <label class="alert-checkbox-label">
+          <input type="checkbox" id="prefPriorityDrop" checked />
+          <span>Priority Alert (notify 30 mins before general release)</span>
+        </label>
+        <label class="alert-checkbox-label">
+          <input type="checkbox" id="prefEmailReceipt" checked />
+          <span>Send confirmation dispatch to inbox</span>
+        </label>
+      </div>
+
+      <div class="modal-form-actions">
+        <button type="button" class="btn-cancel" onclick="closeStockAlertModal()">Cancel</button>
+        <button type="submit" class="btn-submit-alert" id="btnSubmitStockAlert">
+          <span>Subscribe to Alert 🔔</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Active Watchlist Subscriptions Drawer / Persistence List -->
+    <div class="active-watchlist-section">
+      <div class="watchlist-section-header">
+        <h4>YOUR ACTIVE RESTOCK WATCHLIST</h4>
+        <span class="watchlist-badge" id="watchlistCountBadge">0 Active</span>
+      </div>
+      <div class="watchlist-items-list" id="watchlistItemsList">
+        <!-- Rendered from localStorage -->
+      </div>
+    </div>
+  </div>
+  <!-- ===== END Issue #401 ===== -->
 
   <div id="toast" class="toast">Item added to cart!</div>
   <script src="script.js"></script>
