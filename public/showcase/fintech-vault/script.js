@@ -1060,6 +1060,429 @@ window.confirmDeposit = function confirmDeposit() {
   });
 })();
 
+/* BEGIN Debt payoff simulation engine */
+function simulateDebtPayoff(accounts, extraMonthlyPayment, strategy, startDate = new Date()) {
+  if (!Array.isArray(accounts) || accounts.length === 0) {
+    throw new RangeError('Add at least one debt account.');
+  }
+  if (!['snowball', 'avalanche'].includes(strategy)) {
+    throw new RangeError('Choose a supported payoff strategy.');
+  }
+  if (!Number.isFinite(extraMonthlyPayment) || extraMonthlyPayment < 0) {
+    throw new RangeError('Extra monthly payment must be a non-negative number.');
+  }
+  if (!(startDate instanceof Date) || Number.isNaN(startDate.getTime())) {
+    throw new RangeError('Start date must be a valid date.');
+  }
+
+  const debts = accounts.map((account, index) => {
+    const balanceCents = Math.round(Number(account.balance) * 100);
+    const minimumPaymentCents = Math.round(Number(account.minimumPayment) * 100);
+    const apr = Number(account.apr);
+
+    if (!Number.isSafeInteger(balanceCents) || balanceCents <= 0
+      || !Number.isSafeInteger(minimumPaymentCents) || minimumPaymentCents <= 0
+      || !Number.isFinite(apr) || apr < 0 || apr > 1000) {
+      throw new RangeError('Each debt must have a positive balance and minimum payment, and an APR from 0 to 1000%.');
+    }
+
+    return {
+      name: String(account.name || `Debt ${index + 1}`),
+      balanceCents,
+      minimumPaymentCents,
+      apr,
+      originalIndex: index,
+      payoffMonth: null
+    };
+  });
+
+  const extraCents = Math.round(extraMonthlyPayment * 100);
+  const minimumBudgetCents = debts.reduce((sum, debt) => sum + debt.minimumPaymentCents, 0);
+  const monthlyBudgetCents = minimumBudgetCents + extraCents;
+  if (!Number.isSafeInteger(extraCents) || !Number.isSafeInteger(monthlyBudgetCents)) {
+    throw new RangeError('The monthly payment total is too large to calculate safely.');
+  }
+
+  const initialBalanceCents = debts.reduce((sum, debt) => sum + debt.balanceCents, 0);
+  if (!Number.isSafeInteger(initialBalanceCents)) {
+    throw new RangeError('The total debt balance is too large to calculate safely.');
+  }
+
+  const balanceHistory = [{
+    month: 0,
+    balanceCents: initialBalanceCents
+  }];
+  let totalInterestCents = 0;
+  let months = 0;
+  let reason = null;
+
+  while (debts.some((debt) => debt.balanceCents > 0) && months < 1200) {
+    const startingBalancesCents = debts.map((debt) => debt.balanceCents);
+
+    debts.forEach((debt) => {
+      if (debt.balanceCents === 0) return;
+      const interestCents = Math.round((debt.balanceCents * debt.apr) / 1200);
+      if (!Number.isSafeInteger(interestCents) || !Number.isSafeInteger(debt.balanceCents + interestCents)) {
+        throw new RangeError('An account balance is too large to calculate safely.');
+      }
+      debt.balanceCents += interestCents;
+      totalInterestCents += interestCents;
+      if (!Number.isSafeInteger(totalInterestCents)) {
+        throw new RangeError('The total interest is too large to calculate safely.');
+      }
+    });
+
+    let remainingBudgetCents = monthlyBudgetCents;
+    debts.forEach((debt) => {
+      if (debt.balanceCents === 0) return;
+      const paymentCents = Math.min(debt.minimumPaymentCents, debt.balanceCents);
+      debt.balanceCents -= paymentCents;
+      remainingBudgetCents -= paymentCents;
+    });
+
+    const targets = debts
+      .filter((debt) => debt.balanceCents > 0)
+      .sort((a, b) => {
+        if (strategy === 'snowball') {
+          return a.balanceCents - b.balanceCents || a.originalIndex - b.originalIndex;
+        }
+        return b.apr - a.apr || a.balanceCents - b.balanceCents || a.originalIndex - b.originalIndex;
+      });
+
+    targets.forEach((debt) => {
+      if (remainingBudgetCents <= 0) return;
+      const paymentCents = Math.min(remainingBudgetCents, debt.balanceCents);
+      debt.balanceCents -= paymentCents;
+      remainingBudgetCents -= paymentCents;
+    });
+
+    months += 1;
+    debts.forEach((debt) => {
+      if (debt.balanceCents === 0 && debt.payoffMonth === null) {
+        debt.payoffMonth = months;
+      }
+    });
+
+    const remainingBalanceCents = debts.reduce((sum, debt) => sum + debt.balanceCents, 0);
+    if (!Number.isSafeInteger(remainingBalanceCents)) {
+      throw new RangeError('The total debt balance is too large to calculate safely.');
+    }
+    balanceHistory.push({ month: months, balanceCents: remainingBalanceCents });
+    if (debts.every((debt, index) => debt.balanceCents >= startingBalancesCents[index])) {
+      reason = 'payments-do-not-reduce-balance';
+      break;
+    }
+  }
+
+  const paidOff = debts.every((debt) => debt.balanceCents === 0);
+  if (!paidOff && !reason) reason = 'projection-limit-reached';
+
+  const debtFreeDate = paidOff
+    ? new Date(startDate.getFullYear(), startDate.getMonth() + months, 1)
+    : null;
+
+  return {
+    strategy,
+    paidOff,
+    reason,
+    months,
+    debtFreeDate,
+    monthlyBudgetCents,
+    totalInterestCents,
+    balanceHistory,
+    debtPayoffMonths: debts.map(({ name, payoffMonth }) => ({ name, payoffMonth }))
+  };
+}
+/* END Debt payoff simulation engine */
+
+(function initDebtStrategist() {
+  'use strict';
+
+  function initialize() {
+    const accountList = document.getElementById('debtAccountList');
+    const extraPaymentInput = document.getElementById('debtExtraPayment');
+    const errorMessage = document.getElementById('debtPlannerError');
+    const comparisonGrid = document.getElementById('debtComparisonGrid');
+    const savingsCallout = document.getElementById('debtSavingsCallout');
+    const chart = document.getElementById('debtPayoffChart');
+    const printButton = document.getElementById('printDebtPlanBtn');
+    const addButton = document.getElementById('addDebtAccountBtn');
+    if (!accountList || !extraPaymentInput || !errorMessage || !comparisonGrid
+      || !savingsCallout || !chart || !printButton || !addButton) return;
+
+    const currency = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 2
+    });
+    let nextAccountId = 0;
+
+    function addAccount(account = {}) {
+      nextAccountId += 1;
+      const row = document.createElement('div');
+      row.className = 'debt-account-row';
+      row.dataset.debtAccount = '';
+
+      const fields = [
+        { key: 'name', label: 'Account name', type: 'text', value: account.name || `Debt ${nextAccountId}` },
+        { key: 'balance', label: 'Balance', type: 'number', min: '0.01', step: '0.01', value: account.balance ?? '' },
+        { key: 'apr', label: 'APR (%)', type: 'number', min: '0', max: '1000', step: '0.01', value: account.apr ?? '' },
+        { key: 'minimumPayment', label: 'Minimum payment', type: 'number', min: '0.01', step: '0.01', value: account.minimumPayment ?? '' }
+      ];
+
+      fields.forEach((field) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = `debt-field debt-field-${field.key}`;
+        const inputId = `debt-${field.key}-${nextAccountId}`;
+        const label = document.createElement('label');
+        label.htmlFor = inputId;
+        label.textContent = field.label;
+        const input = document.createElement('input');
+        input.id = inputId;
+        input.type = field.type;
+        input.value = String(field.value);
+        input.dataset.debtField = field.key;
+        if (field.min !== undefined) input.min = field.min;
+        if (field.max !== undefined) input.max = field.max;
+        if (field.step !== undefined) input.step = field.step;
+        if (field.type === 'number') input.inputMode = 'decimal';
+        wrapper.append(label, input);
+        row.append(wrapper);
+      });
+
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'debt-remove-button';
+      removeButton.textContent = 'Remove';
+      removeButton.setAttribute('aria-label', `Remove ${account.name || `Debt ${nextAccountId}`}`);
+      row.append(removeButton);
+      accountList.append(row);
+      updateRemoveButtons();
+      return row;
+    }
+
+    function updateRemoveButtons() {
+      const rows = accountList.querySelectorAll('[data-debt-account]');
+      rows.forEach((row) => {
+        row.querySelector('.debt-remove-button').disabled = rows.length <= 1;
+      });
+    }
+
+    function readAccounts() {
+      return Array.from(accountList.querySelectorAll('[data-debt-account]')).map((row, index) => {
+        const fieldValue = (key) => row.querySelector(`[data-debt-field="${key}"]`).value;
+        return {
+          name: fieldValue('name').trim() || `Debt ${index + 1}`,
+          balance: Number(fieldValue('balance')),
+          apr: Number(fieldValue('apr')),
+          minimumPayment: Number(fieldValue('minimumPayment'))
+        };
+      });
+    }
+
+    function appendText(parent, tagName, className, text) {
+      const element = document.createElement(tagName);
+      if (className) element.className = className;
+      element.textContent = text;
+      parent.append(element);
+      return element;
+    }
+
+    function renderStrategyCard(result, title, className) {
+      const card = document.createElement('article');
+      card.className = `debt-comparison-card ${className}`;
+      appendText(card, 'h4', 'debt-method-title', title);
+      appendText(
+        card,
+        'p',
+        'debt-free-date',
+        result.paidOff
+          ? result.debtFreeDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+          : 'Payoff date unavailable'
+      );
+      appendText(
+        card,
+        'p',
+        'debt-result-caption',
+        result.paidOff
+          ? `Debt-free in ${result.months} month${result.months === 1 ? '' : 's'}`
+          : result.reason === 'payments-do-not-reduce-balance'
+            ? 'Payments do not reduce the total balance.'
+            : 'Balance remains after the 100-year projection.'
+      );
+
+      const stats = document.createElement('dl');
+      stats.className = 'debt-result-stats';
+      [
+        ['Total interest', currency.format(result.totalInterestCents / 100)],
+        ['Monthly budget', currency.format(result.monthlyBudgetCents / 100)]
+      ].forEach(([label, value]) => {
+        const item = document.createElement('div');
+        appendText(item, 'dt', '', label);
+        appendText(item, 'dd', '', value);
+        stats.append(item);
+      });
+      card.append(stats);
+
+      const milestones = document.createElement('ul');
+      milestones.className = 'debt-milestones';
+      result.debtPayoffMonths.forEach((debt) => {
+        appendText(
+          milestones,
+          'li',
+          '',
+          `${debt.name}: ${debt.payoffMonth === null ? 'not paid off in projection' : `month ${debt.payoffMonth}`}`
+        );
+      });
+      card.append(milestones);
+      return card;
+    }
+
+    function createSvgElement(tagName, attributes = {}) {
+      const element = document.createElementNS('http://www.w3.org/2000/svg', tagName);
+      Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+      return element;
+    }
+
+    function renderChart(snowball, avalanche) {
+      chart.replaceChildren();
+      const left = 64;
+      const right = 744;
+      const top = 22;
+      const bottom = 232;
+      const maxMonth = Math.max(
+        snowball.balanceHistory.at(-1).month,
+        avalanche.balanceHistory.at(-1).month,
+        1
+      );
+      const maxBalance = Math.max(
+        ...snowball.balanceHistory.map((point) => point.balanceCents),
+        ...avalanche.balanceHistory.map((point) => point.balanceCents),
+        1
+      );
+
+      for (let index = 0; index <= 4; index += 1) {
+        const y = top + ((bottom - top) * index) / 4;
+        const value = maxBalance * (1 - index / 4);
+        chart.append(createSvgElement('line', {
+          x1: left, y1: y, x2: right, y2: y, class: 'debt-chart-gridline'
+        }));
+        const label = createSvgElement('text', { x: left - 10, y: y + 4, 'text-anchor': 'end', class: 'debt-chart-label' });
+        label.textContent = currency.format(value / 100);
+        chart.append(label);
+      }
+
+      const xLabels = [0, Math.ceil(maxMonth / 2), maxMonth];
+      xLabels.forEach((month) => {
+        const x = left + ((right - left) * month) / maxMonth;
+        const label = createSvgElement('text', { x, y: bottom + 24, 'text-anchor': 'middle', class: 'debt-chart-label' });
+        label.textContent = String(month);
+        chart.append(label);
+      });
+      const monthAxisLabel = createSvgElement('text', {
+        x: (left + right) / 2,
+        y: bottom + 42,
+        'text-anchor': 'middle',
+        class: 'debt-chart-label'
+      });
+      monthAxisLabel.textContent = 'Months';
+      chart.append(monthAxisLabel);
+
+      function pathFor(history) {
+        const lastPoint = history[history.length - 1];
+        const points = history.slice();
+        if (lastPoint.month < maxMonth) points.push({ month: maxMonth, balanceCents: lastPoint.balanceCents });
+        return points.map((point, index) => {
+          const x = left + ((right - left) * point.month) / maxMonth;
+          const y = bottom - ((bottom - top) * point.balanceCents) / maxBalance;
+          return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+        }).join(' ');
+      }
+
+      chart.append(createSvgElement('path', { d: pathFor(snowball.balanceHistory), class: 'debt-chart-line snowball-line' }));
+      chart.append(createSvgElement('path', { d: pathFor(avalanche.balanceHistory), class: 'debt-chart-line avalanche-line' }));
+      chart.setAttribute('aria-label', `Remaining debt for Snowball and Avalanche strategies over ${maxMonth} months`);
+    }
+
+    function update() {
+      const accounts = readAccounts();
+      const extraPayment = extraPaymentInput.valueAsNumber;
+      const validAccounts = accounts.length > 0 && accounts.every((account) => (
+        Number.isFinite(account.balance) && account.balance > 0
+        && Number.isFinite(account.apr) && account.apr >= 0 && account.apr <= 1000
+        && Number.isFinite(account.minimumPayment) && account.minimumPayment > 0
+      ));
+
+      if (!validAccounts || !Number.isFinite(extraPayment) || extraPayment < 0) {
+        errorMessage.textContent = 'Enter a positive balance and minimum payment, an APR from 0 to 1000%, and a non-negative extra payment for every account.';
+        errorMessage.hidden = false;
+        comparisonGrid.replaceChildren();
+        savingsCallout.textContent = '';
+        chart.replaceChildren();
+        return;
+      }
+
+      errorMessage.hidden = true;
+      const snowball = simulateDebtPayoff(accounts, extraPayment, 'snowball');
+      const avalanche = simulateDebtPayoff(accounts, extraPayment, 'avalanche');
+      comparisonGrid.replaceChildren(
+        renderStrategyCard(snowball, 'Debt Snowball', 'snowball-card'),
+        renderStrategyCard(avalanche, 'Debt Avalanche', 'avalanche-card')
+      );
+
+      if (snowball.paidOff && avalanche.paidOff) {
+        const interestDifferenceCents = snowball.totalInterestCents - avalanche.totalInterestCents;
+        savingsCallout.className = 'debt-savings-callout';
+        if (interestDifferenceCents > 0) {
+          savingsCallout.textContent = `Avalanche saves ${currency.format(interestDifferenceCents / 100)} in interest compared with Snowball.`;
+        } else if (interestDifferenceCents < 0) {
+          savingsCallout.textContent = `Snowball saves ${currency.format(Math.abs(interestDifferenceCents) / 100)} in interest compared with Avalanche.`;
+        } else {
+          savingsCallout.textContent = 'Both strategies have the same estimated total interest.';
+        }
+      } else {
+        savingsCallout.className = 'debt-savings-callout debt-savings-warning';
+        savingsCallout.textContent = 'At least one strategy does not pay off all balances with this monthly budget. Increase your extra payment or review the account details.';
+      }
+
+      renderChart(snowball, avalanche);
+    }
+
+    addButton.addEventListener('click', () => {
+      addAccount();
+      update();
+    });
+    accountList.addEventListener('input', update);
+    accountList.addEventListener('click', (event) => {
+      const removeButton = event.target.closest('.debt-remove-button');
+      if (!removeButton) return;
+      removeButton.closest('[data-debt-account]').remove();
+      if (accountList.querySelectorAll('[data-debt-account]').length === 0) addAccount();
+      updateRemoveButtons();
+      update();
+    });
+    extraPaymentInput.addEventListener('input', update);
+    printButton.addEventListener('click', () => {
+      document.body.classList.add('print-debt-plan');
+      window.addEventListener('afterprint', () => {
+        document.body.classList.remove('print-debt-plan');
+      }, { once: true });
+      window.print();
+    });
+
+    addAccount({ name: 'Credit card', balance: 8200, apr: 22.9, minimumPayment: 210 });
+    addAccount({ name: 'Auto loan', balance: 14800, apr: 6.4, minimumPayment: 355 });
+    addAccount({ name: 'Personal loan', balance: 5600, apr: 12.5, minimumPayment: 185 });
+    update();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+  } else {
+    initialize();
+  }
+})();
+
 // ==========================================================
 // Issue #194: Quick Export Transaction Report (CSV & PDF)
 // ==========================================================

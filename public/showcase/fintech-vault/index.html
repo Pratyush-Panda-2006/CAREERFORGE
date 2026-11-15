@@ -1238,6 +1238,62 @@
   </section>
   <!-- ===== Crypto vs Stock DCA Investment Simulator END ===== -->
 
+  <section class="engine-section debt-section" id="debt-strategist" aria-labelledby="debtTitle">
+    <div class="engine-container">
+      <header class="section-header">
+        <h2 id="debtTitle">Debt Elimination Strategist</h2>
+        <p>Compare the Debt Snowball and Debt Avalanche approaches with one consistent monthly budget and see when each account could be paid off.</p>
+      </header>
+
+      <div class="debt-planner-controls">
+        <div class="debt-account-heading">
+          <div>
+            <h3>Your debt accounts</h3>
+            <p>Add each balance, APR, and required minimum payment.</p>
+          </div>
+          <button type="button" class="debt-add-button" id="addDebtAccountBtn">+ Add account</button>
+        </div>
+        <div class="debt-account-list" id="debtAccountList" aria-label="Debt accounts"></div>
+        <div class="debt-budget-row">
+          <label for="debtExtraPayment">Extra monthly payment</label>
+          <div class="debt-budget-input">
+            <span aria-hidden="true">$</span>
+            <input id="debtExtraPayment" type="number" min="0" step="0.01" value="300" inputmode="decimal">
+          </div>
+          <p>Both strategies use the sum of your minimum payments plus this extra amount each month.</p>
+        </div>
+      </div>
+
+      <p class="debt-error" id="debtPlannerError" role="alert" hidden></p>
+
+      <div class="debt-results" id="debtResults">
+        <div class="debt-results-heading">
+          <div>
+            <h3>Strategy comparison</h3>
+            <p>Interest is estimated monthly, rounded to cents, with payments applied after interest.</p>
+          </div>
+          <button type="button" class="debt-print-button" id="printDebtPlanBtn">Print comparison</button>
+        </div>
+
+        <div class="debt-savings-callout" id="debtSavingsCallout" aria-live="polite"></div>
+        <div class="debt-comparison-grid" id="debtComparisonGrid"></div>
+
+        <section class="debt-chart-card" aria-labelledby="debtChartTitle">
+          <div class="debt-chart-heading">
+            <h4 id="debtChartTitle">Projected remaining debt</h4>
+            <div class="debt-chart-legend" aria-label="Chart legend">
+              <span><i class="snowball-key"></i>Snowball</span>
+              <span><i class="avalanche-key"></i>Avalanche</span>
+            </div>
+          </div>
+          <svg class="debt-chart" id="debtPayoffChart" viewBox="0 0 760 280" role="img" aria-label="Line chart comparing remaining debt over time"></svg>
+        </section>
+      </div>
+
+      <p class="debt-disclaimer">Estimates assume fixed APRs, monthly interest, and consistent payments. Actual lender calculations, fees, and payment dates may differ; this planner is for educational purposes only.</p>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="footer-content">
       <div class="brand">💎 APEXVAULT</div>
