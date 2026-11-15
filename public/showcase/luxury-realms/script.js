@@ -2495,3 +2495,330 @@
 })();
 /* ===== END Issue #413 ===== */
 
+
+// ==========================================================================
+// Issue #350: Interactive Superyacht Charter Route Customizer & Fuel Surcharge Estimator
+// ==========================================================================
+(function initSuperyachtRouteCustomizer() {
+  if (typeof document === 'undefined') return;
+
+  function setup() {
+    var section = document.getElementById('superyacht-route-customizer');
+    if (!section) return;
+
+    var regionSelect = document.getElementById('yachtRegionSelect');
+    var vesselSelect = document.getElementById('yachtVesselSelect');
+    var availablePortSelect = document.getElementById('availablePortSelect');
+    var addPortBtn = document.getElementById('btnAddPort');
+    var resetBtn = document.getElementById('btnResetRoute');
+    var timeline = document.getElementById('waypointsTimeline');
+    var portCountBadge = document.getElementById('routePortCountBadge');
+    var vesselBadge = document.getElementById('summaryVesselBadge');
+
+    var totalDistEl = document.getElementById('yachtTotalDist');
+    var distKmEl = document.getElementById('yachtDistKm');
+    var cruisingTimeEl = document.getElementById('yachtCruisingTime');
+    var cruisingSpeedEl = document.getElementById('yachtCruisingSpeed');
+    var charterDaysEl = document.getElementById('yachtCharterDays');
+    var fuelBurnEl = document.getElementById('yachtFuelBurn');
+    var costBaseCharterEl = document.getElementById('costBaseCharter');
+    var costFuelSurchargeEl = document.getElementById('costFuelSurcharge');
+    var costBerthingFeesEl = document.getElementById('costBerthingFees');
+    var costEcoLevyEl = document.getElementById('costEcoLevy');
+    var costTotalBudgetEl = document.getElementById('costTotalBudget');
+
+    var copyBtn = document.getElementById('btnCopyYachtSummary');
+    var downloadBtn = document.getElementById('btnDownloadYachtJson');
+    var toast = document.getElementById('yachtToast');
+
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function () { toast.classList.remove('show'); }, 2400);
+    }
+
+    var VESSELS = {
+      horizon: { name: '55m Aura Horizon', speed: 14, burn: 450, dayRate: 35000 },
+      celestia: { name: '72m Celestia Sea', speed: 16, burn: 750, dayRate: 65000 },
+      sovereign: { name: '90m Imperial Sovereign', speed: 18, burn: 1200, dayRate: 110000 }
+    };
+
+    var REGIONS = {
+      riviera: {
+        name: 'French & Italian Riviera',
+        ports: [
+          { id: 'monaco', name: 'Port Hercules, Monaco', coords: "43°44'N 7°25'E", lat: 43.73, lon: 7.42, note: 'Helipad & Grand Casino Berth' },
+          { id: 'cannes', name: 'Port de Cannes, France', coords: "43°33'N 7°01'E", lat: 43.55, lon: 7.02, note: 'Palais VIP Tender Mooring' },
+          { id: 'st_tropez', name: 'Port de Saint-Tropez', coords: "43°16'N 6°38'E", lat: 43.27, lon: 6.64, note: 'Pampelonne Beach Club Bay' },
+          { id: 'portofino', name: 'Marina di Portofino, Italy', coords: "44°18'N 9°12'E", lat: 44.30, lon: 9.21, note: 'Ligurian Fjord Anchorage' },
+          { id: 'capri', name: 'Marina Grande, Capri', coords: "40°33'N 14°14'E", lat: 40.55, lon: 14.24, note: 'Faraglioni Rocks & Blue Grotto' }
+        ],
+        defaultRoute: ['monaco', 'cannes', 'st_tropez', 'portofino']
+      },
+      amalfi: {
+        name: 'Amalfi Coast & Archipelago',
+        ports: [
+          { id: 'naples', name: 'Molo Luise, Naples', coords: "40°50'N 14°15'E", lat: 40.83, lon: 14.25, note: 'Historic Mega-Yacht Terminal' },
+          { id: 'positano', name: 'Positano Roadstead', coords: "40°37'N 14°29'E", lat: 40.62, lon: 14.48, note: 'Cliffside Panorama Anchorage' },
+          { id: 'amalfi', name: 'Porto di Amalfi', coords: "40°38'N 14°36'E", lat: 40.63, lon: 14.60, note: 'Cathedral Harbor Mooring' },
+          { id: 'stromboli', name: 'Stromboli Marine Reserve', coords: "38°47'N 15°13'E", lat: 38.79, lon: 15.22, note: 'Night Volcanic Glow Watch' }
+        ],
+        defaultRoute: ['naples', 'positano', 'amalfi', 'stromboli']
+      },
+      caribbean: {
+        name: 'Leeward Islands & Caribbean',
+        ports: [
+          { id: 'st_thomas', name: 'Yacht Haven Grande, St. Thomas', coords: "18°20'N 64°55'W", lat: 18.33, lon: -64.92, note: 'Duty-Free Deep Water Marina' },
+          { id: 'st_john', name: 'Cruz Bay, St. John (USVI)', coords: "18°20'N 64°47'W", lat: 18.33, lon: -64.79, note: 'National Park Coral Reefs' },
+          { id: 'virgin_gorda', name: 'Bitter End, Virgin Gorda', coords: "18°30'N 64°21'W", lat: 18.50, lon: -64.35, note: 'North Sound Protected Basin' },
+          { id: 'st_barths', name: 'Port de Gustavia, St. Barths', coords: "17°53'N 62°51'W", lat: 17.89, lon: -62.85, note: 'Rue de la République Mooring' }
+        ],
+        defaultRoute: ['st_thomas', 'st_john', 'virgin_gorda', 'st_barths']
+      }
+    };
+
+    var currentRegionKey = 'riviera';
+    var activeWaypoints = [...REGIONS[currentRegionKey].defaultRoute];
+
+    // Nautical Distance Calculation (Haversine formula in NM: 1 deg ~ 60 NM)
+    function calcLegDistance(p1, p2) {
+      var dLat = (p2.lat - p1.lat) * (Math.PI / 180);
+      var dLon = (p2.lon - p1.lon) * (Math.PI / 180);
+      var lat1 = p1.lat * (Math.PI / 180);
+      var lat2 = p2.lat * (Math.PI / 180);
+
+      var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      var nm = 3440.065 * c; // Earth radius in nautical miles
+      return Math.max(12, Math.round(nm));
+    }
+
+    function populatePortSelect() {
+      if (!availablePortSelect) return;
+      availablePortSelect.replaceChildren();
+      var region = REGIONS[currentRegionKey];
+      region.ports.forEach(function (port) {
+        var opt = document.createElement('option');
+        opt.value = port.id;
+        opt.textContent = port.name;
+        availablePortSelect.appendChild(opt);
+      });
+    }
+
+    function renderTimelineAndCalculate() {
+      if (!timeline) return;
+      timeline.replaceChildren();
+
+      var region = REGIONS[currentRegionKey];
+      var vesselKey = vesselSelect ? vesselSelect.value : 'celestia';
+      var vessel = VESSELS[vesselKey] || VESSELS.celestia;
+
+      if (vesselBadge) vesselBadge.textContent = vessel.name;
+      if (cruisingSpeedEl) cruisingSpeedEl.textContent = '@ ' + vessel.speed + ' Knots Transit Speed';
+
+      var totalNm = 0;
+      var portMap = {};
+      region.ports.forEach(function (p) { portMap[p.id] = p; });
+
+      activeWaypoints.forEach(function (portId, idx) {
+        var port = portMap[portId];
+        if (!port) return;
+
+        var item = document.createElement('div');
+        item.className = 'waypoint-item';
+
+        var left = document.createElement('div');
+        left.className = 'waypoint-left';
+
+        var idxCircle = document.createElement('div');
+        idxCircle.className = 'waypoint-idx';
+        idxCircle.textContent = String(idx + 1);
+
+        var info = document.createElement('div');
+        info.className = 'waypoint-info';
+
+        var strong = document.createElement('strong');
+        strong.textContent = (idx === 0 ? '🏁 Departure: ' : (idx === activeWaypoints.length - 1 ? '⚓ Final Destination: ' : '📍 Port of Call: ')) + port.name;
+
+        var small = document.createElement('small');
+        small.textContent = port.coords + ' • ' + port.note;
+
+        info.appendChild(strong);
+        info.appendChild(small);
+
+        left.appendChild(idxCircle);
+        left.appendChild(info);
+
+        item.appendChild(left);
+
+        // If next port exists, calculate leg distance
+        if (idx < activeWaypoints.length - 1) {
+          var nextPort = portMap[activeWaypoints[idx + 1]];
+          if (nextPort) {
+            var legDist = calcLegDistance(port, nextPort);
+            totalNm += legDist;
+
+            var tag = document.createElement('span');
+            tag.className = 'waypoint-leg-tag';
+            var legHrs = (legDist / vessel.speed).toFixed(1);
+            tag.textContent = 'Next Leg: ' + legDist + ' NM (~' + legHrs + 'h)';
+            item.appendChild(tag);
+          }
+        }
+
+        // Remove button (only if > 2 waypoints)
+        if (activeWaypoints.length > 2) {
+          var removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'btn-remove-port';
+          removeBtn.title = 'Remove port';
+          removeBtn.setAttribute('aria-label', 'Remove ' + port.name);
+          removeBtn.textContent = '✕';
+          removeBtn.addEventListener('click', function () {
+            activeWaypoints.splice(idx, 1);
+            renderTimelineAndCalculate();
+            showToast('Removed ' + port.name + ' from route');
+          });
+          item.appendChild(removeBtn);
+        }
+
+        timeline.appendChild(item);
+      });
+
+      if (portCountBadge) {
+        portCountBadge.textContent = activeWaypoints.length + ' Waypoints';
+      }
+
+      // Financial and Telemetry Equations
+      var cruisingHours = totalNm / vessel.speed;
+      var charterDays = Math.max(3, Math.ceil(cruisingHours / 4) + activeWaypoints.length - 1);
+      var fuelBurnLiters = Math.round(cruisingHours * vessel.burn);
+
+      var baseCharterCost = charterDays * vessel.dayRate;
+      var fuelSurcharge = Math.round(fuelBurnLiters * 1.85); // $1.85 / Liter Marine MGO
+      var harborFees = activeWaypoints.length * 3700;
+      var ecoLevy = Math.round((fuelSurcharge + harborFees) * 0.03);
+      var totalEstimatedCost = baseCharterCost + fuelSurcharge + harborFees + ecoLevy;
+
+      if (totalDistEl) totalDistEl.textContent = totalNm + ' NM';
+      if (distKmEl) distKmEl.textContent = '~' + (totalNm * 1.852).toFixed(1) + ' Kilometers';
+      if (cruisingTimeEl) cruisingTimeEl.textContent = cruisingHours.toFixed(1) + ' Hours';
+      if (charterDaysEl) charterDaysEl.textContent = charterDays + ' Days';
+      if (fuelBurnEl) fuelBurnEl.textContent = fuelBurnLiters.toLocaleString('en-US') + ' L';
+
+      if (costBaseCharterEl) costBaseCharterEl.textContent = '$' + baseCharterCost.toLocaleString('en-US');
+      if (costFuelSurchargeEl) costFuelSurchargeEl.textContent = '$' + fuelSurcharge.toLocaleString('en-US');
+      if (costBerthingFeesEl) costBerthingFeesEl.textContent = '$' + harborFees.toLocaleString('en-US');
+      if (costEcoLevyEl) costEcoLevyEl.textContent = '$' + ecoLevy.toLocaleString('en-US');
+      if (costTotalBudgetEl) costTotalBudgetEl.textContent = '$' + totalEstimatedCost.toLocaleString('en-US');
+    }
+
+    if (regionSelect) {
+      regionSelect.addEventListener('change', function (e) {
+        currentRegionKey = e.target.value;
+        activeWaypoints = [...REGIONS[currentRegionKey].defaultRoute];
+        populatePortSelect();
+        renderTimelineAndCalculate();
+        showToast('Switched Cruising Region to ' + REGIONS[currentRegionKey].name);
+      });
+    }
+
+    if (vesselSelect) {
+      vesselSelect.addEventListener('change', function () {
+        renderTimelineAndCalculate();
+        showToast('Updated Charter Vessel Specifications');
+      });
+    }
+
+    if (addPortBtn) {
+      addPortBtn.addEventListener('click', function () {
+        if (!availablePortSelect) return;
+        var pId = availablePortSelect.value;
+        if (!pId) return;
+        activeWaypoints.push(pId);
+        renderTimelineAndCalculate();
+        showToast('Added port of call to itinerary');
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        activeWaypoints = [...REGIONS[currentRegionKey].defaultRoute];
+        renderTimelineAndCalculate();
+        showToast('Itinerary reset to default coastal route');
+      });
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var vesselKey = vesselSelect ? vesselSelect.value : 'celestia';
+        var vessel = VESSELS[vesselKey] || VESSELS.celestia;
+        var summary = [
+          '=== AURA LUXURY REALMS // MARITIME SUPERYACHT CHARTER BRIEF ===',
+          'Cruising Basin: ' + REGIONS[currentRegionKey].name,
+          'Selected Vessel: ' + vessel.name,
+          'Total Route Distance: ' + (totalDistEl ? totalDistEl.textContent : '315 NM'),
+          'Cruising Transit Time: ' + (cruisingTimeEl ? cruisingTimeEl.textContent : '19.7 Hours'),
+          'Recommended Charter Duration: ' + (charterDaysEl ? charterDaysEl.textContent : '5 Days'),
+          'Projected Marine Fuel Burn: ' + (fuelBurnEl ? fuelBurnEl.textContent : '14,775 L'),
+          'Total Estimated Charter Ledger: ' + (costTotalBudgetEl ? costTotalBudgetEl.textContent : '$368,398'),
+          'Generated on: ' + new Date().toISOString()
+        ].join('\n');
+
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(summary);
+        }
+        showToast('Maritime charter brief copied to clipboard!');
+      });
+    }
+
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function () {
+        var vesselKey = vesselSelect ? vesselSelect.value : 'celestia';
+        var vessel = VESSELS[vesselKey] || VESSELS.celestia;
+        var data = {
+          maritimeAgency: 'Aura Luxury Realms Maritime Fleet Division',
+          timestamp: new Date().toISOString(),
+          cruisingRegion: REGIONS[currentRegionKey].name,
+          vessel: vessel,
+          portsOfCall: activeWaypoints,
+          routeTelemetry: {
+            totalDistanceNauticalMiles: totalDistEl ? totalDistEl.textContent : '315 NM',
+            cruisingDurationHours: cruisingTimeEl ? cruisingTimeEl.textContent : '19.7 Hours',
+            recommendedCharterDays: charterDaysEl ? charterDaysEl.textContent : '5 Days',
+            marineFuelBurnLiters: fuelBurnEl ? fuelBurnEl.textContent : '14,775 L'
+          },
+          costLedger: {
+            baseCharter: costBaseCharterEl ? costBaseCharterEl.textContent : '',
+            fuelSurcharge: costFuelSurchargeEl ? costFuelSurchargeEl.textContent : '',
+            harborBerthing: costBerthingFeesEl ? costBerthingFeesEl.textContent : '',
+            marineEcoLevy: costEcoLevyEl ? costEcoLevyEl.textContent : '',
+            totalEstimatedCharterBudget: costTotalBudgetEl ? costTotalBudgetEl.textContent : ''
+          }
+        };
+
+        var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'superyacht-itinerary-' + currentRegionKey + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        showToast('Exported Maritime Itinerary JSON!');
+      });
+    }
+
+    populatePortSelect();
+    renderTimelineAndCalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();

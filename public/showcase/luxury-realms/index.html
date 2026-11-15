@@ -971,6 +971,119 @@
   </div>
   <!-- ===== END Issue #351 ===== -->
 
+  <!-- ===== BEGIN Issue #350: Interactive Superyacht Charter Route Customizer & Fuel Surcharge Estimator ===== -->
+  <section class="superyacht-route-section" id="superyacht-route-customizer" aria-labelledby="yachtRouteTitle">
+    <div class="yacht-container">
+      <div class="yacht-header">
+        <span class="yacht-kicker">⚓ MARITIME EXPEDITIONS &amp; CHARTERS</span>
+        <h2 id="yachtRouteTitle">Superyacht Charter Route &amp; Fuel Surcharge Estimator</h2>
+        <p class="yacht-subtitle">
+          Chart bespoke Mediterranean or Caribbean cruising itineraries. Select ports of call to calculate cumulative nautical miles, cruising duration, yacht fuel consumption burn rates, and environmental marine surcharges.
+        </p>
+      </div>
+
+      <!-- Controls: Region Selector & Vessel Selection -->
+      <div class="yacht-selectors-grid">
+        <div class="yacht-selector-card">
+          <label for="yachtRegionSelect" class="selector-heading">Cruising Basin &amp; Region:</label>
+          <select id="yachtRegionSelect" class="yacht-select">
+            <option value="riviera">French &amp; Italian Riviera (Monaco, St. Tropez, Portofino, Capri)</option>
+            <option value="amalfi">Amalfi Coast &amp; Tyrrhenian Archipelago</option>
+            <option value="caribbean">Leeward Islands &amp; Caribbean (St. Barths, Virgin Gorda)</option>
+          </select>
+        </div>
+
+        <div class="yacht-selector-card">
+          <label for="yachtVesselSelect" class="selector-heading">Charter Yacht Class:</label>
+          <select id="yachtVesselSelect" class="yacht-select">
+            <option value="horizon">55m Superyacht "Aura Horizon" (14 kts • 450 L/hr • $35k/day)</option>
+            <option value="celestia" selected>72m Mega-Yacht "Celestia Sea" (16 kts • 750 L/hr • $65k/day)</option>
+            <option value="sovereign">90m Gigayacht "Imperial Sovereign" (18 kts • 1,200 L/hr • $110k/day)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Main Workspace: Waypoints Manager + Interactive Timeline + Financial Telemetry -->
+      <div class="yacht-workspace-grid">
+        <!-- Left: Waypoint Port Selector & Interactive Route Legs -->
+        <div class="yacht-route-card">
+          <div class="route-card-header">
+            <h3>Itinerary Waypoint Sequence</h3>
+            <span class="route-badge" id="routePortCountBadge">4 Waypoints</span>
+          </div>
+
+          <!-- Port Adding Bar -->
+          <div class="add-port-bar">
+            <label for="availablePortSelect" class="sr-only">Add Destination Port</label>
+            <select id="availablePortSelect" class="yacht-select-sm">
+              <!-- Dynamically populated based on region -->
+            </select>
+            <button type="button" class="btn-add-port" id="btnAddPort">+ Add Port of Call</button>
+            <button type="button" class="btn-reset-route" id="btnResetRoute">Reset</button>
+          </div>
+
+          <!-- Waypoints Timeline Connector List -->
+          <div class="waypoints-timeline" id="waypointsTimeline">
+            <!-- Dynamically rendered port cards with leg distance, speed time, and remove button -->
+          </div>
+        </div>
+
+        <!-- Right: Telemetry & Charter Cost Summary -->
+        <div class="yacht-summary-card">
+          <div class="summary-card-header">
+            <h3>Maritime Navigation Telemetry</h3>
+            <span class="vessel-badge" id="summaryVesselBadge">72m Celestia Sea</span>
+          </div>
+
+          <!-- Metric Highlights Grid -->
+          <div class="yacht-metrics-grid">
+            <div class="yacht-metric-box">
+              <span class="metric-label">Total Distance</span>
+              <strong class="metric-val" id="yachtTotalDist">315 NM</strong>
+              <small class="metric-sub" id="yachtDistKm">~583.4 Kilometers</small>
+            </div>
+
+            <div class="yacht-metric-box">
+              <span class="metric-label">Cruising Underway</span>
+              <strong class="metric-val" id="yachtCruisingTime">19.7 Hours</strong>
+              <small class="metric-sub" id="yachtCruisingSpeed">@ 16 Knots Transit Speed</small>
+            </div>
+
+            <div class="yacht-metric-box">
+              <span class="metric-label">Recommended Charter</span>
+              <strong class="metric-val" id="yachtCharterDays">5 Days</strong>
+              <small class="metric-sub">Port Leisure &amp; Anchorage</small>
+            </div>
+
+            <div class="yacht-metric-box">
+              <span class="metric-label">Marine Diesel Burn</span>
+              <strong class="metric-val" id="yachtFuelBurn">14,775 L</strong>
+              <small class="metric-sub" id="yachtFuelRate">@ $1.85 / Liter Marine MGO</small>
+            </div>
+          </div>
+
+          <!-- Cost Accounting Breakdown -->
+          <div class="yacht-cost-breakdown">
+            <div class="cost-breakdown-title">ESTIMATED CHARTER &amp; SURCHARGE LEDGER</div>
+            <div class="cost-row"><span>Base Yacht Charter (5 Days)</span><strong id="costBaseCharter">$325,000</strong></div>
+            <div class="cost-row"><span>Propulsion Fuel Surcharge</span><strong id="costFuelSurcharge">$27,334</strong></div>
+            <div class="cost-row"><span>Harbor Pilot &amp; Berthing Fees (4 Ports)</span><strong id="costBerthingFees">$14,800</strong></div>
+            <div class="cost-row"><span>Marine Eco-Conservation Levy (3%)</span><strong id="costEcoLevy">$1,264</strong></div>
+            <div class="cost-row cost-total"><span>Total Estimated Charter Budget</span><strong id="costTotalBudget">$368,398</strong></div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="yacht-action-buttons">
+            <button type="button" class="btn-yacht-copy" id="btnCopyYachtSummary">Copy Charter Brief 📋</button>
+            <button type="button" class="btn-yacht-download" id="btnDownloadYachtJson">Export Maritime Itinerary (.JSON) ↓</button>
+          </div>
+          <div id="yachtToast" class="yacht-toast" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #350 ===== -->
+
 <div
   class="concierge-overlay"
   id="conciergeModal"
