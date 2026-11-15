@@ -1941,6 +1941,7 @@ if (typeof window !== 'undefined') {
 
 /* ===== BEGIN Issue #353: Satellite Reforestation Progress Visualizer ===== */
 (function initSatelliteReforestation() {
+  if (typeof document === 'undefined') return;
   const section = document.getElementById('satellite-reforestation-section');
   if (!section) return;
 
@@ -2187,6 +2188,7 @@ if (typeof window !== 'undefined') {
 /* ===== BEGIN Issue #415: Clean Water Well Project Fund Progress Bar & Geo-Coordinates ===== */
 (function initCleanWaterTracker() {
   'use strict';
+  if (typeof document === 'undefined') return;
 
   var WELL_PROJECTS = {
     turkana: {
@@ -2535,3 +2537,141 @@ if (typeof window !== 'undefined') {
 })();
 /* ===== END Issue #415 ===== */
 
+
+// ==========================================================================
+// Issue #352: Corporate Sustainability Partnership Tier Builder & CSR Calculator
+// ==========================================================================
+(function initCorporateSponsorship() {
+  function setup() {
+    var section = document.getElementById('corporate-sponsorship');
+    if (!section) return;
+
+    var slider = document.getElementById('corpDonationSlider');
+    var amountDisplay = document.getElementById('corpAmountDisplay');
+    var treesVal = document.getElementById('csrTreesVal');
+    var carbonVal = document.getElementById('csrCarbonVal');
+    var volunteerVal = document.getElementById('csrVolunteerVal');
+    var taxVal = document.getElementById('csrTaxVal');
+    var toast = document.getElementById('corpToast');
+    var btnCopy = document.getElementById('btnCopyCsrSummary');
+    var btnDownload = document.getElementById('btnDownloadCsrBrief');
+
+    var tierCards = section.querySelectorAll('.tier-card');
+    var tierButtons = section.querySelectorAll('.btn-tier-select');
+
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function () {
+        toast.classList.remove('show');
+      }, 2400);
+    }
+
+    function calculateMetrics(amount) {
+      // 1 tree = ~$16.66 ($50k = 3,000 trees)
+      var trees = Math.round(amount * 0.06);
+      // 1 ton carbon = ~$312.50 ($50k = 160 tons)
+      var carbon = Math.round(amount * 0.0032);
+      // Volunteer hours ($50k = 280 hours)
+      var volunteer = Math.round(amount * 0.0056);
+
+      if (amountDisplay) amountDisplay.textContent = '$' + amount.toLocaleString('en-US');
+      if (treesVal) treesVal.textContent = trees.toLocaleString('en-US');
+      if (carbonVal) carbonVal.textContent = carbon.toLocaleString('en-US') + ' tCO2e';
+      if (volunteerVal) volunteerVal.textContent = volunteer.toLocaleString('en-US') + ' Hours';
+      if (taxVal) taxVal.textContent = '$' + amount.toLocaleString('en-US');
+
+      // Update active state on tier cards if exactly matched
+      tierCards.forEach(function (card) {
+        var cardAmount = parseInt(card.dataset.amount, 10);
+        var isMatch = cardAmount === amount;
+        card.classList.toggle('featured', isMatch);
+        var btn = card.querySelector('.btn-tier-select');
+        if (btn) btn.classList.toggle('active', isMatch);
+      });
+    }
+
+    if (slider) {
+      slider.addEventListener('input', function (e) {
+        var val = parseInt(e.target.value, 10);
+        calculateMetrics(val);
+      });
+    }
+
+    tierButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tier = btn.dataset.tierSelect;
+        var card = section.querySelector('.tier-card[data-tier="' + tier + '"]');
+        if (!card) return;
+        var amount = parseInt(card.dataset.amount, 10);
+        if (slider) slider.value = amount;
+        calculateMetrics(amount);
+        showToast('Selected ' + tier.toUpperCase() + ' Corporate Sponsorship Tier');
+      });
+    });
+
+    if (btnCopy) {
+      btnCopy.addEventListener('click', function () {
+        var currentAmt = slider ? parseInt(slider.value, 10) : 50000;
+        var summary = [
+          '=== REWILDING ALLIANCE // CORPORATE CSR PROSPECTUS ===',
+          'Annual Contribution: $' + currentAmt.toLocaleString('en-US'),
+          '501(c)(3) Tax Deductible: 100% Tax-Exempt',
+          'Direct Ecological Return:',
+          '  - Native Trees Planted: ' + (treesVal ? treesVal.textContent : '3,000'),
+          '  - Verified Carbon Offsets: ' + (carbonVal ? carbonVal.textContent : '160 tCO2e'),
+          '  - Employee Engagement Hours: ' + (volunteerVal ? volunteerVal.textContent : '280 Hours'),
+          'Impact Verified via: Verra & Gold Standard Protocols',
+          'Generated on: ' + new Date().toISOString()
+        ].join('\n');
+
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(summary);
+        }
+        showToast('Corporate CSR summary copied to clipboard!');
+      });
+    }
+
+    if (btnDownload) {
+      btnDownload.addEventListener('click', function () {
+        var currentAmt = slider ? parseInt(slider.value, 10) : 50000;
+        var data = {
+          entity: 'Rewilding Alliance Global Enterprise Partnership',
+          prospectusVersion: '2026.1',
+          timestamp: new Date().toISOString(),
+          annualEnterpriseContribution: currentAmt,
+          taxExemptStatus: '501(c)(3) Direct Eligible Deduction',
+          csrMetrics: {
+            nativeTreesPlanted: treesVal ? treesVal.textContent : '3,000',
+            carbonCreditsOffset: carbonVal ? carbonVal.textContent : '160 tCO2e',
+            employeeVolunteerHours: volunteerVal ? volunteerVal.textContent : '280 Hours',
+            verificationStandard: 'Gold Standard & Verra VCS'
+          }
+        };
+
+        var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'corporate-csr-prospectus-' + currentAmt + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        showToast('Exported Corporate ESG Prospectus JSON!');
+      });
+    }
+
+    // Initial setup
+    calculateMetrics(slider ? parseInt(slider.value, 10) : 50000);
+  }
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setup);
+    } else {
+      setup();
+    }
+  }
+})();
