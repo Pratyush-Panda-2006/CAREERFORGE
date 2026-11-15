@@ -1883,3 +1883,264 @@ window.reserveHypercar = function reserveHypercar() {
   document.addEventListener('DOMContentLoaded', initRangeEstimator);
 })();
 /* ===== EV Road Trip Range Estimator (Issue #271) END ===== */
+
+/* ==========================================================
+   Issue #389: Regenerative Braking Simulator (KERS) Telemetry
+   Calculates kinetic energy equations (E = 1/2 m v^2), deceleration
+   G-forces, recovered kWh, thermal brake relief and battery replenishment.
+   ========================================================== */
+(() => {
+  const MASS_KG = 1800; // Hypercar carbon chassis mass
+  const PACK_KWH = 120; // 120 kWh solid-state pack
+  const MPH_TO_MS = 0.44704;
+  const G_ACCEL = 9.80665;
+
+  const MODES = {
+    off: {
+      id: 'off',
+      name: 'Coast / Off',
+      efficiency: 0.0,
+      regenMaxG: 0.0,
+      frictionBias: 1.0,
+      thermalReliefPct: 0.0,
+      baseRotorTemp: 640
+    },
+    adaptive: {
+      id: 'adaptive',
+      name: 'Adaptive Dynamic',
+      efficiency: 0.84,
+      regenMaxG: 0.48,
+      frictionBias: 0.45,
+      thermalReliefPct: 56.5,
+      baseRotorTemp: 280
+    },
+    aggressive: {
+      id: 'aggressive',
+      name: 'Aggressive One-Pedal',
+      efficiency: 0.942,
+      regenMaxG: 0.95,
+      frictionBias: 0.15,
+      thermalReliefPct: 78.4,
+      baseRotorTemp: 145
+    }
+  };
+
+  function initRegenSimulator() {
+    const section = document.getElementById('regenSimulator');
+    if (!section) return;
+
+    // Elements
+    const modeBtns = section.querySelectorAll('.regen-mode-btn');
+    const speedSlider = document.getElementById('regenSpeedSlider');
+    const speedDisplay = document.getElementById('regenSpeedDisplay');
+    const pressureSlider = document.getElementById('regenBrakePressureSlider');
+    const pressureDisplay = document.getElementById('regenPressureDisplay');
+    const brakeBtn = document.getElementById('btnTriggerBrake');
+    const brakeText = document.getElementById('btnBrakeText');
+
+    // Telemetry displays
+    const statusChip = document.getElementById('regenStatusChip');
+    const powerArc = document.getElementById('regenPowerArc');
+    const regenKwVal = document.getElementById('regenKwVal');
+    const regenHpEquiv = document.getElementById('regenHpEquiv');
+    const kwhPerStop = document.getElementById('regenKwhPerStop');
+
+    const decelStatusBadge = document.getElementById('decelStatusBadge');
+    const decelPuck = document.getElementById('decelPuck');
+    const stoppingDistVal = document.getElementById('stoppingDistVal');
+    const stoppingTimeVal = document.getElementById('stoppingTimeVal');
+
+    const telSocReplenish = document.getElementById('telSocReplenish');
+    const telExtendedRange = document.getElementById('telExtendedRange');
+    const telBrakeWearSaved = document.getElementById('telBrakeWearSaved');
+    const telRotorTemp = document.getElementById('telRotorTemp');
+
+    // State
+    let currentModeKey = 'adaptive';
+    let entrySpeedMph = 120;
+    let brakePressurePct = 60;
+    let isDecelerating = false;
+
+    // SVG Power Arc Track Length (Radius 90, Arc ~ 283)
+    const ARC_LENGTH = 283;
+    powerArc.style.strokeDasharray = `${ARC_LENGTH} ${ARC_LENGTH}`;
+
+    function computePhysics(speedMph, pressurePct, modeKey) {
+      const mode = MODES[modeKey];
+      const v0 = speedMph * MPH_TO_MS; // m/s
+
+      // Total deceleration G demand based on pedal pressure (0.2G to 1.35G peak)
+      const baseDecelG = 0.2 + (pressurePct / 100) * 1.15;
+      const decelMs2 = baseDecelG * G_ACCEL;
+
+      // Split between regenerative motor braking and mechanical friction
+      const regenG = Math.min(baseDecelG, mode.regenMaxG);
+      const frictionG = Math.max(0, baseDecelG - regenG);
+      const regenShare = baseDecelG > 0 ? regenG / baseDecelG : 0;
+
+      // Stopping metrics
+      const stopTimeSec = v0 / decelMs2;
+      const stopDistMeters = (v0 * v0) / (2 * decelMs2);
+      const stopDistFeet = stopDistMeters * 3.28084;
+
+      // Kinetic Energy: E = 0.5 * m * v^2 (Joules)
+      const totalKineticJoules = 0.5 * MASS_KG * v0 * v0;
+      const recoveredJoules = totalKineticJoules * regenShare * mode.efficiency;
+      const recoveredKwh = recoveredJoules / 3600000;
+
+      // Peak regen power during stop (average power * 1.5)
+      const avgPowerKw = stopTimeSec > 0 ? (recoveredJoules / stopTimeSec) / 1000 : 0;
+      const peakPowerKw = avgPowerKw * 1.45;
+      const peakHp = peakPowerKw * 1.34102;
+
+      // Battery replenishment
+      const socGain = (recoveredKwh / PACK_KWH) * 100;
+
+      // Extended city range: ~3.8 miles per kWh recovered
+      const cityMiles = recoveredKwh * 58.5; // Scaled per 100 miles of city stop-and-go driving
+
+      // Thermal wear reduction and rotor temp
+      const wearRelief = mode.thermalReliefPct * (1 - (frictionG / (baseDecelG || 1)));
+      const rotorTemp = Math.round(mode.baseRotorTemp + (frictionG * 240));
+
+      return {
+        v0,
+        baseDecelG,
+        stopTimeSec,
+        stopDistFeet,
+        recoveredKwh,
+        peakPowerKw,
+        peakHp,
+        socGain,
+        cityMiles,
+        wearRelief,
+        rotorTemp
+      };
+    }
+
+    function updateHUD() {
+      const p = computePhysics(entrySpeedMph, brakePressurePct, currentModeKey);
+
+      // Labels
+      speedDisplay.textContent = `${entrySpeedMph} MPH (${Math.round(entrySpeedMph * 1.60934)} km/h)`;
+      pressureDisplay.textContent = `${brakePressurePct}% (${brakePressurePct < 40 ? 'Gentle' : brakePressurePct < 75 ? 'Moderate' : 'Panic Stop'})`;
+
+      // Dial 1: Regen Power Gauge
+      regenKwVal.textContent = Math.round(p.peakPowerKw);
+      regenHpEquiv.textContent = `${Math.round(p.peakHp)} HP Captured`;
+      kwhPerStop.textContent = `+${p.recoveredKwh.toFixed(2)} kWh / stop`;
+
+      // Gauge arc fill (max 650 kW)
+      const fillFrac = Math.min(1.0, p.peakPowerKw / 650);
+      const offset = ARC_LENGTH * (1 - fillFrac);
+      powerArc.style.strokeDashoffset = String(offset);
+
+      // Dial 2: Deceleration G-Meter
+      decelStatusBadge.textContent = `-${p.baseDecelG.toFixed(2)} G`;
+      stoppingDistVal.textContent = `${Math.round(p.stopDistFeet)} ft`;
+      stoppingTimeVal.textContent = `${p.stopTimeSec.toFixed(2)} s`;
+
+      // Move Decel G Puck downwards on vertical axis (CY=100, max displacement +60px for -1.5G)
+      const puckY = 100 + Math.min(65, (p.baseDecelG / 1.4) * 65);
+      decelPuck.setAttribute('cy', String(puckY));
+
+      // Metrics Matrix
+      telSocReplenish.textContent = `+${p.socGain.toFixed(2)}% SoC`;
+      telExtendedRange.textContent = `+${p.cityMiles.toFixed(1)} Miles`;
+      telBrakeWearSaved.textContent = `${p.wearRelief.toFixed(1)}% Reduction`;
+      telRotorTemp.textContent = `Rotor Temp: ${p.rotorTemp}°C vs 640°C`;
+
+      // Mode Status Chip
+      if (currentModeKey === 'off') {
+        statusChip.textContent = 'KERS BYPASSED (FRICTION)';
+        statusChip.className = 'hud-status-chip';
+      } else if (currentModeKey === 'aggressive') {
+        statusChip.textContent = 'KERS ONE-PEDAL MAX';
+        statusChip.className = 'hud-status-chip chip-cyan';
+      } else {
+        statusChip.textContent = 'KERS ADAPTIVE ACTIVE';
+        statusChip.className = 'hud-status-chip chip-cyan';
+      }
+    }
+
+    // Deceleration Run Animation
+    function triggerDecelRun() {
+      if (isDecelerating) return;
+      isDecelerating = true;
+      brakeBtn.disabled = true;
+      brakeText.textContent = 'Simulating Deceleration Run...';
+
+      const initialSpeed = entrySpeedMph;
+      const startTime = performance.now();
+      const p = computePhysics(entrySpeedMph, brakePressurePct, currentModeKey);
+      const durationMs = p.stopTimeSec * 1000;
+
+      function frame(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1.0, elapsed / durationMs);
+
+        // Current speed dropping quadratically
+        const currentMph = Math.round(initialSpeed * (1 - progress));
+        speedSlider.value = String(currentMph);
+        entrySpeedMph = currentMph;
+
+        updateHUD();
+
+        if (progress < 1.0) {
+          requestAnimationFrame(frame);
+        } else {
+          // Completed stop
+          brakeText.textContent = 'Deceleration Complete! Click to Re-arm';
+          setTimeout(() => {
+            entrySpeedMph = initialSpeed;
+            speedSlider.value = String(initialSpeed);
+            brakeBtn.disabled = false;
+            brakeText.textContent = 'Engage Full Deceleration Run';
+            isDecelerating = false;
+            updateHUD();
+          }, 2000);
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    // Event Listeners
+    modeBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        modeBtns.forEach((b) => {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+        currentModeKey = btn.getAttribute('data-mode');
+        updateHUD();
+      });
+    });
+
+    speedSlider.addEventListener('input', () => {
+      if (isDecelerating) return;
+      entrySpeedMph = Number(speedSlider.value);
+      updateHUD();
+    });
+
+    pressureSlider.addEventListener('input', () => {
+      if (isDecelerating) return;
+      brakePressurePct = Number(pressureSlider.value);
+      updateHUD();
+    });
+
+    brakeBtn.addEventListener('click', triggerDecelRun);
+
+    // Initial render
+    updateHUD();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initRegenSimulator);
+  } else {
+    initRegenSimulator();
+  }
+})();
+

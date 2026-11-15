@@ -979,6 +979,36 @@
     </div>
   </section>
 
+  <section class="stage-console" id="stage-lighting" aria-labelledby="stage-title">
+    <p class="stage-kicker">PULSE WAVE // LIGHTING LAB</p>
+    <h2 id="stage-title">BUILD THE LIGHT SHOW</h2>
+    <p>Conduct six moving heads and a laser fan on a perspective stage. This local visual simulator uses a BPM clock, not live audio or physical DMX equipment.</p>
+    <div class="stage-workspace">
+      <div class="stage-preview">
+        <canvas width="1000" height="520" role="img" aria-label="Perspective stage with six tempo-driven moving spotlights and optional laser sweeps">Canvas lighting preview requires browser graphics support.</canvas>
+        <div class="stage-buttons"><button type="button" id="stage-play" aria-pressed="true">Pause lighting</button><button type="button" id="stage-reset">Restart sequence</button></div>
+        <p id="stage-status" role="status"></p>
+      </div>
+      <fieldset class="stage-faders"><legend>DMX-style console</legend>
+        <label for="stage-bpm">Tempo <output data-stage-value="bpm" for="stage-bpm">120</output> BPM</label>
+        <input id="stage-bpm" data-stage-control="bpm" type="range" min="60" max="180" value="120">
+        <label for="stage-hue">Base hue <output data-stage-value="hue" for="stage-hue">285</output>°</label>
+        <input id="stage-hue" data-stage-control="hue" type="range" min="0" max="360" value="285">
+        <label for="stage-intensity">Master dimmer <output data-stage-value="intensity" for="stage-intensity">65</output>%</label>
+        <input id="stage-intensity" data-stage-control="intensity" type="range" min="0" max="100" value="65">
+        <label for="stage-sweep">Pan spread <output data-stage-value="sweep" for="stage-sweep">55</output>°</label>
+        <input id="stage-sweep" data-stage-control="sweep" type="range" min="10" max="80" value="55">
+        <label for="stage-pattern">Sequence</label>
+        <select id="stage-pattern" data-stage-control="pattern"><option value="sweep">Rotating sweep</option><option value="chase">Beat chase</option><option value="fan">Symmetric fan</option></select>
+        <label class="stage-check"><input type="checkbox" data-stage-control="lasers"> Laser sweeps</label>
+        <label class="stage-check"><input type="checkbox" data-stage-control="pulse"> Strobe modulation (up to 2 Hz)</label>
+        <small>Strobe is off initially and only dims individual fixtures. Reduced motion keeps a static preview; controls remain usable.</small>
+      </fieldset>
+    </div>
+    <details class="stage-channel-map"><summary>Inspect simulated DMX channels</summary><p>Per head: pan · tilt · hue · dimmer · laser · strobe (0–255). Illustrative mapping, no data is transmitted.</p><pre id="stage-dmx" aria-label="Simulated DMX channel values"></pre></details>
+  </section>
+  <script type="module" src="stage-lighting.js"></script>
+
   <script src="script.js"></script>
   <script type="module" src="festival-map.js"></script>
 </body>

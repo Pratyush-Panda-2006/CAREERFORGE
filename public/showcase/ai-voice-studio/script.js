@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTtsStudio();
   initMultiTrackWaveform();
   initDawTimeline();
+  initModulationLab();
 });
 
 // ---------- Voice Studio Tuner Engine ----------
@@ -1741,4 +1742,431 @@ function initDawTimeline() {
   renderRuler();
   refreshAllClips();
   updateTimecode();
+}
+
+
+// ==========================================================================
+// Issue #387: Voice Pitch-Shift & Robotic Modulation Filter Laboratory
+// ==========================================================================
+function initModulationLab() {
+  const section = document.getElementById('modulationLab');
+  if (!section) return;
+
+  // Controls
+  const pitchSlider = document.getElementById('modPitchSlider');
+  const cutoffSlider = document.getElementById('modCutoffSlider');
+  const carrierSlider = document.getElementById('modCarrierSlider');
+  const crushSlider = document.getElementById('modCrushSlider');
+  const delaySlider = document.getElementById('modDelaySlider');
+  const wetDrySlider = document.getElementById('modWetDrySlider');
+
+  const pitchVal = document.getElementById('modPitchVal');
+  const cutoffVal = document.getElementById('modCutoffVal');
+  const carrierVal = document.getElementById('modCarrierVal');
+  const crushVal = document.getElementById('modCrushVal');
+  const delayVal = document.getElementById('modDelayVal');
+  const wetDryVal = document.getElementById('modWetDryVal');
+
+  const presetButtons = section.querySelectorAll('.mod-preset-btn');
+  const auditionBtn = document.getElementById('btnModAudition');
+  const resetBtn = document.getElementById('btnModReset');
+  const phraseSelect = document.getElementById('modSamplePhraseSelect');
+  const playIcon = document.getElementById('modPlayIcon');
+  const playText = document.getElementById('modPlayText');
+  const canvas = document.getElementById('modOscilloscopeCanvas');
+  const ledDsp = document.getElementById('ledDsp');
+  const ledClip = document.getElementById('ledClip');
+
+  // Presets definition
+  const presets = {
+    cyborg: { pitch: 0, cutoff: 2400, carrier: 60, crush: 5.5, delay: 140, wet: 70 },
+    helium: { pitch: 12, cutoff: 5800, carrier: 15, crush: 0.5, delay: 60, wet: 40 },
+    radio: { pitch: -7, cutoff: 1200, carrier: 20, crush: 2.0, delay: 90, wet: 55 },
+    cathedral: { pitch: 0, cutoff: 4200, carrier: 10, crush: 0.0, delay: 520, wet: 85 },
+    clean: { pitch: 0, cutoff: 8000, carrier: 10, crush: 0.0, delay: 0, wet: 0 }
+  };
+
+  function updateDisplays() {
+    if (pitchSlider && pitchVal) {
+      const p = parseInt(pitchSlider.value, 10);
+      pitchVal.textContent = `${p > 0 ? '+' : ''}${p} st`;
+    }
+    if (cutoffSlider && cutoffVal) {
+      cutoffVal.textContent = `${Number(cutoffSlider.value).toLocaleString()} Hz`;
+    }
+    if (carrierSlider && carrierVal) {
+      carrierVal.textContent = `${carrierSlider.value} Hz`;
+    }
+    if (crushSlider && crushVal) {
+      crushVal.textContent = `${crushSlider.value} Drive`;
+    }
+    if (delaySlider && delayVal) {
+      delayVal.textContent = `${delaySlider.value} ms`;
+    }
+    if (wetDrySlider && wetDryVal) {
+      wetDryVal.textContent = `${wetDrySlider.value}% Wet`;
+    }
+  }
+
+  function applyPreset(presetKey) {
+    const p = presets[presetKey];
+    if (!p) return;
+    if (pitchSlider) pitchSlider.value = p.pitch;
+    if (cutoffSlider) cutoffSlider.value = p.cutoff;
+    if (carrierSlider) carrierSlider.value = p.carrier;
+    if (crushSlider) crushSlider.value = p.crush;
+    if (delaySlider) delaySlider.value = p.delay;
+    if (wetDrySlider) wetDrySlider.value = p.wet;
+    updateDisplays();
+
+    presetButtons.forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.preset === presetKey);
+    });
+  }
+
+  presetButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyPreset(btn.dataset.preset);
+    });
+  });
+
+  [pitchSlider, cutoffSlider, carrierSlider, crushSlider, delaySlider, wetDrySlider].forEach((slider) => {
+    if (slider) {
+      slider.addEventListener('input', () => {
+        updateDisplays();
+        presetButtons.forEach((btn) => btn.classList.remove('active'));
+      });
+    }
+  });
+
+  // Oscilloscope drawing
+  let audioCtx = null;
+  let activeSourceNode = null;
+  let activeLfo = null;
+  let analyserNode = null;
+  let isAuditioning = false;
+  let animFrameId = null;
+
+  function initOscilloscope() {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const width = canvas.width;
+    const height = canvas.height;
+
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(0, 0, width, height);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0; x < width; x += 40) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+    }
+    for (let y = 0; y < height; y += 22) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+    }
+    ctx.stroke();
+
+    // Flat center line
+    ctx.strokeStyle = '#06b6d4';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const mid = height / 2;
+    for (let x = 0; x < width; x++) {
+      const y = mid + Math.sin(x * 0.05) * 2;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  function startOscilloscopeLoop() {
+    if (!canvas || !analyserNode) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const width = canvas.width;
+    const height = canvas.height;
+    const bufferLength = analyserNode.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    function draw() {
+      if (!isAuditioning) {
+        initOscilloscope();
+        if (ledClip) ledClip.classList.remove('active');
+        return;
+      }
+      animFrameId = requestAnimationFrame(draw);
+      analyserNode.getByteTimeDomainData(dataArray);
+
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, width, height);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = 0; x < width; x += 40) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+      }
+      for (let y = 0; y < height; y += 22) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+      }
+      ctx.stroke();
+
+      // Waveform
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#22d3ee';
+      ctx.beginPath();
+
+      const sliceWidth = width / bufferLength;
+      let x = 0;
+      let maxSample = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const diff = Math.abs(v - 1.0);
+        if (diff > maxSample) maxSample = diff;
+        const y = (v * height) / 2;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+        x += sliceWidth;
+      }
+      ctx.stroke();
+
+      // Peak clip light
+      if (ledClip) {
+        ledClip.classList.toggle('active', maxSample > 0.85);
+      }
+    }
+
+    draw();
+  }
+
+  function makeDistortionCurve(amount) {
+    const k = typeof amount === 'number' ? amount * 10 : 0;
+    const nSamples = 44100;
+    const curve = new Float32Array(nSamples);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < nSamples; ++i) {
+      const x = (i * 2) / nSamples - 1;
+      if (k === 0) {
+        curve[i] = x;
+      } else {
+        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+      }
+    }
+    return curve;
+  }
+
+  function createVocalBuffer(ctx, phraseKey) {
+    const sampleRate = ctx.sampleRate;
+    const duration = 2.4;
+    const numSamples = Math.floor(sampleRate * duration);
+    const buffer = ctx.createBuffer(1, numSamples, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    // Formant parameters for speech simulation
+    const formants = phraseKey === 'station'
+      ? [350, 1600, 2400]
+      : phraseKey === 'countdown'
+      ? [450, 1100, 2600]
+      : [280, 2100, 2800];
+
+    const basePitch = phraseKey === 'station' ? 140 : phraseKey === 'countdown' ? 120 : 160;
+
+    for (let i = 0; i < numSamples; i++) {
+      const t = i / sampleRate;
+      // Syllable envelopes (4 syllables)
+      const syllableEnv = 0.5 + 0.5 * Math.sin(2 * Math.PI * 3.5 * t);
+      // Glottal buzz
+      let sample = 0;
+      for (let h = 1; h <= 8; h++) {
+        const freq = basePitch * h;
+        // Resonance boosts near formants
+        let weight = 1 / h;
+        for (const f of formants) {
+          const dist = Math.abs(freq - f);
+          if (dist < 200) weight += 1.8;
+        }
+        sample += Math.sin(2 * Math.PI * freq * t) * weight;
+      }
+      // Apply envelope & fade in/out
+      const fadeIn = Math.min(1, t / 0.05);
+      const fadeOut = Math.min(1, (duration - t) / 0.1);
+      data[i] = (sample / 8) * syllableEnv * fadeIn * fadeOut * 0.7;
+    }
+
+    return buffer;
+  }
+
+  function stopAudition() {
+    isAuditioning = false;
+    if (activeSourceNode) {
+      try {
+        activeSourceNode.stop();
+        activeSourceNode.disconnect();
+      } catch {
+        // Ignored
+      }
+      activeSourceNode = null;
+    }
+    if (activeLfo) {
+      try {
+        activeLfo.stop();
+        activeLfo.disconnect();
+      } catch {
+        // Ignored
+      }
+      activeLfo = null;
+    }
+    if (animFrameId) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    }
+    if (auditionBtn) {
+      auditionBtn.classList.remove('playing');
+      if (playIcon) playIcon.textContent = '▶';
+      if (playText) playText.textContent = 'Audition Modulated Voice';
+    }
+    if (ledDsp) ledDsp.classList.add('active');
+    if (ledClip) ledClip.classList.remove('active');
+    initOscilloscope();
+  }
+
+  function startAudition() {
+    stopAudition();
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    if (!audioCtx) {
+      audioCtx = new AudioContextClass();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const pitchSemitones = parseInt(pitchSlider ? pitchSlider.value : '0', 10);
+    const cutoffHz = parseFloat(cutoffSlider ? cutoffSlider.value : '2400');
+    const carrierHz = parseFloat(carrierSlider ? carrierSlider.value : '45');
+    const crushDrive = parseFloat(crushSlider ? crushSlider.value : '0');
+    const delayTimeMs = parseFloat(delaySlider ? delaySlider.value : '0');
+    const wetRatio = parseFloat(wetDrySlider ? wetDrySlider.value : '50') / 100;
+
+    const phraseKey = phraseSelect ? phraseSelect.value : 'cyborg';
+    const buffer = createVocalBuffer(audioCtx, phraseKey);
+
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.playbackRate.value = Math.pow(2, pitchSemitones / 12);
+
+    // Filter Node
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = cutoffHz;
+    filter.Q.value = 2.5;
+
+    // Distortion / Bitcrush Node
+    const waveshaper = audioCtx.createWaveShaper();
+    waveshaper.curve = makeDistortionCurve(crushDrive);
+    waveshaper.oversample = '2x';
+
+    // Ring Modulation (Carrier Oscillator + Gain)
+    const ringGain = audioCtx.createGain();
+    const lfo = audioCtx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = carrierHz;
+    const lfoDepth = audioCtx.createGain();
+    lfoDepth.gain.value = 0.5;
+    ringGain.gain.value = 0.5;
+
+    lfo.connect(lfoDepth);
+    lfoDepth.connect(ringGain.gain);
+
+    // Delay Node & Feedback
+    const delay = audioCtx.createDelay(1.0);
+    delay.delayTime.value = Math.max(0.001, delayTimeMs / 1000);
+    const delayFeedback = audioCtx.createGain();
+    delayFeedback.gain.value = delayTimeMs > 0 ? 0.4 : 0.0;
+    delay.connect(delayFeedback);
+    delayFeedback.connect(delay);
+
+    // Dry / Wet Routing
+    const dryGain = audioCtx.createGain();
+    dryGain.gain.value = 1.0 - wetRatio * 0.7;
+
+    const wetGain = audioCtx.createGain();
+    wetGain.gain.value = wetRatio;
+
+    // Analyser Node
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+
+    source.connect(dryGain);
+    dryGain.connect(analyser);
+
+    source.connect(filter);
+    filter.connect(waveshaper);
+    waveshaper.connect(ringGain);
+
+    if (delayTimeMs > 10) {
+      ringGain.connect(delay);
+      delay.connect(wetGain);
+      ringGain.connect(wetGain);
+    } else {
+      ringGain.connect(wetGain);
+    }
+
+    wetGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    activeSourceNode = source;
+    activeLfo = lfo;
+    analyserNode = analyser;
+    isAuditioning = true;
+
+    if (auditionBtn) {
+      auditionBtn.classList.add('playing');
+      if (playIcon) playIcon.textContent = '⏹';
+      if (playText) playText.textContent = 'Stop DSP Audition';
+    }
+
+    lfo.start();
+    source.start();
+    startOscilloscopeLoop();
+
+    source.onended = () => {
+      stopAudition();
+    };
+  }
+
+  if (auditionBtn) {
+    auditionBtn.addEventListener('click', () => {
+      if (isAuditioning) {
+        stopAudition();
+      } else {
+        startAudition();
+      }
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      applyPreset('cyborg');
+      stopAudition();
+    });
+  }
+
+  // Initial setup
+  applyPreset('cyborg');
+  initOscilloscope();
 }

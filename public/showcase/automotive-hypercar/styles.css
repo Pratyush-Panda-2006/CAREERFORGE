@@ -2066,3 +2066,408 @@ html { scroll-behavior: smooth; }
   font-weight: bold;
 }
 /* ===== EV Road Trip Range Estimator (Issue #271) END ===== */
+
+/* ==========================================================
+   Issue #389: Regenerative Braking Simulator (KERS) Styles
+   ========================================================== */
+
+.regen-sim-section {
+  padding: 80px 24px;
+  background: radial-gradient(circle at 50% 20%, #0a1120 0%, #04070d 80%);
+  border-top: 1px solid rgba(0, 240, 255, 0.2);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+  position: relative;
+}
+
+.regen-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 3-Way Mode Selector */
+.regen-mode-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.regen-mode-lbl {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #00f0ff;
+  text-transform: uppercase;
+}
+
+.regen-mode-pills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.regen-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: #e2e8f0;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+}
+
+.regen-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(0, 240, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.regen-mode-btn.active {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border-color: #00f0ff;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+  color: #fff;
+}
+
+.mode-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.mode-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mode-meta strong {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.88rem;
+  color: #fff;
+}
+
+.mode-meta small {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+/* Cockpit Grid */
+.regen-cockpit-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1.35fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.regen-controls-card {
+  background: rgba(10, 16, 28, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 20px;
+  padding: 24px;
+  backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+
+.chip-cyan {
+  background: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.4);
+}
+
+.regen-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.input-header-row label {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.val-pill {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #00f0ff;
+  background: rgba(0, 240, 255, 0.1);
+  padding: 3px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 240, 255, 0.25);
+}
+
+.regen-range {
+  width: 100%;
+  accent-color: #00f0ff;
+  cursor: pointer;
+}
+
+.regen-specs-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  color: #94a3b8;
+}
+
+.spec-row strong {
+  color: #e2e8f0;
+}
+
+.text-cyan { color: #00f0ff; }
+.text-emerald { color: #00ff88; }
+.text-gold { color: #ffaa00; }
+
+.btn-trigger-brake {
+  background: linear-gradient(135deg, #00f0ff 0%, #0284c7 100%);
+  color: #04070d;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 900;
+  padding: 16px 22px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 240, 255, 0.4);
+}
+
+.btn-trigger-brake:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+
+.btn-trigger-brake:active {
+  transform: translateY(0);
+}
+
+/* Telemetry Column */
+.regen-telemetry-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.regen-dials-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 20px;
+}
+
+.regen-gauge-card, .decel-g-card {
+  background: rgba(10, 16, 28, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.live-dot-cyan {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00f0ff;
+  box-shadow: 0 0 10px #00f0ff;
+  animation: pulse 1.5s infinite;
+}
+
+.regen-gauge-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.regen-dial-svg {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+}
+
+.regen-track-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.regen-track-active {
+  fill: none;
+  stroke: #00f0ff;
+  stroke-width: 14;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.7));
+  transition: stroke-dasharray 0.3s ease;
+}
+
+.gauge-center-readout {
+  position: absolute;
+  bottom: 15px;
+  text-align: center;
+}
+
+.gauge-kw-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+}
+
+.gauge-unit {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  color: #00f0ff;
+  margin-top: 4px;
+}
+
+.gauge-hp-equiv {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.gauge-footer-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Decel G Dial */
+.decel-g-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.decel-g-svg {
+  width: 100%;
+  max-width: 170px;
+  height: auto;
+}
+
+.g-outer-circle { fill: none; stroke: rgba(0, 240, 255, 0.3); stroke-width: 1.5; }
+.g-mid-circle { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-dasharray: 3 3; }
+.g-inner-circle { fill: none; stroke: rgba(255, 255, 255, 0.08); }
+.g-axis-v, .g-axis-h { stroke: rgba(255, 255, 255, 0.15); stroke-width: 1; }
+
+.decel-puck {
+  fill: #00f0ff;
+  stroke: #fff;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 8px #00f0ff);
+  transition: all 0.25s ease;
+}
+
+.decel-readout-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.decel-readout-row strong {
+  color: #e2e8f0;
+}
+
+/* Bottom Metrics Cards */
+.regen-metrics-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.tel-metric-card {
+  background: rgba(10, 16, 28, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tel-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.tel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tel-lbl {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.tel-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.tel-sub {
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+@media (max-width: 950px) {
+  .regen-cockpit-grid {
+    grid-template-columns: 1fr;
+  }
+  .regen-dials-grid {
+    grid-template-columns: 1fr;
+  }
+  .regen-metrics-cards {
+    grid-template-columns: 1fr;
+  }
+}
+

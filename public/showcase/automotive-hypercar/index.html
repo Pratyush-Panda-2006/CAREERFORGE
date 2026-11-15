@@ -16,6 +16,7 @@
     <p>0 to 60 MPH in 1.74s • Carbon Monocoque Chassis • Solid-State Battery</p>
     <nav class="section-links" aria-label="Explore hypercar">
       <a href="#launch-control">Launch Simulator</a>
+      <a href="#regenSimulator">KERS Regen Braking</a>
       <a href="#comparator">Specifications</a>
       <a href="#wind-tunnel">Aerodynamics</a>
       <a href="#configurator">Configure your order</a>
@@ -622,6 +623,184 @@
     </div>
   </section>
   <!-- ===== EV Road Trip Range Estimator (Issue #271) END ===== -->
+
+  <!-- ===== BEGIN Issue #389: Regenerative Braking Energy Recovery Simulator with Deceleration Telemetry ===== -->
+  <section class="regen-sim-section" id="regenSimulator" aria-labelledby="regenHeading">
+    <div class="regen-container">
+      <div class="lc-badge">DYNAMIC TELEMETRY // KINETIC ENERGY RECOVERY SYSTEM (KERS)</div>
+      <h2 id="regenHeading">Regenerative Braking &amp; Deceleration Telemetry Simulator</h2>
+      <p class="lc-intro">
+        Harness kinetic energy equations ($E = \frac{1}{2}mv^2$) during extreme hypercar deceleration. Simulate dual-stator magnetic regeneration, monitor longitudinal braking G-force vectoring, evaluate carbon-ceramic rotor thermal wear reduction, and measure extended battery range.
+      </p>
+
+      <!-- 3-Way Regen Mode Toggle -->
+      <div class="regen-mode-selector" role="radiogroup" aria-label="KERS Regenerative Braking Modes">
+        <span class="regen-mode-lbl">Regen Calibration Mode:</span>
+        <div class="regen-mode-pills">
+          <button type="button" class="regen-mode-btn" data-mode="off" role="radio" aria-checked="false" id="modeRegenOff">
+            <span class="mode-icon">⭕</span>
+            <div class="mode-meta">
+              <strong>Level 0: Coast / Off</strong>
+              <small>0% Motor Regen • 100% Friction Pads</small>
+            </div>
+          </button>
+          <button type="button" class="regen-mode-btn active" data-mode="adaptive" role="radio" aria-checked="true" id="modeRegenAdaptive">
+            <span class="mode-icon">⚡</span>
+            <div class="mode-meta">
+              <strong>Level 1: Adaptive Dynamic</strong>
+              <small>Predictive 0.45G Peak • Smart Decel</small>
+            </div>
+          </button>
+          <button type="button" class="regen-mode-btn" data-mode="aggressive" role="radio" aria-checked="false" id="modeRegenAggressive">
+            <span class="mode-icon">💥</span>
+            <div class="mode-meta">
+              <strong>Level 2: Aggressive One-Pedal</strong>
+              <small>Max 0.95G Dual-Stator Capture</small>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cockpit HUD Grid: Controls on Left, Dials & Telemetry on Right -->
+      <div class="regen-cockpit-grid">
+        <!-- Controls Column -->
+        <div class="regen-controls-card">
+          <div class="hud-card-header">
+            <span class="hud-card-tag">DECELERATION &amp; KINETIC INPUTS</span>
+            <span class="hud-status-chip chip-cyan" id="regenStatusChip">KERS SYSTEM ARMED</span>
+          </div>
+
+          <!-- Entry Velocity Slider -->
+          <div class="regen-input-group">
+            <div class="input-header-row">
+              <label for="regenSpeedSlider">Vehicle Entry Velocity</label>
+              <span class="val-pill" id="regenSpeedDisplay">120 MPH (193 km/h)</span>
+            </div>
+            <input type="range" id="regenSpeedSlider" class="regen-range" min="30" max="220" step="5" value="120" />
+            <div class="slider-marks"><span>30 MPH</span><span>120 MPH</span><span>220 MPH</span></div>
+          </div>
+
+          <!-- Deceleration Demand Slider -->
+          <div class="regen-input-group">
+            <div class="input-header-row">
+              <label for="regenBrakePressureSlider">Brake Pedal Deceleration Demand</label>
+              <span class="val-pill" id="regenPressureDisplay">60% (Moderate Stop)</span>
+            </div>
+            <input type="range" id="regenBrakePressureSlider" class="regen-range" min="10" max="100" step="5" value="60" />
+            <div class="slider-marks"><span>10% (Gentle)</span><span>50%</span><span>100% (Emergency Panic)</span></div>
+          </div>
+
+          <!-- Vehicle Mass & Specs Info -->
+          <div class="regen-specs-card">
+            <div class="spec-row">
+              <span>Hypercar Kerb Mass (m):</span>
+              <strong>1,800 kg (Carbon Monocoque)</strong>
+            </div>
+            <div class="spec-row">
+              <span>Motor Inverter Topology:</span>
+              <strong>Dual-Motor 900V SiC (94.2% Efficiency)</strong>
+            </div>
+            <div class="spec-row">
+              <span>Peak Decel Capacity:</span>
+              <strong class="text-cyan">Up to -1.35 G (Kinetic + Carbon Friction)</strong>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button type="button" class="btn-trigger-brake" id="btnTriggerBrake">
+            <span class="btn-icon">🛑</span>
+            <span id="btnBrakeText">Engage Full Deceleration Run</span>
+          </button>
+        </div>
+
+        <!-- Telemetry Display Column -->
+        <div class="regen-telemetry-column">
+          <!-- Dial HUD Grid -->
+          <div class="regen-dials-grid">
+            <!-- Dial 1: Electric Energy Capture Dial -->
+            <div class="hud-card regen-gauge-card">
+              <div class="hud-card-header">
+                <span class="hud-card-tag">KINETIC RECOVERY POWER</span>
+                <span class="live-dot-cyan"></span>
+              </div>
+
+              <div class="regen-gauge-wrap">
+                <svg class="regen-dial-svg" viewBox="0 0 240 180" aria-label="Energy Regeneration Gauge">
+                  <path class="regen-track-bg" d="M 30 150 A 90 90 0 1 1 210 150" />
+                  <path class="regen-track-active" id="regenPowerArc" d="M 30 150 A 90 90 0 1 1 210 150" />
+                </svg>
+                <div class="gauge-center-readout">
+                  <div class="gauge-kw-val" id="regenKwVal">385</div>
+                  <div class="gauge-unit">kW REGEN</div>
+                  <div class="gauge-hp-equiv" id="regenHpEquiv">516 HP Captured</div>
+                </div>
+              </div>
+
+              <div class="gauge-footer-metric">
+                <span>Total Energy Harvested:</span>
+                <strong class="text-cyan" id="regenKwhPerStop">+0.48 kWh / stop</strong>
+              </div>
+            </div>
+
+            <!-- Dial 2: Longitudinal Deceleration G-Meter -->
+            <div class="hud-card decel-g-card">
+              <div class="hud-card-header">
+                <span class="hud-card-tag">LONGITUDINAL DECEL G-FORCE</span>
+                <span class="hud-status-chip chip-cyan" id="decelStatusBadge">-0.82 G</span>
+              </div>
+
+              <div class="decel-g-wrap">
+                <svg class="decel-g-svg" viewBox="0 0 200 200" aria-label="Deceleration G-Meter">
+                  <circle cx="100" cy="100" r="85" class="g-outer-circle" />
+                  <circle cx="100" cy="100" r="55" class="g-mid-circle" />
+                  <circle cx="100" cy="100" r="25" class="g-inner-circle" />
+                  <line x1="100" y1="15" x2="100" y2="185" class="g-axis-v" />
+                  <line x1="15" y1="100" x2="185" y2="100" class="g-axis-h" />
+                  <!-- Animated Decel Vector Puck -->
+                  <circle cx="100" cy="100" r="7" class="decel-puck" id="decelPuck" />
+                </svg>
+                <div class="decel-readout-row">
+                  <div><span>Stopping Dist:</span> <strong id="stoppingDistVal">148 ft</strong></div>
+                  <div><span>Stop Time:</span> <strong id="stoppingTimeVal">1.94 s</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Telemetry HUD Matrix Cards -->
+          <div class="regen-metrics-cards">
+            <div class="tel-metric-card">
+              <span class="tel-icon">🔋</span>
+              <div class="tel-content">
+                <span class="tel-lbl">Battery SoC Replenished</span>
+                <strong class="tel-val text-cyan" id="telSocReplenish">+0.65% SoC</strong>
+                <small class="tel-sub">Stored in 120 kWh Pack</small>
+              </div>
+            </div>
+
+            <div class="tel-metric-card">
+              <span class="tel-icon">🏎️</span>
+              <div class="tel-content">
+                <span class="tel-lbl">Extended City Range</span>
+                <strong class="tel-val text-emerald" id="telExtendedRange">+28.5 Miles</strong>
+                <small class="tel-sub">Per 100 City Miles</small>
+              </div>
+            </div>
+
+            <div class="tel-metric-card">
+              <span class="tel-icon">🔥</span>
+              <div class="tel-content">
+                <span class="tel-lbl">Brake Thermal Wear Relief</span>
+                <strong class="tel-val text-gold" id="telBrakeWearSaved">74.2% Reduction</strong>
+                <small class="tel-sub" id="telRotorTemp">Rotor Temp: 165°C vs 620°C</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #389 ===== -->
 
   <section id="lap-simulator" class="lap-panel" aria-labelledby="lap-title">
     <div class="lap-eyebrow">APEX / SIMULATION LAB</div>
