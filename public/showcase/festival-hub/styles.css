@@ -1156,11 +1156,113 @@ button {
   box-shadow: 0 0 40px rgba(168, 85, 247, 0.12);
 }
 
+.vm-live-panel {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 16px;
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  border-radius: 14px;
+  background: rgba(15, 10, 30, 0.72);
+}
+
+.vm-live-layer-controls,
+.vm-live-route-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.vm-layer-btn,
+.vm-route-label select {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  font: inherit;
+}
+
+.vm-layer-btn {
+  cursor: pointer;
+}
+
+.vm-layer-btn[aria-pressed="true"] {
+  border-color: #a855f7;
+  background: rgba(168, 85, 247, 0.16);
+  color: #fff;
+}
+
+.vm-layer-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.vm-layer-btn:focus-visible,
+.vm-route-label select:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.vm-route-label {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+}
+
+.vm-route-label select {
+  cursor: pointer;
+}
+
+.vm-route-label option {
+  background: #100a22;
+  color: #fff;
+}
+
+.vm-live-caption,
+.vm-live-readout,
+.vm-live-status {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.vm-live-readout {
+  color: #d8b4fe;
+}
+
+.vm-live-status {
+  color: #cbd5e1;
+}
+
+.vm-frame.is-picking-location .vm-map {
+  cursor: crosshair;
+}
+
 .vm-svg {
   display: block;
   width: 100%;
   height: auto;
   border-radius: 18px;
+}
+
+.vm-live-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.vm-pin,
+.ml-pins-layer {
+  z-index: 2;
 }
 
 .vm-svg-label {
@@ -1543,6 +1645,23 @@ button {
 @media (max-width: 600px) {
   .venue-map {
     padding: 20px 16px 48px;
+  }
+
+  .vm-live-panel {
+    padding: 12px;
+  }
+
+  .vm-live-layer-controls,
+  .vm-live-route-controls,
+  .vm-route-label {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .vm-layer-btn,
+  .vm-route-label select {
+    width: 100%;
+    text-align: left;
   }
 
   .venue-map h2 {
