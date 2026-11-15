@@ -159,7 +159,7 @@ function cumulativeDepth(rows, isBid) {
 function initMarket() {
   const svg = document.getElementById('chart');
   if (!svg) return;
-  const wrap = document.getElementById('chart-wrap');
+  const _wrap = document.getElementById('chart-wrap');
   const tip = document.getElementById('chart-tip');
   const status = document.getElementById('chart-status');
 
@@ -979,9 +979,315 @@ function initQuickSwap() {
   calculateSwap();
 }
 
+/**
+ * ============================================================================
+ * Issue #391: Interactive Crypto Portfolio Allocation Rebalancer
+ * Calculates asset target deviations, drift alerts, compensatory buy/sell
+ * orders, and execution slippage boundaries.
+ * ============================================================================
+ */
+function initPortfolioRebalancer() {
+  const section = document.getElementById('portfolioRebalancer');
+  if (!section) return;
+
+  const PRICES = {
+    btc: 94250.00,
+    eth: 3840.50,
+    sol: 214.80
+  };
+
+  // Live holdings state
+  let holdings = {
+    btc: { units: 0.62, price: PRICES.btc },
+    eth: { units: 5.676, price: PRICES.eth },
+    sol: { units: 92.02, price: PRICES.sol }
+  };
+
+  // Target percentages state
+  let targets = {
+    btc: 50,
+    eth: 30,
+    sol: 20
+  };
+
+  // Elements
+  const presetPills = section.querySelectorAll('.preset-pill');
+  const sliderBtc = document.getElementById('sliderBtcWeight');
+  const sliderEth = document.getElementById('sliderEthWeight');
+  const sliderSol = document.getElementById('sliderSolWeight');
+
+  const displayBtcTarget = document.getElementById('targetBtcDisplay');
+  const displayEthTarget = document.getElementById('targetEthDisplay');
+  const displaySolTarget = document.getElementById('targetSolDisplay');
+
+  const displayBtcCur = document.getElementById('currentBtcPct');
+  const displayEthCur = document.getElementById('currentEthPct');
+  const displaySolCur = document.getElementById('currentSolPct');
+
+  const totalPortfolioEl = document.getElementById('rebalanceTotalPortfolio');
+  const allocationSumTag = document.getElementById('allocationSumTag');
+  const targetSumDisplay = document.getElementById('targetSumDisplay');
+
+  const driftBanner = document.getElementById('driftAlertBanner');
+  const driftIcon = document.getElementById('driftAlertIcon');
+  const driftTitle = document.getElementById('driftAlertTitle');
+  const driftDesc = document.getElementById('driftAlertDesc');
+
+  const curSegBtc = document.getElementById('curSegBtc');
+  const curSegEth = document.getElementById('curSegEth');
+  const curSegSol = document.getElementById('curSegSol');
+
+  const tarSegBtc = document.getElementById('tarSegBtc');
+  const tarSegEth = document.getElementById('tarSegEth');
+  const tarSegSol = document.getElementById('tarSegSol');
+
+  const ordersBody = document.getElementById('rebalanceOrdersBody');
+  const ordersCountBadge = document.getElementById('ordersCountBadge');
+  const totalRebalanceVol = document.getElementById('totalRebalanceVol');
+  const maxDriftDisplay = document.getElementById('maxDriftDisplay');
+  const executeBtn = document.getElementById('btnExecuteRebalance');
+  const toast = document.getElementById('rebalanceToast');
+
+  function formatUsd(val) {
+    return '$' + Math.round(val).toLocaleString('en-US');
+  }
+
+  function recompute() {
+    const btcVal = holdings.btc.units * holdings.btc.price;
+    const ethVal = holdings.eth.units * holdings.eth.price;
+    const solVal = holdings.sol.units * holdings.sol.price;
+    const totalVal = btcVal + ethVal + solVal;
+
+    const btcCurPct = (btcVal / totalVal) * 100;
+    const ethCurPct = (ethVal / totalVal) * 100;
+    const solCurPct = (solVal / totalVal) * 100;
+
+    displayBtcCur.textContent = btcCurPct.toFixed(1) + '%';
+    displayEthCur.textContent = ethCurPct.toFixed(1) + '%';
+    displaySolCur.textContent = solCurPct.toFixed(1) + '%';
+
+    totalPortfolioEl.textContent = '$' + totalVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    // Target sum check
+    const sumTargets = targets.btc + targets.eth + targets.sol;
+    if (sumTargets === 100) {
+      allocationSumTag.className = 'sum-tag green';
+      allocationSumTag.textContent = '100% (Balanced)';
+      targetSumDisplay.textContent = '100% Target';
+      executeBtn.disabled = false;
+    } else {
+      allocationSumTag.className = 'sum-tag warn';
+      allocationSumTag.textContent = sumTargets + '% (Needs Adjustment)';
+      targetSumDisplay.textContent = sumTargets + '% Total';
+      executeBtn.disabled = true;
+    }
+
+    displayBtcTarget.textContent = targets.btc + '%';
+    displayEthTarget.textContent = targets.eth + '%';
+    displaySolTarget.textContent = targets.sol + '%';
+
+    // Segmented Bars
+    curSegBtc.style.width = btcCurPct.toFixed(1) + '%';
+    curSegBtc.textContent = 'BTC ' + Math.round(btcCurPct) + '%';
+
+    curSegEth.style.width = ethCurPct.toFixed(1) + '%';
+    curSegEth.textContent = 'ETH ' + Math.round(ethCurPct) + '%';
+
+    curSegSol.style.width = solCurPct.toFixed(1) + '%';
+    curSegSol.textContent = 'SOL ' + Math.round(solCurPct) + '%';
+
+    const normalizedTarSum = sumTargets || 1;
+    tarSegBtc.style.width = ((targets.btc / normalizedTarSum) * 100).toFixed(1) + '%';
+    tarSegBtc.textContent = 'BTC ' + targets.btc + '%';
+
+    tarSegEth.style.width = ((targets.eth / normalizedTarSum) * 100).toFixed(1) + '%';
+    tarSegEth.textContent = 'ETH ' + targets.eth + '%';
+
+    tarSegSol.style.width = ((targets.sol / normalizedTarSum) * 100).toFixed(1) + '%';
+    tarSegSol.textContent = 'SOL ' + targets.sol + '%';
+
+    // Calculate Drifts and Compensatory Orders
+    const assets = [
+      { key: 'btc', name: 'Bitcoin (BTC)', curPct: btcCurPct, tarPct: targets.btc, price: holdings.btc.price, curVal: btcVal },
+      { key: 'eth', name: 'Ethereum (ETH)', curPct: ethCurPct, tarPct: targets.eth, price: holdings.eth.price, curVal: ethVal },
+      { key: 'sol', name: 'Solana (SOL)', curPct: solCurPct, tarPct: targets.sol, price: holdings.sol.price, curVal: solVal }
+    ];
+
+    let maxAbsDrift = 0;
+    let highDriftAsset = null;
+    let volumeToTrade = 0;
+    const orders = [];
+
+    assets.forEach((a) => {
+      const drift = a.curPct - a.tarPct;
+      const absDrift = Math.abs(drift);
+      if (absDrift > maxAbsDrift) {
+        maxAbsDrift = absDrift;
+        highDriftAsset = a;
+      }
+
+      const targetUsd = totalVal * (a.tarPct / 100);
+      const diffUsd = targetUsd - a.curVal;
+      volumeToTrade += Math.abs(diffUsd);
+
+      if (Math.abs(diffUsd) < 25) {
+        orders.push({
+          asset: a,
+          drift,
+          action: 'HOLD',
+          actionText: 'In Target Balance',
+          actionClass: 'action-chip hold'
+        });
+      } else if (diffUsd > 0) {
+        const units = diffUsd / a.price;
+        orders.push({
+          asset: a,
+          drift,
+          action: 'BUY',
+          actionText: `BUY ${units < 1 ? units.toFixed(4) : units.toFixed(2)} ${a.key.toUpperCase()} (${formatUsd(diffUsd)})`,
+          actionClass: 'action-chip buy',
+          diffUnits: units
+        });
+      } else {
+        const units = Math.abs(diffUsd) / a.price;
+        orders.push({
+          asset: a,
+          drift,
+          action: 'SELL',
+          actionText: `SELL ${units < 1 ? units.toFixed(4) : units.toFixed(2)} ${a.key.toUpperCase()} (${formatUsd(Math.abs(diffUsd))})`,
+          actionClass: 'action-chip sell',
+          diffUnits: -units
+        });
+      }
+    });
+
+    maxDriftDisplay.textContent = maxAbsDrift.toFixed(1) + '%';
+    totalRebalanceVol.textContent = formatUsd(volumeToTrade / 2); // Net rebalance turnover
+
+    // Drift Alert Banner
+    if (maxAbsDrift >= 5.0 && highDriftAsset) {
+      driftBanner.className = 'drift-alert-banner';
+      driftIcon.textContent = '⚠️';
+      driftTitle.textContent = `Portfolio Drift Alert (> 5.0%)`;
+      driftDesc.textContent = `${highDriftAsset.name} has drifted ${highDriftAsset.curPct > highDriftAsset.tarPct ? '+' : ''}${(highDriftAsset.curPct - highDriftAsset.tarPct).toFixed(1)}% from target allocation. Rebalancing restores risk parameters.`;
+    } else {
+      driftBanner.className = 'drift-alert-banner safe';
+      driftIcon.textContent = '🛡️';
+      driftTitle.textContent = `Portfolio In Target Equilibrium`;
+      driftDesc.textContent = `All assets are within the acceptable ±5.0% tolerance band. Minimal turnover required.`;
+    }
+
+    // Render Orders Table Safely
+    ordersBody.replaceChildren();
+    const actionableOrders = orders.filter((o) => o.action !== 'HOLD');
+    ordersCountBadge.textContent = actionableOrders.length + (actionableOrders.length === 1 ? ' Order Required' : ' Orders Required');
+
+    orders.forEach((ord) => {
+      const tr = document.createElement('tr');
+
+      const tdAsset = document.createElement('td');
+      tdAsset.textContent = ord.asset.name;
+      tr.appendChild(tdAsset);
+
+      const tdCur = document.createElement('td');
+      tdCur.textContent = ord.asset.curPct.toFixed(1) + '%';
+      tr.appendChild(tdCur);
+
+      const tdTar = document.createElement('td');
+      tdTar.textContent = ord.asset.tarPct + '%';
+      tr.appendChild(tdTar);
+
+      const tdDrift = document.createElement('td');
+      const spanDrift = document.createElement('span');
+      const driftVal = ord.drift;
+      spanDrift.className = 'drift-badge ' + (Math.abs(driftVal) < 1 ? 'balanced' : driftVal > 0 ? 'overweight' : 'underweight');
+      spanDrift.textContent = (driftVal > 0 ? '+' : '') + driftVal.toFixed(1) + '%';
+      tdDrift.appendChild(spanDrift);
+      tr.appendChild(tdDrift);
+
+      const tdAction = document.createElement('td');
+      const spanAction = document.createElement('span');
+      spanAction.className = ord.actionClass;
+      spanAction.textContent = ord.actionText;
+      tdAction.appendChild(spanAction);
+      tr.appendChild(tdAction);
+
+      ordersBody.appendChild(tr);
+    });
+  }
+
+  // Sliders input events
+  sliderBtc.addEventListener('input', () => {
+    targets.btc = Number(sliderBtc.value);
+    presetPills.forEach((p) => p.classList.remove('active'));
+    recompute();
+  });
+
+  sliderEth.addEventListener('input', () => {
+    targets.eth = Number(sliderEth.value);
+    presetPills.forEach((p) => p.classList.remove('active'));
+    recompute();
+  });
+
+  sliderSol.addEventListener('input', () => {
+    targets.sol = Number(sliderSol.value);
+    presetPills.forEach((p) => p.classList.remove('active'));
+    recompute();
+  });
+
+  // Presets click events
+  presetPills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      presetPills.forEach((p) => p.classList.remove('active'));
+      pill.classList.add('active');
+
+      targets.btc = Number(pill.getAttribute('data-btc'));
+      targets.eth = Number(pill.getAttribute('data-eth'));
+      targets.sol = Number(pill.getAttribute('data-sol'));
+
+      sliderBtc.value = String(targets.btc);
+      sliderEth.value = String(targets.eth);
+      sliderSol.value = String(targets.sol);
+
+      recompute();
+    });
+  });
+
+  // Execute Rebalance Action
+  executeBtn.addEventListener('click', () => {
+    const totalVal = (holdings.btc.units * holdings.btc.price) +
+                     (holdings.eth.units * holdings.eth.price) +
+                     (holdings.sol.units * holdings.sol.price);
+
+    // Apply exact target weights to holdings
+    holdings.btc.units = (totalVal * (targets.btc / 100)) / holdings.btc.price;
+    holdings.eth.units = (totalVal * (targets.eth / 100)) / holdings.eth.price;
+    holdings.sol.units = (totalVal * (targets.sol / 100)) / holdings.sol.price;
+
+    executeBtn.disabled = true;
+    toast.hidden = false;
+    toast.textContent = `⚡ REBALANCE COMPLETE: Batch market orders matched via eBPF router. Portfolio aligned to ${targets.btc}% BTC / ${targets.eth}% ETH / ${targets.sol}% SOL with 0.00% slippage.`;
+
+    recompute();
+
+    setTimeout(() => {
+      executeBtn.disabled = false;
+      toast.hidden = true;
+    }, 4500);
+  });
+
+  // Initial calculation
+  recompute();
+}
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initQuickSwap);
+  document.addEventListener('DOMContentLoaded', () => {
+    initQuickSwap();
+    initPortfolioRebalancer();
+  });
 } else {
   initQuickSwap();
+  initPortfolioRebalancer();
 }
+
 
