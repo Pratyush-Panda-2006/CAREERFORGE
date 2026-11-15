@@ -1,5 +1,5 @@
-/**
- * ApexVault — Compound Interest Retirement Growth Projection Engine
+﻿/**
+ * ApexVault â€” Compound Interest Retirement Growth Projection Engine
  * Interactive SVG Chart, Dynamic Path Generation, & Milestone Calculations
  */
 
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const milestoneTableContainer = document.getElementById('milestoneTableContainer');
   const milestoneTableBody = document.getElementById('milestoneTableBody');
 
-  // Currency Support Config ($ USD, € EUR, £ GBP)
+  // Currency Support Config ($ USD, â‚¬ EUR, Â£ GBP)
   const CURRENCY_MAP = {
     USD: {
       symbol: '$',
@@ -67,38 +67,38 @@ document.addEventListener('DOMContentLoaded', () => {
       initialMarks: ['$0', '$50k', '$150k', '$250k+'],
       monthlyMarks: ['$0', '$2,500', '$5,000', '$10,000+'],
       presets: [
-        '$500/mo • 8.5% • 25 Yrs',
-        '$1.2k/mo • 11.5% • 30 Yrs',
-        '$2.5k/mo • 9.0% • 15 Yrs',
-        '$250/mo • 5.2% • 10 Yrs'
+        '$500/mo â€¢ 8.5% â€¢ 25 Yrs',
+        '$1.2k/mo â€¢ 11.5% â€¢ 30 Yrs',
+        '$2.5k/mo â€¢ 9.0% â€¢ 15 Yrs',
+        '$250/mo â€¢ 5.2% â€¢ 10 Yrs'
       ]
     },
     EUR: {
-      symbol: '€',
+      symbol: 'â‚¬',
       code: 'EUR',
       name: 'Euro',
       rate: 0.92,
-      initialMarks: ['€0', '€50k', '€150k', '€250k+'],
-      monthlyMarks: ['€0', '€2,500', '€5,000', '€10,000+'],
+      initialMarks: ['â‚¬0', 'â‚¬50k', 'â‚¬150k', 'â‚¬250k+'],
+      monthlyMarks: ['â‚¬0', 'â‚¬2,500', 'â‚¬5,000', 'â‚¬10,000+'],
       presets: [
-        '€500/mo • 8.5% • 25 Yrs',
-        '€1.2k/mo • 11.5% • 30 Yrs',
-        '€2.5k/mo • 9.0% • 15 Yrs',
-        '€250/mo • 5.2% • 10 Yrs'
+        'â‚¬500/mo â€¢ 8.5% â€¢ 25 Yrs',
+        'â‚¬1.2k/mo â€¢ 11.5% â€¢ 30 Yrs',
+        'â‚¬2.5k/mo â€¢ 9.0% â€¢ 15 Yrs',
+        'â‚¬250/mo â€¢ 5.2% â€¢ 10 Yrs'
       ]
     },
     GBP: {
-      symbol: '£',
+      symbol: 'Â£',
       code: 'GBP',
       name: 'British Pound',
       rate: 0.79,
-      initialMarks: ['£0', '£50k', '£150k', '£250k+'],
-      monthlyMarks: ['£0', '£2,500', '£5,000', '£10,000+'],
+      initialMarks: ['Â£0', 'Â£50k', 'Â£150k', 'Â£250k+'],
+      monthlyMarks: ['Â£0', 'Â£2,500', 'Â£5,000', 'Â£10,000+'],
       presets: [
-        '£500/mo • 8.5% • 25 Yrs',
-        '£1.2k/mo • 11.5% • 30 Yrs',
-        '£2.5k/mo • 9.0% • 15 Yrs',
-        '£250/mo • 5.2% • 10 Yrs'
+        'Â£500/mo â€¢ 8.5% â€¢ 25 Yrs',
+        'Â£1.2k/mo â€¢ 11.5% â€¢ 30 Yrs',
+        'Â£2.5k/mo â€¢ 9.0% â€¢ 15 Yrs',
+        'Â£250/mo â€¢ 5.2% â€¢ 10 Yrs'
       ]
     }
   };
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
       formatCurrency(currentProjection.finalWealth);
 
     finalWealthSub.textContent =
-      `At Year ${years} • Compounded ${
+      `At Year ${years} â€¢ Compounded ${
         compoundingFrequency === 12 ? 'Monthly' : 'Annually'
       }`;
 
@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
       currencyActiveTag.textContent = `${config.code} (${config.symbol})`;
     }
     if (currencyRateInfo) {
-      currencyRateInfo.textContent = `Reference FX: 1 USD ≈ ${config.rate.toFixed(2)} ${config.code}`;
+      currencyRateInfo.textContent = `Reference FX: 1 USD â‰ˆ ${config.rate.toFixed(2)} ${config.code}`;
     }
 
     // 3. Update Input Parameter Labels
@@ -637,7 +637,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 7. Update Portfolio Balance in Navbar (if not masked)
-    if (portfolioBalance && !portfolioBalance.textContent.includes('•')) {
+    if (portfolioBalance && !portfolioBalance.textContent.includes('â€¢')) {
       const basePortfolioUsd = 128450;
       const convertedPortfolio = basePortfolioUsd * config.rate;
       portfolioBalance.textContent = `${config.symbol}${Math.round(convertedPortfolio).toLocaleString('en-US')}.00`;
@@ -664,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isHidden ? 'block' : 'none';
 
       if (toggleArrow) {
-        toggleArrow.textContent = isHidden ? '▲' : '▼';
+        toggleArrow.textContent = isHidden ? 'â–²' : 'â–¼';
       }
 
       toggleBreakdownBtn.classList.toggle('expanded', isHidden);
@@ -757,7 +757,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tooltipYear.textContent =
         pt.year === 0
           ? 'Starting Point (Year 0)'
-          : `Projection Milestone — Year ${pt.year}`;
+          : `Projection Milestone â€” Year ${pt.year}`;
 
       tooltipWealth.textContent = formatCurrency(pt.wealth);
       tooltipPrincipal.textContent = formatCurrency(pt.principal);
@@ -851,11 +851,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const fxCurrencyMeta = {
-    USD: { flag: '🇺🇸', locale: 'en-US' },
-    EUR: { flag: '🇪🇺', locale: 'de-DE' },
-    GBP: { flag: '🇬🇧', locale: 'en-GB' },
-    JPY: { flag: '🇯🇵', locale: 'ja-JP' },
-    CAD: { flag: '🇨🇦', locale: 'en-CA' }
+    USD: { flag: 'ðŸ‡ºðŸ‡¸', locale: 'en-US' },
+    EUR: { flag: 'ðŸ‡ªðŸ‡º', locale: 'de-DE' },
+    GBP: { flag: 'ðŸ‡¬ðŸ‡§', locale: 'en-GB' },
+    JPY: { flag: 'ðŸ‡¯ðŸ‡µ', locale: 'ja-JP' },
+    CAD: { flag: 'ðŸ‡¨ðŸ‡¦', locale: 'en-CA' }
   };
 
   const fxFeeRate = 0.005;
@@ -907,11 +907,11 @@ document.addEventListener('DOMContentLoaded', () => {
       fxCurrencyMeta[to].flag;
 
     document.getElementById('fxRateLine').textContent =
-      `1 ${from} = ${formatFxRate(midRate)} ${to} · indicative mid-market rate`;
+      `1 ${from} = ${formatFxRate(midRate)} ${to} Â· indicative mid-market rate`;
 
     if (!validAmount) {
       fxError.hidden = false;
-      fxReceiveAmount.textContent = '—';
+      fxReceiveAmount.textContent = 'â€”';
 
       [
         'fxMidRate',
@@ -920,7 +920,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'fxBankFee',
         'fxNetAmount'
       ].forEach(id => {
-        document.getElementById(id).textContent = '—';
+        document.getElementById(id).textContent = 'â€”';
       });
 
       return;
@@ -945,7 +945,7 @@ document.addEventListener('DOMContentLoaded', () => {
       formatFxCurrency(grossAmount, to);
 
     document.getElementById('fxBankFee').textContent =
-      `− ${formatFxCurrency(bankFee, to)}`;
+      `âˆ’ ${formatFxCurrency(bankFee, to)}`;
 
     document.getElementById('fxNetAmount').textContent =
       formatFxCurrency(netAmount, to);
@@ -1050,13 +1050,13 @@ window.confirmDeposit = function confirmDeposit() {
   let hidden = false;
   button.addEventListener('click', () => {
     hidden = !hidden;
-    amount.textContent = hidden ? '••••••••' : original;
+    amount.textContent = hidden ? 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' : original;
     if (hidden) amount.setAttribute('aria-label', 'Balance hidden');
     else amount.removeAttribute('aria-label');
     button.setAttribute('aria-pressed', String(hidden));
     button.setAttribute('aria-label', hidden ? 'Show balance' : 'Hide balance');
     button.title = hidden ? 'Show balance' : 'Hide balance';
-    button.firstElementChild.textContent = hidden ? '◎' : '◉';
+    button.firstElementChild.textContent = hidden ? 'â—Ž' : 'â—‰';
   });
 })();
 
@@ -1936,7 +1936,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'stash-1',
       name: 'Emergency Safety Stash',
       category: 'Security',
-      icon: '🛡️',
+      icon: 'ðŸ›¡ï¸',
       target: 25000,
       current: 14500,
       weekly: 250,
@@ -1946,7 +1946,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'stash-2',
       name: 'Prime Real Estate Down Payment',
       category: 'Real Estate',
-      icon: '🏙️',
+      icon: 'ðŸ™ï¸',
       target: 120000,
       current: 42000,
       weekly: 500,
@@ -1956,7 +1956,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'stash-3',
       name: 'Tech Angel Investment Seed',
       category: 'Growth',
-      icon: '🚀',
+      icon: 'ðŸš€',
       target: 50000,
       current: 18000,
       weekly: 350,
@@ -2137,7 +2137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (totalWealthEl) totalWealthEl.textContent = formatCurrency(results.totalWealth);
     if (totalPrincipalEl) totalPrincipalEl.textContent = formatCurrency(results.totalPrincipal);
     if (totalInterestEl) totalInterestEl.textContent = `+${formatCurrency(results.compoundInterest)}`;
-    if (chipEl) chipEl.innerHTML = `<span>⚡ ${results.multiplier}x Wealth Multiplier over ${selectedYears} Year${selectedYears > 1 ? 's' : ''}</span>`;
+    if (chipEl) chipEl.innerHTML = `<span>âš¡ ${results.multiplier}x Wealth Multiplier over ${selectedYears} Year${selectedYears > 1 ? 's' : ''}</span>`;
   }
 
   function syncProjectorSlidersToVault() {
@@ -2232,18 +2232,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const weekly = parseFloat(document.getElementById('stashWeekly').value) || 100;
 
         const iconMap = {
-          'Real Estate': '🏙️',
-          'Security': '🛡️',
-          'Growth': '🚀',
-          'Vehicle': '🏎️',
-          'Travel': '✈️'
+          'Real Estate': 'ðŸ™ï¸',
+          'Security': 'ðŸ›¡ï¸',
+          'Growth': 'ðŸš€',
+          'Vehicle': 'ðŸŽï¸',
+          'Travel': 'âœˆï¸'
         };
 
         const newStash = {
           id: 'stash-' + Date.now(),
           name: name || 'Custom Goal',
           category,
-          icon: iconMap[category] || '💰',
+          icon: iconMap[category] || 'ðŸ’°',
           target,
           current: initial,
           weekly,
@@ -2840,13 +2840,13 @@ var FraudDetector = (function () {
     btc: {
       id: 'btc',
       name: 'Bitcoin (BTC)',
-      symbol: '₿',
+      symbol: 'â‚¿',
       color: '#f59e0b',
       gradStop0: 'rgba(245, 158, 11, 0.4)',
       gradStop1: 'rgba(245, 158, 11, 0.08)',
       annualCagr: 0.452,
       basePrice: 65000,
-      badgeText: '+45.2% Hist. CAGR • High Volatility',
+      badgeText: '+45.2% Hist. CAGR â€¢ High Volatility',
       alphaTitle: 'DCA Volatility Smoothing Advantage (Bitcoin)',
       alphaDesc: 'Weekly recurring purchases smoothed entry across Bitcoin market corrections, reducing peak drawdown risk by 28.4% compared to an all-in lump sum.',
       alphaBadge: '+28.4% Volatility Smoothing',
@@ -2859,13 +2859,13 @@ var FraudDetector = (function () {
     sp500: {
       id: 'sp500',
       name: 'S&P 500 Index (SPY)',
-      symbol: '📈',
+      symbol: 'ðŸ“ˆ',
       color: '#10b981',
       gradStop0: 'rgba(16, 185, 129, 0.4)',
       gradStop1: 'rgba(16, 185, 129, 0.08)',
       annualCagr: 0.124,
       basePrice: 520,
-      badgeText: '+12.4% Hist. CAGR • Steady Compound',
+      badgeText: '+12.4% Hist. CAGR â€¢ Steady Compound',
       alphaTitle: 'Steady Dollar-Cost Accumulation (S&P 500)',
       alphaDesc: 'Consistent recurring index investing captures long-term corporate earnings growth while eliminating emotional market-timing stress.',
       alphaBadge: '+12.4% Compound Pace',
@@ -2878,13 +2878,13 @@ var FraudDetector = (function () {
     eth: {
       id: 'eth',
       name: 'Ethereum (ETH)',
-      symbol: 'Ξ',
+      symbol: 'Îž',
       color: '#8b5cf6',
       gradStop0: 'rgba(139, 92, 246, 0.4)',
       gradStop1: 'rgba(139, 92, 246, 0.08)',
       annualCagr: 0.386,
       basePrice: 3400,
-      badgeText: '+38.6% Hist. CAGR • High Beta',
+      badgeText: '+38.6% Hist. CAGR â€¢ High Beta',
       alphaTitle: 'Smart-Contract Ecosystem Compounding (Ethereum)',
       alphaDesc: 'High-beta recurring accumulation captures decentralized protocol growth cycles with resilient cost-basis averaging.',
       alphaBadge: '+24.1% Cost-Basis Edge',
@@ -3415,7 +3415,7 @@ var FraudDetector = (function () {
     toggleTableBtn.addEventListener('click', () => {
       const isHidden = tableContainer.style.display === 'none';
       tableContainer.style.display = isHidden ? 'block' : 'none';
-      toggleArrow.textContent = isHidden ? '▲' : '▼';
+      toggleArrow.textContent = isHidden ? 'â–²' : 'â–¼';
     });
 
     // Initial render
@@ -3426,5 +3426,339 @@ var FraudDetector = (function () {
     document.addEventListener('DOMContentLoaded', initDcaSimulator);
   } else {
     initDcaSimulator();
+  }
+})();
+
+// ===== Issue #344: Interactive Loan Amortization Schedule Calculator =====
+(function initLoanAmortizationCalculator() {
+  if (typeof document === 'undefined') return;
+
+  function setup() {
+    const root = document.getElementById('loan-amortization-calculator');
+    if (!root) return;
+
+    // Elements
+    const amountSlider = document.getElementById('loanAmountSlider');
+    const amountInput = document.getElementById('loanAmountInput');
+    const amountVal = document.getElementById('loanAmountVal');
+
+    const rateSlider = document.getElementById('loanRateSlider');
+    const rateInput = document.getElementById('loanRateInput');
+    const rateVal = document.getElementById('loanRateVal');
+    const rateBadge = document.getElementById('loanRateBadge');
+
+    const termToggles = root.querySelectorAll('.btn-term-toggle');
+
+    const extraSlider = document.getElementById('extraPaymentSlider');
+    const extraInput = document.getElementById('extraPaymentInput');
+    const extraVal = document.getElementById('extraPaymentVal');
+
+    const presetBtns = root.querySelectorAll('.btn-loan-preset');
+
+    const kpiBaseMonthly = document.getElementById('kpiBaseMonthly');
+    const kpiTotalMonthly = document.getElementById('kpiTotalMonthly');
+    const kpiAcceleratedYears = document.getElementById('kpiAcceleratedYears');
+    const kpiTimeSaved = document.getElementById('kpiTimeSaved');
+    const kpiTotalInterest = document.getElementById('kpiTotalInterest');
+    const kpiInterestBaseline = document.getElementById('kpiInterestBaseline');
+    const kpiInterestSaved = document.getElementById('kpiInterestSaved');
+    const kpiSavingsPct = document.getElementById('kpiSavingsPct');
+
+    const progressBar = document.getElementById('loanProgressBar');
+    const progressPct = document.getElementById('payoffProgressPct');
+    const timelineBadge = document.getElementById('payoffTimelineBadge');
+
+    const tbody = document.getElementById('amortScheduleTbody');
+    const btnCopy = document.getElementById('btnCopyLoanSummary');
+    const btnDownload = document.getElementById('btnDownloadLoanJson');
+    const toast = document.getElementById('loanToast');
+
+    let currentTermYears = 30;
+
+    function formatCurrency(num) {
+      return '$' + Math.round(num).toLocaleString('en-US');
+    }
+
+    function formatCurrencyExact(num) {
+      return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function calculate() {
+      const P = parseFloat(amountInput.value) || 750000;
+      const R = parseFloat(rateInput.value) || 6.5;
+      const Y = currentTermYears;
+      const E = parseFloat(extraInput.value) || 0;
+
+      const r = (R / 100) / 12;
+      const N = Y * 12;
+
+      // Base monthly payment
+      let PMT = 0;
+      if (r === 0) {
+        PMT = P / N;
+      } else {
+        PMT = P * (r * Math.pow(1 + r, N)) / (Math.pow(1 + r, N) - 1);
+      }
+
+      const baselineTotalInterest = (PMT * N) - P;
+
+      // Accelerated Amortization
+      let balance = P;
+      let month = 0;
+      let totalInterestPaid = 0;
+      let totalPrincipalPaid = 0;
+      const yearlySchedule = [];
+      let yearInterest = 0;
+      let yearPrincipal = 0;
+
+      while (balance > 0.001 && month < 1200) {
+        month++;
+        const interestMonth = balance * r;
+        let principalMonth = (PMT - interestMonth) + E;
+
+        if (principalMonth > balance) {
+          principalMonth = balance;
+        }
+
+        balance -= principalMonth;
+        totalInterestPaid += interestMonth;
+        totalPrincipalPaid += principalMonth;
+        yearInterest += interestMonth;
+        yearPrincipal += principalMonth;
+
+        if (month % 12 === 0 || balance <= 0.001) {
+          const yearNum = Math.ceil(month / 12);
+          yearlySchedule.push({
+            year: yearNum,
+            interest: yearInterest,
+            principal: yearPrincipal,
+            balance: Math.max(0, balance)
+          });
+          yearInterest = 0;
+          yearPrincipal = 0;
+        }
+      }
+
+      const acceleratedMonths = month;
+      const acceleratedYears = (acceleratedMonths / 12).toFixed(1);
+      const monthsSaved = Math.max(0, N - acceleratedMonths);
+      const yearsSavedNum = Math.floor(monthsSaved / 12);
+      const remMonthsSaved = monthsSaved % 12;
+
+      const interestSaved = Math.max(0, baselineTotalInterest - totalInterestPaid);
+      const savingsPctVal = baselineTotalInterest > 0 ? ((interestSaved / baselineTotalInterest) * 100).toFixed(1) : '0.0';
+
+      // Update UI elements
+      if (amountVal) amountVal.textContent = formatCurrency(P);
+      if (rateVal) rateVal.textContent = R.toFixed(2) + '%';
+      if (rateBadge) rateBadge.textContent = R.toFixed(2) + '% APR';
+      if (extraVal) extraVal.textContent = '+' + formatCurrency(E) + ' / mo';
+
+      if (kpiBaseMonthly) kpiBaseMonthly.textContent = formatCurrencyExact(PMT);
+      if (kpiTotalMonthly) kpiTotalMonthly.textContent = 'Total: ' + formatCurrencyExact(PMT + E) + ' / mo';
+
+      if (kpiAcceleratedYears) kpiAcceleratedYears.textContent = acceleratedYears + ' yrs';
+      if (kpiTimeSaved) {
+        if (monthsSaved > 0) {
+          kpiTimeSaved.textContent = yearsSavedNum + 'y ' + remMonthsSaved + 'm sooner than ' + Y + 'y';
+        } else {
+          kpiTimeSaved.textContent = 'Full ' + Y + '-year standard payoff';
+        }
+      }
+
+      if (kpiTotalInterest) kpiTotalInterest.textContent = formatCurrency(totalInterestPaid);
+      if (kpiInterestBaseline) kpiInterestBaseline.textContent = 'Baseline: ' + formatCurrency(baselineTotalInterest);
+
+      if (kpiInterestSaved) kpiInterestSaved.textContent = formatCurrency(interestSaved);
+      if (kpiSavingsPct) kpiSavingsPct.textContent = savingsPctVal + '% interest curtailment';
+
+      // Progress bar (debt payoff reduction)
+      const timeReductionPct = N > 0 ? Math.min(100, Math.round(((N - acceleratedMonths) / N) * 100)) : 0;
+      if (progressBar) progressBar.style.width = Math.max(5, 100 - timeReductionPct) + '%';
+      if (progressPct) progressPct.textContent = monthsSaved > 0 ? '-' + timeReductionPct + '% Duration' : 'Standard 100%';
+      if (timelineBadge) {
+        timelineBadge.textContent = monthsSaved > 0 ? 'Accelerated: ' + acceleratedYears + ' Years' : Y + '-Year Baseline';
+      }
+
+      // Populate Table safely with textContent
+      if (tbody) {
+        tbody.replaceChildren();
+        yearlySchedule.forEach((row) => {
+          const tr = document.createElement('tr');
+
+          const tdYear = document.createElement('td');
+          tdYear.textContent = 'Year ' + row.year;
+
+          const tdPrincipal = document.createElement('td');
+          tdPrincipal.textContent = formatCurrency(row.principal);
+
+          const tdInterest = document.createElement('td');
+          tdInterest.textContent = formatCurrency(row.interest);
+
+          const tdTotalPaid = document.createElement('td');
+          tdTotalPaid.textContent = formatCurrency(row.principal + row.interest);
+
+          const tdBalance = document.createElement('td');
+          tdBalance.textContent = formatCurrency(row.balance);
+
+          tr.appendChild(tdYear);
+          tr.appendChild(tdPrincipal);
+          tr.appendChild(tdInterest);
+          tr.appendChild(tdTotalPaid);
+          tr.appendChild(tdBalance);
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      return {
+        principal: P,
+        annualRatePct: R,
+        termYears: Y,
+        extraMonthlyPayment: E,
+        baseMonthlyPayment: PMT,
+        totalMonthlyPayment: PMT + E,
+        baselineTotalInterest: baselineTotalInterest,
+        acceleratedTotalInterest: totalInterestPaid,
+        interestSaved: interestSaved,
+        payoffYears: parseFloat(acceleratedYears),
+        monthsSaved: monthsSaved,
+        scheduleLengthYears: yearlySchedule.length
+      };
+    }
+
+    // Sync input handlers
+    function syncAmount(val) {
+      const v = Math.max(1000, Math.min(10000000, Number(val) || 0));
+      amountSlider.value = String(v);
+      amountInput.value = String(v);
+      calculate();
+    }
+
+    function syncRate(val) {
+      const v = Math.max(0.1, Math.min(25.0, Number(val) || 0));
+      rateSlider.value = String(v);
+      rateInput.value = String(v);
+      calculate();
+    }
+
+    function syncExtra(val) {
+      const v = Math.max(0, Math.min(25000, Number(val) || 0));
+      extraSlider.value = String(v);
+      extraInput.value = String(v);
+      calculate();
+    }
+
+    amountSlider.addEventListener('input', (e) => syncAmount(e.target.value));
+    amountInput.addEventListener('input', (e) => syncAmount(e.target.value));
+
+    rateSlider.addEventListener('input', (e) => syncRate(e.target.value));
+    rateInput.addEventListener('input', (e) => syncRate(e.target.value));
+
+    extraSlider.addEventListener('input', (e) => syncExtra(e.target.value));
+    extraInput.addEventListener('input', (e) => syncExtra(e.target.value));
+
+    // Term toggles
+    termToggles.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        termToggles.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTermYears = parseInt(btn.getAttribute('data-term'), 10) || 30;
+        calculate();
+      });
+    });
+
+    // Preset benchmark buttons
+    presetBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const amount = parseFloat(btn.getAttribute('data-amount')) || 750000;
+        const rate = parseFloat(btn.getAttribute('data-rate')) || 6.5;
+        const years = parseInt(btn.getAttribute('data-years'), 10) || 30;
+        const extra = parseFloat(btn.getAttribute('data-extra')) || 300;
+
+        currentTermYears = years;
+        termToggles.forEach((tb) => {
+          tb.classList.toggle('active', parseInt(tb.getAttribute('data-term'), 10) === years);
+        });
+
+        amountInput.value = String(amount);
+        amountSlider.value = String(amount);
+
+        rateInput.value = String(rate);
+        rateSlider.value = String(rate);
+
+        extraInput.value = String(extra);
+        extraSlider.value = String(extra);
+
+        calculate();
+        showToast('Financing benchmark loaded!');
+      });
+    });
+
+    // Copy memo
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => {
+        const res = calculate();
+        const text = [
+          'FINTECH VAULT // LOAN AMORTIZATION ACCELERATION MEMO',
+          '---------------------------------------------------',
+          'Principal Loan Amount: ' + formatCurrency(res.principal),
+          'Annual Interest Rate:  ' + res.annualRatePct.toFixed(2) + '% APR',
+          'Standard Loan Term:    ' + res.termYears + ' Years',
+          'Base Monthly Payment:  ' + formatCurrencyExact(res.baseMonthlyPayment),
+          'Extra Monthly Curtail: +' + formatCurrency(res.extraMonthlyPayment) + ' / mo',
+          'Total Monthly Payment: ' + formatCurrencyExact(res.totalMonthlyPayment),
+          'Accelerated Horizon:   ' + res.payoffYears + ' Years (' + res.monthsSaved + ' months faster)',
+          'Total Interest Paid:   ' + formatCurrency(res.acceleratedTotalInterest),
+          'Total Interest Saved:  ' + formatCurrency(res.interestSaved)
+        ].join('\n');
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            showToast('Amortization summary copied to clipboard!');
+          }).catch(() => {
+            showToast('Summary copied!');
+          });
+        } else {
+          showToast('Clipboard summary prepared!');
+        }
+      });
+    }
+
+    // Download JSON brief
+    if (btnDownload) {
+      btnDownload.addEventListener('click', () => {
+        const res = calculate();
+        const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(res, null, 2));
+        const a = document.createElement('a');
+        a.setAttribute('href', dataStr);
+        a.setAttribute('download', 'loan-amortization-schedule.json');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast('Amortization brief JSON downloaded!');
+      });
+    }
+
+    // Initial calculation
+    calculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
   }
 })();
