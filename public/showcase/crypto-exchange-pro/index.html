@@ -415,6 +415,140 @@
   </section>
   <!-- ===== END Issue #391 ===== -->
 
+  <!-- ===== BEGIN Issue #328: Interactive Trade History Filter Drawer & CSV Export ===== -->
+  <section class="trade-history-section" id="tradeHistorySection" aria-labelledby="tradeHistoryHeading">
+    <div class="trade-history-container">
+      <div class="trade-history-header">
+        <div class="th-title-group">
+          <span class="swap-tag">// INSTITUTIONAL ORDER LEDGER // EXECUTION AUDIT TRAIL</span>
+          <h2 id="tradeHistoryHeading">Trade Execution History &amp; Audit Drawer</h2>
+          <p class="th-sub">
+            Filter historical fills across spot trading pairs. Inspect fill prices, maker/taker fee tiers, realized PnL, and export compliance-grade execution reports to CSV.
+          </p>
+        </div>
+        <div class="th-header-actions">
+          <button type="button" class="btn-th-drawer-toggle" id="btnToggleTradeDrawer" aria-expanded="false" aria-controls="tradeDetailsDrawer">
+            <span>🔍 Inspect Ledger Drawer</span>
+          </button>
+          <button type="button" class="btn-th-export" id="btnExportTradesCsv">
+            <span>📥 Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Controls Strip -->
+      <div class="th-filter-bar">
+        <!-- Pair Selector -->
+        <div class="th-filter-item">
+          <label for="thPairFilter">Trading Pair</label>
+          <select id="thPairFilter" class="th-select">
+            <option value="ALL">All Currency Pairs</option>
+            <option value="BTC/USDT">BTC/USDT</option>
+            <option value="ETH/USDT">ETH/USDT</option>
+            <option value="SOL/USDT">SOL/USDT</option>
+            <option value="AVAX/USDT">AVAX/USDT</option>
+            <option value="LINK/USDT">LINK/USDT</option>
+          </select>
+        </div>
+
+        <!-- Order Side -->
+        <div class="th-filter-item">
+          <label for="thSideFilter">Order Side</label>
+          <select id="thSideFilter" class="th-select">
+            <option value="ALL">All Sides (Buy &amp; Sell)</option>
+            <option value="BUY">BUY / LONG</option>
+            <option value="SELL">SELL / SHORT</option>
+          </select>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="th-filter-item">
+          <label for="thDateFilter">Execution Window</label>
+          <select id="thDateFilter" class="th-select">
+            <option value="ALL">All Time (30 Days)</option>
+            <option value="24H">Past 24 Hours</option>
+            <option value="7D">Past 7 Days</option>
+            <option value="30D">Past 30 Days</option>
+          </select>
+        </div>
+
+        <!-- Search Order ID -->
+        <div class="th-filter-item search-item">
+          <label for="thSearchInput">Search Order ID / TX</label>
+          <input type="text" id="thSearchInput" class="th-input" placeholder="e.g. ORD-8941..." />
+        </div>
+
+        <button type="button" class="btn-th-reset" id="btnResetTradeFilters">Reset</button>
+      </div>
+
+      <!-- Telemetry KPI Summary Strip -->
+      <div class="th-kpi-strip">
+        <div class="th-kpi-card">
+          <span class="kpi-tag">TOTAL EXECUTED VOLUME</span>
+          <strong class="kpi-value" id="kpiTotalVolume">$184,920.45</strong>
+          <small class="kpi-sub">Across filtered matches</small>
+        </div>
+
+        <div class="th-kpi-card">
+          <span class="kpi-tag">REALIZED TRADING FEES</span>
+          <strong class="kpi-value" id="kpiTotalFees">$184.92</strong>
+          <small class="kpi-sub">VIP-3 Taker 0.10% Tier</small>
+        </div>
+
+        <div class="th-kpi-card highlight-green">
+          <span class="kpi-tag">NET REALIZED PNL</span>
+          <strong class="kpi-value green-text" id="kpiTotalPnl">+$4,821.15</strong>
+          <small class="kpi-sub">Profits after fee deductions</small>
+        </div>
+
+        <div class="th-kpi-card">
+          <span class="kpi-tag">EXECUTION SUCCESS</span>
+          <strong class="kpi-value" id="kpiTradeCount">12 Fills (100%)</strong>
+          <small class="kpi-sub" id="kpiAvgSlippage">0.012% avg slippage</small>
+        </div>
+      </div>
+
+      <!-- Trade History Table -->
+      <div class="th-table-wrapper">
+        <table class="th-table" id="thTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Order ID</th>
+              <th>Pair</th>
+              <th>Side</th>
+              <th class="text-right">Fill Price</th>
+              <th class="text-right">Amount</th>
+              <th class="text-right">Executed Value</th>
+              <th class="text-right">Fee (USDT)</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="thTableBody">
+            <!-- Dynamically populated via script -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Trade Details Drawer Backdrop & Slide-over Panel -->
+    <div class="th-drawer-backdrop" id="thDrawerBackdrop" hidden></div>
+    <aside class="th-drawer" id="tradeDetailsDrawer" aria-hidden="true" role="dialog" aria-labelledby="drawerTitle">
+      <div class="drawer-header">
+        <div>
+          <span class="swap-tag">// EXECUTION TICKET</span>
+          <h3 id="drawerTitle">Trade Execution Details</h3>
+        </div>
+        <button type="button" class="btn-drawer-close" id="btnCloseTradeDrawer" aria-label="Close trade details drawer">&times;</button>
+      </div>
+
+      <div class="drawer-body" id="drawerBodyContent">
+        <!-- Rendered dynamically -->
+      </div>
+    </aside>
+  </section>
+  <!-- ===== END Issue #328 ===== -->
+
   <section class="token-discovery market" aria-labelledby="token-market-title">
     <div class="token-discovery-head">
       <div><h2 id="token-market-title">Explore tokens</h2><p>Illustrative market snapshot. Prices are simulated, not live quotes.</p></div>
