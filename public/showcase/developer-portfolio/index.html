@@ -449,6 +449,207 @@
       </div>
     </section>
 
+    <!-- ===== System Architecture Topology Explorer Section (Issue #397) ===== -->
+    <section class="architecture-topology-section" id="architecture" aria-labelledby="archTopologyTitle">
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">dev@kernel-box: ~/infra % kubectl get topology --namespace=prod -o visual</span>
+          <div class="topology-status-badge" id="archClusterBadge">
+            <span class="topology-live-dot" aria-hidden="true"></span>
+            <span id="archClusterStatusText">CLUSTER HEALTHY • 5/5 NODES ACTIVE</span>
+          </div>
+        </div>
+
+        <div class="architecture-body">
+          <div class="topology-intro-row">
+            <div>
+              <span class="arch-tag">// DISTRIBUTED INFRASTRUCTURE</span>
+              <h2 id="archTopologyTitle">System Architecture Topology Explorer</h2>
+              <p class="arch-sub">
+                Interactive microservices data flow blueprint. Click any node to inspect tech stack specifications, live QPS, and P99 latency telemetry.
+              </p>
+            </div>
+            <div class="topology-controls-bar">
+              <div class="filter-pill-group" role="radiogroup" aria-label="Architecture traffic paths">
+                <button type="button" class="arch-filter-pill active" data-path="all">All Flow</button>
+                <button type="button" class="arch-filter-pill" data-path="ingress">Ingress Path</button>
+                <button type="button" class="arch-filter-pill" data-path="cache">Cache Path</button>
+                <button type="button" class="arch-filter-pill" data-path="events">Event Stream</button>
+              </div>
+              <button type="button" class="arch-burst-btn" id="btnBurstTraffic">
+                ⚡ Burst Traffic (2x)
+              </button>
+            </div>
+          </div>
+
+          <!-- SVG Topology Blueprint Stage -->
+          <div class="topology-canvas-container" id="topologyCanvasContainer">
+            <svg id="archTopologySvg" class="arch-topology-svg" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" aria-label="System architecture topology diagram">
+              <defs>
+                <!-- Grid background pattern -->
+                <pattern id="archGridPattern" width="24" height="24" patternUnits="userSpaceOnUse">
+                  <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1" />
+                  <circle cx="24" cy="24" r="1" fill="rgba(56, 189, 248, 0.15)" />
+                </pattern>
+
+                <!-- Neon glow filters -->
+                <filter id="neonGlowBlue" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="neonGlowAmber" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- Grid Background Rect -->
+              <rect width="100%" height="100%" fill="url(#archGridPattern)" />
+
+              <!-- Connection Connector Paths -->
+              <g class="connector-lines-group">
+                <!-- Frontend -> Gateway -->
+                <path id="path-fe-gw" class="arch-connector-path path-ingress" d="M 180 190 L 320 190" />
+                
+                <!-- Gateway -> Event Bus -->
+                <path id="path-gw-eb" class="arch-connector-path path-events" d="M 440 190 C 500 190, 500 100, 560 100" />
+                
+                <!-- Gateway -> Cache -->
+                <path id="path-gw-cache" class="arch-connector-path path-cache" d="M 440 190 C 500 190, 500 280, 560 280" />
+                
+                <!-- Cache -> DB -->
+                <path id="path-cache-db" class="arch-connector-path path-cache" d="M 680 280 C 740 280, 740 190, 800 190" />
+                
+                <!-- Event Bus -> DB -->
+                <path id="path-eb-db" class="arch-connector-path path-events" d="M 680 100 C 740 100, 740 190, 800 190" />
+              </g>
+
+              <!-- Animated Data Packets Group -->
+              <g id="dataPacketsGroup" class="data-packets-group">
+                <!-- Packets rendered and animated via script.js -->
+              </g>
+
+              <!-- Service Nodes Group -->
+              <g class="topology-nodes-group">
+                <!-- Node 1: Frontend Edge (x: 60, y: 140) -->
+                <g class="topology-node" id="archNodeFrontend" data-node="frontend" role="button" tabindex="0" transform="translate(60, 140)">
+                  <rect class="node-bg" width="120" height="100" rx="12" />
+                  <rect class="node-border" width="120" height="100" rx="12" />
+                  <text class="node-icon" x="60" y="38" text-anchor="middle">🌐</text>
+                  <text class="node-title" x="60" y="58" text-anchor="middle">Next.js Edge</text>
+                  <text class="node-type" x="60" y="74" text-anchor="middle">Frontend CDN</text>
+                  <rect class="node-latency-pill" x="30" y="80" width="60" height="14" rx="4" />
+                  <text class="node-latency-text" x="60" y="90" text-anchor="middle">42ms TTFB</text>
+                </g>
+
+                <!-- Node 2: API Gateway (x: 320, y: 140) -->
+                <g class="topology-node" id="archNodeGateway" data-node="gateway" role="button" tabindex="0" transform="translate(320, 140)">
+                  <rect class="node-bg" width="120" height="100" rx="12" />
+                  <rect class="node-border" width="120" height="100" rx="12" />
+                  <text class="node-icon" x="60" y="38" text-anchor="middle">🛡️</text>
+                  <text class="node-title" x="60" y="58" text-anchor="middle">Envoy Proxy</text>
+                  <text class="node-type" x="60" y="74" text-anchor="middle">API Gateway</text>
+                  <rect class="node-latency-pill" x="30" y="80" width="60" height="14" rx="4" />
+                  <text class="node-latency-text" x="60" y="90" text-anchor="middle">1.4ms P99</text>
+                </g>
+
+                <!-- Node 3: Event Bus (x: 560, y: 50) -->
+                <g class="topology-node" id="archNodeEventbus" data-node="eventbus" role="button" tabindex="0" transform="translate(560, 50)">
+                  <rect class="node-bg" width="120" height="100" rx="12" />
+                  <rect class="node-border" width="120" height="100" rx="12" />
+                  <text class="node-icon" x="60" y="38" text-anchor="middle">⚡</text>
+                  <text class="node-title" x="60" y="58" text-anchor="middle">Kafka Stream</text>
+                  <text class="node-type" x="60" y="74" text-anchor="middle">Event Bus</text>
+                  <rect class="node-latency-pill" x="25" y="80" width="70" height="14" rx="4" />
+                  <text class="node-latency-text" x="60" y="90" text-anchor="middle">125 MB/s</text>
+                </g>
+
+                <!-- Node 4: Redis Cache Cluster (x: 560, y: 230) -->
+                <g class="topology-node" id="archNodeCache" data-node="cache" role="button" tabindex="0" transform="translate(560, 230)">
+                  <rect class="node-bg" width="120" height="100" rx="12" />
+                  <rect class="node-border" width="120" height="100" rx="12" />
+                  <text class="node-icon" x="60" y="38" text-anchor="middle">🚀</text>
+                  <text class="node-title" x="60" y="58" text-anchor="middle">Redis Cluster</text>
+                  <text class="node-type" x="60" y="74" text-anchor="middle">In-Memory Cache</text>
+                  <rect class="node-latency-pill" x="28" y="80" width="64" height="14" rx="4" />
+                  <text class="node-latency-text" x="60" y="90" text-anchor="middle">0.4ms Latency</text>
+                </g>
+
+                <!-- Node 5: Database Cluster (x: 800, y: 140) -->
+                <g class="topology-node" id="archNodeDb" data-node="db" role="button" tabindex="0" transform="translate(800, 140)">
+                  <rect class="node-bg" width="120" height="100" rx="12" />
+                  <rect class="node-border" width="120" height="100" rx="12" />
+                  <text class="node-icon" x="60" y="38" text-anchor="middle">🗄️</text>
+                  <text class="node-title" x="60" y="58" text-anchor="middle">Postgres Shards</text>
+                  <text class="node-type" x="60" y="74" text-anchor="middle">Citus Cluster</text>
+                  <rect class="node-latency-pill" x="28" y="80" width="64" height="14" rx="4" />
+                  <text class="node-latency-text" x="60" y="90" text-anchor="middle">2.8ms Query</text>
+                </g>
+              </g>
+            </svg>
+
+            <!-- Node Inspection Details Popover Card -->
+            <div class="node-inspect-popover" id="nodeInspectPopover" role="dialog" aria-modal="false" aria-labelledby="popoverNodeTitle" hidden>
+              <div class="popover-header">
+                <div class="popover-title-row">
+                  <span class="popover-icon" id="popoverNodeIcon">🛡️</span>
+                  <div>
+                    <h3 id="popoverNodeTitle">Envoy Proxy API Gateway</h3>
+                    <span class="popover-cluster-pod" id="popoverNodePod">Pod: prod-ingress-gateway-7b9c</span>
+                  </div>
+                </div>
+                <button type="button" class="popover-close-btn" id="popoverCloseBtn" aria-label="Close node inspector">&times;</button>
+              </div>
+
+              <div class="popover-body">
+                <!-- Telemetry Stats Grid -->
+                <div class="popover-metrics-grid">
+                  <div class="popover-metric-box">
+                    <span class="metric-lbl">THROUGHPUT</span>
+                    <strong class="metric-val text-cyan" id="popoverMetricThroughput">24.8K QPS</strong>
+                  </div>
+                  <div class="popover-metric-box">
+                    <span class="metric-lbl">P99 LATENCY</span>
+                    <strong class="metric-val text-amber" id="popoverMetricLatency">1.4 ms</strong>
+                  </div>
+                  <div class="popover-metric-box">
+                    <span class="metric-lbl">HEALTH SCORE</span>
+                    <strong class="metric-val text-emerald" id="popoverMetricHealth">99.999%</strong>
+                  </div>
+                  <div class="popover-metric-box">
+                    <span class="metric-lbl">MEMORY / CPU</span>
+                    <strong class="metric-val text-violet" id="popoverMetricResources">1.2 GB • 18%</strong>
+                  </div>
+                </div>
+
+                <!-- Tech Stack Chips -->
+                <div class="popover-tech-section">
+                  <span class="popover-section-label">ENGINEERING STACK &amp; PROTOCOLS</span>
+                  <div class="tech-chips-row" id="popoverTechChips">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+
+                <!-- Deep-Dive Description -->
+                <p class="popover-description" id="popoverDescription">
+                  High-performance Envoy reverse proxy configured with custom Go filters for token bucket rate limiting, zero-trust mutual TLS, and dynamic routing.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Git Commit Tree Visualization Graph Section (Issue #398) -->
     <section class="git-tree-section" id="git-graph" aria-labelledby="git-graph-title">
       <div class="terminal-card">

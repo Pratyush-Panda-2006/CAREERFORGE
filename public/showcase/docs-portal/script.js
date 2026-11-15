@@ -2426,3 +2426,418 @@ if (document.readyState === 'loading') {
 } else {
   initGraphQLPlayground();
 }
+
+
+/* ===== BEGIN Issue #399: Multi-Language Code Snippet Converter ===== */
+(function initSnippetConverterModule() {
+  const STORAGE_KEY = 'docs_portal_active_lang';
+
+  const SNIPPETS = {
+    'dispatch-agent': {
+      curl: `curl -X POST https://api.prisma.io/v1/agents/dispatch \\
+  -H "Authorization: Bearer prisma_live_99a84b12c58e4d1f887201a09e" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "agent_id": "rag-worker-01",
+    "prompt": "Analyze vector embeddings for chunk #92",
+    "max_tokens": 1024,
+    "temperature": 0.2,
+    "stream": false,
+    "metadata": {
+      "tenant_id": "org_48921",
+      "cost_center": "mlops-platform"
+    }
+  }'`,
+      python: `import requests
+
+url = "https://api.prisma.io/v1/agents/dispatch"
+headers = {
+    "Authorization": "Bearer prisma_live_99a84b12c58e4d1f887201a09e",
+    "Content-Type": "application/json"
+}
+payload = {
+    "agent_id": "rag-worker-01",
+    "prompt": "Analyze vector embeddings for chunk #92",
+    "max_tokens": 1024,
+    "temperature": 0.2,
+    "stream": False,
+    "metadata": {
+        "tenant_id": "org_48921",
+        "cost_center": "mlops-platform"
+    }
+}
+
+response = requests.post(url, json=payload, headers=headers)
+print("Status Code:", response.status_code)
+print("Result:", response.json())`,
+      javascript: `// Node.js 18+ native fetch / browser fetch
+const url = 'https://api.prisma.io/v1/agents/dispatch';
+
+const response = await fetch(url, {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer prisma_live_99a84b12c58e4d1f887201a09e',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    agent_id: 'rag-worker-01',
+    prompt: 'Analyze vector embeddings for chunk #92',
+    max_tokens: 1024,
+    temperature: 0.2,
+    stream: false,
+    metadata: {
+      tenant_id: 'org_48921',
+      cost_center: 'mlops-platform'
+    }
+  })
+});
+
+const data = await response.json();
+console.log('Dispatched task:', data.task_id);`,
+      go: `package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	url := "https://api.prisma.io/v1/agents/dispatch"
+
+	payload := map[string]interface{}{
+		"agent_id":    "rag-worker-01",
+		"prompt":      "Analyze vector embeddings for chunk #92",
+		"max_tokens":  1024,
+		"temperature": 0.2,
+		"stream":      false,
+		"metadata": map[string]string{
+			"tenant_id":   "org_48921",
+			"cost_center": "mlops-platform",
+		},
+	}
+
+	body, _ := json.Marshal(payload)
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	req.Header.Set("Authorization", "Bearer prisma_live_99a84b12c58e4d1f887201a09e")
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	fmt.Println("Response Status:", resp.Status)
+	fmt.Println("Body:", string(respBody))
+}`
+    },
+    'list-models': {
+      curl: `curl -X GET https://api.prisma.io/v1/models \\
+  -H "Authorization: Bearer prisma_live_99a84b12c58e4d1f887201a09e" \\
+  -H "Accept: application/json"`,
+      python: `import requests
+
+url = "https://api.prisma.io/v1/models"
+headers = {
+    "Authorization": "Bearer prisma_live_99a84b12c58e4d1f887201a09e",
+    "Accept": "application/json"
+}
+
+response = requests.get(url, headers=headers)
+models = response.json()
+for model in models.get("data", []):
+    print(f"{model['id']} - Latency: {model['p99_latency_ms']}ms")`,
+      javascript: `// Query active model cluster status
+const response = await fetch('https://api.prisma.io/v1/models', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer prisma_live_99a84b12c58e4d1f887201a09e',
+    'Accept': 'application/json'
+  }
+});
+
+const { data: models } = await response.json();
+console.table(models);`,
+      go: `package main
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	url := "https://api.prisma.io/v1/models"
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Authorization", "Bearer prisma_live_99a84b12c58e4d1f887201a09e")
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}`
+    },
+    'create-embeddings': {
+      curl: `curl -X POST https://api.prisma.io/v1/embeddings \\
+  -H "Authorization: Bearer prisma_live_99a84b12c58e4d1f887201a09e" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "prisma-dense-v3-1536",
+    "input": ["Enterprise distributed consensus protocol benchmark"],
+    "encoding_format": "float"
+  }'`,
+      python: `import requests
+
+url = "https://api.prisma.io/v1/embeddings"
+headers = {
+    "Authorization": "Bearer prisma_live_99a84b12c58e4d1f887201a09e",
+    "Content-Type": "application/json"
+}
+payload = {
+    "model": "prisma-dense-v3-1536",
+    "input": ["Enterprise distributed consensus protocol benchmark"],
+    "encoding_format": "float"
+}
+
+response = requests.post(url, json=payload, headers=headers)
+embedding_vector = response.json()["data"][0]["embedding"]
+print(f"Dimension: {len(embedding_vector)}")`,
+      javascript: `// Generate vector embeddings for vector search
+const response = await fetch('https://api.prisma.io/v1/embeddings', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer prisma_live_99a84b12c58e4d1f887201a09e',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    model: 'prisma-dense-v3-1536',
+    input: ['Enterprise distributed consensus protocol benchmark'],
+    encoding_format: 'float'
+  })
+});
+
+const result = await response.json();
+console.log('Embedding dimension:', result.data[0].embedding.length);`,
+      go: `package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	url := "https://api.prisma.io/v1/embeddings"
+	payload := map[string]interface{}{
+		"model":           "prisma-dense-v3-1536",
+		"input":           []string{"Enterprise distributed consensus protocol benchmark"},
+		"encoding_format": "float",
+	}
+
+	body, _ := json.Marshal(payload)
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	req.Header.Set("Authorization", "Bearer prisma_live_99a84b12c58e4d1f887201a09e")
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	respData, _ := io.ReadAll(resp.Body)
+	fmt.Println("Embeddings Response:", string(respData))
+}`
+    }
+  };
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[m]);
+  }
+
+  function highlightSyntax(code, lang) {
+    const escaped = escapeHtml(code);
+
+    if (lang === 'curl') {
+      return escaped
+        .replace(/(curl)/g, '<span class="tok-kw">$1</span>')
+        .replace(/(-X\s+[A-Z]+)/g, '<span class="tok-flag">$1</span>')
+        .replace(/(-H\s+)/g, '<span class="tok-flag">$1</span>')
+        .replace(/(-d\s+)/g, '<span class="tok-flag">$1</span>')
+        .replace(/(https?:\/\/[^\s\\]+)/g, '<span class="tok-url">$1</span>')
+        .replace(/(".*?")/g, '<span class="tok-str">$1</span>');
+    }
+
+    if (lang === 'python') {
+      return escaped
+        .replace(/(import|from|for|in|def|class|return)\b/g, '<span class="tok-kw">$1</span>')
+        .replace(/(True|False|None)\b/g, '<span class="tok-bool">$1</span>')
+        .replace(/(requests\.(?:post|get|put|delete)|print|len)\b/g, '<span class="tok-fn">$1</span>')
+        .replace(/(#.*$)/gm, '<span class="tok-comment">$1</span>')
+        .replace(/(f?".*?")/g, '<span class="tok-str">$1</span>')
+        .replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+    }
+
+    if (lang === 'javascript') {
+      return escaped
+        .replace(/(const|let|var|await|async|import|from|return|function)\b/g, '<span class="tok-kw">$1</span>')
+        .replace(/(true|false|null|undefined)\b/g, '<span class="tok-bool">$1</span>')
+        .replace(/(fetch|console\.(?:log|table)|JSON\.(?:stringify|parse))\b/g, '<span class="tok-fn">$1</span>')
+        .replace(/(\/\/.*$)/gm, '<span class="tok-comment">$1</span>')
+        .replace(/('.*?'|".*?")/g, '<span class="tok-str">$1</span>')
+        .replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+    }
+
+    if (lang === 'go') {
+      return escaped
+        .replace(/(package|import|func|main|var|type|struct|return|panic|defer)\b/g, '<span class="tok-kw">$1</span>')
+        .replace(/(true|false|nil)\b/g, '<span class="tok-bool">$1</span>')
+        .replace(/(http\.(?:NewRequest|Client)|json\.(?:Marshal|Unmarshal)|fmt\.(?:Println|Printf)|io\.ReadAll)\b/g, '<span class="tok-fn">$1</span>')
+        .replace(/(\/\/.*$)/gm, '<span class="tok-comment">$1</span>')
+        .replace(/(".*?")/g, '<span class="tok-str">$1</span>')
+        .replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+    }
+
+    return escaped;
+  }
+
+  function getActiveLang() {
+    try {
+      return localStorage.getItem(STORAGE_KEY) || 'curl';
+    } catch {
+      return 'curl';
+    }
+  }
+
+  function setActiveLang(lang) {
+    try {
+      localStorage.setItem(STORAGE_KEY, lang);
+    } catch {
+      // ignore
+    }
+    renderAllBlocks(lang);
+  }
+
+  function renderBlock(blockEl, lang) {
+    const endpointKey = blockEl.getAttribute('data-endpoint');
+    const endpointData = SNIPPETS[endpointKey];
+    if (!endpointData) return;
+
+    const rawCode = endpointData[lang] || endpointData.curl;
+    const lines = rawCode.split('\n');
+
+    // Update tabs active state
+    const tabs = blockEl.querySelectorAll('.snippet-tab-btn');
+    tabs.forEach((tab) => {
+      const isTarget = tab.getAttribute('data-lang') === lang;
+      tab.classList.toggle('active', isTarget);
+      tab.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+    });
+
+    // Render line numbers
+    const lineNumbersEl = blockEl.querySelector('.snippet-line-numbers');
+    if (lineNumbersEl) {
+      lineNumbersEl.innerHTML = lines.map((_, i) => `<span class="snippet-line-num">${i + 1}</span>`).join('');
+    }
+
+    // Render code
+    const codeEl = blockEl.querySelector('.snippet-code');
+    if (codeEl) {
+      codeEl.innerHTML = highlightSyntax(rawCode, lang);
+      codeEl.setAttribute('data-raw', rawCode);
+    }
+  }
+
+  function renderAllBlocks(lang) {
+    const blocks = document.querySelectorAll('.snippet-switcher-block');
+    blocks.forEach((block) => renderBlock(block, lang));
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('snippetToast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2800);
+  }
+
+  window.copySnippetCode = function(buttonEl) {
+    const block = buttonEl.closest('.snippet-switcher-block');
+    if (!block) return;
+    const codeEl = block.querySelector('.snippet-code');
+    const raw = codeEl ? (codeEl.getAttribute('data-raw') || codeEl.textContent) : '';
+
+    const langTab = block.querySelector('.snippet-tab-btn.active');
+    const langName = langTab ? langTab.textContent.trim() : 'Code';
+
+    navigator.clipboard.writeText(raw).then(() => {
+      buttonEl.classList.add('copied');
+      const label = buttonEl.querySelector('.copy-label') || buttonEl;
+      const originalText = label.textContent;
+      label.textContent = '✓ Copied!';
+      showToast(`✓ Copied ${langName} snippet to clipboard!`);
+
+      setTimeout(() => {
+        buttonEl.classList.remove('copied');
+        label.textContent = originalText;
+      }, 2200);
+    }).catch(() => {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = raw;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+
+      buttonEl.classList.add('copied');
+      setTimeout(() => buttonEl.classList.remove('copied'), 2000);
+      showToast(`✓ Copied ${langName} snippet to clipboard!`);
+    });
+  };
+
+  function initListeners() {
+    document.addEventListener('click', (e) => {
+      const tabBtn = e.target.closest('.snippet-tab-btn');
+      if (tabBtn) {
+        const lang = tabBtn.getAttribute('data-lang');
+        if (lang) {
+          setActiveLang(lang);
+        }
+      }
+    });
+
+    const initialLang = getActiveLang();
+    renderAllBlocks(initialLang);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initListeners);
+  } else {
+    initListeners();
+  }
+})();
+/* ===== END Issue #399: Multi-Language Code Snippet Converter ===== */
