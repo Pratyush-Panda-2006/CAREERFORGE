@@ -2957,12 +2957,21 @@ func main() {
   }
 
   function randomSecret() {
-    const chars = '0123456789abcdef';
-    let s = 'whsec_';
-    for (let i = 0; i < 32; i++) {
-      s += chars[Math.floor(Math.random() * chars.length)];
+    if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.getRandomValues === 'function') {
+      const arr = new Uint8Array(16);
+      window.crypto.getRandomValues(arr);
+      return 'whsec_' + Array.from(arr).map((b) => b.toString(16).padStart(2, '0')).join('');
     }
-    return s;
+    return 'whsec_8f9c2a4e1b7d5093e6c0b38a71d4f29e';
+  }
+
+  function generateDeliveryId() {
+    if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.getRandomValues === 'function') {
+      const arr = new Uint8Array(8);
+      window.crypto.getRandomValues(arr);
+      return 'del_' + Array.from(arr).map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+    return 'del_902fa1bc8834ef10';
   }
 
   function initWebhookSimulator() {
@@ -3065,8 +3074,8 @@ func main() {
           deliveryStatus.textContent = 'Executing mock HTTP request...';
         }
 
-        // Simulate realistic network latency (120 - 240ms)
-        const latency = Math.floor(120 + Math.random() * 120);
+        // Simulate realistic network latency
+        const latency = 142;
         await new Promise((r) => setTimeout(r, latency));
 
         const eventKey = eventSelect ? eventSelect.value : 'user.created';
@@ -3105,7 +3114,7 @@ func main() {
 
       const payloadObj = EVENT_PAYLOADS[eventKey] || EVENT_PAYLOADS['user.created'];
       const timestamp = Math.floor(Date.now() / 1000);
-      const deliveryId = `del_${Math.random().toString(36).slice(2, 10)}${Math.random().toString(36).slice(2, 6)}`;
+      const deliveryId = generateDeliveryId();
 
       const payloadJson = JSON.stringify(payloadObj, null, 2);
       currentRawPayload = payloadJson;
