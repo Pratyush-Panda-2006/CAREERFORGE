@@ -2137,7 +2137,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (totalWealthEl) totalWealthEl.textContent = formatCurrency(results.totalWealth);
     if (totalPrincipalEl) totalPrincipalEl.textContent = formatCurrency(results.totalPrincipal);
     if (totalInterestEl) totalInterestEl.textContent = `+${formatCurrency(results.compoundInterest)}`;
-    if (chipEl) chipEl.innerHTML = `<span>âš¡ ${results.multiplier}x Wealth Multiplier over ${selectedYears} Year${selectedYears > 1 ? 's' : ''}</span>`;
+    if (chipEl) {
+      chipEl.replaceChildren();
+      const chipSpan = document.createElement('span');
+      chipSpan.textContent = `⚡ ${results.multiplier}x Wealth Multiplier over ${selectedYears} Year${selectedYears > 1 ? 's' : ''}`;
+      chipEl.appendChild(chipSpan);
+    }
   }
 
   function syncProjectorSlidersToVault() {
