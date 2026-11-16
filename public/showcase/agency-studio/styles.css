@@ -2802,6 +2802,43 @@ body {
   color: #e9d5ff;
 }
 
+.turnaround-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 7px;
+  border: 1px solid rgba(192, 132, 252, 0.55);
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.13);
+  color: #e9d5ff;
+  font-size: 0.69rem;
+  font-weight: 700;
+}
+.turnaround-tooltip {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 5px);
+  left: 8px;
+  width: max-content;
+  max-width: min(270px, 80vw);
+  padding: 9px 11px;
+  border: 1px solid #c084fc;
+  border-radius: 8px;
+  background: #1e1b4b;
+  color: #f5f3ff;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 160ms ease, transform 160ms ease, visibility 160ms;
+  pointer-events: none;
+}
+.deliverable-chip:hover .turnaround-tooltip,
+.deliverable-chip:focus-visible .turnaround-tooltip { opacity: 1; visibility: visible; transform: translateY(0); }
+.summary-turnaround { margin: 0 0 18px; padding: 10px 12px; border-left: 3px solid #c084fc; background: rgba(168, 85, 247, 0.12); color: #e9d5ff; font-size: 0.8rem; line-height: 1.5; }
+@media (prefers-reduced-motion: reduce) { .turnaround-tooltip { transition: none; } }
+
 .complexity-chips-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
