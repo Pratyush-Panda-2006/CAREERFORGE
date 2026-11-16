@@ -321,7 +321,7 @@
     <div class="matches-header">
       <div class="matches-tag">// CHAMPIONSHIP FIXTURES</div>
       <h2 id="matches-title">TOURNAMENT MATCHUPS</h2>
-      <p class="matches-desc">Real-time schedule, live stage status, and upcoming fixtures for Vortex Global Season 4</p>
+      <p class="matches-desc">Live stage status and illustrative upcoming fixtures for the next Vortex showcase week</p>
       <div class="match-filter-tabs" role="tablist" aria-label="Filter tournament matches by status">
         <button type="button" class="match-filter-tab active" data-filter="all" role="tab" aria-selected="true" aria-controls="tournament-matches">
           ALL FIXTURES <span class="filter-count">(4)</span>
@@ -390,7 +390,7 @@
       </article>
 
       <!-- Match Card 2: UPCOMING TODAY -->
-      <article class="match-card is-upcoming" data-status="upcoming" aria-label="Upcoming Match: Neon Riders vs Apex Titans">
+      <article class="match-card is-upcoming" data-status="upcoming" data-fixture-day="0" data-start-utc="21:00" data-fixture-id="upper-final" aria-label="Upcoming Match: Neon Riders vs Apex Titans">
         <div class="match-card-top">
           <span class="match-tier-pill">UPPER BRACKET FINAL • BO3</span>
           <span class="badge-status badge-upcoming" aria-label="Status: Upcoming" title="Scheduled Tournament Fixture">
@@ -427,16 +427,17 @@
         <div class="match-card-footer">
           <div class="match-time-info">
             <span class="time-label">SCHEDULED START</span>
-            <span class="time-val"><span class="sched-date">TODAY, OCT 29</span> • <strong class="sched-utc">21:00 UTC</strong> (IN ~2H)</span>
+            <time class="time-val fixture-start">Loading schedule…</time>
+            <span class="match-countdown-badge"><span class="countdown-dot" aria-hidden="true"></span><span class="match-countdown" aria-live="off">Calculating countdown…</span></span>
           </div>
-          <button type="button" class="btn-match-action btn-notify" onclick="alert('Notification set for Neon Riders vs Apex Titans!')" aria-label="Set reminder for Neon Riders vs Apex Titans">
-            🔔 Remind Me
+          <button type="button" class="btn-match-action btn-calendar" aria-label="Add Neon Riders vs Apex Titans to calendar">
+            📅 Add to Calendar
           </button>
         </div>
       </article>
 
       <!-- Match Card 3: UPCOMING TOMORROW -->
-      <article class="match-card is-upcoming" data-status="upcoming" aria-label="Upcoming Match: Vortex Prime vs Phantom Squad">
+      <article class="match-card is-upcoming" data-status="upcoming" data-fixture-day="1" data-start-utc="17:30" data-fixture-id="lower-semis" aria-label="Upcoming Match: Vortex Prime vs Phantom Squad">
         <div class="match-card-top">
           <span class="match-tier-pill">LOWER BRACKET SEMIS • BO3</span>
           <span class="badge-status badge-upcoming" aria-label="Status: Upcoming" title="Scheduled Tournament Fixture">
@@ -473,16 +474,17 @@
         <div class="match-card-footer">
           <div class="match-time-info">
             <span class="time-label">SCHEDULED START</span>
-            <span class="time-val"><span class="sched-date">TOMORROW, OCT 30</span> • <strong class="sched-utc">17:30 UTC</strong></span>
+            <time class="time-val fixture-start">Loading schedule…</time>
+            <span class="match-countdown-badge"><span class="countdown-dot" aria-hidden="true"></span><span class="match-countdown" aria-live="off">Calculating countdown…</span></span>
           </div>
-          <button type="button" class="btn-match-action btn-notify" onclick="alert('Notification set for Vortex Prime vs Phantom Squad!')" aria-label="Set reminder for Vortex Prime vs Phantom Squad">
-            🔔 Remind Me
+          <button type="button" class="btn-match-action btn-calendar" aria-label="Add Vortex Prime vs Phantom Squad to calendar">
+            📅 Add to Calendar
           </button>
         </div>
       </article>
 
       <!-- Match Card 4: UPCOMING FINALS -->
-      <article class="match-card is-upcoming" data-status="upcoming" aria-label="Upcoming Match: Apex Titans vs Neon Riders">
+      <article class="match-card is-upcoming" data-status="upcoming" data-fixture-day="2" data-start-utc="19:00" data-fixture-id="consolation-final" aria-label="Upcoming Match: Apex Titans vs Neon Riders">
         <div class="match-card-top">
           <span class="match-tier-pill">CONSOLATION FINAL • BO3</span>
           <span class="badge-status badge-upcoming" aria-label="Status: Upcoming" title="Scheduled Tournament Fixture">
@@ -519,10 +521,11 @@
         <div class="match-card-footer">
           <div class="match-time-info">
             <span class="time-label">SCHEDULED START</span>
-            <span class="time-val"><span class="sched-date">OCT 31, 2026</span> • <strong class="sched-utc">19:00 UTC</strong></span>
+            <time class="time-val fixture-start">Loading schedule…</time>
+            <span class="match-countdown-badge"><span class="countdown-dot" aria-hidden="true"></span><span class="match-countdown" aria-live="off">Calculating countdown…</span></span>
           </div>
-          <button type="button" class="btn-match-action btn-notify" onclick="alert('Notification set for Apex Titans vs Neon Riders!')" aria-label="Set reminder for Apex Titans vs Neon Riders">
-            🔔 Remind Me
+          <button type="button" class="btn-match-action btn-calendar" aria-label="Add Apex Titans vs Neon Riders to calendar">
+            📅 Add to Calendar
           </button>
         </div>
       </article>
@@ -822,6 +825,7 @@
   <div id="fr-toast-container" class="fr-toast-container" aria-live="polite"></div>
 
   <script src="script.js"></script>
+  <script type="module" src="fixture-calendar.js"></script>
   <script src="bracket.js"></script>
   <!-- ===== BEGIN Issue #196: Live Stream Cinema Modal & Chat Simulator ===== -->
   <div id="twitchStreamBackdrop" class="twitch-stream-backdrop" onclick="closeStreamModal()"></div>
