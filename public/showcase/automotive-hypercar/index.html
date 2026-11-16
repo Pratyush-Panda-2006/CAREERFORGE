@@ -802,6 +802,179 @@
   </section>
   <!-- ===== END Issue #389 ===== -->
 
+  <!-- ===== BEGIN Issue #326: Active Aerodynamic Wing & Spoiler Telemetry Visualizer ===== -->
+  <section class="active-aero-section" id="activeWingTelemetry" aria-labelledby="aeroHeading">
+    <div class="active-aero-header">
+      <span class="aero-badge">AERODYNAMICS // FLUID DYNAMICS TELEMETRY</span>
+      <h2 id="aeroHeading">Active Rear Wing &amp; Angle-of-Attack Telemetry</h2>
+      <p class="aero-lead">
+        Adjust the active dual-element rear wing angle of attack from 0° (DRS low drag) to 45° (Airbrake high downforce). Calculates dynamic downforce loads, drag penalty coefficients (Cd), and simulates airflow streamline vectors.
+      </p>
+    </div>
+
+    <!-- Presets Strip -->
+    <div class="aero-presets-strip" role="group" aria-label="Aerodynamic Mode Presets">
+      <span class="presets-label">Preset Aero Profiles:</span>
+      <button type="button" class="btn-aero-preset" data-angle="0" data-speed="330">🏎️ DRS Low Drag (0° · 330 km/h)</button>
+      <button type="button" class="btn-aero-preset active" data-angle="15" data-speed="240">⚡ Balanced Apex (15° · 240 km/h)</button>
+      <button type="button" class="btn-aero-preset" data-angle="30" data-speed="180">🌪️ High Downforce (30° · 180 km/h)</button>
+      <button type="button" class="btn-aero-preset" data-angle="45" data-speed="210">🛑 Airbrake Deploy (45° · 210 km/h)</button>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <div class="aero-workspace-grid">
+      <!-- Left: Dynamic SVG Airfoil & Streamline Visualizer -->
+      <div class="aero-visualizer-card">
+        <div class="card-head">
+          <span class="head-tag">CFD STREAMLINE SIMULATOR</span>
+          <span class="aero-mode-tag" id="aeroActiveMode">BALANCED APEX</span>
+        </div>
+
+        <div class="svg-airfoil-wrap">
+          <svg id="aeroSvg" class="aero-svg" viewBox="0 0 600 300" aria-label="Rear wing airfoil angle of attack and airflow streamlines">
+            <defs>
+              <linearGradient id="streamlineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.1" />
+                <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#0284c7" stop-opacity="0.2" />
+              </linearGradient>
+              <linearGradient id="downforceArrowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f43f5e" />
+                <stop offset="100%" stop-color="#e11d48" />
+              </linearGradient>
+            </defs>
+
+            <!-- Streamlines (Upper, Chord, Lower) -->
+            <path id="streamline1" class="streamline-path" d="M 20,70 Q 250,65 580,75" fill="none" stroke="url(#streamlineGrad)" stroke-width="2.5" />
+            <path id="streamline2" class="streamline-path" d="M 20,110 Q 250,105 580,120" fill="none" stroke="url(#streamlineGrad)" stroke-width="3" />
+            <path id="streamline3" class="streamline-path" d="M 20,150 Q 250,150 580,170" fill="none" stroke="url(#streamlineGrad)" stroke-width="3.5" />
+            <path id="streamline4" class="streamline-path" d="M 20,190 Q 250,195 580,225" fill="none" stroke="url(#streamlineGrad)" stroke-width="3" />
+            <path id="streamline5" class="streamline-path" d="M 20,230 Q 250,240 580,265" fill="none" stroke="url(#streamlineGrad)" stroke-width="2.5" />
+
+            <!-- Pylon Mount -->
+            <path d="M 285,160 L 295,270 L 315,270 L 320,160 Z" fill="#1e293b" stroke="#334155" stroke-width="2" />
+
+            <!-- Rotating Wing Element Group -->
+            <g id="airfoilWingGroup" transform="translate(300, 150) rotate(15)">
+              <!-- Main Dual Element Airfoil Profile -->
+              <path d="M -110,-12 C -60,-28 60,-22 110,-6 C 115,-3 118,5 110,8 C 60,18 -50,14 -105,4 C -116,1 -116,-8 -110,-12 Z" fill="#0f172a" stroke="#38bdf8" stroke-width="3" />
+              <!-- Endplate -->
+              <rect x="-115" y="-35" width="230" height="70" rx="8" fill="none" stroke="rgba(56, 189, 248, 0.4)" stroke-dasharray="4,4" />
+              <!-- Gurney Flap -->
+              <line x1="110" y1="-6" x2="110" y2="-22" stroke="#f43f5e" stroke-width="4" stroke-linecap="round" />
+            </g>
+
+            <!-- Downforce Vector Arrow -->
+            <g id="downforceVector" transform="translate(300, 160)">
+              <line x1="0" y1="0" x2="0" y2="70" stroke="url(#downforceArrowGrad)" stroke-width="4" stroke-linecap="round" />
+              <polygon points="-8,70 8,70 0,84" fill="#e11d48" />
+              <text x="14" y="55" fill="#f43f5e" font-size="12" font-family="'JetBrains Mono', monospace" font-weight="700">DOWNFORCE</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="aero-summary-strip">
+          <div class="strip-stat">
+            <span class="lbl">AOA ANGLE</span>
+            <strong id="readoutAoa">15.0°</strong>
+          </div>
+          <div class="strip-stat">
+            <span class="lbl">AIRSPEED</span>
+            <strong id="readoutSpeed">240 km/h</strong>
+          </div>
+          <div class="strip-stat">
+            <span class="lbl">FLOW STATUS</span>
+            <strong class="green-text" id="readoutFlowStatus">Attached Laminar</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Sliders & Telemetry KPI Dashboard -->
+      <div class="aero-controls-card">
+        <div class="card-head">
+          <span class="head-tag">TELEMETRY &amp; GAUGES</span>
+          <button type="button" class="btn-copy-aero" id="btnCopyAero">📋 Copy Specs</button>
+        </div>
+
+        <!-- Sliders -->
+        <div class="aero-sliders-group">
+          <div class="aero-field">
+            <div class="field-label-row">
+              <label for="wingAngleSlider">Rear Wing Angle of Attack (AoA)</label>
+              <strong id="wingAngleVal">15°</strong>
+            </div>
+            <input type="range" id="wingAngleSlider" class="aero-slider" min="0" max="45" step="1" value="15" />
+            <div class="slider-scale">
+              <span>0° (DRS)</span>
+              <span>15° (Balanced)</span>
+              <span>30° (High)</span>
+              <span>45° (Airbrake)</span>
+            </div>
+          </div>
+
+          <div class="aero-field">
+            <div class="field-label-row">
+              <label for="wingSpeedSlider">Vehicle Ground Velocity</label>
+              <strong id="wingSpeedVal">240 km/h</strong>
+            </div>
+            <input type="range" id="wingSpeedSlider" class="aero-slider" min="80" max="360" step="5" value="240" />
+            <div class="slider-scale">
+              <span>80 km/h</span>
+              <span>200 km/h</span>
+              <span>360 km/h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="aero-kpi-grid">
+          <div class="kpi-cell highlight-rose">
+            <span class="kpi-lbl">AERODYNAMIC DOWNFORCE</span>
+            <div class="kpi-val-row">
+              <span class="kpi-num" id="kpiDownforceKg">482</span>
+              <span class="kpi-unit">kg</span>
+            </div>
+            <small class="kpi-sub" id="kpiDownforceN">4,728 N vertical load</small>
+          </div>
+
+          <div class="kpi-cell highlight-amber">
+            <span class="kpi-lbl">TOTAL DRAG COEFFICIENT</span>
+            <div class="kpi-val-row">
+              <span class="kpi-num" id="kpiCd">0.38</span>
+              <span class="kpi-unit">Cd</span>
+            </div>
+            <small class="kpi-sub" id="kpiDragPenalty">+22.6% over DRS</small>
+          </div>
+
+          <div class="kpi-cell">
+            <span class="kpi-lbl">AERODYNAMIC DRAG FORCE</span>
+            <div class="kpi-val-row">
+              <span class="kpi-num" id="kpiDragN">1,894</span>
+              <span class="kpi-unit">N</span>
+            </div>
+            <small class="kpi-sub" id="kpiDragPower">126 kW power absorbed</small>
+          </div>
+
+          <div class="kpi-cell highlight-cyan">
+            <span class="kpi-lbl">CORNERING GRIP MULTIPLIER</span>
+            <div class="kpi-val-row">
+              <span class="kpi-num" id="kpiGripMultiplier">1.46</span>
+              <span class="kpi-unit">G</span>
+            </div>
+            <small class="kpi-sub" id="kpiGripSub">+0.38G tire normal load</small>
+          </div>
+        </div>
+
+        <!-- Airbrake & DRS Quick Action Triggers -->
+        <div class="aero-quick-triggers">
+          <button type="button" class="btn-quick-trigger btn-drs" id="btnDeployDrs">⚡ Deploy DRS</button>
+          <button type="button" class="btn-quick-trigger btn-airbrake" id="btnDeployAirbrake">🛑 Snap Airbrake</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #326 ===== -->
+
   <section id="lap-simulator" class="lap-panel" aria-labelledby="lap-title">
     <div class="lap-eyebrow">APEX / SIMULATION LAB</div>
     <h2 id="lap-title">Circuit lap simulator</h2>
