@@ -548,6 +548,7 @@ function initTtsStudio() {
 
   const textEl = document.getElementById('tts-text');
   const countEl = document.getElementById('tts-count');
+  const durationEl = document.getElementById('tts-duration');
   const voiceEl = document.getElementById('tts-voice');
   const voiceNote = document.getElementById('tts-voice-note');
   const rateEl = document.getElementById('tts-rate');
@@ -569,7 +570,15 @@ function initTtsStudio() {
     pitchOut.textContent = Number(pitchEl.value).toFixed(1);
   }
   function updateCount() {
-    countEl.textContent = textEl.value.length + ' / ' + textEl.maxLength;
+    const text = textEl.value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const seconds = words ? Math.max(1, Math.round(words * 60 / 150)) : 0;
+    const duration = seconds < 60
+      ? seconds + ' sec'
+      : Math.floor(seconds / 60) + ' min ' + (seconds % 60) + ' sec';
+    countEl.textContent = text.length + ' chars / ' + textEl.maxLength;
+    durationEl.textContent = '~' + duration + ' spoken';
+    countEl.classList.toggle('near-limit', text.length >= 900);
   }
   rateEl.addEventListener('input', updateReadouts);
   pitchEl.addEventListener('input', updateReadouts);
