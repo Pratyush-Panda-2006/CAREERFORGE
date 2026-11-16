@@ -458,6 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize
   calculateMortgage();
+  initInvestmentCalculator();
   console.log('Vanguard Real Estate Mortgage Calculator Engine loaded');
 });
 
@@ -1850,7 +1851,9 @@ window.calculateMeasurement = calculateMeasurement;
       }
     });
 
-    window.addEventListener('resize', updateView);
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+      window.addEventListener('resize', updateView);
+    }
   }
 
   window.openVrTourModal = openModal;
@@ -1864,3 +1867,232 @@ window.calculateMeasurement = calculateMeasurement;
   }
 })();
 /* ===== END Issue #419: 360° Virtual Reality Panoramic Room Viewer Modal ===== */
+
+
+// ==========================================================================
+// Issue #356: Interactive Property Investment ROI & Cap Rate Calculator
+// ==========================================================================
+function initInvestmentCalculator() {
+  const section = document.getElementById('investment-calculator');
+  if (!section) return;
+
+  const priceInput = document.getElementById('roiPriceInput');
+  const rentInput = document.getElementById('roiMonthlyRentInput');
+  const mgmtSlider = document.getElementById('roiMgmtSlider');
+  const vacancySlider = document.getElementById('roiVacancySlider');
+  const taxInsSlider = document.getElementById('roiTaxInsSlider');
+  const downPaymentSlider = document.getElementById('roiDownPaymentSlider');
+
+  const priceBadge = document.getElementById('roiPriceBadge');
+  const rentBadge = document.getElementById('roiRentBadge');
+  const mgmtBadge = document.getElementById('roiMgmtBadge');
+  const vacancyBadge = document.getElementById('roiVacancyBadge');
+  const taxInsBadge = document.getElementById('roiTaxInsBadge');
+  const downPaymentBadge = document.getElementById('roiDownPaymentBadge');
+
+  const kpiCapRate = document.getElementById('kpiCapRate');
+  const kpiGradeBadge = document.getElementById('kpiGradeBadge');
+  const kpiGrossYield = document.getElementById('kpiGrossYield');
+  const kpiAnnualGrossRent = document.getElementById('kpiAnnualGrossRent');
+  const kpiNoi = document.getElementById('kpiNoi');
+  const kpiMonthlyNoi = document.getElementById('kpiMonthlyNoi');
+  const kpiCashOnCash = document.getElementById('kpiCashOnCash');
+  const kpiNetCashFlow = document.getElementById('kpiNetCashFlow');
+
+  const rowGrossRent = document.getElementById('rowGrossRent');
+  const rowVacancy = document.getElementById('rowVacancy');
+  const rowEgi = document.getElementById('rowEgi');
+  const rowMgmt = document.getElementById('rowMgmt');
+  const rowTaxIns = document.getElementById('rowTaxIns');
+  const rowReserves = document.getElementById('rowReserves');
+  const rowNoi = document.getElementById('rowNoi');
+  const rowDebtService = document.getElementById('rowDebtService');
+  const rowNetCashFlow = document.getElementById('rowNetCashFlow');
+
+  const chips = [
+    document.getElementById('roiChipMalibu'),
+    document.getElementById('roiChipTribeca'),
+    document.getElementById('roiChipAspen')
+  ];
+
+  const btnCopyMemo = document.getElementById('btnCopyRoiMemo');
+  const btnDownloadJson = document.getElementById('btnDownloadRoiJson');
+  const toast = document.getElementById('roiToast');
+
+  function showToast(msg) {
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  function fmtCurr(val) {
+    return '$' + Math.round(val).toLocaleString('en-US');
+  }
+
+  function recalculate() {
+    const price = Math.max(100000, parseFloat(priceInput ? priceInput.value : '14500000') || 14500000);
+    const rent = Math.max(1000, parseFloat(rentInput ? rentInput.value : '68000') || 68000);
+    const mgmtRate = parseFloat(mgmtSlider ? mgmtSlider.value : '8') / 100;
+    const vacancyRate = parseFloat(vacancySlider ? vacancySlider.value : '5') / 100;
+    const taxInsRate = parseFloat(taxInsSlider ? taxInsSlider.value : '1.2') / 100;
+    const downPaymentPercent = parseFloat(downPaymentSlider ? downPaymentSlider.value : '35') / 100;
+
+    // Badges
+    if (priceBadge) priceBadge.textContent = fmtCurr(price);
+    if (rentBadge) rentBadge.textContent = `${fmtCurr(rent)} / mo`;
+    if (mgmtBadge) mgmtBadge.textContent = `${(mgmtRate * 100).toFixed(1)}%`;
+    if (vacancyBadge) vacancyBadge.textContent = `${(vacancyRate * 100).toFixed(1)}%`;
+    if (taxInsBadge) taxInsBadge.textContent = `${(taxInsRate * 100).toFixed(1)}%`;
+    if (downPaymentBadge) {
+      downPaymentBadge.textContent = `${Math.round(downPaymentPercent * 100)}% (${fmtCurr(price * downPaymentPercent)})`;
+    }
+
+    // Calculations
+    const annualGrossRent = rent * 12;
+    const vacancyLoss = annualGrossRent * vacancyRate;
+    const egi = annualGrossRent - vacancyLoss;
+
+    const mgmtFee = egi * mgmtRate;
+    const taxInsFee = price * taxInsRate;
+    const reservesFee = price * 0.004;
+    const totalOpex = mgmtFee + taxInsFee + reservesFee;
+
+    const noi = egi - totalOpex;
+    const capRate = (noi / price) * 100;
+    const grossYield = (annualGrossRent / price) * 100;
+
+    // Debt service (6.25% interest, 30 years)
+    const downPayment = price * downPaymentPercent;
+    const loanAmount = Math.max(0, price - downPayment);
+    let annualDebtService = 0;
+
+    if (loanAmount > 0) {
+      const monthlyRate = 0.0625 / 12;
+      const numPayments = 360;
+      const monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+      annualDebtService = monthlyPayment * 12;
+    }
+
+    const netCashFlow = noi - annualDebtService;
+    const cashOnCash = downPayment > 0 ? (netCashFlow / downPayment) * 100 : 0;
+
+    // Update KPI Displays
+    if (kpiCapRate) kpiCapRate.textContent = `${capRate.toFixed(2)}%`;
+    if (kpiGrossYield) kpiGrossYield.textContent = `${grossYield.toFixed(2)}%`;
+    if (kpiAnnualGrossRent) kpiAnnualGrossRent.textContent = `${fmtCurr(annualGrossRent)} / yr`;
+    if (kpiNoi) kpiNoi.textContent = fmtCurr(noi);
+    if (kpiMonthlyNoi) kpiMonthlyNoi.textContent = `${fmtCurr(noi / 12)} / mo`;
+    if (kpiCashOnCash) kpiCashOnCash.textContent = `${cashOnCash.toFixed(2)}%`;
+    if (kpiNetCashFlow) kpiNetCashFlow.textContent = `Pre-Tax: ${fmtCurr(netCashFlow)}/yr`;
+
+    // Investment Grade Badge
+    if (kpiGradeBadge) {
+      if (capRate >= 6.0) {
+        kpiGradeBadge.className = 'investment-grade-badge high-yield';
+        kpiGradeBadge.textContent = '🌟 High Yield Opportunity';
+      } else if (capRate >= 4.5) {
+        kpiGradeBadge.className = 'investment-grade-badge';
+        kpiGradeBadge.textContent = '💎 Prime Trophy Asset';
+      } else {
+        kpiGradeBadge.className = 'investment-grade-badge preservation';
+        kpiGradeBadge.textContent = '🏛️ Ultra-Luxe Capital Preservation';
+      }
+    }
+
+    // Statement Rows
+    if (rowGrossRent) rowGrossRent.textContent = fmtCurr(annualGrossRent);
+    if (rowVacancy) rowVacancy.textContent = `-${fmtCurr(vacancyLoss)}`;
+    if (rowEgi) rowEgi.textContent = fmtCurr(egi);
+    if (rowMgmt) rowMgmt.textContent = `-${fmtCurr(mgmtFee)}`;
+    if (rowTaxIns) rowTaxIns.textContent = `-${fmtCurr(taxInsFee)}`;
+    if (rowReserves) rowReserves.textContent = `-${fmtCurr(reservesFee)}`;
+    if (rowNoi) rowNoi.textContent = fmtCurr(noi);
+    if (rowDebtService) rowDebtService.textContent = `-${fmtCurr(annualDebtService)}`;
+    if (rowNetCashFlow) rowNetCashFlow.textContent = `${fmtCurr(netCashFlow)} / yr`;
+  }
+
+  // Bind inputs
+  [priceInput, rentInput].forEach(inp => {
+    if (inp) inp.addEventListener('input', () => {
+      chips.forEach(c => c && c.classList.remove('active'));
+      recalculate();
+    });
+  });
+
+  [mgmtSlider, vacancySlider, taxInsSlider, downPaymentSlider].forEach(slider => {
+    if (slider) slider.addEventListener('input', recalculate);
+  });
+
+  // Preset Chips
+  chips.forEach(chip => {
+    if (chip) {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c && c.classList.remove('active'));
+        chip.classList.add('active');
+        if (priceInput) priceInput.value = chip.dataset.price;
+        if (rentInput) rentInput.value = chip.dataset.rent;
+        if (mgmtSlider) mgmtSlider.value = chip.dataset.mgmt;
+        if (vacancySlider) vacancySlider.value = chip.dataset.vacancy;
+        recalculate();
+        showToast(`Loaded ${chip.textContent.trim().split('(')[0].trim()} financials`);
+      });
+    }
+  });
+
+  // Actions
+  if (btnCopyMemo) {
+    btnCopyMemo.addEventListener('click', () => {
+      const summaryText = [
+        `=== VANGUARD LUXURY REAL ESTATE // INVESTMENT MEMO ===`,
+        `Acquisition Price: ${priceBadge ? priceBadge.textContent : '$14.5M'}`,
+        `Monthly Rent: ${rentBadge ? rentBadge.textContent : '$68,000/mo'}`,
+        `Capitalization Rate (Cap Rate): ${kpiCapRate ? kpiCapRate.textContent : '5.12%'}`,
+        `Investment Grade: ${kpiGradeBadge ? kpiGradeBadge.textContent : 'Prime'}`,
+        `Gross Rental Yield: ${kpiGrossYield ? kpiGrossYield.textContent : '5.63%'}`,
+        `Net Operating Income (NOI): ${kpiNoi ? kpiNoi.textContent : '$742k'} / yr`,
+        `Cash-on-Cash Return: ${kpiCashOnCash ? kpiCashOnCash.textContent : '6.84%'}`,
+        `Generated: ${new Date().toISOString()}`
+      ].join('\n');
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(summaryText);
+      }
+      showToast('Investment underwriting memo copied to clipboard!');
+    });
+  }
+
+  if (btnDownloadJson) {
+    btnDownloadJson.addEventListener('click', () => {
+      const p = parseFloat(priceInput ? priceInput.value : '14500000') || 14500000;
+      const r = parseFloat(rentInput ? rentInput.value : '68000') || 68000;
+      const data = {
+        memoTitle: 'Vanguard Luxury Estate Investment Underwriting Report',
+        timestamp: new Date().toISOString(),
+        purchasePrice: p,
+        monthlyGrossRent: r,
+        annualGrossScheduledRent: r * 12,
+        capRate: kpiCapRate ? kpiCapRate.textContent : '5.12%',
+        investmentTier: kpiGradeBadge ? kpiGradeBadge.textContent : 'Prime Trophy Asset',
+        grossRentalYield: kpiGrossYield ? kpiGrossYield.textContent : '5.63%',
+        netOperatingIncome: kpiNoi ? kpiNoi.textContent : '$742,400',
+        cashOnCashReturn: kpiCashOnCash ? kpiCashOnCash.textContent : '6.84%',
+        preTaxCashFlow: rowNetCashFlow ? rowNetCashFlow.textContent : '$82,944'
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `investment-underwriting-${p}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      showToast('Exported underwriting brief JSON!');
+    });
+  }
+
+  // Initial calculation
+  recalculate();
+}

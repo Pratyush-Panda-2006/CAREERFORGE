@@ -351,6 +351,27 @@
     </div>
     <!-- ===== END Issue #405 Toolbar ===== -->
 
+    <div class="vm-live-panel" role="region" aria-label="Live venue map controls">
+      <div class="vm-live-layer-controls" role="group" aria-label="Map overlays">
+        <button type="button" class="vm-layer-btn" id="vm-crowd-toggle" aria-pressed="true">Crowd heatmap: on</button>
+        <button type="button" class="vm-layer-btn" id="vm-sound-toggle" aria-pressed="true">Sound contours: on</button>
+      </div>
+      <div class="vm-live-route-controls">
+        <button type="button" class="vm-layer-btn" id="vm-set-location" aria-pressed="false">Set my location</button>
+        <label class="vm-route-label" for="vm-route-target">Navigate to
+          <select id="vm-route-target">
+            <option value="exit">Main Gate (Exit)</option>
+            <option value="medical">Medical Tent / Info Hub</option>
+          </select>
+        </label>
+        <button type="button" class="vm-layer-btn" id="vm-find-route" disabled>Find route</button>
+        <button type="button" class="vm-layer-btn" id="vm-clear-route" disabled>Clear route</button>
+      </div>
+      <p class="vm-live-caption">Crowd counts and stage decibels are simulated for this demo, not live sensor readings.</p>
+      <p class="vm-live-readout" id="vm-crowd-summary">Crowd simulation starting…</p>
+      <p class="vm-live-status" id="vm-live-status" role="status" aria-live="polite">Set your location, then choose an exit or the medical tent for a walking route.</p>
+    </div>
+
     <div class="vm-frame" id="vm-frame">
       <div class="vm-map" id="vm-map">
         <svg class="vm-svg" viewBox="0 0 800 480" aria-hidden="true" focusable="false">
@@ -371,6 +392,8 @@
             <path d="M445 250 H585" />
             <path d="M400 290 Q400 380 540 392" />
             <path d="M400 330 Q400 392 262 392" />
+            <path d="M215 250 H85 V440 H400" />
+            <path d="M585 250 H715 V440 H400" />
           </g>
           <circle cx="400" cy="250" r="46" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.18)" stroke-width="2" />
           <text class="vm-svg-label" x="400" y="248" text-anchor="middle">INFO</text>
@@ -415,6 +438,7 @@
             <text class="vm-svg-label" x="400" y="462" text-anchor="middle">MAIN GATE</text>
           </g>
         </svg>
+        <canvas class="vm-live-canvas" id="vm-live-canvas" aria-hidden="true"></canvas>
 
         <button type="button" class="vm-pin" data-stage="main-stage" style="left:50%;top:27%" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover">
           <span class="vm-pin-num" aria-hidden="true">1</span>
@@ -955,6 +979,37 @@
     </div>
   </section>
 
+  <section class="stage-console" id="stage-lighting" aria-labelledby="stage-title">
+    <p class="stage-kicker">PULSE WAVE // LIGHTING LAB</p>
+    <h2 id="stage-title">BUILD THE LIGHT SHOW</h2>
+    <p>Conduct six moving heads and a laser fan on a perspective stage. This local visual simulator uses a BPM clock, not live audio or physical DMX equipment.</p>
+    <div class="stage-workspace">
+      <div class="stage-preview">
+        <canvas width="1000" height="520" role="img" aria-label="Perspective stage with six tempo-driven moving spotlights and optional laser sweeps">Canvas lighting preview requires browser graphics support.</canvas>
+        <div class="stage-buttons"><button type="button" id="stage-play" aria-pressed="true">Pause lighting</button><button type="button" id="stage-reset">Restart sequence</button></div>
+        <p id="stage-status" role="status"></p>
+      </div>
+      <fieldset class="stage-faders"><legend>DMX-style console</legend>
+        <label for="stage-bpm">Tempo <output data-stage-value="bpm" for="stage-bpm">120</output> BPM</label>
+        <input id="stage-bpm" data-stage-control="bpm" type="range" min="60" max="180" value="120">
+        <label for="stage-hue">Base hue <output data-stage-value="hue" for="stage-hue">285</output>°</label>
+        <input id="stage-hue" data-stage-control="hue" type="range" min="0" max="360" value="285">
+        <label for="stage-intensity">Master dimmer <output data-stage-value="intensity" for="stage-intensity">65</output>%</label>
+        <input id="stage-intensity" data-stage-control="intensity" type="range" min="0" max="100" value="65">
+        <label for="stage-sweep">Pan spread <output data-stage-value="sweep" for="stage-sweep">55</output>°</label>
+        <input id="stage-sweep" data-stage-control="sweep" type="range" min="10" max="80" value="55">
+        <label for="stage-pattern">Sequence</label>
+        <select id="stage-pattern" data-stage-control="pattern"><option value="sweep">Rotating sweep</option><option value="chase">Beat chase</option><option value="fan">Symmetric fan</option></select>
+        <label class="stage-check"><input type="checkbox" data-stage-control="lasers"> Laser sweeps</label>
+        <label class="stage-check"><input type="checkbox" data-stage-control="pulse"> Strobe modulation (up to 2 Hz)</label>
+        <small>Strobe is off initially and only dims individual fixtures. Reduced motion keeps a static preview; controls remain usable.</small>
+      </fieldset>
+    </div>
+    <details class="stage-channel-map"><summary>Inspect simulated DMX channels</summary><p>Per head: pan · tilt · hue · dimmer · laser · strobe (0–255). Illustrative mapping, no data is transmitted.</p><pre id="stage-dmx" aria-label="Simulated DMX channel values"></pre></details>
+  </section>
+  <script type="module" src="stage-lighting.js"></script>
+
   <script src="script.js"></script>
+  <script type="module" src="festival-map.js"></script>
 </body>
 </html>

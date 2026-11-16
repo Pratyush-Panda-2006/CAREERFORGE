@@ -2841,3 +2841,322 @@ func main() {
   }
 })();
 /* ===== END Issue #399: Multi-Language Code Snippet Converter ===== */
+
+/* ==========================================================================
+   Issue #336: Interactive Webhook Simulator & HMAC Signature Playground
+   ========================================================================== */
+(function() {
+  'use strict';
+
+  const EVENT_PAYLOADS = {
+    'user.created': {
+      event: 'user.created',
+      id: 'evt_usr_902f81ab4c',
+      created_at: 1731713400,
+      api_version: '2026-10-01',
+      data: {
+        user_id: 'usr_99812401',
+        email: 'alex.chen@prisma-enterprise.io',
+        full_name: 'Alex Chen',
+        role: 'workspace_admin',
+        organization: 'Nexus AI Labs',
+        tier: 'enterprise_scale',
+        mfa_enabled: true
+      }
+    },
+    'invoice.paid': {
+      event: 'invoice.paid',
+      id: 'evt_inv_341908bc12',
+      created_at: 1731713400,
+      api_version: '2026-10-01',
+      data: {
+        invoice_id: 'inv_2026_1109',
+        customer_id: 'cus_88712390',
+        amount_cents: 284000,
+        currency: 'usd',
+        status: 'settled',
+        billing_reason: 'monthly_subscription_cycle',
+        hosted_invoice_url: 'https://billing.prisma.io/inv_2026_1109',
+        payment_method: 'card_visa_4242'
+      }
+    },
+    'payment.failed': {
+      event: 'payment.failed',
+      id: 'evt_pay_772109df33',
+      created_at: 1731713400,
+      api_version: '2026-10-01',
+      data: {
+        charge_id: 'ch_5590213',
+        customer_id: 'cus_88712390',
+        amount_cents: 284000,
+        currency: 'usd',
+        attempt_count: 2,
+        decline_code: 'insufficient_funds',
+        error_message: 'Card issuer declined transaction: insufficient balance.',
+        next_retry_at: 1731799800
+      }
+    },
+    'deployment.succeeded': {
+      event: 'deployment.succeeded',
+      id: 'evt_dep_112098ea45',
+      created_at: 1731713400,
+      api_version: '2026-10-01',
+      data: {
+        pipeline_id: 'pipe_us_east_44',
+        commit_sha: '72f9d1f8e9',
+        environment: 'production',
+        active_replicas: 16,
+        edge_regions: ['iad1', 'fra1', 'sin1'],
+        health_check: 'all_green',
+        deploy_duration_ms: 4120
+      }
+    },
+    'refund.processed': {
+      event: 'refund.processed',
+      id: 'evt_ref_661908fe99',
+      created_at: 1731713400,
+      api_version: '2026-10-01',
+      data: {
+        refund_id: 'ref_9042189',
+        charge_id: 'ch_5590213',
+        amount_refunded_cents: 12500,
+        currency: 'usd',
+        reason: 'customer_requested',
+        acquirer_reference_number: 'arn_9921389012'
+      }
+    }
+  };
+
+  async function computeHmacSha256(secret, message) {
+    try {
+      if (window.crypto && window.crypto.subtle) {
+        const enc = new TextEncoder();
+        const key = await window.crypto.subtle.importKey(
+          'raw',
+          enc.encode(secret),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['sign']
+        );
+        const sig = await window.crypto.subtle.sign('HMAC', key, enc.encode(message));
+        const hashArray = Array.from(new Uint8Array(sig));
+        return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+      }
+    } catch {
+      // Fallback below
+    }
+
+    // Deterministic fallback signature
+    let hash = 0;
+    const combined = secret + '::' + message;
+    for (let i = 0; i < combined.length; i++) {
+      hash = ((hash << 5) - hash) + combined.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).padStart(16, '0') + 'c9b4e18d6a7f23053d10abfe781290cf';
+  }
+
+  function randomSecret() {
+    if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.getRandomValues === 'function') {
+      const arr = new Uint8Array(16);
+      window.crypto.getRandomValues(arr);
+      return 'whsec_' + Array.from(arr).map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+    return 'whsec_8f9c2a4e1b7d5093e6c0b38a71d4f29e';
+  }
+
+  function generateDeliveryId() {
+    if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.getRandomValues === 'function') {
+      const arr = new Uint8Array(8);
+      window.crypto.getRandomValues(arr);
+      return 'del_' + Array.from(arr).map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+    return 'del_902fa1bc8834ef10';
+  }
+
+  function initWebhookSimulator() {
+    const root = document.getElementById('webhook-simulator');
+    if (!root) return;
+
+    const eventSelect = document.getElementById('webhookEventSelect');
+    const endpointInput = document.getElementById('webhookEndpointInput');
+    const secretInput = document.getElementById('webhookSecretInput');
+    const btnRegenSecret = document.getElementById('btnRegenSecret');
+
+    const tabBtnHeaders = document.getElementById('tabBtnHeaders');
+    const tabBtnPayload = document.getElementById('tabBtnPayload');
+    const viewHeaders = document.getElementById('viewHeaders');
+    const viewPayload = document.getElementById('viewPayload');
+
+    const codeHeadersDisplay = document.getElementById('codeHeadersDisplay');
+    const codePayloadDisplay = document.getElementById('codePayloadDisplay');
+
+    const btnCopy = document.getElementById('btnCopyWebhookData');
+    const copyLabel = document.getElementById('copyWebhookLabel');
+    const btnDispatch = document.getElementById('btnDispatchWebhook');
+    const deliveryStatus = document.getElementById('simDeliveryStatus');
+    const responsePanel = document.getElementById('simResponsePanel');
+    const responseAckDisplay = document.getElementById('responseAckDisplay');
+    const toast = document.getElementById('snippetToast');
+
+    if (!codeHeadersDisplay || !codePayloadDisplay) return;
+
+    let activeTab = 'headers';
+    let currentRawHeaders = '';
+    let currentRawPayload = '';
+
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // Tab switching
+    function switchTab(tabKey) {
+      activeTab = tabKey;
+      if (tabBtnHeaders) {
+        tabBtnHeaders.classList.toggle('active', tabKey === 'headers');
+        tabBtnHeaders.setAttribute('aria-selected', tabKey === 'headers' ? 'true' : 'false');
+      }
+      if (tabBtnPayload) {
+        tabBtnPayload.classList.toggle('active', tabKey === 'payload');
+        tabBtnPayload.setAttribute('aria-selected', tabKey === 'payload' ? 'true' : 'false');
+      }
+      if (viewHeaders) viewHeaders.hidden = (tabKey !== 'headers');
+      if (viewPayload) viewPayload.hidden = (tabKey !== 'payload');
+
+      if (copyLabel) {
+        copyLabel.textContent = tabKey === 'headers' ? 'Copy Headers' : 'Copy Payload';
+      }
+    }
+
+    if (tabBtnHeaders) tabBtnHeaders.addEventListener('click', () => switchTab('headers'));
+    if (tabBtnPayload) tabBtnPayload.addEventListener('click', () => switchTab('payload'));
+
+    // Regenerate secret
+    if (btnRegenSecret && secretInput) {
+      btnRegenSecret.addEventListener('click', () => {
+        secretInput.value = randomSecret();
+        updateSimulation();
+      });
+    }
+
+    // Input listeners
+    if (eventSelect) eventSelect.addEventListener('change', updateSimulation);
+    if (endpointInput) endpointInput.addEventListener('input', updateSimulation);
+    if (secretInput) secretInput.addEventListener('input', updateSimulation);
+
+    // Copy action
+    if (btnCopy) {
+      btnCopy.addEventListener('click', async () => {
+        const textToCopy = activeTab === 'headers' ? currentRawHeaders : currentRawPayload;
+        try {
+          await navigator.clipboard.writeText(textToCopy);
+          showToast(`✓ Copied ${activeTab === 'headers' ? 'HTTP Headers' : 'JSON Payload'} to clipboard!`);
+        } catch {
+          showToast('✓ Copied to clipboard!');
+        }
+      });
+    }
+
+    // Mock Delivery Dispatch
+    if (btnDispatch) {
+      btnDispatch.addEventListener('click', async () => {
+        btnDispatch.disabled = true;
+        btnDispatch.textContent = '⏳ Dispatching Webhook POST...';
+
+        if (deliveryStatus) {
+          deliveryStatus.hidden = false;
+          deliveryStatus.className = 'sim-delivery-status pending';
+          deliveryStatus.textContent = 'Executing mock HTTP request...';
+        }
+
+        // Simulate realistic network latency
+        const latency = 142;
+        await new Promise((r) => setTimeout(r, latency));
+
+        const eventKey = eventSelect ? eventSelect.value : 'user.created';
+        const payloadObj = EVENT_PAYLOADS[eventKey] || EVENT_PAYLOADS['user.created'];
+        const endpoint = endpointInput ? endpointInput.value : 'https://api.merchant.io/v1/webhooks/listener';
+
+        if (deliveryStatus) {
+          deliveryStatus.className = 'sim-delivery-status success';
+          deliveryStatus.textContent = `✓ Delivered HTTP 200 OK (${latency}ms)`;
+        }
+
+        if (responsePanel && responseAckDisplay) {
+          responsePanel.hidden = false;
+          const ackObj = {
+            status: 'success',
+            received_at: new Date().toISOString(),
+            target_endpoint: endpoint,
+            event: payloadObj.event,
+            event_id: payloadObj.id,
+            signature_verified: true,
+            bytes_received: currentRawPayload.length,
+            message: 'Webhook payload received, HMAC-SHA256 validated, and queued for asynchronous background workers.'
+          };
+          responseAckDisplay.textContent = JSON.stringify(ackObj, null, 2);
+        }
+
+        btnDispatch.disabled = false;
+        btnDispatch.textContent = '🚀 Test Mock Webhook Delivery';
+      });
+    }
+
+    async function updateSimulation() {
+      const eventKey = eventSelect ? eventSelect.value : 'user.created';
+      const endpoint = endpointInput ? endpointInput.value.trim() : 'https://api.merchant.io/v1/webhooks/listener';
+      const secret = secretInput ? secretInput.value.trim() : 'whsec_8f9c2a4e1b7d5093e6c0b38a71d4f29e';
+
+      const payloadObj = EVENT_PAYLOADS[eventKey] || EVENT_PAYLOADS['user.created'];
+      const timestamp = Math.floor(Date.now() / 1000);
+      const deliveryId = generateDeliveryId();
+
+      const payloadJson = JSON.stringify(payloadObj, null, 2);
+      currentRawPayload = payloadJson;
+
+      // HMAC payload signature string: "t=<timestamp>.<payloadJson>"
+      const signaturePayload = `${timestamp}.${payloadJson}`;
+      const hmacHex = await computeHmacSha256(secret, signaturePayload);
+
+      let host = 'api.merchant.io';
+      try {
+        const u = new URL(endpoint);
+        host = u.host;
+      } catch {
+        // Fallback
+      }
+
+      const headersText = [
+        `POST /v1/webhooks/listener HTTP/1.1`,
+        `Host: ${host}`,
+        `Content-Type: application/json; charset=utf-8`,
+        `User-Agent: Nexus-Webhooks/2.4.0 (+https://docs.prisma.io/webhooks)`,
+        `X-Nexus-Event: ${payloadObj.event}`,
+        `X-Nexus-Delivery: ${deliveryId}`,
+        `X-Nexus-Timestamp: ${timestamp}`,
+        `X-Nexus-Signature-256: t=${timestamp},v1=${hmacHex}`,
+        `Content-Length: ${new TextEncoder().encode(payloadJson).length}`
+      ].join('\n');
+
+      currentRawHeaders = headersText;
+
+      codeHeadersDisplay.textContent = headersText;
+      codePayloadDisplay.textContent = payloadJson;
+    }
+
+    // Initial run
+    updateSimulation();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWebhookSimulator);
+  } else {
+    initWebhookSimulator();
+  }
+})();
+
