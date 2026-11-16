@@ -351,6 +351,27 @@
     </div>
     <!-- ===== END Issue #405 Toolbar ===== -->
 
+    <div class="vm-live-panel" role="region" aria-label="Live venue map controls">
+      <div class="vm-live-layer-controls" role="group" aria-label="Map overlays">
+        <button type="button" class="vm-layer-btn" id="vm-crowd-toggle" aria-pressed="true">Crowd heatmap: on</button>
+        <button type="button" class="vm-layer-btn" id="vm-sound-toggle" aria-pressed="true">Sound contours: on</button>
+      </div>
+      <div class="vm-live-route-controls">
+        <button type="button" class="vm-layer-btn" id="vm-set-location" aria-pressed="false">Set my location</button>
+        <label class="vm-route-label" for="vm-route-target">Navigate to
+          <select id="vm-route-target">
+            <option value="exit">Main Gate (Exit)</option>
+            <option value="medical">Medical Tent / Info Hub</option>
+          </select>
+        </label>
+        <button type="button" class="vm-layer-btn" id="vm-find-route" disabled>Find route</button>
+        <button type="button" class="vm-layer-btn" id="vm-clear-route" disabled>Clear route</button>
+      </div>
+      <p class="vm-live-caption">Crowd counts and stage decibels are simulated for this demo, not live sensor readings.</p>
+      <p class="vm-live-readout" id="vm-crowd-summary">Crowd simulation starting…</p>
+      <p class="vm-live-status" id="vm-live-status" role="status" aria-live="polite">Set your location, then choose an exit or the medical tent for a walking route.</p>
+    </div>
+
     <div class="vm-frame" id="vm-frame">
       <div class="vm-map" id="vm-map">
         <svg class="vm-svg" viewBox="0 0 800 480" aria-hidden="true" focusable="false">
@@ -371,6 +392,8 @@
             <path d="M445 250 H585" />
             <path d="M400 290 Q400 380 540 392" />
             <path d="M400 330 Q400 392 262 392" />
+            <path d="M215 250 H85 V440 H400" />
+            <path d="M585 250 H715 V440 H400" />
           </g>
           <circle cx="400" cy="250" r="46" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.18)" stroke-width="2" />
           <text class="vm-svg-label" x="400" y="248" text-anchor="middle">INFO</text>
@@ -415,6 +438,7 @@
             <text class="vm-svg-label" x="400" y="462" text-anchor="middle">MAIN GATE</text>
           </g>
         </svg>
+        <canvas class="vm-live-canvas" id="vm-live-canvas" aria-hidden="true"></canvas>
 
         <button type="button" class="vm-pin" data-stage="main-stage" style="left:50%;top:27%" aria-haspopup="dialog" aria-expanded="false" aria-controls="vm-popover">
           <span class="vm-pin-num" aria-hidden="true">1</span>
@@ -986,5 +1010,6 @@
   <script type="module" src="stage-lighting.js"></script>
 
   <script src="script.js"></script>
+  <script type="module" src="festival-map.js"></script>
 </body>
 </html>
