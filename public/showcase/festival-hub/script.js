@@ -1840,3 +1840,45 @@ function initMeetupLocator() {
 }
 
 
+
+// Festival attendee FAQ: category and keyword filters keep the disclosure
+// controls native buttons, so keyboard users can expand every visible answer.
+(function initFestivalFaq() {
+  const search = document.getElementById('faq-search');
+  if (!search) return;
+  const filters = Array.from(document.querySelectorAll('[data-faq-filter]'));
+  const items = Array.from(document.querySelectorAll('.faq-item'));
+  const results = document.getElementById('faq-results');
+  let category = 'all';
+
+  function render() {
+    let visible = 0;
+    items.forEach(item => {
+      const match = FestivalFaqFilter.matches({
+        category: item.dataset.faqCategory,
+        text: item.textContent
+      }, category, search.value);
+      item.hidden = !match;
+      if (match) visible += 1;
+    });
+    results.textContent = visible ? `Showing ${visible} of ${items.length} questions` : 'No questions match. Try another keyword or category.';
+  }
+
+  filters.forEach(button => button.addEventListener('click', () => {
+    category = button.dataset.faqFilter;
+    filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+    render();
+  }));
+  search.addEventListener('input', render);
+  items.forEach(item => {
+    const button = item.querySelector('button[aria-controls]');
+    const answer = document.getElementById(button.getAttribute('aria-controls'));
+    button.addEventListener('click', () => {
+      const expanded = button.getAttribute('aria-expanded') === 'true';
+      button.setAttribute('aria-expanded', String(!expanded));
+      answer.setAttribute('aria-hidden', String(expanded));
+      answer.classList.toggle('is-open', !expanded);
+    });
+  });
+  render();
+})();
