@@ -1,4 +1,4 @@
-import { MatchingEngine } from './matching-engine.js';
+﻿import { MatchingEngine } from './matching-engine.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('VortexDEX Exchange Pro engine ready');
@@ -250,7 +250,7 @@ function initMarket() {
       depthSvg.append(svgEl('line', { x1: x, x2: x, y1: top, y2: bottom, class: 'crosshair' }),
         svgEl('line', { x1: left, x2: right, y1: y, y2: y, class: 'crosshair' }),
         svgEl('circle', { cx: x, cy: y, r: 4, class: `depth-marker depth-${row.side}` }));
-      const text = `${row.side === 'bid' ? 'Buy (bid)' : 'Sell (ask)'} · $${formatPrice(row.price, PAIRS[state.pair].decimals)} · Cumulative ${row.total.toFixed(3)} ${state.pair.toUpperCase()}`;
+      const text = `${row.side === 'bid' ? 'Buy (bid)' : 'Sell (ask)'} Â· $${formatPrice(row.price, PAIRS[state.pair].decimals)} Â· Cumulative ${row.total.toFixed(3)} ${state.pair.toUpperCase()}`;
       depthTip.textContent = text;
       depthTip.dataset.price = String(row.price);
       depthTip.dataset.total = String(row.total);
@@ -335,7 +335,7 @@ function initMarket() {
       const info = engine.summary(order);
       const row = document.createElement('li');
       const text = document.createElement('span');
-      text.textContent = `${info.id} · ${info.side} ${info.remaining.toFixed(6)} remaining @ $${formatPrice(info.price, 2)} · ${info.filled.toFixed(6)} filled`;
+      text.textContent = `${info.id} Â· ${info.side} ${info.remaining.toFixed(6)} remaining @ $${formatPrice(info.price, 2)} Â· ${info.filled.toFixed(6)} filled`;
       const cancel = document.createElement('button');
       cancel.type = 'button';
       cancel.textContent = 'Cancel';
@@ -359,7 +359,7 @@ function initMarket() {
     trades.textContent = '';
     engine.trades.forEach(trade => {
       const row = document.createElement('li');
-      row.textContent = `${new Date(trade.time).toLocaleTimeString()} · ${trade.side.toUpperCase()} ${trade.quantity.toFixed(6)} @ $${formatPrice(trade.price, 2)} · ${trade.maker} / ${trade.taker}`;
+      row.textContent = `${new Date(trade.time).toLocaleTimeString()} Â· ${trade.side.toUpperCase()} ${trade.quantity.toFixed(6)} @ $${formatPrice(trade.price, 2)} Â· ${trade.maker} / ${trade.taker}`;
       trades.append(row);
     });
     if (!trades.children.length) trades.textContent = 'No simulated trades yet.';
@@ -784,8 +784,8 @@ function initQuickSwap() {
 
     if (isNaN(rawPay) || rawPay <= 0) {
       receiveInput.value = '';
-      if (payFiatEl) payFiatEl.textContent = '≈ $0.00 USD';
-      if (receiveFiatEl) receiveFiatEl.textContent = '≈ $0.00 USD';
+      if (payFiatEl) payFiatEl.textContent = 'â‰ˆ $0.00 USD';
+      if (receiveFiatEl) receiveFiatEl.textContent = 'â‰ˆ $0.00 USD';
       if (minReceivedDisplay) minReceivedDisplay.textContent = '--';
       if (priceImpactDisplay) priceImpactDisplay.textContent = '< 0.01%';
       executeBtn.disabled = true;
@@ -804,8 +804,8 @@ function initQuickSwap() {
     const receiveDecimals = TOKEN_CONFIG[receiveToken].decimals;
     receiveInput.value = netReceive.toFixed(receiveDecimals);
 
-    if (payFiatEl) payFiatEl.textContent = `≈ ${formatUsd(payUsd)} USD`;
-    if (receiveFiatEl) receiveFiatEl.textContent = `≈ ${formatUsd(netReceive * receivePrice)} USD`;
+    if (payFiatEl) payFiatEl.textContent = `â‰ˆ ${formatUsd(payUsd)} USD`;
+    if (receiveFiatEl) receiveFiatEl.textContent = `â‰ˆ ${formatUsd(netReceive * receivePrice)} USD`;
 
     // Minimum received based on slippage
     const minReceived = netReceive * (1 - slippage / 100);
@@ -827,7 +827,7 @@ function initQuickSwap() {
     } else {
       executeBtn.disabled = false;
       executeBtn.classList.remove('insufficient');
-      swapBtnText.textContent = `Swap ${payToken} for ${receiveToken} ⚡`;
+      swapBtnText.textContent = `Swap ${payToken} for ${receiveToken} âš¡`;
     }
   }
 
@@ -1167,14 +1167,14 @@ function initPortfolioRebalancer() {
     // Drift Alert Banner
     if (maxAbsDrift >= 5.0 && highDriftAsset) {
       driftBanner.className = 'drift-alert-banner';
-      driftIcon.textContent = '⚠️';
+      driftIcon.textContent = 'âš ï¸';
       driftTitle.textContent = `Portfolio Drift Alert (> 5.0%)`;
       driftDesc.textContent = `${highDriftAsset.name} has drifted ${highDriftAsset.curPct > highDriftAsset.tarPct ? '+' : ''}${(highDriftAsset.curPct - highDriftAsset.tarPct).toFixed(1)}% from target allocation. Rebalancing restores risk parameters.`;
     } else {
       driftBanner.className = 'drift-alert-banner safe';
-      driftIcon.textContent = '🛡️';
+      driftIcon.textContent = 'ðŸ›¡ï¸';
       driftTitle.textContent = `Portfolio In Target Equilibrium`;
-      driftDesc.textContent = `All assets are within the acceptable ±5.0% tolerance band. Minimal turnover required.`;
+      driftDesc.textContent = `All assets are within the acceptable Â±5.0% tolerance band. Minimal turnover required.`;
     }
 
     // Render Orders Table Safely
@@ -1266,7 +1266,7 @@ function initPortfolioRebalancer() {
 
     executeBtn.disabled = true;
     toast.hidden = false;
-    toast.textContent = `⚡ REBALANCE COMPLETE: Batch market orders matched via eBPF router. Portfolio aligned to ${targets.btc}% BTC / ${targets.eth}% ETH / ${targets.sol}% SOL with 0.00% slippage.`;
+    toast.textContent = `âš¡ REBALANCE COMPLETE: Batch market orders matched via eBPF router. Portfolio aligned to ${targets.btc}% BTC / ${targets.eth}% ETH / ${targets.sol}% SOL with 0.00% slippage.`;
 
     recompute();
 
@@ -1284,10 +1284,324 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     initQuickSwap();
     initPortfolioRebalancer();
+    initTradeHistoryDrawer();
   });
 } else {
   initQuickSwap();
   initPortfolioRebalancer();
+  initTradeHistoryDrawer();
 }
 
 
+
+
+// ===== Issue #328: Interactive Trade History Filter Drawer & CSV Export =====
+function initTradeHistoryDrawer() {
+  if (typeof document === 'undefined') return;
+
+  const root = document.getElementById('tradeHistorySection');
+  if (!root) return;
+
+  // Elements
+  const pairFilter = document.getElementById('thPairFilter');
+  const sideFilter = document.getElementById('thSideFilter');
+  const dateFilter = document.getElementById('thDateFilter');
+  const searchInput = document.getElementById('thSearchInput');
+  const resetBtn = document.getElementById('btnResetTradeFilters');
+
+  const kpiVolume = document.getElementById('kpiTotalVolume');
+  const kpiFees = document.getElementById('kpiTotalFees');
+  const kpiPnl = document.getElementById('kpiTotalPnl');
+  const kpiCount = document.getElementById('kpiTradeCount');
+
+  const tbody = document.getElementById('thTableBody');
+  const btnToggleDrawer = document.getElementById('btnToggleTradeDrawer');
+  const btnExportCsv = document.getElementById('btnExportTradesCsv');
+
+  const drawer = document.getElementById('tradeDetailsDrawer');
+  const backdrop = document.getElementById('thDrawerBackdrop');
+  const drawerClose = document.getElementById('btnCloseTradeDrawer');
+  const drawerBody = document.getElementById('drawerBodyContent');
+
+  // Realistic mock trades dataset (past 30 days)
+  const now = Date.now();
+  const H = 3600 * 1000;
+  const D = 24 * H;
+
+  const MOCK_TRADES = [
+    { id: 'ORD-9841', pair: 'BTC/USDT', side: 'BUY', price: 88450.00, amount: 0.85, fee: 75.18, pnl: 1420.50, timestamp: now - (2 * H), hash: '0x8f2a...91d4', feeTier: 'VIP-3 Taker (0.10%)' },
+    { id: 'ORD-9836', pair: 'ETH/USDT', side: 'BUY', price: 3085.50, amount: 14.50, fee: 44.74, pnl: 685.20, timestamp: now - (5 * H), hash: '0x3c71...08bf', feeTier: 'VIP-3 Maker (0.08%)' },
+    { id: 'ORD-9824', pair: 'SOL/USDT', side: 'SELL', price: 214.20, amount: 80.00, fee: 17.14, pnl: 940.00, timestamp: now - (18 * H), hash: '0x49bb...7e12', feeTier: 'VIP-3 Taker (0.10%)' },
+    { id: 'ORD-9811', pair: 'BTC/USDT', side: 'SELL', price: 87920.00, amount: 0.50, fee: 43.96, pnl: -310.00, timestamp: now - (1 * D), hash: '0xaa19...518c', feeTier: 'VIP-3 Taker (0.10%)' },
+    { id: 'ORD-9798', pair: 'AVAX/USDT', side: 'BUY', price: 34.80, amount: 450.00, fee: 15.66, pnl: 412.50, timestamp: now - (2 * D), hash: '0x88fe...62aa', feeTier: 'VIP-3 Maker (0.08%)' },
+    { id: 'ORD-9782', pair: 'LINK/USDT', side: 'BUY', price: 14.65, amount: 1200.00, fee: 17.58, pnl: 580.00, timestamp: now - (4 * D), hash: '0x12c4...e389', feeTier: 'VIP-3 Taker (0.10%)' },
+    { id: 'ORD-9765', pair: 'ETH/USDT', side: 'SELL', price: 3120.00, amount: 8.00, fee: 24.96, pnl: 840.00, timestamp: now - (6 * D), hash: '0x94bb...01cf', feeTier: 'VIP-3 Taker (0.10%)' },
+    { id: 'ORD-9749', pair: 'SOL/USDT', side: 'BUY', price: 202.40, amount: 125.00, fee: 25.30, pnl: 1475.00, timestamp: now - (9 * D), hash: '0x55dc...a117', feeTier: 'VIP-3 Maker (0.08%)' },
+    { id: 'ORD-9730', pair: 'BTC/USDT', side: 'BUY', price: 84150.00, amount: 1.20, fee: 100.98, pnl: 2850.00, timestamp: now - (14 * D), hash: '0x6e78...b902', feeTier: 'VIP-3 Taker (0.10%)' },
+    { id: 'ORD-9715', pair: 'AVAX/USDT', side: 'SELL', price: 36.20, amount: 300.00, fee: 10.86, pnl: 310.00, timestamp: now - (18 * D), hash: '0x2289...34cc', feeTier: 'VIP-3 Taker (0.10%)' },
+    { id: 'ORD-9694', pair: 'LINK/USDT', side: 'SELL', price: 15.10, amount: 800.00, fee: 12.08, pnl: 240.00, timestamp: now - (22 * D), hash: '0x71e4...80ea', feeTier: 'VIP-3 Maker (0.08%)' },
+    { id: 'ORD-9670', pair: 'ETH/USDT', side: 'BUY', price: 2980.00, amount: 10.00, fee: 29.80, pnl: 1220.00, timestamp: now - (27 * D), hash: '0xb561...74fe', feeTier: 'VIP-3 Taker (0.10%)' }
+  ];
+
+  function formatCurrency(n) {
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    return mm + '/' + dd + ' ' + hh + ':' + min;
+  }
+
+  function getFilteredTrades() {
+    const pairVal = pairFilter ? pairFilter.value : 'ALL';
+    const sideVal = sideFilter ? sideFilter.value : 'ALL';
+    const dateVal = dateFilter ? dateFilter.value : 'ALL';
+    const searchVal = searchInput ? searchInput.value.trim().toUpperCase() : '';
+
+    return MOCK_TRADES.filter((t) => {
+      if (pairVal !== 'ALL' && t.pair !== pairVal) return false;
+      if (sideVal !== 'ALL' && t.side !== sideVal) return false;
+
+      const age = now - t.timestamp;
+      if (dateVal === '24H' && age > D) return false;
+      if (dateVal === '7D' && age > (7 * D)) return false;
+      if (dateVal === '30D' && age > (30 * D)) return false;
+
+      if (searchVal && !t.id.includes(searchVal) && !t.pair.includes(searchVal) && !t.hash.toUpperCase().includes(searchVal)) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  function openDrawer(trade) {
+    if (!drawer || !backdrop || !drawerBody) return;
+
+    drawerBody.replaceChildren();
+
+    const targetTrade = trade || MOCK_TRADES[0];
+    const val = targetTrade.price * targetTrade.amount;
+
+    const grid = document.createElement('div');
+    grid.className = 'drawer-detail-grid';
+
+    const items = [
+      ['Order Identifier', targetTrade.id],
+      ['Execution Pair', targetTrade.pair],
+      ['Order Side', targetTrade.side],
+      ['Timestamp', new Date(targetTrade.timestamp).toISOString()],
+      ['Fill Price', formatCurrency(targetTrade.price)],
+      ['Filled Quantity', String(targetTrade.amount) + ' units'],
+      ['Executed Value', formatCurrency(val)],
+      ['Trading Fee', formatCurrency(targetTrade.fee)],
+      ['Realized PnL', (targetTrade.pnl >= 0 ? '+' : '') + formatCurrency(targetTrade.pnl)],
+      ['Settlement Tx Hash', targetTrade.hash],
+      ['Matching Engine Node', 'eBPF-HYPERMATCH-04 (Tokyo AWS)']
+    ];
+
+    items.forEach(([label, value]) => {
+      const row = document.createElement('div');
+      row.className = 'detail-row';
+
+      const s1 = document.createElement('span');
+      s1.textContent = label;
+
+      const s2 = document.createElement('span');
+      s2.textContent = value;
+      if (label === 'Order Side') {
+        s2.className = 'side-badge ' + (value === 'BUY' ? 'buy' : 'sell');
+      } else if (label === 'Realized PnL') {
+        s2.className = targetTrade.pnl >= 0 ? 'green-text' : 'red-text';
+      }
+
+      row.appendChild(s1);
+      row.appendChild(s2);
+      grid.appendChild(row);
+    });
+
+    const jsonHeading = document.createElement('span');
+    jsonHeading.style.fontSize = '0.74rem';
+    jsonHeading.style.color = '#64748b';
+    jsonHeading.style.marginTop = '14px';
+    jsonHeading.textContent = 'RAW JSON SETTLEMENT RECEIPT:';
+
+    const jsonBox = document.createElement('pre');
+    jsonBox.className = 'drawer-json-box';
+    jsonBox.textContent = JSON.stringify(targetTrade, null, 2);
+
+    drawerBody.appendChild(grid);
+    drawerBody.appendChild(jsonHeading);
+    drawerBody.appendChild(jsonBox);
+
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    backdrop.hidden = false;
+  }
+
+  function closeDrawer() {
+    if (!drawer || !backdrop) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    backdrop.hidden = true;
+  }
+
+  function render() {
+    const list = getFilteredTrades();
+
+    let totalVol = 0;
+    let totalFees = 0;
+    let totalPnl = 0;
+
+    if (tbody) tbody.replaceChildren();
+
+    if (list.length === 0) {
+      if (tbody) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 9;
+        td.className = 'text-center';
+        td.style.color = '#94a3b8';
+        td.style.padding = '32px';
+        td.textContent = 'No trade executions match your active filter criteria.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      }
+    } else {
+      list.forEach((t) => {
+        const totalVal = t.price * t.amount;
+        totalVol += totalVal;
+        totalFees += t.fee;
+        totalPnl += t.pnl;
+
+        if (tbody) {
+          const tr = document.createElement('tr');
+
+          const tdTime = document.createElement('td');
+          tdTime.textContent = formatDate(t.timestamp);
+
+          const tdId = document.createElement('td');
+          tdId.style.fontWeight = '700';
+          tdId.textContent = t.id;
+
+          const tdPair = document.createElement('td');
+          tdPair.textContent = t.pair;
+
+          const tdSide = document.createElement('td');
+          const badge = document.createElement('span');
+          badge.className = 'side-badge ' + (t.side === 'BUY' ? 'buy' : 'sell');
+          badge.textContent = t.side;
+          tdSide.appendChild(badge);
+
+          const tdPrice = document.createElement('td');
+          tdPrice.className = 'text-right';
+          tdPrice.textContent = formatCurrency(t.price);
+
+          const tdAmount = document.createElement('td');
+          tdAmount.className = 'text-right';
+          tdAmount.textContent = t.amount.toFixed(2);
+
+          const tdVal = document.createElement('td');
+          tdVal.className = 'text-right';
+          tdVal.textContent = formatCurrency(totalVal);
+
+          const tdFee = document.createElement('td');
+          tdFee.className = 'text-right';
+          tdFee.textContent = formatCurrency(t.fee);
+
+          const tdAction = document.createElement('td');
+          tdAction.className = 'text-center';
+          const btnInspect = document.createElement('button');
+          btnInspect.type = 'button';
+          btnInspect.className = 'btn-inspect-trade';
+          btnInspect.textContent = 'Inspect';
+          btnInspect.addEventListener('click', () => openDrawer(t));
+          tdAction.appendChild(btnInspect);
+
+          tr.appendChild(tdTime);
+          tr.appendChild(tdId);
+          tr.appendChild(tdPair);
+          tr.appendChild(tdSide);
+          tr.appendChild(tdPrice);
+          tr.appendChild(tdAmount);
+          tr.appendChild(tdVal);
+          tr.appendChild(tdFee);
+          tr.appendChild(tdAction);
+
+          tbody.appendChild(tr);
+        }
+      });
+    }
+
+    if (kpiVolume) kpiVolume.textContent = formatCurrency(totalVol);
+    if (kpiFees) kpiFees.textContent = formatCurrency(totalFees);
+    if (kpiPnl) {
+      kpiPnl.textContent = (totalPnl >= 0 ? '+' : '') + formatCurrency(totalPnl);
+      kpiPnl.className = 'kpi-value ' + (totalPnl >= 0 ? 'green-text' : 'red-text');
+    }
+    if (kpiCount) kpiCount.textContent = list.length + ' Fills (100%)';
+  }
+
+  // Filter change handlers
+  if (pairFilter) pairFilter.addEventListener('change', render);
+  if (sideFilter) sideFilter.addEventListener('change', render);
+  if (dateFilter) dateFilter.addEventListener('change', render);
+  if (searchInput) searchInput.addEventListener('input', render);
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (pairFilter) pairFilter.value = 'ALL';
+      if (sideFilter) sideFilter.value = 'ALL';
+      if (dateFilter) dateFilter.value = 'ALL';
+      if (searchInput) searchInput.value = '';
+      render();
+    });
+  }
+
+  if (btnToggleDrawer) {
+    btnToggleDrawer.addEventListener('click', () => {
+      const filtered = getFilteredTrades();
+      openDrawer(filtered[0] || MOCK_TRADES[0]);
+    });
+  }
+
+  if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+  if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+  // CSV Export
+  if (btnExportCsv) {
+    btnExportCsv.addEventListener('click', () => {
+      const list = getFilteredTrades();
+      const headers = ['Order_ID', 'Timestamp_ISO', 'Pair', 'Side', 'Price_USDT', 'Amount', 'Total_Value_USDT', 'Fee_USDT', 'Realized_PnL_USDT', 'Hash'];
+      const rows = list.map((t) => [
+        t.id,
+        new Date(t.timestamp).toISOString(),
+        t.pair,
+        t.side,
+        t.price.toFixed(2),
+        t.amount.toFixed(4),
+        (t.price * t.amount).toFixed(2),
+        t.fee.toFixed(2),
+        t.pnl.toFixed(2),
+        t.hash
+      ]);
+
+      const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'crypto-trade-execution-history.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // Initial render
+  render();
+}
