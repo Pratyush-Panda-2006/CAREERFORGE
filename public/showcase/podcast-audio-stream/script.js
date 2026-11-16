@@ -933,8 +933,65 @@ document.addEventListener('DOMContentLoaded', () => {
   initChapterListeners();
   updateTimeUI();
   restoreState();
+  const sharedState = ShareLogic.parseLink(window.location.search);
+  if (sharedState) {
+    // A shared link takes precedence over this browser's saved episode, without autoplay.
+    selectedEpisode = sharedState.episode;
+    DURATION = selectedEpisode === '141' ? 3240 : 2880;
+    currentTime = sharedState.time;
+    renderChapters(selectedEpisode);
+    setEpisodeHeader(selectedEpisode);
+    showDock();
+    updatePlayButtonIcon();
+    updateTimeUI(true);
+    saveState();
+  }
   applyVolume();
   renderBookmarks();
+  const shareDialog = document.getElementById('episode-share-dialog');
+  const shareTimestamp = document.getElementById('share-with-timestamp');
+  const shareLink = document.getElementById('share-link');
+  const shareStatus = document.getElementById('share-status');
+  let shareEpisode = selectedEpisode;
+  let shareTime = 0;
+
+  function updateShareLink() {
+    const url = ShareLogic.buildLink(window.location.href, shareEpisode, shareTime, shareTimestamp.checked);
+    shareLink.value = url;
+    document.getElementById('share-email-link').href = `mailto:?subject=${encodeURIComponent('Listen to Waveform episode ' + shareEpisode)}&body=${encodeURIComponent(url)}`;
+    document.getElementById('share-whatsapp-link').href = `https://wa.me/?text=${encodeURIComponent(url)}`;
+    shareStatus.textContent = '';
+  }
+
+  function openShareDialog(episode) {
+    shareEpisode = episode;
+    shareTime = episode === selectedEpisode ? Math.floor(currentTime) : 0;
+    shareTimestamp.checked = false;
+    document.getElementById('episode-share-name').textContent = `Episode ${episode}: ${EPISODES[episode].title}`;
+    document.getElementById('share-time-label').textContent = `(${formatTime(shareTime)})`;
+    updateShareLink();
+    shareDialog.showModal();
+  }
+
+  document.getElementById('dock-share-btn').addEventListener('click', () => openShareDialog(selectedEpisode));
+  document.querySelectorAll('[data-share-episode]').forEach(button => {
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      openShareDialog(button.dataset.shareEpisode);
+    });
+  });
+  shareTimestamp.addEventListener('change', updateShareLink);
+  document.getElementById('share-close-btn').addEventListener('click', () => shareDialog.close());
+  document.getElementById('share-copy-btn').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink.value);
+      shareStatus.textContent = 'Copied! Link ready to share.';
+    } catch {
+      shareLink.focus();
+      shareLink.select();
+      shareStatus.textContent = 'Copy unavailable here. Select and copy the link above.';
+    }
+  });
   const bookmarkButton = document.getElementById('bookmark-moment-btn');
   if (bookmarkButton) bookmarkButton.addEventListener('click', saveBookmark);
 
