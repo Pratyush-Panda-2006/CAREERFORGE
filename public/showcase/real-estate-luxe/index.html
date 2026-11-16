@@ -402,6 +402,170 @@
     </div>
   </section>
 
+  <!-- ===== BEGIN Issue #301: Monthly HOA & Property Tax Cost Breakdown Calculator ===== -->
+  <section class="calculator-section hoa-tax-section" id="ownership-cost-breakdown" aria-labelledby="hoaTaxTitle">
+    <div class="calc-container">
+      <div class="calc-header">
+        <div class="gold-tag">MONTHLY CARRYING COSTS &amp; ESCROW</div>
+        <h2 id="hoaTaxTitle">Monthly HOA &amp; Property Tax Cost Breakdown</h2>
+        <p>Model itemized monthly carrying expenses for luxury real estate acquisitions. Review principal &amp; interest, municipal ad valorem property taxes (1.2%), premium homeowners insurance, and gated HOA dues with dynamic SVG chart visualization.</p>
+      </div>
+
+      <!-- Quick Preset Selection Chips -->
+      <div class="hoa-estate-selector" role="group" aria-label="Select sample luxury estate">
+        <button type="button" class="hoa-chip active" data-price="14500000" data-hoa="2850" data-name="Malibu Oceanfront Contemporary">Malibu Villa ($14.5M)</button>
+        <button type="button" class="hoa-chip" data-price="22000000" data-hoa="4800" data-name="Penthouse 74, Tribeca">Tribeca Penthouse ($22M)</button>
+        <button type="button" class="hoa-chip" data-price="35000000" data-hoa="6200" data-name="Red Mountain Modern Aspen">Aspen Alpine Estate ($35M)</button>
+        <button type="button" class="hoa-chip" data-price="8900000" data-hoa="1850" data-name="Greenwich Country Compound">Greenwich Estate ($8.9M)</button>
+      </div>
+
+      <div class="hoa-calc-grid">
+        <!-- Inputs Card -->
+        <div class="calc-card hoa-inputs-card">
+          <div class="card-title-wrap">
+            <span class="card-num">01</span>
+            <h3>Acquisition &amp; Fee Parameters</h3>
+          </div>
+
+          <div class="input-field-group">
+            <div class="label-row">
+              <label for="hoaPropPrice">Property Listing Price</label>
+              <span class="val-display" id="hoaPropPriceBadge">$14,500,000</span>
+            </div>
+            <div class="currency-input-wrap">
+              <span class="curr-sign">$</span>
+              <input type="number" id="hoaPropPrice" min="1000000" max="100000000" step="250000" value="14500000" class="num-input" />
+            </div>
+          </div>
+
+          <div class="input-field-group">
+            <div class="label-row">
+              <label for="hoaDownPct">Down Payment (<span id="hoaDownPctBadge">20%</span>)</label>
+              <span class="val-display" id="hoaDownDollarsBadge">$2,900,000</span>
+            </div>
+            <input type="range" id="hoaDownPct" min="10" max="60" step="5" value="20" class="custom-range" />
+            <div class="range-marks">
+              <span>10%</span>
+              <span>20%</span>
+              <span>40%</span>
+              <span>60%</span>
+            </div>
+          </div>
+
+          <div class="input-field-group">
+            <div class="label-row">
+              <label for="hoaMortgageRate">30-Year Fixed Mortgage Rate</label>
+              <span class="val-display" id="hoaMortgageRateBadge">6.25%</span>
+            </div>
+            <input type="range" id="hoaMortgageRate" min="3.5" max="10.0" step="0.125" value="6.25" class="custom-range" />
+            <div class="range-marks">
+              <span>3.5%</span>
+              <span>6.25%</span>
+              <span>8.0%</span>
+              <span>10.0%</span>
+            </div>
+          </div>
+
+          <div class="input-field-group">
+            <div class="label-row">
+              <label for="hoaMonthlyDues">Monthly HOA / Gated Community Dues</label>
+              <span class="val-display" id="hoaDuesBadge">$2,850 / mo</span>
+            </div>
+            <div class="currency-input-wrap">
+              <span class="curr-sign">$</span>
+              <input type="number" id="hoaMonthlyDues" min="0" max="25000" step="100" value="2850" class="num-input" />
+            </div>
+          </div>
+
+          <div class="input-field-group">
+            <div class="label-row">
+              <label for="hoaTaxRate">Annual Property Tax Rate</label>
+              <span class="val-display" id="hoaTaxRateBadge">1.20%</span>
+            </div>
+            <div class="currency-input-wrap">
+              <span class="curr-sign">%</span>
+              <input type="number" id="hoaTaxRate" min="0.5" max="3.5" step="0.05" value="1.20" class="num-input" />
+            </div>
+            <p class="field-hint">Ad valorem municipal assessment rate benchmark (standard 1.2% per annum).</p>
+          </div>
+        </div>
+
+        <!-- Dynamic Visualization & Breakdown Card -->
+        <div class="calc-card hoa-results-card">
+          <div class="card-title-wrap">
+            <span class="card-num">02</span>
+            <h3>Itemized Monthly Ownership Breakdown</h3>
+          </div>
+
+          <div class="hoa-summary-head">
+            <span class="hoa-total-label">Total Estimated Monthly Carrying Cost</span>
+            <div class="hoa-total-display">
+              <span class="curr-sign">$</span>
+              <strong id="hoaTotalMonthlyCost">94,064</strong>
+              <span class="per-month">/ month</span>
+            </div>
+            <span class="hoa-annual-sub" id="hoaTotalAnnualCost">$1,128,768 annualized commitment</span>
+          </div>
+
+          <!-- Dynamic SVG Donut Chart -->
+          <div class="hoa-chart-wrapper">
+            <div class="hoa-chart-container">
+              <svg id="hoaDonutChart" viewBox="0 0 200 200" class="hoa-donut-svg" role="img" aria-label="Monthly carrying cost distribution pie chart">
+                <circle class="donut-bg" cx="100" cy="100" r="75" fill="transparent" stroke="rgba(255,255,255,0.06)" stroke-width="26"></circle>
+                <circle id="segPi" class="donut-seg seg-pi" cx="100" cy="100" r="75" fill="transparent" stroke="#c9a84c" stroke-width="26" stroke-dasharray="0 471" stroke-dashoffset="0"></circle>
+                <circle id="segTax" class="donut-seg seg-tax" cx="100" cy="100" r="75" fill="transparent" stroke="#8b5cf6" stroke-width="26" stroke-dasharray="0 471" stroke-dashoffset="0"></circle>
+                <circle id="segIns" class="donut-seg seg-ins" cx="100" cy="100" r="75" fill="transparent" stroke="#10b981" stroke-width="26" stroke-dasharray="0 471" stroke-dashoffset="0"></circle>
+                <circle id="segHoa" class="donut-seg seg-hoa" cx="100" cy="100" r="75" fill="transparent" stroke="#f59e0b" stroke-width="26" stroke-dasharray="0 471" stroke-dashoffset="0"></circle>
+              </svg>
+              <div class="donut-center-info">
+                <span class="center-tag">MONTHLY</span>
+                <strong id="donutCenterAmount">$94.1k</strong>
+              </div>
+            </div>
+
+            <!-- Legend with percentages and dollar amounts -->
+            <div class="hoa-legend-grid">
+              <div class="legend-row" data-target="segPi">
+                <span class="legend-chip chip-gold"></span>
+                <span class="legend-name">Principal &amp; Interest (P&amp;I)</span>
+                <span class="legend-pct" id="pctPi">76.1%</span>
+                <strong class="legend-amt" id="amtPi">$71,577</strong>
+              </div>
+
+              <div class="legend-row" data-target="segTax">
+                <span class="legend-chip chip-purple"></span>
+                <span class="legend-name">Property Taxes (1.2% / yr)</span>
+                <span class="legend-pct" id="pctTax">15.4%</span>
+                <strong class="legend-amt" id="amtTax">$14,500</strong>
+              </div>
+
+              <div class="legend-row" data-target="segIns">
+                <span class="legend-chip chip-green"></span>
+                <span class="legend-name">Homeowners &amp; Umbrella Insurance</span>
+                <span class="legend-pct" id="pctIns">5.5%</span>
+                <strong class="legend-amt" id="amtIns">$5,137</strong>
+              </div>
+
+              <div class="legend-row" data-target="segHoa">
+                <span class="legend-chip chip-orange"></span>
+                <span class="legend-name">HOA &amp; Private Community Dues</span>
+                <span class="legend-pct" id="pctHoa">3.0%</span>
+                <strong class="legend-amt" id="amtHoa">$2,850</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="hoa-actions-bar">
+            <button type="button" class="btn-hoa-export" id="btnExportHoaSheet">Export Carrying Breakdown (.JSON) ↓</button>
+            <button type="button" class="btn-hoa-copy" id="btnCopyHoaBreakdown">Copy Itemized Summary 📋</button>
+          </div>
+          <div id="hoaToast" class="hoa-toast" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #301 ===== -->
+
   <!-- ===== BEGIN Issue #356: Interactive Property Investment ROI & Cap Rate Calculator ===== -->
   <section class="calculator-section roi-cap-rate-section" id="investment-calculator" aria-labelledby="roiCalcTitle">
     <div class="calc-container">
