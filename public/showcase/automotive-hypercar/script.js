@@ -2376,3 +2376,48 @@ window.reserveHypercar = function reserveHypercar() {
     setup();
   }
 })();
+// Illustrative charge-mode comparison: the energy comes from the same pack
+// capacity and 10–80% window shown in the range estimator.
+(function initChargingComparison() {
+  const buttons = Array.from(document.querySelectorAll('[data-charging-mode]'));
+  if (!buttons.length) return;
+  const fill = document.getElementById('chargingBatteryFill');
+  const duration = document.getElementById('chargingDuration');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let frameId = null;
+  let fillFrameId = null;
+
+  function render(mode) {
+    if (frameId !== null) cancelAnimationFrame(frameId);
+    if (fillFrameId !== null) cancelAnimationFrame(fillFrameId);
+    const estimate = ChargingModel.estimate(mode);
+    const value = mode === 'ac' ? Math.round(estimate.minutes / 60 * 10) / 10 : Math.round(estimate.minutes);
+    const unit = mode === 'ac' ? 'hr' : 'min';
+    buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.chargingMode === mode)));
+    document.getElementById('chargingModeLabel').textContent = estimate.label;
+    document.getElementById('chargingDetail').textContent = mode === 'ac'
+      ? `${estimate.energyKwh} kWh added at an idealized 11 kW input rate.`
+      : `${estimate.energyKwh} kWh added; includes an illustrative allowance for DC charging taper.`;
+    fill.style.transition = 'none';
+    fill.style.width = reducedMotion.matches ? '80%' : '10%';
+    if (reducedMotion.matches) {
+      duration.textContent = `≈ ${value} ${unit}`;
+      return;
+    }
+    fill.getBoundingClientRect(); // commit the 10% starting width before animating
+    fill.style.transition = '';
+    fillFrameId = requestAnimationFrame(() => { fill.style.width = '80%'; fillFrameId = null; });
+    const start = performance.now();
+    function tick(now) {
+      const progress = Math.min(1, (now - start) / 500);
+      const eased = 1 - (1 - progress) ** 3;
+      duration.textContent = `≈ ${(value * eased).toFixed(mode === 'ac' ? 1 : 0)} ${unit}`;
+      if (progress < 1) frameId = requestAnimationFrame(tick);
+      else frameId = null;
+    }
+    frameId = requestAnimationFrame(tick);
+  }
+
+  buttons.forEach(button => button.addEventListener('click', () => render(button.dataset.chargingMode)));
+  render('dc');
+})();
