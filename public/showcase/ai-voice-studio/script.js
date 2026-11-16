@@ -1,11 +1,11 @@
-// Sonora AI Voice Studio & Neural Tuner Engine
+﻿// Sonora AI Voice Studio & Neural Tuner Engine
 // Real-time Pitch, Speed & Emotion Modulation
 
 const VOICE_MODELS = {
   aria: {
     id: 'aria',
     name: 'Aria',
-    tagline: 'Studio Warmth • Conversational',
+    tagline: 'Studio Warmth â€¢ Conversational',
     lang: 'en-US',
     basePitch: 1.0,
     baseSpeed: 1.0,
@@ -15,7 +15,7 @@ const VOICE_MODELS = {
   marcus: {
     id: 'marcus',
     name: 'Marcus',
-    tagline: 'Deep Broadcast • Narration',
+    tagline: 'Deep Broadcast â€¢ Narration',
     lang: 'en-GB',
     basePitch: 0.85,
     baseSpeed: 0.95,
@@ -25,7 +25,7 @@ const VOICE_MODELS = {
   elena: {
     id: 'elena',
     name: 'Elena',
-    tagline: 'Cybernetic Synth • AI Assistant',
+    tagline: 'Cybernetic Synth â€¢ AI Assistant',
     lang: 'en-US',
     basePitch: 1.15,
     baseSpeed: 1.05,
@@ -35,7 +35,7 @@ const VOICE_MODELS = {
   leo: {
     id: 'leo',
     name: 'Leo',
-    tagline: 'Energetic Streamer • Dynamic',
+    tagline: 'Energetic Streamer â€¢ Dynamic',
     lang: 'en-US',
     basePitch: 1.25,
     baseSpeed: 1.20,
@@ -48,25 +48,25 @@ const EMOTION_PRESETS = {
   neutral: {
     pitch: 1.00,
     speed: 1.00,
-    title: 'Neutral 😐',
+    title: 'Neutral ðŸ˜',
     feedback: 'Neutral emotion applied: balanced fundamental frequency and natural conversational pacing.'
   },
   cheerful: {
     pitch: 1.25,
     speed: 1.15,
-    title: 'Cheerful 😊',
+    title: 'Cheerful ðŸ˜Š',
     feedback: 'Cheerful emotion applied: +3.9 semitone pitch contour and bright, uplifted tempo.'
   },
   professional: {
     pitch: 0.90,
     speed: 0.95,
-    title: 'Professional 👔',
+    title: 'Professional ðŸ‘”',
     feedback: 'Professional emotion applied: measured cadence with authoritative, grounded acoustic resonance.'
   },
   energetic: {
     pitch: 1.35,
     speed: 1.30,
-    title: 'Energetic ⚡',
+    title: 'Energetic âš¡',
     feedback: 'Energetic emotion applied: high-impact pitch shift with rapid, dynamic speech rhythm.'
   }
 };
@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMultiTrackWaveform();
   initDawTimeline();
   initModulationLab();
+  initVoiceAccentPreviewer();
 });
 
 // ---------- Voice Studio Tuner Engine ----------
@@ -124,7 +125,7 @@ function initVoiceStudioTuner() {
   function resetSampleButton(button) {
     if (!button) return;
     button.classList.remove('playing');
-    button.querySelector('.sample-play-icon').textContent = '▶';
+    button.querySelector('.sample-play-icon').textContent = 'â–¶';
     button.querySelector('.sample-play-label').textContent = 'Play sample';
     const modelName = VOICE_MODELS[button.dataset.playSample]?.name || 'voice';
     button.title = 'Play ' + modelName + ' voice sample';
@@ -168,11 +169,11 @@ function initVoiceStudioTuner() {
     activeSampleButton = button;
     activeSampleUtterance = utterance;
     button.classList.add('playing');
-    button.querySelector('.sample-play-icon').textContent = '■';
-    button.querySelector('.sample-play-label').textContent = 'Playing…';
+    button.querySelector('.sample-play-icon').textContent = 'â– ';
+    button.querySelector('.sample-play-label').textContent = 'Playingâ€¦';
     button.title = 'Stop ' + model.name + ' voice sample';
     button.setAttribute('aria-label', 'Stop ' + model.name + ' voice sample');
-    feedbackEl.textContent = 'Playing ' + model.name + ' voice sample…';
+    feedbackEl.textContent = 'Playing ' + model.name + ' voice sampleâ€¦';
 
     const finish = () => {
       if (activeSampleUtterance !== utterance) return;
@@ -249,7 +250,7 @@ function initVoiceStudioTuner() {
       }
     });
 
-    activeModelNameEl.textContent = `${model.name} (${model.tagline.split('•')[0].trim()})`;
+    activeModelNameEl.textContent = `${model.name} (${model.tagline.split('â€¢')[0].trim()})`;
     feedbackEl.textContent = `Active voice model switched to ${model.name}. Adjust Pitch and Speed sliders to calibrate voice output.`;
 
     updateSliderDisplay();
@@ -295,7 +296,7 @@ function initVoiceStudioTuner() {
       slider.value = settings.volume;
       output.textContent = `${Math.round(settings.volume * 100)}%`;
 
-      muteBtn.textContent = settings.muted ? '🔇 Unmute' : '🔊 Mute';
+      muteBtn.textContent = settings.muted ? 'ðŸ”‡ Unmute' : 'ðŸ”Š Mute';
       muteBtn.setAttribute('aria-pressed', String(settings.muted));
       muteBtn.setAttribute(
         'aria-label',
@@ -381,7 +382,7 @@ function initVoiceStudioTuner() {
 
     if (!matched) {
       currentEmotion = 'custom';
-      activeEmotionNameEl.textContent = 'Custom 🎛️';
+      activeEmotionNameEl.textContent = 'Custom ðŸŽ›ï¸';
     }
   }
 
@@ -513,7 +514,7 @@ function initVoiceStudioTuner() {
       ttsRate.dispatchEvent(new Event('input', { bubbles: true }));
       ttsPitch.dispatchEvent(new Event('input', { bubbles: true }));
 
-      feedbackEl.textContent = `✓ Tuner settings synced to Text-to-Speech Studio (Rate: ${speedInput.value}x, Pitch: ${pitchInput.value}x).`;
+      feedbackEl.textContent = `âœ“ Tuner settings synced to Text-to-Speech Studio (Rate: ${speedInput.value}x, Pitch: ${pitchInput.value}x).`;
 
       // Smooth scroll down to TTS studio
       const studioSection = document.getElementById('studio');
@@ -1029,7 +1030,7 @@ function initMultiTrackWaveform() {
     if (playBtn) {
       playBtn.classList.toggle('is-playing', isPlaying);
       if (playLabel) playLabel.textContent = isPlaying ? 'Pause Real-Time Stream' : 'Start Real-Time Stream';
-      if (playIcon) playIcon.textContent = isPlaying ? '⏸' : '▶';
+      if (playIcon) playIcon.textContent = isPlaying ? 'â¸' : 'â–¶';
     }
   }
 
@@ -1048,7 +1049,7 @@ function initMultiTrackWaveform() {
     freezeBtn.addEventListener('click', () => {
       isFrozen = !isFrozen;
       freezeBtn.classList.toggle('is-frozen', isFrozen);
-      freezeBtn.querySelector('span').textContent = isFrozen ? '▶ Unfreeze' : '❄️ Freeze';
+      freezeBtn.querySelector('span').textContent = isFrozen ? 'â–¶ Unfreeze' : 'â„ï¸ Freeze';
     });
   }
 
@@ -1457,7 +1458,7 @@ function initDawTimeline() {
     }
 
     state.isPlaying = true;
-    playIcon.textContent = '⏸';
+    playIcon.textContent = 'â¸';
     playText.textContent = 'Pause';
     statusBar.textContent = 'Playing multi-track timeline...';
 
@@ -1489,7 +1490,7 @@ function initDawTimeline() {
     state.isPlaying = false;
     stopAudio();
     if (animId) cancelAnimationFrame(animId);
-    playIcon.textContent = '▶';
+    playIcon.textContent = 'â–¶';
     playText.textContent = 'Resume Timeline';
     statusBar.textContent = `Paused at ${state.currentTime.toFixed(2)}s.`;
   }
@@ -1500,7 +1501,7 @@ function initDawTimeline() {
     if (animId) cancelAnimationFrame(animId);
     state.currentTime = 0.0;
     updateTimecode();
-    playIcon.textContent = '▶';
+    playIcon.textContent = 'â–¶';
     playText.textContent = 'Play Timeline';
     statusBar.textContent = 'Timeline stopped and rewound to 00:00.00.';
   }
@@ -1729,7 +1730,7 @@ function initDawTimeline() {
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
 
-        statusBar.textContent = '🎉 Multi-track WAV audio successfully exported and downloaded!';
+        statusBar.textContent = 'ðŸŽ‰ Multi-track WAV audio successfully exported and downloaded!';
       } catch (err) {
         statusBar.textContent = `Export failed: ${err.message}`;
       }
@@ -2035,7 +2036,7 @@ function initModulationLab() {
     }
     if (auditionBtn) {
       auditionBtn.classList.remove('playing');
-      if (playIcon) playIcon.textContent = '▶';
+      if (playIcon) playIcon.textContent = 'â–¶';
       if (playText) playText.textContent = 'Audition Modulated Voice';
     }
     if (ledDsp) ledDsp.classList.add('active');
@@ -2136,7 +2137,7 @@ function initModulationLab() {
 
     if (auditionBtn) {
       auditionBtn.classList.add('playing');
-      if (playIcon) playIcon.textContent = '⏹';
+      if (playIcon) playIcon.textContent = 'â¹';
       if (playText) playText.textContent = 'Stop DSP Audition';
     }
 
@@ -2169,4 +2170,255 @@ function initModulationLab() {
   // Initial setup
   applyPreset('cyborg');
   initOscilloscope();
+}
+
+
+// ===== Issue #324: Voice Accent & Dialect Previewer with Cadence Presets =====
+function initVoiceAccentPreviewer() {
+  if (typeof document === 'undefined') return;
+
+  const root = document.getElementById('voiceAccentPreviewer');
+  if (!root) return;
+
+  const dialectCards = root.querySelectorAll('.dialect-card');
+  const phraseChips = root.querySelectorAll('.btn-phrase-chip');
+  const cadencePills = root.querySelectorAll('.cadence-pill');
+
+  const textarea = document.getElementById('accentSampleInput');
+  const dialectBadge = document.getElementById('activeDialectBadge');
+  const statusDot = document.getElementById('accentPlaybackStatus');
+
+  const pitchSlider = document.getElementById('accentPitchSlider');
+  const pitchVal = document.getElementById('accentPitchVal');
+  const rateSlider = document.getElementById('accentRateSlider');
+  const rateVal = document.getElementById('accentRateVal');
+  const volumeSlider = document.getElementById('accentVolumeSlider');
+  const volumeVal = document.getElementById('accentVolumeVal');
+
+  const waveform = document.getElementById('accentWaveform');
+  const playBtn = document.getElementById('btnAccentPlay');
+  const playBtnText = document.getElementById('accentPlayBtnText');
+  const copyBtn = document.getElementById('btnCopyAccentConfig');
+
+  let activeDialect = {
+    id: 'british-rp',
+    name: 'Oxford Standard RP',
+    flag: '🇬🇧',
+    lang: 'en-GB',
+    basePitch: 1.05,
+    baseRate: 0.95
+  };
+
+  let cadenceOffset = {
+    pitchDelta: 0,
+    rateDelta: 0,
+    name: 'Standard Flow'
+  };
+
+  let isSpeaking = false;
+  let simulatedTimer = null;
+
+  function updateSliderDisplay() {
+    if (pitchVal && pitchSlider) pitchVal.textContent = parseFloat(pitchSlider.value).toFixed(2) + 'x';
+    if (rateVal && rateSlider) rateVal.textContent = parseFloat(rateSlider.value).toFixed(2) + 'x';
+    if (volumeVal && volumeSlider) volumeVal.textContent = Math.round(parseFloat(volumeSlider.value) * 100) + '%';
+  }
+
+  function applyDialectAndCadence() {
+    const finalPitch = Math.max(0.5, Math.min(1.8, activeDialect.basePitch + cadenceOffset.pitchDelta));
+    const finalRate = Math.max(0.5, Math.min(1.8, activeDialect.baseRate + cadenceOffset.rateDelta));
+
+    if (pitchSlider) pitchSlider.value = String(finalPitch.toFixed(2));
+    if (rateSlider) rateSlider.value = String(finalRate.toFixed(2));
+
+    if (dialectBadge) {
+      dialectBadge.textContent = activeDialect.flag + ' ' + activeDialect.name + ' (' + cadenceOffset.name + ')';
+    }
+
+    updateSliderDisplay();
+  }
+
+  // Dialect card selection
+  dialectCards.forEach((card) => {
+    card.addEventListener('click', () => {
+      dialectCards.forEach((c) => {
+        c.classList.remove('active');
+        c.setAttribute('aria-checked', 'false');
+      });
+      card.classList.add('active');
+      card.setAttribute('aria-checked', 'true');
+
+      activeDialect.id = card.getAttribute('data-id') || 'custom';
+      activeDialect.flag = card.getAttribute('data-flag') || '🎙️';
+      activeDialect.lang = card.getAttribute('data-lang') || 'en-US';
+      activeDialect.basePitch = parseFloat(card.getAttribute('data-pitch')) || 1.0;
+      activeDialect.baseRate = parseFloat(card.getAttribute('data-rate')) || 1.0;
+
+      const nameEl = card.querySelector('.dialect-name');
+      activeDialect.name = nameEl ? nameEl.textContent.trim() : 'Dialect';
+
+      applyDialectAndCadence();
+    });
+
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click();
+      }
+    });
+  });
+
+  // Phrase chips
+  phraseChips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      phraseChips.forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const text = chip.getAttribute('data-text');
+      if (text && textarea) {
+        textarea.value = text;
+      }
+    });
+  });
+
+  // Cadence variation pills
+  cadencePills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      cadencePills.forEach((p) => p.classList.remove('active'));
+      pill.classList.add('active');
+
+      cadenceOffset.pitchDelta = parseFloat(pill.getAttribute('data-pitch-delta')) || 0;
+      cadenceOffset.rateDelta = parseFloat(pill.getAttribute('data-rate-delta')) || 0;
+      cadenceOffset.name = pill.textContent.trim();
+
+      applyDialectAndCadence();
+    });
+  });
+
+  // Sliders input
+  if (pitchSlider) pitchSlider.addEventListener('input', updateSliderDisplay);
+  if (rateSlider) rateSlider.addEventListener('input', updateSliderDisplay);
+  if (volumeSlider) volumeSlider.addEventListener('input', updateSliderDisplay);
+
+  function stopSpeaking() {
+    isSpeaking = false;
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // Ignored
+      }
+    }
+    if (simulatedTimer) {
+      clearTimeout(simulatedTimer);
+      simulatedTimer = null;
+    }
+    if (playBtn) {
+      playBtn.classList.remove('speaking');
+      const icon = playBtn.querySelector('.play-icon');
+      if (icon) icon.textContent = '▶';
+    }
+    if (playBtnText) playBtnText.textContent = 'Audition Accent';
+    if (waveform) waveform.classList.remove('speaking');
+    if (statusDot) {
+      statusDot.className = 'accent-status-dot';
+      statusDot.textContent = 'IDLE';
+    }
+  }
+
+  function startSpeaking() {
+    stopSpeaking();
+
+    const textToSpeak = textarea ? textarea.value.trim() : 'Testing speech dialect';
+    if (!textToSpeak) return;
+
+    isSpeaking = true;
+    if (playBtn) {
+      playBtn.classList.add('speaking');
+      const icon = playBtn.querySelector('.play-icon');
+      if (icon) icon.textContent = '⏹';
+    }
+    if (playBtnText) playBtnText.textContent = 'Stop Audition';
+    if (waveform) waveform.classList.add('speaking');
+    if (statusDot) {
+      statusDot.className = 'accent-status-dot speaking';
+      statusDot.textContent = 'SYNTHESIZING';
+    }
+
+    const currentPitch = pitchSlider ? parseFloat(pitchSlider.value) : 1.0;
+    const currentRate = rateSlider ? parseFloat(rateSlider.value) : 1.0;
+    const currentVol = volumeSlider ? parseFloat(volumeSlider.value) : 1.0;
+
+    let hasSpokenNative = false;
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
+      try {
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = activeDialect.lang;
+        utterance.pitch = currentPitch;
+        utterance.rate = currentRate;
+        utterance.volume = currentVol;
+
+        const voices = window.speechSynthesis.getVoices();
+        if (voices && voices.length > 0) {
+          const match = voices.find((v) => v.lang.replace('_', '-').startsWith(activeDialect.lang));
+          if (match) utterance.voice = match;
+        }
+
+        utterance.onend = () => stopSpeaking();
+        utterance.onerror = () => stopSpeaking();
+
+        window.speechSynthesis.speak(utterance);
+        hasSpokenNative = true;
+      } catch {
+        hasSpokenNative = false;
+      }
+    }
+
+    if (!hasSpokenNative) {
+      // Graceful fallback simulation (e.g. headless browser or blocked speech audio)
+      const approxDurationMs = Math.max(2000, Math.min(8000, (textToSpeak.length * 65) / currentRate));
+      simulatedTimer = setTimeout(() => {
+        stopSpeaking();
+      }, approxDurationMs);
+    }
+  }
+
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      if (isSpeaking) {
+        stopSpeaking();
+      } else {
+        startSpeaking();
+      }
+    });
+  }
+
+  // Copy config
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const config = {
+        dialectId: activeDialect.id,
+        dialectName: activeDialect.name,
+        targetLang: activeDialect.lang,
+        pitch: pitchSlider ? parseFloat(pitchSlider.value) : 1.0,
+        rate: rateSlider ? parseFloat(rateSlider.value) : 1.0,
+        volume: volumeSlider ? parseFloat(volumeSlider.value) : 1.0,
+        cadencePreset: cadenceOffset.name,
+        sampleText: textarea ? textarea.value : ''
+      };
+
+      const jsonStr = JSON.stringify(config, null, 2);
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(jsonStr).then(() => {
+          const original = copyBtn.textContent;
+          copyBtn.textContent = '✓ Config Copied!';
+          setTimeout(() => {
+            copyBtn.textContent = original;
+          }, 2000);
+        });
+      }
+    });
+  }
+
+  // Initial calculation
+  applyDialectAndCadence();
 }
