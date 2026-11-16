@@ -1648,92 +1648,452 @@ function initDawTimeline() {
     return new Blob([view], { type: 'audio/wav' });
   }
 
-  if (exportBtn) {
-    exportBtn.addEventListener('click', async () => {
-      try {
-        statusBar.textContent = 'Rendering 16-bit PCM multi-track audio mixdown...';
-        const sampleRate = 44100;
-        const OfflineContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-        const offlineCtx = new OfflineContext(1, Math.floor(sampleRate * TOTAL_DURATION), sampleRate);
+  // Renders the current timeline (mute/solo/volume/trim as set) to one mono
+  // AudioBuffer at the requested sample rate.
+  async function renderMixdown(sampleRate) {
+    const OfflineContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const offlineCtx = new OfflineContext(1, Math.floor(sampleRate * TOTAL_DURATION), sampleRate);
 
-        const hasSolo = state.tracks.voice.solo || state.tracks.ambience.solo;
+    const hasSolo = state.tracks.voice.solo || state.tracks.ambience.solo;
 
-        // Render Voice Track
-        const voiceTrack = state.tracks.voice;
-        if (!voiceTrack.muted && (!hasSolo || voiceTrack.solo)) {
-          const vStart = voiceTrack.clip.start;
-          const vDur = Math.max(0.1, voiceTrack.clip.rawDuration - voiceTrack.clip.trimStart - voiceTrack.clip.trimEnd);
+    // Render Voice Track
+    const voiceTrack = state.tracks.voice;
+    if (!voiceTrack.muted && (!hasSolo || voiceTrack.solo)) {
+      const vStart = voiceTrack.clip.start;
+      const vDur = Math.max(0.1, voiceTrack.clip.rawDuration - voiceTrack.clip.trimStart - voiceTrack.clip.trimEnd);
 
-          const osc = offlineCtx.createOscillator();
-          const gain = offlineCtx.createGain();
-          const filter = offlineCtx.createBiquadFilter();
+      const osc = offlineCtx.createOscillator();
+      const gain = offlineCtx.createGain();
+      const filter = offlineCtx.createBiquadFilter();
 
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(180, vStart);
-          osc.frequency.exponentialRampToValueAtTime(240, vStart + 1.2);
-          osc.frequency.exponentialRampToValueAtTime(170, vStart + vDur);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, vStart);
+      osc.frequency.exponentialRampToValueAtTime(240, vStart + 1.2);
+      osc.frequency.exponentialRampToValueAtTime(170, vStart + vDur);
 
-          filter.type = 'bandpass';
-          filter.frequency.setValueAtTime(1200, vStart);
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1200, vStart);
 
-          gain.gain.setValueAtTime(0.001, vStart);
-          gain.gain.exponentialRampToValueAtTime(voiceTrack.volume * 0.4, vStart + 0.1);
-          gain.gain.setValueAtTime(voiceTrack.volume * 0.4, vStart + vDur - 0.1);
-          gain.gain.exponentialRampToValueAtTime(0.001, vStart + vDur);
+      gain.gain.setValueAtTime(0.001, vStart);
+      gain.gain.exponentialRampToValueAtTime(voiceTrack.volume * 0.4, vStart + 0.1);
+      gain.gain.setValueAtTime(voiceTrack.volume * 0.4, vStart + vDur - 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, vStart + vDur);
 
-          osc.connect(filter);
-          filter.connect(gain);
-          gain.connect(offlineCtx.destination);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(offlineCtx.destination);
 
-          osc.start(vStart);
-          osc.stop(vStart + vDur);
-        }
+      osc.start(vStart);
+      osc.stop(vStart + vDur);
+    }
 
-        // Render Ambience Track
-        const ambTrack = state.tracks.ambience;
-        if (!ambTrack.muted && (!hasSolo || ambTrack.solo)) {
-          const aStart = ambTrack.clip.start;
-          const aDur = Math.max(0.1, ambTrack.clip.rawDuration - ambTrack.clip.trimStart - ambTrack.clip.trimEnd);
+    // Render Ambience Track
+    const ambTrack = state.tracks.ambience;
+    if (!ambTrack.muted && (!hasSolo || ambTrack.solo)) {
+      const aStart = ambTrack.clip.start;
+      const aDur = Math.max(0.1, ambTrack.clip.rawDuration - ambTrack.clip.trimStart - ambTrack.clip.trimEnd);
 
-          const osc1 = offlineCtx.createOscillator();
-          const gain = offlineCtx.createGain();
-          const filter = offlineCtx.createBiquadFilter();
+      const osc1 = offlineCtx.createOscillator();
+      const gain = offlineCtx.createGain();
+      const filter = offlineCtx.createBiquadFilter();
 
-          osc1.type = ambTrack.preset === 'rain' ? 'triangle' : 'sawtooth';
-          osc1.frequency.setValueAtTime(ambTrack.preset === 'rain' ? 65 : 110, aStart);
+      osc1.type = ambTrack.preset === 'rain' ? 'triangle' : 'sawtooth';
+      osc1.frequency.setValueAtTime(ambTrack.preset === 'rain' ? 65 : 110, aStart);
 
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(ambTrack.preset === 'rain' ? 450 : 320, aStart);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(ambTrack.preset === 'rain' ? 450 : 320, aStart);
 
-          gain.gain.setValueAtTime(0.001, aStart);
-          gain.gain.exponentialRampToValueAtTime(ambTrack.volume * 0.25, aStart + 0.2);
-          gain.gain.setValueAtTime(ambTrack.volume * 0.25, aStart + aDur - 0.2);
-          gain.gain.exponentialRampToValueAtTime(0.001, aStart + aDur);
+      gain.gain.setValueAtTime(0.001, aStart);
+      gain.gain.exponentialRampToValueAtTime(ambTrack.volume * 0.25, aStart + 0.2);
+      gain.gain.setValueAtTime(ambTrack.volume * 0.25, aStart + aDur - 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.001, aStart + aDur);
 
-          osc1.connect(filter);
-          filter.connect(gain);
-          gain.connect(offlineCtx.destination);
+      osc1.connect(filter);
+      filter.connect(gain);
+      gain.connect(offlineCtx.destination);
 
-          osc1.start(aStart);
-          osc1.stop(aStart + aDur);
-        }
+      osc1.start(aStart);
+      osc1.stop(aStart + aDur);
+    }
 
-        const renderedBuffer = await offlineCtx.startRendering();
-        const wavBlob = audioBufferToWav(renderedBuffer);
-        const downloadUrl = URL.createObjectURL(wavBlob);
+    return offlineCtx.startRendering();
+  }
 
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = 'sonora-multitrack-mix.wav';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
+  // ---- Export Audio modal -------------------------------------------------
+  const exportModalEl = document.getElementById('exportModal');
+  const exportFormEl = document.getElementById('exportForm');
 
-        statusBar.textContent = 'ðŸŽ‰ Multi-track WAV audio successfully exported and downloaded!';
-      } catch (err) {
-        statusBar.textContent = `Export failed: ${err.message}`;
+  // Pure option logic lives in export-options.js (unit tested); it is loaded
+  // the first time the modal opens.
+  let exportOptionsModule = null;
+  let mp3Status = 'loading';
+  let mp3LoadPromise = null;
+  let exportOpener = null;
+  let exportToken = null;
+  let exportAvailability = null;
+  let exportInertState = [];
+
+  function loadMp3Encoder() {
+    if (typeof window.lamejs === 'function' && window.lamejs.Mp3Encoder) return Promise.resolve();
+    if (!mp3LoadPromise) {
+      mp3LoadPromise = new Promise((resolve, reject) => {
+        const tag = document.createElement('script');
+        tag.src = 'vendor/lame.min.js';
+        tag.onload = () => {
+          if (typeof window.lamejs === 'function' && window.lamejs.Mp3Encoder) resolve();
+          else reject(new Error('MP3 encoder did not initialise'));
+        };
+        tag.onerror = () => reject(new Error('MP3 encoder failed to load'));
+        document.head.appendChild(tag);
+      }).catch((err) => {
+        mp3LoadPromise = null;
+        throw err;
+      });
+    }
+    return mp3LoadPromise;
+  }
+
+  function detectExportEnv() {
+    const Realtime = window.AudioContext || window.webkitAudioContext;
+    const hasRecorder = typeof window.MediaRecorder === 'function' && typeof window.MediaRecorder.isTypeSupported === 'function';
+    return {
+      offlineAudio: !!(window.OfflineAudioContext || window.webkitOfflineAudioContext),
+      isTypeSupported: hasRecorder ? (type) => window.MediaRecorder.isTypeSupported(type) : undefined,
+      realtimeAudio: !!(Realtime && Realtime.prototype && 'createMediaStreamDestination' in Realtime.prototype),
+      mp3Encoder: mp3Status
+    };
+  }
+
+  function exportEl(id) {
+    return document.getElementById(id);
+  }
+
+  function selectedExportFormat() {
+    const checked = exportFormEl.querySelector('input[name="exportFormat"]:checked');
+    return checked ? checked.value : null;
+  }
+
+  function selectedSampleRate() {
+    const checked = exportFormEl.querySelector('input[name="exportSampleRate"]:checked');
+    return checked ? Number(checked.value) : 44100;
+  }
+
+  function applyExportAvailability() {
+    exportAvailability = exportOptionsModule.getFormatAvailability(detectExportEnv());
+    const ids = { wav: 'exportFormatWav', mp3: 'exportFormatMp3', ogg: 'exportFormatOgg' };
+    Object.keys(ids).forEach((format) => {
+      const input = exportEl(ids[format]);
+      const note = exportEl(ids[format] + 'Note');
+      const entry = exportAvailability[format];
+      if (note.dataset.defaultText === undefined) note.dataset.defaultText = note.textContent;
+      input.disabled = !entry.available;
+      input.closest('.export-choice').classList.toggle('is-disabled', !entry.available);
+      note.textContent = entry.available ? note.dataset.defaultText : entry.reason;
+    });
+    const wanted = exportOptionsModule.firstAvailableFormat(exportAvailability, selectedExportFormat());
+    if (wanted && wanted !== selectedExportFormat()) exportEl(ids[wanted]).checked = true;
+    const nothing = wanted === null;
+    exportEl('exportUnavailable').hidden = !nothing;
+    exportEl('exportUnavailable').textContent = nothing ? exportAvailability.wav.reason : '';
+    exportEl('exportSubmitBtn').disabled = nothing || !!exportToken;
+    refreshExportForm();
+  }
+
+  function refreshExportForm() {
+    const format = selectedExportFormat();
+    if (!format) return;
+    exportEl('exportExt').textContent = '.' + exportOptionsModule.FORMATS[format].ext;
+    exportEl('exportBitrateField').hidden = format !== 'mp3';
+    const typed = exportEl('exportFileName').value;
+    const finalName = exportOptionsModule.buildFileName(typed, format);
+    const hint = exportEl('exportFileHint');
+    if (typed.trim() === '') {
+      hint.textContent = 'Empty name, will save as ' + finalName;
+    } else if (exportOptionsModule.filenameWasChanged(typed)) {
+      hint.textContent = 'Not allowed in file names, will save as ' + finalName;
+    } else {
+      hint.textContent = 'Will save as ' + finalName;
+    }
+  }
+
+  function setExportProgress(message) {
+    exportEl('exportProgress').textContent = message;
+  }
+
+  function setExportBusy(busy) {
+    exportFormEl.setAttribute('aria-busy', String(busy));
+    exportFormEl.querySelectorAll('input, select').forEach((control) => {
+      if (busy) {
+        control.dataset.wasDisabled = control.disabled ? '1' : '';
+        control.disabled = true;
+      } else if (control.dataset.wasDisabled !== undefined) {
+        control.disabled = control.dataset.wasDisabled === '1';
+        delete control.dataset.wasDisabled;
       }
+    });
+    exportEl('exportSubmitBtn').disabled = busy;
+    // Disabled controls drop focus, so park it on Cancel while busy.
+    if (busy) exportEl('exportCancelBtn').focus();
+  }
+
+  function exportFocusables() {
+    return Array.from(exportModalEl.querySelectorAll('button, input, select, a[href], [tabindex]'))
+      .filter((el) => !el.disabled && el.tabIndex >= 0 && !el.closest('[hidden]') && el.getClientRects().length > 0);
+  }
+
+  function setBackgroundInert(on) {
+    if (on) {
+      exportInertState = Array.from(document.body.children)
+        .filter((el) => el !== exportModalEl && el.tagName !== 'SCRIPT')
+        .map((el) => ({ el, inert: el.inert }));
+      exportInertState.forEach((item) => { item.el.inert = true; });
+    } else {
+      exportInertState.forEach((item) => { item.el.inert = item.inert; });
+      exportInertState = [];
+    }
+  }
+
+  function closeExportModal() {
+    if (exportModalEl.hidden) return;
+    if (exportToken) {
+      exportToken.cancelled = true;
+      if (exportToken.stop) exportToken.stop();
+      exportToken = null;
+      setExportBusy(false);
+      statusBar.textContent = 'Export cancelled.';
+    }
+    exportModalEl.hidden = true;
+    document.body.classList.remove('export-modal-open');
+    setBackgroundInert(false);
+    setExportProgress('');
+    if (exportOpener && document.contains(exportOpener)) exportOpener.focus();
+    exportOpener = null;
+  }
+
+  async function openExportModal() {
+    if (!exportModalEl.hidden) return;
+    exportOpener = exportBtn;
+    try {
+      if (!exportOptionsModule) exportOptionsModule = await import('./export-options.js');
+    } catch (err) {
+      statusBar.textContent = `Export options could not be loaded: ${err.message}`;
+      return;
+    }
+    mp3Status = typeof window.lamejs === 'function' && window.lamejs.Mp3Encoder ? 'ready' : 'loading';
+    setExportProgress('');
+    applyExportAvailability();
+    exportModalEl.hidden = false;
+    document.body.classList.add('export-modal-open');
+    setBackgroundInert(true);
+    const first = exportFormEl.querySelector('input[name="exportFormat"]:checked') || exportEl('exportModalClose');
+    first.focus();
+
+    if (mp3Status !== 'ready') {
+      loadMp3Encoder().then(() => { mp3Status = 'ready'; }, () => { mp3Status = 'failed'; }).then(() => {
+        if (!exportModalEl.hidden && !exportToken) applyExportAvailability();
+      });
+    }
+  }
+
+  function triggerDownload(blob, fileName) {
+    const downloadUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
+  }
+
+  function yieldToBrowser() {
+    return new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  async function encodeMp3(buffer, bitrate, token) {
+    const samples = exportOptionsModule.floatToInt16(buffer.getChannelData(0));
+    const encoder = new window.lamejs.Mp3Encoder(1, buffer.sampleRate, bitrate);
+    const BLOCK = 1152;
+    const parts = [];
+    for (let i = 0, n = 0; i < samples.length; i += BLOCK, n++) {
+      if (token.cancelled) return null;
+      const chunk = encoder.encodeBuffer(samples.subarray(i, i + BLOCK));
+      if (chunk.length > 0) parts.push(chunk);
+      if (n % 64 === 0) {
+        setExportProgress('Encoding MP3 ' + bitrate + ' kbps... ' + Math.round((i / samples.length) * 100) + '%');
+        await yieldToBrowser();
+      }
+    }
+    const tail = encoder.flush();
+    if (tail.length > 0) parts.push(tail);
+    return new Blob(parts, { type: 'audio/mpeg' });
+  }
+
+  // The browser has no direct OGG encoder API, so the rendered mix is played
+  // into a MediaStream and recorded by MediaRecorder (real time, silent).
+  function recordOgg(buffer, mimeType, token) {
+    return new Promise((resolve, reject) => {
+      const RealtimeContext = window.AudioContext || window.webkitAudioContext;
+      let ctx;
+      try {
+        ctx = new RealtimeContext({ sampleRate: buffer.sampleRate });
+      } catch (err) {
+        ctx = new RealtimeContext();
+      }
+      const streamDest = ctx.createMediaStreamDestination();
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(streamDest);
+
+      let recorder;
+      try {
+        recorder = new window.MediaRecorder(streamDest.stream, { mimeType });
+      } catch (err) {
+        ctx.close();
+        reject(err);
+        return;
+      }
+
+      const chunks = [];
+      let settled = false;
+      let ticker = null;
+      let safety = null;
+      const settle = (fn) => {
+        if (settled) return;
+        settled = true;
+        clearInterval(ticker);
+        clearTimeout(safety);
+        ctx.close().catch(() => {});
+        fn();
+      };
+      const stopRecorder = () => {
+        if (recorder.state !== 'inactive') recorder.stop();
+      };
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) chunks.push(event.data);
+      };
+      recorder.onerror = (event) => settle(() => reject(event.error || new Error('OGG recording failed')));
+      recorder.onstop = () => settle(() => {
+        if (chunks.length === 0) reject(new Error('The browser returned an empty OGG recording'));
+        else resolve(new Blob(chunks, { type: 'audio/ogg' }));
+      });
+      source.onended = stopRecorder;
+      token.stop = () => {
+        source.onended = null;
+        try { source.stop(); } catch (err) { /* not started yet */ }
+        stopRecorder();
+      };
+
+      // A realtime context can stay suspended (no audio device, blocked
+      // autoplay). Give up with a clear message instead of hanging.
+      const resumeWait = new Promise((_, rejectWait) => {
+        setTimeout(() => rejectWait(new Error('Audio output could not start in this browser, so OGG cannot be recorded. Use WAV or MP3.')), 4000);
+      });
+      Promise.race([ctx.resume(), resumeWait]).then(() => {
+        if (ctx.state !== 'running') throw new Error('Audio output could not start in this browser, so OGG cannot be recorded. Use WAV or MP3.');
+        if (token.cancelled) { settle(() => resolve(null)); return; }
+        recorder.start();
+        source.start();
+        const startedAt = Date.now();
+        ticker = setInterval(() => {
+          const elapsed = Math.min(buffer.duration, (Date.now() - startedAt) / 1000);
+          setExportProgress('Recording OGG in real time... ' + elapsed.toFixed(0) + 's of ' + buffer.duration.toFixed(0) + 's');
+        }, 250);
+        safety = setTimeout(() => settle(() => {
+          try { recorder.stop(); } catch (err) { /* already stopped */ }
+          reject(new Error('OGG recording timed out'));
+        }), (buffer.duration + 8) * 1000);
+      }).catch((err) => settle(() => reject(err)));
+    });
+  }
+
+  async function runExport(options) {
+    const token = { cancelled: false, stop: null };
+    exportToken = token;
+    setExportBusy(true);
+    const label = options.format.toUpperCase();
+    try {
+      setExportProgress('Rendering mixdown at ' + (options.sampleRate / 1000) + ' kHz...');
+      const rendered = await renderMixdown(options.sampleRate);
+      if (token.cancelled) return;
+
+      let blob;
+      if (options.format === 'wav') {
+        blob = audioBufferToWav(rendered);
+      } else if (options.format === 'mp3') {
+        blob = await encodeMp3(rendered, options.bitrate, token);
+      } else {
+        setExportProgress('Recording OGG in real time...');
+        blob = await recordOgg(rendered, exportOptionsModule.pickOggMimeType(detectExportEnv().isTypeSupported), token);
+      }
+      if (token.cancelled || !blob) return;
+
+      triggerDownload(blob, options.fileName);
+      statusBar.textContent = 'Exported ' + options.fileName + ' (' + label + ', ' + (options.sampleRate / 1000) + ' kHz, ' + Math.max(1, Math.round(blob.size / 1024)) + ' KB).';
+      exportToken = null;
+      setExportBusy(false);
+      closeExportModal();
+    } catch (err) {
+      if (token.cancelled) return;
+      exportToken = null;
+      setExportBusy(false);
+      setExportProgress('Export failed: ' + err.message);
+      statusBar.textContent = `Export failed: ${err.message}`;
+      exportEl('exportSubmitBtn').focus();
+    }
+  }
+
+  if (exportBtn && exportModalEl && exportFormEl) {
+    exportBtn.addEventListener('click', openExportModal);
+    exportEl('exportModalClose').addEventListener('click', closeExportModal);
+    exportEl('exportCancelBtn').addEventListener('click', closeExportModal);
+
+    exportModalEl.addEventListener('mousedown', (event) => {
+      if (event.target === exportModalEl) closeExportModal();
+    });
+
+    exportModalEl.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeExportModal();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusables = exportFocusables();
+      if (focusables.length === 0) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || !exportModalEl.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !exportModalEl.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    exportFormEl.addEventListener('change', refreshExportForm);
+    exportEl('exportFileName').addEventListener('input', refreshExportForm);
+
+    exportFormEl.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (exportToken || !exportOptionsModule) return;
+      const resolved = exportOptionsModule.resolveExportOptions({
+        format: selectedExportFormat(),
+        sampleRate: selectedSampleRate(),
+        bitrate: exportEl('exportBitrate').value,
+        fileName: exportEl('exportFileName').value
+      }, exportAvailability);
+      if (!resolved.ok) {
+        setExportProgress(resolved.error);
+        return;
+      }
+      runExport(resolved.options);
     });
   }
 
