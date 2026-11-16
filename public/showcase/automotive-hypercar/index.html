@@ -16,6 +16,7 @@
     <p>0 to 60 MPH in 1.74s • Carbon Monocoque Chassis • Solid-State Battery</p>
     <nav class="section-links" aria-label="Explore hypercar">
       <a href="#launch-control">Launch Simulator</a>
+      <a href="#regenSimulator">KERS Regen Braking</a>
       <a href="#comparator">Specifications</a>
       <a href="#wind-tunnel">Aerodynamics</a>
       <a href="#configurator">Configure your order</a>
@@ -622,6 +623,357 @@
     </div>
   </section>
   <!-- ===== EV Road Trip Range Estimator (Issue #271) END ===== -->
+
+  <!-- ===== BEGIN Issue #389: Regenerative Braking Energy Recovery Simulator with Deceleration Telemetry ===== -->
+  <section class="regen-sim-section" id="regenSimulator" aria-labelledby="regenHeading">
+    <div class="regen-container">
+      <div class="lc-badge">DYNAMIC TELEMETRY // KINETIC ENERGY RECOVERY SYSTEM (KERS)</div>
+      <h2 id="regenHeading">Regenerative Braking &amp; Deceleration Telemetry Simulator</h2>
+      <p class="lc-intro">
+        Harness kinetic energy equations ($E = \frac{1}{2}mv^2$) during extreme hypercar deceleration. Simulate dual-stator magnetic regeneration, monitor longitudinal braking G-force vectoring, evaluate carbon-ceramic rotor thermal wear reduction, and measure extended battery range.
+      </p>
+
+      <!-- 3-Way Regen Mode Toggle -->
+      <div class="regen-mode-selector" role="radiogroup" aria-label="KERS Regenerative Braking Modes">
+        <span class="regen-mode-lbl">Regen Calibration Mode:</span>
+        <div class="regen-mode-pills">
+          <button type="button" class="regen-mode-btn" data-mode="off" role="radio" aria-checked="false" id="modeRegenOff">
+            <span class="mode-icon">⭕</span>
+            <div class="mode-meta">
+              <strong>Level 0: Coast / Off</strong>
+              <small>0% Motor Regen • 100% Friction Pads</small>
+            </div>
+          </button>
+          <button type="button" class="regen-mode-btn active" data-mode="adaptive" role="radio" aria-checked="true" id="modeRegenAdaptive">
+            <span class="mode-icon">⚡</span>
+            <div class="mode-meta">
+              <strong>Level 1: Adaptive Dynamic</strong>
+              <small>Predictive 0.45G Peak • Smart Decel</small>
+            </div>
+          </button>
+          <button type="button" class="regen-mode-btn" data-mode="aggressive" role="radio" aria-checked="false" id="modeRegenAggressive">
+            <span class="mode-icon">💥</span>
+            <div class="mode-meta">
+              <strong>Level 2: Aggressive One-Pedal</strong>
+              <small>Max 0.95G Dual-Stator Capture</small>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cockpit HUD Grid: Controls on Left, Dials & Telemetry on Right -->
+      <div class="regen-cockpit-grid">
+        <!-- Controls Column -->
+        <div class="regen-controls-card">
+          <div class="hud-card-header">
+            <span class="hud-card-tag">DECELERATION &amp; KINETIC INPUTS</span>
+            <span class="hud-status-chip chip-cyan" id="regenStatusChip">KERS SYSTEM ARMED</span>
+          </div>
+
+          <!-- Entry Velocity Slider -->
+          <div class="regen-input-group">
+            <div class="input-header-row">
+              <label for="regenSpeedSlider">Vehicle Entry Velocity</label>
+              <span class="val-pill" id="regenSpeedDisplay">120 MPH (193 km/h)</span>
+            </div>
+            <input type="range" id="regenSpeedSlider" class="regen-range" min="30" max="220" step="5" value="120" />
+            <div class="slider-marks"><span>30 MPH</span><span>120 MPH</span><span>220 MPH</span></div>
+          </div>
+
+          <!-- Deceleration Demand Slider -->
+          <div class="regen-input-group">
+            <div class="input-header-row">
+              <label for="regenBrakePressureSlider">Brake Pedal Deceleration Demand</label>
+              <span class="val-pill" id="regenPressureDisplay">60% (Moderate Stop)</span>
+            </div>
+            <input type="range" id="regenBrakePressureSlider" class="regen-range" min="10" max="100" step="5" value="60" />
+            <div class="slider-marks"><span>10% (Gentle)</span><span>50%</span><span>100% (Emergency Panic)</span></div>
+          </div>
+
+          <!-- Vehicle Mass & Specs Info -->
+          <div class="regen-specs-card">
+            <div class="spec-row">
+              <span>Hypercar Kerb Mass (m):</span>
+              <strong>1,800 kg (Carbon Monocoque)</strong>
+            </div>
+            <div class="spec-row">
+              <span>Motor Inverter Topology:</span>
+              <strong>Dual-Motor 900V SiC (94.2% Efficiency)</strong>
+            </div>
+            <div class="spec-row">
+              <span>Peak Decel Capacity:</span>
+              <strong class="text-cyan">Up to -1.35 G (Kinetic + Carbon Friction)</strong>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button type="button" class="btn-trigger-brake" id="btnTriggerBrake">
+            <span class="btn-icon">🛑</span>
+            <span id="btnBrakeText">Engage Full Deceleration Run</span>
+          </button>
+        </div>
+
+        <!-- Telemetry Display Column -->
+        <div class="regen-telemetry-column">
+          <!-- Dial HUD Grid -->
+          <div class="regen-dials-grid">
+            <!-- Dial 1: Electric Energy Capture Dial -->
+            <div class="hud-card regen-gauge-card">
+              <div class="hud-card-header">
+                <span class="hud-card-tag">KINETIC RECOVERY POWER</span>
+                <span class="live-dot-cyan"></span>
+              </div>
+
+              <div class="regen-gauge-wrap">
+                <svg class="regen-dial-svg" viewBox="0 0 240 180" aria-label="Energy Regeneration Gauge">
+                  <path class="regen-track-bg" d="M 30 150 A 90 90 0 1 1 210 150" />
+                  <path class="regen-track-active" id="regenPowerArc" d="M 30 150 A 90 90 0 1 1 210 150" />
+                </svg>
+                <div class="gauge-center-readout">
+                  <div class="gauge-kw-val" id="regenKwVal">385</div>
+                  <div class="gauge-unit">kW REGEN</div>
+                  <div class="gauge-hp-equiv" id="regenHpEquiv">516 HP Captured</div>
+                </div>
+              </div>
+
+              <div class="gauge-footer-metric">
+                <span>Total Energy Harvested:</span>
+                <strong class="text-cyan" id="regenKwhPerStop">+0.48 kWh / stop</strong>
+              </div>
+            </div>
+
+            <!-- Dial 2: Longitudinal Deceleration G-Meter -->
+            <div class="hud-card decel-g-card">
+              <div class="hud-card-header">
+                <span class="hud-card-tag">LONGITUDINAL DECEL G-FORCE</span>
+                <span class="hud-status-chip chip-cyan" id="decelStatusBadge">-0.82 G</span>
+              </div>
+
+              <div class="decel-g-wrap">
+                <svg class="decel-g-svg" viewBox="0 0 200 200" aria-label="Deceleration G-Meter">
+                  <circle cx="100" cy="100" r="85" class="g-outer-circle" />
+                  <circle cx="100" cy="100" r="55" class="g-mid-circle" />
+                  <circle cx="100" cy="100" r="25" class="g-inner-circle" />
+                  <line x1="100" y1="15" x2="100" y2="185" class="g-axis-v" />
+                  <line x1="15" y1="100" x2="185" y2="100" class="g-axis-h" />
+                  <!-- Animated Decel Vector Puck -->
+                  <circle cx="100" cy="100" r="7" class="decel-puck" id="decelPuck" />
+                </svg>
+                <div class="decel-readout-row">
+                  <div><span>Stopping Dist:</span> <strong id="stoppingDistVal">148 ft</strong></div>
+                  <div><span>Stop Time:</span> <strong id="stoppingTimeVal">1.94 s</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Telemetry HUD Matrix Cards -->
+          <div class="regen-metrics-cards">
+            <div class="tel-metric-card">
+              <span class="tel-icon">🔋</span>
+              <div class="tel-content">
+                <span class="tel-lbl">Battery SoC Replenished</span>
+                <strong class="tel-val text-cyan" id="telSocReplenish">+0.65% SoC</strong>
+                <small class="tel-sub">Stored in 120 kWh Pack</small>
+              </div>
+            </div>
+
+            <div class="tel-metric-card">
+              <span class="tel-icon">🏎️</span>
+              <div class="tel-content">
+                <span class="tel-lbl">Extended City Range</span>
+                <strong class="tel-val text-emerald" id="telExtendedRange">+28.5 Miles</strong>
+                <small class="tel-sub">Per 100 City Miles</small>
+              </div>
+            </div>
+
+            <div class="tel-metric-card">
+              <span class="tel-icon">🔥</span>
+              <div class="tel-content">
+                <span class="tel-lbl">Brake Thermal Wear Relief</span>
+                <strong class="tel-val text-gold" id="telBrakeWearSaved">74.2% Reduction</strong>
+                <small class="tel-sub" id="telRotorTemp">Rotor Temp: 165°C vs 620°C</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #389 ===== -->
+
+  <!-- ===== BEGIN Issue #326: Active Aerodynamic Wing & Spoiler Telemetry Visualizer ===== -->
+  <section class="active-aero-section" id="activeWingTelemetry" aria-labelledby="aeroHeading">
+    <div class="active-aero-header">
+      <span class="aero-badge">AERODYNAMICS // FLUID DYNAMICS TELEMETRY</span>
+      <h2 id="aeroHeading">Active Rear Wing &amp; Angle-of-Attack Telemetry</h2>
+      <p class="aero-lead">
+        Adjust the active dual-element rear wing angle of attack from 0° (DRS low drag) to 45° (Airbrake high downforce). Calculates dynamic downforce loads, drag penalty coefficients (Cd), and simulates airflow streamline vectors.
+      </p>
+    </div>
+
+    <!-- Presets Strip -->
+    <div class="aero-presets-strip" role="group" aria-label="Aerodynamic Mode Presets">
+      <span class="presets-label">Preset Aero Profiles:</span>
+      <button type="button" class="btn-aero-preset" data-angle="0" data-speed="330">🏎️ DRS Low Drag (0° · 330 km/h)</button>
+      <button type="button" class="btn-aero-preset active" data-angle="15" data-speed="240">⚡ Balanced Apex (15° · 240 km/h)</button>
+      <button type="button" class="btn-aero-preset" data-angle="30" data-speed="180">🌪️ High Downforce (30° · 180 km/h)</button>
+      <button type="button" class="btn-aero-preset" data-angle="45" data-speed="210">🛑 Airbrake Deploy (45° · 210 km/h)</button>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <div class="aero-workspace-grid">
+      <!-- Left: Dynamic SVG Airfoil & Streamline Visualizer -->
+      <div class="aero-visualizer-card">
+        <div class="card-head">
+          <span class="head-tag">CFD STREAMLINE SIMULATOR</span>
+          <span class="aero-mode-tag" id="aeroActiveMode">BALANCED APEX</span>
+        </div>
+
+        <div class="svg-airfoil-wrap">
+          <svg id="aeroSvg" class="aero-svg" viewBox="0 0 600 300" aria-label="Rear wing airfoil angle of attack and airflow streamlines">
+            <defs>
+              <linearGradient id="streamlineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.1" />
+                <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#0284c7" stop-opacity="0.2" />
+              </linearGradient>
+              <linearGradient id="downforceArrowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f43f5e" />
+                <stop offset="100%" stop-color="#e11d48" />
+              </linearGradient>
+            </defs>
+
+            <!-- Streamlines (Upper, Chord, Lower) -->
+            <path id="streamline1" class="streamline-path" d="M 20,70 Q 250,65 580,75" fill="none" stroke="url(#streamlineGrad)" stroke-width="2.5" />
+            <path id="streamline2" class="streamline-path" d="M 20,110 Q 250,105 580,120" fill="none" stroke="url(#streamlineGrad)" stroke-width="3" />
+            <path id="streamline3" class="streamline-path" d="M 20,150 Q 250,150 580,170" fill="none" stroke="url(#streamlineGrad)" stroke-width="3.5" />
+            <path id="streamline4" class="streamline-path" d="M 20,190 Q 250,195 580,225" fill="none" stroke="url(#streamlineGrad)" stroke-width="3" />
+            <path id="streamline5" class="streamline-path" d="M 20,230 Q 250,240 580,265" fill="none" stroke="url(#streamlineGrad)" stroke-width="2.5" />
+
+            <!-- Pylon Mount -->
+            <path d="M 285,160 L 295,270 L 315,270 L 320,160 Z" fill="#1e293b" stroke="#334155" stroke-width="2" />
+
+            <!-- Rotating Wing Element Group -->
+            <g id="airfoilWingGroup" transform="translate(300, 150) rotate(15)">
+              <!-- Main Dual Element Airfoil Profile -->
+              <path d="M -110,-12 C -60,-28 60,-22 110,-6 C 115,-3 118,5 110,8 C 60,18 -50,14 -105,4 C -116,1 -116,-8 -110,-12 Z" fill="#0f172a" stroke="#38bdf8" stroke-width="3" />
+              <!-- Endplate -->
+              <rect x="-115" y="-35" width="230" height="70" rx="8" fill="none" stroke="rgba(56, 189, 248, 0.4)" stroke-dasharray="4,4" />
+              <!-- Gurney Flap -->
+              <line x1="110" y1="-6" x2="110" y2="-22" stroke="#f43f5e" stroke-width="4" stroke-linecap="round" />
+            </g>
+
+            <!-- Downforce Vector Arrow -->
+            <g id="downforceVector" transform="translate(300, 160)">
+              <line x1="0" y1="0" x2="0" y2="70" stroke="url(#downforceArrowGrad)" stroke-width="4" stroke-linecap="round" />
+              <polygon points="-8,70 8,70 0,84" fill="#e11d48" />
+              <text x="14" y="55" fill="#f43f5e" font-size="12" font-family="'JetBrains Mono', monospace" font-weight="700">DOWNFORCE</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="aero-summary-strip">
+          <div class="strip-stat">
+            <span class="lbl">AOA ANGLE</span>
+            <strong id="readoutAoa">15.0°</strong>
+          </div>
+          <div class="strip-stat">
+            <span class="lbl">AIRSPEED</span>
+            <strong id="readoutSpeed">240 km/h</strong>
+          </div>
+          <div class="strip-stat">
+            <span class="lbl">FLOW STATUS</span>
+            <strong class="green-text" id="readoutFlowStatus">Attached Laminar</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Sliders & Telemetry KPI Dashboard -->
+      <div class="aero-controls-card">
+        <div class="card-head">
+          <span class="head-tag">TELEMETRY &amp; GAUGES</span>
+          <button type="button" class="btn-copy-aero" id="btnCopyAero">📋 Copy Specs</button>
+        </div>
+
+        <!-- Sliders -->
+        <div class="aero-sliders-group">
+          <div class="aero-field">
+            <div class="field-label-row">
+              <label for="wingAngleSlider">Rear Wing Angle of Attack (AoA)</label>
+              <strong id="wingAngleVal">15°</strong>
+            </div>
+            <input type="range" id="wingAngleSlider" class="aero-slider" min="0" max="45" step="1" value="15" />
+            <div class="slider-scale">
+              <span>0° (DRS)</span>
+              <span>15° (Balanced)</span>
+              <span>30° (High)</span>
+              <span>45° (Airbrake)</span>
+            </div>
+          </div>
+
+          <div class="aero-field">
+            <div class="field-label-row">
+              <label for="wingSpeedSlider">Vehicle Ground Velocity</label>
+              <strong id="wingSpeedVal">240 km/h</strong>
+            </div>
+            <input type="range" id="wingSpeedSlider" class="aero-slider" min="80" max="360" step="5" value="240" />
+            <div class="slider-scale">
+              <span>80 km/h</span>
+              <span>200 km/h</span>
+              <span>360 km/h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="aero-kpi-grid">
+          <div class="kpi-cell highlight-rose">
+            <span class="kpi-lbl">AERODYNAMIC DOWNFORCE</span>
+            <div class="kpi-val-row">
+              <span class="kpi-num" id="kpiDownforceKg">482</span>
+              <span class="kpi-unit">kg</span>
+            </div>
+            <small class="kpi-sub" id="kpiDownforceN">4,728 N vertical load</small>
+          </div>
+
+          <div class="kpi-cell highlight-amber">
+            <span class="kpi-lbl">TOTAL DRAG COEFFICIENT</span>
+            <div class="kpi-val-row">
+              <span class="kpi-num" id="kpiCd">0.38</span>
+              <span class="kpi-unit">Cd</span>
+            </div>
+            <small class="kpi-sub" id="kpiDragPenalty">+22.6% over DRS</small>
+          </div>
+
+          <div class="kpi-cell">
+            <span class="kpi-lbl">AERODYNAMIC DRAG FORCE</span>
+            <div class="kpi-val-row">
+              <span class="kpi-num" id="kpiDragN">1,894</span>
+              <span class="kpi-unit">N</span>
+            </div>
+            <small class="kpi-sub" id="kpiDragPower">126 kW power absorbed</small>
+          </div>
+
+          <div class="kpi-cell highlight-cyan">
+            <span class="kpi-lbl">CORNERING GRIP MULTIPLIER</span>
+            <div class="kpi-val-row">
+              <span class="kpi-num" id="kpiGripMultiplier">1.46</span>
+              <span class="kpi-unit">G</span>
+            </div>
+            <small class="kpi-sub" id="kpiGripSub">+0.38G tire normal load</small>
+          </div>
+        </div>
+
+        <!-- Airbrake & DRS Quick Action Triggers -->
+        <div class="aero-quick-triggers">
+          <button type="button" class="btn-quick-trigger btn-drs" id="btnDeployDrs">⚡ Deploy DRS</button>
+          <button type="button" class="btn-quick-trigger btn-airbrake" id="btnDeployAirbrake">🛑 Snap Airbrake</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #326 ===== -->
 
   <section id="lap-simulator" class="lap-panel" aria-labelledby="lap-title">
     <div class="lap-eyebrow">APEX / SIMULATION LAB</div>

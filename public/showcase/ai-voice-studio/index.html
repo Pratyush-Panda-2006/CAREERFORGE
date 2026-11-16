@@ -464,6 +464,378 @@
     <p role="status" aria-live="polite"></p>
   </section>
 
+  <!-- ===== BEGIN Issue #387: Voice Pitch-Shift & Robotic Modulation Filter Laboratory ===== -->
+  <section class="modulation-lab-section" id="modulationLab" aria-labelledby="modLabTitle">
+    <div class="mod-lab-header">
+      <div class="badge">🎛️ REAL-TIME DSP LABORATORY // WEB AUDIO API</div>
+      <h2 id="modLabTitle">Voice Pitch-Shift &amp; Robotic Modulation Rack</h2>
+      <p>Transform speech waveforms in real time. Route vocal clips through a modular hardware rack of Biquad filters, LFO ring modulators, pitch transposer, and spatial delay nodes.</p>
+    </div>
+
+    <!-- Modulation Presets Bar -->
+    <div class="mod-presets-bar">
+      <span class="mod-presets-label">DSP Effect Presets:</span>
+      <div class="mod-presets-grid" role="group" aria-label="DSP Voice Effect Presets">
+        <button type="button" class="mod-preset-btn active" data-preset="cyborg">
+          <span class="preset-icon">🤖</span>
+          <div class="preset-info">
+            <strong>Cyber Cyborg</strong>
+            <small>Ring Mod + Bitcrush + Metallic</small>
+          </div>
+        </button>
+        <button type="button" class="mod-preset-btn" data-preset="helium">
+          <span class="preset-icon">🚀</span>
+          <div class="preset-info">
+            <strong>Helium Shift</strong>
+            <small>+12 Semitones • Formant Boost</small>
+          </div>
+        </button>
+        <button type="button" class="mod-preset-btn" data-preset="radio">
+          <span class="preset-icon">📻</span>
+          <div class="preset-info">
+            <strong>Deep Radio Bass</strong>
+            <small>-7 Semitones • Warm 80Hz Res</small>
+          </div>
+        </button>
+        <button type="button" class="mod-preset-btn" data-preset="cathedral">
+          <span class="preset-icon">🏛️</span>
+          <div class="preset-info">
+            <strong>Cathedral Reverb</strong>
+            <small>Long Spatial Tail • 450ms Delay</small>
+          </div>
+        </button>
+        <button type="button" class="mod-preset-btn" data-preset="clean">
+          <span class="preset-icon">🎙️</span>
+          <div class="preset-info">
+            <strong>Clean Bypass</strong>
+            <small>Dry Direct Signal (100%)</small>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Hardware Rack Chassis -->
+    <div class="mod-rack-chassis">
+      <!-- Rack Top Screw Bar & LED Indicators -->
+      <div class="rack-top-strip">
+        <div class="rack-mount-hole"></div>
+        <div class="rack-unit-label">SONORA DSP-4000 // MODULAR VOCAL PROCESSOR</div>
+        <div class="rack-leds">
+          <span class="led-indicator active" id="ledPower"><i class="led-dot green"></i> POWER</span>
+          <span class="led-indicator active" id="ledDsp"><i class="led-dot cyan"></i> DSP ACTIVE</span>
+          <span class="led-indicator" id="ledClip"><i class="led-dot red"></i> PEAK CLIP</span>
+        </div>
+        <div class="rack-mount-hole"></div>
+      </div>
+
+      <!-- Rack Modules Grid -->
+      <div class="rack-modules-grid">
+        <!-- Module 1: Pitch & Formant -->
+        <div class="rack-module">
+          <div class="module-header">
+            <span class="module-title">MODULE 01: PITCH &amp; FREQUENCY</span>
+            <span class="module-tag">TRANSPOSE</span>
+          </div>
+          <div class="module-controls">
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modPitchSlider">Pitch Shift (Semitones)</label>
+                <span class="control-badge" id="modPitchVal">+0 st</span>
+              </div>
+              <input type="range" id="modPitchSlider" class="rack-slider" min="-12" max="12" step="1" value="0" />
+              <div class="slider-marks"><span>-12 st</span><span>0 (Normal)</span><span>+12 st</span></div>
+            </div>
+
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modCutoffSlider">Biquad Cutoff Filter</label>
+                <span class="control-badge" id="modCutoffVal">3,200 Hz</span>
+              </div>
+              <input type="range" id="modCutoffSlider" class="rack-slider" min="200" max="8000" step="100" value="3200" />
+              <div class="slider-marks"><span>200 Hz</span><span>Bandpass</span><span>8 kHz</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module 2: Ring Modulation & Robotic Saturation -->
+        <div class="rack-module">
+          <div class="module-header">
+            <span class="module-title">MODULE 02: ROBOTIC MODULATOR</span>
+            <span class="module-tag">LFO CARRIER</span>
+          </div>
+          <div class="module-controls">
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modCarrierSlider">Carrier LFO Frequency</label>
+                <span class="control-badge" id="modCarrierVal">45 Hz</span>
+              </div>
+              <input type="range" id="modCarrierSlider" class="rack-slider" min="10" max="400" step="5" value="45" />
+              <div class="slider-marks"><span>10 Hz</span><span>Sub-Audio</span><span>400 Hz</span></div>
+            </div>
+
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modCrushSlider">Cyborg Bitcrush &amp; Drive</label>
+                <span class="control-badge" id="modCrushVal">4.5 Drive</span>
+              </div>
+              <input type="range" id="modCrushSlider" class="rack-slider" min="0" max="10" step="0.5" value="4.5" />
+              <div class="slider-marks"><span>Clean</span><span>Warm Sat</span><span>Hard Clip</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module 3: Spatial Echo & Reverb Mix -->
+        <div class="rack-module">
+          <div class="module-header">
+            <span class="module-title">MODULE 03: SPATIAL DELAY &amp; MIX</span>
+            <span class="module-tag">TIME DOMAIN</span>
+          </div>
+          <div class="module-controls">
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modDelaySlider">Feedback Delay Time</label>
+                <span class="control-badge" id="modDelayVal">180 ms</span>
+              </div>
+              <input type="range" id="modDelaySlider" class="rack-slider" min="0" max="800" step="20" value="180" />
+              <div class="slider-marks"><span>0 ms</span><span>Slapback</span><span>800 ms</span></div>
+            </div>
+
+            <div class="rack-control-group">
+              <div class="control-label-row">
+                <label for="modWetDrySlider">Wet / Dry DSP Blend</label>
+                <span class="control-badge" id="modWetDryVal">65% Wet</span>
+              </div>
+              <input type="range" id="modWetDrySlider" class="rack-slider" min="0" max="100" step="5" value="65" />
+              <div class="slider-marks"><span>0% Dry</span><span>50% Mix</span><span>100% Wet</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualizer & Audition Control Panel -->
+      <div class="rack-footer-panel">
+        <!-- Live DSP Waveform Canvas -->
+        <div class="mod-visualizer-wrap">
+          <div class="vis-header-row">
+            <span class="vis-tag">REAL-TIME DSP OSCILLOSCOPE MONITOR</span>
+            <span class="vis-fps" id="visFpsDisplay">60 FPS • 44.1 kHz</span>
+          </div>
+          <canvas id="modOscilloscopeCanvas" width="560" height="90" aria-label="Real-time audio modulation oscilloscope"></canvas>
+        </div>
+
+        <!-- Audition Actions & Voice Sample Source -->
+        <div class="mod-actions-col">
+          <div class="sample-source-select-wrap">
+            <label for="modSamplePhraseSelect">Audition Audio Phrase:</label>
+            <select id="modSamplePhraseSelect" class="mod-select">
+              <option value="cyborg">"Neural voice synthesis online. Autonomous threat prevention engaged."</option>
+              <option value="station">"Welcome aboard the orbital station. Docking clamps secured."</option>
+              <option value="countdown">"T-minus ten seconds to orbital thruster ignition. Stand by."</option>
+            </select>
+          </div>
+
+          <div class="mod-btn-row">
+            <button type="button" class="btn-mod-audition" id="btnModAudition">
+              <span class="btn-play-icon" id="modPlayIcon">▶</span>
+              <span id="modPlayText">Audition Modulated Voice</span>
+            </button>
+            <button type="button" class="btn-mod-reset" id="btnModReset">Reset Rack</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #387 ===== -->
+
+  <!-- ===== BEGIN Issue #324: Voice Accent & Dialect Previewer with Cadence Presets ===== -->
+  <section class="accent-previewer-section" id="voiceAccentPreviewer" aria-labelledby="accentTitle">
+    <div class="accent-header">
+      <div class="badge">🎙️ NEURAL REGIONAL ENGINE // ACCENT &amp; DIALECT PREVIEWER</div>
+      <h2 id="accentTitle">Global Voice Accent &amp; Dialect Studio</h2>
+      <p>Audition vocal personas across international dialects. Fine-tune regional pitch inflections, syllable cadence presets, and speech synthesis phonetics with live waveform feedback.</p>
+    </div>
+
+    <!-- Dialect Cards Grid -->
+    <div class="dialect-cards-grid" role="radiogroup" aria-label="Select Voice Accent Dialect">
+      <div class="dialect-card active" data-id="british-rp" data-lang="en-GB" data-pitch="1.05" data-rate="0.95" data-flag="🇬🇧" role="radio" aria-checked="true" tabindex="0">
+        <div class="dialect-top">
+          <span class="dialect-flag">🇬🇧</span>
+          <span class="dialect-tag">BRITISH RP</span>
+        </div>
+        <h3 class="dialect-name">Oxford Standard RP</h3>
+        <p class="dialect-desc">Crisp consonants, aristocratic cadence, and measured academic poise.</p>
+        <div class="dialect-meta">
+          <span>Pitch: +5%</span>
+          <span>Pace: 0.95x</span>
+        </div>
+      </div>
+
+      <div class="dialect-card" data-id="us-pacific" data-lang="en-US" data-pitch="1.00" data-rate="1.10" data-flag="🇺🇸" role="radio" aria-checked="false" tabindex="0">
+        <div class="dialect-top">
+          <span class="dialect-flag">🇺🇸</span>
+          <span class="dialect-tag">US PACIFIC</span>
+        </div>
+        <h3 class="dialect-name">West Coast Dynamic</h3>
+        <p class="dialect-desc">Brisk, upbeat Silicon Valley conversational cadence with vocal fry control.</p>
+        <div class="dialect-meta">
+          <span>Pitch: Norm</span>
+          <span>Pace: 1.10x</span>
+        </div>
+      </div>
+
+      <div class="dialect-card" data-id="australian" data-lang="en-AU" data-pitch="0.92" data-rate="1.05" data-flag="🇦🇺" role="radio" aria-checked="false" tabindex="0">
+        <div class="dialect-top">
+          <span class="dialect-flag">🇦🇺</span>
+          <span class="dialect-tag">AUSTRALIAN</span>
+        </div>
+        <h3 class="dialect-name">Sydney Metro Coastal</h3>
+        <p class="dialect-desc">Relaxed vowels, rising inflections, and warm resonant projection.</p>
+        <div class="dialect-meta">
+          <span>Pitch: -8%</span>
+          <span>Pace: 1.05x</span>
+        </div>
+      </div>
+
+      <div class="dialect-card" data-id="transatlantic" data-lang="en-GB" data-pitch="1.20" data-rate="1.15" data-flag="🗽" role="radio" aria-checked="false" tabindex="0">
+        <div class="dialect-top">
+          <span class="dialect-flag">🗽</span>
+          <span class="dialect-tag">TRANSATLANTIC</span>
+        </div>
+        <h3 class="dialect-name">Golden Age Broadcaster</h3>
+        <p class="dialect-desc">Non-rhotic, formal theatrical diction engineered for radio clarity.</p>
+        <div class="dialect-meta">
+          <span>Pitch: +20%</span>
+          <span>Pace: 1.15x</span>
+        </div>
+      </div>
+
+      <div class="dialect-card" data-id="irish-celtic" data-lang="en-IE" data-pitch="1.10" data-rate="1.00" data-flag="🇮🇪" role="radio" aria-checked="false" tabindex="0">
+        <div class="dialect-top">
+          <span class="dialect-flag">🇮🇪</span>
+          <span class="dialect-tag">IRISH LILT</span>
+        </div>
+        <h3 class="dialect-name">Dublin Coastal Lilt</h3>
+        <p class="dialect-desc">Musical cadence, soft plosives, and rhythmic storytelling resonance.</p>
+        <div class="dialect-meta">
+          <span>Pitch: +10%</span>
+          <span>Pace: 1.00x</span>
+        </div>
+      </div>
+
+      <div class="dialect-card" data-id="scandinavian" data-lang="en-GB" data-pitch="0.96" data-rate="0.92" data-flag="🇸🇪" role="radio" aria-checked="false" tabindex="0">
+        <div class="dialect-top">
+          <span class="dialect-flag">🇸🇪</span>
+          <span class="dialect-tag">NORDIC CLEAN</span>
+        </div>
+        <h3 class="dialect-name">Nordic Euro Clean</h3>
+        <p class="dialect-desc">Precise neutral phonemes, pitch stability, and minimal vibrato.</p>
+        <div class="dialect-meta">
+          <span>Pitch: -4%</span>
+          <span>Pace: 0.92x</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audition Workbench Grid -->
+    <div class="accent-workbench-grid">
+      <!-- Left: Phrase & Cadence Variations -->
+      <div class="accent-panel-card">
+        <div class="panel-head">
+          <span class="panel-label">AUDITION PHRASE &amp; CADENCE</span>
+          <span class="active-dialect-pill" id="activeDialectBadge">🇬🇧 British RP Active</span>
+        </div>
+
+        <div class="phrase-input-wrap">
+          <label for="accentSampleInput">Audition Script Phrase</label>
+          <textarea id="accentSampleInput" class="accent-textarea" rows="3" placeholder="Enter audition script...">Perfection is not an accident; it is the deliberate pursuit of architectural elegance and vocal clarity.</textarea>
+        </div>
+
+        <div class="phrase-presets-strip">
+          <span class="strip-label">Quick Phrases:</span>
+          <button type="button" class="btn-phrase-chip active" data-text="Perfection is not an accident; it is the deliberate pursuit of architectural elegance and vocal clarity.">Architectural</button>
+          <button type="button" class="btn-phrase-chip" data-text="Deploying serverless containers to twenty-four edge clusters with zero packet loss.">Tech / Edge</button>
+          <button type="button" class="btn-phrase-chip" data-text="Good evening and welcome to the world premiere of our generative audio engine.">Broadcast</button>
+        </div>
+
+        <div class="cadence-presets-block">
+          <span class="strip-label">Cadence Inflection Modes:</span>
+          <div class="cadence-pills-row" role="group" aria-label="Cadence Inflection Presets">
+            <button type="button" class="cadence-pill active" data-cadence="natural" data-pitch-delta="0" data-rate-delta="0">✨ Standard Flow</button>
+            <button type="button" class="cadence-pill" data-cadence="urgent" data-pitch-delta="0.15" data-rate-delta="0.20">⚡ Breaking Alert</button>
+            <button type="button" class="cadence-pill" data-cadence="docu" data-pitch-delta="-0.08" data-rate-delta="-0.15">🎙️ Documentary</button>
+            <button type="button" class="cadence-pill" data-cadence="whisper" data-pitch-delta="-0.12" data-rate-delta="-0.20">🌙 ASMR Soft</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Sliders, Live Waveform & Playback Trigger -->
+      <div class="accent-panel-card controls-card">
+        <div class="panel-head">
+          <span class="panel-label">FINE-TUNING CONTROLS</span>
+          <span class="accent-status-dot" id="accentPlaybackStatus">IDLE</span>
+        </div>
+
+        <!-- Sliders -->
+        <div class="accent-sliders-stack">
+          <div class="accent-slider-row">
+            <div class="slider-meta">
+              <label for="accentPitchSlider">Pitch Transposition</label>
+              <strong id="accentPitchVal">1.05x</strong>
+            </div>
+            <input type="range" id="accentPitchSlider" min="0.5" max="1.8" step="0.05" value="1.05" />
+          </div>
+
+          <div class="accent-slider-row">
+            <div class="slider-meta">
+              <label for="accentRateSlider">Speaking Cadence (Speed)</label>
+              <strong id="accentRateVal">0.95x</strong>
+            </div>
+            <input type="range" id="accentRateSlider" min="0.5" max="1.8" step="0.05" value="0.95" />
+          </div>
+
+          <div class="accent-slider-row">
+            <div class="slider-meta">
+              <label for="accentVolumeSlider">Output Volume</label>
+              <strong id="accentVolumeVal">100%</strong>
+            </div>
+            <input type="range" id="accentVolumeSlider" min="0" max="1" step="0.05" value="1.0" />
+          </div>
+        </div>
+
+        <!-- Live Waveform Visualizer simulation -->
+        <div class="accent-waveform-visualizer" id="accentWaveform" aria-hidden="true">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="accent-actions-row">
+          <button type="button" class="btn-accent-play" id="btnAccentPlay">
+            <span class="play-icon">▶</span> <span id="accentPlayBtnText">Audition Accent</span>
+          </button>
+          <button type="button" class="btn-accent-copy" id="btnCopyAccentConfig">
+            📋 Copy JSON Spec
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #324 ===== -->
+
   <!-- Multi-Track Audio Timeline Editor (DAW) -->
   <section class="daw-section" id="daw-timeline" aria-labelledby="daw-title">
     <div class="daw-header">

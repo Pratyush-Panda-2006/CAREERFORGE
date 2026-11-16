@@ -1,11 +1,11 @@
-// Sonora AI Voice Studio & Neural Tuner Engine
+﻿// Sonora AI Voice Studio & Neural Tuner Engine
 // Real-time Pitch, Speed & Emotion Modulation
 
 const VOICE_MODELS = {
   aria: {
     id: 'aria',
     name: 'Aria',
-    tagline: 'Studio Warmth • Conversational',
+    tagline: 'Studio Warmth â€¢ Conversational',
     lang: 'en-US',
     basePitch: 1.0,
     baseSpeed: 1.0,
@@ -15,7 +15,7 @@ const VOICE_MODELS = {
   marcus: {
     id: 'marcus',
     name: 'Marcus',
-    tagline: 'Deep Broadcast • Narration',
+    tagline: 'Deep Broadcast â€¢ Narration',
     lang: 'en-GB',
     basePitch: 0.85,
     baseSpeed: 0.95,
@@ -25,7 +25,7 @@ const VOICE_MODELS = {
   elena: {
     id: 'elena',
     name: 'Elena',
-    tagline: 'Cybernetic Synth • AI Assistant',
+    tagline: 'Cybernetic Synth â€¢ AI Assistant',
     lang: 'en-US',
     basePitch: 1.15,
     baseSpeed: 1.05,
@@ -35,7 +35,7 @@ const VOICE_MODELS = {
   leo: {
     id: 'leo',
     name: 'Leo',
-    tagline: 'Energetic Streamer • Dynamic',
+    tagline: 'Energetic Streamer â€¢ Dynamic',
     lang: 'en-US',
     basePitch: 1.25,
     baseSpeed: 1.20,
@@ -48,25 +48,25 @@ const EMOTION_PRESETS = {
   neutral: {
     pitch: 1.00,
     speed: 1.00,
-    title: 'Neutral 😐',
+    title: 'Neutral ðŸ˜',
     feedback: 'Neutral emotion applied: balanced fundamental frequency and natural conversational pacing.'
   },
   cheerful: {
     pitch: 1.25,
     speed: 1.15,
-    title: 'Cheerful 😊',
+    title: 'Cheerful ðŸ˜Š',
     feedback: 'Cheerful emotion applied: +3.9 semitone pitch contour and bright, uplifted tempo.'
   },
   professional: {
     pitch: 0.90,
     speed: 0.95,
-    title: 'Professional 👔',
+    title: 'Professional ðŸ‘”',
     feedback: 'Professional emotion applied: measured cadence with authoritative, grounded acoustic resonance.'
   },
   energetic: {
     pitch: 1.35,
     speed: 1.30,
-    title: 'Energetic ⚡',
+    title: 'Energetic âš¡',
     feedback: 'Energetic emotion applied: high-impact pitch shift with rapid, dynamic speech rhythm.'
   }
 };
@@ -84,6 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initTtsStudio();
   initMultiTrackWaveform();
   initDawTimeline();
+  initModulationLab();
+  initVoiceAccentPreviewer();
 });
 
 // ---------- Voice Studio Tuner Engine ----------
@@ -123,7 +125,7 @@ function initVoiceStudioTuner() {
   function resetSampleButton(button) {
     if (!button) return;
     button.classList.remove('playing');
-    button.querySelector('.sample-play-icon').textContent = '▶';
+    button.querySelector('.sample-play-icon').textContent = 'â–¶';
     button.querySelector('.sample-play-label').textContent = 'Play sample';
     const modelName = VOICE_MODELS[button.dataset.playSample]?.name || 'voice';
     button.title = 'Play ' + modelName + ' voice sample';
@@ -167,11 +169,11 @@ function initVoiceStudioTuner() {
     activeSampleButton = button;
     activeSampleUtterance = utterance;
     button.classList.add('playing');
-    button.querySelector('.sample-play-icon').textContent = '■';
-    button.querySelector('.sample-play-label').textContent = 'Playing…';
+    button.querySelector('.sample-play-icon').textContent = 'â– ';
+    button.querySelector('.sample-play-label').textContent = 'Playingâ€¦';
     button.title = 'Stop ' + model.name + ' voice sample';
     button.setAttribute('aria-label', 'Stop ' + model.name + ' voice sample');
-    feedbackEl.textContent = 'Playing ' + model.name + ' voice sample…';
+    feedbackEl.textContent = 'Playing ' + model.name + ' voice sampleâ€¦';
 
     const finish = () => {
       if (activeSampleUtterance !== utterance) return;
@@ -248,7 +250,7 @@ function initVoiceStudioTuner() {
       }
     });
 
-    activeModelNameEl.textContent = `${model.name} (${model.tagline.split('•')[0].trim()})`;
+    activeModelNameEl.textContent = `${model.name} (${model.tagline.split('â€¢')[0].trim()})`;
     feedbackEl.textContent = `Active voice model switched to ${model.name}. Adjust Pitch and Speed sliders to calibrate voice output.`;
 
     updateSliderDisplay();
@@ -294,7 +296,7 @@ function initVoiceStudioTuner() {
       slider.value = settings.volume;
       output.textContent = `${Math.round(settings.volume * 100)}%`;
 
-      muteBtn.textContent = settings.muted ? '🔇 Unmute' : '🔊 Mute';
+      muteBtn.textContent = settings.muted ? 'ðŸ”‡ Unmute' : 'ðŸ”Š Mute';
       muteBtn.setAttribute('aria-pressed', String(settings.muted));
       muteBtn.setAttribute(
         'aria-label',
@@ -380,7 +382,7 @@ function initVoiceStudioTuner() {
 
     if (!matched) {
       currentEmotion = 'custom';
-      activeEmotionNameEl.textContent = 'Custom 🎛️';
+      activeEmotionNameEl.textContent = 'Custom ðŸŽ›ï¸';
     }
   }
 
@@ -512,7 +514,7 @@ function initVoiceStudioTuner() {
       ttsRate.dispatchEvent(new Event('input', { bubbles: true }));
       ttsPitch.dispatchEvent(new Event('input', { bubbles: true }));
 
-      feedbackEl.textContent = `✓ Tuner settings synced to Text-to-Speech Studio (Rate: ${speedInput.value}x, Pitch: ${pitchInput.value}x).`;
+      feedbackEl.textContent = `âœ“ Tuner settings synced to Text-to-Speech Studio (Rate: ${speedInput.value}x, Pitch: ${pitchInput.value}x).`;
 
       // Smooth scroll down to TTS studio
       const studioSection = document.getElementById('studio');
@@ -1028,7 +1030,7 @@ function initMultiTrackWaveform() {
     if (playBtn) {
       playBtn.classList.toggle('is-playing', isPlaying);
       if (playLabel) playLabel.textContent = isPlaying ? 'Pause Real-Time Stream' : 'Start Real-Time Stream';
-      if (playIcon) playIcon.textContent = isPlaying ? '⏸' : '▶';
+      if (playIcon) playIcon.textContent = isPlaying ? 'â¸' : 'â–¶';
     }
   }
 
@@ -1047,7 +1049,7 @@ function initMultiTrackWaveform() {
     freezeBtn.addEventListener('click', () => {
       isFrozen = !isFrozen;
       freezeBtn.classList.toggle('is-frozen', isFrozen);
-      freezeBtn.querySelector('span').textContent = isFrozen ? '▶ Unfreeze' : '❄️ Freeze';
+      freezeBtn.querySelector('span').textContent = isFrozen ? 'â–¶ Unfreeze' : 'â„ï¸ Freeze';
     });
   }
 
@@ -1456,7 +1458,7 @@ function initDawTimeline() {
     }
 
     state.isPlaying = true;
-    playIcon.textContent = '⏸';
+    playIcon.textContent = 'â¸';
     playText.textContent = 'Pause';
     statusBar.textContent = 'Playing multi-track timeline...';
 
@@ -1488,7 +1490,7 @@ function initDawTimeline() {
     state.isPlaying = false;
     stopAudio();
     if (animId) cancelAnimationFrame(animId);
-    playIcon.textContent = '▶';
+    playIcon.textContent = 'â–¶';
     playText.textContent = 'Resume Timeline';
     statusBar.textContent = `Paused at ${state.currentTime.toFixed(2)}s.`;
   }
@@ -1499,7 +1501,7 @@ function initDawTimeline() {
     if (animId) cancelAnimationFrame(animId);
     state.currentTime = 0.0;
     updateTimecode();
-    playIcon.textContent = '▶';
+    playIcon.textContent = 'â–¶';
     playText.textContent = 'Play Timeline';
     statusBar.textContent = 'Timeline stopped and rewound to 00:00.00.';
   }
@@ -1728,7 +1730,7 @@ function initDawTimeline() {
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
 
-        statusBar.textContent = '🎉 Multi-track WAV audio successfully exported and downloaded!';
+        statusBar.textContent = 'ðŸŽ‰ Multi-track WAV audio successfully exported and downloaded!';
       } catch (err) {
         statusBar.textContent = `Export failed: ${err.message}`;
       }
@@ -1741,4 +1743,682 @@ function initDawTimeline() {
   renderRuler();
   refreshAllClips();
   updateTimecode();
+}
+
+
+// ==========================================================================
+// Issue #387: Voice Pitch-Shift & Robotic Modulation Filter Laboratory
+// ==========================================================================
+function initModulationLab() {
+  const section = document.getElementById('modulationLab');
+  if (!section) return;
+
+  // Controls
+  const pitchSlider = document.getElementById('modPitchSlider');
+  const cutoffSlider = document.getElementById('modCutoffSlider');
+  const carrierSlider = document.getElementById('modCarrierSlider');
+  const crushSlider = document.getElementById('modCrushSlider');
+  const delaySlider = document.getElementById('modDelaySlider');
+  const wetDrySlider = document.getElementById('modWetDrySlider');
+
+  const pitchVal = document.getElementById('modPitchVal');
+  const cutoffVal = document.getElementById('modCutoffVal');
+  const carrierVal = document.getElementById('modCarrierVal');
+  const crushVal = document.getElementById('modCrushVal');
+  const delayVal = document.getElementById('modDelayVal');
+  const wetDryVal = document.getElementById('modWetDryVal');
+
+  const presetButtons = section.querySelectorAll('.mod-preset-btn');
+  const auditionBtn = document.getElementById('btnModAudition');
+  const resetBtn = document.getElementById('btnModReset');
+  const phraseSelect = document.getElementById('modSamplePhraseSelect');
+  const playIcon = document.getElementById('modPlayIcon');
+  const playText = document.getElementById('modPlayText');
+  const canvas = document.getElementById('modOscilloscopeCanvas');
+  const ledDsp = document.getElementById('ledDsp');
+  const ledClip = document.getElementById('ledClip');
+
+  // Presets definition
+  const presets = {
+    cyborg: { pitch: 0, cutoff: 2400, carrier: 60, crush: 5.5, delay: 140, wet: 70 },
+    helium: { pitch: 12, cutoff: 5800, carrier: 15, crush: 0.5, delay: 60, wet: 40 },
+    radio: { pitch: -7, cutoff: 1200, carrier: 20, crush: 2.0, delay: 90, wet: 55 },
+    cathedral: { pitch: 0, cutoff: 4200, carrier: 10, crush: 0.0, delay: 520, wet: 85 },
+    clean: { pitch: 0, cutoff: 8000, carrier: 10, crush: 0.0, delay: 0, wet: 0 }
+  };
+
+  function updateDisplays() {
+    if (pitchSlider && pitchVal) {
+      const p = parseInt(pitchSlider.value, 10);
+      pitchVal.textContent = `${p > 0 ? '+' : ''}${p} st`;
+    }
+    if (cutoffSlider && cutoffVal) {
+      cutoffVal.textContent = `${Number(cutoffSlider.value).toLocaleString()} Hz`;
+    }
+    if (carrierSlider && carrierVal) {
+      carrierVal.textContent = `${carrierSlider.value} Hz`;
+    }
+    if (crushSlider && crushVal) {
+      crushVal.textContent = `${crushSlider.value} Drive`;
+    }
+    if (delaySlider && delayVal) {
+      delayVal.textContent = `${delaySlider.value} ms`;
+    }
+    if (wetDrySlider && wetDryVal) {
+      wetDryVal.textContent = `${wetDrySlider.value}% Wet`;
+    }
+  }
+
+  function applyPreset(presetKey) {
+    const p = presets[presetKey];
+    if (!p) return;
+    if (pitchSlider) pitchSlider.value = p.pitch;
+    if (cutoffSlider) cutoffSlider.value = p.cutoff;
+    if (carrierSlider) carrierSlider.value = p.carrier;
+    if (crushSlider) crushSlider.value = p.crush;
+    if (delaySlider) delaySlider.value = p.delay;
+    if (wetDrySlider) wetDrySlider.value = p.wet;
+    updateDisplays();
+
+    presetButtons.forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.preset === presetKey);
+    });
+  }
+
+  presetButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyPreset(btn.dataset.preset);
+    });
+  });
+
+  [pitchSlider, cutoffSlider, carrierSlider, crushSlider, delaySlider, wetDrySlider].forEach((slider) => {
+    if (slider) {
+      slider.addEventListener('input', () => {
+        updateDisplays();
+        presetButtons.forEach((btn) => btn.classList.remove('active'));
+      });
+    }
+  });
+
+  // Oscilloscope drawing
+  let audioCtx = null;
+  let activeSourceNode = null;
+  let activeLfo = null;
+  let analyserNode = null;
+  let isAuditioning = false;
+  let animFrameId = null;
+
+  function initOscilloscope() {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const width = canvas.width;
+    const height = canvas.height;
+
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(0, 0, width, height);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0; x < width; x += 40) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+    }
+    for (let y = 0; y < height; y += 22) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+    }
+    ctx.stroke();
+
+    // Flat center line
+    ctx.strokeStyle = '#06b6d4';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const mid = height / 2;
+    for (let x = 0; x < width; x++) {
+      const y = mid + Math.sin(x * 0.05) * 2;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  function startOscilloscopeLoop() {
+    if (!canvas || !analyserNode) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const width = canvas.width;
+    const height = canvas.height;
+    const bufferLength = analyserNode.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    function draw() {
+      if (!isAuditioning) {
+        initOscilloscope();
+        if (ledClip) ledClip.classList.remove('active');
+        return;
+      }
+      animFrameId = requestAnimationFrame(draw);
+      analyserNode.getByteTimeDomainData(dataArray);
+
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, width, height);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = 0; x < width; x += 40) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+      }
+      for (let y = 0; y < height; y += 22) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+      }
+      ctx.stroke();
+
+      // Waveform
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#22d3ee';
+      ctx.beginPath();
+
+      const sliceWidth = width / bufferLength;
+      let x = 0;
+      let maxSample = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const diff = Math.abs(v - 1.0);
+        if (diff > maxSample) maxSample = diff;
+        const y = (v * height) / 2;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+        x += sliceWidth;
+      }
+      ctx.stroke();
+
+      // Peak clip light
+      if (ledClip) {
+        ledClip.classList.toggle('active', maxSample > 0.85);
+      }
+    }
+
+    draw();
+  }
+
+  function makeDistortionCurve(amount) {
+    const k = typeof amount === 'number' ? amount * 10 : 0;
+    const nSamples = 44100;
+    const curve = new Float32Array(nSamples);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < nSamples; ++i) {
+      const x = (i * 2) / nSamples - 1;
+      if (k === 0) {
+        curve[i] = x;
+      } else {
+        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+      }
+    }
+    return curve;
+  }
+
+  function createVocalBuffer(ctx, phraseKey) {
+    const sampleRate = ctx.sampleRate;
+    const duration = 2.4;
+    const numSamples = Math.floor(sampleRate * duration);
+    const buffer = ctx.createBuffer(1, numSamples, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    // Formant parameters for speech simulation
+    const formants = phraseKey === 'station'
+      ? [350, 1600, 2400]
+      : phraseKey === 'countdown'
+      ? [450, 1100, 2600]
+      : [280, 2100, 2800];
+
+    const basePitch = phraseKey === 'station' ? 140 : phraseKey === 'countdown' ? 120 : 160;
+
+    for (let i = 0; i < numSamples; i++) {
+      const t = i / sampleRate;
+      // Syllable envelopes (4 syllables)
+      const syllableEnv = 0.5 + 0.5 * Math.sin(2 * Math.PI * 3.5 * t);
+      // Glottal buzz
+      let sample = 0;
+      for (let h = 1; h <= 8; h++) {
+        const freq = basePitch * h;
+        // Resonance boosts near formants
+        let weight = 1 / h;
+        for (const f of formants) {
+          const dist = Math.abs(freq - f);
+          if (dist < 200) weight += 1.8;
+        }
+        sample += Math.sin(2 * Math.PI * freq * t) * weight;
+      }
+      // Apply envelope & fade in/out
+      const fadeIn = Math.min(1, t / 0.05);
+      const fadeOut = Math.min(1, (duration - t) / 0.1);
+      data[i] = (sample / 8) * syllableEnv * fadeIn * fadeOut * 0.7;
+    }
+
+    return buffer;
+  }
+
+  function stopAudition() {
+    isAuditioning = false;
+    if (activeSourceNode) {
+      try {
+        activeSourceNode.stop();
+        activeSourceNode.disconnect();
+      } catch {
+        // Ignored
+      }
+      activeSourceNode = null;
+    }
+    if (activeLfo) {
+      try {
+        activeLfo.stop();
+        activeLfo.disconnect();
+      } catch {
+        // Ignored
+      }
+      activeLfo = null;
+    }
+    if (animFrameId) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    }
+    if (auditionBtn) {
+      auditionBtn.classList.remove('playing');
+      if (playIcon) playIcon.textContent = 'â–¶';
+      if (playText) playText.textContent = 'Audition Modulated Voice';
+    }
+    if (ledDsp) ledDsp.classList.add('active');
+    if (ledClip) ledClip.classList.remove('active');
+    initOscilloscope();
+  }
+
+  function startAudition() {
+    stopAudition();
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    if (!audioCtx) {
+      audioCtx = new AudioContextClass();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const pitchSemitones = parseInt(pitchSlider ? pitchSlider.value : '0', 10);
+    const cutoffHz = parseFloat(cutoffSlider ? cutoffSlider.value : '2400');
+    const carrierHz = parseFloat(carrierSlider ? carrierSlider.value : '45');
+    const crushDrive = parseFloat(crushSlider ? crushSlider.value : '0');
+    const delayTimeMs = parseFloat(delaySlider ? delaySlider.value : '0');
+    const wetRatio = parseFloat(wetDrySlider ? wetDrySlider.value : '50') / 100;
+
+    const phraseKey = phraseSelect ? phraseSelect.value : 'cyborg';
+    const buffer = createVocalBuffer(audioCtx, phraseKey);
+
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.playbackRate.value = Math.pow(2, pitchSemitones / 12);
+
+    // Filter Node
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = cutoffHz;
+    filter.Q.value = 2.5;
+
+    // Distortion / Bitcrush Node
+    const waveshaper = audioCtx.createWaveShaper();
+    waveshaper.curve = makeDistortionCurve(crushDrive);
+    waveshaper.oversample = '2x';
+
+    // Ring Modulation (Carrier Oscillator + Gain)
+    const ringGain = audioCtx.createGain();
+    const lfo = audioCtx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = carrierHz;
+    const lfoDepth = audioCtx.createGain();
+    lfoDepth.gain.value = 0.5;
+    ringGain.gain.value = 0.5;
+
+    lfo.connect(lfoDepth);
+    lfoDepth.connect(ringGain.gain);
+
+    // Delay Node & Feedback
+    const delay = audioCtx.createDelay(1.0);
+    delay.delayTime.value = Math.max(0.001, delayTimeMs / 1000);
+    const delayFeedback = audioCtx.createGain();
+    delayFeedback.gain.value = delayTimeMs > 0 ? 0.4 : 0.0;
+    delay.connect(delayFeedback);
+    delayFeedback.connect(delay);
+
+    // Dry / Wet Routing
+    const dryGain = audioCtx.createGain();
+    dryGain.gain.value = 1.0 - wetRatio * 0.7;
+
+    const wetGain = audioCtx.createGain();
+    wetGain.gain.value = wetRatio;
+
+    // Analyser Node
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+
+    source.connect(dryGain);
+    dryGain.connect(analyser);
+
+    source.connect(filter);
+    filter.connect(waveshaper);
+    waveshaper.connect(ringGain);
+
+    if (delayTimeMs > 10) {
+      ringGain.connect(delay);
+      delay.connect(wetGain);
+      ringGain.connect(wetGain);
+    } else {
+      ringGain.connect(wetGain);
+    }
+
+    wetGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    activeSourceNode = source;
+    activeLfo = lfo;
+    analyserNode = analyser;
+    isAuditioning = true;
+
+    if (auditionBtn) {
+      auditionBtn.classList.add('playing');
+      if (playIcon) playIcon.textContent = 'â¹';
+      if (playText) playText.textContent = 'Stop DSP Audition';
+    }
+
+    lfo.start();
+    source.start();
+    startOscilloscopeLoop();
+
+    source.onended = () => {
+      stopAudition();
+    };
+  }
+
+  if (auditionBtn) {
+    auditionBtn.addEventListener('click', () => {
+      if (isAuditioning) {
+        stopAudition();
+      } else {
+        startAudition();
+      }
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      applyPreset('cyborg');
+      stopAudition();
+    });
+  }
+
+  // Initial setup
+  applyPreset('cyborg');
+  initOscilloscope();
+}
+
+
+// ===== Issue #324: Voice Accent & Dialect Previewer with Cadence Presets =====
+function initVoiceAccentPreviewer() {
+  if (typeof document === 'undefined') return;
+
+  const root = document.getElementById('voiceAccentPreviewer');
+  if (!root) return;
+
+  const dialectCards = root.querySelectorAll('.dialect-card');
+  const phraseChips = root.querySelectorAll('.btn-phrase-chip');
+  const cadencePills = root.querySelectorAll('.cadence-pill');
+
+  const textarea = document.getElementById('accentSampleInput');
+  const dialectBadge = document.getElementById('activeDialectBadge');
+  const statusDot = document.getElementById('accentPlaybackStatus');
+
+  const pitchSlider = document.getElementById('accentPitchSlider');
+  const pitchVal = document.getElementById('accentPitchVal');
+  const rateSlider = document.getElementById('accentRateSlider');
+  const rateVal = document.getElementById('accentRateVal');
+  const volumeSlider = document.getElementById('accentVolumeSlider');
+  const volumeVal = document.getElementById('accentVolumeVal');
+
+  const waveform = document.getElementById('accentWaveform');
+  const playBtn = document.getElementById('btnAccentPlay');
+  const playBtnText = document.getElementById('accentPlayBtnText');
+  const copyBtn = document.getElementById('btnCopyAccentConfig');
+
+  let activeDialect = {
+    id: 'british-rp',
+    name: 'Oxford Standard RP',
+    flag: '🇬🇧',
+    lang: 'en-GB',
+    basePitch: 1.05,
+    baseRate: 0.95
+  };
+
+  let cadenceOffset = {
+    pitchDelta: 0,
+    rateDelta: 0,
+    name: 'Standard Flow'
+  };
+
+  let isSpeaking = false;
+  let simulatedTimer = null;
+
+  function updateSliderDisplay() {
+    if (pitchVal && pitchSlider) pitchVal.textContent = parseFloat(pitchSlider.value).toFixed(2) + 'x';
+    if (rateVal && rateSlider) rateVal.textContent = parseFloat(rateSlider.value).toFixed(2) + 'x';
+    if (volumeVal && volumeSlider) volumeVal.textContent = Math.round(parseFloat(volumeSlider.value) * 100) + '%';
+  }
+
+  function applyDialectAndCadence() {
+    const finalPitch = Math.max(0.5, Math.min(1.8, activeDialect.basePitch + cadenceOffset.pitchDelta));
+    const finalRate = Math.max(0.5, Math.min(1.8, activeDialect.baseRate + cadenceOffset.rateDelta));
+
+    if (pitchSlider) pitchSlider.value = String(finalPitch.toFixed(2));
+    if (rateSlider) rateSlider.value = String(finalRate.toFixed(2));
+
+    if (dialectBadge) {
+      dialectBadge.textContent = activeDialect.flag + ' ' + activeDialect.name + ' (' + cadenceOffset.name + ')';
+    }
+
+    updateSliderDisplay();
+  }
+
+  // Dialect card selection
+  dialectCards.forEach((card) => {
+    card.addEventListener('click', () => {
+      dialectCards.forEach((c) => {
+        c.classList.remove('active');
+        c.setAttribute('aria-checked', 'false');
+      });
+      card.classList.add('active');
+      card.setAttribute('aria-checked', 'true');
+
+      activeDialect.id = card.getAttribute('data-id') || 'custom';
+      activeDialect.flag = card.getAttribute('data-flag') || '🎙️';
+      activeDialect.lang = card.getAttribute('data-lang') || 'en-US';
+      activeDialect.basePitch = parseFloat(card.getAttribute('data-pitch')) || 1.0;
+      activeDialect.baseRate = parseFloat(card.getAttribute('data-rate')) || 1.0;
+
+      const nameEl = card.querySelector('.dialect-name');
+      activeDialect.name = nameEl ? nameEl.textContent.trim() : 'Dialect';
+
+      applyDialectAndCadence();
+    });
+
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click();
+      }
+    });
+  });
+
+  // Phrase chips
+  phraseChips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      phraseChips.forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const text = chip.getAttribute('data-text');
+      if (text && textarea) {
+        textarea.value = text;
+      }
+    });
+  });
+
+  // Cadence variation pills
+  cadencePills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      cadencePills.forEach((p) => p.classList.remove('active'));
+      pill.classList.add('active');
+
+      cadenceOffset.pitchDelta = parseFloat(pill.getAttribute('data-pitch-delta')) || 0;
+      cadenceOffset.rateDelta = parseFloat(pill.getAttribute('data-rate-delta')) || 0;
+      cadenceOffset.name = pill.textContent.trim();
+
+      applyDialectAndCadence();
+    });
+  });
+
+  // Sliders input
+  if (pitchSlider) pitchSlider.addEventListener('input', updateSliderDisplay);
+  if (rateSlider) rateSlider.addEventListener('input', updateSliderDisplay);
+  if (volumeSlider) volumeSlider.addEventListener('input', updateSliderDisplay);
+
+  function stopSpeaking() {
+    isSpeaking = false;
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // Ignored
+      }
+    }
+    if (simulatedTimer) {
+      clearTimeout(simulatedTimer);
+      simulatedTimer = null;
+    }
+    if (playBtn) {
+      playBtn.classList.remove('speaking');
+      const icon = playBtn.querySelector('.play-icon');
+      if (icon) icon.textContent = '▶';
+    }
+    if (playBtnText) playBtnText.textContent = 'Audition Accent';
+    if (waveform) waveform.classList.remove('speaking');
+    if (statusDot) {
+      statusDot.className = 'accent-status-dot';
+      statusDot.textContent = 'IDLE';
+    }
+  }
+
+  function startSpeaking() {
+    stopSpeaking();
+
+    const textToSpeak = textarea ? textarea.value.trim() : 'Testing speech dialect';
+    if (!textToSpeak) return;
+
+    isSpeaking = true;
+    if (playBtn) {
+      playBtn.classList.add('speaking');
+      const icon = playBtn.querySelector('.play-icon');
+      if (icon) icon.textContent = '⏹';
+    }
+    if (playBtnText) playBtnText.textContent = 'Stop Audition';
+    if (waveform) waveform.classList.add('speaking');
+    if (statusDot) {
+      statusDot.className = 'accent-status-dot speaking';
+      statusDot.textContent = 'SYNTHESIZING';
+    }
+
+    const currentPitch = pitchSlider ? parseFloat(pitchSlider.value) : 1.0;
+    const currentRate = rateSlider ? parseFloat(rateSlider.value) : 1.0;
+    const currentVol = volumeSlider ? parseFloat(volumeSlider.value) : 1.0;
+
+    let hasSpokenNative = false;
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
+      try {
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = activeDialect.lang;
+        utterance.pitch = currentPitch;
+        utterance.rate = currentRate;
+        utterance.volume = currentVol;
+
+        const voices = window.speechSynthesis.getVoices();
+        if (voices && voices.length > 0) {
+          const match = voices.find((v) => v.lang.replace('_', '-').startsWith(activeDialect.lang));
+          if (match) utterance.voice = match;
+        }
+
+        utterance.onend = () => stopSpeaking();
+        utterance.onerror = () => stopSpeaking();
+
+        window.speechSynthesis.speak(utterance);
+        hasSpokenNative = true;
+      } catch {
+        hasSpokenNative = false;
+      }
+    }
+
+    if (!hasSpokenNative) {
+      // Graceful fallback simulation (e.g. headless browser or blocked speech audio)
+      const approxDurationMs = Math.max(2000, Math.min(8000, (textToSpeak.length * 65) / currentRate));
+      simulatedTimer = setTimeout(() => {
+        stopSpeaking();
+      }, approxDurationMs);
+    }
+  }
+
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      if (isSpeaking) {
+        stopSpeaking();
+      } else {
+        startSpeaking();
+      }
+    });
+  }
+
+  // Copy config
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const config = {
+        dialectId: activeDialect.id,
+        dialectName: activeDialect.name,
+        targetLang: activeDialect.lang,
+        pitch: pitchSlider ? parseFloat(pitchSlider.value) : 1.0,
+        rate: rateSlider ? parseFloat(rateSlider.value) : 1.0,
+        volume: volumeSlider ? parseFloat(volumeSlider.value) : 1.0,
+        cadencePreset: cadenceOffset.name,
+        sampleText: textarea ? textarea.value : ''
+      };
+
+      const jsonStr = JSON.stringify(config, null, 2);
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(jsonStr).then(() => {
+          const original = copyBtn.textContent;
+          copyBtn.textContent = '✓ Config Copied!';
+          setTimeout(() => {
+            copyBtn.textContent = original;
+          }, 2000);
+        });
+      }
+    });
+  }
+
+  // Initial calculation
+  applyDialectAndCadence();
 }

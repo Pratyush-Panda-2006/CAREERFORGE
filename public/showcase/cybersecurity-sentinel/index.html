@@ -380,6 +380,337 @@
   </section>
   <!-- ===== END issue #277 ===== -->
 
+  <!-- ===== BEGIN Issue #395: SSL/TLS Certificate Inspector & Cipher Suite Analyzer ===== -->
+  <section class="ssl-section" id="sslInspector" aria-labelledby="sslTitle">
+    <div class="ps-tag">// CRYPTOGRAPHIC PROTOCOL AUDIT // TLS 1.3 &amp; X.509</div>
+    <h2 id="sslTitle">SSL/TLS Certificate Inspector &amp; Cipher Suite Analyzer</h2>
+    <p class="ps-note" role="note">Simulated cryptographic handshake inspection engine. Validates X.509 certificate trust chains, checks Certificate Transparency (CT) logs, analyzes cipher suites against modern forward-secrecy standards, and detects protocol vulnerabilities.</p>
+
+    <!-- Quick Domain Presets & Lookup Bar -->
+    <div class="ssl-lookup-bar">
+      <div class="ssl-presets-row" role="group" aria-label="Target domain presets">
+        <span class="ssl-presets-label">Domain Presets:</span>
+        <button type="button" class="ssl-preset-btn active" data-domain="sentinel.defense.org">sentinel.defense.org <span class="preset-grade grade-aplus">A+</span></button>
+        <button type="button" class="ssl-preset-btn" data-domain="api.crypto-vault.io">api.crypto-vault.io <span class="preset-grade grade-a">A</span></button>
+        <button type="button" class="ssl-preset-btn" data-domain="legacy-portal.internal">legacy-portal.internal <span class="preset-grade grade-c">C</span></button>
+        <button type="button" class="ssl-preset-btn" data-domain="expired-corp.net">expired-corp.net <span class="preset-grade grade-f">F</span></button>
+      </div>
+
+      <form class="ssl-search-form" id="sslSearchForm" novalidate>
+        <div class="ssl-input-wrap">
+          <span class="ssl-input-icon" aria-hidden="true">🔒</span>
+          <input type="text" id="sslDomainInput" class="audit-input ssl-domain-input" placeholder="e.g. cloudflare.com or custom domain" value="sentinel.defense.org" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Target domain to inspect" />
+          <button type="submit" class="audit-toggle ssl-scan-btn" id="sslScanBtn">
+            <span class="btn-spinner" id="sslSpinner" hidden></span>
+            <span id="sslBtnText">Inspect TLS Handshake</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Diagnostic Results Grid -->
+    <div class="ssl-results-grid" id="sslResultsGrid">
+      <!-- Card 1: Certificate Health & Grade Card -->
+      <div class="ssl-card ssl-grade-card">
+        <div class="ssl-card-head">
+          <span class="ssl-card-tag">CRYPTOGRAPHIC POSTURE</span>
+          <span class="ssl-status-pill" id="sslStatusPill">
+            <span class="status-dot"></span>
+            <span id="sslStatusText">SECURE &amp; TRUSTED</span>
+          </span>
+        </div>
+
+        <div class="ssl-grade-display">
+          <div class="ssl-grade-circle" id="sslGradeCircle" data-grade="A+">
+            <span class="ssl-grade-letter" id="sslGradeLetter">A+</span>
+            <span class="ssl-grade-sub">SECURITY SCORE</span>
+          </div>
+          <div class="ssl-summary-metrics">
+            <div class="ssl-metric-row">
+              <span class="ssl-m-label">Subject CN:</span>
+              <strong class="ssl-m-val mono-cyan" id="sslSubjectCn">sentinel.defense.org</strong>
+            </div>
+            <div class="ssl-metric-row">
+              <span class="ssl-m-label">TLS Protocol:</span>
+              <strong class="ssl-m-val" id="sslTlsProtocol">TLS 1.3 (RFC 8446)</strong>
+            </div>
+            <div class="ssl-metric-row">
+              <span class="ssl-m-label">Key Exchange:</span>
+              <strong class="ssl-m-val" id="sslKeyExchange">X25519 (ECDHE, 256-bit) • PFS</strong>
+            </div>
+            <div class="ssl-metric-row">
+              <span class="ssl-m-label">Validity Countdown:</span>
+              <strong class="ssl-m-val text-emerald" id="sslExpiryCountdown">284 Days Remaining</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="ssl-vuln-banner" id="sslVulnBanner">
+          <span class="vuln-icon" id="sslVulnIcon">🛡️</span>
+          <div class="vuln-text">
+            <strong id="sslVulnTitle">Zero High-Risk Vulnerabilities Detected</strong>
+            <p id="sslVulnDesc">Handshake strictly mandates modern AEAD ciphers with Ephemeral Diffie-Hellman forward secrecy. Deprecated CBC and TLS 1.0/1.1 are actively blocked.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: X.509 Certificate Chain Tree -->
+      <div class="ssl-card ssl-chain-card">
+        <div class="ssl-card-head">
+          <span class="ssl-card-tag">X.509 CERTIFICATE TRUST CHAIN</span>
+          <span class="mono-dim">RFC 5280</span>
+        </div>
+
+        <div class="ssl-chain-tree" id="sslChainTree">
+          <!-- Populated safely via JavaScript -->
+        </div>
+      </div>
+
+      <!-- Card 3: Cipher Suites Analyzer Table -->
+      <div class="ssl-card ssl-ciphers-card">
+        <div class="ssl-card-head">
+          <span class="ssl-card-tag">SUPPORTED CIPHER SUITES &amp; PROTOCOLS</span>
+          <div class="cipher-legend">
+            <span class="c-leg-item"><span class="c-dot strong"></span>Recommended (AEAD)</span>
+            <span class="c-leg-item"><span class="c-dot warn"></span>Legacy CBC</span>
+            <span class="c-leg-item"><span class="c-dot insecure"></span>Insecure</span>
+          </div>
+        </div>
+
+        <div class="ssl-table-wrap">
+          <table class="ssl-table" id="sslCiphersTable">
+            <thead>
+              <tr>
+                <th scope="col">Cipher Suite Name</th>
+                <th scope="col">Protocol</th>
+                <th scope="col">Key Exchange</th>
+                <th scope="col">Encryption Mode</th>
+                <th scope="col">Security Rating</th>
+              </tr>
+            </thead>
+            <tbody id="sslCiphersBody">
+              <!-- Populated safely via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Card 4: Certificate Transparency Logs & Protocol Extensions -->
+      <div class="ssl-card ssl-ct-card">
+        <div class="ssl-card-head">
+          <span class="ssl-card-tag">CERTIFICATE TRANSPARENCY (CT) LOGS &amp; EXTENSIONS</span>
+          <span class="mono-dim">RFC 6962 / SCT</span>
+        </div>
+
+        <div class="ct-layout">
+          <div class="ct-logs-col">
+            <span class="ct-subhead">Signed Certificate Timestamps (SCTs):</span>
+            <ul class="ct-log-list" id="sslCtLogsList">
+              <!-- Populated safely via JavaScript -->
+            </ul>
+          </div>
+          <div class="ct-features-col">
+            <span class="ct-subhead">Security Extensions &amp; Flags:</span>
+            <div class="ct-features-grid" id="sslFeaturesGrid">
+              <!-- Populated safely via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #395 ===== -->
+
+  <!-- ===== START Issue #332: Interactive Firewall Rule Manager & CIDR Validator ===== -->
+  <section class="firewall-manager-section" id="firewallRuleManager" aria-labelledby="firewallManagerTitle">
+    <div class="fw-container">
+      <!-- Section Header -->
+      <div class="fw-header">
+        <div class="fw-badge">EDGE PERIMETER DEFENSE &bull; ISSUE #332</div>
+        <h2 id="firewallManagerTitle" class="fw-title">Next-Gen Firewall (NGFW) Rule Manager &amp; CIDR Subnet Validator</h2>
+        <p class="fw-subtitle">
+          Configure, validate, and enforce ingress and egress perimeter network access control lists. Features real-time IPv4 &amp; IPv6 CIDR subnet syntax verification, stateful action toggling (ALLOW / DENY / DROP), and priority-ordered telemetry.
+        </p>
+      </div>
+
+      <!-- KPI Metrics Overview -->
+      <div class="fw-metrics-grid">
+        <div class="fw-metric-card">
+          <div class="metric-icon icon-rules">🛡️</div>
+          <div class="metric-details">
+            <span class="metric-lbl">Total Configured Rules</span>
+            <strong class="metric-num" id="fwMetricTotal">6</strong>
+          </div>
+        </div>
+        <div class="fw-metric-card">
+          <div class="metric-icon icon-active">🟢</div>
+          <div class="metric-details">
+            <span class="metric-lbl">Active Enforcing Rules</span>
+            <strong class="metric-num" id="fwMetricActive">5</strong>
+          </div>
+        </div>
+        <div class="fw-metric-card">
+          <div class="metric-icon icon-whitelist">✅</div>
+          <div class="metric-details">
+            <span class="metric-lbl">Whitelisted Subnets</span>
+            <strong class="metric-num" id="fwMetricWhitelist">3</strong>
+          </div>
+        </div>
+        <div class="fw-metric-card">
+          <div class="metric-icon icon-blacklist">🚫</div>
+          <div class="metric-details">
+            <span class="metric-lbl">Blacklisted CIDR Blocks</span>
+            <strong class="metric-num" id="fwMetricBlacklist">3</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action & Filter Bar -->
+      <div class="fw-toolbar">
+        <div class="fw-toolbar-filters">
+          <div class="fw-filter-item">
+            <label for="fwFilterStatus">Status:</label>
+            <select id="fwFilterStatus" class="fw-select" aria-label="Filter by rule status">
+              <option value="all">All Rules</option>
+              <option value="active">Active Only</option>
+              <option value="disabled">Disabled Only</option>
+            </select>
+          </div>
+          <div class="fw-filter-item">
+            <label for="fwFilterAction">Policy Action:</label>
+            <select id="fwFilterAction" class="fw-select" aria-label="Filter by policy action">
+              <option value="all">All Actions</option>
+              <option value="ALLOW">Whitelist (ALLOW)</option>
+              <option value="DENY">Blacklist (DENY)</option>
+              <option value="DROP">Silent Drop (DROP)</option>
+            </select>
+          </div>
+          <div class="fw-filter-search">
+            <input type="search" id="fwSearchInput" class="fw-search-input" placeholder="Search by name, CIDR, or port..." aria-label="Search firewall rules">
+          </div>
+        </div>
+        <div class="fw-toolbar-actions">
+          <button type="button" class="btn-fw-primary" id="btnToggleAddRule">
+            + Add Firewall Rule
+          </button>
+          <button type="button" class="btn-fw-secondary" id="btnResetDefaultRules" title="Reset default SOC perimeter rules">
+            ↺ Reset Defaults
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive Rule Creator Drawer/Form -->
+      <div class="fw-creator-drawer" id="fwCreatorDrawer" hidden>
+        <div class="fw-drawer-inner">
+          <div class="fw-drawer-head">
+            <div>
+              <span class="fw-drawer-kicker">POLICY DEFINITION</span>
+              <h3 class="fw-drawer-title">Add Perimeter Access Rule</h3>
+            </div>
+            <button type="button" class="fw-close-btn" id="btnCloseCreator" aria-label="Close rule creator">&times;</button>
+          </div>
+
+          <form id="fwAddRuleForm" class="fw-form" novalidate>
+            <div class="form-row form-row-2">
+              <div class="form-group">
+                <label for="ruleNameInput">Rule Description / Name <span class="req">*</span></label>
+                <input type="text" id="ruleNameInput" class="fw-input" placeholder="e.g. Corporate VPN Gateway Egress" required>
+              </div>
+              <div class="form-group">
+                <label for="rulePriorityInput">Evaluation Priority (10 - 1000) <span class="req">*</span></label>
+                <input type="number" id="rulePriorityInput" class="fw-input" value="15" min="1" max="9999" required>
+              </div>
+            </div>
+
+            <div class="form-row form-row-3">
+              <div class="form-group">
+                <label for="ruleActionSelect">Policy Action <span class="req">*</span></label>
+                <select id="ruleActionSelect" class="fw-select" required>
+                  <option value="ALLOW">ALLOW (Whitelist Traffic)</option>
+                  <option value="DENY">DENY (Reject with TCP RST)</option>
+                  <option value="DROP">DROP (Silent Blackhole)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="ruleDirectionSelect">Direction <span class="req">*</span></label>
+                <select id="ruleDirectionSelect" class="fw-select" required>
+                  <option value="INGRESS">INGRESS (Inbound)</option>
+                  <option value="EGRESS">EGRESS (Outbound)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="ruleProtocolSelect">Protocol <span class="req">*</span></label>
+                <select id="ruleProtocolSelect" class="fw-select" required>
+                  <option value="ANY">ANY (All Protocols)</option>
+                  <option value="TCP">TCP</option>
+                  <option value="UDP">UDP</option>
+                  <option value="ICMP">ICMP</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row form-row-2">
+              <div class="form-group">
+                <label for="ruleCidrInput">IP or CIDR Subnet Block <span class="req">*</span></label>
+                <div class="input-with-validation">
+                  <input type="text" id="ruleCidrInput" class="fw-input" placeholder="e.g. 192.168.1.0/24 or 2001:db8::/32" required>
+                  <span class="validator-badge" id="cidrValidatorBadge">Awaiting CIDR</span>
+                </div>
+                <div class="cidr-feedback-msg" id="cidrFeedbackMsg">
+                  Enter an IPv4 (e.g. 10.0.0.0/16, 172.16.5.1/32) or IPv6 CIDR (e.g. 2001:db8::/48).
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="rulePortInput">Destination Port / Range</label>
+                <input type="text" id="rulePortInput" class="fw-input" placeholder="e.g. 443, 80-85, or ANY" value="ANY">
+                <small class="form-hint">Comma separated ports or range (e.g. 80, 443, 8000-8080)</small>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button type="submit" class="btn-fw-submit" id="btnSubmitRule">
+                🛡️ Deploy &amp; Enforce Rule
+              </button>
+              <button type="button" class="btn-fw-cancel" id="btnCancelRule">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- SOC Defense Rules Data Table -->
+      <div class="fw-table-card">
+        <div class="fw-table-wrapper">
+          <table class="fw-table" id="fwRulesTable">
+            <thead>
+              <tr>
+                <th scope="col" style="width: 70px;">Priority</th>
+                <th scope="col" style="width: 80px;">Status</th>
+                <th scope="col" style="width: 85px;">Dir</th>
+                <th scope="col">Rule Name &amp; Description</th>
+                <th scope="col">IP / CIDR Block</th>
+                <th scope="col">Proto &bull; Port</th>
+                <th scope="col" style="width: 100px;">Policy</th>
+                <th scope="col" style="width: 90px;">Hits (24h)</th>
+                <th scope="col" style="width: 100px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="fwRulesTableBody">
+              <!-- Dynamically populated via script.js -->
+            </tbody>
+          </table>
+        </div>
+        <div class="fw-empty-state" id="fwEmptyState" hidden>
+          <div class="empty-icon">🔍</div>
+          <h4>No firewall rules match your filter criteria</h4>
+          <p>Try resetting filters or adding a new access control rule.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #332 ===== -->
+
   <script src="script.js"></script>
   <dialog id="audit-dialog" aria-labelledby="audit-title">
     <h2 id="audit-title">Generate simulated audit report</h2>

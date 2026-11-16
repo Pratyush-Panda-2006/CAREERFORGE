@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initInteractiveScopeEstimator();
   initReviewModal();
   initFaqAccordion();
+  initBrandMoodboard();
 });
 
 // ---------------------------------------------------------------
@@ -1992,3 +1993,518 @@ function initInteractiveScopeEstimator() {
   renderScopeEstimate();
 }
 /* ===== END Issue #435 ===== */
+
+
+// ==========================================================================
+// Issue #385: Interactive Client Brand Moodboard Builder & Palette Generator
+// ==========================================================================
+function initBrandMoodboard() {
+  const section = document.getElementById('brandMoodboard');
+  if (!section) return;
+
+  const themeButtons = section.querySelectorAll('.theme-pill-btn');
+  const cardsGrid = document.getElementById('moodboardCardsGrid');
+  const harmonySelect = document.getElementById('paletteHarmonySelect');
+  const harmonyTypeBadge = document.getElementById('paletteHarmonyType');
+  const generateBtn = document.getElementById('btnGeneratePalette');
+  const swatchesGrid = document.getElementById('paletteSwatchesGrid');
+  const fontPairingSelect = document.getElementById('fontPairingSelect');
+  const mockupHeadline = document.getElementById('mockupHeadline');
+  const mockupBody = document.getElementById('mockupBody');
+  const mockupBadge = document.getElementById('mockupBadge');
+  const mockupFontTag = document.getElementById('mockupFontTag');
+  const mockupPrimaryBtn = document.getElementById('mockupPrimaryBtn');
+  const btnCopyBrief = document.getElementById('btnCopyBrief');
+  const btnDownloadBrief = document.getElementById('btnDownloadBrief');
+  const toast = document.getElementById('moodboardToast');
+
+  // Theme cards presets
+  const themePresets = {
+    'minimal-luxe': {
+      baseHue: 265,
+      harmony: 'complementary',
+      cards: [
+        {
+          visualClass: 'visual-luxe-1',
+          tag: 'TEXTURE 01',
+          title: 'Sculptural Geometry',
+          desc: 'Architectural stone planes, matte obsidian reflections, high contrast chiaroscuro.'
+        },
+        {
+          visualClass: 'visual-luxe-2',
+          tag: 'LIGHTING 02',
+          title: 'Atmospheric Mist',
+          desc: 'Subtle iridescent gradients, brushed titanium borders, tactile micro-textures.'
+        },
+        {
+          visualClass: 'visual-luxe-3',
+          tag: 'FORM 03',
+          title: 'Kinetic Typography',
+          desc: 'Monospaced coordinate grids paired with sweeping high-contrast display headlines.'
+        }
+      ]
+    },
+    'cyber-neo': {
+      baseHue: 185,
+      harmony: 'triadic',
+      cards: [
+        {
+          visualClass: 'visual-luxe-2',
+          tag: 'NEON 01',
+          title: 'Hyper-Density Grid',
+          desc: 'Sub-pixel vector scanlines, holographic laser refraction, deep cyan luminescence.'
+        },
+        {
+          visualClass: 'visual-luxe-1',
+          tag: 'INTERFACE 02',
+          title: 'Cybernetic Monolith',
+          desc: 'Dark mode tactical UI with fluorescent violet accents and telemetry readouts.'
+        },
+        {
+          visualClass: 'visual-luxe-3',
+          tag: 'MOTION 03',
+          title: 'Volumetric Pulse',
+          desc: 'Glitched optical typography with high-speed horizontal inertia and chromatic dispersion.'
+        }
+      ]
+    },
+    'warm-editorial': {
+      baseHue: 28,
+      harmony: 'analogous',
+      cards: [
+        {
+          visualClass: 'visual-luxe-1',
+          tag: 'PRINT 01',
+          title: 'Linen & Terracotta',
+          desc: 'Organic woven paper fibers, sun-drenched ochre pigments, warm tactile grain.'
+        },
+        {
+          visualClass: 'visual-luxe-2',
+          tag: 'CRAFT 02',
+          title: 'Serif Poetry',
+          desc: 'Timeless high-contrast editorial typography with elegant swashes and spacious leadings.'
+        },
+        {
+          visualClass: 'visual-luxe-3',
+          tag: 'STUDIO 03',
+          title: 'Sunlit Bronze',
+          desc: 'Natural daylight casting sharp geometric window shadows on architectural ceramics.'
+        }
+      ]
+    },
+    'organic-modern': {
+      baseHue: 155,
+      harmony: 'monochrome',
+      cards: [
+        {
+          visualClass: 'visual-luxe-2',
+          tag: 'EARTH 01',
+          title: 'Botanical Clay',
+          desc: 'Raw mineral powders, desaturated moss greens, and unglazed ceramic textures.'
+        },
+        {
+          visualClass: 'visual-luxe-1',
+          tag: 'NATURE 02',
+          title: 'Sage Minimal',
+          desc: 'Balanced whitespace with soft curved silhouettes inspired by weathered river stones.'
+        },
+        {
+          visualClass: 'visual-luxe-3',
+          tag: 'SPACE 03',
+          title: 'Nordic Oak & Steel',
+          desc: 'Pale Scandinavian woods contrasting with precision-beveled architectural graphite.'
+        }
+      ]
+    }
+  };
+
+  let activeTheme = 'minimal-luxe';
+
+  // 5 Swatches state
+  let swatches = [
+    { role: 'Dominant', hex: '#6366F1', locked: false },
+    { role: 'Primary', hex: '#8B5CF6', locked: false },
+    { role: 'Accent', hex: '#EC4899', locked: false },
+    { role: 'Neutral', hex: '#1E293B', locked: false },
+    { role: 'Contrast', hex: '#38BDF8', locked: false }
+  ];
+
+  function showToast(message) {
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2400);
+  }
+
+  // HSL to HEX helper
+  function hslToHex(h, s, l) {
+    const sNorm = s / 100;
+    const lNorm = l / 100;
+    const c = (1 - Math.abs(2 * lNorm - 1)) * sNorm;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = lNorm - c / 2;
+    let r = 0;
+    let g = 0;
+    let b = 0;
+
+    if (h >= 0 && h < 60) {
+      r = c; g = x; b = 0;
+    } else if (h >= 60 && h < 120) {
+      r = x; g = c; b = 0;
+    } else if (h >= 120 && h < 180) {
+      r = 0; g = c; b = x;
+    } else if (h >= 180 && h < 240) {
+      r = 0; g = x; b = c;
+    } else if (h >= 240 && h < 300) {
+      r = x; g = 0; b = c;
+    } else if (h >= 300 && h < 360) {
+      r = c; g = 0; b = x;
+    }
+
+    const rHex = Math.round((r + m) * 255).toString(16).padStart(2, '0');
+    const gHex = Math.round((g + m) * 255).toString(16).padStart(2, '0');
+    const bHex = Math.round((b + m) * 255).toString(16).padStart(2, '0');
+
+    return `#${rHex}${gHex}${bHex}`.toUpperCase();
+  }
+
+  function generateHarmonicPalette(userHue = null) {
+    const harmony = harmonySelect ? harmonySelect.value : 'complementary';
+    const baseH = userHue !== null ? userHue : Math.floor(Math.random() * 360);
+
+    let colors = [];
+    if (harmony === 'complementary') {
+      colors = [
+        hslToHex(baseH, 70, 50),
+        hslToHex((baseH + 20) % 360, 65, 45),
+        hslToHex((baseH + 180) % 360, 85, 60),
+        hslToHex((baseH + 200) % 360, 25, 20),
+        hslToHex((baseH + 180) % 360, 90, 75)
+      ];
+    } else if (harmony === 'analogous') {
+      colors = [
+        hslToHex(baseH, 75, 48),
+        hslToHex((baseH + 30) % 360, 70, 54),
+        hslToHex((baseH + 60) % 360, 80, 58),
+        hslToHex((baseH + 330) % 360, 30, 22),
+        hslToHex((baseH + 45) % 360, 90, 75)
+      ];
+    } else if (harmony === 'triadic') {
+      colors = [
+        hslToHex(baseH, 80, 52),
+        hslToHex((baseH + 120) % 360, 75, 55),
+        hslToHex((baseH + 240) % 360, 85, 60),
+        hslToHex((baseH + 120) % 360, 20, 18),
+        hslToHex((baseH + 60) % 360, 90, 70)
+      ];
+    } else {
+      // Monochrome
+      colors = [
+        hslToHex(baseH, 65, 30),
+        hslToHex(baseH, 70, 48),
+        hslToHex(baseH, 85, 62),
+        hslToHex(baseH, 20, 15),
+        hslToHex(baseH, 50, 80)
+      ];
+    }
+
+    swatches.forEach((swatch, idx) => {
+      if (!swatch.locked && colors[idx]) {
+        swatch.hex = colors[idx];
+      }
+    });
+
+    renderSwatches();
+    updateMockupPreview();
+  }
+
+  function renderSwatches() {
+    if (!swatchesGrid) return;
+    swatchesGrid.innerHTML = '';
+
+    swatches.forEach((swatch, index) => {
+      const card = document.createElement('div');
+      card.className = 'swatch-card';
+      card.setAttribute('draggable', 'true');
+      card.dataset.index = String(index);
+
+      // Color Preview & Native Picker
+      const preview = document.createElement('div');
+      preview.className = 'swatch-color-preview';
+      preview.style.backgroundColor = swatch.hex;
+
+      const picker = document.createElement('input');
+      picker.type = 'color';
+      picker.className = 'swatch-native-picker';
+      picker.value = swatch.hex;
+      picker.setAttribute('aria-label', `Change ${swatch.role} color`);
+      picker.addEventListener('input', (e) => {
+        swatch.hex = e.target.value.toUpperCase();
+        preview.style.backgroundColor = swatch.hex;
+        hexBtn.querySelector('.hex-code').textContent = swatch.hex;
+        updateMockupPreview();
+      });
+
+      const lockBtn = document.createElement('button');
+      lockBtn.type = 'button';
+      lockBtn.className = `swatch-lock-btn ${swatch.locked ? 'locked' : ''}`;
+      lockBtn.setAttribute('aria-label', swatch.locked ? 'Unlock color' : 'Lock color');
+      lockBtn.textContent = swatch.locked ? '🔒' : '🔓';
+      lockBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        swatch.locked = !swatch.locked;
+        lockBtn.className = `swatch-lock-btn ${swatch.locked ? 'locked' : ''}`;
+        lockBtn.textContent = swatch.locked ? '🔒' : '🔓';
+        showToast(`${swatch.role} (${swatch.hex}) ${swatch.locked ? 'locked' : 'unlocked'}`);
+      });
+
+      preview.appendChild(picker);
+      preview.appendChild(lockBtn);
+
+      // Meta info
+      const meta = document.createElement('div');
+      meta.className = 'swatch-meta';
+
+      const role = document.createElement('span');
+      role.className = 'swatch-role';
+      role.textContent = swatch.role;
+
+      const hexBtn = document.createElement('button');
+      hexBtn.type = 'button';
+      hexBtn.className = 'swatch-hex-btn';
+      hexBtn.title = 'Click to copy HEX code';
+
+      const hexCodeSpan = document.createElement('span');
+      hexCodeSpan.className = 'hex-code';
+      hexCodeSpan.textContent = swatch.hex;
+
+      const copyIcon = document.createElement('span');
+      copyIcon.className = 'copy-icon';
+      copyIcon.textContent = '📋';
+
+      hexBtn.appendChild(hexCodeSpan);
+      hexBtn.appendChild(copyIcon);
+
+      hexBtn.addEventListener('click', () => {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(swatch.hex);
+        }
+        showToast(`Copied ${swatch.hex} to clipboard!`);
+      });
+
+      meta.appendChild(role);
+      meta.appendChild(hexBtn);
+
+      card.appendChild(preview);
+      card.appendChild(meta);
+
+      // Drag and drop reordering
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', String(index));
+      });
+
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+      });
+
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const toIndex = index;
+        if (fromIndex !== toIndex && !isNaN(fromIndex)) {
+          const item = swatches.splice(fromIndex, 1)[0];
+          swatches.splice(toIndex, 0, item);
+          renderSwatches();
+          updateMockupPreview();
+          showToast('Palette swatch order updated');
+        }
+      });
+
+      swatchesGrid.appendChild(card);
+    });
+
+    if (harmonyTypeBadge && harmonySelect) {
+      harmonyTypeBadge.textContent = `${harmonySelect.options[harmonySelect.selectedIndex].text.toUpperCase()}`;
+    }
+  }
+
+  function renderThemeCards(themeKey) {
+    if (!cardsGrid) return;
+    const preset = themePresets[themeKey];
+    if (!preset) return;
+
+    cardsGrid.innerHTML = '';
+    preset.cards.forEach((c) => {
+      const art = document.createElement('article');
+      art.className = 'mood-card active';
+
+      const vis = document.createElement('div');
+      vis.className = `mood-card-visual ${c.visualClass}`;
+
+      const tag = document.createElement('span');
+      tag.className = 'mood-card-tag';
+      tag.textContent = c.tag;
+      vis.appendChild(tag);
+
+      const cnt = document.createElement('div');
+      cnt.className = 'mood-card-content';
+
+      const h4 = document.createElement('h4');
+      h4.textContent = c.title;
+
+      const p = document.createElement('p');
+      p.textContent = c.desc;
+
+      cnt.appendChild(h4);
+      cnt.appendChild(p);
+
+      art.appendChild(vis);
+      art.appendChild(cnt);
+
+      cardsGrid.appendChild(art);
+    });
+  }
+
+  function updateMockupPreview() {
+    const fontMode = fontPairingSelect ? fontPairingSelect.value : 'editorial';
+
+    if (fontMode === 'editorial') {
+      if (mockupHeadline) mockupHeadline.style.fontFamily = "'Playfair Display', serif";
+      if (mockupBody) mockupBody.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+      if (mockupFontTag) mockupFontTag.textContent = 'Playfair Display 700 • Plus Jakarta Sans 400';
+    } else if (fontMode === 'neo-brutalist') {
+      if (mockupHeadline) mockupHeadline.style.fontFamily = "'Space Grotesk', sans-serif";
+      if (mockupBody) mockupBody.style.fontFamily = "'JetBrains Mono', monospace";
+      if (mockupFontTag) mockupFontTag.textContent = 'Space Grotesk 700 • JetBrains Mono 400';
+    } else {
+      if (mockupHeadline) mockupHeadline.style.fontFamily = "'Inter', sans-serif";
+      if (mockupBody) mockupBody.style.fontFamily = "'Space Mono', monospace";
+      if (mockupFontTag) mockupFontTag.textContent = 'Inter 700 • Space Mono 400';
+    }
+
+    // Apply active palette accent to primary button and badge
+    const accentColor = swatches[2] ? swatches[2].hex : '#EC4899';
+    const primaryColor = swatches[1] ? swatches[1].hex : '#8B5CF6';
+
+    if (mockupPrimaryBtn) {
+      mockupPrimaryBtn.style.backgroundColor = accentColor;
+      mockupPrimaryBtn.style.boxShadow = `0 4px 16px ${accentColor}4D`;
+    }
+    if (mockupBadge) {
+      mockupBadge.style.color = primaryColor;
+      mockupBadge.style.borderColor = `${primaryColor}66`;
+      mockupBadge.style.backgroundColor = `${primaryColor}1A`;
+    }
+  }
+
+  // Event listeners
+  themeButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      themeButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeTheme = btn.dataset.theme;
+
+      const preset = themePresets[activeTheme];
+      if (preset) {
+        if (harmonySelect) harmonySelect.value = preset.harmony;
+        renderThemeCards(activeTheme);
+        generateHarmonicPalette(preset.baseHue);
+      }
+    });
+  });
+
+  if (harmonySelect) {
+    harmonySelect.addEventListener('change', () => {
+      generateHarmonicPalette();
+    });
+  }
+
+  if (generateBtn) {
+    generateBtn.addEventListener('click', () => {
+      generateHarmonicPalette();
+      showToast('Generated fresh harmonic color palette ✦');
+    });
+  }
+
+  // Spacebar to randomize palette when not focused in an input
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) {
+        return;
+      }
+      const rect = section.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight && rect.bottom > 0;
+      if (inView) {
+        e.preventDefault();
+        generateHarmonicPalette();
+        showToast('Generated new palette (Space)');
+      }
+    }
+  });
+
+  if (fontPairingSelect) {
+    fontPairingSelect.addEventListener('change', () => {
+      updateMockupPreview();
+      showToast(`Switched typography pairing to ${fontPairingSelect.options[fontPairingSelect.selectedIndex].text}`);
+    });
+  }
+
+  if (btnCopyBrief) {
+    btnCopyBrief.addEventListener('click', () => {
+      const fontText = fontPairingSelect ? fontPairingSelect.options[fontPairingSelect.selectedIndex].text : 'Editorial';
+      const briefSummary = [
+        `=== AETHERIA STUDIO // BRAND DESIGN BRIEF ===`,
+        `Aesthetic Direction: ${activeTheme.toUpperCase()}`,
+        `Typography Pairing: ${fontText}`,
+        `Harmonic Palette:`,
+        ...swatches.map((s) => `  - ${s.role}: ${s.hex}${s.locked ? ' [Locked]' : ''}`),
+        `Generated on: ${new Date().toISOString()}`
+      ].join('\n');
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(briefSummary);
+      }
+      showToast('Brand brief summary copied to clipboard!');
+    });
+  }
+
+  if (btnDownloadBrief) {
+    btnDownloadBrief.addEventListener('click', () => {
+      const briefData = {
+        project: 'Aetheria Client Brand Identity System',
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        aestheticTheme: activeTheme,
+        harmonyFormula: harmonySelect ? harmonySelect.value : 'complementary',
+        typography: {
+          pairing: fontPairingSelect ? fontPairingSelect.value : 'editorial',
+          label: fontPairingSelect ? fontPairingSelect.options[fontPairingSelect.selectedIndex].text : 'Editorial Elegance'
+        },
+        palette: swatches.map((s) => ({
+          role: s.role,
+          hex: s.hex,
+          locked: s.locked
+        }))
+      };
+
+      const jsonStr = JSON.stringify(briefData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `brand-brief-${activeTheme}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      showToast('Exported branded design brief JSON!');
+    });
+  }
+
+  // Initial render
+  renderThemeCards(activeTheme);
+  generateHarmonicPalette(themePresets[activeTheme].baseHue);
+}

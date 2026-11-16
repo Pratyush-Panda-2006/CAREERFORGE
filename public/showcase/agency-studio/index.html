@@ -621,6 +621,136 @@
   </div>
 </section>
 
+  <!-- ===== BEGIN Issue #385: Interactive Client Brand Moodboard Builder & Palette Generator ===== -->
+  <section id="brandMoodboard" class="brand-moodboard-section" aria-labelledby="moodboardTitle">
+    <div class="moodboard-header">
+      <span class="badge">// INTERACTIVE BRAND LAB</span>
+      <h2 id="moodboardTitle">Brand Moodboard &amp; Palette Generator</h2>
+      <p>Curate your project aesthetic, generate harmonious color palettes, test dynamic typography pairings, and export an executive design brief.</p>
+    </div>
+
+    <!-- Moodboard Canvas & Toolbar -->
+    <div class="moodboard-container">
+      <!-- Aesthetic Theme Filter Bar -->
+      <div class="moodboard-theme-bar">
+        <span class="bar-label">Aesthetic Direction:</span>
+        <div class="theme-buttons" role="group" aria-label="Brand Aesthetic Presets">
+          <button type="button" class="theme-pill-btn active" data-theme="minimal-luxe">Minimal Luxe</button>
+          <button type="button" class="theme-pill-btn" data-theme="cyber-neo">Cyberpunk Neo</button>
+          <button type="button" class="theme-pill-btn" data-theme="warm-editorial">Warm Editorial</button>
+          <button type="button" class="theme-pill-btn" data-theme="organic-modern">Organic Modern</button>
+        </div>
+      </div>
+
+      <!-- Inspiration Moodboard Cards Grid -->
+      <div class="moodboard-cards-grid" id="moodboardCardsGrid">
+        <article class="mood-card active" data-card="1">
+          <div class="mood-card-visual visual-luxe-1">
+            <span class="mood-card-tag">TEXTURE 01</span>
+          </div>
+          <div class="mood-card-content">
+            <h4>Sculptural Geometry</h4>
+            <p>Architectural stone planes, matte obsidian reflections, high contrast chiaroscuro.</p>
+          </div>
+        </article>
+
+        <article class="mood-card active" data-card="2">
+          <div class="mood-card-visual visual-luxe-2">
+            <span class="mood-card-tag">LIGHTING 02</span>
+          </div>
+          <div class="mood-card-content">
+            <h4>Atmospheric Mist</h4>
+            <p>Subtle iridescent gradients, brushed titanium borders, tactile micro-textures.</p>
+          </div>
+        </article>
+
+        <article class="mood-card active" data-card="3">
+          <div class="mood-card-visual visual-luxe-3">
+            <span class="mood-card-tag">FORM 03</span>
+          </div>
+          <div class="mood-card-content">
+            <h4>Kinetic Typography</h4>
+            <p>Monospaced coordinate grids paired with sweeping high-contrast display headlines.</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- Palette Generator Panel -->
+      <div class="palette-builder-panel">
+        <div class="palette-builder-header">
+          <div class="palette-title-group">
+            <h3>Dynamic Color Harmony Matrix</h3>
+            <span class="palette-count-tag" id="paletteHarmonyType">COMPLEMENTARY HARMONY</span>
+          </div>
+          <div class="palette-actions">
+            <select id="paletteHarmonySelect" class="palette-select" aria-label="Harmonic Math Formula">
+              <option value="complementary">Complementary Harmony</option>
+              <option value="analogous">Analogous Harmony</option>
+              <option value="triadic">Triadic Contrast</option>
+              <option value="monochrome">Monochrome Depth</option>
+            </select>
+            <button type="button" class="btn-generate-palette" id="btnGeneratePalette">
+              <span>✦</span> Generate Palette (Space)
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Swatches Grid with Drag / Lock / Color Picker -->
+        <div class="palette-swatches-grid" id="paletteSwatchesGrid" aria-label="Dynamic Color Swatches">
+          <!-- Swatches generated dynamically with roles, hex code, copy button, lock toggle, native color picker -->
+        </div>
+      </div>
+
+      <!-- Live Typography Pairing & Mockup Preview -->
+      <div class="type-pairing-panel">
+        <div class="type-pairing-header">
+          <div>
+            <h3>Typography Pairing &amp; UI Mockup</h3>
+            <p>Preview live pairing with active palette accents applied to interface elements.</p>
+          </div>
+          <div class="type-controls">
+            <label for="fontPairingSelect">Font Pairing:</label>
+            <select id="fontPairingSelect" class="palette-select">
+              <option value="editorial">Editorial Elegance (Playfair Display + Plus Jakarta)</option>
+              <option value="neo-brutalist">Neo-Brutalist (Space Grotesk + JetBrains Mono)</option>
+              <option value="tech-modern">Tech Forward (Inter + Space Mono)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live Mockup Box -->
+        <div class="type-mockup-card" id="typeMockupCard">
+          <div class="mockup-header-row">
+            <span class="mockup-brand-badge" id="mockupBadge">AETHERIA // BRAND CORE</span>
+            <span class="mockup-font-tag" id="mockupFontTag">Playfair Display 700 • Plus Jakarta Sans 400</span>
+          </div>
+          <h3 class="mockup-headline" id="mockupHeadline">Architectural Digital Experiences Engineered For Radical Impact</h3>
+          <p class="mockup-body" id="mockupBody">
+            We bridge hyper-bespoke digital aesthetics with performant code architectures. Every brand system is synthesized through mathematical color ratios and tailored typographic scale.
+          </p>
+          <div class="mockup-cta-row">
+            <button type="button" class="mockup-btn-primary" id="mockupPrimaryBtn">Initiate Project Inquiry ✦</button>
+            <button type="button" class="mockup-btn-secondary" id="mockupSecondaryBtn">Explore Visual Assets</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Design Brief Export Strip -->
+      <div class="brief-export-strip">
+        <div class="brief-meta-info">
+          <strong>Design Brief Status:</strong>
+          <span id="briefStatusText">All 5 palette swatches locked &amp; typography pairing validated.</span>
+        </div>
+        <div class="brief-btns">
+          <button type="button" class="btn-brief-copy" id="btnCopyBrief">Copy Brief Summary</button>
+          <button type="button" class="btn-brief-download" id="btnDownloadBrief">Export Design Brief (.JSON) ↓</button>
+        </div>
+      </div>
+      <div id="moodboardToast" class="moodboard-toast" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+  <!-- ===== END Issue #385 ===== -->
+
 <!-- Client FAQ Accordion -->
     <section id="faq" class="faq-section" aria-labelledby="faqTitle">
       <div class="faq-header">
