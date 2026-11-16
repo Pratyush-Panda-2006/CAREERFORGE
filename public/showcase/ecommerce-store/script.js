@@ -1973,11 +1973,11 @@ function addQuickViewToCart() {
   // Visual feedback on the button
   const btn = document.getElementById('qvAddToCartBtn');
   if (btn) {
-    const originalContent = btn.innerHTML;
-    btn.innerHTML = '<span>âœ“ Added to Cart!</span>';
+    const originalText = btn.textContent;
+    btn.textContent = '✓ Added to Cart!';
     btn.style.backgroundColor = '#22c55e';
     setTimeout(() => {
-      btn.innerHTML = originalContent;
+      btn.textContent = originalText;
       btn.style.backgroundColor = '';
     }, 1500);
   }
