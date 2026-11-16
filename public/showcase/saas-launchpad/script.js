@@ -2918,20 +2918,32 @@ function initRateLimiterSimulator() {
   function renderLogs() {
     if (!logEl) return;
     if (state.logEntries.length === 0) {
-      logEl.innerHTML = '<li class="rl-log-empty">Dispatch requests or click "Send Burst Requests" to inspect pass/429 verdicts.</li>';
+      logEl.replaceChildren();
+      const emptyLi = document.createElement('li');
+      emptyLi.className = 'rl-log-empty';
+      emptyLi.textContent = 'Dispatch requests or click "Send Burst Requests" to inspect pass/429 verdicts.';
+      logEl.appendChild(emptyLi);
       return;
     }
-    logEl.innerHTML = state.logEntries
-      .map(
-        (entry) => `
-        <li class="rl-log-row ${entry.ok ? 'pass' : 'drop'}">
-          <span>#${entry.seq} POST /v1/events</span>
-          <span>${entry.ok ? `${entry.rem.toFixed(1)} tok left` : 'Bucket Empty'}</span>
-          <span class="rl-code-badge ${entry.ok ? 'pass' : 'drop'}">${entry.ok ? '200 OK' : '429 DROP'}</span>
-        </li>
-      `
-      )
-      .join('');
+    const fragment = document.createDocumentFragment();
+    state.logEntries.forEach((entry) => {
+      const li = document.createElement('li');
+      li.className = `rl-log-row ${entry.ok ? 'pass' : 'drop'}`;
+
+      const span1 = document.createElement('span');
+      span1.textContent = `#${entry.seq} POST /v1/events`;
+
+      const span2 = document.createElement('span');
+      span2.textContent = entry.ok ? `${entry.rem.toFixed(1)} tok left` : 'Bucket Empty';
+
+      const span3 = document.createElement('span');
+      span3.className = `rl-code-badge ${entry.ok ? 'pass' : 'drop'}`;
+      span3.textContent = entry.ok ? '200 OK' : '429 DROP';
+
+      li.append(span1, span2, span3);
+      fragment.appendChild(li);
+    });
+    logEl.replaceChildren(fragment);
   }
 
   function dispatchRequest(count = 1) {
