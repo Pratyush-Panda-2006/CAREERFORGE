@@ -1060,6 +1060,39 @@ window.confirmDeposit = function confirmDeposit() {
   });
 })();
 
+// The card control is a showcase-only preview; no payment or account API is called.
+(() => {
+  function initVirtualCard() {
+    const card = document.getElementById('virtual-debit-card');
+    const button = document.getElementById('virtual-card-toggle');
+    const status = document.getElementById('virtual-card-status');
+    const toast = document.getElementById('virtual-card-toast');
+    if (!card || !button || !status || !toast) return;
+
+    let frozen = false;
+    let toastTimer;
+    button.addEventListener('click', () => {
+      frozen = !frozen;
+      card.classList.toggle('is-frozen', frozen);
+      card.setAttribute('aria-label', `Demo virtual debit card, ${frozen ? 'frozen' : 'active'}`);
+      button.setAttribute('aria-pressed', String(frozen));
+      button.textContent = frozen ? 'Unfreeze demo card' : 'Freeze demo card';
+      status.textContent = frozen ? 'Card preview frozen' : 'Card preview active';
+      status.classList.toggle('is-frozen', frozen);
+      toast.textContent = frozen ? 'Demo card frozen' : 'Demo card unfrozen';
+      toast.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.hidden = true; }, 3500);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initVirtualCard);
+  } else {
+    initVirtualCard();
+  }
+})();
+
 /* BEGIN Debt payoff simulation engine */
 function simulateDebtPayoff(accounts, extraMonthlyPayment, strategy, startDate = new Date()) {
   if (!Array.isArray(accounts) || accounts.length === 0) {
