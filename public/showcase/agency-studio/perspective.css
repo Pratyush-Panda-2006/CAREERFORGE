@@ -1,0 +1,14 @@
+.card-motion-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 24px; }
+.card-motion-controls button { min-height: 44px; padding: 10px 16px; border: 1px solid #6b7280; border-radius: 999px; background: #111827; color: #e9d5ff; font: inherit; cursor: pointer; }
+.card-motion-controls button:focus-visible { outline: 3px solid #c084fc; outline-offset: 3px; }
+.card-motion-controls button:disabled { opacity: .6; cursor: default; }
+.card-motion-controls [hidden] { display: none; }
+#card-motion-status { flex-basis: 100%; color: #cbd5e1; font-size: .9rem; }
+#work .grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr)); }
+.perspective-stage { perspective: 1000px; min-width: 0; }
+#work .perspective-card { height: 100%; position: relative; transform: rotateX(var(--card-pitch, 0deg)) rotateY(var(--card-roll, 0deg)); transition: box-shadow .25s ease, border-color .25s ease; }
+.perspective-card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), #fff, transparent 65%); opacity: var(--glare-opacity, 0); }
+@media (prefers-reduced-motion: reduce) {
+  #work .perspective-card { transform: none; transition: none; }
+  .perspective-card::after { display: none; }
+}
