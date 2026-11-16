@@ -4532,3 +4532,542 @@ body {
     align-items: flex-start;
   }
 }
+
+/* ===== BEGIN Issue #297: Recurring Donation Impact Calculator ===== */
+.recurring-impact-section {
+  padding: 4.5rem 1.5rem;
+  background: linear-gradient(180deg, rgba(8, 28, 21, 0.95) 0%, rgba(13, 40, 24, 0.98) 100%);
+  border-top: 1px solid rgba(82, 183, 136, 0.2);
+  border-bottom: 1px solid rgba(82, 183, 136, 0.2);
+  color: #d8f3dc;
+  position: relative;
+  overflow: hidden;
+}
+
+.impact-calc-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.impact-calc-header {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 3rem auto;
+}
+
+.impact-eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #74c69d;
+  background: rgba(116, 198, 157, 0.12);
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(116, 198, 157, 0.25);
+}
+
+.impact-calc-header h2 {
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+}
+
+.impact-subtitle {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #b7e4c7;
+  margin: 0;
+}
+
+.impact-calc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* Controls Column */
+.impact-control-card {
+  background: rgba(27, 67, 50, 0.55);
+  border: 1px solid rgba(82, 183, 136, 0.3);
+  border-radius: 1.25rem;
+  padding: 2.25rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+}
+
+.impact-slider-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.impact-control-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #d8f3dc;
+}
+
+.impact-amount-display {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  background: rgba(45, 106, 79, 0.6);
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(116, 198, 157, 0.4);
+}
+
+.impact-currency {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #95d5b2;
+}
+
+.impact-val {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.impact-period {
+  font-size: 0.85rem;
+  color: #b7e4c7;
+  margin-left: 0.15rem;
+}
+
+.impact-slider-wrapper {
+  margin-bottom: 1.75rem;
+}
+
+.impact-range-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+  cursor: pointer;
+  accent-color: #52b788;
+}
+
+.impact-slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #74c69d;
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+.impact-preset-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.impact-chip {
+  flex: 1 1 calc(33.333% - 0.5rem);
+  padding: 0.65rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #d8f3dc;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(82, 183, 136, 0.25);
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.impact-chip:hover {
+  background: rgba(82, 183, 136, 0.18);
+  border-color: #52b788;
+  color: #ffffff;
+}
+
+.impact-chip.active {
+  background: #52b788;
+  border-color: #74c69d;
+  color: #081c15;
+  box-shadow: 0 4px 12px rgba(82, 183, 136, 0.35);
+}
+
+.impact-frequency-toggle {
+  display: flex;
+  background: rgba(8, 28, 21, 0.6);
+  padding: 0.3rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(82, 183, 136, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.impact-freq-btn {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #b7e4c7;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.impact-freq-btn.active {
+  background: rgba(45, 106, 79, 0.85);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.impact-pledge-callout {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: rgba(82, 183, 136, 0.1);
+  border: 1px solid rgba(116, 198, 157, 0.25);
+  border-radius: 0.85rem;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.5rem;
+}
+
+.impact-pledge-callout .callout-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.impact-pledge-callout p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #d8f3dc;
+}
+
+.impact-pledge-callout strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.impact-action-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-impact-pledge {
+  flex: 1.4;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(135deg, #52b788 0%, #40916c 100%);
+  color: #081c15;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 18px rgba(82, 183, 136, 0.3);
+}
+
+.btn-impact-pledge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(82, 183, 136, 0.45);
+  background: linear-gradient(135deg, #74c69d 0%, #52b788 100%);
+}
+
+.btn-impact-share {
+  flex: 1;
+  padding: 0.85rem 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(82, 183, 136, 0.35);
+  color: #d8f3dc;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-impact-share:hover {
+  background: rgba(82, 183, 136, 0.15);
+  color: #ffffff;
+}
+
+.impact-toast {
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #2d6a4f;
+  color: #ffffff;
+  display: none;
+}
+
+.impact-toast.show {
+  display: block;
+}
+
+/* Metrics & Milestones Column */
+.impact-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.impact-stat-card {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background: rgba(27, 67, 50, 0.45);
+  border: 1px solid rgba(82, 183, 136, 0.25);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.impact-stat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(116, 198, 157, 0.55);
+}
+
+.stat-icon-wrap {
+  font-size: 1.85rem;
+  line-height: 1;
+  padding: 0.6rem;
+  border-radius: 0.75rem;
+  background: rgba(82, 183, 136, 0.15);
+  border: 1px solid rgba(116, 198, 157, 0.25);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-num {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.stat-unit {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #74c69d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0.15rem 0 0.45rem 0;
+}
+
+.stat-desc {
+  font-size: 0.78rem;
+  color: #b7e4c7;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Tangible Milestone Cards */
+.impact-milestones-card {
+  background: rgba(27, 67, 50, 0.35);
+  border: 1px solid rgba(82, 183, 136, 0.25);
+  border-radius: 1.15rem;
+  padding: 1.5rem 1.75rem;
+}
+
+.milestones-heading {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 1.25rem 0;
+  letter-spacing: -0.01em;
+}
+
+.milestones-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.milestone-step {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: rgba(8, 28, 21, 0.5);
+  border: 1px solid rgba(82, 183, 136, 0.2);
+  border-radius: 0.85rem;
+}
+
+.step-badge-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0.5rem;
+  border-radius: 0.6rem;
+  background: rgba(82, 183, 136, 0.18);
+}
+
+.step-details {
+  flex: 1;
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.step-header strong {
+  font-size: 0.88rem;
+  color: #ffffff;
+}
+
+.step-status {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(82, 183, 136, 0.25);
+  color: #74c69d;
+  border: 1px solid rgba(116, 198, 157, 0.4);
+}
+
+.step-details p {
+  font-size: 0.8rem;
+  color: #b7e4c7;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Modal styling */
+.impact-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+  padding: 1rem;
+}
+
+.impact-modal {
+  background: #0d2818;
+  border: 1px solid #52b788;
+  border-radius: 1.25rem;
+  width: 100%;
+  max-width: 520px;
+  padding: 2.25rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  position: relative;
+  text-align: center;
+}
+
+.impact-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: transparent;
+  border: none;
+  font-size: 1.75rem;
+  color: #b7e4c7;
+  cursor: pointer;
+}
+
+.impact-modal-close:hover {
+  color: #ffffff;
+}
+
+.modal-celebrate-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.impact-modal h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.5rem 0;
+}
+
+.pledge-modal-sub {
+  font-size: 0.95rem;
+  color: #b7e4c7;
+  margin: 0 0 1.5rem 0;
+}
+
+.pledge-summary-box {
+  background: rgba(8, 28, 21, 0.75);
+  border: 1px solid rgba(82, 183, 136, 0.3);
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+  text-align: left;
+}
+
+.pledge-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.88rem;
+}
+
+.pledge-item:last-child {
+  border-bottom: none;
+}
+
+.pledge-item .p-label {
+  color: #b7e4c7;
+}
+
+.pledge-item .p-val {
+  font-weight: 700;
+  color: #74c69d;
+}
+
+.btn-confirm-pledge {
+  width: 100%;
+  padding: 0.9rem;
+  background: #52b788;
+  color: #081c15;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-confirm-pledge:hover {
+  background: #74c69d;
+}
+
+@media (max-width: 900px) {
+  .impact-calc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .impact-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .impact-chip {
+    flex: 1 1 calc(50% - 0.5rem);
+  }
+}
+/* ===== END Issue #297 ===== */
