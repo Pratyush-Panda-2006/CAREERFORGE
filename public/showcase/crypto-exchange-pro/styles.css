@@ -42,6 +42,45 @@ body {
 .brand { font-weight: 800; font-size: 1.1rem; color: #38bdf8; }
 .status { font-size: 0.75rem; color: #10b981; }
 
+.navbar { flex-wrap: wrap; gap: 12px; }
+.vip-fee-wrap { position: relative; }
+.vip-fee-trigger {
+  padding: 8px 12px;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.45), rgba(245, 158, 11, 0.12));
+  color: #fde68a;
+  font: 700 0.76rem 'JetBrains Mono', monospace;
+  cursor: pointer;
+}
+.vip-fee-trigger:hover, .vip-fee-trigger:focus-visible { border-color: #fbbf24; color: #fff7d6; }
+.vip-fee-popover {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 14px;
+  background: #101827;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.vip-fee-popover[hidden] { display: none; }
+.vip-fee-popover h2 { margin: 0 0 8px; color: #fef3c7; font-size: 0.95rem; }
+.vip-current-fees { color: #fde68a; font-weight: 800; }
+.vip-progress { overflow: hidden; height: 8px; margin: 10px 0 6px; border-radius: 99px; background: #334155; }
+.vip-progress span { display: block; height: 100%; background: linear-gradient(90deg, #f59e0b, #facc15); }
+.vip-fee-popover ul { padding: 0; margin: 12px 0; list-style: none; }
+.vip-fee-popover li { padding: 4px 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.vip-fee-popover li.current { color: #fde68a; font-weight: 700; }
+.vip-fee-note { margin-bottom: 0; color: #94a3b8; font-size: 0.7rem; }
+@media (max-width: 600px) { .vip-fee-popover { left: 0; transform: none; } }
+
 .trading-container { max-width: 1000px; margin: 60px auto; padding: 0 24px; text-align: center; }
 
 .pill {
