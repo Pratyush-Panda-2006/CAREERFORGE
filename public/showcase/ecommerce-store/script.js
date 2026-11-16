@@ -67,8 +67,7 @@ function saveCoupon() {
 function calculateTotals(subtotal, couponCode) {
   const coupon = COUPONS[couponCode] || null;
   const discount = coupon && coupon.type === 'percent' ? subtotal * coupon.value : 0;
-  let shipping = subtotal > 0 ? SHIPPING_FEE : 0;
-  if (coupon && coupon.type === 'freeship') shipping = 0;
+  const shipping = subtotal > 0 && !ShippingProgress.calculate(subtotal, couponCode).unlocked ? SHIPPING_FEE : 0;
   const tax = (subtotal - discount) * TAX_RATE;
   const total = subtotal - discount + shipping + tax;
   return { subtotal, discount, shipping, tax, total };
@@ -180,9 +179,24 @@ function renderCart() {
   };
   setText('cartSubtotal', formatMoney(totals.subtotal));
   setText('cartDiscount', `-${formatMoney(totals.discount)}`);
-  setText('cartShipping', totals.shipping === 0 && appliedCoupon === 'FREESHIP' && totals.subtotal > 0 ? 'FREE' : formatMoney(totals.shipping));
+  setText('cartShipping', totals.shipping === 0 && totals.subtotal > 0 ? 'FREE' : formatMoney(totals.shipping));
   setText('cartTax', formatMoney(totals.tax));
   setText('cartTotal', formatMoney(totals.total));
+
+  const shippingProgress = ShippingProgress.calculate(totals.subtotal, appliedCoupon);
+  const progressTrack = document.getElementById('shippingProgressTrack');
+  const progressFill = document.getElementById('shippingProgressFill');
+  const progressBadge = document.getElementById('shippingProgressBadge');
+  const progressContainer = document.getElementById('shippingProgress');
+  if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(shippingProgress.percent));
+  if (progressFill) progressFill.style.width = `${shippingProgress.percent}%`;
+  if (progressBadge) progressBadge.hidden = !shippingProgress.unlocked;
+  if (progressContainer) progressContainer.classList.toggle('unlocked', shippingProgress.unlocked);
+  setText('shippingProgressMessage', shippingProgress.couponUnlocked
+    ? 'Free Express Shipping unlocked with FREESHIP!'
+    : shippingProgress.unlocked
+      ? 'Free Express Shipping unlocked!'
+      : `Add ${formatMoney(shippingProgress.remaining)} more to unlock Free Express Shipping!`);
 
   const discountRow = document.getElementById('discountRow');
   if (discountRow) discountRow.hidden = !(totals.discount > 0);
