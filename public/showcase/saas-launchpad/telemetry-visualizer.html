@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Metrics Telemetry & Sparkline Visualizer</title>
+  <link rel="stylesheet" href="telemetry-visualizer.css">
+</head>
+<body class="saas-telemetry-standalone">
+  <div class="saas-telemetry-panel">
+    <div class="panel-header">
+      <div class="panel-headings">
+        <span class="telemetry-tag">REALTIME TELEMETRY</span>
+        <h3>Infrastructure Uptime & API Gateway Health</h3>
+        <p>Live latency smoothing and dynamic sparkline trajectory</p>
+      </div>
+
+      <!-- Time Window Selectors - Issue #585 -->
+      <div class="saas-time-controls">
+        <button type="button" class="saas-time-btn" data-window="1H">1H</button>
+        <button type="button" class="saas-time-btn active" data-window="24H">24H</button>
+        <button type="button" class="saas-time-btn" data-window="7D">7D</button>
+      </div>
+    </div>
+
+    <!-- Canvas Visualizer Element -->
+    <div class="canvas-box">
+      <canvas id="saas-launchpad-telemetry-canvas" width="600" height="260"></canvas>
+      <div id="saasTelemetryTooltip" class="saas-tooltip" style="display: none;"></div>
+    </div>
+
+    <div class="panel-footer">
+      <div class="status-live">
+        <span class="pulse-ring"></span>
+        <span>Gateway Node: US-East-1 (Operational)</span>
+      </div>
+      <div class="stats-group">
+        <span>Current Health: <strong>99.98%</strong></span>
+        <span>P99 Latency: <strong>24ms</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="telemetry-visualizer.js"></script>
+</body>
+</html>
