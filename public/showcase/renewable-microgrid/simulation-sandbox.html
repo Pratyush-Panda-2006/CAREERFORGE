@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renewable Microgrid - Monte Carlo Simulation Sandbox</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+</head>
+<body class="sim-body">
+  <div class="sim-container">
+    <header class="sim-header">
+      <div class="header-info">
+        <h1 class="sim-title">⚡ Monte Carlo Microgrid Scenario Forecaster</h1>
+        <p class="sim-subtitle">1,000-trial stochastic simulation engine calculating probabilistic variance bounds</p>
+      </div>
+      <div class="header-action">
+        <button id="run-sim-btn" class="btn btn-primary">Run 1,000 Trials</button>
+      </div>
+    </header>
+
+    <section class="controls-grid">
+      <div class="control-card">
+        <label for="slider-volatility">Weather Volatility Variance: <span id="vol-label">25%</span></label>
+        <input type="range" id="slider-volatility" min="5" max="60" value="25" step="1">
+      </div>
+      <div class="control-card">
+        <label for="slider-solar">Solar Installed Capacity: <span id="solar-label">150 kW</span></label>
+        <input type="range" id="slider-solar" min="50" max="300" value="150" step="10">
+      </div>
+      <div class="control-card">
+        <label for="slider-wind">Wind Generation Capacity: <span id="wind-label">80 kW</span></label>
+        <input type="range" id="slider-wind" min="20" max="200" value="80" step="10">
+      </div>
+    </section>
+
+    <section class="kpi-banner">
+      <div class="stat-pill">
+        <span class="pill-label">Expected Mean</span>
+        <span class="pill-value" id="stat-mean">0 kW</span>
+      </div>
+      <div class="stat-pill">
+        <span class="pill-label">Std Deviation (&sigma;)</span>
+        <span class="pill-value" id="stat-std">0 kW</span>
+      </div>
+      <div class="stat-pill">
+        <span class="pill-label">95% Confidence Band</span>
+        <span class="pill-value" id="stat-ci">[0, 0]</span>
+      </div>
+      <div class="stat-pill">
+        <span class="pill-label">P50 Median</span>
+        <span class="pill-value" id="stat-p50">0 kW</span>
+      </div>
+    </section>
+
+    <main class="chart-container">
+      <div class="chart-header">
+        <h3>Distribution Density & Percentile Quantiles</h3>
+        <span class="badge-distribution">NORMALIZED HISTOGRAM</span>
+      </div>
+      <div class="bell-curve-display" id="histogram-bars">
+        <!-- Bars rendered here -->
+      </div>
+      <div class="percentiles-legend" id="percentiles-legend">
+        <!-- Quantile labels -->
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { RenewableMicrogridMonteCarloEngine } from './simulation-sandbox.js';
+
+    const engine = new RenewableMicrogridMonteCarloEngine({
+      baseLoad: 110,
+      solarCapacity: 150,
+      windCapacity: 80
+    });
+
+    const volSlider = document.getElementById('slider-volatility');
+    const solarSlider = document.getElementById('slider-solar');
+    const windSlider = document.getElementById('slider-wind');
+
+    volSlider.oninput = () => document.getElementById('vol-label').textContent = `${volSlider.value}%`;
+    solarSlider.oninput = () => document.getElementById('solar-label').textContent = `${solarSlider.value} kW`;
+    windSlider.oninput = () => document.getElementById('wind-label').textContent = `${windSlider.value} kW`;
+
+    function runAndRender() {
+      engine.solarCapacity = parseFloat(solarSlider.value);
+      engine.windCapacity = parseFloat(windSlider.value);
+      const vol = parseFloat(volSlider.value) / 100;
+
+      const results = engine.runSimulation(1000, vol);
+      const mean = engine.getMean();
+      const std = engine.getStandardDeviation();
+      const p = engine.calculatePercentiles([5, 25, 50, 75, 95]);
+      const ci = engine.getConfidenceInterval(0.95);
+
+      document.getElementById('stat-mean').textContent = `${mean > 0 ? '+' : ''}${mean} kW`;
+      document.getElementById('stat-std').textContent = `±${std} kW`;
+      document.getElementById('stat-ci').textContent = `[${ci.lower}, ${ci.upper}]`;
+      document.getElementById('stat-p50').textContent = `${p[50]} kW`;
+
+      // Render simplified 20-bucket histogram
+      const min = results[0];
+      const max = results[results.length - 1];
+      const buckets = 24;
+      const step = (max - min) / buckets;
+      const counts = new Array(buckets).fill(0);
+
+      results.forEach(r => {
+        let bIdx = Math.floor((r - min) / step);
+        if (bIdx >= buckets) bIdx = buckets - 1;
+        counts[bIdx]++;
+      });
+
+      const maxCount = Math.max(...counts, 1);
+      const barsContainer = document.getElementById('histogram-bars');
+      barsContainer.innerHTML = '';
+
+      counts.forEach((c, idx) => {
+        const barHeight = Math.max(4, Math.round((c / maxCount) * 160));
+        const bar = document.createElement('div');
+        bar.className = 'histogram-bar';
+        bar.style.height = `${barHeight}px`;
+        bar.title = `Count: ${c}`;
+        barsContainer.appendChild(bar);
+      });
+
+      const legend = document.getElementById('percentiles-legend');
+      legend.innerHTML = `
+        <span class="p-chip">P5: ${p[5]} kW</span>
+        <span class="p-chip">P25: ${p[25]} kW</span>
+        <span class="p-chip active">P50: ${p[50]} kW</span>
+        <span class="p-chip">P75: ${p[75]} kW</span>
+        <span class="p-chip">P95: ${p[95]} kW</span>
+      `;
+    }
+
+    document.getElementById('run-sim-btn').onclick = runAndRender;
+    runAndRender();
+  </script>
+</body>
+</html>
