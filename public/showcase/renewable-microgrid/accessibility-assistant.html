@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renewable Microgrid - WCAG Accessibility Assistant</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+</head>
+<body class="a11y-body">
+  <div class="a11y-container">
+    <header class="a11y-header">
+      <div class="header-info">
+        <h1 class="a11y-title">♿ Microgrid WCAG Accessibility Inspector</h1>
+        <p class="a11y-subtitle">Automated luminance ratio math, ARIA attribute audits & high-contrast remediation preview</p>
+      </div>
+      <div class="header-actions">
+        <button id="remediate-btn" class="btn btn-primary">1-Click High-Contrast Remediation</button>
+      </div>
+    </header>
+
+    <section class="scorecard-grid">
+      <div class="score-card">
+        <span class="score-label">WCAG Compliance Pass Rate</span>
+        <span class="score-value" id="score-rate">100%</span>
+      </div>
+      <div class="score-card">
+        <span class="score-label">Elements Audited</span>
+        <span class="score-value" id="score-total">0</span>
+      </div>
+      <div class="score-card">
+        <span class="score-label">AA Standard Passes (4.5:1)</span>
+        <span class="score-value" id="score-passed">0</span>
+      </div>
+      <div class="score-card">
+        <span class="score-label">Compliance Grade</span>
+        <span class="score-value grade-badge" id="score-grade">A</span>
+      </div>
+    </section>
+
+    <main class="audit-panel">
+      <div class="panel-head">
+        <h2>Live DOM Contrast & Key Navigation Checklist</h2>
+        <span class="badge-audit">WCAG 2.1 AA/AAA EVALUATION</span>
+      </div>
+      <div class="checklist-table-container">
+        <table class="checklist-table">
+          <thead>
+            <tr>
+              <th>Target Element</th>
+              <th>Foreground / Background</th>
+              <th>Contrast Ratio</th>
+              <th>WCAG Tier</th>
+              <th>ARIA Label</th>
+              <th>Focusable</th>
+            </tr>
+          </thead>
+          <tbody id="checklist-tbody">
+            <!-- Evaluated rows -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { RenewableMicrogridA11yAuditor } from './accessibility-assistant.js';
+
+    const auditor = new RenewableMicrogridA11yAuditor();
+
+    const sampleElements = [
+      { id: 'btn-inverter-master', tag: 'button', text: 'Inverter Master Switch', color: '#f0fdf4', backgroundColor: '#064e3b', hasAriaLabel: true, tabIndex: 0 },
+      { id: 'badge-grid-status', tag: 'span', text: 'Island Mode Active', color: '#34d399', backgroundColor: '#022c22', hasAriaLabel: true, tabIndex: 0 },
+      { id: 'input-frequency-target', tag: 'input', text: '50.00 Hz', color: '#a7f3d0', backgroundColor: '#0f172a', hasAriaLabel: true, tabIndex: 0 },
+      { id: 'alert-harmonic-distortion', tag: 'div', text: 'THD > 4.8% Warning', color: '#fde047', backgroundColor: '#422006', hasAriaLabel: true, tabIndex: 0 },
+      { id: 'link-telemetry-export', tag: 'a', text: 'View Raw Telemetry Log', color: '#6ee7b7', backgroundColor: '#064e3b', hasAriaLabel: true, tabIndex: 0 }
+    ];
+
+    let isRemediated = false;
+
+    function renderAudit() {
+      const results = auditor.auditElements(sampleElements);
+      const scorecard = auditor.getScorecard();
+
+      document.getElementById('score-rate').textContent = `${scorecard.passRate}%`;
+      document.getElementById('score-total').textContent = scorecard.total;
+      document.getElementById('score-passed').textContent = scorecard.passed;
+      document.getElementById('score-grade').textContent = scorecard.grade;
+
+      const tbody = document.getElementById('checklist-tbody');
+      tbody.innerHTML = '';
+
+      results.forEach(res => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><code>${escapeHtml(res.id)}</code> (${res.tag})</td>
+          <td>
+            <span class="color-swatch" style="background:${res.fg}"></span> ${res.fg}
+            <span class="swatch-sep">/</span>
+            <span class="color-swatch" style="background:${res.bg}"></span> ${res.bg}
+          </td>
+          <td><span class="ratio-pill">${res.contrastRatio}:1</span></td>
+          <td><span class="status-badge badge-${res.wcagRating.toLowerCase().replace(/\s+/g, '-')}">${res.wcagRating}</span></td>
+          <td>${res.hasAria ? '✅ Valid' : '❌ Missing'}</td>
+          <td>${res.hasKeyboardFocus ? '✅ Focusable' : '❌ Unreachable'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    document.getElementById('remediate-btn').onclick = () => {
+      isRemediated = !isRemediated;
+      if (isRemediated) {
+        document.body.classList.add('high-contrast-mode');
+        sampleElements.forEach(el => {
+          el.color = '#ffffff';
+          el.backgroundColor = '#000000';
+        });
+        document.getElementById('remediate-btn').textContent = 'Revert Standard Mode';
+      } else {
+        document.body.classList.remove('high-contrast-mode');
+        sampleElements[0].color = '#f0fdf4'; sampleElements[0].backgroundColor = '#064e3b';
+        sampleElements[1].color = '#34d399'; sampleElements[1].backgroundColor = '#022c22';
+        sampleElements[2].color = '#a7f3d0'; sampleElements[2].backgroundColor = '#0f172a';
+        sampleElements[3].color = '#fde047'; sampleElements[3].backgroundColor = '#422006';
+        sampleElements[4].color = '#6ee7b7'; sampleElements[4].backgroundColor = '#064e3b';
+        document.getElementById('remediate-btn').textContent = '1-Click High-Contrast Remediation';
+      }
+      renderAudit();
+    };
+
+    renderAudit();
+  </script>
+</body>
+</html>
