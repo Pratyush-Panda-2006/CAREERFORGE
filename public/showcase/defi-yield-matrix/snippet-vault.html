@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Yield Matrix - Quantitative Formula Snippet Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+</head>
+<body>
+  <div class="vault-wrapper">
+    <header class="vault-header">
+      <div>
+        <h1 class="vault-title">DeFi Yield Formula Preset Vault</h1>
+        <p class="vault-subtitle">Search and inspect verified Uniswap v3 capital efficiency models, flash loan profit equations, and kink borrow rate curves.</p>
+      </div>
+      <button id="openAddModalBtn" class="btn-primary">+ Add DeFi Preset</button>
+    </header>
+
+    <div class="controls-bar">
+      <input type="text" id="searchSnippetInput" class="search-input" placeholder="Search formulas by keyword, AMM parameter, lending curve, or tag...">
+      <div id="tagFilterBar" class="tag-bar">
+        <button class="filter-pill active" data-tag="all">All Presets</button>
+        <button class="filter-pill" data-tag="liquidity">AMM Liquidity</button>
+        <button class="filter-pill" data-tag="arbitrage">Flash Loan MEV</button>
+        <button class="filter-pill" data-tag="lending">Lending Rates</button>
+        <button class="filter-pill" data-tag="yield">Yield APY</button>
+      </div>
+    </div>
+
+    <div id="snippetList" class="snippets-grid"></div>
+  </div>
+
+  <div id="addSnippetModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Save DeFi Formula Preset</h3>
+        <button id="closeModalBtn" class="close-btn">&times;</button>
+      </div>
+      <form id="newSnippetForm">
+        <div class="form-group">
+          <label for="inputSnippetTitle">Preset Title</label>
+          <input type="text" id="inputSnippetTitle" placeholder="e.g. Constant Product Invariant AMM Swap Impact" required>
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetCategory">Category</label>
+          <select id="inputSnippetCategory">
+            <option value="liquidity">AMM Liquidity</option>
+            <option value="arbitrage">Flash Loan MEV</option>
+            <option value="lending">Lending Rates</option>
+            <option value="yield">Yield APY</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetTags">Tags (comma-separated)</label>
+          <input type="text" id="inputSnippetTags" placeholder="amm, liquidity, slippage">
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetDesc">Description</label>
+          <input type="text" id="inputSnippetDesc" placeholder="Brief financial summary...">
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetCode">Financial Formula / JavaScript</label>
+          <textarea id="inputSnippetCode" rows="6" placeholder="// Enter JavaScript DeFi algorithm..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">Save to Vault</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="snippet-vault.js"></script>
+</body>
+</html>
