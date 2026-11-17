@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Preferences & State Engine</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body class="saas-preferences-standalone">
+  <div class="saas-preferences-page">
+    <header class="saas-preferences-topbar">
+      <div class="topbar-branding">
+        <span class="saas-badge">SYSTEM SETTINGS</span>
+        <h2>SaaS Launchpad Configuration Engine</h2>
+      </div>
+      <button type="button" class="saas-pref-open-btn" id="saasPreferencesTriggerBtn">
+        ⚙ Configure Workspace
+      </button>
+    </header>
+
+    <!-- Modal Drawer - Issue #583 -->
+    <div class="saas-preferences-modal active" id="saas-launchpad-preferences-modal" role="dialog" aria-modal="true" aria-hidden="false">
+      <div class="saas-preferences-drawer">
+        <div class="drawer-header">
+          <div class="drawer-title-group">
+            <span class="drawer-icon">⚡</span>
+            <h3>Workspace Preferences</h3>
+          </div>
+          <button type="button" class="drawer-close-btn" id="saasPreferencesCloseBtn" aria-label="Close preferences">✕</button>
+        </div>
+
+        <div class="drawer-body">
+          <div class="pref-field-row">
+            <div class="field-meta">
+              <label for="saasPrefSoundToggle" class="field-label">Notification Chimes & Sound</label>
+              <p class="field-desc">Play audio feedback for deploy events and alerts</p>
+            </div>
+            <label class="saas-toggle-switch">
+              <input type="checkbox" id="saasPrefSoundToggle" checked>
+              <span class="saas-slider"></span>
+            </label>
+          </div>
+
+          <div class="pref-field-row">
+            <div class="field-meta">
+              <label for="saasPrefHighContrastToggle" class="field-label">High-Contrast Analytics Mode</label>
+              <p class="field-desc">Boost data grid luminescence for enhanced clarity</p>
+            </div>
+            <label class="saas-toggle-switch">
+              <input type="checkbox" id="saasPrefHighContrastToggle">
+              <span class="saas-slider"></span>
+            </label>
+          </div>
+
+          <div class="pref-field-row">
+            <div class="field-meta">
+              <label for="saasPrefCompactToggle" class="field-label">Compact Metric Cards</label>
+              <p class="field-desc">Dense dashboard view with reduced element margins</p>
+            </div>
+            <label class="saas-toggle-switch">
+              <input type="checkbox" id="saasPrefCompactToggle">
+              <span class="saas-slider"></span>
+            </label>
+          </div>
+
+          <div class="pref-field-row">
+            <div class="field-meta">
+              <label for="saasPrefRefreshSelect" class="field-label">Telemetry Polling Interval</label>
+              <p class="field-desc">Background frequency for server sparkline telemetry</p>
+            </div>
+            <select id="saasPrefRefreshSelect" class="saas-select">
+              <option value="1">1 second (Live)</option>
+              <option value="5">5 seconds (Default)</option>
+              <option value="15">15 seconds (Eco)</option>
+              <option value="60">60 seconds (Manual)</option>
+            </select>
+          </div>
+
+          <div class="pref-field-row">
+            <div class="field-meta">
+              <label for="saasPrefTimeframeSelect" class="field-label">Default Graph Timeframe</label>
+              <p class="field-desc">Initial window displayed on primary chart visualizer</p>
+            </div>
+            <select id="saasPrefTimeframeSelect" class="saas-select">
+              <option value="1H">Past 1 Hour</option>
+              <option value="24H">Past 24 Hours</option>
+              <option value="7D">Past 7 Days</option>
+              <option value="30D">Past 30 Days</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="drawer-footer">
+          <button type="button" class="drawer-btn btn-secondary" id="saasResetPreferencesBtn">Reset Defaults</button>
+          <button type="button" class="drawer-btn btn-primary" id="saasExportPreferencesBtn">Export Config (JSON)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
