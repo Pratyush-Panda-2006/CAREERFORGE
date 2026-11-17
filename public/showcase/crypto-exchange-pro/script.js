@@ -1,6 +1,8 @@
 import { MatchingEngine } from './matching-engine.js';
 import { TickerStream } from './ticker-stream.js';
 
+import { summarizeVipTier, VIP_TIERS } from './vip-fees.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('VortexDEX Exchange Pro engine ready');
   initMarket();
@@ -1380,6 +1382,39 @@ function initTradeHistoryDrawer() {
     { id: 'ORD-9694', pair: 'LINK/USDT', side: 'SELL', price: 15.10, amount: 800.00, fee: 12.08, pnl: 240.00, timestamp: now - (22 * D), hash: '0x71e4...80ea', feeTier: 'VIP-3 Maker (0.08%)' },
     { id: 'ORD-9670', pair: 'ETH/USDT', side: 'BUY', price: 2980.00, amount: 10.00, fee: 29.80, pnl: 1220.00, timestamp: now - (27 * D), hash: '0xb561...74fe', feeTier: 'VIP-3 Taker (0.10%)' }
   ];
+
+  const vipTrigger = document.getElementById('vip-fee-trigger');
+  const vipPopover = document.getElementById('vip-fee-popover');
+  if (vipTrigger && vipPopover) {
+    const { volume, tier, next, progress } = summarizeVipTier(MOCK_TRADES, now);
+    const money = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+    document.getElementById('vip-tier-label').textContent = `VIP ${tier.level}`;
+    document.getElementById('vip-current-fees').textContent = `Maker: ${tier.maker.toFixed(2)}%  /  Taker: ${tier.taker.toFixed(2)}%`;
+    document.getElementById('vip-volume-summary').textContent = `${money(volume)} sample volume in the last 30 days`;
+    document.getElementById('vip-next-tier').textContent = next
+      ? `${money(Math.max(0, next.minVolume - volume))} more sample volume to VIP ${next.level}`
+      : 'VIP 5 reached: zero maker fees unlocked in this illustrative schedule.';
+    vipPopover.querySelector('.vip-progress').setAttribute('aria-valuenow', String(Math.round(progress)));
+    document.getElementById('vip-progress-fill').style.width = `${progress}%`;
+
+    const list = document.getElementById('vip-tier-list');
+    VIP_TIERS.forEach((item) => {
+      const row = document.createElement('li');
+      row.textContent = `VIP ${item.level} · ${money(item.minVolume)} / 30d · Maker ${item.maker.toFixed(2)}% · Taker ${item.taker.toFixed(2)}%`;
+      if (item.level === tier.level) row.classList.add('current');
+      list.appendChild(row);
+    });
+
+    const close = () => { vipPopover.hidden = true; vipTrigger.setAttribute('aria-expanded', 'false'); };
+    vipTrigger.addEventListener('click', () => {
+      vipPopover.hidden = !vipPopover.hidden;
+      vipTrigger.setAttribute('aria-expanded', String(!vipPopover.hidden));
+    });
+    document.addEventListener('click', (event) => {
+      if (!vipPopover.hidden && !vipPopover.contains(event.target) && !vipTrigger.contains(event.target)) close();
+    });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+  }
 
   function formatCurrency(n) {
     return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
