@@ -1,0 +1,159 @@
+/* Quantum Forge - Reactive Toast Notification Queue Styles */
+:root {
+  --qf-primary: #8b5cf6;
+  --qf-bg: #0b0f19;
+  --qf-panel-bg: rgba(17, 24, 39, 0.85);
+  --qf-border: #1f2937;
+  --qf-text: #f3f4f6;
+  --qf-text-muted: #9ca3af;
+  --qf-info: #3b82f6;
+  --qf-success: #10b981;
+  --qf-warning: #f59e0b;
+  --qf-danger: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--qf-bg);
+  color: var(--qf-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.notifier-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--qf-panel-bg);
+  border: 1px solid var(--qf-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
+}
+
+.notifier-header {
+  border-bottom: 1px solid var(--qf-border);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.notifier-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: var(--qf-text-muted);
+  text-transform: uppercase;
+}
+
+.form-group input, .form-group select {
+  padding: 0.6rem;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #fff;
+}
+
+.btn-trigger {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--qf-primary), #6366f1);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.toast-viewport {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 9999;
+  max-width: 360px;
+}
+
+.toast-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: #1e293b;
+  border-left: 4px solid var(--qf-info);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-card.toast-info { border-left-color: var(--qf-info); }
+.toast-card.toast-success { border-left-color: var(--qf-success); }
+.toast-card.toast-warning { border-left-color: var(--qf-warning); }
+.toast-card.toast-danger { border-left-color: var(--qf-danger); }
+
+.toast-body strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+  color: #fff;
+}
+
+.toast-body p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--qf-text-muted);
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--qf-text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.history-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--qf-border);
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-item {
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background: rgba(30, 41, 59, 0.4);
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge - Reactive Event Notifier</title>
+  <link rel="stylesheet" href="event-notifier.css">
+</head>
+<body>
+  <div class="notifier-container">
+    <header class="notifier-header">
+      <h1>🔔 Quantum Event Notifier & Audio Feedback Dispatcher</h1>
+      <p>Priority-weighted toast notification stream with synthesized audio feedback chimes.</p>
+    </header>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="notif-type">Priority Alert Level</label>
+        <select id="notif-type">
+          <option value="info">Info (Weight: 100)</option>
+          <option value="success">Success (Weight: 200)</option>
+          <option value="warning">Warning (Weight: 300)</option>
+          <option value="danger">Danger (Weight: 400)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="notif-title">Alert Title</label>
+        <input type="text" id="notif-title" value="Qubit Decoherence Detected">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 1.5rem;">
+      <label for="notif-msg">Notification Message</label>
+      <input type="text" id="notif-msg" value="Phase shift on Qubit 4 exceeded 15 microsecond threshold.">
+    </div>
+
+    <button id="trigger-notif-btn" class="btn-trigger">Dispatch Event Notification</button>
+
+    <div class="history-section">
+      <h3>Event Notification History</h3>
+      <ul id="history-list" class="history-list"></ul>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-viewport"></div>
+
+  <script type="module" src="event-notifier.js"></script>
+</body>
+</html>
