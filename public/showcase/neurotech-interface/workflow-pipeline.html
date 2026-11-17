@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neurotech Interface - BCI Trial & Protocol Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body class="neuro-pipeline-body">
+  <header class="pipeline-header">
+    <div class="pipeline-brand">
+      <span class="pipeline-icon">🧠</span>
+      <h1>Neural Interface Trial & Calibration Workflow Pipeline</h1>
+    </div>
+    <div class="pipeline-actions">
+      <button type="button" id="openNewTaskModal" class="btn btn-primary">+ Add BCI Session</button>
+      <button type="button" id="exportPipelineBtn" class="btn btn-secondary">Export JSON</button>
+    </div>
+  </header>
+
+  <main class="pipeline-main">
+    <div class="kanban-board" id="kanbanBoard"></div>
+  </main>
+
+  <div class="modal-backdrop" id="taskModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create BCI Trial Task</h3>
+        <button type="button" class="close-btn" id="closeModalBtn">&times;</button>
+      </div>
+      <form id="newTaskForm" class="modal-form">
+        <div class="form-group">
+          <label for="taskTitleInput">Session Name / Protocol</label>
+          <input type="text" id="taskTitleInput" required placeholder="e.g. Motor Imagery Cursor Steering 100-Trial Run">
+        </div>
+        <div class="form-group">
+          <label for="taskDescInput">Telemetry & Electrode Configuration</label>
+          <textarea id="taskDescInput" rows="3" placeholder="Sampling rate, active channels, bandpass parameters..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskColSelect">Initial Pipeline Phase</label>
+            <select id="taskColSelect">
+              <option value="backlog">Protocol Backlog</option>
+              <option value="in_progress">Active Neural Recording</option>
+              <option value="review">Signal QC & Artifact Rejection</option>
+              <option value="completed">Model Verified & Calibrated</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="taskPrioritySelect">Priority Level</label>
+            <select id="taskPrioritySelect">
+              <option value="high">High (Clinical Trial)</option>
+              <option value="medium" selected>Medium (Standard Calibration)</option>
+              <option value="low">Low (Baseline Impedance)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="taskAssigneeInput">Lead Neuro-Engineer</label>
+          <input type="text" id="taskAssigneeInput" placeholder="e.g. Dr. Aris Thorne">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="workflow-pipeline.js"></script>
+</body>
+</html>
