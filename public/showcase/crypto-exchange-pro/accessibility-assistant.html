@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Exchange Pro - Automated WCAG Contrast & Keyboard Accessibility Inspector</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+</head>
+<body>
+  <div class="a11y-container">
+    <header class="a11y-header">
+      <div class="badge-tag">Trading Terminal Accessibility</div>
+      <h1>Exchange UI Contrast & WCAG 2.1 Compliance Inspector</h1>
+      <p>Automated real-time color contrast evaluation, buy/sell accessibility verification, and focus order inspection for professional crypto exchange interfaces.</p>
+    </header>
+
+    <div class="a11y-grid">
+      <section class="a11y-card controls-card">
+        <h2>Terminal Color Pairing</h2>
+
+        <div class="picker-group">
+          <label>Foreground / Order Book Text</label>
+          <div class="picker-row">
+            <input type="color" id="fgColorPicker" value="#f59e0b" aria-label="Foreground color picker">
+            <input type="text" id="fgColorInput" value="#f59e0b" maxlength="7" spellcheck="false" aria-label="Foreground hex code">
+          </div>
+        </div>
+
+        <div class="picker-group">
+          <label>Background / Canvas Fill</label>
+          <div class="picker-row">
+            <input type="color" id="bgColorPicker" value="#0a0e17" aria-label="Background color picker">
+            <input type="text" id="bgColorInput" value="#0a0e17" maxlength="7" spellcheck="false" aria-label="Background hex code">
+          </div>
+        </div>
+
+        <div class="preset-group">
+          <label>Exchange Terminal Presets</label>
+          <div class="preset-buttons">
+            <button type="button" class="preset-btn" data-fg="#10b981" data-bg="#062e1e">Buy Bid (Green)</button>
+            <button type="button" class="preset-btn" data-fg="#ef4444" data-bg="#330b0b">Sell Ask (Red)</button>
+            <button type="button" class="preset-btn" data-fg="#f59e0b" data-bg="#0a0e17">Default Gold</button>
+            <button type="button" class="preset-btn" data-fg="#38bdf8" data-bg="#0f172a">Cyan Depth</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="a11y-card results-card">
+        <h2>Live Contrast Verification</h2>
+
+        <div class="preview-box" id="contrastPreviewBox">
+          <p id="previewText" class="preview-heading">BTC/USDT ORDER #984210 [LIMIT BUY]</p>
+          <p class="preview-sub">Price: $92,450.00 • Amount: 1.500 BTC • Total: $138,675.00 USDT</p>
+        </div>
+
+        <div class="ratio-display">
+          <span class="ratio-label">Calculated Contrast Ratio</span>
+          <span class="ratio-value" id="contrastRatioVal">-- : 1</span>
+        </div>
+
+        <div class="wcag-table">
+          <div class="wcag-row">
+            <span class="criterion">WCAG AA Normal Text (&ge; 4.5:1)</span>
+            <span class="status-pill" id="aaNormalPill">--</span>
+          </div>
+          <div class="wcag-row">
+            <span class="criterion">WCAG AA Large Text / UI Components (&ge; 3.0:1)</span>
+            <span class="status-pill" id="aaLargePill">--</span>
+          </div>
+          <div class="wcag-row">
+            <span class="criterion">WCAG AAA Normal Text (&ge; 7.0:1)</span>
+            <span class="status-pill" id="aaaNormalPill">--</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="accessibility-assistant.js"></script>
+</body>
+</html>
