@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Agile Workflow Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body class="pipeline-body">
+  <div class="pipeline-container">
+    <header class="pipeline-header">
+      <div class="header-left">
+        <h1 class="pipeline-title">🚀 SaaS Sprint Pipeline</h1>
+        <p class="pipeline-subtitle">Autonomous drag-and-drop task workflow engine with WIP limits & lifecycle state machine</p>
+      </div>
+      <div class="header-actions">
+        <button id="open-task-modal-btn" class="btn btn-primary">+ New Feature Task</button>
+        <button id="export-pipeline-btn" class="btn btn-secondary">Export Pipeline JSON</button>
+      </div>
+    </header>
+
+    <main class="kanban-board" id="kanban-board">
+      <div class="kanban-column" data-col="backlog">
+        <div class="column-header">
+          <span class="column-title">Backlog</span>
+          <span class="column-pill count-pill" id="pill-backlog">0</span>
+        </div>
+        <div class="card-list" id="col-backlog" ondragover="event.preventDefault()"></div>
+      </div>
+
+      <div class="kanban-column" data-col="in_progress">
+        <div class="column-header">
+          <span class="column-title">In Progress</span>
+          <span class="column-pill limit-pill" id="pill-in_progress">0 / 3 WIP</span>
+        </div>
+        <div class="card-list" id="col-in_progress" ondragover="event.preventDefault()"></div>
+      </div>
+
+      <div class="kanban-column" data-col="review">
+        <div class="column-header">
+          <span class="column-title">Review</span>
+          <span class="column-pill limit-pill" id="pill-review">0 / 2 WIP</span>
+        </div>
+        <div class="card-list" id="col-review" ondragover="event.preventDefault()"></div>
+      </div>
+
+      <div class="kanban-column" data-col="completed">
+        <div class="column-header">
+          <span class="column-title">Completed</span>
+          <span class="column-pill count-pill" id="pill-completed">0</span>
+        </div>
+        <div class="card-list" id="col-completed" ondragover="event.preventDefault()"></div>
+      </div>
+    </main>
+
+    <div id="task-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h3 class="modal-title">Create Sprint Task</h3>
+        <form id="task-form">
+          <div class="form-group">
+            <label for="task-title">Feature / Issue Title</label>
+            <input type="text" id="task-title" required placeholder="e.g. Multi-tenant Tenant Isolation">
+          </div>
+          <div class="form-group">
+            <label for="task-desc">Acceptance Criteria</label>
+            <textarea id="task-desc" rows="3" placeholder="Deliverables and verification specs..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="task-priority">Priority</label>
+            <select id="task-priority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="cancel-modal-btn" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Task</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { SaasLaunchpadPipelineEngine } from './workflow-pipeline.js';
+
+    const engine = new SaasLaunchpadPipelineEngine({
+      cards: [
+        { id: 'saas-10', title: 'Stripe Metered Billing Integration', description: 'Implement usage-based billing tier synchronization', priority: 'high', columnId: 'backlog' },
+        { id: 'saas-11', title: 'OAuth2 Multi-Tenant SSO Provider', description: 'Support Okta and Google Workspace enterprise logins', priority: 'critical', columnId: 'in_progress' },
+        { id: 'saas-12', title: 'Audit Trail Export Engine', description: 'Generate SOC2-compliant compliance logs in CSV/JSON', priority: 'medium', columnId: 'review' }
+      ]
+    });
+
+    function render() {
+      ['backlog', 'in_progress', 'review', 'completed'].forEach(colId => {
+        const listEl = document.getElementById(`col-${colId}`);
+        listEl.innerHTML = '';
+        const cards = engine.getCardsInColumn(colId);
+        
+        cards.forEach(card => {
+          const cardEl = document.createElement('div');
+          cardEl.className = `task-card priority-${card.priority}`;
+          cardEl.draggable = true;
+          cardEl.dataset.cardId = card.id;
+          cardEl.innerHTML = `
+            <div class="card-head">
+              <span class="badge badge-${card.priority}">${card.priority}</span>
+              <span class="card-id">#${card.id}</span>
+            </div>
+            <div class="card-title">${card.title}</div>
+            <p class="card-desc">${card.description}</p>
+          `;
+
+          cardEl.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', JSON.stringify({ cardId: card.id, fromCol: colId }));
+            cardEl.classList.add('dragging');
+          });
+          cardEl.addEventListener('dragend', () => cardEl.classList.remove('dragging'));
+          listEl.appendChild(cardEl);
+        });
+
+        const pill = document.getElementById(`pill-${colId}`);
+        const col = engine.columns.find(c => c.id === colId);
+        if (col.wipLimit > 0) {
+          pill.textContent = `${cards.length} / ${col.wipLimit} WIP`;
+          pill.className = `column-pill limit-pill ${cards.length >= col.wipLimit ? 'limit-reached' : ''}`;
+        } else {
+          pill.textContent = `${cards.length}`;
+        }
+      });
+    }
+
+    document.querySelectorAll('.kanban-column').forEach(columnEl => {
+      columnEl.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        columnEl.classList.add('drag-over');
+      });
+      columnEl.addEventListener('dragleave', () => {
+        columnEl.classList.remove('drag-over');
+      });
+      columnEl.addEventListener('drop', (e) => {
+        e.preventDefault();
+        columnEl.classList.remove('drag-over');
+        try {
+          const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+          const targetCol = columnEl.dataset.col;
+          engine.moveCard(data.cardId, data.fromCol, targetCol);
+          render();
+        } catch (err) {
+          alert(err.message);
+        }
+      });
+    });
+
+    const modal = document.getElementById('task-modal');
+    document.getElementById('open-task-modal-btn').onclick = () => modal.classList.remove('hidden');
+    document.getElementById('cancel-modal-btn').onclick = () => modal.classList.add('hidden');
+    document.getElementById('task-form').onsubmit = (e) => {
+      e.preventDefault();
+      try {
+        engine.addCard({
+          id: 'saas-' + Date.now().toString(36),
+          title: document.getElementById('task-title').value,
+          description: document.getElementById('task-desc').value,
+          priority: document.getElementById('task-priority').value,
+          columnId: 'backlog'
+        });
+        e.target.reset();
+        modal.classList.add('hidden');
+        render();
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+
+    document.getElementById('export-pipeline-btn').onclick = () => {
+      const json = engine.exportPipelineJSON();
+      navigator.clipboard.writeText(json).then(() => alert('SaaS Pipeline state copied to clipboard!'));
+    };
+
+    render();
+  </script>
+</body>
+</html>
