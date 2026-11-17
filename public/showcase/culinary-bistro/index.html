@@ -18,6 +18,7 @@
     <button type="button" class="order-btn order-hero" id="orderOnline">Order Online</button>
     <button type="button" class="order-btn kds-hero-btn" id="openKdsBtn" aria-haspopup="dialog" aria-controls="kdsModal">🧑‍🍳 Kitchen Display (KDS)</button>
     <a href="#mixologyLab" class="order-btn mixology-hero-btn">🍸 Mixology Lab</a>
+    <a href="#giftCardSection" class="order-btn gift-hero-btn" id="giftHeroBtn">🎁 Gift Cards</a>
   </header>
 
   <main className="menu-section" id="menu">
@@ -1088,6 +1089,244 @@
     </div>
   </section>
   <!-- ===== END Issue #330 ===== -->
+
+  <!-- ===== Issue #275: Digital Gift Card Custom Balance Builder & Preview Modal ===== -->
+  <section class="gift-card-section" id="giftCardSection" aria-labelledby="giftCardTitle">
+    <div class="gift-card-container">
+      <div class="gift-section-header">
+        <span class="gc-kicker">LUMIÈRE OFFRE PRIVÉE • DIGITAL GASTRONOMY PASSPORT</span>
+        <h2 id="giftCardTitle">Digital Gift Card &amp; Custom Balance Builder</h2>
+        <p class="gc-subtitle">
+          Gift an evening of sensory indulgence. Select your balance, personalize dedication notes, choose curated Parisian artwork themes, and preview the bespoke certificate in real-time.
+        </p>
+      </div>
+
+      <div class="gift-customizer-grid">
+        <!-- Builder Controls Form -->
+        <div class="gc-builder-panel">
+          <div class="gc-field-group">
+            <label class="gc-label" id="gcDenomLabel">Select Dining Denomination</label>
+            <div class="gc-chips-row" role="radiogroup" aria-labelledby="gcDenomLabel">
+              <button type="button" class="gc-chip active" data-amount="50" role="radio" aria-checked="true">
+                <span class="chip-val">€50</span>
+                <span class="chip-sub">Apéro &amp; Sweets</span>
+              </button>
+              <button type="button" class="gc-chip" data-amount="100" role="radio" aria-checked="false">
+                <span class="chip-val">€100</span>
+                <span class="chip-sub">Classic Dinner</span>
+              </button>
+              <button type="button" class="gc-chip" data-amount="250" role="radio" aria-checked="false">
+                <span class="chip-val">€250</span>
+                <span class="chip-sub">Prestige Tasting (Two)</span>
+              </button>
+              <button type="button" class="gc-chip" data-amount="500" role="radio" aria-checked="false">
+                <span class="chip-val">€500</span>
+                <span class="chip-sub">Chef's Cellar Reserve</span>
+              </button>
+              <button type="button" class="gc-chip" data-amount="custom" role="radio" aria-checked="false">
+                <span class="chip-val">Custom</span>
+                <span class="chip-sub">€25 – €2,500</span>
+              </button>
+            </div>
+
+            <!-- Custom Amount Input (Toggled) -->
+            <div class="gc-custom-input-wrap" id="gcCustomInputWrap" hidden>
+              <div class="gc-input-prefix">
+                <span>€</span>
+                <input type="number" id="gcCustomAmount" min="25" max="2500" step="5" placeholder="Enter custom € amount (25 - 2500)" aria-label="Custom gift card amount in Euros" />
+              </div>
+              <small class="gc-hint">Enter any balance between €25 and €2,500.</small>
+            </div>
+          </div>
+
+          <!-- Artwork Themes -->
+          <div class="gc-field-group">
+            <label class="gc-label" id="gcThemeLabel">Curated Atelier Theme</label>
+            <div class="gc-theme-picker" role="radiogroup" aria-labelledby="gcThemeLabel">
+              <button type="button" class="gc-theme-option active" data-theme="vintage-paris" role="radio" aria-checked="true">
+                <div class="theme-swatch theme-vintage"></div>
+                <div class="theme-text">
+                  <strong>Vintage Paris 1890</strong>
+                  <span>Gilded parchment &amp; Art Nouveau filigree</span>
+                </div>
+              </button>
+              <button type="button" class="gc-theme-option" data-theme="michelin-luxe" role="radio" aria-checked="false">
+                <div class="theme-swatch theme-michelin"></div>
+                <div class="theme-text">
+                  <strong>Michelin Star Luxe</strong>
+                  <span>Brushed black obsidian &amp; metallic 24K gold</span>
+                </div>
+              </button>
+              <button type="button" class="gc-theme-option" data-theme="midnight-champagne" role="radio" aria-checked="false">
+                <div class="theme-swatch theme-champagne"></div>
+                <div class="theme-text">
+                  <strong>Midnight Champagne</strong>
+                  <span>Sapphire blue &amp; effervescent platinum</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Personalization Inputs -->
+          <div class="gc-field-group">
+            <label class="gc-label" for="gcRecipientName">Recipient Name</label>
+            <input type="text" id="gcRecipientName" class="gc-input" placeholder="e.g. Élodie Fontaine" maxlength="40" />
+          </div>
+
+          <div class="gc-field-group">
+            <label class="gc-label" for="gcSenderName">From / Sender Name</label>
+            <input type="text" id="gcSenderName" class="gc-input" placeholder="e.g. Jean-Luc &amp; Chantal" maxlength="40" />
+          </div>
+
+          <div class="gc-field-group">
+            <div class="gc-label-row">
+              <label class="gc-label" for="gcPersonalMessage">Personal Dedication Message</label>
+              <span class="gc-char-counter" id="gcCharCounter">0 / 140</span>
+            </div>
+            <textarea id="gcPersonalMessage" class="gc-textarea" rows="3" maxlength="140" placeholder="Write a warm bistro wish for your guest..."></textarea>
+            
+            <!-- Quick Message Suggestions -->
+            <div class="gc-prompt-chips">
+              <button type="button" class="gc-prompt-chip" data-msg="To exquisite culinary memories and joyful shared laughter. Bon Appétit!">🥂 Bon Appétit</button>
+              <button type="button" class="gc-prompt-chip" data-msg="Happy Anniversary! Celebrating another beautiful year together in timeless Parisian style.">💍 Anniversary</button>
+              <button type="button" class="gc-prompt-chip" data-msg="A world-class gastronomic journey to celebrate your extraordinary milestone.">✨ Milestone</button>
+            </div>
+          </div>
+
+          <!-- Complimentary Dining Perks -->
+          <div class="gc-field-group">
+            <label class="gc-label">Included Concierge Perks</label>
+            <div class="gc-perks-list">
+              <label class="gc-checkbox-label">
+                <input type="checkbox" id="gcPerkChampagne" checked />
+                <span>🥂 Complimentary Chef's welcome Champagne flute (+€0)</span>
+              </label>
+              <label class="gc-checkbox-label">
+                <input type="checkbox" id="gcPerkBooth" />
+                <span>🕯️ Priority Seine-side or courtyard garden booth (+€0)</span>
+              </label>
+              <label class="gc-checkbox-label">
+                <input type="checkbox" id="gcPerkTruffles" />
+                <span>🍫 Handcrafted Valrhona Truffle Petit Fours box (+€15)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Card Preview -->
+        <div class="gc-preview-panel">
+          <div class="gc-preview-sticky">
+            <div class="gc-preview-banner">
+              <span>LIVE CERTIFICATE PREVIEW</span>
+              <span class="gc-live-badge">REAL-TIME SYNC</span>
+            </div>
+
+            <!-- The Digital Certificate Card -->
+            <div class="gift-certificate-card theme-vintage-paris" id="giftCertificateCard">
+              <div class="gc-card-pattern"></div>
+              <div class="gc-card-inner">
+                <div class="gc-card-top">
+                  <div class="gc-brand-seal">
+                    <span class="gc-seal-icon">⚜️</span>
+                    <span class="gc-seal-brand">LUMIÈRE PARIS</span>
+                  </div>
+                  <div class="gc-card-val-badge">
+                    <span class="val-currency">€</span>
+                    <span class="val-num" id="cardBalanceDisplay">50</span>
+                  </div>
+                </div>
+
+                <div class="gc-card-body">
+                  <span class="gc-passport-tag">GASTRONOMY PRIVILEGE CERTIFICATE</span>
+                  <div class="gc-recipient-block">
+                    <span class="gc-recipient-lbl">PRESENTED HONORED GUEST</span>
+                    <h3 class="gc-recipient-name" id="cardRecipientDisplay">Valued Guest</h3>
+                  </div>
+                  <p class="gc-card-msg" id="cardMessageDisplay">"To exquisite culinary memories and joyful shared laughter. Bon Appétit!"</p>
+                  <div class="gc-sender-block">
+                    <span class="gc-sender-lbl">WITH COMPLIMENTS FROM</span>
+                    <span class="gc-sender-name" id="cardSenderDisplay">Lumière Bistro</span>
+                  </div>
+                </div>
+
+                <div class="gc-card-footer">
+                  <div class="gc-code-box">
+                    <span class="code-lbl">CERTIFICATE SERIAL</span>
+                    <code class="code-val" id="cardSerialDisplay">LUM-2026-B812-7491</code>
+                  </div>
+                  <div class="gc-validity-box">
+                    <span class="valid-lbl">EXPIRES</span>
+                    <span class="valid-val" id="cardExpiryDisplay">Nov 2028</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Summary & Actions -->
+            <div class="gc-actions-card">
+              <div class="gc-summary-row">
+                <span>Card Balance:</span>
+                <strong id="gcSummaryBalance">€50.00</strong>
+              </div>
+              <div class="gc-summary-row" id="gcPerkRow" hidden>
+                <span>Concierge Add-ons:</span>
+                <strong id="gcSummaryAddons">+€15.00</strong>
+              </div>
+              <div class="gc-summary-row total-row">
+                <span>Total Payable:</span>
+                <strong class="gc-total-price" id="gcSummaryTotal">€50.00</strong>
+              </div>
+
+              <div class="gc-button-stack">
+                <button type="button" class="gc-btn-primary" id="openCertModalBtn">
+                  <span>📜 Inspect Full Resolution Certificate</span>
+                </button>
+                <div class="gc-sub-actions">
+                  <button type="button" class="gc-btn-secondary" id="copyCertCodeBtn">
+                    <span id="copyBtnText">📋 Copy Serial Code</span>
+                  </button>
+                  <button type="button" class="gc-btn-secondary" id="directPrintBtn">
+                    <span>🖨️ Print Voucher</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Certificate Modal Dialog (Printable / Full Resolution) -->
+  <div class="gift-modal-backdrop" id="giftModalBackdrop" hidden>
+    <div class="gift-modal-dialog" id="giftModalDialog" role="dialog" aria-modal="true" aria-labelledby="giftModalTitle">
+      <div class="gift-modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-kicker">OFFICIAL ATELIER VOUCHER</span>
+          <h3 id="giftModalTitle">Lumière Paris Digital Certificate</h3>
+        </div>
+        <button type="button" class="gift-modal-close" id="closeGiftModalBtn" aria-label="Close Certificate Modal">&times;</button>
+      </div>
+
+      <div class="gift-modal-body">
+        <div class="modal-card-stage" id="modalCardStage">
+          <!-- Cloned or rendered certificate display -->
+          <div class="modal-cert-container" id="modalCertContainer"></div>
+        </div>
+        <div class="modal-print-instructions">
+          <p>This digital voucher is redeemable at Lumière Bistro, 14 Rue de Beaujolais, 75001 Paris, or during online private dining checkout.</p>
+        </div>
+      </div>
+
+      <div class="gift-modal-footer">
+        <button type="button" class="gc-btn-secondary" id="modalCloseActionBtn">Close</button>
+        <button type="button" class="gc-btn-primary" id="modalPrintActionBtn">
+          <span>🖨️ Print Certificate (PDF)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- ===== END Issue #275 ===== -->
 
   <!-- Sommelier Wine Pairing & Flavor Radar Modal (Issue #445) -->
   <div class="sommelier-modal-backdrop" id="sommelierModalBackdrop" hidden>

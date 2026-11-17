@@ -3026,4 +3026,313 @@ if (document.readyState === 'loading') {
   }
 })();
 
+/* ==========================================================================
+   Issue #275: Digital Gift Card Custom Balance Builder & Preview Modal
+   ========================================================================== */
+(function initGiftCardModule() {
+  function initGiftCard() {
+    const section = document.getElementById('giftCardSection');
+    if (!section) return;
+
+    // State
+    const state = {
+      amount: 50,
+      customAmount: 50,
+      isCustom: false,
+      theme: 'vintage-paris',
+      recipient: '',
+      sender: '',
+      message: 'To exquisite culinary memories and joyful shared laughter. Bon Appétit!',
+      perkTruffles: false,
+      serialCode: generateSerial()
+    };
+
+    function generateSerial() {
+      const part1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const part2 = Math.floor(1000 + Math.random() * 9000);
+      return `LUM-2026-${part1}-${part2}`;
+    }
+
+    // DOM Elements
+    const denomChips = section.querySelectorAll('.gc-chip');
+    const customWrap = document.getElementById('gcCustomInputWrap');
+    const customInput = document.getElementById('gcCustomAmount');
+    const themeOptions = section.querySelectorAll('.gc-theme-option');
+    const recipientInput = document.getElementById('gcRecipientName');
+    const senderInput = document.getElementById('gcSenderName');
+    const messageInput = document.getElementById('gcPersonalMessage');
+    const charCounter = document.getElementById('gcCharCounter');
+    const promptChips = section.querySelectorAll('.gc-prompt-chip');
+    const trufflesCheckbox = document.getElementById('gcPerkTruffles');
+
+    // Preview Card Elements
+    const cardEl = document.getElementById('giftCertificateCard');
+    const cardBalanceDisplay = document.getElementById('cardBalanceDisplay');
+    const cardRecipientDisplay = document.getElementById('cardRecipientDisplay');
+    const cardMessageDisplay = document.getElementById('cardMessageDisplay');
+    const cardSenderDisplay = document.getElementById('cardSenderDisplay');
+    const cardSerialDisplay = document.getElementById('cardSerialDisplay');
+
+    // Summary Elements
+    const summaryBalance = document.getElementById('gcSummaryBalance');
+    const summaryAddons = document.getElementById('gcSummaryAddons');
+    const perkRow = document.getElementById('gcPerkRow');
+    const summaryTotal = document.getElementById('gcSummaryTotal');
+
+    // Actions
+    const copyBtn = document.getElementById('copyCertCodeBtn');
+    const copyBtnText = document.getElementById('copyBtnText');
+    const directPrintBtn = document.getElementById('directPrintBtn');
+    const openModalBtn = document.getElementById('openCertModalBtn');
+
+    // Modal Elements
+    const modalBackdrop = document.getElementById('giftModalBackdrop');
+    const modalCloseBtn = document.getElementById('closeGiftModalBtn');
+    const modalCloseActionBtn = document.getElementById('modalCloseActionBtn');
+    const modalPrintBtn = document.getElementById('modalPrintActionBtn');
+    const modalCardStage = document.getElementById('modalCertContainer');
+
+    function updatePreview() {
+      const effectiveBalance = state.isCustom ? (state.customAmount || 25) : state.amount;
+      const addonFee = state.perkTruffles ? 15 : 0;
+      const totalAmount = effectiveBalance + addonFee;
+
+      // Update card texts
+      if (cardBalanceDisplay) {
+        cardBalanceDisplay.textContent = String(effectiveBalance);
+      }
+      if (cardRecipientDisplay) {
+        cardRecipientDisplay.textContent = state.recipient.trim() || 'Valued Guest';
+      }
+      if (cardMessageDisplay) {
+        cardMessageDisplay.textContent = state.message.trim() ? `"${state.message.trim()}"` : '"To unforgettable bistro evenings. Bon Appétit!"';
+      }
+      if (cardSenderDisplay) {
+        cardSenderDisplay.textContent = state.sender.trim() || 'Lumière Bistro';
+      }
+      if (cardSerialDisplay) {
+        cardSerialDisplay.textContent = state.serialCode;
+      }
+
+      // Update theme classes on card
+      if (cardEl) {
+        cardEl.classList.remove('theme-vintage-paris', 'theme-michelin-luxe', 'theme-midnight-champagne');
+        cardEl.classList.add(`theme-${state.theme}`);
+      }
+
+      // Update summary panel
+      if (summaryBalance) {
+        summaryBalance.textContent = `€${effectiveBalance.toFixed(2)}`;
+      }
+      if (perkRow && summaryAddons) {
+        if (addonFee > 0) {
+          perkRow.hidden = false;
+          summaryAddons.textContent = `+€${addonFee.toFixed(2)}`;
+        } else {
+          perkRow.hidden = true;
+        }
+      }
+      if (summaryTotal) {
+        summaryTotal.textContent = `€${totalAmount.toFixed(2)}`;
+      }
+    }
+
+    // Denomination Chips Handlers
+    denomChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        denomChips.forEach((c) => {
+          c.classList.remove('active');
+          c.setAttribute('aria-checked', 'false');
+        });
+        chip.classList.add('active');
+        chip.setAttribute('aria-checked', 'true');
+
+        const val = chip.getAttribute('data-amount');
+        if (val === 'custom') {
+          state.isCustom = true;
+          if (customWrap) customWrap.hidden = false;
+          if (customInput) {
+            customInput.focus();
+            const parsed = parseFloat(customInput.value);
+            if (!Number.isNaN(parsed) && parsed >= 25 && parsed <= 2500) {
+              state.customAmount = parsed;
+            } else {
+              state.customAmount = 150;
+              customInput.value = '150';
+            }
+          }
+        } else {
+          state.isCustom = false;
+          state.amount = parseInt(val, 10) || 50;
+          if (customWrap) customWrap.hidden = true;
+        }
+        updatePreview();
+      });
+    });
+
+    // Custom Amount Input Handler
+    if (customInput) {
+      customInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        if (!Number.isNaN(val) && val >= 25 && val <= 2500) {
+          state.customAmount = Math.round(val);
+          updatePreview();
+        }
+      });
+    }
+
+    // Theme Picker Handlers
+    themeOptions.forEach((opt) => {
+      opt.addEventListener('click', () => {
+        themeOptions.forEach((o) => {
+          o.classList.remove('active');
+          o.setAttribute('aria-checked', 'false');
+        });
+        opt.classList.add('active');
+        opt.setAttribute('aria-checked', 'true');
+
+        const theme = opt.getAttribute('data-theme');
+        if (theme) {
+          state.theme = theme;
+          updatePreview();
+        }
+      });
+    });
+
+    // Recipient & Sender Input Handlers
+    if (recipientInput) {
+      recipientInput.addEventListener('input', (e) => {
+        state.recipient = e.target.value;
+        updatePreview();
+      });
+    }
+
+    if (senderInput) {
+      senderInput.addEventListener('input', (e) => {
+        state.sender = e.target.value;
+        updatePreview();
+      });
+    }
+
+    // Dedication Message & Char Counter
+    if (messageInput) {
+      messageInput.value = state.message;
+      if (charCounter) charCounter.textContent = `${state.message.length} / 140`;
+
+      messageInput.addEventListener('input', (e) => {
+        state.message = e.target.value;
+        if (charCounter) {
+          charCounter.textContent = `${e.target.value.length} / 140`;
+        }
+        updatePreview();
+      });
+    }
+
+    // Dedication Prompt Suggestion Chips
+    promptChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const msg = chip.getAttribute('data-msg');
+        if (msg) {
+          state.message = msg;
+          if (messageInput) {
+            messageInput.value = msg;
+          }
+          if (charCounter) {
+            charCounter.textContent = `${msg.length} / 140`;
+          }
+          updatePreview();
+        }
+      });
+    });
+
+    // Addons checkbox
+    if (trufflesCheckbox) {
+      trufflesCheckbox.addEventListener('change', (e) => {
+        state.perkTruffles = e.target.checked;
+        updatePreview();
+      });
+    }
+
+    // Copy Serial Code
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(state.serialCode);
+          }
+          if (copyBtnText) copyBtnText.textContent = '✓ Serial Code Copied!';
+          copyBtn.style.borderColor = '#22c55e';
+          setTimeout(() => {
+            if (copyBtnText) copyBtnText.textContent = '📋 Copy Serial Code';
+            copyBtn.style.borderColor = '';
+          }, 2000);
+        } catch {
+          if (copyBtnText) copyBtnText.textContent = state.serialCode;
+        }
+      });
+    }
+
+    // Direct Print
+    if (directPrintBtn) {
+      directPrintBtn.addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    // Modal Handling
+    function openCertificateModal() {
+      if (!modalBackdrop || !modalCardStage || !cardEl) return;
+
+      // Clone card into modal
+      modalCardStage.replaceChildren();
+      const clone = cardEl.cloneNode(true);
+      clone.id = 'modalClonedCertificate';
+      modalCardStage.appendChild(clone);
+
+      modalBackdrop.hidden = false;
+      document.body.style.overflow = 'hidden';
+      if (modalCloseBtn) modalCloseBtn.focus();
+    }
+
+    function closeCertificateModal() {
+      if (!modalBackdrop) return;
+      modalBackdrop.hidden = true;
+      document.body.style.overflow = '';
+      if (openModalBtn) openModalBtn.focus();
+    }
+
+    if (openModalBtn) openModalBtn.addEventListener('click', openCertificateModal);
+    if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeCertificateModal);
+    if (modalCloseActionBtn) modalCloseActionBtn.addEventListener('click', closeCertificateModal);
+    if (modalPrintBtn) {
+      modalPrintBtn.addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    if (modalBackdrop) {
+      modalBackdrop.addEventListener('click', (e) => {
+        if (e.target === modalBackdrop) {
+          closeCertificateModal();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalBackdrop && !modalBackdrop.hidden) {
+        closeCertificateModal();
+      }
+    });
+
+    // Initial render
+    updatePreview();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGiftCard);
+  } else {
+    initGiftCard();
+  }
+})();
+
 
