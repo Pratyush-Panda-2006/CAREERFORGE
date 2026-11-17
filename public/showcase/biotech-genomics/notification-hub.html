@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biotech Genomics - Notification Hub & Alert Stream</title>
+  <link rel="stylesheet" href="notification-hub.css">
+</head>
+<body>
+  <div class="hub-container">
+    <header class="hub-header">
+      <span class="hub-badge">Lab Telemetry</span>
+      <h1>🧬 Genomic Laboratory Alert Stream & Toast Queue</h1>
+      <p>Autonomous lab event dispatcher handling critical incubator temp excursions, sequencer errors, and QC approvals</p>
+    </header>
+
+    <section class="controls-card">
+      <h2>Simulate Laboratory Telemetry</h2>
+      <div class="button-toolbar">
+        <button id="triggerCriticalBtn" class="btn btn-critical">🚨 Trigger Cryo-Storage Alarm</button>
+        <button id="triggerWarningBtn" class="btn btn-warning">⚠️ Trigger Low Reagent Warning</button>
+        <button id="triggerSuccessBtn" class="btn btn-success">✅ Trigger Exome QC Pass</button>
+        <button id="triggerInfoBtn" class="btn btn-info">ℹ️ Trigger NovaSeq Run Started</button>
+        <button id="clearAllBtn" class="btn btn-outline">🗑️ Clear Toast Queue</button>
+      </div>
+    </section>
+
+    <main class="stream-layout">
+      <div class="active-section">
+        <h3>Active Prioritized Toast Queue (<span id="activeCount">0</span>)</h3>
+        <div id="activeToastsViewport" class="toasts-viewport">
+          <!-- Active prioritized toasts injected here -->
+        </div>
+      </div>
+
+      <div class="history-section">
+        <h3>Actionable Alert Event Log (<span id="historyCount">0</span>)</h3>
+        <div id="alertHistoryList" class="alert-history-list">
+          <!-- Notification history stream rendered here -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="notification-hub.js"></script>
+</body>
+</html>
