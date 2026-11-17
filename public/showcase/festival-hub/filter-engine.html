@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Dynamic Search, Filter & Multi-Column Sorting</title>
+  <link rel="stylesheet" href="filter-engine.css">
+</head>
+<body class="festival-filter-standalone">
+  <div class="festival-filter-container">
+    <header class="festival-filter-header">
+      <div class="header-titles">
+        <span class="festival-pill">🌸 Festival Hub Live Catalog</span>
+        <h2>Stage Performances & Event Discovery Engine</h2>
+      </div>
+    </header>
+
+    <!-- Search, Chips & Sort Toolbar - Issue #580 -->
+    <div class="festival-toolbar-panel">
+      <div class="festival-search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="festivalSearchInput" placeholder="Search artists, stages, genres or sound cues..." aria-label="Search festival items">
+        <button type="button" id="festivalClearSearchBtn" class="clear-btn" aria-label="Clear search">✕</button>
+      </div>
+
+      <div class="festival-sort-control">
+        <label for="festivalSortSelect">Sort by:</label>
+        <select id="festivalSortSelect" class="festival-select">
+          <option value="name:asc">Name (A → Z)</option>
+          <option value="name:desc">Name (Z → A)</option>
+          <option value="rating:desc">Top Rated (High → Low)</option>
+          <option value="popularity:desc">Most Popular</option>
+          <option value="stage:asc">Stage Location</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tag Filter Chips -->
+    <div class="festival-tags-row">
+      <span class="filter-label">Filter tags:</span>
+      <button type="button" class="festival-filter-chip" data-tag="electronic">#electronic</button>
+      <button type="button" class="festival-filter-chip" data-tag="live">#live</button>
+      <button type="button" class="festival-filter-chip" data-tag="headliner">#headliner</button>
+      <button type="button" class="festival-filter-chip" data-tag="acoustic">#acoustic</button>
+      <button type="button" class="festival-filter-chip" data-tag="ambient">#ambient</button>
+      <button type="button" class="festival-filter-chip" data-tag="night">#night</button>
+    </div>
+
+    <!-- Empty State Alert -->
+    <div id="festivalEmptyState" class="festival-empty-card" style="display: none;">
+      <div class="empty-icon">🎪</div>
+      <h3>No Festival Events Found</h3>
+      <p>Try clearing active filter chips or adjusting your search query.</p>
+    </div>
+
+    <!-- Filtered Results Grid -->
+    <div id="festivalFilteredResults" class="festival-results-grid"></div>
+  </div>
+
+  <script type="module" src="filter-engine.js"></script>
+</body>
+</html>
