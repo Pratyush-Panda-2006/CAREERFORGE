@@ -1,0 +1,154 @@
+/* Biotech Genomics - Monte Carlo Simulation Sandbox Styles */
+:root {
+  --bio-primary: #059669;
+  --bio-primary-glow: rgba(5, 150, 105, 0.35);
+  --bio-accent: #10b981;
+  --bio-bg: #061c14;
+  --bio-panel-bg: rgba(6, 44, 30, 0.85);
+  --bio-border: #064e3b;
+  --bio-text: #ecfdf5;
+  --bio-text-muted: #a7f3d0;
+  --bio-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bio-bg);
+  color: var(--bio-text);
+  font-family: var(--bio-font);
+}
+
+.sim-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--bio-panel-bg);
+  border: 1px solid var(--bio-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px var(--bio-primary-glow);
+  backdrop-filter: blur(12px);
+}
+
+.sim-header {
+  border-bottom: 1px solid var(--bio-border);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sim-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sim-header p {
+  margin: 0;
+  color: var(--bio-text-muted);
+  font-size: 0.95rem;
+}
+
+.sim-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .sim-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sim-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: rgba(2, 44, 34, 0.6);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--bio-border);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bio-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-group input {
+  padding: 0.6rem 0.8rem;
+  background: rgba(6, 78, 59, 0.5);
+  border: 1px solid #047857;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--bio-accent);
+  box-shadow: 0 0 0 3px var(--bio-primary-glow);
+}
+
+.btn-primary {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, var(--bio-primary), #047857);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.sim-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: rgba(4, 120, 87, 0.25);
+  border: 1px solid var(--bio-border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.stat-card .label {
+  font-size: 0.8rem;
+  color: var(--bio-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card .value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stat-card.highlight .value {
+  color: var(--bio-accent);
+}
