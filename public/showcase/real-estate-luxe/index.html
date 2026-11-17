@@ -16,6 +16,7 @@
     <p>Exclusive luxury property listings in Beverly Hills, Aspen, and Côte d'Azur.</p>
     <div class="hero-actions">
       <button type="button" class="hero-link btn-launch-vr-tour" id="btnLaunchVrTour" onclick="openVrTourModal()">🌐 Launch 360° Virtual Tour</button>
+      <button type="button" class="hero-link btn-schedule-tour" id="btnHeroScheduleTour">🗓️ Schedule Private Viewing</button>
       <a href="#mortgage-calculator" class="hero-link">Mortgage Financing Calculator ↓</a>
     </div>
     <figure class="property-gallery" aria-label="Featured architecture photos" aria-roledescription="carousel">
@@ -1154,6 +1155,142 @@
     </div>
   </div>
   <!-- ===== END Issue #419 ===== -->
+
+  <!-- ===== BEGIN Issue #300: Private Viewing Scheduling Modal ===== -->
+  <div id="privateViewingBackdrop" class="tour-modal-backdrop" hidden></div>
+  <div id="privateViewingModal" class="tour-modal" role="dialog" aria-modal="true" aria-labelledby="viewingModalTitle" hidden>
+    <div class="tour-modal-container">
+      <div class="tour-modal-header">
+        <div class="tour-title-wrap">
+          <span class="gold-badge">BESPOKE SHOWING</span>
+          <h3 id="viewingModalTitle">Schedule Private Estate Viewing</h3>
+          <p class="tour-property-name" id="viewingPropertyName">Malibu Oceanfront Contemporary Estate</p>
+        </div>
+        <button type="button" class="tour-close-btn" id="btnCloseViewingModal" aria-label="Close scheduling modal">&times;</button>
+      </div>
+
+      <!-- Booking Form View -->
+      <form id="viewingBookingForm" class="tour-form" novalidate>
+        <!-- Step 1: Date & Time Selection -->
+        <div class="tour-form-section">
+          <label class="form-section-label" for="viewingDatePicker">1. Select Preferred Viewing Date</label>
+          <input type="date" id="viewingDatePicker" class="tour-date-input" required />
+          <p class="field-hint">Private showings are conducted strictly by discreet confidential appointment.</p>
+        </div>
+
+        <div class="tour-form-section">
+          <span class="form-section-label">2. Preferred Architectural Lighting &amp; Slot</span>
+          <div class="time-slots-grid" role="radiogroup" aria-label="Viewing time slots">
+            <button type="button" class="time-slot-btn active" data-slot="Morning Sunlight (10:00 AM - 12:00 PM)">
+              <span class="slot-icon">🌅</span>
+              <span class="slot-name">Morning Sunlight</span>
+              <span class="slot-hours">10:00 AM – 12:00 PM</span>
+            </button>
+            <button type="button" class="time-slot-btn" data-slot="Midday Architectural (1:00 PM - 3:00 PM)">
+              <span class="slot-icon">☀️</span>
+              <span class="slot-name">Midday Architectural</span>
+              <span class="slot-hours">1:00 PM – 3:00 PM</span>
+            </button>
+            <button type="button" class="time-slot-btn" data-slot="Golden Hour Sunset (5:30 PM - 7:30 PM)">
+              <span class="slot-icon">🌇</span>
+              <span class="slot-name">Golden Hour Sunset</span>
+              <span class="slot-hours">5:30 PM – 7:30 PM</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Dedicated Concierge / Advisor -->
+        <div class="tour-form-section">
+          <span class="form-section-label">3. Select Dedicated Private Client Concierge</span>
+          <div class="agents-selector-grid" role="radiogroup" aria-label="Luxury estate advisors">
+            <div class="agent-card active" data-agent="Elena Rostova">
+              <div class="agent-avatar">👑</div>
+              <div class="agent-info">
+                <strong>Elena Rostova</strong>
+                <span class="agent-role">Principal Private Client Partner</span>
+                <span class="agent-specialty">Coastal Estates • Sovereign Portfolio</span>
+              </div>
+            </div>
+            <div class="agent-card" data-agent="Julian Vance">
+              <div class="agent-avatar">🏛️</div>
+              <div class="agent-info">
+                <strong>Julian Vance</strong>
+                <span class="agent-role">Head of Architectural Acquisitions</span>
+                <span class="agent-specialty">Trophy Penthouses • Historic Castles</span>
+              </div>
+            </div>
+            <div class="agent-card" data-agent="Aria Chen">
+              <div class="agent-avatar">💎</div>
+              <div class="agent-info">
+                <strong>Aria Chen</strong>
+                <span class="agent-role">Global Private Office Director</span>
+                <span class="agent-specialty">Equestrian Ranches • Helipad Compounds</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Prospective Buyer Information -->
+        <div class="tour-form-section">
+          <span class="form-section-label">4. Private Client Information</span>
+          <div class="buyer-inputs-grid">
+            <div class="input-block">
+              <label for="buyerFullName">Principal / Representative Name</label>
+              <input type="text" id="buyerFullName" class="tour-text-input" placeholder="e.g. Lord Sterling Hayes" required />
+            </div>
+            <div class="input-block">
+              <label for="buyerContact">Confidential Email or Direct Phone</label>
+              <input type="text" id="buyerContact" class="tour-text-input" placeholder="e.g. privateoffice@hayes.ch" required />
+            </div>
+          </div>
+          <label class="chauffeur-toggle">
+            <input type="checkbox" id="chauffeurCheck" />
+            <span>Arrange complimentary executive armored chauffeur / helipad transfer</span>
+          </label>
+        </div>
+
+        <div id="viewingFormError" class="tour-form-error" role="alert" hidden></div>
+
+        <button type="submit" class="btn-confirm-viewing" id="btnSubmitViewing">Confirm Private Showing Request ⚜️</button>
+      </form>
+
+      <!-- Instant Confirmation View -->
+      <div id="viewingConfirmationView" class="tour-confirmation-view" hidden>
+        <div class="confirm-badge-icon">⚜️</div>
+        <h4>Private Showing Reserved</h4>
+        <p class="confirm-sub">Your appointment has been registered with the private brokerage desk.</p>
+        
+        <div class="confirm-ticket-card">
+          <div class="ticket-row">
+            <span class="t-label">Reservation Code:</span>
+            <strong class="t-code" id="confirmTicketCode">LUXE-8942-NY</strong>
+          </div>
+          <div class="ticket-row">
+            <span class="t-label">Estate Property:</span>
+            <span id="confirmEstateName">Malibu Oceanfront Contemporary Estate</span>
+          </div>
+          <div class="ticket-row">
+            <span class="t-label">Viewing Date:</span>
+            <span id="confirmDate">October 24, 2026</span>
+          </div>
+          <div class="ticket-row">
+            <span class="t-label">Selected Slot:</span>
+            <span id="confirmSlot">Golden Hour Sunset (5:30 PM - 7:30 PM)</span>
+          </div>
+          <div class="ticket-row">
+            <span class="t-label">Hosting Concierge:</span>
+            <span id="confirmAgent">Elena Rostova</span>
+          </div>
+        </div>
+
+        <div class="confirm-actions">
+          <button type="button" class="btn-ticket-copy" id="btnCopyTourDetails">Copy Showing Pass 📋</button>
+          <button type="button" class="btn-ticket-done" id="btnCloseConfirmation">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===== END Issue #300 ===== -->
 
   <script src="filters.js"></script>
   <script src="script.js"></script>
