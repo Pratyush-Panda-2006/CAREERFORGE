@@ -2096,3 +2096,408 @@ function initInvestmentCalculator() {
   // Initial calculation
   recalculate();
 }
+
+/* ===== BEGIN Issue #301: Monthly HOA & Property Tax Calculator ===== */
+(function () {
+  'use strict';
+
+  function initHoaTaxCalculator() {
+    const propPriceInput = document.getElementById('hoaPropPrice');
+    const propPriceBadge = document.getElementById('hoaPropPriceBadge');
+    const downRange = document.getElementById('hoaDownPct');
+    const downPctBadge = document.getElementById('hoaDownPctBadge');
+    const downDollarsBadge = document.getElementById('hoaDownDollarsBadge');
+    const rateRange = document.getElementById('hoaMortgageRate');
+    const rateBadge = document.getElementById('hoaMortgageRateBadge');
+    const duesInput = document.getElementById('hoaMonthlyDues');
+    const duesBadge = document.getElementById('hoaDuesBadge');
+    const taxRateInput = document.getElementById('hoaTaxRate');
+    const taxRateBadge = document.getElementById('hoaTaxRateBadge');
+
+    const totalMonthlyEl = document.getElementById('hoaTotalMonthlyCost');
+    const totalAnnualEl = document.getElementById('hoaTotalAnnualCost');
+    const donutCenterAmt = document.getElementById('donutCenterAmount');
+
+    const amtPiEl = document.getElementById('amtPi');
+    const pctPiEl = document.getElementById('pctPi');
+    const amtTaxEl = document.getElementById('amtTax');
+    const pctTaxEl = document.getElementById('pctTax');
+    const amtInsEl = document.getElementById('amtIns');
+    const pctInsEl = document.getElementById('pctIns');
+    const amtHoaEl = document.getElementById('amtHoa');
+    const pctHoaEl = document.getElementById('pctHoa');
+
+    const segPi = document.getElementById('segPi');
+    const segTax = document.getElementById('segTax');
+    const segIns = document.getElementById('segIns');
+    const segHoa = document.getElementById('segHoa');
+
+    const chips = document.querySelectorAll('.hoa-chip');
+    const btnExport = document.getElementById('btnExportHoaSheet');
+    const btnCopy = document.getElementById('btnCopyHoaBreakdown');
+    const toast = document.getElementById('hoaToast');
+
+    if (!propPriceInput) return;
+
+    const CIRCUMFERENCE = 2 * Math.PI * 75; // ~471.24
+
+    function recalculate() {
+      const price = parseFloat(propPriceInput.value) || 14500000;
+      const downPct = parseFloat(downRange.value) || 20;
+      const rate = parseFloat(rateRange.value) || 6.25;
+      const hoaDues = parseFloat(duesInput.value) || 0;
+      const taxRate = parseFloat(taxRateInput.value) || 1.20;
+
+      // Badges
+      if (propPriceBadge) propPriceBadge.textContent = '$' + price.toLocaleString();
+      if (downPctBadge) downPctBadge.textContent = downPct + '%';
+      const downDollars = (price * downPct) / 100;
+      if (downDollarsBadge) downDollarsBadge.textContent = '$' + Math.round(downDollars).toLocaleString();
+      if (rateBadge) rateBadge.textContent = rate.toFixed(2) + '%';
+      if (duesBadge) duesBadge.textContent = '$' + Math.round(hoaDues).toLocaleString() + ' / mo';
+      if (taxRateBadge) taxRateBadge.textContent = taxRate.toFixed(2) + '%';
+
+      // Calculations
+      const loanAmt = Math.max(0, price - downDollars);
+      const monthlyRate = (rate / 100) / 12;
+      const n = 360; // 30-year fixed
+      let monthlyPi = 0;
+      if (loanAmt > 0 && monthlyRate > 0) {
+        monthlyPi = loanAmt * (monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
+      }
+
+      const monthlyTax = (price * (taxRate / 100)) / 12;
+      const monthlyIns = (price * 0.00425) / 12; // 0.425% annual luxury hazard & umbrella
+      const totalMonthly = monthlyPi + monthlyTax + monthlyIns + hoaDues;
+      const totalAnnual = totalMonthly * 12;
+
+      // Render totals
+      if (totalMonthlyEl) totalMonthlyEl.textContent = Math.round(totalMonthly).toLocaleString();
+      if (totalAnnualEl) totalAnnualEl.textContent = '$' + Math.round(totalAnnual).toLocaleString() + ' annualized commitment';
+      if (donutCenterAmt) {
+        const kAmt = (totalMonthly / 1000).toFixed(1);
+        donutCenterAmt.textContent = '$' + kAmt + 'k';
+      }
+
+      // Percentages
+      const pctPiVal = totalMonthly > 0 ? (monthlyPi / totalMonthly) * 100 : 0;
+      const pctTaxVal = totalMonthly > 0 ? (monthlyTax / totalMonthly) * 100 : 0;
+      const pctInsVal = totalMonthly > 0 ? (monthlyIns / totalMonthly) * 100 : 0;
+      const pctHoaVal = totalMonthly > 0 ? (hoaDues / totalMonthly) * 100 : 0;
+
+      if (amtPiEl) amtPiEl.textContent = '$' + Math.round(monthlyPi).toLocaleString();
+      if (pctPiEl) pctPiEl.textContent = pctPiVal.toFixed(1) + '%';
+
+      if (amtTaxEl) amtTaxEl.textContent = '$' + Math.round(monthlyTax).toLocaleString();
+      if (pctTaxEl) pctTaxEl.textContent = pctTaxVal.toFixed(1) + '%';
+
+      if (amtInsEl) amtInsEl.textContent = '$' + Math.round(monthlyIns).toLocaleString();
+      if (pctInsEl) pctInsEl.textContent = pctInsVal.toFixed(1) + '%';
+
+      if (amtHoaEl) amtHoaEl.textContent = '$' + Math.round(hoaDues).toLocaleString();
+      if (pctHoaEl) pctHoaEl.textContent = pctHoaVal.toFixed(1) + '%';
+
+      // Update SVG Donut Segments
+      const lenPi = (pctPiVal / 100) * CIRCUMFERENCE;
+      const lenTax = (pctTaxVal / 100) * CIRCUMFERENCE;
+      const lenIns = (pctInsVal / 100) * CIRCUMFERENCE;
+      const lenHoa = (pctHoaVal / 100) * CIRCUMFERENCE;
+
+      let offset = 0;
+      if (segPi) {
+        segPi.setAttribute('stroke-dasharray', lenPi + ' ' + (CIRCUMFERENCE - lenPi));
+        segPi.setAttribute('stroke-dashoffset', String(-offset));
+        offset += lenPi;
+      }
+      if (segTax) {
+        segTax.setAttribute('stroke-dasharray', lenTax + ' ' + (CIRCUMFERENCE - lenTax));
+        segTax.setAttribute('stroke-dashoffset', String(-offset));
+        offset += lenTax;
+      }
+      if (segIns) {
+        segIns.setAttribute('stroke-dasharray', lenIns + ' ' + (CIRCUMFERENCE - lenIns));
+        segIns.setAttribute('stroke-dashoffset', String(-offset));
+        offset += lenIns;
+      }
+      if (segHoa) {
+        segHoa.setAttribute('stroke-dasharray', lenHoa + ' ' + (CIRCUMFERENCE - lenHoa));
+        segHoa.setAttribute('stroke-dashoffset', String(-offset));
+      }
+    }
+
+    [propPriceInput, downRange, rateRange, duesInput, taxRateInput].forEach(inp => {
+      if (inp) inp.addEventListener('input', recalculate);
+    });
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const price = chip.getAttribute('data-price');
+        const hoa = chip.getAttribute('data-hoa');
+        if (price && propPriceInput) propPriceInput.value = price;
+        if (hoa && duesInput) duesInput.value = hoa;
+        recalculate();
+      });
+    });
+
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 3500);
+    }
+
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => {
+        const p = propPriceInput.value;
+        const total = totalMonthlyEl ? totalMonthlyEl.textContent : '';
+        const pi = amtPiEl ? amtPiEl.textContent : '';
+        const tax = amtTaxEl ? amtTaxEl.textContent : '';
+        const ins = amtInsEl ? amtInsEl.textContent : '';
+        const hoa = amtHoaEl ? amtHoaEl.textContent : '';
+
+        const summary = 'Monthly Carrying Breakdown ($' + parseInt(p, 10).toLocaleString() + ' Acquisition):\n' +
+          '• Total Monthly: $' + total + ' / mo\n' +
+          '• Principal & Interest: ' + pi + '\n' +
+          '• Municipal Property Tax: ' + tax + '\n' +
+          '• Hazard & Umbrella Insurance: ' + ins + '\n' +
+          '• HOA & Community Dues: ' + hoa + '\n' +
+          'Vanguard Private Client Group';
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(summary).then(() => {
+            showToast('Itemized carrying summary copied! 📋');
+          });
+        }
+      });
+    }
+
+    if (btnExport) {
+      btnExport.addEventListener('click', () => {
+        const p = parseFloat(propPriceInput.value) || 14500000;
+        const data = {
+          memo: 'Vanguard Luxury Homeownership Monthly Carrying Breakdown',
+          timestamp: new Date().toISOString(),
+          listingPrice: p,
+          downPayment: downDollarsBadge ? downDollarsBadge.textContent : '',
+          mortgageRate: rateBadge ? rateBadge.textContent : '',
+          totalMonthlyCarryingCost: totalMonthlyEl ? '$' + totalMonthlyEl.textContent : '',
+          annualizedCarryingCost: totalAnnualEl ? totalAnnualEl.textContent : '',
+          itemizedCosts: {
+            principalAndInterest: amtPiEl ? amtPiEl.textContent : '',
+            propertyTaxMonthly: amtTaxEl ? amtTaxEl.textContent : '',
+            homeownersInsuranceMonthly: amtInsEl ? amtInsEl.textContent : '',
+            hoaCommunityDuesMonthly: amtHoaEl ? amtHoaEl.textContent : ''
+          }
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'hoa-tax-breakdown-' + p + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        showToast('Exported carrying breakdown JSON! ↓');
+      });
+    }
+
+    // Run initial calculation
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHoaTaxCalculator);
+  } else {
+    initHoaTaxCalculator();
+  }
+})();
+/* ===== END Issue #301 ===== */
+
+/* ===== BEGIN Issue #300: Private Viewing Scheduling Modal ===== */
+(function () {
+  'use strict';
+
+  function initPrivateViewingModal() {
+    const backdrop = document.getElementById('privateViewingBackdrop');
+    const modal = document.getElementById('privateViewingModal');
+    const propNameEl = document.getElementById('viewingPropertyName');
+    const closeBtn = document.getElementById('btnCloseViewingModal');
+    const heroBtn = document.getElementById('btnHeroScheduleTour');
+    const form = document.getElementById('viewingBookingForm');
+    const datePicker = document.getElementById('viewingDatePicker');
+    const errorEl = document.getElementById('viewingFormError');
+    const confirmView = document.getElementById('viewingConfirmationView');
+    const btnDone = document.getElementById('btnCloseConfirmation');
+    const btnCopy = document.getElementById('btnCopyTourDetails');
+
+    const slotBtns = document.querySelectorAll('.time-slot-btn');
+    const agentCards = document.querySelectorAll('.agent-card');
+
+    let selectedSlot = 'Morning Sunlight (10:00 AM - 12:00 PM)';
+    let selectedAgent = 'Elena Rostova';
+
+    // Set minimum date to tomorrow
+    if (datePicker) {
+      const tomorrow = new Date(Date.now() + 86400000);
+      const minDateStr = tomorrow.toISOString().split('T')[0];
+      datePicker.min = minDateStr;
+      datePicker.value = minDateStr;
+    }
+
+    function openModal(estateName) {
+      if (!modal || !backdrop) return;
+      if (propNameEl) propNameEl.textContent = estateName || 'Premier Luxury Estate';
+      if (form) form.removeAttribute('hidden');
+      if (confirmView) confirmView.setAttribute('hidden', '');
+      if (errorEl) errorEl.setAttribute('hidden', '');
+
+      backdrop.removeAttribute('hidden');
+      modal.removeAttribute('hidden');
+    }
+
+    function closeModal() {
+      if (modal) modal.setAttribute('hidden', '');
+      if (backdrop) backdrop.setAttribute('hidden', '');
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (btnDone) btnDone.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    if (heroBtn) {
+      heroBtn.addEventListener('click', () => {
+        openModal('Malibu Oceanfront Contemporary Estate');
+      });
+    }
+
+    // Slot selection
+    slotBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        slotBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedSlot = btn.getAttribute('data-slot') || 'Morning Sunlight';
+      });
+    });
+
+    // Agent selection
+    agentCards.forEach(card => {
+      card.addEventListener('click', () => {
+        agentCards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        selectedAgent = card.getAttribute('data-agent') || 'Elena Rostova';
+      });
+    });
+
+    // Form submission
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dateVal = datePicker ? datePicker.value : '';
+        const nameVal = (document.getElementById('buyerFullName') || {}).value || '';
+        const contactVal = (document.getElementById('buyerContact') || {}).value || '';
+
+        if (!dateVal) {
+          showError('Please choose a viewing date.');
+          return;
+        }
+
+        const picked = new Date(dateVal);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (picked < today) {
+          showError('Please select a current or upcoming date.');
+          return;
+        }
+
+        if (!nameVal.trim() || !contactVal.trim()) {
+          showError('Please provide your name and confidential contact information.');
+          return;
+        }
+
+        // Generate reservation code
+        const ticketCode = 'LUXE-' + Math.floor(1000 + Math.random() * 9000) + '-SHOW';
+        const codeEl = document.getElementById('confirmTicketCode');
+        const estEl = document.getElementById('confirmEstateName');
+        const dtEl = document.getElementById('confirmDate');
+        const slEl = document.getElementById('confirmSlot');
+        const agEl = document.getElementById('confirmAgent');
+
+        if (codeEl) codeEl.textContent = ticketCode;
+        if (estEl) estEl.textContent = propNameEl ? propNameEl.textContent : 'Luxury Estate';
+        if (dtEl) dtEl.textContent = dateVal;
+        if (slEl) slEl.textContent = selectedSlot;
+        if (agEl) agEl.textContent = selectedAgent;
+
+        form.setAttribute('hidden', '');
+        if (confirmView) confirmView.removeAttribute('hidden');
+      });
+    }
+
+    function showError(msg) {
+      if (!errorEl) return;
+      errorEl.textContent = msg;
+      errorEl.removeAttribute('hidden');
+    }
+
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => {
+        const code = document.getElementById('confirmTicketCode')?.textContent || '';
+        const estate = document.getElementById('confirmEstateName')?.textContent || '';
+        const date = document.getElementById('confirmDate')?.textContent || '';
+        const slot = document.getElementById('confirmSlot')?.textContent || '';
+        const agent = document.getElementById('confirmAgent')?.textContent || '';
+
+        const summary = 'Private Showing Pass [' + code + ']\n' +
+          'Estate: ' + estate + '\n' +
+          'Date: ' + date + '\n' +
+          'Window: ' + slot + '\n' +
+          'Advisory Host: ' + agent + '\n' +
+          'Vanguard Private Office';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(summary).then(() => {
+            btnCopy.textContent = 'Showing Pass Copied! ✓';
+            setTimeout(() => { btnCopy.textContent = 'Copy Showing Pass 📋'; }, 3000);
+          });
+        }
+      });
+    }
+
+    // Decorate cards in #estate-grid
+    const grid = document.getElementById('estate-grid');
+    function decorateEstateCards() {
+      if (!grid) return;
+      const cards = grid.querySelectorAll('.card');
+      cards.forEach(card => {
+        if (!card.querySelector('.btn-private-viewing')) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-private-viewing';
+          btn.textContent = 'Schedule Private Viewing 🏛️';
+          btn.addEventListener('click', () => {
+            const heading = card.querySelector('h3');
+            const estateName = heading ? heading.textContent.trim() : 'Bespoke Estate';
+            openModal(estateName);
+          });
+          card.appendChild(btn);
+        }
+      });
+    }
+
+    if (grid) {
+      decorateEstateCards();
+      const observer = new MutationObserver(decorateEstateCards);
+      observer.observe(grid, { childList: true });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPrivateViewingModal);
+  } else {
+    initPrivateViewingModal();
+  }
+})();
+/* ===== END Issue #300 ===== */

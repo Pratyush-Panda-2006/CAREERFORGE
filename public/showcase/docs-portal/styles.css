@@ -2,7 +2,9 @@
    Prisma API Docs Portal & Interactive Live Playground Styles
    ========================================================== */
 
-:root {
+/* Theme 1: Default Dark (Default Root) */
+:root,
+[data-theme="dark"] {
   --bg: #090d16;
   --bg-darker: #050811;
   --sidebar: #0b1120;
@@ -15,8 +17,68 @@
   --accent-gradient: linear-gradient(90deg, #38bdf8 0%, #6366f1 50%, #a855f7 100%);
   --accent-glow: 0 0 12px rgba(56, 189, 248, 0.8), 0 0 24px rgba(99, 102, 241, 0.5);
   --text: #f3f4f6;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
   --muted: #9ca3af;
   --code-bg: #020617;
+  --kbd-bg: rgba(255, 255, 255, 0.08);
+  --callout-bg: rgba(56, 189, 248, 0.06);
+  --dropdown-bg: #0e1424;
+  --dropdown-hover: rgba(56, 189, 248, 0.1);
+  --badge-bg: rgba(255, 255, 255, 0.05);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+/* Theme 2: High-Contrast Obsidian (WCAG AAA Compliance) */
+[data-theme="obsidian"] {
+  --bg: #000000;
+  --bg-darker: #050505;
+  --sidebar: #050505;
+  --sidebar-active: rgba(0, 240, 255, 0.22);
+  --panel-bg: #0a0a0a;
+  --card-bg: #101010;
+  --border: #383838;
+  --border-focus: #00f0ff;
+  --accent: #00f0ff;
+  --accent-gradient: linear-gradient(90deg, #00f0ff 0%, #38bdf8 100%);
+  --accent-glow: 0 0 16px rgba(0, 240, 255, 0.95);
+  --text: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: #e5e5e5;
+  --muted: #a3a3a3;
+  --code-bg: #000000;
+  --kbd-bg: #1f1f1f;
+  --callout-bg: rgba(0, 240, 255, 0.08);
+  --dropdown-bg: #0a0a0a;
+  --dropdown-hover: rgba(0, 240, 255, 0.16);
+  --badge-bg: #141414;
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.9), 0 0 0 1px #333333;
+}
+
+/* Theme 3: Clean Light (WCAG AA Compliant High Legibility) */
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --bg-darker: #f1f5f9;
+  --sidebar: #ffffff;
+  --sidebar-active: rgba(2, 132, 199, 0.12);
+  --panel-bg: #ffffff;
+  --card-bg: #ffffff;
+  --border: #e2e8f0;
+  --border-focus: #0284c7;
+  --accent: #0284c7;
+  --accent-gradient: linear-gradient(90deg, #0284c7 0%, #4f46e5 100%);
+  --accent-glow: 0 0 12px rgba(2, 132, 199, 0.25);
+  --text: #1e293b;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --muted: #64748b;
+  --code-bg: #0f172a;
+  --kbd-bg: #e2e8f0;
+  --callout-bg: rgba(2, 132, 199, 0.06);
+  --dropdown-bg: #ffffff;
+  --dropdown-hover: rgba(2, 132, 199, 0.08);
+  --badge-bg: #f1f5f9;
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.1), 0 0 0 1px #e2e8f0;
 }
 
 * {
@@ -3221,5 +3283,338 @@ pre.has-copy-btn {
 @media (max-width: 900px) {
   .sim-config-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Issue #281: Interactive Multi-Theme Switcher (Dark, Obsidian, Light)
+   ========================================================================== */
+
+/* Top Documentation Toolbar */
+.docs-top-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.docs-top-navbar .breadcrumbs {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+.docs-top-navbar .active-crumb {
+  color: var(--muted);
+  font-size: 0.82rem;
+  background: var(--badge-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.docs-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Theme Switcher Dropdown */
+.theme-switcher-dropdown {
+  position: relative;
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--dropdown-hover);
+  border-color: var(--border-focus);
+  color: var(--accent);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.theme-icon-curr {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.theme-label-curr {
+  font-size: 0.85rem;
+}
+
+.dropdown-chevron {
+  transition: transform 0.2s ease;
+  color: var(--muted);
+}
+
+.theme-toggle-btn[aria-expanded="true"] .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.theme-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 260px;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+  z-index: 1000;
+  list-style: none;
+  animation: themeDropdownFadeIn 0.18s ease-out;
+}
+
+.theme-menu[hidden] {
+  display: none;
+}
+
+@keyframes themeDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.theme-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.theme-item:hover,
+.theme-item:focus-visible {
+  background: var(--dropdown-hover);
+}
+
+.theme-item.active {
+  background: var(--sidebar-active);
+}
+
+.theme-opt-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.theme-opt-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.theme-opt-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.theme-opt-desc {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.theme-check {
+  font-size: 0.9rem;
+  color: var(--accent);
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.theme-item.active .theme-check {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Theme Color Adaptations Across Showcase (Light & Obsidian)
+   ========================================================================== */
+
+/* Clean Light Mode Specific Overrides */
+[data-theme="light"] body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+[data-theme="light"] .sidebar {
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+}
+
+[data-theme="light"] .logo {
+  color: #0f172a;
+}
+
+[data-theme="light"] .topic-filter {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .topic-filter:focus {
+  border-color: var(--accent);
+  background: #ffffff;
+}
+
+[data-theme="light"] .docs-search-trigger {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+[data-theme="light"] .docs-search-trigger:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+[data-theme="light"] .nav-link {
+  color: #475569;
+}
+
+[data-theme="light"] .nav-link:hover {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+}
+
+[data-theme="light"] .nav-link.active {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.12);
+}
+
+[data-theme="light"] .section-title {
+  color: #64748b;
+}
+
+[data-theme="light"] .content h1 {
+  background: linear-gradient(180deg, #0f172a 40%, #334155 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .content h2,
+[data-theme="light"] .content h3,
+[data-theme="light"] .content h4 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .content p,
+[data-theme="light"] .lead {
+  color: #334155;
+}
+
+[data-theme="light"] .content code:not(pre code) {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+[data-theme="light"] .callout {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+[data-theme="light"] .callout strong {
+  color: #0369a1;
+}
+
+[data-theme="light"] .callout-body {
+  color: #0c4a6e;
+}
+
+[data-theme="light"] .badge {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+[data-theme="light"] .table-wrapper,
+[data-theme="light"] .console-card,
+[data-theme="light"] .card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] th {
+  background: #f8fafc;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+[data-theme="light"] td {
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* High-Contrast Obsidian Specific Enhancements */
+[data-theme="obsidian"] .sidebar {
+  background-color: #000000;
+  border-right: 1px solid #333333;
+}
+
+[data-theme="obsidian"] .nav-link {
+  color: #d4d4d4;
+}
+
+[data-theme="obsidian"] .nav-link.active {
+  color: #00f0ff;
+  border-left: 2px solid #00f0ff;
+}
+
+[data-theme="obsidian"] .content h1,
+[data-theme="obsidian"] .content h2,
+[data-theme="obsidian"] .content h3 {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+[data-theme="obsidian"] .callout {
+  background: #080808;
+  border-color: #00f0ff;
+}
+
+[data-theme="obsidian"] .content code:not(pre code) {
+  background: #111111;
+  color: #00f0ff;
+  border: 1px solid #262626;
+}
+
+@media (max-width: 640px) {
+  .docs-top-navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 }

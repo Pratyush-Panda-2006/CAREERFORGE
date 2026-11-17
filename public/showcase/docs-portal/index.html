@@ -53,11 +53,61 @@
     </aside>
 
     <main class="content" id="docArticle">
-      <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="#overview">Docs</a>
-        <span aria-hidden="true">/</span>
-        <span>API Reference</span>
-      </nav>
+      <!-- Top Documentation Navbar with Breadcrumbs & Interactive Theme Switcher (Issue #281) -->
+      <header class="docs-top-navbar" aria-label="Documentation toolbar">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="#overview">Docs</a>
+          <span aria-hidden="true">/</span>
+          <span>API Reference</span>
+          <span aria-hidden="true">/</span>
+          <span class="active-crumb">v2.4.0</span>
+        </nav>
+
+        <div class="docs-navbar-actions">
+          <!-- Theme Switcher Dropdown -->
+          <div class="theme-switcher-dropdown" id="themeSwitcher">
+            <button type="button" 
+                    class="theme-toggle-btn" 
+                    id="themeToggleBtn" 
+                    aria-haspopup="listbox" 
+                    aria-expanded="false" 
+                    aria-label="Select color theme">
+              <span class="theme-icon-curr" id="themeCurrentIcon" aria-hidden="true">🌙</span>
+              <span class="theme-label-curr" id="themeCurrentLabel">Dark</span>
+              <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+            <ul class="theme-menu" id="themeMenu" role="listbox" aria-label="Theme options" hidden>
+              <li class="theme-item active" role="option" data-theme="dark" id="theme-opt-dark" aria-selected="true" tabindex="0">
+                <span class="theme-opt-icon">🌙</span>
+                <div class="theme-opt-info">
+                  <span class="theme-opt-title">Default Dark</span>
+                  <span class="theme-opt-desc">Balanced indigo-slate dark mode</span>
+                </div>
+                <span class="theme-check" aria-hidden="true">✓</span>
+              </li>
+              <li class="theme-item" role="option" data-theme="obsidian" id="theme-opt-obsidian" aria-selected="false" tabindex="0">
+                <span class="theme-opt-icon">💎</span>
+                <div class="theme-opt-info">
+                  <span class="theme-opt-title">High-Contrast Obsidian</span>
+                  <span class="theme-opt-desc">Pure black &amp; neon cyan (WCAG AAA)</span>
+                </div>
+                <span class="theme-check" aria-hidden="true">✓</span>
+              </li>
+              <li class="theme-item" role="option" data-theme="light" id="theme-opt-light" aria-selected="false" tabindex="0">
+                <span class="theme-opt-icon">☀️</span>
+                <div class="theme-opt-info">
+                  <span class="theme-opt-title">Clean Light</span>
+                  <span class="theme-opt-desc">High legibility day mode</span>
+                </div>
+                <span class="theme-check" aria-hidden="true">✓</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
       <!-- Article Header & Metadata -->
       <section id="overview" class="doc-section">
         <div class="meta-row">

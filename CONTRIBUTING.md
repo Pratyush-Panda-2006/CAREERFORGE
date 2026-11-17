@@ -21,10 +21,9 @@ Every task and contribution is graded under the official NSoC scoring system:
 - The **`nsoc26`** tag is automatically added to all issues and PRs by our CI automation bots.
 - Issues will have their difficulty assigned by maintainers (`level1`, `level2`, or `level3`).
 
-### 🎯 Issue Claiming & Level 3 Concurrency Limit
+### 🎯 Issue Claiming
 - Reply with **`/claim`** on any unassigned issue to assign yourself.
 - **3-Day (72h) Deadline:** Once assigned, you have 72 hours to submit a linked Pull Request. If inactive, the claim automatically expires via cron.
-- **Level 3 Maximum Limit (4 Active Claims):** To maintain fair distribution of high-value tasks across all community members, contributors can have at most **4 active Level 3 issues** claimed at any given time. If you have 4 active Level 3 claims, you must submit PRs and close at least one of them before claiming a 5th. This concurrency restriction applies **strictly to Level 3** tasks (Level 1 and Level 2 issues are exempt).
 
 ---
 
@@ -35,14 +34,19 @@ Every task and contribution is graded under the official NSoC scoring system:
 - The `src/` directory contains the core platform routing, navbar, leaderboard, and showcase hub logic. Pull Requests modifying files in `src/` will be automatically rejected.
 
 ### 📌 Rule 2: Website Contributions Belong Exclusively in `public/showcase/`
-- All website template contributions, bug fixes, feature additions, and styling updates **MUST** be made exclusively inside their assigned project directory under:
+- All website template contributions, bug fixes, feature additions, and styling updates **MUST** be made exclusively inside their assigned project directory under `public/showcase/[project-name]/`.
+- **Flexible Multi-File Architecture:** Contributors can add **one or more HTML, CSS, and JavaScript files** (e.g. `index.html`, sub-pages, modular CSS stylesheets, ES modules, helper scripts, unit tests `*.test.mjs`, and assets):
   ```text
   public/showcase/[project-name]/
-  ├── index.html
-  ├── styles.css
-  └── script.js
+  ├── index.html                   # Primary entry point
+  ├── [sub-page].html              # Additional HTML sub-pages (optional)
+  ├── styles.css                   # Main stylesheet
+  ├── [module].css                 # Additional CSS stylesheets (optional)
+  ├── script.js                    # Primary logic script
+  ├── [utils].js                   # Modular JS / ES modules (optional)
+  └── [feature].test.mjs           # Unit tests (optional, run via node --test)
   ```
-- Current 20 isolated website project showcase directories:
+- Current 40 isolated website project showcase directories:
   1. `public/showcase/ecommerce-store/` — Tech gear & e-commerce shop
   2. `public/showcase/agency-studio/` — Creative studio & design agency
   3. `public/showcase/festival-hub/` — Electronic music & cyber festival
@@ -63,6 +67,26 @@ Every task and contribution is graded under the official NSoC scoring system:
   18. `public/showcase/cybersecurity-sentinel/` — Zero-trust threat shield platform
   19. `public/showcase/luxury-realms/` — Private island & jet concierge
   20. `public/showcase/crypto-exchange-pro/` — Sub-millisecond crypto perpetual DEX
+  21. `public/showcase/aerospace-orbiter/` — Mission control & orbital mechanics hub
+  22. `public/showcase/quantum-forge/` — Quantum circuit & qubit state simulator
+  23. `public/showcase/biotech-genomics/` — CRISPR-Cas9 & DNA sequence workbench
+  24. `public/showcase/smart-iot-nexus/` — Industrial IoT sensor matrix & telemetry
+  25. `public/showcase/defi-yield-matrix/` — DeFi liquidity & compounding APY optimizer
+  26. `public/showcase/virtual-museum-3d/` — Curated antiquities & 3D artifact gallery
+  27. `public/showcase/renewable-microgrid/` — Clean energy microgrid load balancer
+  28. `public/showcase/vr-metaverse-hub/` — WebXR spatial computing lounge & digital hub
+  29. `public/showcase/supply-chain-logistics/` — Global intermodal freight & shipping tracker
+  30. `public/showcase/robotics-automata/` — Robotic arm inverse kinematics simulator
+  31. `public/showcase/neurotech-interface/` — Neural EEG waveform monitor & cognitive BCI
+  32. `public/showcase/weather-radar-atlas/` — Severe weather Doppler radar & barometrics
+  33. `public/showcase/streaming-cinema-hub/` — Indie cinema & 4K watch party lounge
+  34. `public/showcase/fitness-crossfit-pro/` — Functional HIIT & calorie expenditure tracker
+  35. `public/showcase/charity-microloans/` — Global peer-to-peer microfinance network
+  36. `public/showcase/drone-delivery-skyway/` — Autonomous urban drone air corridor manager
+  37. `public/showcase/music-daw-studio/` — 16-step drum sequencer & polyphonic synthesizer
+  38. `public/showcase/pet-adoption-haven/` — Animal rescue & foster matching network
+  39. `public/showcase/legal-smart-contracts/` — Smart contract clause & escrow milestone machine
+  40. `public/showcase/agritech-precision-farming/` — Precision agriculture & drone crop telemetry
 
 ### 📌 Rule 3: Test Static Templates Locally Before Submitting a PR
 - Run the local dev server using Vite before creating a Pull Request:

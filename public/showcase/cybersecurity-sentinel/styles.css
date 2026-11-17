@@ -1,5 +1,32 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+#siem-workspace { max-width: 1280px; margin: 64px auto; padding: 24px; line-height: 1.6; }
+#siem-workspace h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); color: #ecfdf5; margin: 8px 0; }
+#siem-workspace h3 { color: #a7f3d0; margin-bottom: 16px; }
+#siem-workspace p { color: #cbd5e1; font-family: Inter, sans-serif; margin: 10px 0; }
+.siem-eyebrow { color: #6ee7b7 !important; letter-spacing: .12em; font-size: .8rem; }
+.siem-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 24px 0; }
+.siem-panel { padding: 24px; min-width: 0; border: 1px solid #35534b; border-radius: 16px; background: #0b1721; }
+#siem-workspace label { display: grid; gap: 6px; margin-bottom: 12px; font-size: .85rem; }
+#siem-workspace input, #siem-workspace select { width: 100%; min-width: 0; padding: 10px; background: #030712; color: #f1f5f9; border: 1px solid #64748b; border-radius: 6px; font: inherit; }
+#siem-workspace button { cursor: pointer; padding: 10px 14px; border: 1px solid #34d399; border-radius: 6px; background: #123b32; color: #d1fae5; font: inherit; font-size: .8rem; }
+#siem-workspace button:disabled { opacity: .65; cursor: default; }
+#siem-workspace :is(button, input, select, summary):focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
+#siem-workspace fieldset { border: 1px solid #35534b; padding: 12px; margin-bottom: 12px; border-radius: 8px; }
+.siem-fields { display: flex; flex-wrap: wrap; gap: 12px; }
+.siem-fields label { flex: 1 1 100px; }
+.siem-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+#siem-events, #siem-rules { padding-left: 20px; overflow-wrap: anywhere; }
+#siem-events { max-height: 260px; overflow-y: auto; font-size: .8rem; }
+#siem-rules li { margin-bottom: 20px; }
+.siem-incident { padding: 16px; border-left: 3px solid #fbbf24; border-radius: 6px; background: #14252d; margin: 14px 0; overflow-wrap: anywhere; }
+.siem-incident ul { padding-left: 20px; font-size: .8rem; }
+.siem-incident button { margin-top: 12px; }
+.siem-incident summary { cursor: pointer; }
+.siem-tactics { font-size: .8rem; color: #fcd34d !important; }
+#siem-message { min-height: 28px; color: #a7f3d0 !important; }
+@media (max-width: 760px) { .siem-grid { grid-template-columns: 1fr; } .siem-panel { padding: 16px; } #siem-workspace { padding: 16px; } }
+
 body {
   font-family: 'Fira Code', monospace;
   background-color: #030712;
@@ -13,6 +40,28 @@ body {
   max-width: 850px;
   margin: 0 auto;
 }
+.security-posture { position: relative; width: fit-content; max-width: 100%; margin: 12px auto 18px; text-align: left; font-family: 'Inter', sans-serif; }
+.security-posture summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 14px; border: 1px solid #34d399; border-radius: 999px;
+  background: rgba(6, 78, 59, 0.35); color: #a7f3d0; font-size: 0.82rem;
+  font-weight: 700; cursor: pointer; list-style: none;
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.16);
+}
+.security-posture summary::-webkit-details-marker { display: none; }
+.security-posture summary:focus-visible { outline: 2px solid #6ee7b7; outline-offset: 3px; }
+.security-posture[open] summary span { transform: rotate(180deg); }
+.security-posture-panel {
+  position: absolute; z-index: 5; top: calc(100% + 8px); left: 50%;
+  width: min(320px, 90vw); transform: translateX(-50%);
+  padding: 16px; border: 1px solid #34d399; border-radius: 12px;
+  background: #08221f; color: #e5e7eb; box-shadow: 0 16px 30px rgba(0,0,0,0.55);
+}
+.security-posture-panel strong { color: #a7f3d0; font-size: 0.86rem; }
+.security-posture-panel ul { list-style: none; padding: 8px 0; margin: 0; }
+.security-posture-panel li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.12); font-size: 0.78rem; }
+.security-posture-panel li span:last-child { color: #6ee7b7; text-align: right; }
+.security-posture-panel p { margin: 10px 0 0; color: #cbd5e1; font-size: 0.73rem; line-height: 1.5; }
 
 .badge { color: #10b981; font-size: 0.8rem; margin-bottom: 16px; letter-spacing: 1px; }
 

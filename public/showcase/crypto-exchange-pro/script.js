@@ -1,4 +1,5 @@
-﻿import { MatchingEngine } from './matching-engine.js';
+import { MatchingEngine } from './matching-engine.js';
+import { TickerStream } from './ticker-stream.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('VortexDEX Exchange Pro engine ready');
@@ -48,9 +49,9 @@ function initTokenDiscovery() {
 }
 
 /* ------------------------------------------------------------------
-   Mock market engine. Everything is simulated: a seeded PRNG drives the
-   candle history and the once-per-second live ticks, so the same pair and
-   interval always start from the same history.
+   Mock market engine. Seeded historical candles end at the latest simulated
+   stream price. Live packets use geometric Brownian price steps; no real
+   market connection is made.
 ------------------------------------------------------------------- */
 
 const PAIRS = {
@@ -189,8 +190,10 @@ function initMarket() {
   let lastResult = 'Submit a paper order to try matching against the displayed liquidity.';
   let fills = [];
   let quotesPaused = false;
+  const stream = new TickerStream(PAIRS);
   document.getElementById('paper-pause')?.addEventListener('click', event => {
     quotesPaused = !quotesPaused;
+    if (quotesPaused) stream.stop(); else stream.start();
     event.currentTarget.setAttribute('aria-pressed', String(quotesPaused));
     event.currentTarget.textContent = quotesPaused ? 'Resume simulated quotes' : 'Pause simulated quotes';
   });
@@ -397,14 +400,12 @@ function initMarket() {
   }
 
   // ---- live tick: runs once per second -------------------------------
-  function tickEngines() {
+  function tickEngines(packet) {
     if (quotesPaused) return;
     state.tick++;
     Object.keys(PAIRS).forEach((key) => {
       const e = engines[key];
-      const p = PAIRS[key];
-      const step = noise(e.rng) * p.vol * 0.9;
-      e.price = Math.max(e.price * (1 + step), 0.01);
+      e.price = packet.markets[key].price;
     });
 
     const price = engines[state.pair].price;
@@ -432,8 +433,10 @@ function initMarket() {
       const pct = ((e.price - e.ref) / e.ref) * 100;
       if (priceEl) priceEl.textContent = '$' + formatPrice(e.price, p.decimals);
       if (changeEl) {
-        changeEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
-        changeEl.setAttribute('data-dir', pct >= 0 ? 'up' : 'down');
+        const isUp = pct >= 0;
+        changeEl.textContent = `${isUp ? '▲ +' : '▼ '}${pct.toFixed(2)}%`;
+        changeEl.setAttribute('data-dir', isUp ? 'up' : 'down');
+        changeEl.setAttribute('aria-label', `${isUp ? 'Up' : 'Down'} ${Math.abs(pct).toFixed(2)} percent`);
       }
     });
   }
@@ -678,7 +681,42 @@ function initMarket() {
   renderAll();
   announce();
 
-  setInterval(() => { if (!document.hidden) tickEngines(); }, 1000);
+  const connection = document.getElementById('stream-status');
+  const stats = document.getElementById('stream-stats');
+  const tape = document.getElementById('stream-tape');
+  const outage = document.getElementById('stream-outage');
+  const drop = document.getElementById('stream-drop');
+  stream.on('status', info => {
+    connection.dataset.state = info.state;
+    connection.textContent = `SIMULATED FEED · ${info.state.toUpperCase()}`
+      + (info.delay ? ` · retry ${info.attempt} in ${info.delay / 1000}s` : '');
+    outage.disabled = drop.disabled = info.state !== 'connected';
+    if (info.state !== 'connected') stats.textContent = 'Quotes are stale while the feed is stopped or reconnecting.';
+  });
+  stream.on('drop', sequence => { stats.textContent = `Packet ${sequence} dropped. Recovering the full snapshot on the next delivery…`; });
+  stream.on('packet', packet => {
+    tickEngines(packet);
+    stats.textContent = `Simulated latency ${packet.latency ? `${packet.latency}ms` : '— (snapshot)'} · sequence ${packet.sequence} · dropped ${packet.dropped} · recovered ${packet.recovered}`;
+    connection.classList.remove('stream-tick');
+    // Reapply on the next rendered frame so each delivered packet pulses once.
+    requestAnimationFrame(() => connection.classList.add('stream-tick'));
+    tape.replaceChildren();
+    const market = packet.markets[state.pair];
+    market.trades.slice(0, 5).forEach(trade => {
+      const row = document.createElement('li');
+      row.textContent = `#${trade.id} · ${PAIRS[state.pair].label} · ${trade.side.toUpperCase()} ${trade.quantity.toFixed(4)} @ $${formatPrice(trade.price, 2)}`;
+      tape.append(row);
+    });
+    if (!market.trades.length) tape.textContent = 'Waiting for simulated executions…';
+  });
+  outage.addEventListener('click', () => stream.outage());
+  drop.addEventListener('click', () => { stream.dropNext = true; stats.textContent = 'Next packet will be dropped; snapshot recovery follows automatically.'; });
+  const suspend = () => stream.stop();
+  const resume = () => { if (!quotesPaused && !document.hidden) stream.start(); };
+  document.addEventListener('visibilitychange', () => document.hidden ? suspend() : resume());
+  window.addEventListener('pagehide', suspend);
+  window.addEventListener('pageshow', resume);
+  resume();
 }
 
 /* ===============================================================
@@ -1605,3 +1643,371 @@ function initTradeHistoryDrawer() {
   // Initial render
   render();
 }
+
+// ===== Issue #273: Interactive Leverage Slider & Liquidation Risk Calculator =====
+(function initLeverageRiskModule() {
+  const CONTRACT_SPECS = {
+    btc: { symbol: 'BTC', label: 'BTC-PERP', defaultPrice: 94250, defaultExit: 105000, defaultSize: 1.0, mmr: 0.005 },
+    eth: { symbol: 'ETH', label: 'ETH-PERP', defaultPrice: 3840.5, defaultExit: 4200, defaultSize: 10.0, mmr: 0.0075 },
+    sol: { symbol: 'SOL', label: 'SOL-PERP', defaultPrice: 214.8, defaultExit: 240, defaultSize: 50.0, mmr: 0.01 }
+  };
+
+  let state = {
+    side: 'long',
+    pair: 'btc',
+    entryPrice: 94250,
+    size: 1.0,
+    exitPrice: 105000,
+    leverage: 5
+  };
+
+  function setup() {
+    const root = document.getElementById('leverageRiskSection');
+    if (!root) return;
+
+    // Elements
+    const btnSideLong = document.getElementById('btnSideLong');
+    const btnSideShort = document.getElementById('btnSideShort');
+    const pairSelect = document.getElementById('levPairSelect');
+    const entryInput = document.getElementById('levEntryPriceInput');
+    const sizeInput = document.getElementById('levPositionSizeInput');
+    const exitInput = document.getElementById('levExitPriceInput');
+    const levRange = document.getElementById('leverageRange');
+    const btnFillMarket = document.getElementById('btnFillMarketPrice');
+    const btnCopy = document.getElementById('btnCopyRiskAnalysis');
+    const btnReset = document.getElementById('btnResetRiskCalc');
+    const feedbackMsg = document.getElementById('calcFeedbackMsg');
+
+    const baseTokenSymbol = document.getElementById('baseTokenSymbol');
+    const notionalHint = document.getElementById('notionalValueHint');
+    const exitPctHint = document.getElementById('exitPctHint');
+    const levMultiplierVal = document.getElementById('levMultiplierVal');
+    const levImrPill = document.getElementById('levImrPill');
+    const riskBadge = document.getElementById('overallRiskBadge');
+    const riskBadgeText = document.getElementById('riskBadgeText');
+    const liqDistBadge = document.getElementById('liqDistBadge');
+    const calcLiqPrice = document.getElementById('calcLiquidationPrice');
+    const liqDesc = document.getElementById('liqDesc');
+    const riskBarFill = document.getElementById('riskBarFill');
+    const calcInitialMargin = document.getElementById('calcInitialMargin');
+    const calcMaintMargin = document.getElementById('calcMaintMargin');
+    const calcMaintRate = document.getElementById('calcMaintRate');
+    const calcTargetPnl = document.getElementById('calcTargetPnl');
+    const calcRoeVal = document.getElementById('calcRoeVal');
+    const calcNotionalValue = document.getElementById('calcNotionalValue');
+    const levTicks = root.querySelectorAll('.lev-tick');
+    const presetBtns = root.querySelectorAll('.preset-btn');
+
+    function formatUsd(val) {
+      return '$' + Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function calculate() {
+      const spec = CONTRACT_SPECS[state.pair] || CONTRACT_SPECS.btc;
+      const notional = state.entryPrice * state.size;
+      const initialMargin = state.leverage > 0 ? notional / state.leverage : notional;
+      const maintMargin = notional * spec.mmr;
+
+      let liqPrice = 0;
+      let pnl = 0;
+      let distPct = 0;
+
+      if (state.side === 'long') {
+        liqPrice = Math.max(0, state.entryPrice * (1 - (1 / state.leverage) + spec.mmr));
+        pnl = (state.exitPrice - state.entryPrice) * state.size;
+        distPct = state.entryPrice > 0 ? ((liqPrice - state.entryPrice) / state.entryPrice) * 100 : 0;
+      } else {
+        liqPrice = state.entryPrice * (1 + (1 / state.leverage) - spec.mmr);
+        pnl = (state.entryPrice - state.exitPrice) * state.size;
+        distPct = state.entryPrice > 0 ? ((liqPrice - state.entryPrice) / state.entryPrice) * 100 : 0;
+      }
+
+      const roe = initialMargin > 0 ? (pnl / initialMargin) * 100 : 0;
+      const movePct = state.entryPrice > 0 ? ((state.exitPrice - state.entryPrice) / state.entryPrice) * 100 : 0;
+
+      // Update UI elements safely
+      if (baseTokenSymbol) baseTokenSymbol.textContent = spec.symbol;
+      if (notionalHint) notionalHint.textContent = `Notional: ${formatUsd(notional)}`;
+      if (exitPctHint) {
+        exitPctHint.textContent = (movePct >= 0 ? '+' : '') + movePct.toFixed(2) + '% move';
+        exitPctHint.style.color = (state.side === 'long' && movePct >= 0) || (state.side === 'short' && movePct <= 0) ? '#10b981' : '#f59e0b';
+      }
+
+      if (levMultiplierVal) levMultiplierVal.textContent = state.leverage + 'x';
+      if (levImrPill) levImrPill.textContent = (100 / state.leverage).toFixed(1) + '% Initial Margin';
+
+      if (calcLiqPrice) calcLiqPrice.textContent = formatUsd(liqPrice);
+      if (liqDistBadge) {
+        liqDistBadge.textContent = (distPct >= 0 ? '+' : '') + distPct.toFixed(2) + '% from Entry';
+      }
+      if (liqDesc) {
+        liqDesc.textContent = state.side === 'long'
+          ? 'If market drops to this level, maintenance margin breaches and the position is liquidated.'
+          : 'If market rises to this level, maintenance margin breaches and the position is liquidated.';
+      }
+
+      if (calcInitialMargin) calcInitialMargin.textContent = formatUsd(initialMargin);
+      if (calcMaintMargin) calcMaintMargin.textContent = formatUsd(maintMargin);
+      if (calcMaintRate) calcMaintRate.textContent = (spec.mmr * 100).toFixed(2) + '% threshold';
+
+      if (calcTargetPnl) {
+        calcTargetPnl.textContent = (pnl >= 0 ? '+' : '') + formatUsd(pnl);
+        calcTargetPnl.className = 'm-val ' + (pnl >= 0 ? 'green-text' : 'red-text');
+      }
+
+      if (calcRoeVal) {
+        calcRoeVal.textContent = (roe >= 0 ? '+' : '') + roe.toFixed(2) + '% ROE';
+        calcRoeVal.style.color = roe >= 0 ? '#10b981' : '#ef4444';
+      }
+
+      if (calcNotionalValue) calcNotionalValue.textContent = formatUsd(notional);
+
+      // Risk level computation
+      if (riskBarFill) {
+        riskBarFill.style.width = Math.min(100, Math.max(1, state.leverage)) + '%';
+      }
+
+      if (riskBadge && riskBadgeText) {
+        riskBadge.classList.remove('risk-badge-low', 'risk-badge-med', 'risk-badge-high', 'risk-badge-extreme');
+        if (riskBarFill) riskBarFill.classList.remove('bar-low', 'bar-med', 'bar-high', 'bar-extreme');
+
+        if (state.leverage <= 5) {
+          riskBadge.classList.add('risk-badge-low');
+          riskBadgeText.textContent = `CONSERVATIVE LEVERAGE (${state.leverage}x)`;
+          if (riskBarFill) riskBarFill.classList.add('bar-low');
+        } else if (state.leverage <= 20) {
+          riskBadge.classList.add('risk-badge-med');
+          riskBadgeText.textContent = `MODERATE LEVERAGE (${state.leverage}x)`;
+          if (riskBarFill) riskBarFill.classList.add('bar-med');
+        } else if (state.leverage <= 50) {
+          riskBadge.classList.add('risk-badge-high');
+          riskBadgeText.textContent = `HIGH VOLATILITY RISK (${state.leverage}x)`;
+          if (riskBarFill) riskBarFill.classList.add('bar-high');
+        } else {
+          riskBadge.classList.add('risk-badge-extreme');
+          riskBadgeText.textContent = `EXTREME LIQUIDATION DANGER (${state.leverage}x)`;
+          if (riskBarFill) riskBarFill.classList.add('bar-extreme');
+        }
+      }
+
+      // Sync active states on tick buttons
+      levTicks.forEach(btn => {
+        const lev = parseInt(btn.getAttribute('data-lev'), 10);
+        btn.classList.toggle('active', lev === state.leverage);
+      });
+    }
+
+    // Side toggles
+    if (btnSideLong) {
+      btnSideLong.addEventListener('click', () => {
+        state.side = 'long';
+        btnSideLong.classList.add('active');
+        if (btnSideShort) btnSideShort.classList.remove('active');
+        calculate();
+      });
+    }
+
+    if (btnSideShort) {
+      btnSideShort.addEventListener('click', () => {
+        state.side = 'short';
+        btnSideShort.classList.add('active');
+        if (btnSideLong) btnSideLong.classList.remove('active');
+        calculate();
+      });
+    }
+
+    // Pair select
+    if (pairSelect) {
+      pairSelect.addEventListener('change', () => {
+        state.pair = pairSelect.value;
+        const spec = CONTRACT_SPECS[state.pair] || CONTRACT_SPECS.btc;
+        state.entryPrice = spec.defaultPrice;
+        state.exitPrice = spec.defaultExit;
+        state.size = spec.defaultSize;
+
+        if (entryInput) entryInput.value = String(state.entryPrice);
+        if (exitInput) exitInput.value = String(state.exitPrice);
+        if (sizeInput) sizeInput.value = String(state.size);
+
+        calculate();
+      });
+    }
+
+    // Fill current market price
+    if (btnFillMarket) {
+      btnFillMarket.addEventListener('click', () => {
+        const spec = CONTRACT_SPECS[state.pair] || CONTRACT_SPECS.btc;
+        state.entryPrice = spec.defaultPrice;
+        if (entryInput) entryInput.value = String(state.entryPrice);
+        calculate();
+        flashFeedback('Market price filled');
+      });
+    }
+
+    // Inputs
+    if (entryInput) {
+      entryInput.addEventListener('input', () => {
+        state.entryPrice = Math.max(0.01, parseFloat(entryInput.value) || 0.01);
+        calculate();
+      });
+    }
+
+    if (sizeInput) {
+      sizeInput.addEventListener('input', () => {
+        state.size = Math.max(0.0001, parseFloat(sizeInput.value) || 0.0001);
+        calculate();
+      });
+    }
+
+    if (exitInput) {
+      exitInput.addEventListener('input', () => {
+        state.exitPrice = Math.max(0.01, parseFloat(exitInput.value) || 0.01);
+        calculate();
+      });
+    }
+
+    // Leverage range slider
+    if (levRange) {
+      levRange.addEventListener('input', () => {
+        state.leverage = parseInt(levRange.value, 10) || 1;
+        calculate();
+      });
+    }
+
+    // Quick leverage ticks
+    levTicks.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lev = parseInt(btn.getAttribute('data-lev'), 10) || 1;
+        state.leverage = lev;
+        if (levRange) levRange.value = String(lev);
+        calculate();
+      });
+    });
+
+    // Preset buttons
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const side = btn.getAttribute('data-side') || 'long';
+        const pair = btn.getAttribute('data-pair') || 'btc';
+        const lev = parseInt(btn.getAttribute('data-lev'), 10) || 5;
+        const size = parseFloat(btn.getAttribute('data-size')) || 1.0;
+        const exit = parseFloat(btn.getAttribute('data-exit')) || 105000;
+
+        state.side = side;
+        state.pair = pair;
+        state.leverage = lev;
+        state.size = size;
+        state.exitPrice = exit;
+
+        const spec = CONTRACT_SPECS[pair] || CONTRACT_SPECS.btc;
+        state.entryPrice = spec.defaultPrice;
+
+        if (btnSideLong) btnSideLong.classList.toggle('active', side === 'long');
+        if (btnSideShort) btnSideShort.classList.toggle('active', side === 'short');
+        if (pairSelect) pairSelect.value = pair;
+        if (entryInput) entryInput.value = String(state.entryPrice);
+        if (sizeInput) sizeInput.value = String(state.size);
+        if (exitInput) exitInput.value = String(state.exitPrice);
+        if (levRange) levRange.value = String(lev);
+
+        calculate();
+        flashFeedback('Loaded preset: ' + btn.textContent.trim());
+      });
+    });
+
+    // Reset button
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        state = {
+          side: 'long',
+          pair: 'btc',
+          entryPrice: 94250,
+          size: 1.0,
+          exitPrice: 105000,
+          leverage: 5
+        };
+
+        if (btnSideLong) btnSideLong.classList.add('active');
+        if (btnSideShort) btnSideShort.classList.remove('active');
+        if (pairSelect) pairSelect.value = 'btc';
+        if (entryInput) entryInput.value = '94250';
+        if (sizeInput) sizeInput.value = '1.0';
+        if (exitInput) exitInput.value = '105000';
+        if (levRange) levRange.value = '5';
+
+        presetBtns.forEach((b, idx) => b.classList.toggle('active', idx === 0));
+
+        calculate();
+        flashFeedback('Calculator reset to defaults');
+      });
+    }
+
+    // Copy analysis button
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => {
+        const spec = CONTRACT_SPECS[state.pair] || CONTRACT_SPECS.btc;
+        const notional = state.entryPrice * state.size;
+        const initialMargin = notional / state.leverage;
+        const maintMargin = notional * spec.mmr;
+
+        let liqPrice = 0;
+        let pnl = 0;
+        let distPct = 0;
+
+        if (state.side === 'long') {
+          liqPrice = Math.max(0, state.entryPrice * (1 - (1 / state.leverage) + spec.mmr));
+          pnl = (state.exitPrice - state.entryPrice) * state.size;
+          distPct = ((liqPrice - state.entryPrice) / state.entryPrice) * 100;
+        } else {
+          liqPrice = state.entryPrice * (1 + (1 / state.leverage) - spec.mmr);
+          pnl = (state.entryPrice - state.exitPrice) * state.size;
+          distPct = ((liqPrice - state.entryPrice) / state.entryPrice) * 100;
+        }
+
+        const roe = initialMargin > 0 ? (pnl / initialMargin) * 100 : 0;
+        const riskLevel = state.leverage <= 5 ? 'CONSERVATIVE (Low Risk)' : (state.leverage <= 20 ? 'MODERATE' : (state.leverage <= 50 ? 'HIGH VOLATILITY' : 'EXTREME DANGER'));
+
+        const text = [
+          '⚡ VORTEX DEX — PERPETUAL POSITION RISK MEMO',
+          `Contract: ${spec.label} | Side: ${state.side.toUpperCase()} ${state.leverage}x`,
+          `Entry Price: ${formatUsd(state.entryPrice)} | Size: ${state.size} ${spec.symbol} (${formatUsd(notional)} Notional)`,
+          `Required Initial Margin: ${formatUsd(initialMargin)} | Maint. Margin: ${formatUsd(maintMargin)}`,
+          `Estimated Liquidation Price: ${formatUsd(liqPrice)} (${distPct >= 0 ? '+' : ''}${distPct.toFixed(2)}% from entry)`,
+          `Target Exit Price: ${formatUsd(state.exitPrice)} | Est. PnL: ${(pnl >= 0 ? '+' : '')}${formatUsd(pnl)} (${(roe >= 0 ? '+' : '')}${roe.toFixed(2)}% ROE)`,
+          `Risk Classification: ${riskLevel}`
+        ].join('\n');
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            flashFeedback('Risk analysis copied to clipboard! 📋');
+          }).catch(() => {
+            flashFeedback('Risk analysis ready to copy');
+          });
+        } else {
+          flashFeedback('Risk analysis ready');
+        }
+      });
+    }
+
+    function flashFeedback(msg) {
+      if (!feedbackMsg) return;
+      feedbackMsg.textContent = msg;
+      feedbackMsg.classList.add('visible');
+      setTimeout(() => {
+        feedbackMsg.classList.remove('visible');
+      }, 2500);
+    }
+
+    // Initial calculation
+    calculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();

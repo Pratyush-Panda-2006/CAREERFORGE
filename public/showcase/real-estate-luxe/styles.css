@@ -3074,3 +3074,694 @@ body.cmp-open { overflow: hidden; }
     flex-direction: column;
   }
 }
+
+/* ===== BEGIN Issue #301: Monthly HOA & Property Tax Cost Breakdown Calculator ===== */
+.hoa-tax-section {
+  background: linear-gradient(180deg, #0e1017 0%, #141722 100%);
+  border-top: 1px solid rgba(201, 168, 76, 0.25);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+  padding: 4.5rem 1.5rem;
+}
+
+.hoa-estate-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.hoa-chip {
+  padding: 0.65rem 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 9999px;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hoa-chip:hover {
+  background: rgba(201, 168, 76, 0.12);
+  border-color: #c9a84c;
+  color: #ffffff;
+}
+
+.hoa-chip.active {
+  background: #c9a84c;
+  border-color: #d4b55e;
+  color: #0b0c10;
+  box-shadow: 0 4px 14px rgba(201, 168, 76, 0.35);
+}
+
+.hoa-calc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.hoa-inputs-card,
+.hoa-results-card {
+  background: rgba(18, 21, 30, 0.8);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: 14px;
+  padding: 2.25rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+}
+
+.hoa-summary-head {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.hoa-total-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  margin-bottom: 0.35rem;
+}
+
+.hoa-total-display {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.hoa-total-display strong {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.hoa-total-display .per-month {
+  font-size: 1rem;
+  color: #c9a84c;
+}
+
+.hoa-annual-sub {
+  display: block;
+  font-size: 0.85rem;
+  color: #c9a84c;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+/* SVG Donut Chart */
+.hoa-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.75rem;
+}
+
+.hoa-chart-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin-bottom: 1.5rem;
+}
+
+.hoa-donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-seg {
+  transition: stroke-dasharray 0.4s ease, stroke-dashoffset 0.4s ease, stroke-width 0.2s ease;
+  cursor: pointer;
+}
+
+.donut-seg:hover {
+  stroke-width: 30;
+}
+
+.donut-center-info {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.center-tag {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.donut-center-info strong {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #c9a84c;
+}
+
+/* Legend */
+.hoa-legend-grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.legend-row:hover {
+  background: rgba(201, 168, 76, 0.08);
+}
+
+.legend-chip {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.chip-gold { background: #c9a84c; }
+.chip-purple { background: #8b5cf6; }
+.chip-green { background: #10b981; }
+.chip-orange { background: #f59e0b; }
+
+.legend-name {
+  flex: 1;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+}
+
+.legend-pct {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  padding: 0.15rem 0.45rem;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+}
+
+.legend-amt {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  min-width: 80px;
+  text-align: right;
+}
+
+.hoa-actions-bar {
+  display: flex;
+  gap: 0.85rem;
+}
+
+.btn-hoa-export,
+.btn-hoa-copy {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-hoa-export {
+  background: #c9a84c;
+  border: none;
+  color: #0b0c10;
+}
+
+.btn-hoa-export:hover {
+  background: #d4b55e;
+}
+
+.btn-hoa-copy {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  color: #e2e8f0;
+}
+
+.btn-hoa-copy:hover {
+  background: rgba(201, 168, 76, 0.15);
+  color: #ffffff;
+}
+
+.hoa-toast {
+  margin-top: 1rem;
+  padding: 0.65rem 1rem;
+  background: #c9a84c;
+  color: #0b0c10;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: none;
+}
+
+.hoa-toast.show {
+  display: block;
+}
+
+@media (max-width: 960px) {
+  .hoa-calc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== END Issue #301 ===== */
+
+/* ===== BEGIN Issue #300: Private Viewing Scheduling Modal ===== */
+.btn-schedule-tour {
+  background: rgba(201, 168, 76, 0.15);
+  border: 1px solid #c9a84c;
+  color: #f7e7b4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-schedule-tour:hover {
+  background: #c9a84c;
+  color: #0b0c10;
+}
+
+.btn-private-viewing {
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.7rem 1rem;
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  color: #e5cf8e;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-private-viewing:hover {
+  background: #c9a84c;
+  border-color: #d4b55e;
+  color: #0c0d12;
+  box-shadow: 0 4px 14px rgba(201, 168, 76, 0.35);
+}
+
+.tour-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 7, 10, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9998;
+}
+
+.tour-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 92%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 9999;
+}
+
+.tour-modal-container {
+  background: #0f1118;
+  border: 1px solid rgba(201, 168, 76, 0.5);
+  border-radius: 14px;
+  padding: 2.25rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+  color: #e2e8f0;
+}
+
+.tour-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+  padding-bottom: 1.25rem;
+}
+
+.gold-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #c9a84c;
+  background: rgba(201, 168, 76, 0.12);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  margin-bottom: 0.5rem;
+}
+
+.tour-modal-header h3 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.01em;
+}
+
+.tour-property-name {
+  font-size: 0.95rem;
+  color: #c9a84c;
+  margin: 0;
+  font-style: italic;
+}
+
+.tour-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.85rem;
+  color: #94a3b8;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.tour-close-btn:hover {
+  color: #ffffff;
+}
+
+.tour-form-section {
+  margin-bottom: 1.5rem;
+}
+
+.form-section-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #e2e8f0;
+  margin-bottom: 0.75rem;
+}
+
+.tour-date-input,
+.tour-text-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.92rem;
+  box-sizing: border-box;
+}
+
+.tour-date-input:focus,
+.tour-text-input:focus {
+  outline: none;
+  border-color: #c9a84c;
+  box-shadow: 0 0 10px rgba(201, 168, 76, 0.3);
+}
+
+.field-hint {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  margin: 0.4rem 0 0 0;
+}
+
+/* Time Slots */
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.time-slot-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.85rem 0.65rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.time-slot-btn:hover {
+  background: rgba(201, 168, 76, 0.1);
+  border-color: rgba(201, 168, 76, 0.4);
+}
+
+.time-slot-btn.active {
+  background: rgba(201, 168, 76, 0.2);
+  border-color: #c9a84c;
+  box-shadow: 0 0 14px rgba(201, 168, 76, 0.3);
+}
+
+.slot-icon {
+  font-size: 1.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.slot-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.2rem;
+}
+
+.slot-hours {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+/* Agents Selector */
+.agents-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.agent-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.85rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.agent-card:hover {
+  background: rgba(201, 168, 76, 0.1);
+  border-color: rgba(201, 168, 76, 0.4);
+}
+
+.agent-card.active {
+  background: rgba(201, 168, 76, 0.18);
+  border-color: #c9a84c;
+  box-shadow: 0 0 14px rgba(201, 168, 76, 0.3);
+}
+
+.agent-avatar {
+  font-size: 1.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.agent-info strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #ffffff;
+}
+
+.agent-role {
+  display: block;
+  font-size: 0.7rem;
+  color: #c9a84c;
+  margin-bottom: 0.25rem;
+}
+
+.agent-specialty {
+  display: block;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+/* Buyer Inputs */
+.buyer-inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.buyer-inputs-grid label {
+  display: block;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-bottom: 0.35rem;
+}
+
+.chauffeur-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.chauffeur-toggle input {
+  accent-color: #c9a84c;
+  width: 16px;
+  height: 16px;
+}
+
+.tour-form-error {
+  padding: 0.65rem 0.9rem;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  margin-bottom: 1rem;
+}
+
+.btn-confirm-viewing {
+  width: 100%;
+  padding: 0.95rem;
+  background: linear-gradient(135deg, #c9a84c 0%, #a68430 100%);
+  border: none;
+  border-radius: 8px;
+  color: #0b0c10;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 18px rgba(201, 168, 76, 0.4);
+}
+
+.btn-confirm-viewing:hover {
+  background: linear-gradient(135deg, #d4b55e 0%, #b8933b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(201, 168, 76, 0.55);
+}
+
+/* Confirmation View */
+.tour-confirmation-view {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.confirm-badge-icon {
+  font-size: 3rem;
+  color: #c9a84c;
+  margin-bottom: 0.5rem;
+}
+
+.tour-confirmation-view h4 {
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin: 0 0 0.35rem 0;
+}
+
+.confirm-sub {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  margin: 0 0 1.5rem 0;
+}
+
+.confirm-ticket-card {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px dashed #c9a84c;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.ticket-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.85rem;
+}
+
+.ticket-row:last-child {
+  border-bottom: none;
+}
+
+.ticket-row .t-label {
+  color: #94a3b8;
+}
+
+.ticket-row .t-code {
+  color: #c9a84c;
+  letter-spacing: 0.08em;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-ticket-copy {
+  flex: 1;
+  padding: 0.8rem;
+  background: rgba(201, 168, 76, 0.15);
+  border: 1px solid #c9a84c;
+  color: #f7e7b4;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-ticket-copy:hover {
+  background: rgba(201, 168, 76, 0.28);
+}
+
+.btn-ticket-done {
+  flex: 1;
+  padding: 0.8rem;
+  background: #c9a84c;
+  border: none;
+  color: #0b0c10;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-ticket-done:hover {
+  background: #d4b55e;
+}
+
+@media (max-width: 650px) {
+  .time-slots-grid,
+  .agents-selector-grid,
+  .buyer-inputs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== END Issue #300 ===== */

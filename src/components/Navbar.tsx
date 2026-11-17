@@ -31,11 +31,11 @@ export default function Navbar() {
     {
       label: 'Projects & Bounties',
       path: '/projects',
-      description: '20 production-grade showcase templates',
+      description: '40 production-grade showcase templates',
       icon: Code2,
       color: 'text-cyan-400',
       bgColor: 'bg-cyan-400/10 border-cyan-400/25',
-      badge: '20 APPS',
+      badge: '40 APPS',
     },
     {
       label: 'Leaderboard',

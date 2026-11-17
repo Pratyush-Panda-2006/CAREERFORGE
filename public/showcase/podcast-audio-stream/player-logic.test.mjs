@@ -64,10 +64,15 @@ test('bookmark control prompts, persists, renders, and seeks to a saved moment',
     replaceChildren(...children) { this.children = children; }
     setAttribute(name, value) { this.attributes[name] = value; }
     querySelector() { return null; }
+    showModal() { this.open = true; }
+    close() { this.open = false; }
   }
 
   const elements = new Map(['bookmark-moment-btn', 'bookmarks-tray', 'current-time-label',
-    'dock-scrubber', 'scrubber-fill', 'player-dock', 'dock-volume'].map(id => [id, new Element(id)]));
+    'dock-scrubber', 'scrubber-fill', 'player-dock', 'dock-volume',
+    'episode-share-dialog', 'share-with-timestamp', 'share-link', 'share-status',
+    'share-email-link', 'share-whatsapp-link', 'episode-share-name', 'share-time-label',
+    'dock-share-btn', 'share-close-btn', 'share-copy-btn'].map(id => [id, new Element(id)]));
   const storage = new Map();
   const listeners = {};
   const document = {
@@ -84,17 +89,29 @@ test('bookmark control prompts, persists, renders, and seeks to a saved moment',
       getItem(key) { return storage.get(key) ?? null; },
       setItem(key, value) { storage.set(key, value); }
     },
-    window: { prompt: () => '  Key idea  ' },
+    window: { prompt: () => '  Key idea  ', location: { search: '', href: 'https://example.org/podcast/' } },
+    URL,
+    URLSearchParams,
     console,
     setInterval: () => 1,
     clearInterval() {}
   };
   vm.runInNewContext(readFileSync(new URL('./player-logic.js', import.meta.url), 'utf8'), context);
   context.PlayerLogic = context.window.PlayerLogic;
+  vm.runInNewContext(readFileSync(new URL('./share-logic.js', import.meta.url), 'utf8'), context);
+  context.ShareLogic = context.window.ShareLogic;
   vm.runInNewContext(readFileSync(new URL('./script.js', import.meta.url), 'utf8'), context);
   listeners.DOMContentLoaded();
 
   elements.get('dock-scrubber').listeners.input({ target: { value: '125' } });
+  elements.get('dock-share-btn').click();
+  assert.equal(elements.get('episode-share-dialog').open, true);
+  assert.match(elements.get('share-link').value, /episode=142/);
+  elements.get('share-with-timestamp').checked = true;
+  elements.get('share-with-timestamp').listeners.change();
+  assert.match(elements.get('share-link').value, /t=2m5s/);
+  elements.get('share-close-btn').click();
+  assert.equal(elements.get('episode-share-dialog').open, false);
   elements.get('bookmark-moment-btn').click();
 
   assert.deepEqual(JSON.parse(storage.get('waveform-episode-bookmarks')), [{ time: 125, note: 'Key idea' }]);

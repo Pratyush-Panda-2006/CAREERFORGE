@@ -20,6 +20,7 @@
       <a href="#comparator">Specifications</a>
       <a href="#wind-tunnel">Aerodynamics</a>
       <a href="#configurator">Configure your order</a>
+      <a href="#torque-vectoring">Torque vectoring</a>
     </nav>
     <button class="reserve-btn" onclick="reserveHypercar()">Reserve Allocation ↗</button>
   </header>
@@ -624,6 +625,22 @@
   </section>
   <!-- ===== EV Road Trip Range Estimator (Issue #271) END ===== -->
 
+  <section class="charging-comparison" id="charging-comparison" aria-labelledby="charging-title">
+    <p class="charging-kicker">APEX ZERO // CHARGING ARCHITECTURE</p>
+    <h2 id="charging-title">From 10% to 80%, your way</h2>
+    <p>Compare illustrative recharge times for the 130 kWh pack. Actual charging depends on charger output, temperature, and battery taper.</p>
+    <div class="charging-modes" role="group" aria-label="Choose charging mode">
+      <button type="button" data-charging-mode="ac" aria-pressed="false">Level 2 AC · 11 kW</button>
+      <button type="button" data-charging-mode="dc" aria-pressed="true">Ultra-Fast 800V DC · 350 kW</button>
+    </div>
+    <div class="charging-card">
+      <div><span class="charging-label" id="chargingModeLabel">Ultra-Fast 800V DC</span><strong id="chargingDuration" aria-live="polite">≈ 18 min</strong></div>
+      <div class="charging-battery" role="progressbar" aria-label="Illustrative battery charge animation" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" aria-valuetext="80 percent charge"><span id="chargingBatteryFill"></span></div>
+      <p>10% start <span>80% target</span></p>
+      <small id="chargingDetail">91 kWh added; includes an illustrative allowance for DC charging taper.</small>
+    </div>
+  </section>
+
   <!-- ===== BEGIN Issue #389: Regenerative Braking Energy Recovery Simulator with Deceleration Telemetry ===== -->
   <section class="regen-sim-section" id="regenSimulator" aria-labelledby="regenHeading">
     <div class="regen-container">
@@ -1000,7 +1017,68 @@
     <p id="lap-status" role="status">Choose a profile and compound to begin. Reduced-motion mode shows the completed result immediately.</p>
     <details><summary>Model assumptions and timing</summary><p>1,800 kg point mass, 700 kW available power, 115 m/s speed cap; no elevation, downforce, traffic or temperature model. A backward braking pass and forward traction/power pass solve 25 m or shorter segments. Corner limits use v² = μgr; compound grip decreases with tire age and distance. Soft slicks have more dry grip and faster wear, while wet tires have more wet grip. Playback uses elapsed timestamps and pauses when the tab is hidden. Personal bests last only for this page session; track PB and sector fastest records compare completed runs across compounds and tire ages on the same surface and profile.</p></details>
   </section>
+  <section id="torque-vectoring" class="tv-panel" aria-labelledby="tv-title">
+    <div class="tv-eyebrow">APEX / CHASSIS CONTROL</div>
+    <h2 id="tv-title">Quad-motor torque vectoring</h2>
+    <p class="tv-intro">Adjust a high-speed corner and watch the bicycle-model yaw response, active left-to-right motor torque transfer, tire slip and grip utilization. This is an illustrative model, not vehicle control or measured test data.</p>
+    <div class="tv-layout">
+      <form class="tv-controls" aria-label="Cornering simulation controls">
+        <label for="tv-speed">Vehicle speed <output id="tv-speed-value" for="tv-speed">140 km/h</output></label>
+        <input id="tv-speed" type="range" min="60" max="240" step="5" value="140">
+        <label for="tv-steering">Steering angle <output id="tv-steering-value" for="tv-steering">7.5°</output></label>
+        <input id="tv-steering" type="range" min="-15" max="15" step="0.5" value="7.5">
+        <label for="tv-radius">Corner radius <output id="tv-radius-value" for="tv-radius">70 m</output></label>
+        <input id="tv-radius" type="range" min="30" max="180" step="5" value="70">
+        <label for="tv-demand">Drive torque demand <output id="tv-demand-value" for="tv-demand">72%</output></label>
+        <input id="tv-demand" type="range" min="0" max="100" step="1" value="72">
+        <p id="tv-status" class="tv-status" aria-live="polite">Initializing chassis model…</p>
+      </form>
+      <div class="tv-display">
+        <div class="tv-blueprint">
+          <svg class="tv-chassis" viewBox="0 0 560 330" role="img" aria-labelledby="tv-svg-title tv-svg-desc">
+            <title id="tv-svg-title">Top-down quad-motor chassis torque and tire-grip diagram</title>
+            <desc id="tv-svg-desc">Front wheels are at the top. Cyan and magenta arrows show torque vectoring; each wheel changes color with tire grip utilization.</desc>
+            <defs>
+              <marker id="tv-arrow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker>
+            </defs>
+            <path class="tv-track-line" d="M 90 40 C 40 95 40 230 90 285 M 470 40 C 520 95 520 230 470 285"/>
+            <path class="tv-chassis-shell" d="M 218 46 Q 280 26 342 46 L 365 105 L 355 240 Q 345 285 280 294 Q 215 285 205 240 L 195 105 Z"/>
+            <path class="tv-cockpit" d="M 226 91 Q 280 73 334 91 L 343 160 L 217 160 Z M 217 177 L 343 177 L 337 228 Q 280 252 223 228 Z"/>
+            <path class="tv-centerline" d="M 280 48 L 280 286"/>
+            <text class="tv-svg-label" x="280" y="20" text-anchor="middle">FRONT AXLE</text>
+            <text class="tv-svg-label" x="280" y="319" text-anchor="middle">REAR AXLE</text>
+            <rect id="tv-tire-fl" class="tv-tire" x="137" y="64" width="48" height="82" rx="10"/>
+            <rect id="tv-tire-fr" class="tv-tire" x="375" y="64" width="48" height="82" rx="10"/>
+            <rect id="tv-tire-rl" class="tv-tire" x="137" y="192" width="48" height="82" rx="10"/>
+            <rect id="tv-tire-rr" class="tv-tire" x="375" y="192" width="48" height="82" rx="10"/>
+            <path id="tv-arrow-left" class="tv-torque-arrow" d="M 240 165 C 210 165 205 165 190 165" marker-end="url(#tv-arrow-head)"/>
+            <path id="tv-arrow-right" class="tv-torque-arrow" d="M 320 165 C 350 165 355 165 370 165" marker-end="url(#tv-arrow-head)"/>
+            <text id="tv-left-role" class="tv-side-label" x="161" y="166" text-anchor="middle">LEFT</text>
+            <text id="tv-right-role" class="tv-side-label" x="399" y="166" text-anchor="middle">RIGHT</text>
+          </svg>
+          <div class="tv-wheel-grid" aria-label="Individual wheel torque and grip utilization">
+            <div class="tv-wheel-data"><span>FL · FRONT LEFT</span><strong id="tv-torque-fl">0 Nm</strong><small>Grip <span id="tv-grip-fl">0%</span></small></div>
+            <div class="tv-wheel-data"><span>FR · FRONT RIGHT</span><strong id="tv-torque-fr">0 Nm</strong><small>Grip <span id="tv-grip-fr">0%</span></small></div>
+            <div class="tv-wheel-data"><span>RL · REAR LEFT</span><strong id="tv-torque-rl">0 Nm</strong><small>Grip <span id="tv-grip-rl">0%</span></small></div>
+            <div class="tv-wheel-data"><span>RR · REAR RIGHT</span><strong id="tv-torque-rr">0 Nm</strong><small>Grip <span id="tv-grip-rr">0%</span></small></div>
+          </div>
+          <div class="tv-heat-legend"><span>LOW GRIP LOAD</span><span>HIGH GRIP LOAD</span></div>
+        </div>
+        <dl class="tv-telemetry">
+          <div><dt>Lateral acceleration</dt><dd id="tv-lateral-g">0.00 g</dd></div>
+          <div><dt>Yaw rate</dt><dd id="tv-yaw-rate">0.00 °/s</dd></div>
+          <div><dt>Front tire slip</dt><dd id="tv-front-slip">0.00°</dd></div>
+          <div><dt>Rear tire slip</dt><dd id="tv-rear-slip">0.00°</dd></div>
+          <div class="tv-correction"><dt>Active yaw correction</dt><dd id="tv-yaw-correction">0 Nm</dd></div>
+          <div><dt>Handling balance</dt><dd id="tv-balance">NEUTRAL</dd></div>
+        </dl>
+      </div>
+    </div>
+    <details class="tv-assumptions"><summary>Model assumptions</summary><p>A 1,950 kg, 2.8 m wheelbase vehicle is modeled with a linear bicycle chassis, bounded tire forces, and a proportional yaw-rate controller. Torque is split across four 500 Nm wheel motors; differential wheel torque supplies the corrective yaw moment. Tire colors show estimated combined lateral and longitudinal grip utilization. Values are illustrative and are not suitable for real vehicle setup or safety decisions.</p></details>
+  </section>
+  <script src="charging-model.js"></script>
   <script src="script.js"></script>
   <script type="module" src="lap-simulator.js"></script>
+  <script type="module" src="torque-vectoring.js"></script>
 </body>
 </html>

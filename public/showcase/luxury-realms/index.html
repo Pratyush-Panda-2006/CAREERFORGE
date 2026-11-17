@@ -971,6 +971,298 @@
   </div>
   <!-- ===== END Issue #351 ===== -->
 
+  <!-- ===== BEGIN Issue #350: Interactive Superyacht Charter Route Customizer & Fuel Surcharge Estimator ===== -->
+  <section class="superyacht-route-section" id="superyacht-route-customizer" aria-labelledby="yachtRouteTitle">
+    <div class="yacht-container">
+      <div class="yacht-header">
+        <span class="yacht-kicker">⚓ MARITIME EXPEDITIONS &amp; CHARTERS</span>
+        <h2 id="yachtRouteTitle">Superyacht Charter Route &amp; Fuel Surcharge Estimator</h2>
+        <p class="yacht-subtitle">
+          Chart bespoke Mediterranean or Caribbean cruising itineraries. Select ports of call to calculate cumulative nautical miles, cruising duration, yacht fuel consumption burn rates, and environmental marine surcharges.
+        </p>
+      </div>
+
+      <!-- Controls: Region Selector & Vessel Selection -->
+      <div class="yacht-selectors-grid">
+        <div class="yacht-selector-card">
+          <label for="yachtRegionSelect" class="selector-heading">Cruising Basin &amp; Region:</label>
+          <select id="yachtRegionSelect" class="yacht-select">
+            <option value="riviera">French &amp; Italian Riviera (Monaco, St. Tropez, Portofino, Capri)</option>
+            <option value="amalfi">Amalfi Coast &amp; Tyrrhenian Archipelago</option>
+            <option value="caribbean">Leeward Islands &amp; Caribbean (St. Barths, Virgin Gorda)</option>
+          </select>
+        </div>
+
+        <div class="yacht-selector-card">
+          <label for="yachtVesselSelect" class="selector-heading">Charter Yacht Class:</label>
+          <select id="yachtVesselSelect" class="yacht-select">
+            <option value="horizon">55m Superyacht "Aura Horizon" (14 kts • 450 L/hr • $35k/day)</option>
+            <option value="celestia" selected>72m Mega-Yacht "Celestia Sea" (16 kts • 750 L/hr • $65k/day)</option>
+            <option value="sovereign">90m Gigayacht "Imperial Sovereign" (18 kts • 1,200 L/hr • $110k/day)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Main Workspace: Waypoints Manager + Interactive Timeline + Financial Telemetry -->
+      <div class="yacht-workspace-grid">
+        <!-- Left: Waypoint Port Selector & Interactive Route Legs -->
+        <div class="yacht-route-card">
+          <div class="route-card-header">
+            <h3>Itinerary Waypoint Sequence</h3>
+            <span class="route-badge" id="routePortCountBadge">4 Waypoints</span>
+          </div>
+
+          <!-- Port Adding Bar -->
+          <div class="add-port-bar">
+            <label for="availablePortSelect" class="sr-only">Add Destination Port</label>
+            <select id="availablePortSelect" class="yacht-select-sm">
+              <!-- Dynamically populated based on region -->
+            </select>
+            <button type="button" class="btn-add-port" id="btnAddPort">+ Add Port of Call</button>
+            <button type="button" class="btn-reset-route" id="btnResetRoute">Reset</button>
+          </div>
+
+          <!-- Waypoints Timeline Connector List -->
+          <div class="waypoints-timeline" id="waypointsTimeline">
+            <!-- Dynamically rendered port cards with leg distance, speed time, and remove button -->
+          </div>
+        </div>
+
+        <!-- Right: Telemetry & Charter Cost Summary -->
+        <div class="yacht-summary-card">
+          <div class="summary-card-header">
+            <h3>Maritime Navigation Telemetry</h3>
+            <span class="vessel-badge" id="summaryVesselBadge">72m Celestia Sea</span>
+          </div>
+
+          <!-- Metric Highlights Grid -->
+          <div class="yacht-metrics-grid">
+            <div class="yacht-metric-box">
+              <span class="metric-label">Total Distance</span>
+              <strong class="metric-val" id="yachtTotalDist">315 NM</strong>
+              <small class="metric-sub" id="yachtDistKm">~583.4 Kilometers</small>
+            </div>
+
+            <div class="yacht-metric-box">
+              <span class="metric-label">Cruising Underway</span>
+              <strong class="metric-val" id="yachtCruisingTime">19.7 Hours</strong>
+              <small class="metric-sub" id="yachtCruisingSpeed">@ 16 Knots Transit Speed</small>
+            </div>
+
+            <div class="yacht-metric-box">
+              <span class="metric-label">Recommended Charter</span>
+              <strong class="metric-val" id="yachtCharterDays">5 Days</strong>
+              <small class="metric-sub">Port Leisure &amp; Anchorage</small>
+            </div>
+
+            <div class="yacht-metric-box">
+              <span class="metric-label">Marine Diesel Burn</span>
+              <strong class="metric-val" id="yachtFuelBurn">14,775 L</strong>
+              <small class="metric-sub" id="yachtFuelRate">@ $1.85 / Liter Marine MGO</small>
+            </div>
+          </div>
+
+          <!-- Cost Accounting Breakdown -->
+          <div class="yacht-cost-breakdown">
+            <div class="cost-breakdown-title">ESTIMATED CHARTER &amp; SURCHARGE LEDGER</div>
+            <div class="cost-row"><span>Base Yacht Charter (5 Days)</span><strong id="costBaseCharter">$325,000</strong></div>
+            <div class="cost-row"><span>Propulsion Fuel Surcharge</span><strong id="costFuelSurcharge">$27,334</strong></div>
+            <div class="cost-row"><span>Harbor Pilot &amp; Berthing Fees (4 Ports)</span><strong id="costBerthingFees">$14,800</strong></div>
+            <div class="cost-row"><span>Marine Eco-Conservation Levy (3%)</span><strong id="costEcoLevy">$1,264</strong></div>
+            <div class="cost-row cost-total"><span>Total Estimated Charter Budget</span><strong id="costTotalBudget">$368,398</strong></div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="yacht-action-buttons">
+            <button type="button" class="btn-yacht-copy" id="btnCopyYachtSummary">Copy Charter Brief 📋</button>
+            <button type="button" class="btn-yacht-download" id="btnDownloadYachtJson">Export Maritime Itinerary (.JSON) ↓</button>
+          </div>
+          <div id="yachtToast" class="yacht-toast" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #350 ===== -->
+
+  <!-- ===== Issue #295: Bespoke Onboard Catering Menu Customizer ===== -->
+  <section class="catering-section" id="cateringMenuSection" aria-labelledby="cateringTitle">
+    <div class="catering-container">
+      <header class="catering-header">
+        <span class="catering-kicker">✦ HAUTE GASTRONOMIE EN VOL · PRIVATE AVIATION &amp; ESTATE CATERING ✦</span>
+        <h2 id="cateringTitle">Bespoke Onboard Culinary Customizer</h2>
+        <p class="catering-subtitle">
+          Elevate your charter with private culinary curations designed by Michelin-starred culinary ateliers. Select your dining tier, specify strict dietary preferences, and configure fine wine cellar pairings with instant concierge quotation.
+        </p>
+      </header>
+
+      <div class="catering-layout">
+        <!-- Left: Dining Tiers Grid -->
+        <div class="catering-tiers-col">
+          <div class="catering-section-label">1. Select Haute Cuisine Package</div>
+          <div class="catering-cards-grid" role="radiogroup" aria-label="Haute cuisine packages">
+            <!-- Tier 1 -->
+            <div class="catering-card active" data-tier="beluga" data-base="2850" role="radio" aria-checked="true" tabindex="0">
+              <div class="catering-card-top">
+                <span class="catering-badge gold">SIGNATURE GRAND CRU</span>
+                <span class="catering-tier-price">$2,850 <span>/ guest</span></span>
+              </div>
+              <h3 class="catering-card-title">Imperial Beluga &amp; Champagne Haute Experience</h3>
+              <p class="catering-card-desc">Royal Ossetra and Beluga caviar service with mother-of-pearl spoons, Dom Pérignon Vintage 2013, warm buckwheat blinis, and crème fraîche pearls.</p>
+              <div class="catering-tags">
+                <span class="c-tag">👑 Caviar Atelier</span>
+                <span class="c-tag">🍾 Vintage Champagne</span>
+                <span class="c-tag">🇫🇷 Brittany Gillardeau</span>
+              </div>
+            </div>
+
+            <!-- Tier 2 -->
+            <div class="catering-card" data-tier="kaiseki" data-base="1950" role="radio" aria-checked="false" tabindex="0">
+              <div class="catering-card-top">
+                <span class="catering-badge emerald">100% ORGANIC PLANT-BASED</span>
+                <span class="catering-tier-price">$1,950 <span>/ guest</span></span>
+              </div>
+              <h3 class="catering-card-title">Organic Vegan Kaiseki &amp; Tea Ceremony</h3>
+              <p class="catering-card-desc">Kyoto wild matsutake broth, white truffle lotus root crisp, smoked daikon carpaccio, and ceremonial Uji matcha with white peach wagashi.</p>
+              <div class="catering-tags">
+                <span class="c-tag">🌱 Zero Animal Products</span>
+                <span class="c-tag">🍄 Wild Matsutake</span>
+                <span class="c-tag">🍵 Ceremonial Matcha</span>
+              </div>
+            </div>
+
+            <!-- Tier 3 -->
+            <div class="catering-card" data-tier="wagyu" data-base="2400" role="radio" aria-checked="false" tabindex="0">
+              <div class="catering-card-top">
+                <span class="catering-badge ruby">SURF &amp; TURF PRESTIGE</span>
+                <span class="catering-tier-price">$2,400 <span>/ guest</span></span>
+              </div>
+              <h3 class="catering-card-title">Mediterranean Blue Lobster &amp; A5 Miyazaki Wagyu</h3>
+              <p class="catering-card-desc">Line-caught Brittany blue lobster poached in yuzu butter, wood-fired A5 Miyazaki Wagyu tenderloin with Perigord black truffle jus, and Château Margaux 2015.</p>
+              <div class="catering-tags">
+                <span class="c-tag">🥩 A5 Wagyu (Halal)</span>
+                <span class="c-tag">🦞 Brittany Lobster</span>
+                <span class="c-tag">🍷 Grand Cru Bordeaux</span>
+              </div>
+            </div>
+
+            <!-- Tier 4 -->
+            <div class="catering-card" data-tier="nordic" data-base="1750" role="radio" aria-checked="false" tabindex="0">
+              <div class="catering-card-top">
+                <span class="catering-badge sapphire">NORDIC FORAGED</span>
+                <span class="catering-tier-price">$1,750 <span>/ guest</span></span>
+              </div>
+              <h3 class="catering-card-title">Arctic Char &amp; Wild Cloudberry Atelier</h3>
+              <p class="catering-card-desc">Birch-smoked Norwegian Arctic char, sea buckthorn reduction, winter chanterelle brioche, and golden wild cloudberry tart with aged aquavit drizzle.</p>
+              <div class="catering-tags">
+                <span class="c-tag">🐟 Wild Arctic Char</span>
+                <span class="c-tag">🫐 Foraged Berries</span>
+                <span class="c-tag">❄️ Scandinavian Cru</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dietary Restrictions & Special Preferences -->
+          <div class="dietary-selector-box">
+            <div class="catering-section-label">2. Dietary Restrictions &amp; Bespoke Preferences</div>
+            <div class="dietary-chips-grid" role="group" aria-label="Dietary preferences">
+              <button type="button" class="dietary-chip" data-diet="gluten-free">🌾 Gluten-Free</button>
+              <button type="button" class="dietary-chip" data-diet="dairy-free">🥛 Dairy-Free / Lactose-Free</button>
+              <button type="button" class="dietary-chip active" data-diet="halal">☪️ Halal Certified</button>
+              <button type="button" class="dietary-chip" data-diet="kosher">✡️ Kosher Preparation</button>
+              <button type="button" class="dietary-chip" data-diet="nut-free">🥜 Severe Nut Allergy</button>
+              <button type="button" class="dietary-chip" data-diet="shellfish-free">🦐 Shellfish-Free Substitute</button>
+              <button type="button" class="dietary-chip" data-diet="low-sodium">🧂 Low-Sodium / Cardiac Diet</button>
+              <button type="button" class="dietary-chip" data-diet="keto">🥑 Keto / Strict Low-Carb</button>
+            </div>
+
+            <div class="special-request-group">
+              <label for="cateringNotes" class="special-notes-label">Special Sommelier &amp; Executive Chef Instructions:</label>
+              <textarea id="cateringNotes" class="catering-textarea" rows="2" placeholder="e.g., Chill champagne to exactly 6°C; serve caviar upon reaching cruising altitude (FL410)..." maxlength="200"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Real-time Surcharge Calculation & Order Summary -->
+        <div class="catering-quote-sidebar">
+          <div class="catering-quote-card">
+            <div class="quote-header">
+              <span class="quote-kicker">CONCIERGE FLIGHT SUMMARY</span>
+              <h3 class="quote-title">Catering Outflow Estimate</h3>
+            </div>
+
+            <!-- Guest count control -->
+            <div class="quote-guests-control">
+              <label for="cateringGuestCount">Passenger Manifest Count:</label>
+              <div class="guest-counter-stepper">
+                <button type="button" class="stepper-btn" id="guestCountMinus" aria-label="Decrease passenger count">&minus;</button>
+                <input type="number" id="cateringGuestCount" class="guest-num-input" value="4" min="1" max="16" readonly aria-label="Passenger count" />
+                <button type="button" class="stepper-btn" id="guestCountPlus" aria-label="Increase passenger count">&plus;</button>
+              </div>
+            </div>
+
+            <!-- Sommelier & Chef Addon Checkboxes -->
+            <div class="catering-addons-list">
+              <label class="c-addon-checkbox">
+                <input type="checkbox" id="addonWinePairing" checked />
+                <div class="addon-txt">
+                  <strong>Sommelier Reserve Pairing</strong>
+                  <span>+$450 / guest (Grand Cru Flights)</span>
+                </div>
+              </label>
+
+              <label class="c-addon-checkbox">
+                <input type="checkbox" id="addonPersonalChef" checked />
+                <div class="addon-txt">
+                  <strong>Private In-Flight Executive Chef</strong>
+                  <span>+$1,200 flat flight service fee</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Price Breakdown Calculation Table -->
+            <div class="quote-breakdown-lines">
+              <div class="quote-line">
+                <span id="quoteTierLabel">Imperial Beluga Haute (×4):</span>
+                <strong id="quoteTierTotal">$11,400.00</strong>
+              </div>
+              <div class="quote-line">
+                <span id="quoteWineLabel">Reserve Wine Flight (×4):</span>
+                <strong id="quoteWineTotal">$1,800.00</strong>
+              </div>
+              <div class="quote-line">
+                <span>In-Flight Chef Presence:</span>
+                <strong id="quoteChefTotal">$1,200.00</strong>
+              </div>
+              <div class="quote-line quote-tax-line">
+                <span>Airport Catering &amp; Ground Logistics (8.5%):</span>
+                <strong id="quoteLogisticsTotal">$1,224.00</strong>
+              </div>
+              <div class="quote-divider"></div>
+              <div class="quote-line quote-total-line">
+                <span>Total Catering Surcharge:</span>
+                <strong class="total-catering-sum" id="quoteGrandTotal">$15,624.00</strong>
+              </div>
+            </div>
+
+            <!-- Selected Dietary Tags Summary -->
+            <div class="quote-dietary-summary">
+              <span class="diet-summary-title">Configured Dietary Protocols:</span>
+              <div class="diet-summary-tags" id="dietSummaryTags">
+                <span class="diet-pill-active">☪️ Halal Certified</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn-confirm-catering" id="btnConfirmCatering">
+              <span>✦ Attach Culinary Brief to Inquiry</span>
+            </button>
+            <p class="quote-guarantee-note">Compliant with FAA Part 135 and EASA luxury food safety standards. Sourced same-day from artisanal European markets.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #295 ===== -->
+
 <div
   class="concierge-overlay"
   id="conciergeModal"

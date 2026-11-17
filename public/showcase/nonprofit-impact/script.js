@@ -2675,3 +2675,195 @@ if (typeof window !== 'undefined') {
     }
   }
 })();
+
+/* ===== BEGIN Issue #297: Recurring Donation Impact Calculator ===== */
+(function () {
+  'use strict';
+
+  function initRecurringDonationCalculator() {
+    var slider = document.getElementById('recurringDonationSlider');
+    var valDisplay = document.getElementById('impactMonthlyValue');
+    var chips = document.querySelectorAll('.impact-chip');
+    var freqBtns = document.querySelectorAll('.impact-freq-btn');
+    var pledgeText = document.getElementById('impactPledgeText');
+
+    var metricTrees = document.getElementById('metricTrees');
+    var unitTrees = document.getElementById('unitTrees');
+    var metricWater = document.getElementById('metricWater');
+    var unitWater = document.getElementById('unitWater');
+    var metricReef = document.getElementById('metricReef');
+    var unitReef = document.getElementById('unitReef');
+    var metricCarbon = document.getElementById('metricCarbon');
+    var unitCarbon = document.getElementById('unitCarbon');
+
+    var desc3 = document.getElementById('milestoneDesc3');
+    var desc6 = document.getElementById('milestoneDesc6');
+    var desc12 = document.getElementById('milestoneDesc12');
+
+    var btnPledge = document.getElementById('btnInitiatePledge');
+    var btnShare = document.getElementById('btnShareImpact');
+    var toast = document.getElementById('impactCalcToast');
+
+    var modal = document.getElementById('impactPledgeModal');
+    var btnCloseModal = document.getElementById('btnCloseImpactModal');
+    var btnConfirmClose = document.getElementById('btnConfirmPledgeClose');
+    var modalPledgeAmt = document.getElementById('modalPledgeAmt');
+    var modalTrees = document.getElementById('modalTreesVal');
+    var modalWater = document.getElementById('modalWaterVal');
+    var modalReef = document.getElementById('modalReefVal');
+    var modalCarbon = document.getElementById('modalCarbonVal');
+
+    if (!slider) return;
+
+    var currentFreq = 'monthly'; // 'monthly' or 'annual'
+
+    function updateCalculations() {
+      var monthlyAmt = parseInt(slider.value, 10) || 35;
+      if (valDisplay) valDisplay.textContent = String(monthlyAmt);
+      slider.setAttribute('aria-valuenow', String(monthlyAmt));
+
+      var multiplier = currentFreq === 'annual' ? 12 : 1;
+      var periodSuffix = currentFreq === 'annual' ? ' / yr' : ' / mo';
+
+      var treesCount = Math.round((monthlyAmt * multiplier) / 1.25);
+      var waterLiters = Math.round(monthlyAmt * multiplier * 500);
+      var reefSqm = Math.round((monthlyAmt * multiplier) / 5);
+      var carbonTons = ((monthlyAmt * multiplier) / 15).toFixed(1);
+
+      if (metricTrees) metricTrees.textContent = treesCount.toLocaleString();
+      if (unitTrees) unitTrees.textContent = 'Trees Planted' + periodSuffix;
+
+      if (metricWater) metricWater.textContent = waterLiters.toLocaleString();
+      if (unitWater) unitWater.textContent = 'Liters Clean Water' + periodSuffix;
+
+      if (metricReef) metricReef.textContent = reefSqm.toLocaleString();
+      if (unitReef) unitReef.textContent = 'm² Coral Reef Restored' + periodSuffix;
+
+      if (metricCarbon) metricCarbon.textContent = carbonTons;
+      if (unitCarbon) unitCarbon.textContent = 't CO2e Offset' + periodSuffix;
+
+      // Update callout text safely
+      if (pledgeText) {
+        var annualizedTrees = Math.round((monthlyAmt * 12) / 1.25);
+        var annualizedWater = Math.round(monthlyAmt * 12 * 500);
+        pledgeText.textContent = 'At $' + monthlyAmt + '/month, your pledge restores ' +
+          annualizedTrees.toLocaleString() + ' trees and supplies ' +
+          annualizedWater.toLocaleString() + ' liters of potable water each year.';
+      }
+
+      // Update milestone descriptions
+      if (desc3) {
+        var m3Trees = Math.round((monthlyAmt * 3) / 1.25);
+        desc3.textContent = 'Funds ' + m3Trees.toLocaleString() + ' nursery saplings and equips local indigenous rangers with seedling monitoring GPS beacons.';
+      }
+      if (desc6) {
+        var m6Reef = Math.round((monthlyAmt * 6) / 5);
+        desc6.textContent = 'Restores ' + m6Reef.toLocaleString() + ' m² of coral nursery structure and builds sustainable community graywater filters.';
+      }
+      if (desc12) {
+        var m12Carbon = ((monthlyAmt * 12) / 15).toFixed(1);
+        desc12.textContent = 'Neutralizes an entire household\'s carbon footprint (' + m12Carbon + ' tCO2e) and secures lifelong forest legal protection.';
+      }
+
+      // Update chips active state
+      chips.forEach(function (chip) {
+        var amt = parseInt(chip.getAttribute('data-amt'), 10);
+        if (amt === monthlyAmt) {
+          chip.classList.add('active');
+        } else {
+          chip.classList.remove('active');
+        }
+      });
+    }
+
+    slider.addEventListener('input', updateCalculations);
+
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var amt = parseInt(chip.getAttribute('data-amt'), 10);
+        if (amt) {
+          slider.value = amt;
+          updateCalculations();
+        }
+      });
+    });
+
+    freqBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        freqBtns.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentFreq = btn.getAttribute('data-freq') || 'monthly';
+        updateCalculations();
+      });
+    });
+
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function () {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    if (btnShare) {
+      btnShare.addEventListener('click', function () {
+        var monthlyAmt = parseInt(slider.value, 10) || 35;
+        var trees = Math.round((monthlyAmt * 12) / 1.25);
+        var shareTxt = 'I just pledged $' + monthlyAmt + '/month to rewild our planet! That plants ' +
+          trees.toLocaleString() + ' trees each year. Join me at Rewilding Alliance!';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(shareTxt).then(function () {
+            showToast('Pledge impact summary copied to clipboard! 📋');
+          }).catch(function () {
+            showToast('Pledged $' + monthlyAmt + '/mo: ' + trees + ' trees/yr!');
+          });
+        } else {
+          showToast('Pledged $' + monthlyAmt + '/mo: ' + trees + ' trees/yr!');
+        }
+      });
+    }
+
+    if (btnPledge && modal) {
+      btnPledge.addEventListener('click', function () {
+        var monthlyAmt = parseInt(slider.value, 10) || 35;
+        var annualTrees = Math.round((monthlyAmt * 12) / 1.25);
+        var annualWater = Math.round(monthlyAmt * 12 * 500);
+        var annualReef = Math.round((monthlyAmt * 12) / 5);
+        var annualCarbon = ((monthlyAmt * 12) / 15).toFixed(1);
+
+        if (modalPledgeAmt) modalPledgeAmt.textContent = '$' + monthlyAmt + '/month';
+        if (modalTrees) modalTrees.textContent = annualTrees.toLocaleString() + ' Trees';
+        if (modalWater) modalWater.textContent = annualWater.toLocaleString() + ' Liters';
+        if (modalReef) modalReef.textContent = annualReef.toLocaleString() + ' m² Sanctuary';
+        if (modalCarbon) modalCarbon.textContent = annualCarbon + ' t CO2e';
+
+        modal.removeAttribute('hidden');
+      });
+    }
+
+    function closeModal() {
+      if (modal) modal.setAttribute('hidden', '');
+    }
+
+    if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+    if (btnConfirmClose) btnConfirmClose.addEventListener('click', closeModal);
+    if (modal) {
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+    }
+
+    // Run initial calculation
+    updateCalculations();
+  }
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initRecurringDonationCalculator);
+    } else {
+      initRecurringDonationCalculator();
+    }
+  }
+})();
+/* ===== END Issue #297 ===== */
