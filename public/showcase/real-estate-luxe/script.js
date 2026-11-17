@@ -2316,3 +2316,188 @@ function initInvestmentCalculator() {
   }
 })();
 /* ===== END Issue #301 ===== */
+
+/* ===== BEGIN Issue #300: Private Viewing Scheduling Modal ===== */
+(function () {
+  'use strict';
+
+  function initPrivateViewingModal() {
+    const backdrop = document.getElementById('privateViewingBackdrop');
+    const modal = document.getElementById('privateViewingModal');
+    const propNameEl = document.getElementById('viewingPropertyName');
+    const closeBtn = document.getElementById('btnCloseViewingModal');
+    const heroBtn = document.getElementById('btnHeroScheduleTour');
+    const form = document.getElementById('viewingBookingForm');
+    const datePicker = document.getElementById('viewingDatePicker');
+    const errorEl = document.getElementById('viewingFormError');
+    const confirmView = document.getElementById('viewingConfirmationView');
+    const btnDone = document.getElementById('btnCloseConfirmation');
+    const btnCopy = document.getElementById('btnCopyTourDetails');
+
+    const slotBtns = document.querySelectorAll('.time-slot-btn');
+    const agentCards = document.querySelectorAll('.agent-card');
+
+    let selectedSlot = 'Morning Sunlight (10:00 AM - 12:00 PM)';
+    let selectedAgent = 'Elena Rostova';
+
+    // Set minimum date to tomorrow
+    if (datePicker) {
+      const tomorrow = new Date(Date.now() + 86400000);
+      const minDateStr = tomorrow.toISOString().split('T')[0];
+      datePicker.min = minDateStr;
+      datePicker.value = minDateStr;
+    }
+
+    function openModal(estateName) {
+      if (!modal || !backdrop) return;
+      if (propNameEl) propNameEl.textContent = estateName || 'Premier Luxury Estate';
+      if (form) form.removeAttribute('hidden');
+      if (confirmView) confirmView.setAttribute('hidden', '');
+      if (errorEl) errorEl.setAttribute('hidden', '');
+
+      backdrop.removeAttribute('hidden');
+      modal.removeAttribute('hidden');
+    }
+
+    function closeModal() {
+      if (modal) modal.setAttribute('hidden', '');
+      if (backdrop) backdrop.setAttribute('hidden', '');
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (btnDone) btnDone.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    if (heroBtn) {
+      heroBtn.addEventListener('click', () => {
+        openModal('Malibu Oceanfront Contemporary Estate');
+      });
+    }
+
+    // Slot selection
+    slotBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        slotBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedSlot = btn.getAttribute('data-slot') || 'Morning Sunlight';
+      });
+    });
+
+    // Agent selection
+    agentCards.forEach(card => {
+      card.addEventListener('click', () => {
+        agentCards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        selectedAgent = card.getAttribute('data-agent') || 'Elena Rostova';
+      });
+    });
+
+    // Form submission
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dateVal = datePicker ? datePicker.value : '';
+        const nameVal = (document.getElementById('buyerFullName') || {}).value || '';
+        const contactVal = (document.getElementById('buyerContact') || {}).value || '';
+
+        if (!dateVal) {
+          showError('Please choose a viewing date.');
+          return;
+        }
+
+        const picked = new Date(dateVal);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (picked < today) {
+          showError('Please select a current or upcoming date.');
+          return;
+        }
+
+        if (!nameVal.trim() || !contactVal.trim()) {
+          showError('Please provide your name and confidential contact information.');
+          return;
+        }
+
+        // Generate reservation code
+        const ticketCode = 'LUXE-' + Math.floor(1000 + Math.random() * 9000) + '-SHOW';
+        const codeEl = document.getElementById('confirmTicketCode');
+        const estEl = document.getElementById('confirmEstateName');
+        const dtEl = document.getElementById('confirmDate');
+        const slEl = document.getElementById('confirmSlot');
+        const agEl = document.getElementById('confirmAgent');
+
+        if (codeEl) codeEl.textContent = ticketCode;
+        if (estEl) estEl.textContent = propNameEl ? propNameEl.textContent : 'Luxury Estate';
+        if (dtEl) dtEl.textContent = dateVal;
+        if (slEl) slEl.textContent = selectedSlot;
+        if (agEl) agEl.textContent = selectedAgent;
+
+        form.setAttribute('hidden', '');
+        if (confirmView) confirmView.removeAttribute('hidden');
+      });
+    }
+
+    function showError(msg) {
+      if (!errorEl) return;
+      errorEl.textContent = msg;
+      errorEl.removeAttribute('hidden');
+    }
+
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => {
+        const code = document.getElementById('confirmTicketCode')?.textContent || '';
+        const estate = document.getElementById('confirmEstateName')?.textContent || '';
+        const date = document.getElementById('confirmDate')?.textContent || '';
+        const slot = document.getElementById('confirmSlot')?.textContent || '';
+        const agent = document.getElementById('confirmAgent')?.textContent || '';
+
+        const summary = 'Private Showing Pass [' + code + ']\n' +
+          'Estate: ' + estate + '\n' +
+          'Date: ' + date + '\n' +
+          'Window: ' + slot + '\n' +
+          'Advisory Host: ' + agent + '\n' +
+          'Vanguard Private Office';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(summary).then(() => {
+            btnCopy.textContent = 'Showing Pass Copied! ✓';
+            setTimeout(() => { btnCopy.textContent = 'Copy Showing Pass 📋'; }, 3000);
+          });
+        }
+      });
+    }
+
+    // Decorate cards in #estate-grid
+    const grid = document.getElementById('estate-grid');
+    function decorateEstateCards() {
+      if (!grid) return;
+      const cards = grid.querySelectorAll('.card');
+      cards.forEach(card => {
+        if (!card.querySelector('.btn-private-viewing')) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-private-viewing';
+          btn.textContent = 'Schedule Private Viewing 🏛️';
+          btn.addEventListener('click', () => {
+            const heading = card.querySelector('h3');
+            const estateName = heading ? heading.textContent.trim() : 'Bespoke Estate';
+            openModal(estateName);
+          });
+          card.appendChild(btn);
+        }
+      });
+    }
+
+    if (grid) {
+      decorateEstateCards();
+      const observer = new MutationObserver(decorateEstateCards);
+      observer.observe(grid, { childList: true });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPrivateViewingModal);
+  } else {
+    initPrivateViewingModal();
+  }
+})();
+/* ===== END Issue #300 ===== */
