@@ -1,0 +1,208 @@
+/* Weather Radar Atlas - Snippet Vault Styles */
+:root {
+  --bg-radar-dark: #070d18;
+  --bg-radar-card: #0f192b;
+  --bg-radar-panel: #16243d;
+  --border-color: #233554;
+  --accent-cyan: #38bdf8;
+  --accent-emerald: #10b981;
+  --text-main: #f0f6fc;
+  --text-muted: #8ca0ba;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.weather-vault-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-radar-dark);
+  color: var(--text-main);
+  padding: 1.5rem;
+  min-height: 100vh;
+}
+
+.vault-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand h1 {
+  font-size: 1.35rem;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.search-box {
+  flex: 1;
+  max-width: 480px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border-radius: 9999px;
+  background-color: var(--bg-radar-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-box input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-chip {
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  background-color: var(--bg-radar-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+  background-color: var(--bg-radar-panel);
+  color: var(--text-main);
+}
+
+.filter-chip.active {
+  background-color: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.snippets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.25rem;
+}
+
+.snippet-card {
+  background-color: var(--bg-radar-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.snippet-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-cyan);
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.snippet-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.35;
+}
+
+.btn-copy {
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  background-color: var(--bg-radar-panel);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.btn-copy:hover {
+  background-color: rgba(56, 189, 248, 0.2);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+.code-container {
+  background-color: var(--bg-radar-dark);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 0.75rem;
+  max-height: 180px;
+  overflow: auto;
+}
+
+.code-container pre {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #bae6fd;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto;
+}
+
+.card-tag {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background-color: var(--bg-radar-panel);
+  color: var(--text-muted);
+}
+
+.toast-popup {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: var(--accent-emerald);
+  color: #070d18;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast-popup.show {
+  opacity: 1;
+  transform: translateY(0);
+}
