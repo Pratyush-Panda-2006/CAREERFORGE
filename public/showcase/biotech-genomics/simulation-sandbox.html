@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biotech Genomics - Monte Carlo Multi-Scenario Simulator</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+</head>
+<body>
+  <div class="sim-container">
+    <header class="sim-header">
+      <h1>🧬 Genomic Efficacy Monte Carlo Simulator</h1>
+      <p>Stochastic risk variance forecaster for therapeutic response, off-target editing rates, and mutation shifts.</p>
+    </header>
+
+    <div class="sim-grid">
+      <div class="sim-controls">
+        <div class="form-group">
+          <label for="sim-trials">Clinical Trials / Iterations</label>
+          <input type="number" id="sim-trials" value="1000" min="100" max="50000" step="100">
+        </div>
+        <div class="form-group">
+          <label for="sim-volatility">Biological Variance (Volatility)</label>
+          <input type="number" id="sim-volatility" value="0.05" min="0.001" max="0.5" step="0.005">
+        </div>
+        <div class="form-group">
+          <label for="sim-efficacy">Baseline Cleavage Efficacy (%)</label>
+          <input type="number" id="sim-efficacy" value="78.5" min="1" max="100" step="0.5">
+        </div>
+        <div class="form-group">
+          <label for="sim-mutation">Background Mutation Rate</label>
+          <input type="number" id="sim-mutation" value="0.02" min="0" max="0.5" step="0.005">
+        </div>
+        <button id="run-sim-btn" class="btn-primary">Run Stochastic Simulation</button>
+      </div>
+
+      <div class="sim-results">
+        <div class="sim-stats-grid">
+          <div class="stat-card highlight">
+            <div class="label">Mean Efficacy</div>
+            <div id="stat-mean" class="value">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Std Deviation</div>
+            <div id="stat-stddev" class="value">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">P50 (Median)</div>
+            <div id="stat-p50" class="value">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">P95 (Worst 5%)</div>
+            <div id="stat-p95" class="value">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Min Outcome</div>
+            <div id="stat-min" class="value">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Max Outcome</div>
+            <div id="stat-max" class="value">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="simulation-sandbox.js"></script>
+</body>
+</html>
