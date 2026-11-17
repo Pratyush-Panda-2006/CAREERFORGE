@@ -433,8 +433,10 @@ function initMarket() {
       const pct = ((e.price - e.ref) / e.ref) * 100;
       if (priceEl) priceEl.textContent = '$' + formatPrice(e.price, p.decimals);
       if (changeEl) {
-        changeEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
-        changeEl.setAttribute('data-dir', pct >= 0 ? 'up' : 'down');
+        const isUp = pct >= 0;
+        changeEl.textContent = `${isUp ? '▲ +' : '▼ '}${pct.toFixed(2)}%`;
+        changeEl.setAttribute('data-dir', isUp ? 'up' : 'down');
+        changeEl.setAttribute('aria-label', `${isUp ? 'Up' : 'Down'} ${Math.abs(pct).toFixed(2)} percent`);
       }
     });
   }
