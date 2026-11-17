@@ -3449,3 +3449,544 @@ if (document.readyState === 'loading') {
   evaluateCelestialConditions();
 })();
 /* ===== END Issue #424 ===== */
+
+/* ===== Issue #423: Travel Immunization & Health Advisory Risk Matrix ===== */
+(function initTravelImmunizationMatrix() {
+  'use strict';
+
+  const HEALTH_DATA = {
+    'sub-saharan-africa': {
+      id: 'sub-saharan-africa',
+      name: 'Sub-Saharan Africa (Kenya, Tanzania, DR Congo, Ghana)',
+      riskBadge: 'HIGH RISK • TROPICAL & VECTOR ENDEMIC',
+      minLeadTimeWeeks: 6,
+      idealLeadTimeWeeks: 8,
+      mandatoryVaccines: [
+        {
+          name: 'Yellow Fever',
+          requirement: 'Mandatory International Certificate of Vaccination (ICVP)',
+          details: 'Single dose provides lifetime immunity. Must be administered at least 10 days before border arrival.'
+        }
+      ],
+      recommendedVaccines: [
+        { name: 'Typhoid', type: 'Injectable or Oral', protection: 'Enteric fever transmitted through contaminated water/food' },
+        { name: 'Hepatitis A', type: '2-dose series', protection: 'Viral liver infection from food and beverage sources' },
+        { name: 'Rabies (Pre-exposure)', type: '3-dose series', protection: 'Safaris and rural areas with bats, stray canines, and primates' },
+        { name: 'Meningococcal (ACWY)', type: 'Single dose', protection: 'Essential when traveling through the African Meningitis Belt' },
+        { name: 'Cholera', type: 'Oral vaccine (Dukoral)', protection: 'For humanitarian or backcountry expeditions with compromised sanitation' }
+      ],
+      routineBoosters: [
+        { name: 'Tdap (Tetanus, Diphtheria, Pertussis)', note: 'Booster within past 10 years (past 5 years if deep puncture wound)' },
+        { name: 'Polio (IPV)', note: 'One-time adult booster recommended for high-risk transmission zones' },
+        { name: 'MMR (Measles, Mumps, Rubella)', note: 'Ensure 2 documented lifetime doses' }
+      ],
+      malariaGuidance: {
+        risk: 'High Year-Round Risk',
+        prophylaxis: 'Atovaquone-proguanil (Malarone) or Doxycycline daily',
+        timing: 'Start 1-2 days before arrival; continue daily and for 7-28 days post-departure',
+        precautions: 'Permethrin-treated bed nets, 30-50% DEET insect repellent, long sleeves after sunset.'
+      },
+      emergencyClinics: [
+        {
+          facility: 'The Nairobi Hospital Travel & Emergency Center',
+          location: 'Argwings Kodhek Rd, Nairobi, Kenya',
+          phone: '+254 20 2845000',
+          capabilities: 'ICU, Anti-venom bank, Level 1 Trauma, Medevac Helipad'
+        },
+        {
+          facility: 'AMREF Flying Doctors 24/7 Control Center',
+          location: 'Wilson Airport, Nairobi, Kenya',
+          phone: '+254 20 6992000',
+          capabilities: 'Air Ambulance evacuation across East & Central Africa'
+        }
+      ]
+    },
+    'amazon-basin': {
+      id: 'amazon-basin',
+      name: 'Amazon Rainforest Basin (Brazil, Peru, Colombia, Ecuador)',
+      riskBadge: 'HIGH RISK • VECTOR & ZOONOTIC',
+      minLeadTimeWeeks: 4,
+      idealLeadTimeWeeks: 6,
+      mandatoryVaccines: [
+        {
+          name: 'Yellow Fever',
+          requirement: 'Mandatory / Strongly Required for Jungle Regions',
+          details: 'Endemic sylvatic yellow fever transmission in canopy jungle basins. Administer 10+ days before arrival.'
+        }
+      ],
+      recommendedVaccines: [
+        { name: 'Hepatitis A & B', type: 'Twinrix combination', protection: 'Food and blood/fluid pathogen protection' },
+        { name: 'Typhoid', type: 'Polysaccharide vaccine', protection: 'Protects against Salmonella enterica serotype typhi' },
+        { name: 'Rabies (Pre-exposure)', type: '3-dose schedule', protection: 'Crucial due to vampire bat bites and wild jungle mammals' }
+      ],
+      routineBoosters: [
+        { name: 'Tdap', note: 'Vital due to high risk of soil contamination and puncture thorns' },
+        { name: 'Influenza', note: 'Year-round tropical transmission cycle' }
+      ],
+      malariaGuidance: {
+        risk: 'High in Loreto, Acre, Amazonas, & Madre de Dios',
+        prophylaxis: 'Atovaquone-proguanil or Artemisinin-combination standby',
+        timing: 'Start prior to entering jungle; complete entire course',
+        precautions: 'Picaridin or DEET repellent, permethrin clothing, head net in dense brush.'
+      },
+      emergencyClinics: [
+        {
+          facility: 'Hospital Regional de Loreto',
+          location: 'Av. 28 de Julio, Iquitos, Peru',
+          phone: '+51 65 264000',
+          capabilities: 'Tropical medicine infectious diseases ward, Snakebite anti-venom'
+        },
+        {
+          facility: 'Hospital Adventista de Manaus',
+          location: 'Distrito Industrial, Manaus, Brazil',
+          phone: '+55 92 2123 1313',
+          capabilities: 'Trauma ICU, Riverboat medevac coordination'
+        }
+      ]
+    },
+    'himalayas': {
+      id: 'himalayas',
+      name: 'Himalayan High Altitude (Nepal, Bhutan, Tibet, Ladakh)',
+      riskBadge: 'MODERATE RISK • ALTITUDE & WATER-BORNE',
+      minLeadTimeWeeks: 4,
+      idealLeadTimeWeeks: 6,
+      mandatoryVaccines: [],
+      recommendedVaccines: [
+        { name: 'Typhoid', type: 'Injectable Vi vaccine', protection: 'Very high incidence in teahouse and tap water systems' },
+        { name: 'Hepatitis A', type: 'Inactivated vaccine', protection: 'Essential for all Himalayan trekking routes' },
+        { name: 'Japanese Encephalitis', type: '2-dose series (Ixiaro)', protection: 'Recommended if transiting Terai lowlands or rural valleys' },
+        { name: 'Rabies', type: 'Pre-exposure prophylaxis', protection: 'Stray temple dogs and macaque monkey encounters along trails' }
+      ],
+      routineBoosters: [
+        { name: 'Tdap (Tetanus)', note: 'Critical for trail scrapes, crampon cuts, and yak-track terrain' },
+        { name: 'Polio Booster', note: 'Recommended for prolonged rural Nepal/India trekking' }
+      ],
+      malariaGuidance: {
+        risk: 'Low to Zero at high altitude (>2,000m / 6,560ft)',
+        prophylaxis: 'Only needed if spending overnight stays in southern Terai or Pokhara foothills',
+        timing: 'Focus primary medical preparation on AMS (Acetazolamide / Diamox)',
+        precautions: 'Water purification tablets, SteriPEN UV, 0.2 micron microfilter bottle.'
+      },
+      emergencyClinics: [
+        {
+          facility: 'CIWEC Hospital and Travel Medicine Center',
+          location: 'British Embassy Road, Kathmandu, Nepal',
+          phone: '+977 1 4424111',
+          capabilities: 'Gold standard international altitude and tropical medicine clinic'
+        },
+        {
+          facility: 'Himalayan Rescue Association (HRA) Pheriche Clinic',
+          location: 'Pheriche (4,240m), Everest Trekking Route',
+          phone: '+977 1 4440292',
+          capabilities: 'Hyperbaric Gamow bags, Emergency O2, High-altitude pulmonary edema treatment'
+        }
+      ]
+    },
+    'southeast-asia': {
+      id: 'southeast-asia',
+      name: 'Southeast Asia Valleys (Thailand, Vietnam, Cambodia, Indonesia)',
+      riskBadge: 'MODERATE RISK • DENGUE & FOOD-BORNE',
+      minLeadTimeWeeks: 4,
+      idealLeadTimeWeeks: 6,
+      mandatoryVaccines: [
+        {
+          name: 'Yellow Fever (Conditional)',
+          requirement: 'Proof required ONLY if arriving from yellow fever endemic nations',
+          details: 'Standard WHO entry inspection.'
+        }
+      ],
+      recommendedVaccines: [
+        { name: 'Hepatitis A', type: 'Inactivated', protection: 'Street food and remote island culinary safety' },
+        { name: 'Typhoid', type: 'Injectable', protection: 'Protection against enteric fever' },
+        { name: 'Japanese Encephalitis', type: 'Ixiaro vaccine', protection: 'Agricultural zones and flooded rice paddy trekking' },
+        { name: 'Rabies', type: '3-dose', protection: 'High volume of street dogs and wildlife interactions' }
+      ],
+      routineBoosters: [
+        { name: 'MMR & Varicella', note: 'Ensure full immunity in high population density transit hubs' },
+        { name: 'Tdap', note: 'Standard booster' }
+      ],
+      malariaGuidance: {
+        risk: 'Low in major urban centers; Moderate in deep forested border regions',
+        prophylaxis: 'Doxycycline or Atovaquone/Proguanil for border rainforests',
+        timing: 'Dengue is the primary vector risk (transmitted by daytime Aedes mosquitoes)',
+        precautions: 'Rigorous daytime mosquito repellent, air-conditioned lodging.'
+      },
+      emergencyClinics: [
+        {
+          facility: 'Bangkok Hospital International Medical Center',
+          location: '2 Soi Soonvijai 7, Bangkok, Thailand',
+          phone: '+66 2 310 3000',
+          capabilities: 'JCI-accredited tertiary medical hospital, Multi-language emergency hotline'
+        },
+        {
+          facility: 'SOS Medika Clinic Bali',
+          location: 'Jl. Bypass Ngurah Rai, Kuta, Bali',
+          phone: '+62 361 720100',
+          capabilities: '24/7 International medevac dispatch and emergency clinic'
+        }
+      ]
+    },
+    'arctic-polar': {
+      id: 'arctic-polar',
+      name: 'Arctic & Polar Wilderness (Svalbard, Greenland, Antarctica)',
+      riskBadge: 'EXTREME ENVIRONMENT • REMOTE MEDEVAC RESTRICTIONS',
+      minLeadTimeWeeks: 8,
+      idealLeadTimeWeeks: 12,
+      mandatoryVaccines: [
+        {
+          name: 'Expedition Medical & Dental Clearance',
+          requirement: 'Mandatory Physician & Dental Certification Form',
+          details: 'Emergency dental surgery is impossible in pack ice; all crowns and fillings must be certified.'
+        }
+      ],
+      recommendedVaccines: [
+        { name: 'Influenza (Quadrivalent)', type: 'Annual formulation', protection: 'Crucial in enclosed ship cabins and polar research bases' },
+        { name: 'COVID-19 Bivalent Booster', type: 'mRNA formulation', protection: 'Prevent respiratory illness in extreme isolated cold' },
+        { name: 'Pneumococcal', type: 'Prevnar-20', protection: 'Lung protection in sub-zero breathing environments' }
+      ],
+      routineBoosters: [
+        { name: 'Tdap', note: 'Mandatory current tetanus coverage for cold metallic rigging and skidoo operations' }
+      ],
+      malariaGuidance: {
+        risk: 'Zero Risk (Sub-zero climate supports no insect vectors)',
+        prophylaxis: 'Not required',
+        timing: 'Focus medical kit on frostbite, hypothermia, trauma dressings, and seabag seasickness (Scopolamine)',
+        precautions: 'Polar survival suit, windproof goggles with UV400 protection (snow blindness prevention).'
+      },
+      emergencyClinics: [
+        {
+          facility: 'Longyearbyen Hospital (Universitetssykehuset Nord-Norge)',
+          location: 'Vei 201, Longyearbyen, Svalbard (Norway)',
+          phone: '+47 79 02 42 00',
+          capabilities: 'Worlds northernmost hospital; surgical stabilization and air ambulance to Tromso'
+        },
+        {
+          facility: 'Antarctic Logistics & Medical Control (ALCI / IAATO Dispatch)',
+          location: 'Punta Arenas, Chile & Cape Town, South Africa',
+          phone: '+56 61 224 8150',
+          capabilities: 'Ski-equipped Twin Otter medevac dispatch weather permitting'
+        }
+      ]
+    }
+  };
+
+  const countrySelect = document.getElementById('health-country-select');
+  if (!countrySelect) return;
+
+  const dateInput = document.getElementById('health-departure-date');
+  const banner = document.getElementById('lead-time-banner');
+  const statusIcon = document.getElementById('lead-status-icon');
+  const statusText = document.getElementById('lead-status-text');
+  const detailText = document.getElementById('lead-detail-text');
+
+  const mandatoryBadge = document.getElementById('mandatory-count-badge');
+  const mandatoryList = document.getElementById('mandatory-items-list');
+
+  const progressText = document.getElementById('checklist-progress-text');
+  const progressFill = document.getElementById('vaccine-progress-fill');
+  const recommendedList = document.getElementById('recommended-items-list');
+
+  const routineList = document.getElementById('routine-items-list');
+  const malariaBox = document.getElementById('malaria-details-box');
+  const clinicsList = document.getElementById('emergency-clinics-list');
+
+  const exportBtn = document.getElementById('btn-export-health-brief');
+  const copyToast = document.getElementById('health-copy-toast');
+
+  let checkedVaccines = new Set();
+
+  function updateLeadTimeBanner(dest) {
+    if (!banner || !statusText || !detailText) return;
+
+    banner.classList.remove('status-danger', 'status-warning', 'status-success');
+
+    if (!dateInput || !dateInput.value) {
+      if (statusIcon) statusIcon.textContent = '⏱️';
+      statusText.textContent = 'Select departure date to calculate preparation schedule';
+      detailText.textContent = `Recommended preparation lead time for ${dest.name} is ${dest.minLeadTimeWeeks}-${dest.idealLeadTimeWeeks} weeks.`;
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const departure = new Date(dateInput.value);
+    departure.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.ceil((departure.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const weeksRemaining = Number((diffDays / 7).toFixed(1));
+
+    if (diffDays < 0) {
+      banner.classList.add('status-danger');
+      if (statusIcon) statusIcon.textContent = '⚠️';
+      statusText.textContent = 'Departure date is in the past';
+      detailText.textContent = 'Please choose an upcoming expedition date to evaluate clinical scheduling.';
+    } else if (weeksRemaining < dest.minLeadTimeWeeks) {
+      banner.classList.add('status-danger');
+      if (statusIcon) statusIcon.textContent = '🚨';
+      statusText.textContent = `CRITICAL LEAD SHORTAGE: ${weeksRemaining} weeks remaining`;
+      detailText.textContent = `Minimum required lead time is ${dest.minLeadTimeWeeks} weeks. Multi-dose immunization series (Yellow Fever 10-day border rule, Rabies) require immediate clinical scheduling!`;
+    } else if (weeksRemaining < dest.idealLeadTimeWeeks) {
+      banner.classList.add('status-warning');
+      if (statusIcon) statusIcon.textContent = '⚡';
+      statusText.textContent = `ACTIVE PREP WINDOW: ${weeksRemaining} weeks remaining`;
+      detailText.textContent = `You are inside the recommended clinical window (${dest.idealLeadTimeWeeks} weeks ideal). Schedule your travel medicine consult this week.`;
+    } else {
+      banner.classList.add('status-success');
+      if (statusIcon) statusIcon.textContent = '✅';
+      statusText.textContent = `AMPLE LEAD TIME: ${weeksRemaining} weeks remaining`;
+      detailText.textContent = `Sufficient buffer to complete full multi-dose inoculation protocols comfortably.`;
+    }
+  }
+
+  function renderHealthAdvisories() {
+    const selectedKey = countrySelect.value;
+    const dest = HEALTH_DATA[selectedKey] || HEALTH_DATA['sub-saharan-africa'];
+
+    updateLeadTimeBanner(dest);
+
+    // 1. Mandatory Vaccines
+    if (mandatoryList && mandatoryBadge) {
+      mandatoryList.replaceChildren();
+      const count = dest.mandatoryVaccines.length;
+      mandatoryBadge.textContent = count > 0 ? `${count} Required` : 'None Required';
+      mandatoryBadge.style.background = count > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)';
+      mandatoryBadge.style.color = count > 0 ? '#f87171' : '#34d399';
+      mandatoryBadge.style.borderColor = count > 0 ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.4)';
+
+      if (count === 0) {
+        const item = document.createElement('div');
+        item.className = 'advisory-item';
+        const p = document.createElement('p');
+        p.className = 'advisory-item-detail';
+        p.textContent = 'No mandatory international entry vaccination certificates are legally required for standard entry. Continue to recommended travel vaccines.';
+        item.appendChild(p);
+        mandatoryList.appendChild(item);
+      } else {
+        for (const v of dest.mandatoryVaccines) {
+          const item = document.createElement('div');
+          item.className = 'advisory-item';
+
+          const header = document.createElement('div');
+          header.className = 'advisory-item-header';
+
+          const title = document.createElement('strong');
+          title.textContent = v.name;
+
+          const req = document.createElement('span');
+          req.textContent = v.requirement;
+
+          header.append(title, req);
+
+          const desc = document.createElement('p');
+          desc.className = 'advisory-item-detail';
+          desc.textContent = v.details;
+
+          item.append(header, desc);
+          mandatoryList.appendChild(item);
+        }
+      }
+    }
+
+    // 2. Recommended Vaccines Checklist
+    if (recommendedList) {
+      recommendedList.replaceChildren();
+      const total = dest.recommendedVaccines.length;
+
+      const updateProgress = () => {
+        let completed = 0;
+        dest.recommendedVaccines.forEach(v => {
+          if (checkedVaccines.has(`${selectedKey}-${v.name}`)) completed++;
+        });
+        if (progressText) progressText.textContent = `${completed} / ${total} Completed`;
+        if (progressFill) {
+          const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+          progressFill.style.width = `${pct}%`;
+        }
+      };
+
+      for (const v of dest.recommendedVaccines) {
+        const itemKey = `${selectedKey}-${v.name}`;
+        const item = document.createElement('div');
+        item.className = `vaccine-item ${checkedVaccines.has(itemKey) ? 'checked' : ''}`;
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'vaccine-checkbox';
+        checkbox.checked = checkedVaccines.has(itemKey);
+        checkbox.setAttribute('aria-label', `Mark ${v.name} as completed`);
+
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            checkedVaccines.add(itemKey);
+            item.classList.add('checked');
+          } else {
+            checkedVaccines.delete(itemKey);
+            item.classList.remove('checked');
+          }
+          updateProgress();
+        });
+
+        const info = document.createElement('div');
+        info.className = 'vaccine-info';
+
+        const top = document.createElement('div');
+        top.className = 'vaccine-top';
+
+        const name = document.createElement('span');
+        name.className = 'vaccine-name';
+        name.textContent = v.name;
+
+        const type = document.createElement('span');
+        type.className = 'vaccine-type';
+        type.textContent = v.type;
+
+        top.append(name, type);
+
+        const desc = document.createElement('p');
+        desc.className = 'vaccine-desc';
+        desc.textContent = v.protection;
+
+        info.append(top, desc);
+        item.append(checkbox, info);
+        recommendedList.appendChild(item);
+      }
+      updateProgress();
+    }
+
+    // 3. Routine Boosters
+    if (routineList) {
+      routineList.replaceChildren();
+      for (const b of dest.routineBoosters) {
+        const item = document.createElement('div');
+        item.className = 'routine-item';
+
+        const title = document.createElement('strong');
+        title.textContent = b.name;
+        title.style.color = '#fff';
+        title.style.display = 'block';
+        title.style.fontSize = '0.88rem';
+        title.style.marginBottom = '0.2rem';
+
+        const note = document.createElement('p');
+        note.className = 'advisory-item-detail';
+        note.textContent = b.note;
+
+        item.append(title, note);
+        routineList.appendChild(item);
+      }
+    }
+
+    // 4. Malaria Guidance
+    if (malariaBox) {
+      malariaBox.replaceChildren();
+      const mg = dest.malariaGuidance;
+
+      const createRow = (label, val) => {
+        const row = document.createElement('div');
+        row.className = 'malaria-row';
+        const lbl = document.createElement('span');
+        lbl.className = 'malaria-label';
+        lbl.textContent = label;
+        const v = document.createElement('span');
+        v.className = 'malaria-val';
+        v.textContent = val;
+        row.append(lbl, v);
+        return row;
+      };
+
+      malariaBox.append(
+        createRow('Risk Level', mg.risk),
+        createRow('Prophylaxis Medication', mg.prophylaxis),
+        createRow('Regimen Schedule', mg.timing),
+        createRow('Barrier Precautions', mg.precautions)
+      );
+    }
+
+    // 5. Emergency Clinics
+    if (clinicsList) {
+      clinicsList.replaceChildren();
+      for (const c of dest.emergencyClinics) {
+        const item = document.createElement('div');
+        item.className = 'clinic-item';
+
+        const name = document.createElement('span');
+        name.className = 'clinic-name';
+        name.textContent = c.facility;
+
+        const loc = document.createElement('span');
+        loc.className = 'clinic-loc';
+        loc.textContent = c.location;
+
+        const phone = document.createElement('a');
+        phone.className = 'clinic-phone';
+        phone.href = `tel:${c.phone.replace(/\s+/g, '')}`;
+        phone.textContent = `📞 ${c.phone}`;
+
+        const caps = document.createElement('span');
+        caps.className = 'clinic-caps';
+        caps.textContent = c.capabilities;
+
+        item.append(name, loc, phone, caps);
+        clinicsList.appendChild(item);
+      }
+    }
+  }
+
+  countrySelect.addEventListener('change', renderHealthAdvisories);
+  if (dateInput) {
+    dateInput.addEventListener('change', () => {
+      const selectedKey = countrySelect.value;
+      const dest = HEALTH_DATA[selectedKey] || HEALTH_DATA['sub-saharan-africa'];
+      updateLeadTimeBanner(dest);
+    });
+  }
+
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const selectedKey = countrySelect.value;
+      const dest = HEALTH_DATA[selectedKey] || HEALTH_DATA['sub-saharan-africa'];
+      const dateVal = dateInput ? dateInput.value : '';
+
+      const lines = [
+        `=== EXPEDITION MEDICAL & IMMUNIZATION ADVISORY BRIEF ===`,
+        `Destination: ${dest.name}`,
+        `Risk Tier: ${dest.riskBadge}`,
+        `Planned Departure: ${dateVal || 'Not specified'}`,
+        `Minimum Lead Time: ${dest.minLeadTimeWeeks} weeks (Ideal: ${dest.idealLeadTimeWeeks} weeks)`,
+        ``,
+        `[MANDATORY ENTRY VACCINES]`,
+        dest.mandatoryVaccines.length > 0
+          ? dest.mandatoryVaccines.map(v => `- ${v.name}: ${v.requirement} (${v.details})`).join('\n')
+          : `- No mandatory border vaccines required.`,
+        ``,
+        `[RECOMMENDED VACCINES]`,
+        dest.recommendedVaccines.map(v => `- ${v.name} (${v.type}): ${v.protection}`).join('\n'),
+        ``,
+        `[ROUTINE BOOSTERS]`,
+        dest.routineBoosters.map(b => `- ${b.name}: ${b.note}`).join('\n'),
+        ``,
+        `[MALARIA & VECTOR PROPHYLAXIS]`,
+        `- Risk: ${dest.malariaGuidance.risk}`,
+        `- Drug: ${dest.malariaGuidance.prophylaxis}`,
+        `- Timing: ${dest.malariaGuidance.timing}`,
+        `- Precautions: ${dest.malariaGuidance.precautions}`,
+        ``,
+        `[24/7 EMERGENCY MEDEVAC CLINICS]`,
+        dest.emergencyClinics.map(c => `- ${c.facility} | Tel: ${c.phone} | ${c.capabilities}`).join('\n')
+      ];
+
+      const fullText = lines.join('\n');
+      navigator.clipboard?.writeText(fullText).then(() => {
+        if (copyToast) {
+          copyToast.hidden = false;
+          setTimeout(() => { copyToast.hidden = true; }, 2500);
+        }
+      }).catch(() => {
+        alert('Advisory copied to clipboard!');
+      });
+    });
+  }
+
+  renderHealthAdvisories();
+})();
+/* ===== END Issue #423 ===== */
