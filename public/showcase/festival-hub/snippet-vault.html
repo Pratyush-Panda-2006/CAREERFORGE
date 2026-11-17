@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Preset Snippet Library & Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+</head>
+<body class="vault-body">
+  <div class="vault-container">
+    <header class="vault-header">
+      <div class="header-info">
+        <h1 class="vault-title">⚡ Festival Presets & Snippet Vault</h1>
+        <p class="vault-subtitle">Modular configuration presets, DMX lighting profiles & production templates</p>
+      </div>
+      <div class="header-action">
+        <button id="add-snip-btn" class="btn btn-primary">+ Add New Snippet</button>
+      </div>
+    </header>
+
+    <section class="search-filter-section">
+      <div class="search-bar-wrap">
+        <input type="text" id="search-input" placeholder="🔍 Search presets by title, syntax, or keyword...">
+      </div>
+      <div class="tag-chips-container" id="tag-chips">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <main class="snippets-grid" id="snippets-grid">
+      <!-- Snippet cards rendered here -->
+    </main>
+
+    <!-- Modal for new snippet -->
+    <div id="snippet-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h3 class="modal-title">New Production Snippet</h3>
+        <form id="snippet-form">
+          <div class="form-group">
+            <label for="snip-title">Title</label>
+            <input type="text" id="snip-title" required placeholder="e.g. Main Stage Laser Sequence">
+          </div>
+          <div class="form-group">
+            <label for="snip-tags">Tags (comma-separated)</label>
+            <input type="text" id="snip-tags" placeholder="e.g. lighting, lasers, show">
+          </div>
+          <div class="form-group">
+            <label for="snip-code">Preset Script / Code</label>
+            <textarea id="snip-code" rows="5" required placeholder="Paste preset syntax or code here..."></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="cancel-snip-modal" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Preset</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="copy-toast" class="toast-popup hidden">Copied snippet to clipboard!</div>
+  </div>
+
+  <script type="module">
+    import { FestivalHubSnippetVault } from './snippet-vault.js';
+
+    const defaultSnippets = [
+      {
+        id: 'snip-1',
+        title: 'Stage Wash RGB Strobe Cue',
+        tags: ['lighting', 'dmx', 'stage'],
+        code: 'CH_01: 255 (Dimmer)\nCH_02: 180 (Red)\nCH_03: 40 (Green)\nCH_04: 255 (Blue)\nSTROBE_RATE: 16Hz'
+      },
+      {
+        id: 'snip-2',
+        title: 'FOH Line Array EQ Curve',
+        tags: ['audio', 'sound', 'foh'],
+        code: 'HPF: 32Hz 24dB/oct\nBELL_1: 160Hz -2.5dB Q=1.8\nBELL_2: 2.4kHz -1.2dB Q=2.4\nSHELF: 10kHz +1.5dB'
+      },
+      {
+        id: 'snip-3',
+        title: 'VIP Gate RFID Access Webhook',
+        tags: ['rfid', 'api', 'security'],
+        code: 'POST /v1/access/rfid-scan\nHeaders: Authorization: Bearer {FEST_TOKEN}\nPayload: {"wristbandId": "VIP-994", "gate": "NORTH_1"}'
+      },
+      {
+        id: 'snip-4',
+        title: 'Midnight Fireworks Synchronizer',
+        tags: ['pyro', 'fx', 'show'],
+        code: 'SMPTE_START: 23:59:45:00\nFIRING_MODULE_1: PULL_RELAY(PIN_4, 500ms)\nFIRING_MODULE_2: PULL_RELAY(PIN_8, 1200ms)'
+      }
+    ];
+
+    const vault = new FestivalHubSnippetVault(defaultSnippets);
+    let selectedTag = 'all';
+
+    function showToast(msg) {
+      const toast = document.getElementById('copy-toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2200);
+    }
+
+    function renderTags() {
+      const container = document.getElementById('tag-chips');
+      container.innerHTML = '';
+
+      const tags = ['all', ...vault.getAllTags()];
+      tags.forEach(t => {
+        const chip = document.createElement('button');
+        chip.className = `tag-chip ${selectedTag === t ? 'active' : ''}`;
+        chip.textContent = t.toUpperCase();
+        chip.onclick = () => {
+          selectedTag = t;
+          renderTags();
+          renderCards();
+        };
+        container.appendChild(chip);
+      });
+    }
+
+    function renderCards() {
+      const query = document.getElementById('search-input').value;
+      let list = query ? vault.searchSnippets(query) : vault.getAllSnippets();
+      if (selectedTag !== 'all') {
+        list = list.filter(s => s.tags.includes(selectedTag));
+      }
+
+      const grid = document.getElementById('snippets-grid');
+      grid.innerHTML = '';
+
+      if (list.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No matching presets found in vault.</div>';
+        return;
+      }
+
+      list.forEach(snippet => {
+        const card = document.createElement('div');
+        card.className = 'snippet-card';
+        card.innerHTML = `
+          <div class="card-top">
+            <h3 class="card-title">${escapeHtml(snippet.title)}</h3>
+            <button class="btn btn-copy" data-id="${snippet.id}">Copy Code</button>
+          </div>
+          <div class="card-tags">
+            ${snippet.tags.map(tag => `<span class="tag-badge">#${escapeHtml(tag)}</span>`).join('')}
+          </div>
+          <pre class="code-preview"><code>${escapeHtml(snippet.code)}</code></pre>
+        `;
+
+        card.querySelector('.btn-copy').onclick = () => {
+          const code = vault.copySnippetCode(snippet.id);
+          navigator.clipboard.writeText(code).then(() => {
+            showToast(`Copied "${snippet.title}"!`);
+          });
+        };
+
+        grid.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    document.getElementById('search-input').addEventListener('input', renderCards);
+
+    const modal = document.getElementById('snippet-modal');
+    document.getElementById('add-snip-btn').onclick = () => modal.classList.remove('hidden');
+    document.getElementById('cancel-snip-modal').onclick = () => modal.classList.add('hidden');
+
+    document.getElementById('snippet-form').onsubmit = (e) => {
+      e.preventDefault();
+      try {
+        const title = document.getElementById('snip-title').value;
+        const tags = document.getElementById('snip-tags').value;
+        const code = document.getElementById('snip-code').value;
+        vault.addSnippet(title, code, tags);
+        e.target.reset();
+        modal.classList.add('hidden');
+        renderTags();
+        renderCards();
+        showToast('Saved new snippet preset!');
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+
+    renderTags();
+    renderCards();
+  </script>
+</body>
+</html>
