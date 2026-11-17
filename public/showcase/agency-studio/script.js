@@ -1838,6 +1838,11 @@ function initInteractiveScopeEstimator() {
     const velEl = document.getElementById('scopeVelocityBadge');
     if (velEl) velEl.textContent = `${targetWeeks} Wk Target`;
 
+    const turnaroundEl = document.getElementById('summaryTurnaround');
+    if (turnaroundEl) turnaroundEl.textContent = activeServices.length
+      ? `⚡ ${targetWeeks}-week projected delivery · Discovery → Design → Build → Launch`
+      : 'Select a service to preview the delivery timeline.';
+
     const burnEl = document.getElementById('scopeBurnBadge');
     if (burnEl) burnEl.textContent = `~${formatUsd(weeklyBurn)} / wk`;
 
