@@ -3074,3 +3074,276 @@ body.cmp-open { overflow: hidden; }
     flex-direction: column;
   }
 }
+
+/* ===== BEGIN Issue #301: Monthly HOA & Property Tax Cost Breakdown Calculator ===== */
+.hoa-tax-section {
+  background: linear-gradient(180deg, #0e1017 0%, #141722 100%);
+  border-top: 1px solid rgba(201, 168, 76, 0.25);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+  padding: 4.5rem 1.5rem;
+}
+
+.hoa-estate-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.hoa-chip {
+  padding: 0.65rem 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 9999px;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hoa-chip:hover {
+  background: rgba(201, 168, 76, 0.12);
+  border-color: #c9a84c;
+  color: #ffffff;
+}
+
+.hoa-chip.active {
+  background: #c9a84c;
+  border-color: #d4b55e;
+  color: #0b0c10;
+  box-shadow: 0 4px 14px rgba(201, 168, 76, 0.35);
+}
+
+.hoa-calc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.hoa-inputs-card,
+.hoa-results-card {
+  background: rgba(18, 21, 30, 0.8);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: 14px;
+  padding: 2.25rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+}
+
+.hoa-summary-head {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.hoa-total-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  margin-bottom: 0.35rem;
+}
+
+.hoa-total-display {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.hoa-total-display strong {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.hoa-total-display .per-month {
+  font-size: 1rem;
+  color: #c9a84c;
+}
+
+.hoa-annual-sub {
+  display: block;
+  font-size: 0.85rem;
+  color: #c9a84c;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+/* SVG Donut Chart */
+.hoa-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.75rem;
+}
+
+.hoa-chart-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin-bottom: 1.5rem;
+}
+
+.hoa-donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-seg {
+  transition: stroke-dasharray 0.4s ease, stroke-dashoffset 0.4s ease, stroke-width 0.2s ease;
+  cursor: pointer;
+}
+
+.donut-seg:hover {
+  stroke-width: 30;
+}
+
+.donut-center-info {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.center-tag {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.donut-center-info strong {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #c9a84c;
+}
+
+/* Legend */
+.hoa-legend-grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.legend-row:hover {
+  background: rgba(201, 168, 76, 0.08);
+}
+
+.legend-chip {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.chip-gold { background: #c9a84c; }
+.chip-purple { background: #8b5cf6; }
+.chip-green { background: #10b981; }
+.chip-orange { background: #f59e0b; }
+
+.legend-name {
+  flex: 1;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+}
+
+.legend-pct {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  padding: 0.15rem 0.45rem;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+}
+
+.legend-amt {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  min-width: 80px;
+  text-align: right;
+}
+
+.hoa-actions-bar {
+  display: flex;
+  gap: 0.85rem;
+}
+
+.btn-hoa-export,
+.btn-hoa-copy {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-hoa-export {
+  background: #c9a84c;
+  border: none;
+  color: #0b0c10;
+}
+
+.btn-hoa-export:hover {
+  background: #d4b55e;
+}
+
+.btn-hoa-copy {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  color: #e2e8f0;
+}
+
+.btn-hoa-copy:hover {
+  background: rgba(201, 168, 76, 0.15);
+  color: #ffffff;
+}
+
+.hoa-toast {
+  margin-top: 1rem;
+  padding: 0.65rem 1rem;
+  background: #c9a84c;
+  color: #0b0c10;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: none;
+}
+
+.hoa-toast.show {
+  display: block;
+}
+
+@media (max-width: 960px) {
+  .hoa-calc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== END Issue #301 ===== */
