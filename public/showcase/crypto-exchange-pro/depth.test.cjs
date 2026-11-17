@@ -4,7 +4,11 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const context = { document: { addEventListener() {}, getElementById() { return null; } } };
-vm.runInNewContext(fs.readFileSync(path.join(__dirname, 'script.js'), 'utf8'), context);
+// The DOM controller is now ESM. These tests exercise its depth helpers only;
+// the browser-only initialization is not invoked and needs no imported engines.
+const source = fs.readFileSync(path.join(__dirname, 'script.js'), 'utf8')
+  .replace(/^\uFEFF?import .+ from '\.\/[\w-]+\.js';\r?\n/gm, '');
+vm.runInNewContext(source, context);
 const plain = value => JSON.parse(JSON.stringify(value));
 
 test('bids accumulate from highest price outward without changing the input', () => {
