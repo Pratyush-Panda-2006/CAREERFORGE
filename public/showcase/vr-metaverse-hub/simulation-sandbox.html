@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VR Metaverse Hub - Monte Carlo Simulation Sandbox</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+</head>
+<body>
+  <div class="sandbox-container">
+    <header class="sandbox-header">
+      <span class="sandbox-badge">Spatial Telemetry</span>
+      <h1>🥽 Metaverse World Concurrency & Risk Forecaster</h1>
+      <p>Autonomous numerical simulation engine executing iterative Monte Carlo runs to forecast spatial server load, peer packet volatility, and FPS stability</p>
+    </header>
+
+    <section class="controls-card">
+      <div class="control-row">
+        <div class="control-group">
+          <label for="trialSlider">Simulation Iterations: <span id="trialVal">1000</span></label>
+          <input type="range" id="trialSlider" min="100" max="5000" step="100" value="1000">
+        </div>
+        <div class="control-group">
+          <label for="volatilitySlider">Packet Volatility: <span id="volatilityVal">0.18</span></label>
+          <input type="range" id="volatilitySlider" min="0.05" max="0.5" step="0.01" value="0.18">
+        </div>
+        <div class="control-group">
+          <label for="baseLoadSlider">Base Peer Concurrency: <span id="baseLoadVal">1200</span></label>
+          <input type="range" id="baseLoadSlider" min="100" max="5000" step="100" value="1200">
+        </div>
+      </div>
+      <div class="actions-row">
+        <button id="runSimBtn" class="btn btn-primary">Run Monte Carlo Simulation</button>
+      </div>
+    </section>
+
+    <section class="summary-cards">
+      <div class="stat-card">
+        <span class="stat-label">Mean Expected Load</span>
+        <span id="meanMetric" class="stat-val highlight-cyan">-</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Std Deviation (σ)</span>
+        <span id="stdDevMetric" class="stat-val highlight-purple">-</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">P50 (Median)</span>
+        <span id="p50Metric" class="stat-val">-</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">P95 (Peak Stress)</span>
+        <span id="p95Metric" class="stat-val highlight-rose">-</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">P99 (Extreme Shock)</span>
+        <span id="p99Metric" class="stat-val highlight-amber">-</span>
+      </div>
+    </section>
+
+    <main class="chart-section">
+      <h3>Distribution & Frequency Spread</h3>
+      <div id="distributionBarContainer" class="distribution-bars">
+        <!-- Rendered by simulation-sandbox.js -->
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="simulation-sandbox.js"></script>
+</body>
+</html>
