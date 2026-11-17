@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   console.log('Pulse Wave Festival Hub loaded');
   initFestivalCountdown();
   initFestivalWeather();
@@ -102,15 +102,15 @@ function initStageFilters() {
 const ITINERARY_STORAGE_KEY = 'pulsewave_itinerary_v1';
 
 const ARTIST_SCHEDULE_DATA = {
-  'aura-matrix': { id: 'aura-matrix', name: 'AURA MATRIX', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-24', dayLabel: 'Day 01 Â· Oct 24', start: '19:30', end: '21:20', genre: 'Electro House & Laser Show' },
-  'neon-apex': { id: 'neon-apex', name: 'NEON APEX', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-24', dayLabel: 'Day 01 Â· Oct 24', start: '21:00', end: '22:30', genre: 'Cyberpunk Synthwave' },
-  'sub-zero': { id: 'sub-zero', name: 'SUB ZERO BASS', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-24', dayLabel: 'Day 01 Â· Oct 24', start: '23:00', end: '24:30', genre: 'Sub-Bass Riddim & Dubstep' },
-  'neural-collider': { id: 'neural-collider', name: 'NEURAL COLLIDER', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-25', dayLabel: 'Day 02 Â· Oct 25', start: '20:45', end: '22:15', genre: 'Neurofunk Drum & Bass' },
-  'synth-pulse': { id: 'synth-pulse', name: 'SYNTH PULSE', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-25', dayLabel: 'Day 02 Â· Oct 25', start: '21:15', end: '22:45', genre: 'Analog Modular & Chiptune' },
-  'cyber-kinetic': { id: 'cyber-kinetic', name: 'CYBER KINETIC', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-25', dayLabel: 'Day 02 Â· Oct 25', start: '22:30', end: '24:00', genre: 'Melodic Techno Live' },
-  'solar-flare': { id: 'solar-flare', name: 'SOLAR FLARE', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-26', dayLabel: 'Day 03 Â· Oct 26', start: '20:00', end: '21:45', genre: 'Progressive Trance' },
-  'quantum-drop': { id: 'quantum-drop', name: 'QUANTUM DROP', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-26', dayLabel: 'Day 03 Â· Oct 26', start: '21:30', end: '23:00', genre: 'Future Bass & Cyber Trap' },
-  'hex-void': { id: 'hex-void', name: 'HEX VOID', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-26', dayLabel: 'Day 03 Â· Oct 26', start: '22:45', end: '24:15', genre: 'Industrial Darkwave EBM' }
+  'aura-matrix': { id: 'aura-matrix', name: 'AURA MATRIX', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-24', dayLabel: 'Day 01 · Oct 24', start: '19:30', end: '21:20', genre: 'Electro House & Laser Show' },
+  'neon-apex': { id: 'neon-apex', name: 'NEON APEX', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-24', dayLabel: 'Day 01 · Oct 24', start: '21:00', end: '22:30', genre: 'Cyberpunk Synthwave' },
+  'sub-zero': { id: 'sub-zero', name: 'SUB ZERO BASS', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-24', dayLabel: 'Day 01 · Oct 24', start: '23:00', end: '24:30', genre: 'Sub-Bass Riddim & Dubstep' },
+  'neural-collider': { id: 'neural-collider', name: 'NEURAL COLLIDER', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-25', dayLabel: 'Day 02 · Oct 25', start: '20:45', end: '22:15', genre: 'Neurofunk Drum & Bass' },
+  'synth-pulse': { id: 'synth-pulse', name: 'SYNTH PULSE', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-25', dayLabel: 'Day 02 · Oct 25', start: '21:15', end: '22:45', genre: 'Analog Modular & Chiptune' },
+  'cyber-kinetic': { id: 'cyber-kinetic', name: 'CYBER KINETIC', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-25', dayLabel: 'Day 02 · Oct 25', start: '22:30', end: '24:00', genre: 'Melodic Techno Live' },
+  'solar-flare': { id: 'solar-flare', name: 'SOLAR FLARE', stage: 'main-stage', stageLabel: 'Main Stage', day: '2026-10-26', dayLabel: 'Day 03 · Oct 26', start: '20:00', end: '21:45', genre: 'Progressive Trance' },
+  'quantum-drop': { id: 'quantum-drop', name: 'QUANTUM DROP', stage: 'bass-vault', stageLabel: 'Bass Vault', day: '2026-10-26', dayLabel: 'Day 03 · Oct 26', start: '21:30', end: '23:00', genre: 'Future Bass & Cyber Trap' },
+  'hex-void': { id: 'hex-void', name: 'HEX VOID', stage: 'neon-arena', stageLabel: 'Neon Arena', day: '2026-10-26', dayLabel: 'Day 03 · Oct 26', start: '22:45', end: '24:15', genre: 'Industrial Darkwave EBM' }
 };
 
 function timeStrToMins(hhmm) {
@@ -182,9 +182,9 @@ function generateItineraryICS(items) {
       `DTSTAMP:${dtstamp}`,
       `DTSTART;TZID=Asia/Tokyo:${toIcsTimestamp(item.day, item.start)}`,
       `DTEND;TZID=Asia/Tokyo:${toIcsTimestamp(item.day, item.end)}`,
-      `SUMMARY:${item.name} â€” ${item.stageLabel}`,
+      `SUMMARY:${item.name} — ${item.stageLabel}`,
       `LOCATION:${item.stageLabel}, Tokyo Cyber Dome`,
-      `DESCRIPTION:${item.genre} (${formatDisplayTime(item.start)}â€“${formatDisplayTime(item.end)})`,
+      `DESCRIPTION:${item.genre} (${formatDisplayTime(item.start)}–${formatDisplayTime(item.end)})`,
       'END:VEVENT'
     );
   });
@@ -243,13 +243,13 @@ function initScheduleTabs() {
         heartBtn.classList.toggle('is-favorite', isSaved);
         heartBtn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
         const sp = heartBtn.querySelector('span');
-        if (sp) sp.textContent = isSaved ? 'â™¥' : 'â™¡';
+        if (sp) sp.textContent = isSaved ? '♥' : '♡';
       }
       const starBtn = card.querySelector('.itinerary-star-btn');
       if (starBtn) {
         starBtn.classList.toggle('is-bookmarked', isSaved);
         starBtn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
-        starBtn.textContent = isSaved ? 'â˜…' : 'â˜†';
+        starBtn.textContent = isSaved ? '★' : '☆';
       }
     });
   }
@@ -270,7 +270,7 @@ function initScheduleTabs() {
 
     if (itinConflictBadge) {
       itinConflictBadge.hidden = conflicts.length === 0;
-      itinConflictBadge.textContent = `${conflicts.length} âš `;
+      itinConflictBadge.textContent = `${conflicts.length} ⚠`;
     }
 
     if (!container) return;
@@ -283,7 +283,7 @@ function initScheduleTabs() {
         conflictList.innerHTML = conflicts
           .map(
             (c) =>
-              `<li><strong>${c.dayLabel}:</strong> ${c.first.name} (${c.first.stageLabel}, ${formatDisplayTime(c.first.start)}â€“${formatDisplayTime(c.first.end)}) overlaps <strong>${c.second.name}</strong> (${c.second.stageLabel}, ${formatDisplayTime(c.second.start)}â€“${formatDisplayTime(c.second.end)}) by <strong>${c.overlapMinutes} min</strong></li>`
+              `<li><strong>${c.dayLabel}:</strong> ${c.first.name} (${c.first.stageLabel}, ${formatDisplayTime(c.first.start)}–${formatDisplayTime(c.first.end)}) overlaps <strong>${c.second.name}</strong> (${c.second.stageLabel}, ${formatDisplayTime(c.second.start)}–${formatDisplayTime(c.second.end)}) by <strong>${c.overlapMinutes} min</strong></li>`
           )
           .join('');
       } else {
@@ -298,7 +298,7 @@ function initScheduleTabs() {
       container.innerHTML = `
         <div class="itinerary-empty-box">
           <h4>No Sets Bookmarked ${activeDayFilter === 'all' ? 'Yet' : 'For This Day'}</h4>
-          <p>Tap the â˜… bookmark icon on any artist card or click "âš¡ Load Sample Lineup" above to preview chronological stage tracking &amp; conflict detection.</p>
+          <p>Tap the ★ bookmark icon on any artist card or click "⚡ Load Sample Lineup" above to preview chronological stage tracking &amp; conflict detection.</p>
         </div>
       `;
       return;
@@ -324,10 +324,10 @@ function initScheduleTabs() {
                 <div class="timeline-bar ${item.stage} ${isConf ? 'has-conflict' : ''}" style="left: ${leftPct.toFixed(1)}%; width: ${widthPct.toFixed(1)}%;">
                   <div class="timeline-bar-info">
                     <strong>${item.name}</strong>
-                    <span>${item.stageLabel} Â· ${formatDisplayTime(item.start)}â€“${formatDisplayTime(item.end)}</span>
+                    <span>${item.stageLabel} · ${formatDisplayTime(item.start)}–${formatDisplayTime(item.end)}</span>
                   </div>
                   <div class="timeline-bar-right">
-                    ${isConf ? '<span class="timeline-conflict-chip">âš  CONFLICT</span>' : ''}
+                    ${isConf ? '<span class="timeline-conflict-chip">⚠ CONFLICT</span>' : ''}
                     <button type="button" class="timeline-remove-btn" data-remove-artist="${item.id}" aria-label="Remove ${item.name} from itinerary">&times;</button>
                   </div>
                 </div>
@@ -339,8 +339,8 @@ function initScheduleTabs() {
         return `
           <div class="itinerary-day-group">
             <div class="itinerary-day-title">
-              <span>${daySets[0].dayLabel} Â· ${daySets.length} Set${daySets.length === 1 ? '' : 's'}</span>
-              <span>${dayConflicts > 0 ? 'âš ï¸ Overlap Alert' : 'âœ“ Clear'}</span>
+              <span>${daySets[0].dayLabel} · ${daySets.length} Set${daySets.length === 1 ? '' : 's'}</span>
+              <span>${dayConflicts > 0 ? '⚠️ Overlap Alert' : '✓ Clear'}</span>
             </div>
             <div class="timeline-ruler" aria-hidden="true">
               <span>18:00</span><span>19:00</span><span>20:00</span><span>21:00</span><span>22:00</span><span>23:00</span><span>00:00+</span>
@@ -647,19 +647,19 @@ function initFestivalWeather() {
 
   const forecast = [
     {
-      icon: 'â˜€ï¸',
+      icon: '☀️',
       condition: 'Sunny',
       description: 'Clear skies expected throughout the festival day. Perfect conditions for outdoor performances.',
       sunset: '17:00 JST'
     },
     {
-      icon: 'ðŸŒ§ï¸',
+      icon: '🌧️',
       condition: 'Light Rain',
       description: 'Occasional light rainfall expected. Festival attendees should consider carrying rain protection.',
       sunset: '16:59 JST'
     },
     {
-      icon: 'ðŸŒ™',
+      icon: '🌙',
       condition: 'Clear Night',
       description: 'A mostly clear evening with comfortable temperatures for the final festival performances.',
       sunset: '16:58 JST'
@@ -769,7 +769,7 @@ function initFestivalWeather() {
   var openId = null;
   var openTrigger = null;
 
-  // Headliners come from the lineup cards: "Main Stage â€¢ Oct 24 â€¢ 21:00".
+  // Headliners come from the lineup cards: "Main Stage • Oct 24 • 21:00".
   function headlinersFor(stageId) {
     var out = [];
     var cards = document.querySelectorAll('.artist-card[data-stage="' + stageId + '"]');
@@ -778,7 +778,7 @@ function initFestivalWeather() {
       var d = card.querySelector('.artist-details');
       var g = card.querySelector('.artist-genre');
       if (!h || !d) return;
-      var parts = d.textContent.split('â€¢').map(function (p) { return p.trim(); });
+      var parts = d.textContent.split('•').map(function (p) { return p.trim(); });
       if (parts.length < 3) return;
       out.push({ day: parts[1], time: parts[2], artist: h.textContent.trim(), genre: g ? g.textContent.trim() : '', headliner: true });
     });
@@ -1529,10 +1529,10 @@ function initMeetupLocator() {
   const CENTER_LNG = -118.4981;
 
   const TYPE_META = {
-    camp: { label: 'Camp Tent', emoji: 'â›º', color: '#a855f7' },
-    hydration: { label: 'Hydration Station', emoji: 'ðŸ’§', color: '#06b6d4' },
-    totem: { label: 'Meeting Totem', emoji: 'ðŸš©', color: '#ec4899' },
-    food: { label: 'Food Rendezvous', emoji: 'ðŸ”', color: '#f59e0b' }
+    camp: { label: 'Camp Tent', emoji: '⛺', color: '#a855f7' },
+    hydration: { label: 'Hydration Station', emoji: '💧', color: '#06b6d4' },
+    totem: { label: 'Meeting Totem', emoji: '🚩', color: '#ec4899' },
+    food: { label: 'Food Rendezvous', emoji: '🍔', color: '#f59e0b' }
   };
 
   const modeStagesBtn = document.getElementById('btn-mode-stages');
@@ -1581,7 +1581,7 @@ function initMeetupLocator() {
       if (Array.isArray(parsed) && parsed.length > 0) {
         waypoints = parsed;
         saveWaypoints();
-        showToast('Shared squad meetup waypoints loaded! ðŸ“');
+        showToast('Shared squad meetup waypoints loaded! 📍');
       }
     } catch {
       // invalid hash, ignore
@@ -1628,7 +1628,7 @@ function initMeetupLocator() {
       distMeters,
       deg,
       dirName,
-      coordsStr: `${lat}Â° N, ${lng}Â° W`
+      coordsStr: `${lat}° N, ${lng}° W`
     };
   }
 
@@ -1671,7 +1671,7 @@ function initMeetupLocator() {
         <strong class="mc-name">${escapeHtml(wp.name)}</strong>
         <div class="mc-meta">
           <span>${telem.coordsStr}</span>
-          <span>ðŸ§­ ${telem.deg}Â° ${telem.dirName}</span>
+          <span>🧭 ${telem.deg}° ${telem.dirName}</span>
         </div>
       `;
       cardEl.addEventListener('click', () => {
@@ -1697,7 +1697,7 @@ function initMeetupLocator() {
     if (popTitle) popTitle.textContent = wp.name;
     if (popCoords) popCoords.textContent = telem.coordsStr;
     if (popDistance) popDistance.textContent = `${telem.distMeters} meters from Info Hub`;
-    if (popBearing) popBearing.textContent = `${String(telem.deg).padStart(3, '0')}Â° ${telem.dirName}`;
+    if (popBearing) popBearing.textContent = `${String(telem.deg).padStart(3, '0')}° ${telem.dirName}`;
     if (popNeedle) popNeedle.style.transform = `rotate(${telem.deg}deg)`;
 
     if (popover) popover.hidden = false;
@@ -1719,7 +1719,7 @@ function initMeetupLocator() {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareUrl);
       }
-      showToast('Waypoint share link copied to clipboard! ðŸ“‹');
+      showToast('Waypoint share link copied to clipboard! 📋');
     });
   }
 
@@ -1792,7 +1792,7 @@ function initMeetupLocator() {
     saveWaypoints();
     renderWaypoints();
     openPinDetails(newPin);
-    showToast(`Dropped ${meta.label} pin! ðŸ“`);
+    showToast(`Dropped ${meta.label} pin! 📍`);
   });
 
   // Load Sample Squad Pins
@@ -1821,7 +1821,7 @@ function initMeetupLocator() {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareUrl);
       }
-      showToast('Full squad map link copied to clipboard! ðŸ”—');
+      showToast('Full squad map link copied to clipboard! 🔗');
     });
   }
 
