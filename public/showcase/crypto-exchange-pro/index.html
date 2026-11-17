@@ -14,7 +14,9 @@
     <div class="brand">⚡ VORTEX DEX</div>
     <div class="nav-links">
       <a href="#swapSection" class="nav-link">Instant Swap</a>
+      <a href="#leverageRiskSection" class="nav-link">Leverage Risk</a>
       <a href="#portfolioRebalancer" class="nav-link">Rebalancer</a>
+      <a href="#tradeHistorySection" class="nav-link">Trade History</a>
       <a href="#market-title" class="nav-link">Orderbook</a>
     </div>
     <div class="stream-connection"><span id="stream-status" data-state="stopped" role="status">SIMULATED FEED · STOPPED</span><span id="stream-stats">No real network connection or market data.</span></div>
@@ -221,6 +223,172 @@
     </div>
   </section>
   <!-- ===== END Quick Swap Order Execution Panel ===== -->
+
+  <!-- ===== BEGIN Issue #273: Interactive Leverage Slider & Liquidation Risk Calculator ===== -->
+  <section class="leverage-risk-section" id="leverageRiskSection" aria-labelledby="leverageTitle">
+    <div class="leverage-card" id="leverageCard">
+      <div class="leverage-head">
+        <div>
+          <span class="leverage-tag">// DERIVATIVES RISK SIMULATOR</span>
+          <h2 id="leverageTitle">Perpetual Futures Leverage &amp; Liquidation Risk Calculator</h2>
+          <p class="leverage-sub">Model position risk, required initial/maintenance margin, liquidation threshold, and estimated PnL before entering 1x–100x leveraged contracts.</p>
+        </div>
+        <div class="leverage-head-badges">
+          <div class="risk-badge risk-badge-low" id="overallRiskBadge">
+            <span class="risk-pulse-dot"></span>
+            <span id="riskBadgeText">CONSERVATIVE LEVERAGE (5x)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Presets Bar -->
+      <div class="leverage-presets-row">
+        <span class="presets-label">Risk Presets:</span>
+        <div class="presets-buttons" role="group" aria-label="Risk Scenarios">
+          <button type="button" class="preset-btn active" data-side="long" data-pair="btc" data-lev="5" data-size="1.0" data-exit="105000">🛡️ Swing Long (5x)</button>
+          <button type="button" class="preset-btn" data-side="long" data-pair="eth" data-lev="15" data-size="10.0" data-exit="4200">⚡ Intraday Scalp (15x)</button>
+          <button type="button" class="preset-btn" data-side="short" data-pair="sol" data-lev="25" data-size="50.0" data-exit="190">⚠️ Hedged Short (25x)</button>
+          <button type="button" class="preset-btn" data-side="long" data-pair="btc" data-lev="50" data-size="2.0" data-exit="98000">🚨 Degen Breakout (50x)</button>
+        </div>
+      </div>
+
+      <!-- Main grid: Left = Inputs & Leverage Slider, Right = Calculated Metrics -->
+      <div class="leverage-grid">
+        <!-- Input parameters -->
+        <div class="leverage-inputs-col">
+          <!-- Position Side Tabs -->
+          <div class="side-selector-group" role="group" aria-label="Position Direction">
+            <button type="button" class="btn-side-toggle active long" id="btnSideLong" data-side="long">
+              <span class="side-icon">📈</span> LONG / BUY
+            </button>
+            <button type="button" class="btn-side-toggle short" id="btnSideShort" data-side="short">
+              <span class="side-icon">📉</span> SHORT / SELL
+            </button>
+          </div>
+
+          <!-- Market Pair & Entry Price -->
+          <div class="input-row-duo">
+            <div class="calc-field">
+              <label for="levPairSelect">Contract Pair</label>
+              <select id="levPairSelect" class="calc-select" aria-label="Select perpetual contract">
+                <option value="btc" selected>BTC-PERP ($94,250)</option>
+                <option value="eth">ETH-PERP ($3,840.50)</option>
+                <option value="sol">SOL-PERP ($214.80)</option>
+              </select>
+            </div>
+            <div class="calc-field">
+              <div class="field-label-split">
+                <label for="levEntryPriceInput">Entry Price (USD)</label>
+                <button type="button" class="btn-calc-fill" id="btnFillMarketPrice">Fill Current</button>
+              </div>
+              <div class="calc-input-wrap">
+                <span class="currency-prefix">$</span>
+                <input type="number" id="levEntryPriceInput" class="calc-input" step="any" min="0.01" value="94250" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Position Size & Target Exit Price -->
+          <div class="input-row-duo">
+            <div class="calc-field">
+              <div class="field-label-split">
+                <label for="levPositionSizeInput">Position Size (<span id="baseTokenSymbol">BTC</span>)</label>
+                <span class="notional-hint" id="notionalValueHint">Notional: $94,250.00</span>
+              </div>
+              <input type="number" id="levPositionSizeInput" class="calc-input" step="any" min="0.001" value="1.0" />
+            </div>
+            <div class="calc-field">
+              <div class="field-label-split">
+                <label for="levExitPriceInput">Target Exit Price (USD)</label>
+                <span class="exit-pct-hint" id="exitPctHint">+11.41% move</span>
+              </div>
+              <div class="calc-input-wrap">
+                <span class="currency-prefix">$</span>
+                <input type="number" id="levExitPriceInput" class="calc-input" step="any" min="0.01" value="105000" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Leverage Multiplier Slider & Quick Badges -->
+          <div class="leverage-slider-box">
+            <div class="slider-header-row">
+              <label for="leverageRange">Leverage Multiplier</label>
+              <div class="active-leverage-display">
+                <span class="lev-multiplier" id="levMultiplierVal">5x</span>
+                <span class="lev-imr-pill" id="levImrPill">20.0% Initial Margin</span>
+              </div>
+            </div>
+
+            <input type="range" id="leverageRange" class="leverage-range-input" min="1" max="100" step="1" value="5" />
+
+            <div class="leverage-ticks" role="group" aria-label="Leverage Multiplier Shortcuts">
+              <button type="button" class="lev-tick" data-lev="1">1x</button>
+              <button type="button" class="lev-tick active" data-lev="5">5x</button>
+              <button type="button" class="lev-tick" data-lev="10">10x</button>
+              <button type="button" class="lev-tick" data-lev="25">25x</button>
+              <button type="button" class="lev-tick" data-lev="50">50x</button>
+              <button type="button" class="lev-tick" data-lev="75">75x</button>
+              <button type="button" class="lev-tick" data-lev="100">100x</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculated Metrics Card -->
+        <div class="leverage-results-col">
+          <!-- Liquidation Critical Callout -->
+          <div class="liquidation-hero-card" id="liqHeroCard">
+            <div class="hero-top">
+              <span class="hero-tag">ESTIMATED LIQUIDATION PRICE</span>
+              <span class="dist-badge" id="liqDistBadge">-19.50% from Entry</span>
+            </div>
+            <div class="hero-price" id="calcLiquidationPrice">$75,871.25</div>
+            <p class="hero-desc" id="liqDesc">
+              If market drops to this level, maintenance margin breaches and the position is liquidated.
+            </p>
+            <div class="risk-bar-track">
+              <div class="risk-bar-fill" id="riskBarFill" style="width: 20%;"></div>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards Grid -->
+          <div class="metrics-kpi-grid">
+            <div class="metric-card">
+              <span class="m-lbl">Required Initial Margin</span>
+              <strong class="m-val" id="calcInitialMargin">$18,850.00</strong>
+              <small class="m-sub">Collateral locked in wallet</small>
+            </div>
+            <div class="metric-card">
+              <span class="m-lbl">Maintenance Margin</span>
+              <strong class="m-val" id="calcMaintMargin">$471.25</strong>
+              <small class="m-sub" id="calcMaintRate">0.50% threshold</small>
+            </div>
+            <div class="metric-card">
+              <span class="m-lbl">Estimated Target PnL</span>
+              <strong class="m-val green-text" id="calcTargetPnl">+$10,750.00</strong>
+              <small class="m-sub" id="calcRoeVal">+57.03% ROE</small>
+            </div>
+            <div class="metric-card">
+              <span class="m-lbl">Total Position Notional</span>
+              <strong class="m-val" id="calcNotionalValue">$94,250.00</strong>
+              <small class="m-sub">Leveraged market exposure</small>
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="calc-actions-row">
+            <button type="button" class="btn-copy-risk" id="btnCopyRiskAnalysis">
+              📋 Copy Risk Analysis
+            </button>
+            <button type="button" class="btn-reset-calc" id="btnResetRiskCalc">
+              ↺ Reset
+            </button>
+            <span class="calc-feedback-msg" id="calcFeedbackMsg" aria-live="polite"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #273 ===== -->
 
   <!-- ===== BEGIN Issue #391: Interactive Portfolio Allocation Rebalancer ===== -->
   <section class="rebalance-section" id="portfolioRebalancer" aria-labelledby="rebalanceTitle">
