@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Yield Matrix - Protocol Pipeline & Status Workflow Engine</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body>
+  <div class="pipeline-wrapper">
+    <header class="pipeline-header">
+      <div>
+        <h1 class="pipeline-title">DeFi Protocol Pipeline & Status Workflow</h1>
+        <p class="pipeline-subtitle">Interactive strategy ideation, smart contract audits, testnet staging, and mainnet deployment lifecycle.</p>
+      </div>
+      <div class="header-actions">
+        <button id="openNewTaskModal" class="btn-primary">+ New DeFi Task</button>
+        <button id="exportPipelineBtn" class="btn-secondary">Export JSON</button>
+      </div>
+    </header>
+
+    <div id="kanbanBoard" class="kanban-grid"></div>
+  </div>
+
+  <div id="taskModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create DeFi Protocol Task</h3>
+        <button id="closeModalBtn" class="close-btn">&times;</button>
+      </div>
+      <form id="newTaskForm">
+        <div class="form-group">
+          <label for="taskTitleInput">Task Summary</label>
+          <input type="text" id="taskTitleInput" placeholder="e.g. Flash Loan Reentrancy Guard Gas Optimization" required>
+        </div>
+        <div class="form-group">
+          <label for="taskDescInput">Scope & Details</label>
+          <textarea id="taskDescInput" rows="3" placeholder="Provide smart contract audit scope and invariant rules..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="taskPrioritySelect">Priority</label>
+          <select id="taskPrioritySelect">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskColSelect">Initial Column Stage</label>
+          <select id="taskColSelect">
+            <option value="backlog">Strategy Ideation</option>
+            <option value="in_progress">Smart Contract Audit</option>
+            <option value="review">Testnet Vault Staging</option>
+            <option value="completed">Mainnet Deployed & Active</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskAssigneeInput">Assignee</label>
+          <input type="text" id="taskAssigneeInput" value="Protocol Contributor">
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancelModalBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Add Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="workflow-pipeline.js"></script>
+</body>
+</html>
