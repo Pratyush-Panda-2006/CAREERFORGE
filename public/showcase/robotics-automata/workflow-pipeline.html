@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotics Automata - Kinematics & Motion Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body class="robotics-pipeline-body">
+  <header class="pipeline-header">
+    <div class="pipeline-brand">
+      <span class="pipeline-icon">🤖</span>
+      <h1>Autonomous Robotics Assembly &amp; Motion Workflow Pipeline</h1>
+    </div>
+    <div class="pipeline-actions">
+      <button type="button" id="openNewTaskModal" class="btn btn-primary">+ Add Motion Task</button>
+      <button type="button" id="exportPipelineBtn" class="btn btn-secondary">Export JSON</button>
+    </div>
+  </header>
+
+  <main class="pipeline-main">
+    <div class="kanban-board" id="kanbanBoard"></div>
+  </main>
+
+  <div class="modal-backdrop" id="taskModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create Kinematic Motion Task</h3>
+        <button type="button" class="close-btn" id="closeModalBtn">&times;</button>
+      </div>
+      <form id="newTaskForm" class="modal-form">
+        <div class="form-group">
+          <label for="taskTitleInput">Task Name / Motion Trajectory</label>
+          <input type="text" id="taskTitleInput" required placeholder="e.g. 6-DOF Pick-and-Place Trajectory Spline">
+        </div>
+        <div class="form-group">
+          <label for="taskDescInput">Actuator &amp; Kinematic Spec</label>
+          <textarea id="taskDescInput" rows="3" placeholder="End-effector velocity, quintic jerk limits, gripper torque..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskColSelect">Initial Pipeline Phase</label>
+            <select id="taskColSelect">
+              <option value="backlog">Motion Backlog</option>
+              <option value="in_progress">Kinematic Simulation</option>
+              <option value="review">Collision &amp; Force Review</option>
+              <option value="completed">Deployed to Robot Arm</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="taskPrioritySelect">Priority Tier</label>
+            <select id="taskPrioritySelect">
+              <option value="high">High (Factory Cell Critical)</option>
+              <option value="medium" selected>Medium (Standard Cycle)</option>
+              <option value="low">Low (Homing &amp; Idle)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="taskAssigneeInput">Robotics Engineer</label>
+          <input type="text" id="taskAssigneeInput" placeholder="e.g. Motion Planning Lead">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="workflow-pipeline.js"></script>
+</body>
+</html>
