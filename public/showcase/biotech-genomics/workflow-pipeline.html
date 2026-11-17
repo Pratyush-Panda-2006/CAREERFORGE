@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biotech Genomics - Workflow Pipeline Engine</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body>
+  <div class="pipeline-container">
+    <header class="pipeline-header">
+      <div class="pipeline-title">
+        <span class="pipeline-badge">Genomics Laboratory</span>
+        <h1>🧬 Genomic Sample Workflow Pipeline</h1>
+        <p>Interactive Kanban execution engine modeling assay intake, NGS sequencing, variant calling, and clinical sign-off</p>
+      </div>
+      <div class="header-actions">
+        <button id="openNewTaskModal" class="btn btn-primary">+ New Assay Run</button>
+        <button id="exportPipelineBtn" class="btn btn-outline">📥 Export Pipeline JSON</button>
+      </div>
+    </header>
+
+    <main id="kanbanBoard" class="kanban-board">
+      <!-- Columns rendered via workflow-pipeline.js -->
+    </main>
+  </div>
+
+  <!-- New Task Modal -->
+  <div id="taskModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Queue New Genomic Assay Task</h3>
+        <button id="closeModalBtn" class="btn btn-outline" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <form id="newTaskForm">
+        <div class="form-group">
+          <label for="taskColSelect">Assay Stage Column</label>
+          <select id="taskColSelect">
+            <option value="backlog">Sample Extraction (Backlog)</option>
+            <option value="in_progress">NGS Sequencing (In Progress)</option>
+            <option value="review">Bioinformatics Variant Calling (Review)</option>
+            <option value="completed">Clinical Reporting (Completed)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskTitleInput">Specimen ID & Target Assay</label>
+          <input type="text" id="taskTitleInput" required placeholder="e.g. SPEC-4091 Whole Exome Sequencing">
+        </div>
+        <div class="form-group">
+          <label for="taskDescInput">Experimental Protocol & Biomarkers</label>
+          <textarea id="taskDescInput" placeholder="Specify depth coverage (30x/100x), flow cell lane, and candidate gene mutations..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="taskPrioritySelect">Priority Tier</label>
+          <select id="taskPrioritySelect">
+            <option value="high">High (STAT Clinical)</option>
+            <option value="medium" selected>Medium (Standard Batch)</option>
+            <option value="low">Low (Research Archival)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskAssigneeInput">Lead Geneticist / Operator</label>
+          <input type="text" id="taskAssigneeInput" placeholder="e.g. Dr. H. Chen / Core Tech">
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancelModalBtn" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Schedule Assay</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="workflow-pipeline.js"></script>
+</body>
+</html>
