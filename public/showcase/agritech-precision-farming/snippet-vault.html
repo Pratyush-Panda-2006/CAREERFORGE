@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agritech Precision Farming — Preset Snippet Library & Search Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+</head>
+<body>
+  <div class="vault-container">
+    <header class="vault-header">
+      <div class="vault-title">
+        <h1>🌾 Precision Agritech Snippet Vault</h1>
+        <p>Curated repository of telemetry kernels, multi-spectral algorithms, and variable-rate fertigation formulas.</p>
+      </div>
+      <button type="button" id="openAddSnippetBtn" class="btn-add-snip">+ New Snippet Preset</button>
+    </header>
+
+    <div class="search-toolbar">
+      <div class="search-input-wrap">
+        <input type="text" id="snippetSearchInput" placeholder="🔍 Search formulas by keyword, tag, or formula title..." autocomplete="off">
+      </div>
+      <div id="tagFilterChips" class="tag-chips-wrap">
+        <!-- Rendered tags -->
+      </div>
+    </div>
+
+    <div id="snippetsListContainer" class="snippets-grid">
+      <!-- Snippet cards -->
+    </div>
+
+    <div id="copyToast" class="toast" role="status" aria-live="polite">Copied to clipboard!</div>
+
+    <!-- Add Snippet Modal -->
+    <div id="addSnippetModal" class="modal-backdrop" hidden>
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <h2 id="modalTitle">Register Custom Agritech Formula Preset</h2>
+        <div class="form-group">
+          <label for="newSnippetTitle">Formula Title *</label>
+          <input type="text" id="newSnippetTitle" placeholder="e.g. Chlorophyll Index RedEdge (CIRE)">
+        </div>
+        <div class="form-group">
+          <label for="newSnippetTags">Tags (Comma-separated) *</label>
+          <input type="text" id="newSnippetTags" placeholder="e.g. CHLOROPHYLL, REDEDGE, SENSOR">
+        </div>
+        <div class="form-group">
+          <label for="newSnippetDesc">Description</label>
+          <input type="text" id="newSnippetDesc" placeholder="Brief technical summary">
+        </div>
+        <div class="form-group">
+          <label for="newSnippetCode">Formula / Implementation Code *</label>
+          <textarea id="newSnippetCode" placeholder="function computeCIRE(nir, redEdge) { ... }"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="closeAddSnippetBtn" class="btn-add-snip" style="background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.2);">Cancel</button>
+          <button type="button" id="saveSnippetBtn" class="btn-add-snip">Save Preset</button>
+        </div>
+      </div>
+    </div>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Agritech Precision Farming Showcase Dashboard</a>
+    </nav>
+  </div>
+
+  <script type="module" src="snippet-vault.js"></script>
+</body>
+</html>
