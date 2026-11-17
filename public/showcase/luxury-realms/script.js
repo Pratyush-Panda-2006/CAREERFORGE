@@ -768,6 +768,63 @@
       '</svg>';
   }
 
+  var destinationWeatherCache = new Map();
+
+  function describeWeather(code) {
+    if (code === 0) return '☀️ Clear';
+    if (code <= 3) return '⛅ Cloudy';
+    if (code <= 48) return '🌫️ Fog';
+    if (code <= 67 || (code >= 80 && code <= 82)) return '🌧️ Rain';
+    if (code <= 77 || (code >= 85 && code <= 86)) return '❄️ Snow';
+    if (code >= 95) return '⛈️ Storm';
+    return '🌤️ Current';
+  }
+
+  function loadDestinationWeather(city) {
+    var cached = destinationWeatherCache.get(city);
+    if (cached && Date.now() - cached.at < 15 * 60 * 1000) return cached.promise;
+    var query = city.replace(/ \([^)]*\)$/, '');
+    var request = fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(query) + '&count=1&language=en&format=json')
+      .then(function (response) { if (!response.ok) throw new Error('Geocoding unavailable'); return response.json(); })
+      .then(function (geocoding) {
+        var place = geocoding.results && geocoding.results[0];
+        if (!place) throw new Error('Destination not found');
+        var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(place.latitude) + '&longitude=' + encodeURIComponent(place.longitude) + '&current=temperature_2m,weather_code&timezone=auto';
+        return fetch(url).then(function (response) { if (!response.ok) throw new Error('Weather unavailable'); return response.json(); });
+      })
+      .then(function (forecast) {
+        if (!forecast.current || !Number.isFinite(forecast.current.temperature_2m) || !forecast.timezone) throw new Error('Weather data incomplete');
+        return { city: city, timezone: forecast.timezone, label: describeWeather(forecast.current.weather_code) + ' ' + Math.round(forecast.current.temperature_2m) + '°C' };
+      });
+    destinationWeatherCache.set(city, { at: Date.now(), promise: request });
+    request.catch(function () { destinationWeatherCache.delete(city); });
+    return request;
+  }
+
+  function updateDestinationClock(pill) {
+    var timezone = pill.dataset.timezone;
+    if (!timezone) return;
+    var localTime = new Intl.DateTimeFormat('en-GB', { timeZone: timezone, hour: '2-digit', minute: '2-digit', timeZoneName: 'short' }).format(new Date());
+    pill.textContent = pill.dataset.city + ' · ' + pill.dataset.weather + ' · ' + localTime;
+    pill.title = 'Current weather from Open-Meteo; local time updates each minute';
+  }
+
+  setInterval(function () {
+    fleetGrid.querySelectorAll('.fleet-weather-pill[data-timezone]').forEach(function (pill) {
+      updateDestinationClock(pill);
+      var city = pill.dataset.city;
+      var cached = destinationWeatherCache.get(city);
+      if (cached && Date.now() - cached.at < 15 * 60 * 1000) return;
+      loadDestinationWeather(city).then(function (weather) {
+        if (!pill.isConnected || pill.dataset.city !== city) return;
+        pill.dataset.weather = weather.label;
+        updateDestinationClock(pill);
+      }).catch(function () {
+        if (pill.isConnected && pill.dataset.city === city) pill.textContent = city + ' · Weather unavailable';
+      });
+    });
+  }, 60 * 1000);
+
   function renderFleetGrid() {
     fleetGrid.textContent = '';
     var filtered = FLEET_DATA.filter(function (ac) {
@@ -849,13 +906,43 @@
       var pillsWrap = document.createElement('div');
       pillsWrap.className = 'reach-pills';
       var list = ac.reachableByHub[state.hub] || [];
+      var weatherPill = document.createElement('div');
+      weatherPill.className = 'fleet-weather-pill';
+      weatherPill.setAttribute('role', 'status');
+      var selectedDestination = '';
+      function selectDestination(destination) {
+        selectedDestination = destination.replace(/ \(Non-Stop\)$/, '');
+        pillsWrap.querySelectorAll('.reach-pill').forEach(function (button) {
+          button.setAttribute('aria-pressed', String(button.dataset.destination === destination));
+        });
+        weatherPill.textContent = selectedDestination + ' · Loading local weather…';
+        loadDestinationWeather(selectedDestination).then(function (weather) {
+          if (!weatherPill.isConnected || selectedDestination !== weather.city) return;
+          weatherPill.dataset.timezone = weather.timezone;
+          weatherPill.dataset.city = weather.city;
+          weatherPill.dataset.weather = weather.label;
+          updateDestinationClock(weatherPill);
+        }).catch(function () {
+          if (!weatherPill.isConnected || selectedDestination !== destination.replace(/ \(Non-Stop\)$/, '')) return;
+          delete weatherPill.dataset.timezone;
+          weatherPill.textContent = selectedDestination + ' · Weather unavailable';
+        });
+      }
       list.slice(0, 3).forEach(function (dest) {
-        var p = document.createElement('span');
+        var p = document.createElement('button');
+        p.type = 'button';
         p.className = 'reach-pill';
         p.textContent = dest;
+        p.dataset.destination = dest;
+        p.setAttribute('aria-pressed', 'false');
+        p.addEventListener('click', function () { selectDestination(dest); });
         pillsWrap.appendChild(p);
       });
       reachWrap.appendChild(pillsWrap);
+      if (list.length) {
+        selectDestination(list[0]);
+        reachWrap.appendChild(weatherPill);
+      }
 
       // Footer
       var footer = document.createElement('div');
