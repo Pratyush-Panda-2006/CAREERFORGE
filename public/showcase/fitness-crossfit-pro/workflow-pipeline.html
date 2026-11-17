@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Crossfit Pro - Workflow Pipeline Engine</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body>
+  <div class="pipeline-container">
+    <header class="pipeline-header">
+      <div class="pipeline-title">
+        <h1>🏋️ CrossFit Coaching & WOD Pipeline</h1>
+        <p>Interactive Kanban task execution engine with WIP threshold controls & state persistence</p>
+      </div>
+      <div class="header-actions">
+        <button id="openNewTaskModal" class="btn btn-primary">+ New Training Task</button>
+        <button id="exportPipelineBtn" class="btn btn-outline">📥 Export State JSON</button>
+      </div>
+    </header>
+
+    <main id="kanbanBoard" class="kanban-board">
+      <!-- Columns rendered via workflow-pipeline.js -->
+    </main>
+  </div>
+
+  <!-- New Task Modal -->
+  <div id="taskModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Create Workout Session Task</h3>
+        <button id="closeModalBtn" class="btn btn-outline" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <form id="newTaskForm">
+        <div class="form-group">
+          <label for="taskColSelect">Initial Column</label>
+          <select id="taskColSelect">
+            <option value="backlog">WOD Programming Queue</option>
+            <option value="in_progress">Active Class Coaching</option>
+            <option value="review">Telemetry & Scaling Audit</option>
+            <option value="completed">Logged & Verified</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskTitleInput">Session / WOD Title</label>
+          <input type="text" id="taskTitleInput" required placeholder="e.g. Clean & Jerk Heavy Triple Cycle">
+        </div>
+        <div class="form-group">
+          <label for="taskDescInput">Details & Workout Specs</label>
+          <textarea id="taskDescInput" placeholder="Specify movements, load percentages, time caps, and scaling levels..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="taskPrioritySelect">Priority Level</label>
+          <select id="taskPrioritySelect">
+            <option value="high">High</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskAssigneeInput">Target Unit / Assignee</label>
+          <input type="text" id="taskAssigneeInput" placeholder="e.g. Head Coach / Olympic Lifting Specialist">
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancelModalBtn" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Schedule Session</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="workflow-pipeline.js"></script>
+</body>
+</html>
