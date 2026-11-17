@@ -1,0 +1,249 @@
+/* SaaS Launchpad - Workflow Pipeline Styles */
+:root {
+  --bg-gradient: radial-gradient(circle at top right, #0f172a, #020617 80%);
+  --glass-bg: rgba(15, 23, 42, 0.75);
+  --glass-border: rgba(56, 189, 248, 0.2);
+  --glass-hover: rgba(30, 41, 59, 0.9);
+  --accent-cyan: #38bdf8;
+  --accent-blue: #2563eb;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+body.pipeline-body {
+  margin: 0;
+  padding: 2rem;
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.pipeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.pipeline-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.85rem;
+  background: linear-gradient(135deg, var(--accent-cyan), #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pipeline-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #020617;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.kanban-column {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+  transition: all 0.2s ease;
+}
+
+.kanban-column.drag-over {
+  border-color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.column-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.column-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.limit-pill.limit-reached {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex-grow: 1;
+}
+
+.task-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: grab;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.task-card.dragging {
+  opacity: 0.4;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.badge-low { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+.badge-medium { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+.badge-high { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+.badge-critical { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+.card-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+}
+
+.card-desc {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal-card {
+  background: #0f172a;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  color: var(--text-muted);
+}
+
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
