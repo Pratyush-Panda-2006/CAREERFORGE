@@ -1,0 +1,120 @@
+/* SaaS Launchpad - Embeddable Widget Styles */
+:root {
+  --widget-accent: #6366f1;
+  --widget-accent-glow: rgba(99, 102, 241, 0.4);
+  --widget-bg: #0f172a;
+  --widget-card-bg: rgba(30, 41, 59, 0.85);
+  --widget-border: #334155;
+  --widget-text: #f8fafc;
+  --widget-text-muted: #94a3b8;
+}
+
+:root[data-theme="light"] {
+  --widget-bg: #f8fafc;
+  --widget-card-bg: #ffffff;
+  --widget-border: #e2e8f0;
+  --widget-text: #0f172a;
+  --widget-text-muted: #64748b;
+}
+
+body {
+  margin: 0;
+  padding: 1rem;
+  background-color: var(--widget-bg);
+  color: var(--widget-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  user-select: none;
+}
+
+.embed-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--widget-border);
+  padding-bottom: 0.75rem;
+}
+
+.widget-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--widget-accent);
+  border: 1px solid var(--widget-accent);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.tier-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--widget-accent);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.tiers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.tier-card {
+  background: var(--widget-card-bg);
+  border: 1px solid var(--widget-border);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.tier-card:hover {
+  border-color: var(--widget-accent);
+  box-shadow: 0 0 12px var(--widget-accent-glow);
+  transform: translateY(-1px);
+}
+
+.tier-card .label {
+  font-size: 0.8rem;
+  color: var(--widget-text-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.tier-card .value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.tier-card .unit {
+  font-size: 0.75rem;
+  color: var(--widget-text-muted);
+  font-weight: 400;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
