@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Implement client-side export engine & formatted summary report generator — Client-Side Export Engine & Formatted Summary Report</title>
+  <link rel="stylesheet" href="export-engine.css">
+</head>
+<body class="renewable-microgrid-export-standalone">
+  <div class="renewable-microgrid-export-container">
+    <div class="renewable-microgrid-export-card">
+      <div class="card-header">
+        <div class="header-content">
+          <span class="export-badge">DATA EXPORT & AUDIT ENGINE</span>
+          <h2>Implement client-side export engine & formatted summary report generator Exporter</h2>
+          <p>Client-side export engine generating multi-format JSON, CSV, and markdown audit reports for renewable power generation and grid consumption.</p>
+        </div>
+
+        <div class="export-dropdown-wrapper">
+          <button type="button" id="exportMenuTrigger" class="export-trigger-btn" aria-haspopup="true">
+            <span>⚡ Export Data</span>
+            <span class="arrow-down">▼</span>
+          </button>
+
+          <div id="exportDropdownMenu" class="export-dropdown-popover" role="menu">
+            <button type="button" id="downloadJsonBtn" class="dropdown-item" role="menuitem">
+              <span class="item-icon">📦</span>
+              <div class="item-text">
+                <span class="item-title">Download JSON Data</span>
+                <span class="item-desc">Structured application/json format</span>
+              </div>
+            </button>
+            <button type="button" id="exportCsvBtn" class="dropdown-item" role="menuitem">
+              <span class="item-icon">📊</span>
+              <div class="item-text">
+                <span class="item-title">Export CSV Table</span>
+                <span class="item-desc">Spreadsheet compatible CSV table</span>
+              </div>
+            </button>
+            <button type="button" id="copyMarkdownBtn" class="dropdown-item" role="menuitem">
+              <span class="item-icon">📋</span>
+              <div class="item-text">
+                <span class="item-title">Copy Markdown Audit</span>
+                <span class="item-desc">Formatted GitHub Flavored Markdown</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dataset-preview">
+        <h3>Preview Dataset (Renewable Power Subsystems)</h3>
+        <div class="table-responsive">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Rating</th>
+                <th>Metric / Volume</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="previewTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="export-status-panel" id="exportStatusPanel" style="display: none;">
+        <span class="status-indicator"></span>
+        <span id="exportStatusText">Ready</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { RenewableMicrogridExportEngine } from './export-engine.js';
+
+    const engine = new RenewableMicrogridExportEngine();
+    const trigger = document.getElementById('exportMenuTrigger');
+    const menu = document.getElementById('exportDropdownMenu');
+    const statusPanel = document.getElementById('exportStatusPanel');
+    const statusText = document.getElementById('exportStatusText');
+
+    function showStatus(msg) {
+      if (!statusPanel || !statusText) return;
+      statusPanel.style.display = 'flex';
+      statusText.textContent = msg;
+      setTimeout(() => {
+        statusPanel.style.display = 'none';
+      }, 3000);
+    }
+
+    if (trigger && menu) {
+      trigger.addEventListener('click', () => {
+        menu.classList.toggle('active');
+      });
+      document.addEventListener('click', (e) => {
+        if (!trigger.contains(e.target) && !menu.contains(e.target)) {
+          menu.classList.remove('active');
+        }
+      });
+    }
+
+    const jsonBtn = document.getElementById('downloadJsonBtn');
+    if (jsonBtn) {
+      jsonBtn.addEventListener('click', () => {
+        const blob = engine.toJSONBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'renewable-microgrid-data.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        menu.classList.remove('active');
+        showStatus('Downloaded JSON dataset.');
+      });
+    }
+
+    const csvBtn = document.getElementById('exportCsvBtn');
+    if (csvBtn) {
+      csvBtn.addEventListener('click', () => {
+        const blob = engine.toCSVBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'renewable-microgrid-data.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        menu.classList.remove('active');
+        showStatus('Exported CSV spreadsheet.');
+      });
+    }
+
+    const mdBtn = document.getElementById('copyMarkdownBtn');
+    if (mdBtn) {
+      mdBtn.addEventListener('click', async () => {
+        const md = engine.toMarkdownAudit();
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(md);
+          showStatus('Copied formatted Markdown audit to clipboard.');
+        }
+        menu.classList.remove('active');
+      });
+    }
+
+    // Render preview
+    const tbody = document.getElementById('previewTableBody');
+    if (tbody) {
+      const items = engine.getItems();
+      tbody.innerHTML = items.map(it => `
+        <tr>
+          <td><code>${it.id}</code></td>
+          <td><strong>${it.name}</strong></td>
+          <td>${it.category || it.genre || 'General'}</td>
+          <td>⭐ ${it.rating}</td>
+          <td>${it.metric != null ? it.metric.toLocaleString() : (it.attendees || it.volume || 0)}</td>
+          <td><span class="badge status-${String(it.status).toLowerCase().replace(/\s+/g, '-')}">${it.status}</span></td>
+        </tr>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
