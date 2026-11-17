@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Live Telemetry & Metrics Sparkline Visualizer</title>
+  <link rel="stylesheet" href="telemetry-visualizer.css">
+</head>
+<body class="festival-telemetry-standalone">
+  <div class="festival-telemetry-card">
+    <div class="telemetry-header">
+      <div class="telemetry-info">
+        <span class="telemetry-badge">LIVE TELEMETRY</span>
+        <h3>Stage Crowd Density & Sound Decibels</h3>
+        <p class="telemetry-desc">Real-time decibel telemetry and pavilion density sparklines</p>
+      </div>
+
+      <!-- Time Window Selectors - Issue #581 -->
+      <div class="telemetry-time-selectors">
+        <button type="button" class="festival-time-btn" data-window="1H">1H</button>
+        <button type="button" class="festival-time-btn active" data-window="24H">24H</button>
+        <button type="button" class="festival-time-btn" data-window="7D">7D</button>
+      </div>
+    </div>
+
+    <!-- Canvas Telemetry Visualizer Container -->
+    <div class="canvas-wrapper">
+      <canvas id="festival-hub-telemetry-canvas" width="600" height="260"></canvas>
+      <div id="festivalTelemetryTooltip" class="festival-telemetry-tooltip" style="display: none;"></div>
+    </div>
+
+    <div class="telemetry-footer">
+      <div class="metric-pill">
+        <span class="dot live-pulse"></span>
+        <span>Telemetry Stream: Active</span>
+      </div>
+      <div class="metric-stats">
+        <span>Average SPL: <strong>94.2 dB</strong></span>
+        <span>Peak Attendance: <strong>14,800</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="telemetry-visualizer.js"></script>
+</body>
+</html>
