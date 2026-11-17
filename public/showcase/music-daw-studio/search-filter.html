@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music DAW Studio - Dynamic Search & Filter</title>
+  <link rel="stylesheet" href="search-filter.css">
+</head>
+<body>
+  <div class="filter-page-container">
+    <div class="filter-header">
+      <h1>
+        Audio Track & Synth Preset Vault
+        <span class="filter-badge">Issue #710</span>
+      </h1>
+      <p>High-performance in-memory browser for MIDI stems, synth patches, loops, and BPM sorting.</p>
+    </div>
+
+    <div class="controls-toolbar">
+      <div class="search-row">
+        <div class="search-input-wrapper">
+          <input type="text" id="search-filter-input" class="search-input" placeholder="Search by instrument, key signature, or patch...">
+          <button id="search-clear-btn" class="clear-btn" title="Clear search">&times;</button>
+        </div>
+
+        <select id="sort-select" class="sort-select">
+          <option value="name:asc">Track Name (A-Z)</option>
+          <option value="name:desc">Track Name (Z-A)</option>
+          <option value="bpm:desc">Tempo (Fastest BPM First)</option>
+          <option value="bpm:asc">Tempo (Slowest BPM First)</option>
+          <option value="durationSec:desc">Duration (Longest First)</option>
+        </select>
+      </div>
+
+      <div class="chip-row" id="tag-chips-container">
+        <span class="chip-label">Filter Tags:</span>
+        <span class="filter-chip" data-tag="bass">bass</span>
+        <span class="filter-chip" data-tag="synth">synth</span>
+        <span class="filter-chip" data-tag="drums">drums</span>
+        <span class="filter-chip" data-tag="ambient">ambient</span>
+        <span class="filter-chip" data-tag="cyberpunk">cyberpunk</span>
+        <span class="filter-chip" data-tag="lo-fi">lo-fi</span>
+      </div>
+    </div>
+
+    <div class="results-grid" id="results-list"></div>
+
+    <div id="empty-state-alert" class="empty-state">
+      <h3>No matching audio tracks or synth patches found</h3>
+      <p>Try clearing active tags or searching for a different instrument keyword.</p>
+    </div>
+  </div>
+
+  <script type="module" src="search-filter.js"></script>
+</body>
+</html>
