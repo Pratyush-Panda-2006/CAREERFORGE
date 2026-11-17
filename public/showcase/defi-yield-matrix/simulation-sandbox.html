@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Implement monte carlo multi-scenario simulator & risk variance forecaster - Monte Carlo Multi-Scenario Simulator</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+</head>
+<body>
+  <div class="sim-container">
+    <header class="sim-header">
+      <div class="badge-tag">DeFi Yield Risk Forecaster</div>
+      <h1>Implement monte carlo multi-scenario simulator & risk variance forecaster Monte Carlo Simulation Engine</h1>
+      <p>Numerical simulation engine running iterative Monte Carlo trials to forecast protocol APY drift, impermanent loss variance, and downside yield bounds.</p>
+    </header>
+
+    <div class="sim-grid">
+      <section class="sim-controls-panel">
+        <h2>Simulation Parameters</h2>
+        <div class="control-group">
+          <label for="trialSlider">Trial Iterations: <span id="trialVal">1000</span> runs</label>
+          <input type="range" id="trialSlider" min="100" max="5000" step="100" value="1000">
+        </div>
+
+        <div class="control-group">
+          <label for="volatilitySlider">Variance Factor (σ): <span id="volatilityVal">0.18</span></label>
+          <input type="range" id="volatilitySlider" min="0.05" max="0.50" step="0.01" value="0.18">
+        </div>
+
+        <div class="control-group">
+          <label for="baseSlider">Base Pool APY: <span id="baseVal">18</span> % APY</label>
+          <input type="range" id="baseSlider" min="10" max="10000" step="10" value="18">
+        </div>
+
+        <div class="control-actions">
+          <button id="runSimBtn" class="btn-primary">Execute Monte Carlo Runs</button>
+        </div>
+      </section>
+
+      <section class="sim-summary-panel">
+        <h2>Forecasting Confidence Bounds</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Expected Value (Mean)</span>
+            <span class="metric-value" id="meanMetric">--</span>
+            <span class="metric-unit">% APY</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Standard Deviation (σ)</span>
+            <span class="metric-value" id="stdDevMetric">--</span>
+            <span class="metric-unit">% APY</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Median (P50)</span>
+            <span class="metric-value" id="p50Metric">--</span>
+            <span class="metric-unit">% APY</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Risk Exposure (P95)</span>
+            <span class="metric-value" id="p95Metric">--</span>
+            <span class="metric-unit">% APY</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Extreme Tail (P99)</span>
+            <span class="metric-value" id="p99Metric">--</span>
+            <span class="metric-unit">% APY</span>
+          </div>
+        </div>
+
+        <div class="distribution-section">
+          <h3>Simulated Probability Density Distribution</h3>
+          <div class="distribution-bars" id="distributionBarContainer"></div>
+          <div class="dist-axis">
+            <span>Optimistic (P10)</span>
+            <span>Target (P50)</span>
+            <span>Risk Tail (P99)</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="simulation-sandbox.js"></script>
+</body>
+</html>
