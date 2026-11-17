@@ -447,6 +447,21 @@ const promoEngine = new PromoDiscountEngine();
 window.PromoDiscountEngine = PromoDiscountEngine;
 
 const SHIPPING_FEE = 12;
+const TAX_RATE = 0.08;
+const ShippingProgress = (typeof window !== 'undefined' && window.ShippingProgress) || (typeof globalThis !== 'undefined' && globalThis.ShippingProgress) || {
+  THRESHOLD: 150,
+  calculate(subtotal, couponCode) {
+    const amount = Math.max(0, Number(subtotal) || 0);
+    const couponUnlocked = amount > 0 && couponCode === 'FREESHIP';
+    const thresholdUnlocked = amount >= 150;
+    return {
+      unlocked: couponUnlocked || thresholdUnlocked,
+      couponUnlocked,
+      remaining: Math.max(0, 150 - amount),
+      percent: couponUnlocked ? 100 : Math.min(100, Math.round(amount / 150 * 100))
+    };
+  }
+};
 const COUPON_KEY = 'nexusStoreCoupon';
 let appliedCoupon = null;
 
@@ -502,10 +517,25 @@ function saveCoupon() {
 }
 
 // Pure helper so the maths uses PromoDiscountEngine consistently.
+const COUPONS_MAP = typeof promoEngine !== 'undefined' && promoEngine.coupons ? promoEngine.coupons : {
+  CAREER20: { type: 'percent', value: 0.20, label: 'CAREER20: 20% off' },
+  SAVE15: { type: 'percent', value: 0.15, label: 'SAVE15: 15% off' },
+  FIXED25: { type: 'fixed', value: 25.00, label: 'FIXED25:  off order' },
+  FREESHIP: { type: 'freeship', value: 0, label: 'FREESHIP: free delivery' }
+};
+
 function calculateTotals(subtotal, couponCode) {
-  const coupon = COUPONS[couponCode] || null;
+  const coupons = typeof COUPONS !== 'undefined' ? COUPONS : COUPONS_MAP;
+  const coupon = coupons[couponCode] || null;
   const discount = coupon && coupon.type === 'percent' ? subtotal * coupon.value : 0;
-  const shipping = subtotal > 0 && !ShippingProgress.calculate(subtotal, couponCode).unlocked ? SHIPPING_FEE : 0;
+  const shippingHelper = typeof ShippingProgress !== 'undefined' && ShippingProgress.calculate
+    ? ShippingProgress
+    : {
+        calculate: (sub, code) => ({
+          unlocked: sub >= 150 || (sub > 0 && code === 'FREESHIP')
+        })
+      };
+  const shipping = subtotal > 0 && !shippingHelper.calculate(subtotal, couponCode).unlocked ? SHIPPING_FEE : 0;
   const tax = (subtotal - discount) * TAX_RATE;
   const total = subtotal - discount + shipping + tax;
   return { subtotal, discount, shipping, tax, total };
@@ -4956,3 +4986,263 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 
+
+
+
+
+// ==========================================================================
+// Issue #571: Adaptive User Settings & Preference Persistence State Engine
+// ==========================================================================
+
+const ECOMMERCE_DEFAULT_PREFERENCES = {
+  theme: 'dark',
+  layout: 'grid',
+  soundEffects: true,
+  highContrast: false,
+  currency: 'USD',
+  itemsPerPage: 12,
+  autoSaveCart: true
+};
+
+class EcommerceStorePreferenceManager {
+  constructor(storage = (typeof localStorage !== 'undefined' ? localStorage : null)) {
+    this.storage = storage;
+    this.storageKey = 'ecommerce_store_user_preferences_v1';
+    this.preferences = { ...ECOMMERCE_DEFAULT_PREFERENCES };
+    this.listeners = new Set();
+    this.load();
+  }
+
+  load() {
+    if (!this.storage) return this.preferences;
+    try {
+      const raw = this.storage.getItem(this.storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'object' && parsed !== null) {
+          this.preferences = { ...ECOMMERCE_DEFAULT_PREFERENCES, ...parsed };
+        }
+      }
+    } catch {
+      // Fallback to memory
+    }
+    this.applyToDOM();
+    return this.preferences;
+  }
+
+  get(key) {
+    return this.preferences[key] !== undefined ? this.preferences[key] : ECOMMERCE_DEFAULT_PREFERENCES[key];
+  }
+
+  getAll() {
+    return { ...this.preferences };
+  }
+
+  save(key, val) {
+    if (key in ECOMMERCE_DEFAULT_PREFERENCES) {
+      this.preferences[key] = val;
+      this.persist();
+      this.applyToDOM();
+      this.notify(key, val);
+      return true;
+    }
+    return false;
+  }
+
+  persist() {
+    if (!this.storage) return;
+    try {
+      this.storage.setItem(this.storageKey, JSON.stringify(this.preferences));
+    } catch {
+      // Storage quota or unavailable
+    }
+  }
+
+  resetDefaults() {
+    this.preferences = { ...ECOMMERCE_DEFAULT_PREFERENCES };
+    this.persist();
+    this.applyToDOM();
+    this.notify('*', this.preferences);
+    return { ...this.preferences };
+  }
+
+  exportJSON() {
+    return JSON.stringify({
+      ...this.preferences,
+      exportedAt: new Date().toISOString(),
+      store: 'Nexus E-Commerce Showcase'
+    }, null, 2);
+  }
+
+  importJSON(jsonString) {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (typeof parsed !== 'object' || parsed === null) return false;
+      let updated = false;
+      for (const [k, v] of Object.entries(parsed)) {
+        if (k in ECOMMERCE_DEFAULT_PREFERENCES) {
+          this.preferences[k] = v;
+          updated = true;
+        }
+      }
+      if (updated) {
+        this.persist();
+        this.applyToDOM();
+        this.notify('*', this.preferences);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  subscribe(callback) {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
+
+  notify(key, val) {
+    for (const cb of this.listeners) {
+      try { cb(key, val, this.preferences); } catch {}
+    }
+  }
+
+  applyToDOM() {
+    if (typeof document === 'undefined') return;
+    const body = document.body;
+    if (!body) return;
+
+    if (this.preferences.highContrast) {
+      body.classList.add('high-contrast-mode');
+    } else {
+      body.classList.remove('high-contrast-mode');
+    }
+
+    if (this.preferences.theme && document.documentElement) {
+      document.documentElement.setAttribute('data-theme', this.preferences.theme);
+    }
+
+    if (this.preferences.layout) {
+      const catalogGrid = document.querySelector('.products-grid, .product-grid, #productsGrid');
+      if (catalogGrid) {
+        catalogGrid.setAttribute('data-layout', this.preferences.layout);
+      }
+    }
+  }
+}
+
+function initEcommercePreferencesUI() {
+  if (typeof document === 'undefined') return;
+
+  const prefManager = new EcommerceStorePreferenceManager();
+  window.ecommerceStorePreferenceManager = prefManager;
+
+  const modal = document.getElementById('ecommerce-store-preferences-modal');
+  const openBtn = document.getElementById('openPreferencesBtn');
+  const closeBtn = document.getElementById('closePreferencesBtn');
+  const backdrop = document.getElementById('prefBackdrop');
+
+  if (!modal) return;
+
+  function openModal() {
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    syncInputs();
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  function syncInputs() {
+    const p = prefManager.getAll();
+    const themeSel = document.getElementById('prefThemeSelect');
+    const layoutSel = document.getElementById('prefLayoutSelect');
+    const currSel = document.getElementById('prefCurrencySelect');
+    const itemsSel = document.getElementById('prefItemsPerPage');
+    const soundTgl = document.getElementById('prefSoundToggle');
+    const contrastTgl = document.getElementById('prefContrastToggle');
+    const autoSaveTgl = document.getElementById('prefAutoSaveToggle');
+
+    if (themeSel) themeSel.value = p.theme;
+    if (layoutSel) layoutSel.value = p.layout;
+    if (currSel) currSel.value = p.currency;
+    if (itemsSel) itemsSel.value = String(p.itemsPerPage);
+    if (soundTgl) soundTgl.checked = Boolean(p.soundEffects);
+    if (contrastTgl) contrastTgl.checked = Boolean(p.highContrast);
+    if (autoSaveTgl) autoSaveTgl.checked = Boolean(p.autoSaveCart);
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      closeModal();
+    }
+  });
+
+  const themeSel = document.getElementById('prefThemeSelect');
+  if (themeSel) themeSel.addEventListener('change', () => prefManager.save('theme', themeSel.value));
+
+  const layoutSel = document.getElementById('prefLayoutSelect');
+  if (layoutSel) layoutSel.addEventListener('change', () => prefManager.save('layout', layoutSel.value));
+
+  const currSel = document.getElementById('prefCurrencySelect');
+  if (currSel) currSel.addEventListener('change', () => {
+    prefManager.save('currency', currSel.value);
+    if (typeof setCurrency === 'function') {
+      setCurrency(currSel.value);
+    }
+  });
+
+  const itemsSel = document.getElementById('prefItemsPerPage');
+  if (itemsSel) itemsSel.addEventListener('change', () => prefManager.save('itemsPerPage', Number(itemsSel.value)));
+
+  const soundTgl = document.getElementById('prefSoundToggle');
+  if (soundTgl) soundTgl.addEventListener('change', () => prefManager.save('soundEffects', soundTgl.checked));
+
+  const contrastTgl = document.getElementById('prefContrastToggle');
+  if (contrastTgl) contrastTgl.addEventListener('change', () => prefManager.save('highContrast', contrastTgl.checked));
+
+  const autoSaveTgl = document.getElementById('prefAutoSaveToggle');
+  if (autoSaveTgl) autoSaveTgl.addEventListener('change', () => prefManager.save('autoSaveCart', autoSaveTgl.checked));
+
+  const resetBtn = document.getElementById('prefResetBtn');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    prefManager.resetDefaults();
+    syncInputs();
+    if (typeof showToast === 'function') showToast('Preferences reset to defaults.');
+  });
+
+  const exportBtn = document.getElementById('prefExportBtn');
+  if (exportBtn) exportBtn.addEventListener('click', () => {
+    const jsonStr = prefManager.exportJSON();
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexus-preferences-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    if (typeof showToast === 'function') showToast('Preferences exported successfully.');
+  });
+
+  syncInputs();
+}
+
+window.EcommerceStorePreferenceManager = EcommerceStorePreferenceManager;
+window.initEcommercePreferencesUI = initEcommercePreferencesUI;
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEcommercePreferencesUI);
+  } else {
+    initEcommercePreferencesUI();
+  }
+}
