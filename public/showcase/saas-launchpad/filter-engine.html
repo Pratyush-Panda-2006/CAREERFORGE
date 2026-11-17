@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Dynamic Search, Tag Filtering & Multi-Column Sorting</title>
+  <link rel="stylesheet" href="filter-engine.css">
+</head>
+<body class="saas-filter-standalone">
+  <div class="saas-filter-container">
+    <header class="saas-filter-header">
+      <div class="title-wrap">
+        <span class="saas-pill">ANALYTICS ENGINE</span>
+        <h2>Subscription Accounts & Tenant Directory</h2>
+        <p>In-memory multi-column query engine with compound tag filtering</p>
+      </div>
+    </header>
+
+    <!-- Toolbar - Issue #584 -->
+    <div class="saas-toolbar">
+      <div class="saas-search-wrapper">
+        <span class="search-ico">⚡</span>
+        <input type="text" id="saasSearchInput" placeholder="Filter subscriptions by name, plan tier, or tag..." aria-label="Search SaaS plans">
+        <button type="button" id="saasClearSearchBtn" class="clear-btn" aria-label="Clear filter">✕</button>
+      </div>
+
+      <div class="saas-sort-group">
+        <label for="saasSortSelect">Sort:</label>
+        <select id="saasSortSelect" class="saas-dropdown">
+          <option value="mrr:desc">MRR (Highest → Lowest)</option>
+          <option value="mrr:asc">MRR (Lowest → Highest)</option>
+          <option value="users:desc">User Count (High → Low)</option>
+          <option value="churnRate:asc">Lowest Churn Rate</option>
+          <option value="name:asc">Name (A → Z)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tag Chips -->
+    <div class="saas-chips-bar">
+      <span class="chips-title">Tag filters:</span>
+      <button type="button" class="saas-tag-chip" data-tag="enterprise">#enterprise</button>
+      <button type="button" class="saas-tag-chip" data-tag="growth">#growth</button>
+      <button type="button" class="saas-tag-chip" data-tag="cloud">#cloud</button>
+      <button type="button" class="saas-tag-chip" data-tag="fintech">#fintech</button>
+      <button type="button" class="saas-tag-chip" data-tag="devops">#devops</button>
+      <button type="button" class="saas-tag-chip" data-tag="starter">#starter</button>
+    </div>
+
+    <!-- Empty State Alert -->
+    <div id="saasEmptyState" class="saas-empty-panel" style="display: none;">
+      <div class="empty-ico">🔍</div>
+      <h3>No Subscriptions Matched</h3>
+      <p>No active tenants or accounts match your current filter parameters.</p>
+    </div>
+
+    <!-- Results Grid -->
+    <div id="saasFilterResults" class="saas-cards-grid"></div>
+  </div>
+
+  <script type="module" src="filter-engine.js"></script>
+</body>
+</html>
