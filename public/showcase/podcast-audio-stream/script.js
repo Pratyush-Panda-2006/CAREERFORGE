@@ -1744,3 +1744,179 @@ document.addEventListener('DOMContentLoaded', () => {
   load();
   applySpeed();
 })();
+
+/* ===== BEGIN Issue #299: Sleep Timer Logic ===== */
+(function () {
+  'use strict';
+
+  var sleepInterval = null;
+  var sleepRemainingSeconds = 0;
+  var originalVolumeBeforeFade = null;
+
+  var modal = document.getElementById('sleep-timer-modal');
+  var heroBtn = document.getElementById('hero-sleep-timer-btn');
+  var dockBtn = document.getElementById('dock-sleep-timer-btn');
+  var dockBadge = document.getElementById('dock-sleep-timer-badge');
+  var closeBtn = document.getElementById('close-sleep-timer-modal');
+  var statusCard = document.getElementById('sleep-active-status');
+  var countdownDisplay = document.getElementById('sleep-countdown-display');
+  var cancelBtn = document.getElementById('sleep-cancel-btn');
+  var presetOptions = document.querySelectorAll('.sleep-preset-option');
+  var customInput = document.getElementById('sleep-custom-minutes');
+  var customSetBtn = document.getElementById('sleep-custom-set-btn');
+  var endDesc = document.getElementById('preset-end-desc');
+
+  function formatTime(secs) {
+    var m = Math.floor(secs / 60);
+    var s = secs % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function openModal() {
+    if (!modal) return;
+    if (endDesc && typeof DURATION !== 'undefined' && typeof currentTime !== 'undefined') {
+      var remainingEp = Math.max(0, DURATION - currentTime);
+      endDesc.textContent = 'Stops in ~' + Math.ceil(remainingEp / 60) + ' min (at ' + formatTime(DURATION) + ')';
+    }
+    if (typeof modal.showModal === 'function') {
+      modal.showModal();
+    } else {
+      modal.setAttribute('open', '');
+    }
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    if (typeof modal.close === 'function') {
+      modal.close();
+    } else {
+      modal.removeAttribute('open');
+    }
+  }
+
+  function clearTimer() {
+    if (sleepInterval) {
+      clearInterval(sleepInterval);
+      sleepInterval = null;
+    }
+    if (originalVolumeBeforeFade !== null && typeof setVolume === 'function') {
+      setVolume(originalVolumeBeforeFade);
+      originalVolumeBeforeFade = null;
+    }
+    sleepRemainingSeconds = 0;
+
+    if (dockBtn) {
+      dockBtn.classList.remove('active');
+    }
+    if (dockBadge) {
+      dockBadge.textContent = 'Sleep';
+    }
+    if (statusCard) {
+      statusCard.setAttribute('hidden', '');
+    }
+    presetOptions.forEach(function (opt) {
+      opt.classList.remove('selected');
+    });
+  }
+
+  function startTimer(durationSeconds) {
+    clearTimer();
+    sleepRemainingSeconds = durationSeconds;
+
+    if (typeof volume === 'number') {
+      originalVolumeBeforeFade = volume;
+    }
+
+    if (dockBtn) {
+      dockBtn.classList.add('active');
+    }
+    if (statusCard) {
+      statusCard.removeAttribute('hidden');
+    }
+
+    updateTimerDisplay();
+
+    sleepInterval = setInterval(function () {
+      sleepRemainingSeconds--;
+
+      // Gentle fade out over final 30 seconds
+      if (sleepRemainingSeconds <= 30 && sleepRemainingSeconds > 0 && originalVolumeBeforeFade !== null) {
+        var fadeRatio = Math.max(0.05, sleepRemainingSeconds / 30);
+        if (typeof setVolume === 'function') {
+          setVolume(originalVolumeBeforeFade * fadeRatio);
+        }
+      }
+
+      if (sleepRemainingSeconds <= 0) {
+        // Time expired! Pause playback
+        clearTimer();
+        if (typeof pausePlayback === 'function') {
+          pausePlayback();
+        }
+        if (dockBadge) {
+          dockBadge.textContent = 'Paused (Timer)';
+          setTimeout(function () {
+            if (dockBadge) dockBadge.textContent = 'Sleep';
+          }, 4000);
+        }
+        return;
+      }
+
+      updateTimerDisplay();
+    }, 1000);
+
+    closeModal();
+  }
+
+  function updateTimerDisplay() {
+    var formatted = formatTime(sleepRemainingSeconds);
+    if (dockBadge) {
+      dockBadge.textContent = formatted;
+    }
+    if (countdownDisplay) {
+      countdownDisplay.textContent = formatted + ' remaining';
+    }
+  }
+
+  if (heroBtn) heroBtn.addEventListener('click', openModal);
+  if (dockBtn) dockBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', clearTimer);
+
+  if (modal) {
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  presetOptions.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var minutesAttr = btn.getAttribute('data-minutes');
+      var seconds = 0;
+      if (minutesAttr === 'end') {
+        var dur = typeof DURATION !== 'undefined' ? DURATION : 2880;
+        var cur = typeof currentTime !== 'undefined' ? currentTime : 0;
+        seconds = Math.max(10, dur - cur);
+      } else {
+        var mins = parseInt(minutesAttr, 10);
+        if (mins) seconds = mins * 60;
+      }
+
+      if (seconds > 0) {
+        presetOptions.forEach(function (b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        startTimer(seconds);
+      }
+    });
+  });
+
+  if (customSetBtn && customInput) {
+    customSetBtn.addEventListener('click', function () {
+      var customMins = parseInt(customInput.value, 10);
+      if (customMins && customMins > 0) {
+        startTimer(customMins * 60);
+      }
+    });
+  }
+})();
+/* ===== END Issue #299 ===== */
