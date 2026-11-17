@@ -3219,19 +3219,31 @@ async function run() {
       console.log(`          Path: public/showcase/${item.project}/`);
       console.log(`------------------------------------------------------`);
     } else {
-      try {
-        const { data: created } = await octokit.rest.issues.create({
-          owner,
-          repo,
-          title: item.title,
-          body,
-          labels: item.labels
-        });
-        console.log(`✅ [${i + 1}/${issues.length}] Created Issue #${created.number}: ${item.title}`);
-        // Delay to avoid secondary rate limit
-        await new Promise((r) => setTimeout(r, 1500));
-      } catch (err) {
-        console.error(`❌ Failed to create issue "${item.title}":`, err.message);
+      let success = false;
+      let retries = 0;
+      while (!success && retries < 3) {
+        try {
+          const { data: created } = await octokit.rest.issues.create({
+            owner,
+            repo,
+            title: item.title,
+            body,
+            labels: item.labels
+          });
+          console.log(`✅ [${i + 1}/${issues.length}] Created Issue #${created.number}: ${item.title}`);
+          success = true;
+          // Delay to respect rate limits
+          await new Promise((r) => setTimeout(r, 1200));
+        } catch (err) {
+          retries++;
+          console.error(`⚠️ Attempt ${retries} failed for "${item.title}": ${err.message}`);
+          if (err.status === 403 || err.status === 429) {
+            console.log("⏳ Secondary rate limit detected, sleeping for 30 seconds before retry...");
+            await new Promise((r) => setTimeout(r, 30000));
+          } else {
+            await new Promise((r) => setTimeout(r, 3000));
+          }
+        }
       }
     }
   }
