@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Commerce Store - Offline Queue & Data Persistence</title>
+  <link rel="stylesheet" href="offline-sync.css">
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-header">
+      <h1 class="offline-title">
+        E-Commerce Resilient Offline Mutation Queue
+        <span class="offline-badge">Issue #723</span>
+      </h1>
+      <p class="offline-description">
+        Local-first checkout queue ensuring zero cart loss across connectivity drops with automatic background sync and conflict resolution.
+      </p>
+    </div>
+
+    <div class="network-bar">
+      <div class="network-toggle-wrapper">
+        <span>Network Status:</span>
+        <label>
+          <input type="checkbox" id="network-status-toggle" checked>
+          <span>Online Mode</span>
+        </label>
+      </div>
+      <button id="sync-now-btn" class="btn-primary">Trigger Sync</button>
+    </div>
+
+    <div class="action-row">
+      <select id="item-select" class="select-input">
+        <option value="Wireless ANC Headphones">Wireless ANC Headphones ($39.99)</option>
+        <option value="Mechanical Keyboard">Mechanical Keyboard ($79.99)</option>
+        <option value="Ergonomic Mouse">Ergonomic Mouse ($49.99)</option>
+      </select>
+      <button id="enqueue-item-btn" class="btn-secondary">Add To Cart (Enqueue)</button>
+    </div>
+
+    <div class="queue-section">
+      <h3>
+        Pending Mutation Queue
+        <span id="pending-count-badge" class="badge-pending">0 pending</span>
+      </h3>
+      <ul id="queue-items-list" class="queue-list"></ul>
+    </div>
+
+    <div class="queue-section">
+      <h3>Recent Sync History</h3>
+      <ul id="history-items-list" class="queue-list"></ul>
+    </div>
+  </div>
+
+  <script type="module" src="offline-sync.js"></script>
+</body>
+</html>
