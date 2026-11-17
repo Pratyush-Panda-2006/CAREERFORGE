@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Logistics - Privacy-Preserving Client Analytics</title>
+  <link rel="stylesheet" href="analytics-telemetry.css">
+</head>
+<body>
+  <div class="telemetry-container">
+    <header class="telemetry-header">
+      <span class="telemetry-badge">Zero-PII Telemetry</span>
+      <h1>📦 Logistics Interaction Heatmap & Analytics Engine</h1>
+      <p>Self-contained client analytics coordinator measuring operator interactions, scroll depth, session duration, and heatmap hotspots without external trackers</p>
+    </header>
+
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">Session Duration</span>
+        <span id="sessionDurationVal" class="metric-val">00:00</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Max Scroll Depth</span>
+        <span id="scrollDepthVal" class="metric-val">0%</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Events Captured</span>
+        <span id="eventsCountVal" class="metric-val">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Privacy Sanitization</span>
+        <span class="metric-val highlight-emerald">100% Scrubbed</span>
+      </div>
+    </section>
+
+    <section class="interactive-simulator">
+      <h2>Simulate Freight Dispatcher Actions</h2>
+      <div class="simulator-buttons">
+        <button id="simManifestClick" class="sim-btn" data-heatmap="manifest-audit">Inspect Cargo Manifest</button>
+        <button id="simRouteClick" class="sim-btn" data-heatmap="route-optimization">Recalculate Transit Route</button>
+        <button id="simCustomsClick" class="sim-btn" data-heatmap="customs-clearance">Verify Customs Duty</button>
+        <button id="simExportReport" class="btn btn-primary">📥 Export Telemetry JSON</button>
+      </div>
+    </section>
+
+    <main class="data-layout">
+      <div class="heatmap-col">
+        <h3>Component Interaction Heatmap</h3>
+        <div id="heatmapContainer" class="heatmap-list">
+          <!-- Rendered by analytics-telemetry.js -->
+        </div>
+      </div>
+      <div class="events-col">
+        <h3>Live Scrubbed Event Stream</h3>
+        <div id="eventStreamLog" class="event-stream">
+          <!-- Rendered by analytics-telemetry.js -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="analytics-telemetry.js"></script>
+</body>
+</html>
