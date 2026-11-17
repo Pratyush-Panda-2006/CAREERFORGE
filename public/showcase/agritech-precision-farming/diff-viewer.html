@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agritech Precision Farming — Visual Diff & Change Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+</head>
+<body>
+  <div class="diff-container">
+    <header class="diff-header">
+      <div class="diff-title">
+        <h1>📊 Field State & Telemetry Diff Inspector</h1>
+        <p>Line-by-line difference detection, syntax highlighting, and state change percentage metrics for field sensor configs.</p>
+      </div>
+    </header>
+
+    <div class="metrics-strip">
+      <span id="statAddedLines" class="metric-pill pill-added">+0 added</span>
+      <span id="statRemovedLines" class="metric-pill pill-removed">-0 deleted</span>
+      <span id="statUnchangedLines" class="metric-pill pill-unchanged">0 unchanged</span>
+      <span id="statChangePercent" class="metric-pill pill-percent">0% delta</span>
+    </div>
+
+    <div class="inputs-grid">
+      <div class="input-card">
+        <label for="origTextInput">Baseline State (Original)</label>
+        <textarea id="origTextInput" placeholder="Paste baseline telemetry or configuration..."></textarea>
+      </div>
+      <div class="input-card">
+        <label for="modTextInput">Incoming State (Modified)</label>
+        <textarea id="modTextInput" placeholder="Paste modified telemetry or configuration..."></textarea>
+      </div>
+    </div>
+
+    <div class="diff-toolbar">
+      <button type="button" id="compareDiffBtn" class="btn-diff btn-primary">🔍 Run Diff Analysis</button>
+      <button type="button" id="loadSampleDiffBtn" class="btn-diff">🌱 Load Sample States</button>
+      <select id="viewModeSelect" class="view-select">
+        <option value="unified">Unified View</option>
+        <option value="split">Split Side-by-Side</option>
+      </select>
+    </div>
+
+    <section class="diff-panel">
+      <div id="diffOutputContainer">
+        <!-- Rendered diff -->
+      </div>
+    </section>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Agritech Precision Farming Showcase Dashboard</a>
+    </nav>
+  </div>
+
+  <script type="module" src="diff-viewer.js"></script>
+</body>
+</html>
