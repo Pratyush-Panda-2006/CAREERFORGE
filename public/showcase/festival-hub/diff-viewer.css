@@ -1,0 +1,242 @@
+/* Festival Hub - Diff Viewer Styles */
+:root {
+  --bg-gradient: radial-gradient(circle at 10% 20%, #111827, #030712 90%);
+  --panel-bg: rgba(17, 24, 39, 0.85);
+  --border-color: rgba(75, 85, 99, 0.4);
+  --accent-cyan: #06b6d4;
+  --accent-purple: #8b5cf6;
+  --diff-add-bg: rgba(16, 185, 129, 0.18);
+  --diff-add-text: #34d399;
+  --diff-add-border: rgba(16, 185, 129, 0.35);
+  --diff-del-bg: rgba(239, 68, 68, 0.18);
+  --diff-del-text: #f87171;
+  --diff-del-border: rgba(239, 68, 68, 0.35);
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+}
+
+body.diff-body {
+  margin: 0;
+  padding: 2rem;
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.diff-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.diff-title {
+  margin: 0 0 0.4rem 0;
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.diff-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.header-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.view-toggle-group {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.btn-toggle {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-toggle.active {
+  background: var(--accent-purple);
+  color: #fff;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.metrics-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.metric-val {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.metric-additions .metric-val { color: var(--diff-add-text); }
+.metric-deletions .metric-val { color: var(--diff-del-text); }
+.metric-percentage .metric-val { color: #facc15; }
+
+.input-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.input-pane label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.input-pane textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: #e5e7eb;
+  padding: 0.75rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.diff-output-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.split-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  divide-x: 1px solid var(--border-color);
+}
+
+.diff-pane {
+  max-height: 440px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.pane-title {
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.pane-content {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.diff-line {
+  display: flex;
+  min-height: 1.5rem;
+  align-items: center;
+  padding: 0.1rem 0;
+}
+
+.line-gutter {
+  width: 3rem;
+  min-width: 3rem;
+  text-align: right;
+  padding-right: 0.75rem;
+  color: #6b7280;
+  user-select: none;
+  border-right: 1px solid var(--border-color);
+  font-size: 0.75rem;
+}
+
+.line-symbol {
+  width: 1.5rem;
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.line-text {
+  padding-left: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.line-insert {
+  background: var(--diff-add-bg);
+  color: var(--diff-add-text);
+  border-left: 3px solid var(--diff-add-text);
+}
+
+.line-delete {
+  background: var(--diff-del-bg);
+  color: var(--diff-del-text);
+  border-left: 3px solid var(--diff-del-text);
+}
+
+.line-empty {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.hidden {
+  display: none !important;
+}

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Visual State & Text Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+</head>
+<body class="diff-body">
+  <div class="diff-container">
+    <header class="diff-header">
+      <div class="header-info">
+        <h1 class="diff-title">🔍 Festival State & Lineup Diff Inspector</h1>
+        <p class="diff-subtitle">Line-by-line visual change analyzer with unified & side-by-side highlighting</p>
+      </div>
+      <div class="header-controls">
+        <div class="view-toggle-group">
+          <button id="toggle-split" class="btn btn-toggle active">Side-by-Side</button>
+          <button id="toggle-unified" class="btn btn-toggle">Unified</button>
+        </div>
+        <button id="compare-btn" class="btn btn-primary">Compare Changes</button>
+      </div>
+    </header>
+
+    <section class="metrics-bar" id="metrics-bar">
+      <div class="metric-card metric-additions">
+        <span class="metric-label">Additions</span>
+        <span class="metric-val" id="metric-add">+0</span>
+      </div>
+      <div class="metric-card metric-deletions">
+        <span class="metric-label">Deletions</span>
+        <span class="metric-val" id="metric-del">-0</span>
+      </div>
+      <div class="metric-card metric-unchanged">
+        <span class="metric-label">Unchanged</span>
+        <span class="metric-val" id="metric-unchanged">0</span>
+      </div>
+      <div class="metric-card metric-percentage">
+        <span class="metric-label">Net Variance</span>
+        <span class="metric-val" id="metric-pct">0%</span>
+      </div>
+    </section>
+
+    <section class="input-section">
+      <div class="input-pane">
+        <label for="original-input">Original State / Text</label>
+        <textarea id="original-input" rows="7" placeholder="Original schedule or stage configuration..."></textarea>
+      </div>
+      <div class="input-pane">
+        <label for="modified-input">Modified State / Text</label>
+        <textarea id="modified-input" rows="7" placeholder="Updated schedule or stage configuration..."></textarea>
+      </div>
+    </section>
+
+    <main class="diff-output-panel" id="diff-output-panel">
+      <!-- Side by Side Container -->
+      <div class="split-view" id="split-view-container">
+        <div class="diff-pane left-pane" id="split-left-pane">
+          <div class="pane-title">Original (Base)</div>
+          <div class="pane-content" id="split-left-content"></div>
+        </div>
+        <div class="diff-pane right-pane" id="split-right-pane">
+          <div class="pane-title">Modified (Target)</div>
+          <div class="pane-content" id="split-right-content"></div>
+        </div>
+      </div>
+
+      <!-- Unified Container -->
+      <div class="unified-view hidden" id="unified-view-container">
+        <div class="pane-title">Unified Change Stream</div>
+        <div class="pane-content" id="unified-content"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { FestivalHubDiffInspector } from './diff-viewer.js';
+
+    const defaultOriginal = [
+      '{',
+      '  "festival": "Aura Horizon Fest",',
+      '  "headliner": "Starlight Echoes",',
+      '  "gatesOpen": "14:00",',
+      '  "maxCapacity": 45000,',
+      '  "droneShow": false',
+      '}'
+    ].join('\n');
+
+    const defaultModified = [
+      '{',
+      '  "festival": "Aura Horizon Fest 2026",',
+      '  "headliner": "Starlight Echoes & Guests",',
+      '  "gatesOpen": "13:30",',
+      '  "maxCapacity": 50000,',
+      '  "pyrotechnics": true,',
+      '  "droneShow": true',
+      '}'
+    ].join('\n');
+
+    document.getElementById('original-input').value = defaultOriginal;
+    document.getElementById('modified-input').value = defaultModified;
+
+    const inspector = new FestivalHubDiffInspector();
+
+    function renderDiff() {
+      const origText = document.getElementById('original-input').value;
+      const modText = document.getElementById('modified-input').value;
+      inspector.computeDiff(origText, modText);
+
+      const metrics = inspector.getChangeMetrics();
+      document.getElementById('metric-add').textContent = `+${metrics.additions}`;
+      document.getElementById('metric-del').textContent = `-${metrics.deletions}`;
+      document.getElementById('metric-unchanged').textContent = `${metrics.unchanged}`;
+      document.getElementById('metric-pct').textContent = `${metrics.changePercentage}%`;
+
+      // Render Split
+      const side = inspector.generateSideBySideView();
+      const leftEl = document.getElementById('split-left-content');
+      const rightEl = document.getElementById('split-right-content');
+      leftEl.innerHTML = '';
+      rightEl.innerHTML = '';
+
+      side.left.forEach(l => {
+        const row = document.createElement('div');
+        row.className = `diff-line line-${l.type}`;
+        row.innerHTML = `<span class="line-gutter">${l.lineNum || ''}</span><span class="line-text">${escapeHtml(l.text)}</span>`;
+        leftEl.appendChild(row);
+      });
+
+      side.right.forEach(r => {
+        const row = document.createElement('div');
+        row.className = `diff-line line-${r.type}`;
+        row.innerHTML = `<span class="line-gutter">${r.lineNum || ''}</span><span class="line-text">${escapeHtml(r.text)}</span>`;
+        rightEl.appendChild(row);
+      });
+
+      // Render Unified
+      const unifiedEl = document.getElementById('unified-content');
+      unifiedEl.innerHTML = '';
+      inspector.diffs.forEach(d => {
+        const row = document.createElement('div');
+        row.className = `diff-line line-${d.type}`;
+        const symbol = d.type === 'insert' ? '+' : d.type === 'delete' ? '-' : ' ';
+        row.innerHTML = `<span class="line-symbol">${symbol}</span><span class="line-text">${escapeHtml(d.text)}</span>`;
+        unifiedEl.appendChild(row);
+      });
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Synchronize scrolling between left and right panes
+    const leftPane = document.getElementById('split-left-pane');
+    const rightPane = document.getElementById('split-right-pane');
+    let isSyncing = false;
+    leftPane.addEventListener('scroll', () => {
+      if (!isSyncing) {
+        isSyncing = true;
+        rightPane.scrollTop = leftPane.scrollTop;
+        isSyncing = false;
+      }
+    });
+    rightPane.addEventListener('scroll', () => {
+      if (!isSyncing) {
+        isSyncing = true;
+        leftPane.scrollTop = rightPane.scrollTop;
+        isSyncing = false;
+      }
+    });
+
+    document.getElementById('compare-btn').onclick = renderDiff;
+
+    const toggleSplit = document.getElementById('toggle-split');
+    const toggleUnified = document.getElementById('toggle-unified');
+    const splitContainer = document.getElementById('split-view-container');
+    const unifiedContainer = document.getElementById('unified-view-container');
+
+    toggleSplit.onclick = () => {
+      toggleSplit.classList.add('active');
+      toggleUnified.classList.remove('active');
+      splitContainer.classList.remove('hidden');
+      unifiedContainer.classList.add('hidden');
+    };
+
+    toggleUnified.onclick = () => {
+      toggleUnified.classList.add('active');
+      toggleSplit.classList.remove('active');
+      unifiedContainer.classList.remove('hidden');
+      splitContainer.classList.add('hidden');
+    };
+
+    renderDiff();
+  </script>
+</body>
+</html>
