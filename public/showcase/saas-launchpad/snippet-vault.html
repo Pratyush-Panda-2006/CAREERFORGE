@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Code & Preset Snippet Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+</head>
+<body class="vault-body">
+  <div class="vault-container">
+    <header class="vault-header">
+      <div class="header-info">
+        <h1 class="vault-title">📦 SaaS Snippet & Preset Vault</h1>
+        <p class="vault-subtitle">Production-ready boilerplates, auth middleware & API route templates</p>
+      </div>
+      <div class="header-action">
+        <button id="add-snip-btn" class="btn btn-primary">+ Add New Snippet</button>
+      </div>
+    </header>
+
+    <section class="search-filter-section">
+      <div class="search-bar-wrap">
+        <input type="text" id="search-input" placeholder="🔍 Search boilerplates by title, function, or keyword...">
+      </div>
+      <div class="tag-chips-container" id="tag-chips">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <main class="snippets-grid" id="snippets-grid">
+      <!-- Snippet cards rendered here -->
+    </main>
+
+    <!-- Modal for new snippet -->
+    <div id="snippet-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h3 class="modal-title">New SaaS Snippet</h3>
+        <form id="snippet-form">
+          <div class="form-group">
+            <label for="snip-title">Snippet Title</label>
+            <input type="text" id="snip-title" required placeholder="e.g. Next.js Edge Auth Middleware">
+          </div>
+          <div class="form-group">
+            <label for="snip-tags">Tags (comma-separated)</label>
+            <input type="text" id="snip-tags" placeholder="e.g. auth, nextjs, edge">
+          </div>
+          <div class="form-group">
+            <label for="snip-code">Code / Template</label>
+            <textarea id="snip-code" rows="5" required placeholder="Paste code snippet here..."></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="cancel-snip-modal" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Snippet</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="copy-toast" class="toast-popup hidden">Copied snippet to clipboard!</div>
+  </div>
+
+  <script type="module">
+    import { SaasLaunchpadSnippetVault } from './snippet-vault.js';
+
+    const defaultSnippets = [
+      {
+        id: 'snip-10',
+        title: 'Stripe Webhook Signature Verification',
+        tags: ['stripe', 'payments', 'webhooks'],
+        code: 'const event = stripe.webhooks.constructEvent(\n  req.body,\n  req.headers["stripe-signature"],\n  process.env.STRIPE_WEBHOOK_SECRET\n);\nif (event.type === "checkout.session.completed") {\n  await handleCheckoutSession(event.data.object);\n}'
+      },
+      {
+        id: 'snip-11',
+        title: 'Upstash Redis Rate Limit Middleware',
+        tags: ['redis', 'ratelimit', 'security'],
+        code: 'import { Ratelimit } from "@upstash/ratelimit";\nimport { Redis } from "@upstash/redis";\n\nconst ratelimit = new Ratelimit({\n  redis: Redis.fromEnv(),\n  limiter: Ratelimit.slidingWindow(20, "10 s"),\n});\nconst { success } = await ratelimit.limit(identifier);'
+      },
+      {
+        id: 'snip-12',
+        title: 'Multi-Tenant Prisma Extension',
+        tags: ['prisma', 'database', 'tenancy'],
+        code: 'export const tenantPrisma = prisma.$extends({\n  query: {\n    $allModels: {\n      async findMany({ args, query }) {\n        args.where = { ...args.where, tenantId: currentTenantId() };\n        return query(args);\n      }\n    }\n  }\n});'
+      },
+      {
+        id: 'snip-13',
+        title: 'S3 Presigned Upload URL Handler',
+        tags: ['aws', 's3', 'storage'],
+        code: 'const command = new PutObjectCommand({\n  Bucket: process.env.S3_BUCKET,\n  Key: `uploads/${crypto.randomUUID()}.${ext}`,\n  ContentType: mimeType,\n});\nconst url = await getSignedUrl(s3, command, { expiresIn: 3600 });'
+      }
+    ];
+
+    const vault = new SaasLaunchpadSnippetVault(defaultSnippets);
+    let selectedTag = 'all';
+
+    function showToast(msg) {
+      const toast = document.getElementById('copy-toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2200);
+    }
+
+    function renderTags() {
+      const container = document.getElementById('tag-chips');
+      container.innerHTML = '';
+
+      const tags = ['all', ...vault.getAllTags()];
+      tags.forEach(t => {
+        const chip = document.createElement('button');
+        chip.className = `tag-chip ${selectedTag === t ? 'active' : ''}`;
+        chip.textContent = t.toUpperCase();
+        chip.onclick = () => {
+          selectedTag = t;
+          renderTags();
+          renderCards();
+        };
+        container.appendChild(chip);
+      });
+    }
+
+    function renderCards() {
+      const query = document.getElementById('search-input').value;
+      let list = query ? vault.searchSnippets(query) : vault.getAllSnippets();
+      if (selectedTag !== 'all') {
+        list = list.filter(s => s.tags.includes(selectedTag));
+      }
+
+      const grid = document.getElementById('snippets-grid');
+      grid.innerHTML = '';
+
+      if (list.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No matching snippets found in vault.</div>';
+        return;
+      }
+
+      list.forEach(snippet => {
+        const card = document.createElement('div');
+        card.className = 'snippet-card';
+        card.innerHTML = `
+          <div class="card-top">
+            <h3 class="card-title">${escapeHtml(snippet.title)}</h3>
+            <button class="btn btn-copy" data-id="${snippet.id}">Copy Code</button>
+          </div>
+          <div class="card-tags">
+            ${snippet.tags.map(tag => `<span class="tag-badge">#${escapeHtml(tag)}</span>`).join('')}
+          </div>
+          <pre class="code-preview"><code>${escapeHtml(snippet.code)}</code></pre>
+        `;
+
+        card.querySelector('.btn-copy').onclick = () => {
+          const code = vault.copySnippetCode(snippet.id);
+          navigator.clipboard.writeText(code).then(() => {
+            showToast(`Copied "${snippet.title}"!`);
+          });
+        };
+
+        grid.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    document.getElementById('search-input').addEventListener('input', renderCards);
+
+    const modal = document.getElementById('snippet-modal');
+    document.getElementById('add-snip-btn').onclick = () => modal.classList.remove('hidden');
+    document.getElementById('cancel-snip-modal').onclick = () => modal.classList.add('hidden');
+
+    document.getElementById('snippet-form').onsubmit = (e) => {
+      e.preventDefault();
+      try {
+        const title = document.getElementById('snip-title').value;
+        const tags = document.getElementById('snip-tags').value;
+        const code = document.getElementById('snip-code').value;
+        vault.addSnippet(title, code, tags);
+        e.target.reset();
+        modal.classList.add('hidden');
+        renderTags();
+        renderCards();
+        showToast('Saved new snippet to vault!');
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+
+    renderTags();
+    renderCards();
+  </script>
+</body>
+</html>
