@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart IoT Nexus - Device Pipeline & Status Workflow Engine</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body>
+  <div class="pipeline-container">
+    <header class="pipeline-header">
+      <div class="pipeline-title">
+        <span class="pipeline-badge">Edge Operations</span>
+        <h1>📡 IoT Device Fleet Workflow Pipeline</h1>
+        <p>Interactive Kanban task execution engine managing device provisioning, OTA firmware rollout, sensor calibration, and production deployment</p>
+      </div>
+      <div class="header-actions">
+        <button id="openNewTaskModal" class="btn btn-primary">+ New Edge Device Task</button>
+        <button id="exportPipelineBtn" class="btn btn-outline">📥 Export Fleet State JSON</button>
+      </div>
+    </header>
+
+    <main id="kanbanBoard" class="kanban-board">
+      <!-- Columns rendered via workflow-pipeline.js -->
+    </main>
+  </div>
+
+  <!-- New Task Modal -->
+  <div id="taskModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Deploy IoT Fleet Work Order</h3>
+        <button id="closeModalBtn" class="btn btn-outline" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <form id="newTaskForm">
+        <div class="form-group">
+          <label for="taskColSelect">Fleet Lifecycle Stage</label>
+          <select id="taskColSelect">
+            <option value="backlog">Device Provisioning (Backlog)</option>
+            <option value="in_progress">OTA Firmware Flash (In Progress)</option>
+            <option value="review">Telemetry & Sensor Calibration (Review)</option>
+            <option value="completed">Active Fleet Deployment (Completed)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskTitleInput">Device ID & Firmware Target</label>
+          <input type="text" id="taskTitleInput" required placeholder="e.g. NODE-8820 LoRaWAN Gateway Firmware v2.4">
+        </div>
+        <div class="form-group">
+          <label for="taskDescInput">Sensor Hardware & Network Profile</label>
+          <textarea id="taskDescInput" placeholder="Specify MQTT broker topic, sensor sampling rates, and battery thresholds..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="taskPrioritySelect">Priority Level</label>
+          <select id="taskPrioritySelect">
+            <option value="high">High (Security Patch)</option>
+            <option value="medium" selected>Medium (Feature Update)</option>
+            <option value="low">Low (Telemetry Calibration)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskAssigneeInput">Edge Systems Engineer</label>
+          <input type="text" id="taskAssigneeInput" placeholder="e.g. Engineer Marcus / OTA Cluster">
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancelModalBtn" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Schedule Work Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="workflow-pipeline.js"></script>
+</body>
+</html>
