@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge - WCAG Accessibility Inspector</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+</head>
+<body>
+  <div class="a11y-container">
+    <header class="a11y-header">
+      <div>
+        <h1>🔍 Quantum Forge Accessibility Inspector</h1>
+        <p>Real-time WCAG 2.1 contrast evaluation and high contrast accessibility auditing.</p>
+      </div>
+      <button id="toggle-hc-btn" class="btn-toggle">Enable High Contrast</button>
+    </header>
+
+    <div class="a11y-grid">
+      <div class="control-panel">
+        <div class="color-picker-group">
+          <label for="fg-color">Foreground Text Color</label>
+          <div class="color-picker-row">
+            <input type="color" id="fg-picker" value="#f3f4f6" oninput="document.getElementById('fg-color').value=this.value; document.getElementById('fg-color').dispatchEvent(new Event('input'))">
+            <input type="text" id="fg-color" value="#f3f4f6">
+          </div>
+        </div>
+
+        <div class="color-picker-group">
+          <label for="bg-color">Background Color</label>
+          <div class="color-picker-row">
+            <input type="color" id="bg-picker" value="#0b0f19" oninput="document.getElementById('bg-color').value=this.value; document.getElementById('bg-color').dispatchEvent(new Event('input'))">
+            <input type="text" id="bg-color" value="#0b0f19">
+          </div>
+        </div>
+
+        <div id="preview-box" class="preview-card">
+          <h3>Sample Quantum State Preview</h3>
+          <p>This text demonstrates contrast readability against the selected background color.</p>
+        </div>
+      </div>
+
+      <div class="metric-panel">
+        <div class="ratio-display">
+          <div>Contrast Ratio</div>
+          <div id="contrast-ratio" class="ratio-value">--</div>
+          <div class="status-badges">
+            <div id="badge-aa" class="status-badge pass">AA Pass</div>
+            <div id="badge-aaa" class="status-badge pass">AAA Pass</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="accessibility-assistant.js"></script>
+</body>
+</html>
