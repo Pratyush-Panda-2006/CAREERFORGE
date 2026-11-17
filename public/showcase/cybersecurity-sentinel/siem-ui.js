@@ -124,7 +124,7 @@ byId('stream').addEventListener('click', () => {
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
 window.addEventListener('pagehide', stop);
-engine.addRule({ id: id('rule'), name: 'Brute force then privilege change', logic: 'AND',
+engine.addRule({ id: id('rule'), name: 'Brute force and privilege change', logic: 'AND',
   windowSeconds: 60, severity: 'critical',
   conditions: [{ type: 'auth_failure', count: 5 }, { type: 'privilege_change', count: 1 }] });
 render();
