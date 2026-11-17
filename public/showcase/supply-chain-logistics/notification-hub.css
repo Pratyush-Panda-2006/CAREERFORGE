@@ -1,0 +1,264 @@
+/* Supply Chain Logistics - Notification Hub Styles */
+:root {
+  --bg-supply-dark: #080d16;
+  --bg-supply-card: #0f1726;
+  --bg-supply-panel: #162238;
+  --border-color: #243550;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --color-critical: #ef4444;
+  --color-warning: #f59e0b;
+  --color-success: #10b981;
+  --color-info: #0284c7;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.supply-hub-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-supply-dark);
+  color: var(--text-main);
+  padding: 1.5rem;
+  min-height: 100vh;
+}
+
+.hub-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+}
+
+.hub-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hub-title-wrapper h1 {
+  font-size: 1.35rem;
+  color: #fff;
+}
+
+.simulator-panel,
+.log-panel {
+  background-color: var(--bg-supply-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.simulator-panel h2,
+.log-panel h2 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.simulator-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.65rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-critical {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--color-critical);
+  border: 1px solid var(--color-critical);
+}
+
+.btn-critical:hover {
+  background: var(--color-critical);
+  color: #fff;
+}
+
+.btn-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning);
+}
+
+.btn-warning:hover {
+  background: var(--color-warning);
+  color: #000;
+}
+
+.btn-success {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.btn-success:hover {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.btn-info {
+  background: rgba(2, 132, 199, 0.2);
+  color: var(--color-info);
+  border: 1px solid var(--color-info);
+}
+
+.btn-info:hover {
+  background: var(--color-info);
+  color: #fff;
+}
+
+.btn-secondary {
+  background-color: var(--bg-supply-panel);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: #243550;
+}
+
+.notification-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.log-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.85rem;
+  border-radius: 6px;
+  background-color: var(--bg-supply-panel);
+  border-left: 4px solid var(--border-color);
+  font-size: 0.82rem;
+}
+
+.log-item.critical { border-left-color: var(--color-critical); }
+.log-item.warning { border-left-color: var(--color-warning); }
+.log-item.success { border-left-color: var(--color-success); }
+.log-item.info { border-left-color: var(--color-info); }
+
+.log-time {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+/* Toast Viewport */
+.toast-viewport {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.75rem;
+  z-index: 9999;
+  max-width: 380px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: var(--bg-supply-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  animation: toastSlideIn 0.25s ease forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast.toast-critical { border-color: var(--color-critical); }
+.toast.toast-warning { border-color: var(--color-warning); }
+.toast.toast-success { border-color: var(--color-success); }
+.toast.toast-info { border-color: var(--color-info); }
+
+.toast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toast-priority-badge {
+  font-size: 0.68rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.toast-critical .toast-priority-badge { background: rgba(239, 68, 68, 0.2); color: var(--color-critical); }
+.toast-warning .toast-priority-badge { background: rgba(245, 158, 11, 0.2); color: var(--color-warning); }
+.toast-success .toast-priority-badge { background: rgba(16, 185, 129, 0.2); color: var(--color-success); }
+.toast-info .toast-priority-badge { background: rgba(2, 132, 199, 0.2); color: var(--color-info); }
+
+.toast-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.toast-body {
+  font-size: 0.84rem;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.toast-countdown-bar {
+  height: 3px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.toast-countdown-fill {
+  height: 100%;
+  background: var(--text-muted);
+  width: 100%;
+}
+
+.toast-critical .toast-countdown-fill { background: var(--color-critical); }
+.toast-warning .toast-countdown-fill { background: var(--color-warning); }
+.toast-success .toast-countdown-fill { background: var(--color-success); }
+.toast-info .toast-countdown-fill { background: var(--color-info); }
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
