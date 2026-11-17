@@ -1,0 +1,247 @@
+/* Weather Radar Atlas - Visual Diff & State Inspector Styles */
+:root {
+  --bg-radar-dark: #070d18;
+  --bg-radar-card: #0f192b;
+  --bg-radar-panel: #16243d;
+  --border-color: #233554;
+  --accent-cyan: #38bdf8;
+  --text-main: #f0f6fc;
+  --text-muted: #8ca0ba;
+  --diff-added-bg: rgba(56, 189, 248, 0.18);
+  --diff-added-border: #38bdf8;
+  --diff-added-text: #7dd3fc;
+  --diff-removed-bg: rgba(244, 63, 94, 0.18);
+  --diff-removed-border: #f43f5e;
+  --diff-removed-text: #fda4af;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.weather-diff-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-radar-dark);
+  color: var(--text-main);
+  padding: 1.5rem;
+  min-height: 100vh;
+}
+
+.diff-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+}
+
+.diff-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.diff-title-wrapper h1 {
+  font-size: 1.35rem;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.metrics-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.metric-pill {
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--bg-radar-card);
+  border: 1px solid var(--border-color);
+}
+
+.pill-added {
+  color: var(--diff-added-text);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.pill-removed {
+  color: var(--diff-removed-text);
+  border-color: rgba(244, 63, 94, 0.4);
+}
+
+.pill-unchanged {
+  color: var(--text-muted);
+}
+
+.pill-percent {
+  color: var(--accent-cyan);
+}
+
+.diff-inputs-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.input-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-card label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.input-card textarea {
+  width: 100%;
+  height: 180px;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background-color: var(--bg-radar-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+
+.input-card textarea:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+}
+
+.diff-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn {
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--accent-cyan);
+  color: #070d18;
+}
+
+.btn-primary:hover {
+  background-color: #7dd3fc;
+}
+
+.btn-secondary {
+  background-color: var(--bg-radar-panel);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: #233554;
+}
+
+.diff-output-panel {
+  background-color: var(--bg-radar-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.diff-output-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-radar-panel);
+}
+
+.diff-output-header h2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.diff-scroll-panel {
+  overflow-x: auto;
+  max-height: 500px;
+}
+
+.empty-diff {
+  padding: 2.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+}
+
+.diff-row {
+  line-height: 1.5;
+}
+
+.diff-row td {
+  padding: 0.15rem 0.5rem;
+  vertical-align: top;
+}
+
+.line-num {
+  width: 45px;
+  text-align: right;
+  color: var(--text-muted);
+  user-select: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.diff-sign {
+  width: 20px;
+  text-align: center;
+  user-select: none;
+  font-weight: bold;
+}
+
+.diff-text {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.row-added {
+  background-color: var(--diff-added-bg);
+  color: var(--diff-added-text);
+}
+
+.row-added .diff-sign {
+  color: var(--diff-added-border);
+}
+
+.row-removed {
+  background-color: var(--diff-removed-bg);
+  color: var(--diff-removed-text);
+}
+
+.row-removed .diff-sign {
+  color: var(--diff-removed-border);
+}
+
+.row-unchanged {
+  color: var(--text-main);
+}
