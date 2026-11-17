@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Client-Side Export Engine & Summary Report Generator</title>
+  <link rel="stylesheet" href="export-engine.css">
+</head>
+<body class="festival-export-standalone">
+  <div class="festival-export-container">
+    <div class="festival-export-card">
+      <div class="card-header">
+        <div class="header-content">
+          <span class="export-badge">DATA EXPORT & AUDIT ENGINE</span>
+          <h2>Festival Program Data Exporter</h2>
+          <p>Export lineup and schedule datasets into JSON, CSV, or formatted Markdown</p>
+        </div>
+
+        <!-- Dropdown Menu - Issue #582 -->
+        <div class="export-dropdown-wrapper">
+          <button type="button" id="festivalExportMenuTrigger" class="export-trigger-btn" aria-haspopup="true">
+            <span>⚡ Export Data</span>
+            <span class="arrow-down">▼</span>
+          </button>
+
+          <div id="festivalExportDropdownMenu" class="export-dropdown-popover" role="menu">
+            <button type="button" id="festivalDownloadJsonBtn" class="dropdown-item" role="menuitem">
+              <span class="item-icon">📦</span>
+              <div class="item-text">
+                <span class="item-title">Download JSON Data</span>
+                <span class="item-desc">Structured application/json format</span>
+              </div>
+            </button>
+            <button type="button" id="festivalExportCsvBtn" class="dropdown-item" role="menuitem">
+              <span class="item-icon">📊</span>
+              <div class="item-text">
+                <span class="item-title">Export CSV Table</span>
+                <span class="item-desc">Escaped spreadsheet compatible table</span>
+              </div>
+            </button>
+            <button type="button" id="festivalCopyMarkdownBtn" class="dropdown-item" role="menuitem">
+              <span class="item-icon">📋</span>
+              <div class="item-text">
+                <span class="item-title">Copy Markdown Audit</span>
+                <span class="item-desc">Formatted GitHub Flavored Markdown</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview summary card -->
+      <div class="preview-box">
+        <div class="preview-header">
+          <h4>Program Lineup Preview (Active Dataset)</h4>
+          <span class="preview-count">3 Acts Available</span>
+        </div>
+        <div class="preview-table-wrap">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Artist / Act</th>
+                <th>Stage</th>
+                <th>Genre</th>
+                <th>Rating</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>perf_01</code></td>
+                <td>Cyber Bloom Headliner</td>
+                <td>Neon Apex</td>
+                <td>Synthwave</td>
+                <td>⭐ 4.9</td>
+                <td><span class="tag-status confirmed">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td><code>perf_02</code></td>
+                <td>Acoustic Horizon, "Live"</td>
+                <td>Meadow Pavilion</td>
+                <td>Indie Folk</td>
+                <td>⭐ 4.7</td>
+                <td><span class="tag-status confirmed">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td><code>perf_03</code></td>
+                <td>Sub-Bass Odyssey</td>
+                <td>Bass Vault</td>
+                <td>Dubstep</td>
+                <td>⭐ 4.8</td>
+                <td><span class="tag-status live">Live Now</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Toast Feedback -->
+      <div id="festivalExportToast" class="export-toast"></div>
+    </div>
+  </div>
+
+  <script type="module" src="export-engine.js"></script>
+</body>
+</html>
