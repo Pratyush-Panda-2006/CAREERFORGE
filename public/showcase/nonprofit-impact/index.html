@@ -852,6 +852,195 @@
   </section>
   <!-- ===== END Issue #353 ===== -->
 
+  <!-- ===== BEGIN Issue #297: Recurring Donation Impact Calculator with Tangible Monthly Milestones ===== -->
+  <section class="recurring-impact-section" id="recurring-donation-calculator" aria-labelledby="recurring-impact-title">
+    <div class="impact-calc-container">
+      <div class="impact-calc-header">
+        <span class="impact-eyebrow">🌱 SUSTAINED CONSERVATION IMPACT</span>
+        <h2 id="recurring-impact-title">Recurring Donation Impact Calculator</h2>
+        <p class="impact-subtitle">
+          Small monthly gifts create compounding generational change. Move the slider to see your tangible monthly and annualized milestones across forest restoration, clean water, marine ecosystems, and carbon removal.
+        </p>
+      </div>
+
+      <div class="impact-calc-grid">
+        <!-- Controls Column -->
+        <div class="impact-control-card">
+          <div class="impact-slider-head">
+            <span class="impact-control-label">Monthly Pledge Amount</span>
+            <div class="impact-amount-display" id="donationAmountBadge" aria-live="polite">
+              <span class="impact-currency">$</span>
+              <span class="impact-val" id="impactMonthlyValue">35</span>
+              <span class="impact-period">/ month</span>
+            </div>
+          </div>
+
+          <div class="impact-slider-wrapper">
+            <input
+              type="range"
+              id="recurringDonationSlider"
+              class="impact-range-slider"
+              min="10"
+              max="250"
+              step="5"
+              value="35"
+              aria-label="Monthly donation amount in dollars"
+              aria-valuemin="10"
+              aria-valuemax="250"
+              aria-valuenow="35"
+            />
+            <div class="impact-slider-ticks">
+              <span>$10</span>
+              <span>$50</span>
+              <span>$100</span>
+              <span>$175</span>
+              <span>$250</span>
+            </div>
+          </div>
+
+          <!-- Preset Chip Buttons -->
+          <div class="impact-preset-group" role="group" aria-label="Quick pledge presets">
+            <button type="button" class="impact-chip" data-amt="15">$15 / mo</button>
+            <button type="button" class="impact-chip active" data-amt="35">$35 / mo</button>
+            <button type="button" class="impact-chip" data-amt="75">$75 / mo</button>
+            <button type="button" class="impact-chip" data-amt="150">$150 / mo</button>
+            <button type="button" class="impact-chip" data-amt="250">$250 / mo</button>
+          </div>
+
+          <!-- Frequency Toggle -->
+          <div class="impact-frequency-toggle" role="group" aria-label="Contribution view period">
+            <button type="button" class="impact-freq-btn active" id="btnFreqMonthly" data-freq="monthly">Monthly View</button>
+            <button type="button" class="impact-freq-btn" id="btnFreqAnnual" data-freq="annual">Annualized (12 Months)</button>
+          </div>
+
+          <!-- Summary Callout -->
+          <div class="impact-pledge-callout" id="impactPledgeCallout">
+            <span class="callout-icon">✨</span>
+            <p id="impactPledgeText">At <strong>$35/month</strong>, your pledge restores <strong>336 trees</strong> and supplies <strong>210,000 liters</strong> of potable water each year.</p>
+          </div>
+
+          <div class="impact-action-buttons">
+            <button type="button" class="btn-impact-pledge" id="btnInitiatePledge">Pledge This Impact 💚</button>
+            <button type="button" class="btn-impact-share" id="btnShareImpact">Share Pledge Impact 🔗</button>
+          </div>
+          <div id="impactCalcToast" class="impact-toast" role="status" aria-live="polite"></div>
+        </div>
+
+        <!-- Metrics & Tangible Milestones Column -->
+        <div class="impact-metrics-column">
+          <div class="impact-stats-grid">
+            <div class="impact-stat-card stat-trees">
+              <div class="stat-icon-wrap">🌲</div>
+              <div class="stat-content">
+                <span class="stat-num" id="metricTrees">336</span>
+                <span class="stat-unit" id="unitTrees">Trees Planted / yr</span>
+                <p class="stat-desc">Native mangrove &amp; rain-canopy saplings planted in high-biodiversity wildlife corridors.</p>
+              </div>
+            </div>
+
+            <div class="impact-stat-card stat-water">
+              <div class="stat-icon-wrap">💧</div>
+              <div class="stat-content">
+                <span class="stat-num" id="metricWater">210,000</span>
+                <span class="stat-unit" id="unitWater">Liters Clean Water / yr</span>
+                <p class="stat-desc">Potable gravity-fed filtration systems built for rural water-stressed communities.</p>
+              </div>
+            </div>
+
+            <div class="impact-stat-card stat-reef">
+              <div class="stat-icon-wrap">🪸</div>
+              <div class="stat-content">
+                <span class="stat-num" id="metricReef">84</span>
+                <span class="stat-unit" id="unitReef">m² Coral Reef Restored / yr</span>
+                <p class="stat-desc">Micro-fragmentation nursery propagation on resilient barrier reef shelves.</p>
+              </div>
+            </div>
+
+            <div class="impact-stat-card stat-carbon">
+              <div class="stat-icon-wrap">🍃</div>
+              <div class="stat-content">
+                <span class="stat-num" id="metricCarbon">28.0</span>
+                <span class="stat-unit" id="unitCarbon">t CO2e Offset / yr</span>
+                <p class="stat-desc">Direct carbon sequestration via certified permanent forest biomes (Gold Standard).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tangible Milestone Unlock Badges -->
+          <div class="impact-milestones-card">
+            <h3 class="milestones-heading">🏆 Tangible Donor Milestone Roadmap</h3>
+            <div class="milestones-timeline">
+              <div class="milestone-step" id="milestoneStep3">
+                <div class="step-badge-icon">🌱</div>
+                <div class="step-details">
+                  <div class="step-header">
+                    <strong>Month 3 Milestone: Seedling Steward</strong>
+                    <span class="step-status unlocked" id="badgeStatus3">Active</span>
+                  </div>
+                  <p id="milestoneDesc3">Funds 84 nursery saplings and equips local indigenous rangers with seedling monitoring GPS beacons.</p>
+                </div>
+              </div>
+
+              <div class="milestone-step" id="milestoneStep6">
+                <div class="step-badge-icon">🌊</div>
+                <div class="step-details">
+                  <div class="step-header">
+                    <strong>Month 6 Milestone: Coral &amp; Watershed Guardian</strong>
+                    <span class="step-status unlocked" id="badgeStatus6">Active</span>
+                  </div>
+                  <p id="milestoneDesc6">Restores 42 m² of coral nursery structure and builds sustainable community graywater filters.</p>
+                </div>
+              </div>
+
+              <div class="milestone-step" id="milestoneStep12">
+                <div class="step-badge-icon">🌍</div>
+                <div class="step-details">
+                  <div class="step-header">
+                    <strong>Month 12 Milestone: Biosphere Champion</strong>
+                    <span class="step-status unlocked" id="badgeStatus12">Active</span>
+                  </div>
+                  <p id="milestoneDesc12">Neutralizes an entire household's carbon footprint (28.0 tCO2e) and secures lifelong forest legal protection.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Celebration Modal -->
+    <div class="impact-modal-backdrop" id="impactPledgeModal" hidden>
+      <div class="impact-modal" role="dialog" aria-modal="true" aria-labelledby="pledgeModalTitle">
+        <button type="button" class="impact-modal-close" id="btnCloseImpactModal" aria-label="Close dialog">&times;</button>
+        <div class="impact-modal-body">
+          <div class="modal-celebrate-icon">🎉</div>
+          <h3 id="pledgeModalTitle">Thank You for Becoming a Sustaining Guardian!</h3>
+          <p class="pledge-modal-sub">Your monthly commitment of <strong id="modalPledgeAmt">$35/month</strong> starts an incredible journey of regeneration.</p>
+          <div class="pledge-summary-box">
+            <div class="pledge-item">
+              <span class="p-label">Yearly Forest Restoration:</span>
+              <span class="p-val" id="modalTreesVal">336 Trees</span>
+            </div>
+            <div class="pledge-item">
+              <span class="p-label">Yearly Clean Water Generated:</span>
+              <span class="p-val" id="modalWaterVal">210,000 Liters</span>
+            </div>
+            <div class="pledge-item">
+              <span class="p-label">Marine Reef Protection:</span>
+              <span class="p-val" id="modalReefVal">84 m² Sanctuary</span>
+            </div>
+            <div class="pledge-item">
+              <span class="p-label">Carbon Sequestered:</span>
+              <span class="p-val" id="modalCarbonVal">28.0 t CO2e</span>
+            </div>
+          </div>
+          <button type="button" class="btn-confirm-pledge" id="btnConfirmPledgeClose">Complete Pledge &amp; Return</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #297 ===== -->
+
   <dialog class="volunteer-modal" id="volunteer-modal"
         aria-labelledby="volunteer-title">
     <div class="modal-content">
