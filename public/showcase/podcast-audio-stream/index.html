@@ -42,7 +42,7 @@
           <button type="button" class="dock-speed-pill dock-eq-pill" id="dock-eq-pill" title="Open the equalizer" aria-label="Equalizer preset: Flat. Open equalizer">EQ Flat</button>
           <button type="button" class="dock-speed-pill dock-chapters-btn" id="dock-chapters-btn" title="Scroll to chapter navigator" aria-label="Open chapter navigator">📑 Chapters (<span id="dock-chapter-badge">Ch 1/5</span>)</button>
           <button type="button" class="dock-speed-pill dock-transcript-btn" id="dock-transcript-btn" title="View interactive karaoke transcript">📖 Transcript</button>
-          <button type="button" class="dock-speed-pill dock-sleep-pill" id="dock-sleep-timer-btn" title="Set sleep timer" aria-label="Set sleep timer">🌙 <span id="dock-sleep-timer-badge">Sleep</span></button>
+          <button type="button" class="dock-speed-pill" id="dock-share-btn" aria-label="Share current episode">↗ Share</button>
         </div>
 
         <div class="dock-scrubber-row">
@@ -268,15 +268,32 @@
         <h3>The Future of Agentic AI &amp; Spatial Compute</h3>
         <div class="episode-meta"><span class="episode-duration">48 min</span><span class="episode-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
         <p>Guest: Dr. Aris Thorne (OpenAI Lead)</p>
+        <button type="button" class="episode-share-btn" data-share-episode="142" aria-label="Share episode 142">↗ Share episode</button>
       </div>
       <div class="card" id="card-141" onclick="playEpisode('Ep 141')" style="cursor: pointer;">
         <div class="ep-num">EP 141</div>
         <h3>Scaling Vector Databases to 10 Billion Chunks</h3>
         <div class="episode-meta"><span class="episode-duration">54 min</span><span class="episode-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
         <p>Guest: Marcus Vance (ChromaDB Creator)</p>
+        <button type="button" class="episode-share-btn" data-share-episode="141" aria-label="Share episode 141">↗ Share episode</button>
       </div>
     </div>
   </main>
+  <dialog id="episode-share-dialog" class="episode-share-dialog" aria-labelledby="episode-share-title">
+    <div class="share-wave" aria-hidden="true">▁▃▆█▆▃▁ ▂▅▇▅▂</div>
+    <h2 id="episode-share-title">Share this episode</h2>
+    <p id="episode-share-name"></p>
+    <label class="share-timestamp"><input type="checkbox" id="share-with-timestamp" /> Start at current timestamp <span id="share-time-label"></span></label>
+    <label class="share-link-label" for="share-link">Episode link</label>
+    <input id="share-link" type="text" readonly />
+    <div class="share-actions">
+      <button type="button" id="share-copy-btn">Copy link</button>
+      <a id="share-email-link" href="#">Email</a>
+      <a id="share-whatsapp-link" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <button type="button" id="share-close-btn">Close</button>
+    </div>
+    <p id="share-status" role="status" aria-live="polite"></p>
+  </dialog>
   <section class="queue-entry" aria-label="Playback queue">
     <button type="button" id="queue-open">Playback queue (0)</button>
     <p id="queue-announcement" role="status" aria-live="polite"></p>
@@ -352,7 +369,7 @@
   <!-- ===== Sleep Timer Modal (Issue #299) END ===== -->
   <script src="queue-logic.js"></script>
   <script src="player-logic.js"></script>
-  <script src="speed-pitch-logic.js"></script>
+  <script src="share-logic.js"></script>
   <script src="script.js"></script>
   <script src="queue-manager.js"></script>
 </body>
