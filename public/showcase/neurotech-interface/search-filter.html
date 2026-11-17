@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neurotech Interface - Dynamic Search & Filter</title>
+  <link rel="stylesheet" href="search-filter.css">
+</head>
+<body>
+  <div class="filter-page-container">
+    <div class="filter-header">
+      <h1>
+        BCI Electrode & Neural Signal Filter Engine
+        <span class="filter-badge">Issue #692</span>
+      </h1>
+      <p>High-performance in-memory channel search, cortex region filtering, and SNR signal sorting.</p>
+    </div>
+
+    <div class="controls-toolbar">
+      <div class="search-row">
+        <div class="search-input-wrapper">
+          <input type="text" id="search-filter-input" class="search-input" placeholder="Search by channel, region, or frequency wave...">
+          <button id="search-clear-btn" class="clear-btn" title="Clear search">&times;</button>
+        </div>
+
+        <select id="sort-select" class="sort-select">
+          <option value="name:asc">Channel Name (A-Z)</option>
+          <option value="name:desc">Channel Name (Z-A)</option>
+          <option value="snrDb:desc">Signal Quality SNR (Highest First)</option>
+          <option value="snrDb:asc">Signal Quality SNR (Lowest First)</option>
+          <option value="region:asc">Cortex Region (A-Z)</option>
+        </select>
+      </div>
+
+      <div class="chip-row" id="tag-chips-container">
+        <span class="chip-label">Filter Tags:</span>
+        <span class="filter-chip" data-tag="active">active</span>
+        <span class="filter-chip" data-tag="clean">clean</span>
+        <span class="filter-chip" data-tag="high-snr">high-snr</span>
+        <span class="filter-chip" data-tag="frontal">frontal</span>
+        <span class="filter-chip" data-tag="motor">motor</span>
+        <span class="filter-chip" data-tag="noisy">noisy</span>
+      </div>
+    </div>
+
+    <div class="results-grid" id="results-list"></div>
+
+    <div id="empty-state-alert" class="empty-state">
+      <h3>No matching neural channels found</h3>
+      <p>Try clearing your active tags or searching for another cortex electrode.</p>
+    </div>
+  </div>
+
+  <script type="module" src="search-filter.js"></script>
+</body>
+</html>
