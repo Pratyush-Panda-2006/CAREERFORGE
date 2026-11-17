@@ -20,6 +20,7 @@
       <a href="#faq">FAQ</a>
       <a href="#contact" class="cta-btn">Start Project</a>
       <button type="button" class="cta-btn btn-open-kickoff" id="btnOpenKickoffWizard">✦ Kickoff Wizard</button>
+      <button type="button" class="cta-btn btn-open-preferences" id="agencyPreferencesTriggerBtn" title="Preferences">⚙ Preferences</button>
     </nav>
   </header>
   <main>
@@ -1364,6 +1365,72 @@
     </div>
   </div>
   <!-- ===== END Issue #322 ===== -->
+
+  <!-- Agency Studio Preferences Modal Drawer - Issue #575 -->
+  <div class="agency-preferences-modal" id="agency-studio-preferences-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="agency-preferences-content">
+      <div class="agency-preferences-header">
+        <div class="pref-title-wrap">
+          <span class="pref-icon">⚙</span>
+          <h3>Studio Preferences</h3>
+        </div>
+        <button type="button" class="agency-pref-close-btn" id="agencyPreferencesCloseBtn" aria-label="Close preferences">✕</button>
+      </div>
+
+      <div class="agency-preferences-body">
+        <div class="pref-setting-row">
+          <div class="pref-info">
+            <label for="agencyPrefSoundCues" class="pref-label">Sound Cues</label>
+            <p class="pref-desc">Enable subtle ambient audio feedback on interactions</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="agencyPrefSoundCues">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="pref-setting-row">
+          <div class="pref-info">
+            <label for="agencyPrefHighContrast" class="pref-label">High-Contrast Mode</label>
+            <p class="pref-desc">Increase text and border contrast for accessibility</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="agencyPrefHighContrast">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="pref-setting-row">
+          <div class="pref-info">
+            <label for="agencyPrefViewLayout" class="pref-label">View Layout</label>
+            <p class="pref-desc">Select grid density for portfolio showcase items</p>
+          </div>
+          <select id="agencyPrefViewLayout" class="pref-select">
+            <option value="grid">Grid (Default)</option>
+            <option value="compact">Compact Grid</option>
+            <option value="masonry">Dynamic Masonry</option>
+            <option value="list">Editorial List</option>
+          </select>
+        </div>
+
+        <div class="pref-setting-row">
+          <div class="pref-info">
+            <label for="agencyPrefMetricUnits" class="pref-label">Metric Units</label>
+            <p class="pref-desc">Preferred unit standard for project specifications</p>
+          </div>
+          <select id="agencyPrefMetricUnits" class="pref-select">
+            <option value="metric">Metric (SI)</option>
+            <option value="imperial">Imperial (US)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="agency-preferences-footer">
+        <button type="button" class="pref-btn pref-btn-secondary" id="agencyResetPreferencesBtn">Reset Defaults</button>
+        <button type="button" class="pref-btn pref-btn-primary" id="agencyExportPreferencesBtn">Export Config (JSON)</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="liquid-ripple.js"></script>
 </body>
