@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VR Metaverse Hub - Visual WebXR Session & Shader Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+</head>
+<body>
+  <div class="diff-wrapper">
+    <header class="diff-header">
+      <h1 class="diff-title">WebXR Session & Shader Diff Inspector</h1>
+      <p class="diff-subtitle">Compare WebXR session configs, GLTF material uniforms, spatial audio topologies, and avatar bones.</p>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Lines Added</div>
+        <div id="statAddedLines" class="stat-value val-added">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Lines Removed</div>
+        <div id="statRemovedLines" class="stat-value val-removed">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Unchanged</div>
+        <div id="statUnchangedLines" class="stat-value val-unchanged">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Variance Ratio</div>
+        <div id="statChangePercent" class="stat-value val-percent">0%</div>
+      </div>
+    </div>
+
+    <div class="inputs-container">
+      <div class="input-pane">
+        <label for="origTextInput">Original WebXR / GLTF Profile</label>
+        <textarea id="origTextInput" placeholder="Enter original session or shader parameters..."></textarea>
+      </div>
+      <div class="input-pane">
+        <label for="modTextInput">Updated WebXR / GLTF Profile</label>
+        <textarea id="modTextInput" placeholder="Enter updated session or shader parameters..."></textarea>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button id="compareDiffBtn" class="btn-primary">Run Diff Analysis</button>
+      <button id="loadSampleDiffBtn" class="btn-secondary">Load Sample WebXR Diff</button>
+    </div>
+
+    <div id="diffOutputContainer" class="diff-output-box"></div>
+  </div>
+
+  <script type="module" src="diff-viewer.js"></script>
+</body>
+</html>
