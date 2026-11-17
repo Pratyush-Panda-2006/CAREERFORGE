@@ -3193,7 +3193,7 @@ func main() {
 
   // Apply immediately to avoid flash
   const initialTheme = getStoredTheme();
-  document.documentElement.setAttribute('data-theme', initialTheme);
+  if (document.documentElement) document.documentElement.setAttribute('data-theme', initialTheme);
 
   function initThemeSwitcher() {
     const dropdown = document.getElementById('themeSwitcher');
