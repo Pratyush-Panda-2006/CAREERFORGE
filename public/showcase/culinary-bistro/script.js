@@ -478,6 +478,20 @@ function updateRecapBars() {
   const dateStr = reservationState.dateFormatted || reservationState.dateIso;
   const areaStr = SEATING_NAMES[reservationState.area] || 'Main Dining Room';
 
+  // Show availability from the existing local floor-plan engine for the
+  // selected party and time, rather than claiming a real restaurant vacancy.
+  const available = reservationState.time && window.floorPlanEngine
+    ? window.floorPlanEngine.getAvailableTables(tableContext()) : [];
+  document.querySelectorAll('[data-area-availability]').forEach(badge => {
+    const count = available.filter(table => table.area === badge.dataset.areaAvailability).length;
+    badge.textContent = !reservationState.time ? 'Select a time to check tables'
+      : count ? `${count} sample table${count === 1 ? '' : 's'} available`
+        : 'No sample tables at this time';
+    badge.classList.toggle('unavailable', Boolean(reservationState.time) && count === 0);
+  });
+  const patioAdvisory = byId('patioAdvisory');
+  if (patioAdvisory) patioAdvisory.hidden = reservationState.area !== 'terrace';
+
   const recapPartyDate = byId('recapPartyDate');
   if (recapPartyDate) recapPartyDate.textContent = `${partyStr} • ${dateStr}`;
 
