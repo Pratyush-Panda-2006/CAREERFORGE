@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agritech Precision Farming - User Preferences</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body>
+  <div class="pref-page-container">
+    <div class="pref-header">
+      <h1>
+        Agritech Precision Farming
+        <span class="pref-badge">Issue #718</span>
+      </h1>
+      <p>Adaptive client-side preference manager with local persistence and export capabilities.</p>
+    </div>
+
+    <button id="open-preferences-btn" class="pref-trigger-btn">
+      ⚙️ Open Preferences Drawer
+    </button>
+  </div>
+
+  <!-- Preferences Modal / Drawer -->
+  <div id="agritech-precision-farming-preferences-modal" class="agritech-modal-overlay">
+    <div class="agritech-modal-card">
+      <div class="modal-header-row">
+        <h2>Dashboard Preferences</h2>
+        <button id="close-preferences-btn" class="close-x-btn">&times;</button>
+      </div>
+
+      <div class="pref-field-group">
+        <label for="pref-view-layout">Telemetry Layout Mode</label>
+        <select id="pref-view-layout" class="pref-select">
+          <option value="grid">Multi-Metric Grid</option>
+          <option value="dense">Dense Sensor Table</option>
+          <option value="map">Spatial Field Map</option>
+        </select>
+      </div>
+
+      <div class="pref-field-group">
+        <label for="pref-metric-units">Measurement Units</label>
+        <select id="pref-metric-units" class="pref-select">
+          <option value="metric">Metric (°C, Hectares, kg/ha)</option>
+          <option value="imperial">Imperial (°F, Acres, lbs/acre)</option>
+        </select>
+      </div>
+
+      <div class="pref-toggle-row">
+        <span>Audio Alerts & Sound Cues</span>
+        <label class="switch">
+          <input type="checkbox" id="pref-sound-cues">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="pref-toggle-row">
+        <span>High-Contrast Sunlight Mode</span>
+        <label class="switch">
+          <input type="checkbox" id="pref-high-contrast">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button id="reset-preferences-btn" class="btn-secondary">Reset Defaults</button>
+        <button id="export-preferences-btn" class="btn-primary">Export Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
