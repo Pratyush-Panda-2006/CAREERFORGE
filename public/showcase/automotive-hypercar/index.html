@@ -624,6 +624,22 @@
   </section>
   <!-- ===== EV Road Trip Range Estimator (Issue #271) END ===== -->
 
+  <section class="charging-comparison" id="charging-comparison" aria-labelledby="charging-title">
+    <p class="charging-kicker">APEX ZERO // CHARGING ARCHITECTURE</p>
+    <h2 id="charging-title">From 10% to 80%, your way</h2>
+    <p>Compare illustrative recharge times for the 130 kWh pack. Actual charging depends on charger output, temperature, and battery taper.</p>
+    <div class="charging-modes" role="group" aria-label="Choose charging mode">
+      <button type="button" data-charging-mode="ac" aria-pressed="false">Level 2 AC · 11 kW</button>
+      <button type="button" data-charging-mode="dc" aria-pressed="true">Ultra-Fast 800V DC · 350 kW</button>
+    </div>
+    <div class="charging-card">
+      <div><span class="charging-label" id="chargingModeLabel">Ultra-Fast 800V DC</span><strong id="chargingDuration" aria-live="polite">≈ 18 min</strong></div>
+      <div class="charging-battery" role="progressbar" aria-label="Illustrative battery charge animation" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" aria-valuetext="80 percent charge"><span id="chargingBatteryFill"></span></div>
+      <p>10% start <span>80% target</span></p>
+      <small id="chargingDetail">91 kWh added; includes an illustrative allowance for DC charging taper.</small>
+    </div>
+  </section>
+
   <!-- ===== BEGIN Issue #389: Regenerative Braking Energy Recovery Simulator with Deceleration Telemetry ===== -->
   <section class="regen-sim-section" id="regenSimulator" aria-labelledby="regenHeading">
     <div class="regen-container">
@@ -1000,6 +1016,7 @@
     <p id="lap-status" role="status">Choose a profile and compound to begin. Reduced-motion mode shows the completed result immediately.</p>
     <details><summary>Model assumptions and timing</summary><p>1,800 kg point mass, 700 kW available power, 115 m/s speed cap; no elevation, downforce, traffic or temperature model. A backward braking pass and forward traction/power pass solve 25 m or shorter segments. Corner limits use v² = μgr; compound grip decreases with tire age and distance. Soft slicks have more dry grip and faster wear, while wet tires have more wet grip. Playback uses elapsed timestamps and pauses when the tab is hidden. Personal bests last only for this page session; track PB and sector fastest records compare completed runs across compounds and tire ages on the same surface and profile.</p></details>
   </section>
+  <script src="charging-model.js"></script>
   <script src="script.js"></script>
   <script type="module" src="lap-simulator.js"></script>
 </body>
