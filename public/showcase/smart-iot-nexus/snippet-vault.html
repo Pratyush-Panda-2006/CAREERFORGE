@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart IoT Nexus - Embedded Algorithm Preset Snippet Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+</head>
+<body>
+  <div class="vault-wrapper">
+    <header class="vault-header">
+      <div>
+        <h1 class="vault-title">Smart IoT Embedded Algorithm Vault</h1>
+        <p class="vault-subtitle">Search and inspect verified MQTT topic wildcard matchers, Kalman telemetry filters, EMA smoothers, and LoRaWAN ADR calculators.</p>
+      </div>
+      <button id="openAddModalBtn" class="btn-primary">+ Add IoT Preset</button>
+    </header>
+
+    <div class="controls-bar">
+      <input type="text" id="searchSnippetInput" class="search-input" placeholder="Search algorithms by keyword, sensor protocol, filter type, or tag...">
+      <div id="tagFilterBar" class="tag-bar">
+        <button class="filter-pill active" data-tag="all">All Presets</button>
+        <button class="filter-pill" data-tag="mqtt">MQTT Routing</button>
+        <button class="filter-pill" data-tag="filter">Kalman Filter</button>
+        <button class="filter-pill" data-tag="dsp">DSP Smoothing</button>
+        <button class="filter-pill" data-tag="lora">LoRaWAN ADR</button>
+      </div>
+    </div>
+
+    <div id="snippetList" class="snippets-grid"></div>
+  </div>
+
+  <div id="addSnippetModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Save IoT Algorithm Preset</h3>
+        <button id="closeModalBtn" class="close-btn">&times;</button>
+      </div>
+      <form id="newSnippetForm">
+        <div class="form-group">
+          <label for="inputSnippetTitle">Preset Title</label>
+          <input type="text" id="inputSnippetTitle" placeholder="e.g. Circular Ring Buffer Streaming Standard Deviation" required>
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetCategory">Category</label>
+          <select id="inputSnippetCategory">
+            <option value="mqtt">MQTT Routing</option>
+            <option value="filter">Kalman Filter</option>
+            <option value="dsp">DSP Smoothing</option>
+            <option value="lora">LoRaWAN ADR</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetTags">Tags (comma-separated)</label>
+          <input type="text" id="inputSnippetTags" placeholder="sensors, buffer, stats">
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetDesc">Description</label>
+          <input type="text" id="inputSnippetDesc" placeholder="Brief technical summary...">
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetCode">Algorithm / Sensor Processing Code</label>
+          <textarea id="inputSnippetCode" rows="6" placeholder="// Enter JavaScript sensor processing algorithm..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">Save to Vault</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="snippet-vault.js"></script>
+</body>
+</html>
