@@ -23,8 +23,8 @@ if (token && !isDryRun) {
   }
 }
 
-const owner = "Pratyush-Panda-2006";
-const repo = "CAREERFORGE";
+const repoEnv = process.env.GITHUB_REPOSITORY || "Pratyush-Panda-2006/CAREERFORGE";
+const [owner, repo] = repoEnv.split("/");
 
 export const issues = [
   {
