@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming Cinema Hub - Production & Release Workflow Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body class="cinema-pipeline-body">
+  <header class="pipeline-header">
+    <div class="pipeline-brand">
+      <span class="pipeline-icon">🎞️</span>
+      <h1>Cinema Production & Streaming Release Pipeline</h1>
+    </div>
+    <div class="pipeline-actions">
+      <button type="button" id="openNewTaskModal" class="btn btn-primary">+ Add Release Title</button>
+      <button type="button" id="exportPipelineBtn" class="btn btn-secondary">Export JSON</button>
+    </div>
+  </header>
+
+  <main class="pipeline-main">
+    <div class="kanban-board" id="kanbanBoard"></div>
+  </main>
+
+  <div class="modal-backdrop" id="taskModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Schedule Release Title</h3>
+        <button type="button" class="close-btn" id="closeModalBtn">&times;</button>
+      </div>
+      <form id="newTaskForm" class="modal-form">
+        <div class="form-group">
+          <label for="taskTitleInput">Film / Series Title</label>
+          <input type="text" id="taskTitleInput" required placeholder="e.g. Interstellar Odyssey 4K">
+        </div>
+        <div class="form-group">
+          <label for="taskDescInput">Encoding & Master Spec</label>
+          <textarea id="taskDescInput" rows="3" placeholder="Audio tracks, ProRes master transcoding, HDR10+ metadata..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskColSelect">Target Phase</label>
+            <select id="taskColSelect">
+              <option value="backlog">Licensing Backlog</option>
+              <option value="in_progress">Transcoding & QC</option>
+              <option value="review">Editorial & Ratings Review</option>
+              <option value="completed">Live on Streaming CDN</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="taskPrioritySelect">Release Tier</label>
+            <select id="taskPrioritySelect">
+              <option value="high">Tier 1 (Blockbuster Premiere)</option>
+              <option value="medium" selected>Tier 2 (Standard Catalog)</option>
+              <option value="low">Tier 3 (Archival Indie)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="taskAssigneeInput">QC Lead / Studio</label>
+          <input type="text" id="taskAssigneeInput" placeholder="e.g. Paramount / Warner Bros">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Title to Pipeline</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="workflow-pipeline.js"></script>
+</body>
+</html>
