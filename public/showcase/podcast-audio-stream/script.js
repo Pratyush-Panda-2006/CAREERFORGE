@@ -1,6 +1,7 @@
 // Speeds & Audio Player State
 const speeds = [1, 1.25, 1.5, 2];
-let currentSpeedIndex = 0;
+let playbackSpeed = 1; // any value from 0.5 to 3.0 (see speed-pitch-logic.js)
+let speedRestored = false; // true once the speed panel loaded its own saved speed
 
 let isPlaying = false;
 let selectedEpisode = '142';
@@ -144,35 +145,44 @@ function saveBookmark() {
   renderBookmarks();
 }
 
-function toggleSpeed() {
-  currentSpeedIndex = (currentSpeedIndex + 1) % speeds.length;
-  const currentSpeed = applySpeed();
+function setPlaybackSpeed(value) {
+  playbackSpeed = SpeedPitch.snapSpeed(value);
+  applySpeed();
+  if (window.SpeedPitchPanel) window.SpeedPitchPanel.persist();
   saveState();
-  return currentSpeed;
+  return playbackSpeed;
+}
+window.setPlaybackSpeed = setPlaybackSpeed;
+
+// The hero button and dock pill still step through the presets (1x, 1.25x, 1.5x, 2x).
+function toggleSpeed() {
+  return setPlaybackSpeed(SpeedPitch.nextPresetSpeed(playbackSpeed));
 }
 window.toggleSpeed = toggleSpeed;
 
 function applySpeed() {
-  const currentSpeed = speeds[currentSpeedIndex];
+  const currentSpeed = playbackSpeed;
+  const label = SpeedPitch.formatSpeed(currentSpeed);
 
   // Update Hero speed button
   const heroSpeedBtn = document.getElementById('speed-btn');
   if (heroSpeedBtn) {
-    heroSpeedBtn.textContent = `${currentSpeed}x`;
-    heroSpeedBtn.setAttribute('aria-label', `Playback speed: ${currentSpeed}x`);
+    heroSpeedBtn.textContent = label;
+    heroSpeedBtn.setAttribute('aria-label', `Playback speed: ${label}`);
   }
 
   // Update Dock speed pill
   const dockSpeedPill = document.getElementById('dock-speed-pill');
   if (dockSpeedPill) {
-    dockSpeedPill.textContent = `${currentSpeed}x`;
-    dockSpeedPill.setAttribute('aria-label', `Playback speed: ${currentSpeed}x`);
+    dockSpeedPill.textContent = label;
+    dockSpeedPill.setAttribute('aria-label', `Playback speed: ${label}`);
   }
 
   const audio = document.querySelector('audio');
   if (audio) {
     audio.playbackRate = currentSpeed;
   }
+  if (window.SpeedPitchPanel) window.SpeedPitchPanel.render();
   return currentSpeed;
 }
 
@@ -228,6 +238,7 @@ function applyVolume() {
   // The demo plays no real media, but keep any <audio> element in sync.
   const audio = document.querySelector('audio');
   if (audio) audio.volume = volume;
+  if (window.SpeedPitchPanel) window.SpeedPitchPanel.setVolume(volume);
 }
 
 function setVolume(value) {
@@ -244,7 +255,7 @@ function toggleMute() {
 function saveState() {
   try {
     localStorage.setItem(PlayerLogic.STORAGE_KEY, PlayerLogic.serializeState({
-      episode: selectedEpisode, time: currentTime, volume, speedIndex: currentSpeedIndex
+      episode: selectedEpisode, time: currentTime, volume, speedIndex: Math.max(0, speeds.indexOf(playbackSpeed))
     }));
   } catch (e) { /* storage unavailable: player still works, just not remembered */ }
 }
@@ -258,7 +269,8 @@ function restoreState() {
   selectedEpisode = saved.episode;
   DURATION = selectedEpisode === '141' ? 3240 : 2880;
   currentTime = Math.min(saved.time, DURATION);
-  currentSpeedIndex = saved.speedIndex;
+  // The speed panel keeps the exact speed (e.g. 1.35x); the preset index is the fallback.
+  if (!speedRestored) playbackSpeed = speeds[saved.speedIndex];
   volume = saved.volume;
   if (volume > 0) volumeBeforeMute = volume;
   applySpeed();
@@ -275,8 +287,7 @@ function startPlayback() {
 
   if (playInterval) clearInterval(playInterval);
   playInterval = setInterval(() => {
-    const currentSpeed = speeds[currentSpeedIndex] || 1;
-    currentTime += 0.25 * currentSpeed;
+    currentTime += 0.25 * playbackSpeed;
     if (currentTime >= DURATION) {
       currentTime = DURATION;
       pausePlayback();
@@ -1266,4 +1277,470 @@ document.addEventListener('DOMContentLoaded', () => {
   buildBands();
   load();
   render(false);
+})();
+
+/* ===============================================================
+   Playback Speed & Pitch Correction Engine (Issue #418)
+   Speed 0.5x to 3.0x. A granular delay-modulation pitch shifter (two
+   cross-faded delay lines whose delayTime is swept by looping ramps)
+   brings voices back to natural pitch. The maths lives in
+   speed-pitch-logic.js. The episode player itself is simulated, so the
+   Audition button feeds a synthesized test voice through the chain.
+=============================================================== */
+(function initSpeedPitchEngine() {
+  'use strict';
+  var S = window.SpeedPitch;
+  var section = document.getElementById('speed-pitch-section');
+  if (!S || !section) return;
+
+  var canvas = document.getElementById('sp-canvas');
+  var slider = document.getElementById('sp-slider');
+  var correctionBox = document.getElementById('sp-correction');
+  var auditionBtn = document.getElementById('sp-audition');
+  var statusEl = document.getElementById('sp-status');
+  var presetBtns = Array.prototype.slice.call(section.querySelectorAll('.sp-preset-btn'));
+  var reduceMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  var AUDITION_LIMIT_MS = 30000;
+
+  var correction = true;
+  var engine = null;      // { ctx, chain, voice } once a user gesture created it
+  var auditioning = false;
+  var mediaAttached = false;
+  var rafId = 0;
+  var stopTimer = 0;
+  var masterVolume = 1;
+
+  // ----- Web Audio chain ---------------------------------------
+  // input -> dry ---------------------------> out
+  //       -> delayA -> fadeA -+
+  //       -> delayB -> fadeB -+-> wet -------> out -> analyser -> master -> speakers
+  // Each delay's delayTime is driven by a looping 0..1 ramp scaled by +-D.
+  function createChain(ctx) {
+    var sr = ctx.sampleRate;
+    var length = Math.round(S.GRAIN_PERIOD * sr);
+    var period = length / sr;
+    var input = ctx.createGain();
+    var dry = ctx.createGain();
+    var wet = ctx.createGain();
+    var out = ctx.createGain();
+    var analyser = ctx.createAnalyser();
+    var master = ctx.createGain();
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.8;
+    master.gain.value = 0.2;
+    wet.gain.value = 0;
+
+    input.connect(dry);
+    dry.connect(out);
+    wet.connect(out);
+    out.connect(analyser);
+    analyser.connect(master);
+    master.connect(ctx.destination);
+
+    function loopSource(table) {
+      var buffer = ctx.createBuffer(1, length, sr);
+      buffer.copyToChannel(table, 0);
+      var src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.loop = true;
+      return src;
+    }
+
+    var grains = [0, 0.5].map(function (offset) {
+      var delay = ctx.createDelay(1);
+      var fade = ctx.createGain();
+      var modGain = ctx.createGain();
+      var rampSrc = loopSource(S.buildRampTable(length, offset));
+      var fadeSrc = loopSource(S.buildFadeTable(length, offset));
+      delay.delayTime.value = 0;
+      fade.gain.value = 0;
+      modGain.gain.value = 0;
+      rampSrc.connect(modGain);
+      modGain.connect(delay.delayTime);
+      fadeSrc.connect(fade.gain);
+      input.connect(delay);
+      delay.connect(fade);
+      fade.connect(wet);
+      return { delay: delay, fade: fade, modGain: modGain, rampSrc: rampSrc, fadeSrc: fadeSrc };
+    });
+
+    var t0 = ctx.currentTime;
+    grains.forEach(function (g) { g.rampSrc.start(t0); g.fadeSrc.start(t0); });
+
+    function setSpeed(speed, correctionOn, immediate) {
+      var p = S.grainParams(speed, period);
+      var active = correctionOn && !p.bypass;
+      var now = ctx.currentTime;
+      function ramp(param, value) {
+        if (immediate) { param.setValueAtTime(value, now); return; }
+        param.setTargetAtTime(value, now, 0.02);
+      }
+      grains.forEach(function (g) {
+        ramp(g.delay.delayTime, active ? p.baseDelay : 0);
+        ramp(g.modGain.gain, active ? p.sign * p.maxDelay : 0);
+      });
+      ramp(dry.gain, active ? 0 : 1);
+      ramp(wet.gain, active ? 1 : 0);
+      return p;
+    }
+
+    function dispose() {
+      grains.forEach(function (g) {
+        try { g.rampSrc.stop(); g.fadeSrc.stop(); } catch { /* already stopped */ }
+      });
+      input.disconnect();
+      master.disconnect();
+    }
+
+    return {
+      input: input, dry: dry, wet: wet, out: out, analyser: analyser, master: master,
+      grains: grains, period: period, setSpeed: setSpeed, dispose: dispose
+    };
+  }
+
+  // A synthesized stand-in for a recording played at `speed`: a buzzy glottal-like
+  // sawtooth through three formant filters, with syllable-rate amplitude movement.
+  // Fundamental, formants and syllable rate all scale with the speed, like tape.
+  function createVoice(ctx, destination, speed) {
+    var voice = S.scaledVoice(speed);
+    var osc = ctx.createOscillator();
+    var amp = ctx.createGain();
+    var sum = ctx.createGain();
+    var lfo = ctx.createOscillator();
+    var lfoDepth = ctx.createGain();
+    var filters = voice.formants.map(function (fm) {
+      var filter = ctx.createBiquadFilter();
+      var level = ctx.createGain();
+      filter.type = 'bandpass';
+      filter.frequency.value = fm.freq;
+      filter.Q.value = fm.q;
+      level.gain.value = fm.level * 3;
+      osc.connect(filter);
+      filter.connect(level);
+      level.connect(sum);
+      return filter;
+    });
+    osc.type = 'sawtooth';
+    osc.frequency.value = voice.f0;
+    amp.gain.value = 0.65;
+    sum.gain.value = 0.9;
+    lfo.frequency.value = 3 * speed;
+    lfoDepth.gain.value = 0.35;
+    lfo.connect(lfoDepth);
+    lfoDepth.connect(amp.gain);
+    sum.connect(amp);
+    amp.connect(destination);
+    osc.start();
+    lfo.start();
+
+    return {
+      setSpeed: function (next) {
+        var v = S.scaledVoice(next);
+        var now = ctx.currentTime;
+        osc.frequency.setTargetAtTime(v.f0, now, 0.03);
+        lfo.frequency.setTargetAtTime(3 * next, now, 0.03);
+        filters.forEach(function (filter, i) {
+          filter.frequency.setTargetAtTime(v.formants[i].freq, now, 0.03);
+        });
+      },
+      stop: function () {
+        try { osc.stop(); lfo.stop(); } catch { /* already stopped */ }
+        osc.disconnect();
+        amp.disconnect();
+      }
+    };
+  }
+
+  function ensureEngine() {
+    if (engine) return engine;
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    try {
+      var ctx = new Ctx();
+      var chain = createChain(ctx);
+      engine = { ctx: ctx, chain: chain, voice: null };
+      chain.master.gain.value = 0.2 * masterVolume;
+      chain.setSpeed(playbackSpeed, correction, true);
+      attachMediaElement();
+      if (!auditioning && !mediaAttached) ctx.suspend();
+      return engine;
+    } catch {
+      engine = null;
+      return null;
+    }
+  }
+
+  // If a real <audio> element ever shows up on the page, route it through the chain.
+  // Native pitch preservation is switched off so the chain does the correction once.
+  function attachMediaElement() {
+    var audio = document.querySelector('audio');
+    if (!engine || !audio || audio.dataset.spAttached) return;
+    try {
+      var source = engine.ctx.createMediaElementSource(audio);
+      source.connect(engine.chain.input);
+      audio.preservesPitch = false;
+      audio.mozPreservesPitch = false;
+      audio.webkitPreservesPitch = false;
+      audio.dataset.spAttached = 'true';
+      mediaAttached = true;
+    } catch { /* element already captured elsewhere: leave it alone */ }
+  }
+
+  // ----- Persistence -------------------------------------------
+  function persist() {
+    try {
+      localStorage.setItem(S.SETTINGS_KEY, S.serializeSettings({ speed: playbackSpeed, correction: correction }));
+    } catch { /* storage unavailable: still works for this visit */ }
+  }
+
+  function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(S.SETTINGS_KEY); } catch { return; }
+    var saved = S.parseSettings(raw);
+    if (!saved) return;
+    playbackSpeed = saved.speed;
+    correction = saved.correction;
+    speedRestored = true;
+  }
+
+  // ----- Readouts ----------------------------------------------
+  function fmtMs(seconds) { return Math.round(seconds * 1000) + ' ms'; }
+
+  function describe(p) {
+    var label = S.formatSpeed(playbackSpeed);
+    if (p.bypass) return label + ' speed, no correction needed';
+    if (!correction) return label + ' speed, pitch correction off, voices sound shifted ' + (playbackSpeed > 1 ? 'up' : 'down');
+    var st = Math.abs(p.semitones).toFixed(1);
+    return label + ' speed, voice pitch moved ' + st + ' semitones ' + (p.semitones < 0 ? 'down' : 'up') + ' to stay natural';
+  }
+
+  function render() {
+    var p = S.grainParams(playbackSpeed);
+    var active = correction && !p.bypass;
+    var label = S.formatSpeed(playbackSpeed);
+
+    document.getElementById('sp-speed-value').textContent = label;
+    slider.value = String(playbackSpeed);
+    slider.setAttribute('aria-valuetext', label + ' speed');
+    correctionBox.checked = correction;
+    presetBtns.forEach(function (btn) {
+      var on = Math.abs(Number(btn.dataset.speed) - playbackSpeed) < 1e-9;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', String(on));
+    });
+
+    var badge = document.getElementById('sp-correction-badge');
+    badge.textContent = p.bypass ? 'Natural pitch (1x)' : correction ? 'Pitch correction on' : 'Pitch correction off';
+    badge.classList.toggle('is-off', !correction && !p.bypass);
+
+    var shift = document.getElementById('sp-meter-shift');
+    shift.textContent = active ? (p.semitones > 0 ? '+' : '') + p.semitones.toFixed(1) + ' st' : (p.bypass ? '0.0 st' : 'Off');
+    document.getElementById('sp-meter-grain').textContent = fmtMs(S.GRAIN_PERIOD);
+    document.getElementById('sp-meter-sweep').textContent = active ? fmtMs(p.maxDelay) : '0 ms';
+    document.getElementById('sp-meter-latency').textContent = active ? fmtMs(p.latency) : '0 ms';
+
+    canvas.setAttribute('aria-label', 'Frequency response of the test voice. ' + describe(p) + '.');
+    if (engine) {
+      engine.chain.setSpeed(playbackSpeed, correction, false);
+      if (engine.voice) engine.voice.setSpeed(playbackSpeed);
+    }
+    draw();
+  }
+
+  function say(message) { statusEl.textContent = message; }
+
+  // ----- Visualizer --------------------------------------------
+  var GRID_HZ = [100, 200, 500, 1000, 2000, 5000];
+
+  function css(name, fallback) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+
+  function sizeCanvas() {
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.max(canvas.clientWidth, 200);
+    var h = Math.max(canvas.clientHeight, 120);
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+    return { w: w, h: h, dpr: dpr };
+  }
+
+  function tracePath(g, curve, w, h, pad) {
+    curve.forEach(function (pt, i) {
+      var x = pt[0] * w;
+      var y = h - pad - pt[1] * (h - pad * 2);
+      if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+    });
+  }
+
+  function draw() {
+    var g = canvas.getContext && canvas.getContext('2d');
+    if (!g) return;
+    var size = sizeCanvas();
+    var w = size.w, h = size.h, pad = 14;
+    var pink = css('--pink', '#ec4899');
+    g.setTransform(size.dpr, 0, 0, size.dpr, 0, 0);
+    g.clearRect(0, 0, w, h);
+
+    g.font = '600 10px "Space Grotesk", sans-serif';
+    g.textBaseline = 'alphabetic';
+    g.lineWidth = 1;
+    GRID_HZ.forEach(function (hz) {
+      var x = Math.round(S.hzToX(hz) * w) + 0.5;
+      g.strokeStyle = 'rgba(255,255,255,0.07)';
+      g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h - 16); g.stroke();
+      g.fillStyle = 'rgba(161,161,170,0.9)';
+      g.fillText(hz >= 1000 ? hz / 1000 + 'k' : String(hz), Math.min(x + 3, w - 20), h - 4);
+    });
+
+    // live output spectrum (only while the test voice is playing)
+    if (auditioning && engine) {
+      var analyser = engine.chain.analyser;
+      var bins = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(bins);
+      var nyquist = engine.ctx.sampleRate / 2;
+      g.fillStyle = 'rgba(255,255,255,0.28)';
+      for (var x = 0; x < w; x += 3) {
+        var hz = S.xToHz(x / w);
+        var v = bins[Math.min(bins.length - 1, Math.round(hz / nyquist * bins.length))] / 255;
+        var bh = v * (h - pad * 2 - 6);
+        g.fillRect(x, h - 18 - bh, 2, bh);
+      }
+    }
+
+    var area = h - 16;
+    var raw = S.responseCurve(160, S.outputFactor(playbackSpeed, false));
+    var fixed = S.responseCurve(160, S.outputFactor(playbackSpeed, correction));
+
+    // raw varispeed curve
+    g.save();
+    g.setLineDash([5, 4]);
+    g.strokeStyle = 'rgba(161,161,170,0.85)';
+    g.lineWidth = 1.5;
+    g.beginPath();
+    tracePath(g, raw, w, area, pad);
+    g.stroke();
+    g.restore();
+
+    // curve after the chain
+    g.beginPath();
+    tracePath(g, fixed, w, area, pad);
+    g.lineWidth = 2.5;
+    g.strokeStyle = pink;
+    g.shadowColor = pink;
+    g.shadowBlur = reduceMotionQuery && reduceMotionQuery.matches ? 0 : 8;
+    g.stroke();
+    g.shadowBlur = 0;
+  }
+
+  function loop() {
+    rafId = 0;
+    if (!auditioning) return;
+    draw();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function reducedMotion() { return !!(reduceMotionQuery && reduceMotionQuery.matches); }
+
+  // ----- Audition ----------------------------------------------
+  function startAudition() {
+    var eng = ensureEngine();
+    if (!eng) { say('Web Audio is not available in this browser, so the test voice cannot play. The speed controls still work.'); return; }
+    auditioning = true;
+    eng.ctx.resume();
+    eng.voice = createVoice(eng.ctx, eng.chain.input, playbackSpeed);
+    auditionBtn.setAttribute('aria-pressed', 'true');
+    auditionBtn.textContent = '⏸ Stop test voice';
+    section.classList.add('is-live');
+    say('Playing a synthesized test voice at ' + S.formatSpeed(playbackSpeed) + ' with pitch correction ' + (correction ? 'on' : 'off') +
+      '. It stops by itself after 30 seconds.' + (reducedMotion() ? ' Live bars are hidden because reduced motion is on.' : ''));
+    clearTimeout(stopTimer);
+    stopTimer = setTimeout(function () { stopAudition(true); }, AUDITION_LIMIT_MS);
+    if (!reducedMotion() && !rafId) rafId = requestAnimationFrame(loop);
+  }
+
+  function stopAudition(timedOut) {
+    clearTimeout(stopTimer);
+    auditioning = false;
+    if (engine && engine.voice) { engine.voice.stop(); engine.voice = null; }
+    if (engine && !mediaAttached) engine.ctx.suspend();
+    auditionBtn.setAttribute('aria-pressed', 'false');
+    auditionBtn.textContent = '▶ Audition test voice';
+    section.classList.remove('is-live');
+    if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    say(timedOut ? 'Test voice stopped after 30 seconds.' : 'Test voice stopped.');
+    draw();
+  }
+
+  // ----- Wiring ------------------------------------------------
+  presetBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      ensureEngine();
+      setPlaybackSpeed(Number(btn.dataset.speed));
+      say('Speed set to ' + S.formatSpeed(playbackSpeed) + '. ' + describe(S.grainParams(playbackSpeed)) + '.');
+    });
+  });
+
+  slider.addEventListener('input', function () {
+    ensureEngine();
+    setPlaybackSpeed(slider.value);
+  });
+  slider.addEventListener('change', function () {
+    say(describe(S.grainParams(playbackSpeed)) + '.');
+  });
+
+  correctionBox.addEventListener('change', function () {
+    ensureEngine();
+    correction = correctionBox.checked;
+    persist();
+    render();
+    say('Pitch correction ' + (correction ? 'on' : 'off') + '. ' + describe(S.grainParams(playbackSpeed)) + '.');
+  });
+
+  auditionBtn.addEventListener('click', function () {
+    if (auditioning) stopAudition(false); else startAudition();
+  });
+
+  window.addEventListener('resize', draw);
+  if (reduceMotionQuery && reduceMotionQuery.addEventListener) {
+    reduceMotionQuery.addEventListener('change', function () {
+      if (auditioning && !reducedMotion() && !rafId) rafId = requestAnimationFrame(loop);
+      draw();
+    });
+  }
+
+  window.SpeedPitchPanel = {
+    render: render,
+    persist: persist,
+    setVolume: function (v) {
+      masterVolume = v;
+      if (engine) engine.chain.master.gain.setTargetAtTime(0.2 * v, engine.ctx.currentTime, 0.02);
+    }
+  };
+  // Debug and test surface: lets a page script build the same chain on any
+  // BaseAudioContext (for example an OfflineAudioContext) and inspect the live one.
+  window.SpeedPitchEngine = {
+    createChain: createChain,
+    createVoice: createVoice,
+    getState: function () {
+      return {
+        speed: playbackSpeed,
+        correction: correction,
+        auditioning: auditioning,
+        contextState: engine ? engine.ctx.state : null,
+        nodes: engine ? {
+          delays: engine.chain.grains.length,
+          fadeGains: engine.chain.grains.length,
+          modulators: engine.chain.grains.length,
+          analyser: !!engine.chain.analyser
+        } : null
+      };
+    }
+  };
+
+  load();
+  applySpeed();
 })();
