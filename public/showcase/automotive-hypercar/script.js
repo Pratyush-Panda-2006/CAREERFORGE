@@ -1,4 +1,4 @@
-﻿/* Reveal each specification once; the final text remains available without JS. */
+/* Reveal each specification once; the final text remains available without JS. */
 (function () {
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const numbers = document.querySelectorAll('.spec-number');
@@ -458,8 +458,8 @@ window.reserveHypercar = function reserveHypercar() {
     els.power.textContent = fmt(r.powerKw) + ' kW';
     els.speedOut.textContent = state.mph + ' mph';
     els.speed.setAttribute('aria-valuetext', state.mph + ' miles per hour');
-    els.formula.textContent = 'Drag = 0.5 Ã— ' + AIR_DENSITY + ' kg/mÂ³ Ã— (' + r.v.toFixed(1) + ' m/s)Â² Ã— ' +
-      s.cd.toFixed(2) + ' Ã— ' + FRONTAL_AREA.toFixed(1) + ' mÂ² = ' + fmt(r.dragN) + ' N';
+    els.formula.textContent = 'Drag = 0.5 × ' + AIR_DENSITY + ' kg/m³ × (' + r.v.toFixed(1) + ' m/s)² × ' +
+      s.cd.toFixed(2) + ' × ' + FRONTAL_AREA.toFixed(1) + ' m² = ' + fmt(r.dragN) + ' N';
     if (state.key === DEFAULT_STATE) {
       els.delta.textContent = 'Baseline setup: wing retracted.';
     } else {
@@ -532,8 +532,8 @@ window.reserveHypercar = function reserveHypercar() {
     els.speed.min = SPEED_MIN;
     els.speed.max = SPEED_MAX;
     els.speed.value = SPEED_DEFAULT;
-    els.note.textContent = 'Approximate demo model: air density ' + AIR_DENSITY + ' kg/mÂ³, frontal area ' + FRONTAL_AREA.toFixed(1) +
-      ' mÂ², and the Cd / downforce coefficients are made-up values chosen for illustration.';
+    els.note.textContent = 'Approximate demo model: air density ' + AIR_DENSITY + ' kg/m³, frontal area ' + FRONTAL_AREA.toFixed(1) +
+      ' m², and the Cd / downforce coefficients are made-up values chosen for illustration.';
 
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     els.canvas.width = W * dpr;
@@ -557,7 +557,7 @@ window.reserveHypercar = function reserveHypercar() {
 })();
 /* ===== Virtual Wind Tunnel (issue #99) END ===== */
 
-/* ===== 360Â° Vehicle Colorway & Wheel Configurator (issue #51) START ===== */
+/* ===== 360° Vehicle Colorway & Wheel Configurator (issue #51) START ===== */
 (function () {
   'use strict';
 
@@ -688,10 +688,10 @@ window.reserveHypercar = function reserveHypercar() {
   ];
 
   var ANGLES = [
-    { deg: 0,   id: 'front',   label: '000Â° // FRONT 3/4' },
-    { deg: 90,  id: 'side',    label: '090Â° // SIDE AERO' },
-    { deg: 180, id: 'rear',    label: '180Â° // REAR DIFFUSER' },
-    { deg: 270, id: 'top',     label: '270Â° // TOP AERO' }
+    { deg: 0,   id: 'front',   label: '000° // FRONT 3/4' },
+    { deg: 90,  id: 'side',    label: '090° // SIDE AERO' },
+    { deg: 180, id: 'rear',    label: '180° // REAR DIFFUSER' },
+    { deg: 270, id: 'top',     label: '270° // TOP AERO' }
   ];
 
   var state = {
@@ -853,7 +853,7 @@ window.reserveHypercar = function reserveHypercar() {
     '</defs>';
 
     if (presetAngle === 0) {
-      // ===== 000Â° FRONT 3/4 PERSPECTIVE =====
+      // ===== 000° FRONT 3/4 PERSPECTIVE =====
       return '<svg viewBox="0 0 840 380" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         svgDefs +
         // Ground Shadow
@@ -890,7 +890,7 @@ window.reserveHypercar = function reserveHypercar() {
         '<text x="430" y="308" fill="#9ca3af" font-size="7" font-family="Orbitron" font-weight="900" text-anchor="middle" letter-spacing="3">APEX ZERO // 1900 HP</text>' +
       '</svg>';
     } else if (presetAngle === 90) {
-      // ===== 090Â° SIDE AERO SILHOUETTE =====
+      // ===== 090° SIDE AERO SILHOUETTE =====
       return '<svg viewBox="0 0 840 340" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         svgDefs +
         // Shadow
@@ -921,7 +921,7 @@ window.reserveHypercar = function reserveHypercar() {
         '</g>' +
       '</svg>';
     } else if (presetAngle === 180) {
-      // ===== 180Â° REAR DIFFUSER & TAIL =====
+      // ===== 180° REAR DIFFUSER & TAIL =====
       return '<svg viewBox="0 0 840 380" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         svgDefs +
         // Shadow
@@ -956,7 +956,7 @@ window.reserveHypercar = function reserveHypercar() {
         '<rect x="650" y="270" width="45" height="52" rx="4" fill="#18181b" stroke="#27272a" stroke-width="2"/>' +
       '</svg>';
     } else {
-      // ===== 270Â° TOP DOWN COCKPIT =====
+      // ===== 270° TOP DOWN COCKPIT =====
       return '<svg viewBox="0 0 840 400" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         svgDefs +
         // Shadow
@@ -1037,7 +1037,7 @@ window.reserveHypercar = function reserveHypercar() {
     });
 
     // Update Azimuth Slider Readout
-    if (dom.sliderDeg) dom.sliderDeg.textContent = state.angle + 'Â°';
+    if (dom.sliderDeg) dom.sliderDeg.textContent = state.angle + '°';
     if (dom.slider && Number(dom.slider.value) !== state.angle) {
       dom.slider.value = state.angle;
     }
@@ -1082,7 +1082,7 @@ window.reserveHypercar = function reserveHypercar() {
       ];
       if (state.trackAero) specs.push('Track Aero Pack');
       if (state.matrixLed) specs.push('Cyber Matrix LED');
-      dom.summaryText.textContent = specs.join(' â€¢ ');
+      dom.summaryText.textContent = specs.join(' • ');
     }
 
     // Persist
@@ -1341,7 +1341,7 @@ window.reserveHypercar = function reserveHypercar() {
         var url = window.location.origin + window.location.pathname + '#color=' + state.color + '&wheel=' + state.wheel + '&angle=' + state.angle;
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(url).then(function () {
-            showToast('âœ“ Bespoke build URL copied to clipboard!');
+            showToast('✓ Bespoke build URL copied to clipboard!');
           }).catch(function () {
             showToast('Build URL: ' + url);
           });
@@ -1365,7 +1365,7 @@ window.reserveHypercar = function reserveHypercar() {
 
   document.addEventListener('DOMContentLoaded', init);
 })();
-/* ===== 360Â° Vehicle Colorway & Wheel Configurator (issue #51) END ===== */
+/* ===== 360° Vehicle Colorway & Wheel Configurator (issue #51) END ===== */
 
 
 /* ===== Launch Control 0-60 Acceleration Simulation & Live G-Meter (Issue #177) START ===== */
@@ -1438,7 +1438,7 @@ window.reserveHypercar = function reserveHypercar() {
 
       // Reset DOM displays
       if (speedEl) speedEl.textContent = '0';
-      if (rpmEl) rpmEl.textContent = '0 RPM â€¢ 1ST GEAR';
+      if (rpmEl) rpmEl.textContent = '0 RPM • 1ST GEAR';
       if (speedArc) speedArc.style.strokeDashoffset = ARC_CIRCUMFERENCE;
       if (kwOutputEl) kwOutputEl.textContent = '0 kW (0 HP)';
       if (peakMphEl) peakMphEl.textContent = '0.0 MPH';
@@ -1467,7 +1467,7 @@ window.reserveHypercar = function reserveHypercar() {
 
       if (launchBtn) {
         launchBtn.classList.remove('is-active');
-        launchBtn.innerHTML = '<span class="btn-icon">âš¡</span><span class="btn-text">LAUNCH HYPERCAR</span>';
+        launchBtn.innerHTML = '<span class="btn-icon">⚡</span><span class="btn-text">LAUNCH HYPERCAR</span>';
       }
 
       setConsole('[LAUNCH CONTROL ARMED]: Press Launch Hypercar to initiate staging sequence.');
@@ -1478,7 +1478,7 @@ window.reserveHypercar = function reserveHypercar() {
       state.phase = 'staging';
 
       if (launchBtn) {
-        launchBtn.innerHTML = '<span class="btn-icon">â³</span><span class="btn-text">STAGING BOOST...</span>';
+        launchBtn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-text">STAGING BOOST...</span>';
       }
 
       setConsole('[STAGING TREE]: Pre-stage armed. Inverter capacitance charging...');
@@ -1502,7 +1502,7 @@ window.reserveHypercar = function reserveHypercar() {
         setConsole('[LAUNCH INITIATED]: MAXIMUM ACCELERATION! ALL-WHEEL VECTOR ACTIVE.');
         if (launchBtn) {
           launchBtn.classList.add('is-active');
-          launchBtn.innerHTML = '<span class="btn-icon">ðŸš€</span><span class="btn-text">ACCELERATING...</span>';
+          launchBtn.innerHTML = '<span class="btn-icon">🚀</span><span class="btn-text">ACCELERATING...</span>';
         }
         beginAccelerationPhysics();
       }, 1050);
@@ -1553,7 +1553,7 @@ window.reserveHypercar = function reserveHypercar() {
 
         // RPM calculation (Direct drive electric trans, ~0-18,000 RPM)
         var rpm = Math.floor((speed / MAX_SPEED) * 18500);
-        if (rpmEl) rpmEl.textContent = rpm.toLocaleString() + ' RPM â€¢ ' + (speed > 55 ? 'DIRECT DRIVE' : '1ST GEAR');
+        if (rpmEl) rpmEl.textContent = rpm.toLocaleString() + ' RPM • ' + (speed > 55 ? 'DIRECT DRIVE' : '1ST GEAR');
 
         // Speedometer SVG arc
         var fraction = Math.min(1.0, speed / 120.0);
@@ -1608,10 +1608,10 @@ window.reserveHypercar = function reserveHypercar() {
         // Completion condition (~3.0 seconds after 100+ mph run)
         if (elapsed >= 3.0) {
           state.phase = 'completed';
-          setConsole('ðŸ† [SIMULATION COMPLETED]: 0â€“60 MPH officially clocked in ' + (msItems.ms60.valEl ? msItems.ms60.valEl.textContent : '1.74s') + ' with peak ' + state.maxG.toFixed(2) + ' G!');
+          setConsole('🏆 [SIMULATION COMPLETED]: 0–60 MPH officially clocked in ' + (msItems.ms60.valEl ? msItems.ms60.valEl.textContent : '1.74s') + ' with peak ' + state.maxG.toFixed(2) + ' G!');
           if (launchBtn) {
             launchBtn.classList.remove('is-active');
-            launchBtn.innerHTML = '<span class="btn-icon">âš¡</span><span class="btn-text">RE-LAUNCH HYPERCAR</span>';
+            launchBtn.innerHTML = '<span class="btn-icon">⚡</span><span class="btn-text">RE-LAUNCH HYPERCAR</span>';
           }
           return;
         }
@@ -1651,7 +1651,7 @@ window.reserveHypercar = function reserveHypercar() {
   'use strict';
 
   var PACK_CAPACITY_KWH = 130; // 130 kWh Solid-State Hyper-Cell Battery
-  var BASE_RANGE_MILES = 385;  // Baseline EPA range at 21Â°C in Ludicrous Cruise on Flat Terrain
+  var BASE_RANGE_MILES = 385;  // Baseline EPA range at 21°C in Ludicrous Cruise on Flat Terrain
   var GAUGE_CIRCUMFERENCE = 385;
 
   var MODES = {
@@ -1662,15 +1662,15 @@ window.reserveHypercar = function reserveHypercar() {
 
   var TERRAINS = {
     flat: { name: 'Flat Highway', rangeMult: 1.00, regenKwhBase: 0, regenPct: 0, desc: 'Zero incline, nominal rolling resistance' },
-    rolling: { name: 'Rolling Hills', rangeMult: 0.94, regenKwhBase: 8.4, regenPct: 6.5, desc: 'Â±3% elevation changes, 12% kinetic recovery' },
-    mountain: { name: 'Alpine Pass', rangeMult: 0.81, regenKwhBase: 16.5, regenPct: 14.8, desc: 'Â±8% steep mountain grade, heavy downhill regen' }
+    rolling: { name: 'Rolling Hills', rangeMult: 0.94, regenKwhBase: 8.4, regenPct: 6.5, desc: '±3% elevation changes, 12% kinetic recovery' },
+    mountain: { name: 'Alpine Pass', rangeMult: 0.81, regenKwhBase: 16.5, regenPct: 14.8, desc: '±8% steep mountain grade, heavy downhill regen' }
   };
 
   function computeRangePhysics(tempC, modeKey, terrainKey, tripDistanceMiles) {
     var mode = MODES[modeKey] || MODES.cruise;
     var terrain = TERRAINS[terrainKey] || TERRAINS.flat;
 
-    // Temperature efficiency curve (optimal 20Â°C - 24Â°C)
+    // Temperature efficiency curve (optimal 20°C - 24°C)
     var tempEfficiency = 1.0;
     var hvacKw = 1.2;
     var tempAdvice = '';
@@ -1781,7 +1781,7 @@ window.reserveHypercar = function reserveHypercar() {
     function updateUI() {
       var tempC = parseInt(tempSlider.value, 10);
       var tempF = Math.round((tempC * 9 / 5) + 32);
-      tempValOut.textContent = tempC + 'Â°C (' + tempF + 'Â°F)';
+      tempValOut.textContent = tempC + '°C (' + tempF + '°F)';
 
       var distMiles = parseInt(distSlider.value, 10);
       var distKm = Math.round(distMiles * 1.60934);
@@ -1841,7 +1841,7 @@ window.reserveHypercar = function reserveHypercar() {
         } else {
           routeBanner.className = 'range-route-banner warning';
           var deficit = distMiles - res.totalRange;
-          routeBannerText.textContent = 'âš ï¸ Insufficient single-charge range! 350kW DC Fast Charge stop required ' + deficit + ' miles before destination.';
+          routeBannerText.textContent = '⚠️ Insufficient single-charge range! 350kW DC Fast Charge stop required ' + deficit + ' miles before destination.';
         }
       }
     }
@@ -2048,7 +2048,7 @@ window.reserveHypercar = function reserveHypercar() {
       telSocReplenish.textContent = `+${p.socGain.toFixed(2)}% SoC`;
       telExtendedRange.textContent = `+${p.cityMiles.toFixed(1)} Miles`;
       telBrakeWearSaved.textContent = `${p.wearRelief.toFixed(1)}% Reduction`;
-      telRotorTemp.textContent = `Rotor Temp: ${p.rotorTemp}Â°C vs 640Â°C`;
+      telRotorTemp.textContent = `Rotor Temp: ${p.rotorTemp}°C vs 640°C`;
 
       // Mode Status Chip
       if (currentModeKey === 'off') {
@@ -2375,4 +2375,49 @@ window.reserveHypercar = function reserveHypercar() {
   } else {
     setup();
   }
+})();
+// Illustrative charge-mode comparison: the energy comes from the same pack
+// capacity and 10–80% window shown in the range estimator.
+(function initChargingComparison() {
+  const buttons = Array.from(document.querySelectorAll('[data-charging-mode]'));
+  if (!buttons.length) return;
+  const fill = document.getElementById('chargingBatteryFill');
+  const duration = document.getElementById('chargingDuration');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let frameId = null;
+  let fillFrameId = null;
+
+  function render(mode) {
+    if (frameId !== null) cancelAnimationFrame(frameId);
+    if (fillFrameId !== null) cancelAnimationFrame(fillFrameId);
+    const estimate = ChargingModel.estimate(mode);
+    const value = mode === 'ac' ? Math.round(estimate.minutes / 60 * 10) / 10 : Math.round(estimate.minutes);
+    const unit = mode === 'ac' ? 'hr' : 'min';
+    buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.chargingMode === mode)));
+    document.getElementById('chargingModeLabel').textContent = estimate.label;
+    document.getElementById('chargingDetail').textContent = mode === 'ac'
+      ? `${estimate.energyKwh} kWh added at an idealized 11 kW input rate.`
+      : `${estimate.energyKwh} kWh added; includes an illustrative allowance for DC charging taper.`;
+    fill.style.transition = 'none';
+    fill.style.width = reducedMotion.matches ? '80%' : '10%';
+    if (reducedMotion.matches) {
+      duration.textContent = `≈ ${value} ${unit}`;
+      return;
+    }
+    fill.getBoundingClientRect(); // commit the 10% starting width before animating
+    fill.style.transition = '';
+    fillFrameId = requestAnimationFrame(() => { fill.style.width = '80%'; fillFrameId = null; });
+    const start = performance.now();
+    function tick(now) {
+      const progress = Math.min(1, (now - start) / 500);
+      const eased = 1 - (1 - progress) ** 3;
+      duration.textContent = `≈ ${(value * eased).toFixed(mode === 'ac' ? 1 : 0)} ${unit}`;
+      if (progress < 1) frameId = requestAnimationFrame(tick);
+      else frameId = null;
+    }
+    frameId = requestAnimationFrame(tick);
+  }
+
+  buttons.forEach(button => button.addEventListener('click', () => render(button.dataset.chargingMode)));
+  render('dc');
 })();

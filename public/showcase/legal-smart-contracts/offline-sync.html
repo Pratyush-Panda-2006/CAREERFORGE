@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal Smart Contracts — Resilient Offline Consensus Sync</title>
+  <link rel="stylesheet" href="offline-sync.css">
+</head>
+<body>
+  <div class="sync-container">
+    <header class="sync-header">
+      <div class="title-wrap">
+        <h1>⚖️ Offline Contract Persistence & Consensus Queue</h1>
+        <p>Deterministic vector-clock mutation reconciliation for decentralized legal covenants and multi-sig arbitration.</p>
+      </div>
+      <div class="network-status-panel">
+        <span id="connectionStatusBadge" class="status-badge status-online">ONLINE (Consensus Node Connected)</span>
+        <span id="pendingCountBadge" class="counter-badge badge-idle">0 pending</span>
+      </div>
+    </header>
+
+    <div class="sync-actions-bar">
+      <button type="button" id="toggleOnlineBtn" class="btn-legal">📡 Toggle Connectivity</button>
+      <button type="button" id="addClauseBtn" class="btn-legal">✍️ Add Multi-Sig Mutation</button>
+      <button type="button" id="syncNowBtn" class="btn-legal btn-primary">⚡ Commit to Ledger</button>
+      <button type="button" id="clearQueueBtn" class="btn-legal">🗑️ Clear Buffer</button>
+    </div>
+
+    <section class="card-panel">
+      <h2>Pending Contract Mutations Buffer</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mutation ID</th>
+              <th>Action</th>
+              <th>Contract ID</th>
+              <th>Vector Clock</th>
+              <th>Retries</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="queueTableBody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card-panel">
+      <h3>Consensus Relay Audit Console</h3>
+      <div id="syncLogConsole" class="log-console" role="log" aria-live="polite">
+        <!-- Live logs -->
+      </div>
+    </section>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Legal Smart Contracts Showcase Dashboard</a>
+    </nav>
+  </div>
+
+  <script type="module" src="offline-sync.js"></script>
+</body>
+</html>

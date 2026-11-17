@@ -1,0 +1,38 @@
+name: Publish Batch 10 Issues
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/publish-batch10-issues.yml'
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  publish-batch10:
+    name: Publish 150 Conflict-Free Level 3 Issues to GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Publish Batch 10 Issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          node scripts/create-batch10-issues.mjs

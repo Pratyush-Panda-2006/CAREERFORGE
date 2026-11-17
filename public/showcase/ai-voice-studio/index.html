@@ -412,8 +412,11 @@
     <form class="studio-card" id="tts-form" novalidate>
       <div class="field">
         <label for="tts-text">Text to speak</label>
-        <textarea id="tts-text" rows="5" maxlength="2000" placeholder="Type or paste some text here...">Hello! This is Sonora, speaking straight from your browser.</textarea>
-        <span class="char-count" id="tts-count" aria-live="off">0 / 2000</span>
+        <textarea id="tts-text" rows="5" maxlength="2000" aria-describedby="tts-count tts-duration" placeholder="Type or paste some text here...">Hello! This is Sonora, speaking straight from your browser.</textarea>
+        <div class="script-metrics">
+          <span class="char-count" id="tts-count" aria-live="off">0 chars / 2000</span>
+          <span class="speech-duration" id="tts-duration" aria-live="off">~0 sec spoken</span>
+        </div>
       </div>
 
       <div class="field">
@@ -874,8 +877,8 @@
               <option value="0">Off (Free)</option>
             </select>
           </div>
-          <button type="button" class="daw-btn daw-btn-export" id="dawExportBtn" aria-label="Export Mixed WAV Audio">
-            <span>⬇ Export Mix (WAV)</span>
+          <button type="button" class="daw-btn daw-btn-export" id="dawExportBtn" aria-haspopup="dialog" aria-label="Export audio mix, opens export options">
+            <span>⬇ Export Audio</span>
           </button>
         </div>
       </div>
@@ -976,6 +979,87 @@
       </div>
     </div>
   </section>
+
+  <!-- Export Audio modal (opened by #dawExportBtn) -->
+  <div class="export-modal-overlay" id="exportModal" hidden>
+    <div class="export-modal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle" aria-describedby="exportModalDesc">
+      <div class="export-modal-head">
+        <h3 id="exportModalTitle">Export Audio</h3>
+        <button type="button" class="export-modal-close" id="exportModalClose" aria-label="Close export dialog">&times;</button>
+      </div>
+      <p class="export-modal-desc" id="exportModalDesc">Mixes the voice and ambience tracks as they sit on the timeline, then downloads one file.</p>
+
+      <form class="export-form" id="exportForm" novalidate>
+        <fieldset class="export-fieldset">
+          <legend>Format</legend>
+          <div class="export-choice-grid">
+            <label class="export-choice" for="exportFormatWav">
+              <input type="radio" name="exportFormat" id="exportFormatWav" value="wav" checked aria-describedby="exportFormatWavNote">
+              <span class="export-choice-body">
+                <span class="export-choice-title">WAV</span>
+                <span class="export-choice-note" id="exportFormatWavNote">Uncompressed 16-bit mono. Largest file, no quality loss.</span>
+              </span>
+            </label>
+            <label class="export-choice" for="exportFormatMp3">
+              <input type="radio" name="exportFormat" id="exportFormatMp3" value="mp3" aria-describedby="exportFormatMp3Note">
+              <span class="export-choice-body">
+                <span class="export-choice-title">MP3</span>
+                <span class="export-choice-note" id="exportFormatMp3Note">Compressed, plays everywhere. Pick a bitrate below.</span>
+              </span>
+            </label>
+            <label class="export-choice" for="exportFormatOgg">
+              <input type="radio" name="exportFormat" id="exportFormatOgg" value="ogg" aria-describedby="exportFormatOggNote">
+              <span class="export-choice-body">
+                <span class="export-choice-title">OGG</span>
+                <span class="export-choice-note" id="exportFormatOggNote">Compressed (Opus). Encoded in real time, so it takes as long as the mix plays.</span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="export-fieldset">
+          <legend>Sample rate</legend>
+          <div class="export-choice-grid export-choice-grid-2">
+            <label class="export-choice" for="exportRate44">
+              <input type="radio" name="exportSampleRate" id="exportRate44" value="44100" checked>
+              <span class="export-choice-body"><span class="export-choice-title">44.1 kHz</span><span class="export-choice-note">CD standard</span></span>
+            </label>
+            <label class="export-choice" for="exportRate48">
+              <input type="radio" name="exportSampleRate" id="exportRate48" value="48000">
+              <span class="export-choice-body"><span class="export-choice-title">48 kHz</span><span class="export-choice-note">Video / broadcast</span></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="export-field" id="exportBitrateField" hidden>
+          <label for="exportBitrate">MP3 bitrate</label>
+          <select id="exportBitrate" class="daw-select">
+            <option value="128">128 kbps</option>
+            <option value="192">192 kbps</option>
+            <option value="256">256 kbps</option>
+            <option value="320" selected>320 kbps (best)</option>
+          </select>
+        </div>
+
+        <div class="export-field">
+          <label for="exportFileName">File name</label>
+          <div class="export-name-row">
+            <input type="text" id="exportFileName" class="export-input" value="sonora-multitrack-mix" maxlength="120" autocomplete="off" spellcheck="false" aria-describedby="exportFileHint">
+            <span class="export-ext" id="exportExt" aria-hidden="true">.wav</span>
+          </div>
+          <p class="export-hint" id="exportFileHint" aria-live="polite"></p>
+        </div>
+
+        <p class="export-unavailable" id="exportUnavailable" hidden></p>
+        <p class="export-progress" id="exportProgress" role="status" aria-live="polite"></p>
+
+        <div class="export-actions">
+          <button type="button" class="daw-btn" id="exportCancelBtn">Cancel</button>
+          <button type="submit" class="daw-btn daw-btn-export export-submit" id="exportSubmitBtn">⬇ Download</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script type="module" src="voice-recorder.js"></script>
   <script src="script.js"></script>

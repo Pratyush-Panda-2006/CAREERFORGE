@@ -19,6 +19,8 @@
       <a href="#reviews">Reviews</a>
       <a href="#faq">FAQ</a>
       <a href="#contact" class="cta-btn">Start Project</a>
+      <button type="button" class="cta-btn btn-open-kickoff" id="btnOpenKickoffWizard">✦ Kickoff Wizard</button>
+      <button type="button" class="cta-btn btn-open-preferences" id="agencyPreferencesTriggerBtn" title="Preferences">⚙ Preferences</button>
     </nav>
   </header>
   <main>
@@ -169,6 +171,14 @@
     <p class="portfolio-sub">Explore our comprehensive engineering case studies, product challenges, and validated business impact.</p>
   </div>
 
+  <form id="ripple-controls" class="ripple-controls" aria-label="Portfolio ripple settings">
+    <label><input type="checkbox" id="ripple-enabled" checked> Enable liquid ripple</label>
+    <label>Frequency <select name="frequency"><option value="3">Wide waves</option><option value="6" selected>Medium waves</option><option value="12">Fine waves</option></select></label>
+    <label>Amplitude <select name="amplitude"><option value="8">Subtle</option><option value="18" selected>Medium</option><option value="28">Strong</option></select></label>
+    <label>Damping <select name="damping"><option value="2">Slow settle</option><option value="4" selected>Medium settle</option><option value="7">Fast settle</option></select></label>
+    <button type="button" id="ripple-preview">Preview first thumbnail ripple</button>
+    <p id="ripple-status" role="status">Static thumbnails until the renderer is ready.</p>
+  </form>
   <div class="grid">
     <div class="project-card" data-project-id="solana-pay">
       <div class="project-preview purple-gradient">
@@ -284,48 +294,58 @@
           <span class="scope-count-pill" id="scopeServiceCount">3 selected</span>
         </div>
         <div class="deliverable-chips-grid" id="deliverableChipsGrid" role="group" aria-label="Service deliverable toggle chips">
-          <button type="button" class="deliverable-chip active" data-service="brand-identity" aria-pressed="true">
+          <button type="button" class="deliverable-chip active" data-service="brand-identity" aria-pressed="true" aria-label="Brand Identity, $5,500, 2 to 3 weeks" aria-describedby="turnaround-brand">
             <span class="chip-glow-dot"></span>
             <span class="chip-icon">🎨</span>
             <span class="chip-info">
               <strong>Brand Identity</strong>
               <small>$5,500 · 2–3 wks</small>
+              <span class="turnaround-badge">⚡ 2–3 wk sprint</span>
+              <span class="turnaround-tooltip" id="turnaround-brand">Discovery → Identity design → Guidelines handoff</span>
             </span>
           </button>
 
-          <button type="button" class="deliverable-chip active" data-service="web-dev" aria-pressed="true">
+          <button type="button" class="deliverable-chip active" data-service="web-dev" aria-pressed="true" aria-label="Web Development, $14,000, 4 to 6 weeks" aria-describedby="turnaround-web">
             <span class="chip-glow-dot"></span>
             <span class="chip-icon">⚡</span>
             <span class="chip-info">
               <strong>Web Development</strong>
               <small>$14,000 · 4–6 wks</small>
+              <span class="turnaround-badge">⚡ 4–6 wk build</span>
+              <span class="turnaround-tooltip" id="turnaround-web">Discovery → Design → Build and launch</span>
             </span>
           </button>
 
-          <button type="button" class="deliverable-chip" data-service="3d-motion" aria-pressed="false">
+          <button type="button" class="deliverable-chip" data-service="3d-motion" aria-pressed="false" aria-label="3D Motion, $6,500, 2 to 3 weeks" aria-describedby="turnaround-motion">
             <span class="chip-glow-dot"></span>
             <span class="chip-icon">🌀</span>
             <span class="chip-info">
               <strong>3D Motion</strong>
               <small>$6,500 · 2–3 wks</small>
+              <span class="turnaround-badge">⚡ 2–3 wk motion sprint</span>
+              <span class="turnaround-tooltip" id="turnaround-motion">Creative brief → Motion prototypes → Final delivery</span>
             </span>
           </button>
 
-          <button type="button" class="deliverable-chip active" data-service="design-systems" aria-pressed="true">
+          <button type="button" class="deliverable-chip active" data-service="design-systems" aria-pressed="true" aria-label="Design Systems, $7,500, 2 to 4 weeks" aria-describedby="turnaround-systems">
             <span class="chip-glow-dot"></span>
             <span class="chip-icon">🧩</span>
             <span class="chip-info">
               <strong>Design Systems</strong>
               <small>$7,500 · 2–4 wks</small>
+              <span class="turnaround-badge">⚡ 2–4 wk system sprint</span>
+              <span class="turnaround-tooltip" id="turnaround-systems">UI audit → Tokens and components → Team handoff</span>
             </span>
           </button>
 
-          <button type="button" class="deliverable-chip" data-service="seo" aria-pressed="false">
+          <button type="button" class="deliverable-chip" data-service="seo" aria-pressed="false" aria-label="SEO, $3,200, 1 to 2 weeks" aria-describedby="turnaround-seo">
             <span class="chip-glow-dot"></span>
             <span class="chip-icon">📈</span>
             <span class="chip-info">
               <strong>SEO</strong>
               <small>$3,200 · 1–2 wks</small>
+              <span class="turnaround-badge">⚡ 1–2 wk optimization</span>
+              <span class="turnaround-tooltip" id="turnaround-seo">Audit → Search optimization → Launch checks</span>
             </span>
           </button>
         </div>
@@ -379,6 +399,7 @@
           <span class="summary-meta-pill" id="scopeBurnBadge">~$2,700 / wk</span>
           <span class="summary-meta-pill accent" id="scopeSprintModeBadge">Standard Pace</span>
         </div>
+        <p class="summary-turnaround" id="summaryTurnaround" role="status">⚡ 10-week projected delivery · Discovery → Design → Build → Launch</p>
       </div>
 
       <div class="summary-deliverables-list" id="scopeSelectedChipsPreview">
@@ -1111,5 +1132,306 @@
   </div>
   <!-- ===== END Issue #106 ===== -->
 
+  <!-- ===== BEGIN Issue #322: Multi-Step Client Project Kickoff Intake Questionnaire Modal ===== -->
+  <div id="kickoffBackdrop" class="kickoff-backdrop" hidden></div>
+  <div id="kickoffModal" class="kickoff-modal" role="dialog" aria-modal="true" aria-labelledby="kickoffTitle" hidden>
+    <div class="kickoff-container">
+      <!-- Modal Header -->
+      <div class="kickoff-header">
+        <div class="kickoff-title-wrap">
+          <span class="kickoff-tag">STUDIO DISCOVERY INTAKE</span>
+          <h2 id="kickoffTitle">Client Project Kickoff Questionnaire</h2>
+        </div>
+        <button type="button" class="kickoff-close-btn" id="btnCloseKickoffModal" aria-label="Close intake modal">&times;</button>
+      </div>
+
+      <!-- Multi-Step Progress Tracker -->
+      <div class="kickoff-stepper">
+        <div class="stepper-progress-track">
+          <div class="stepper-progress-bar" id="stepperProgressBar" style="width: 25%;"></div>
+        </div>
+        <div class="stepper-pills">
+          <button type="button" class="step-pill active" data-step="1">
+            <span class="pill-dot">1</span>
+            <span class="pill-label">Scope &amp; Goals</span>
+          </button>
+          <button type="button" class="step-pill" data-step="2">
+            <span class="pill-dot">2</span>
+            <span class="pill-label">Visual Style</span>
+          </button>
+          <button type="button" class="step-pill" data-step="3">
+            <span class="pill-dot">3</span>
+            <span class="pill-label">Budget &amp; Timing</span>
+          </button>
+          <button type="button" class="step-pill" data-step="4">
+            <span class="pill-dot">4</span>
+            <span class="pill-label">Brief Review</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step Views Form Container -->
+      <form id="kickoffForm" class="kickoff-form-body" novalidate>
+        <!-- Step 1: Scope & Objectives -->
+        <div class="kickoff-step-view active" id="kickoffStep1">
+          <div class="step-intro">
+            <h3>Project Scope &amp; Core Objectives</h3>
+            <p>Define the strategic domain, primary deliverables, and foundational purpose of your initiative.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="group-title">Select Primary Project Discipline</label>
+            <div class="chips-radio-grid" role="radiogroup" aria-label="Project Discipline">
+              <button type="button" class="k-chip active" data-type="Web3 &amp; Fintech Experience">Web3 &amp; Fintech</button>
+              <button type="button" class="k-chip" data-type="Brand Identity &amp; Motion Design">Brand Identity &amp; Motion</button>
+              <button type="button" class="k-chip" data-type="Flagship Mobile Application (iOS/Android)">Mobile iOS/Android App</button>
+              <button type="button" class="k-chip" data-type="Spatial 3D &amp; Immersive Web">Spatial 3D &amp; WebGL</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="group-title">Primary Strategic Objectives</label>
+            <div class="multi-select-grid">
+              <label class="checkbox-box active">
+                <input type="checkbox" name="obj" value="Drive High-Ticket Conversion" checked />
+                <span>Drive High-Ticket Conversion</span>
+              </label>
+              <label class="checkbox-box active">
+                <input type="checkbox" name="obj" value="Elevate Global Brand Prestige" checked />
+                <span>Elevate Global Brand Prestige</span>
+              </label>
+              <label class="checkbox-box">
+                <input type="checkbox" name="obj" value="Full Architecture Replatform" />
+                <span>Full Architecture Replatform</span>
+              </label>
+              <label class="checkbox-box">
+                <input type="checkbox" name="obj" value="Venture Fundraise &amp; Launch" />
+                <span>Venture Fundraise &amp; Launch</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="kickoffScopeVision" class="group-title">Project Overview &amp; Vision</label>
+            <textarea id="kickoffScopeVision" class="k-textarea" rows="3" placeholder="Briefly describe what you are building, target audiences, and success criteria..."></textarea>
+          </div>
+        </div>
+
+        <!-- Step 2: Visual Style & Brand Tone -->
+        <div class="kickoff-step-view" id="kickoffStep2" hidden>
+          <div class="step-intro">
+            <h3>Visual Style &amp; Brand Aesthetics</h3>
+            <p>Select the overarching artistic direction and emotional resonance that fits your brand identity.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="group-title">Creative Direction / Aesthetic Archetype</label>
+            <div class="style-cards-grid" role="radiogroup" aria-label="Visual Style Archetypes">
+              <div class="style-card active" data-style="Cyberpunk Kinetic &amp; Dark Mode">
+                <div class="style-icon">⚡</div>
+                <strong>Dark Kinetic &amp; Cyber</strong>
+                <p>Neon glow accents, sub-millisecond motion, techno-brutalist grids.</p>
+              </div>
+              <div class="style-card" data-style="Minimalist Luxury &amp; Editorial">
+                <div class="style-icon">🏛️</div>
+                <strong>Minimalist Luxury</strong>
+                <p>Editorial serifs, generous negative space, restrained prestige.</p>
+              </div>
+              <div class="style-card" data-style="Fluid Glassmorphic &amp; Spatial 3D">
+                <div class="style-icon">🔮</div>
+                <strong>Fluid Glass &amp; 3D</strong>
+                <p>Volumetric light refractions, tactile physics, frosted glass panels.</p>
+              </div>
+              <div class="style-card" data-style="Bold Vibrant &amp; High-Contrast">
+                <div class="style-icon">🎨</div>
+                <strong>Bold &amp; Experimental</strong>
+                <p>Oversized typography, vibrant palettes, playful micro-interactions.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="group-title">Brand Resonance Tags</label>
+            <div class="resonance-tags-row">
+              <button type="button" class="res-tag active" data-tag="Avant-Garde">Avant-Garde</button>
+              <button type="button" class="res-tag active" data-tag="Enterprise Trust">Enterprise Trust</button>
+              <button type="button" class="res-tag" data-tag="Futuristic">Futuristic</button>
+              <button type="button" class="res-tag" data-tag="Playful / Disruptive">Playful / Disruptive</button>
+              <button type="button" class="res-tag" data-tag="Ultra-Refined">Ultra-Refined</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Timeline & Budget Brackets -->
+        <div class="kickoff-step-view" id="kickoffStep3" hidden>
+          <div class="step-intro">
+            <h3>Timeline, Budget &amp; Contact</h3>
+            <p>Align capital deployment with target delivery milestones to ensure optimal team allocation.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="group-title">Estimated Investment Bracket</label>
+            <div class="budget-chips-grid" role="radiogroup" aria-label="Budget brackets">
+              <button type="button" class="b-chip" data-budget="$25k – $50k (Sprint MVP)">$25k – $50k<span class="b-sub">Sprint MVP</span></button>
+              <button type="button" class="b-chip active" data-budget="$50k – $100k (Full Platform)">$50k – $100k<span class="b-sub">Full Platform</span></button>
+              <button type="button" class="b-chip" data-budget="$100k – $250k (Flagship Ecosystem)">$100k – $250k<span class="b-sub">Flagship Ecosystem</span></button>
+              <button type="button" class="b-chip" data-budget="$250k+ (Enterprise Partnership)">$250k+<span class="b-sub">Enterprise Alliance</span></button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="group-title">Target Delivery Timeline</label>
+            <div class="timeline-chips-row" role="radiogroup" aria-label="Delivery timeline">
+              <button type="button" class="t-chip" data-time="Rapid Sprint (4–6 Weeks)">Rapid (4–6 Weeks)</button>
+              <button type="button" class="t-chip active" data-time="Standard Production (8–12 Weeks)">Standard (8–12 Weeks)</button>
+              <button type="button" class="t-chip" data-time="Strategic Multi-Phase (3–6 Months)">Strategic (3–6 Months)</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="group-title">Stakeholder Contact Information</label>
+            <div class="contact-inputs-grid">
+              <div class="c-field">
+                <label for="kickoffClientName">Your Name *</label>
+                <input type="text" id="kickoffClientName" class="k-input" placeholder="e.g. Maya Lin" required />
+              </div>
+              <div class="c-field">
+                <label for="kickoffClientCompany">Company / Brand *</label>
+                <input type="text" id="kickoffClientCompany" class="k-input" placeholder="e.g. Apex Protocol" required />
+              </div>
+              <div class="c-field full-width">
+                <label for="kickoffClientEmail">Work Email Address *</label>
+                <input type="email" id="kickoffClientEmail" class="k-input" placeholder="e.g. maya@apexprotocol.io" required />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Summary Review & Export -->
+        <div class="kickoff-step-view" id="kickoffStep4" hidden>
+          <div class="step-intro">
+            <h3>Compiled Project Discovery Brief</h3>
+            <p>Review your assembled discovery parameters before locking the brief with our executive design partners.</p>
+          </div>
+
+          <div class="brief-summary-card" id="briefSummaryCard">
+            <div class="brief-row">
+              <span class="b-label">Discipline &amp; Scope:</span>
+              <strong id="briefDiscipline">Web3 &amp; Fintech Experience</strong>
+            </div>
+            <div class="brief-row">
+              <span class="b-label">Key Objectives:</span>
+              <span id="briefObjectives">Drive High-Ticket Conversion, Elevate Global Brand Prestige</span>
+            </div>
+            <div class="brief-row">
+              <span class="b-label">Visual Archetype:</span>
+              <strong id="briefAesthetic">Dark Kinetic &amp; Cyber</strong>
+            </div>
+            <div class="brief-row">
+              <span class="b-label">Brand Tone Resonance:</span>
+              <span id="briefResonance">Avant-Garde, Enterprise Trust</span>
+            </div>
+            <div class="brief-row">
+              <span class="b-label">Budget Bracket:</span>
+              <strong id="briefBudget">$50k – $100k (Full Platform)</strong>
+            </div>
+            <div class="brief-row">
+              <span class="b-label">Delivery Timeline:</span>
+              <strong id="briefTimeline">Standard Production (8–12 Weeks)</strong>
+            </div>
+            <div class="brief-row">
+              <span class="b-label">Client Stakeholder:</span>
+              <span id="briefClient">Maya Lin (Apex Protocol)</span>
+            </div>
+          </div>
+
+          <div class="brief-action-buttons">
+            <button type="button" class="btn-brief-download" id="btnDownloadBriefJson">Export Discovery Brief (.JSON) ↓</button>
+            <button type="button" class="btn-brief-copy" id="btnCopyBriefText">Copy Brief Summary 📋</button>
+          </div>
+        </div>
+
+        <div id="kickoffFormError" class="kickoff-error-msg" role="alert" hidden></div>
+
+        <!-- Form Navigation Footer -->
+        <div class="kickoff-footer-nav">
+          <button type="button" class="btn-nav-prev" id="btnKickoffPrev" disabled>← Previous</button>
+          <button type="button" class="btn-nav-next" id="btnKickoffNext">Continue to Visual Style →</button>
+          <button type="button" class="btn-nav-submit" id="btnKickoffSubmit" hidden>Submit Project Kickoff Brief 🚀</button>
+        </div>
+      </form>
+
+      <div id="kickoffToast" class="kickoff-toast" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+  <!-- ===== END Issue #322 ===== -->
+
+  <!-- Agency Studio Preferences Modal Drawer - Issue #575 -->
+  <div class="agency-preferences-modal" id="agency-studio-preferences-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="agency-preferences-content">
+      <div class="agency-preferences-header">
+        <div class="pref-title-wrap">
+          <span class="pref-icon">⚙</span>
+          <h3>Studio Preferences</h3>
+        </div>
+        <button type="button" class="agency-pref-close-btn" id="agencyPreferencesCloseBtn" aria-label="Close preferences">✕</button>
+      </div>
+
+      <div class="agency-preferences-body">
+        <div class="pref-setting-row">
+          <div class="pref-info">
+            <label for="agencyPrefSoundCues" class="pref-label">Sound Cues</label>
+            <p class="pref-desc">Enable subtle ambient audio feedback on interactions</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="agencyPrefSoundCues">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="pref-setting-row">
+          <div class="pref-info">
+            <label for="agencyPrefHighContrast" class="pref-label">High-Contrast Mode</label>
+            <p class="pref-desc">Increase text and border contrast for accessibility</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="agencyPrefHighContrast">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="pref-setting-row">
+          <div class="pref-info">
+            <label for="agencyPrefViewLayout" class="pref-label">View Layout</label>
+            <p class="pref-desc">Select grid density for portfolio showcase items</p>
+          </div>
+          <select id="agencyPrefViewLayout" class="pref-select">
+            <option value="grid">Grid (Default)</option>
+            <option value="compact">Compact Grid</option>
+            <option value="masonry">Dynamic Masonry</option>
+            <option value="list">Editorial List</option>
+          </select>
+        </div>
+
+        <div class="pref-setting-row">
+          <div class="pref-info">
+            <label for="agencyPrefMetricUnits" class="pref-label">Metric Units</label>
+            <p class="pref-desc">Preferred unit standard for project specifications</p>
+          </div>
+          <select id="agencyPrefMetricUnits" class="pref-select">
+            <option value="metric">Metric (SI)</option>
+            <option value="imperial">Imperial (US)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="agency-preferences-footer">
+        <button type="button" class="pref-btn pref-btn-secondary" id="agencyResetPreferencesBtn">Reset Defaults</button>
+        <button type="button" class="pref-btn pref-btn-primary" id="agencyExportPreferencesBtn">Export Config (JSON)</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="liquid-ripple.js"></script>
 </body>
 </html>

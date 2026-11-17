@@ -119,6 +119,20 @@ body {
 .item-header h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; }
 .price { font-weight: 700; color: var(--accent); }
 .menu-item p { color: #a8a29e; font-size: 0.85rem; line-height: 1.5; }
+.menu-allergen-note { margin: -20px 0 24px; color: #d6d3d1; font-size: 0.82rem; line-height: 1.5; }
+.menu-allergen { position: relative; margin-top: 14px; font-size: 0.8rem; }
+.menu-allergen summary {
+  display: inline-flex; align-items: center; min-height: 36px; padding: 6px 12px;
+  border: 1px solid #d4af37; border-radius: 999px; color: #fcd34d;
+  background: rgba(120, 53, 15, 0.24); cursor: pointer; list-style: none;
+}
+.menu-allergen summary::-webkit-details-marker { display: none; }
+.menu-allergen summary:focus-visible { outline: 2px solid #fcd34d; outline-offset: 3px; }
+.menu-allergen[open] p {
+  margin-top: 8px; max-width: 28rem; padding: 10px 12px;
+  border: 1px solid #d4af37; border-radius: 8px; background: #21170d;
+  color: #f5f5f4; line-height: 1.5;
+}
 
 /* Takeout order builder */
 .order-btn {
@@ -582,6 +596,20 @@ body {
   color: #a8a29e;
   line-height: 1.35;
 }
+
+.seating-availability {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border: 1px solid rgba(134, 239, 172, 0.5);
+  border-radius: 999px;
+  color: #bbf7d0;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.seating-availability.unavailable { border-color: rgba(251, 191, 36, 0.5); color: #fcd34d; }
+.patio-advisory { margin-top: 14px; padding: 10px 14px; border: 1px solid #b9874d; border-radius: 8px; color: #fde68a; line-height: 1.5; }
+.patio-advisory[hidden] { display: none; }
 
 .seating-card:hover {
   border-color: rgba(245, 158, 11, 0.6);
@@ -2214,10 +2242,13 @@ body {
 }
 
 .dietary-notices {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  max-width: 22rem;
+  font-size: 0.74rem;
 }
+.dietary-notices summary { color: #fcd34d; cursor: pointer; line-height: 1.5; }
+.dietary-notices summary:focus-visible { outline: 2px solid #fcd34d; outline-offset: 3px; }
+.dietary-allergen-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.dietary-notices p { margin-top: 8px; color: #e2e8f0; line-height: 1.5; }
 
 .dietary-title {
   font-size: 0.74rem;
@@ -4448,6 +4479,801 @@ body {
     grid-template-columns: 1fr;
   }
   .tally-sidebar {
+    position: static;
+  }
+}
+
+/* ==========================================================================
+   Issue #275: Digital Gift Card Custom Balance Builder & Preview Modal
+   ========================================================================== */
+
+.gift-hero-btn {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+  border: 1px solid #d4af37 !important;
+  color: #fef08a !important;
+}
+
+.gift-hero-btn:hover {
+  background: #d4af37 !important;
+  color: #0b0c10 !important;
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.4);
+}
+
+.gift-card-section {
+  padding: 80px 24px;
+  background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08) 0%, #0a0b0e 70%);
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  color: #f3f4f6;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.gift-card-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.gift-section-header {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 50px;
+}
+
+.gc-kicker {
+  display: inline-block;
+  font-size: 0.76rem;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  color: #d4af37;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.gift-section-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.gc-subtitle {
+  font-size: 1.05rem;
+  color: #9ca3af;
+  line-height: 1.6;
+}
+
+.gift-customizer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* Left: Builder Panel */
+.gc-builder-panel {
+  background: rgba(18, 20, 26, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 32px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+
+.gc-field-group {
+  margin-bottom: 26px;
+}
+
+.gc-field-group:last-child {
+  margin-bottom: 0;
+}
+
+.gc-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+
+.gc-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.gc-char-counter {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Denomination Chips */
+.gc-chips-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.gc-chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #e5e7eb;
+  text-align: center;
+}
+
+.gc-chip:hover {
+  border-color: rgba(212, 175, 55, 0.6);
+  background: rgba(212, 175, 55, 0.06);
+  transform: translateY(-2px);
+}
+
+.gc-chip.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.08));
+  border-color: #d4af37;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+}
+
+.gc-chip .chip-val {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fef08a;
+  margin-bottom: 4px;
+}
+
+.gc-chip .chip-sub {
+  font-size: 0.68rem;
+  color: #9ca3af;
+  line-height: 1.2;
+}
+
+.gc-custom-input-wrap {
+  margin-top: 12px;
+}
+
+.gc-input-prefix {
+  display: flex;
+  align-items: center;
+  background: rgba(11, 13, 17, 0.8);
+  border: 1px solid #d4af37;
+  border-radius: 8px;
+  padding: 0 14px;
+}
+
+.gc-input-prefix span {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #d4af37;
+  margin-right: 8px;
+}
+
+.gc-input-prefix input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 10px 0;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+}
+
+.gc-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 6px;
+}
+
+/* Theme Picker */
+.gc-theme-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gc-theme-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  color: #e5e7eb;
+}
+
+.gc-theme-option:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.gc-theme-option.active {
+  border-color: #d4af37;
+  background: rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.2);
+}
+
+.theme-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.theme-vintage {
+  background: linear-gradient(135deg, #d4af37 0%, #8c6d23 50%, #4a3610 100%);
+}
+
+.theme-michelin {
+  background: linear-gradient(135deg, #2b2b2e 0%, #111113 50%, #d4af37 100%);
+}
+
+.theme-champagne {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 50%, #e2e8f0 100%);
+}
+
+.theme-text strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.theme-text span {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* Inputs & Textareas */
+.gc-input,
+.gc-textarea {
+  width: 100%;
+  background: rgba(11, 13, 17, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+}
+
+.gc-input:focus,
+.gc-textarea:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+.gc-textarea {
+  resize: vertical;
+}
+
+/* Prompt chips */
+.gc-prompt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.gc-prompt-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gc-prompt-chip:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: #d4af37;
+  color: #fef08a;
+}
+
+/* Perks Checkboxes */
+.gc-perks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gc-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: #d1d5db;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.gc-checkbox-label input[type="checkbox"] {
+  accent-color: #d4af37;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Right: Preview Panel */
+.gc-preview-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.gc-preview-sticky {
+  position: sticky;
+  top: 30px;
+}
+
+.gc-preview-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #d4af37;
+}
+
+.gc-live-badge {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid #22c55e;
+  color: #4ade80;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+}
+
+/* Luxury Gift Certificate Card Styles */
+.gift-certificate-card {
+  position: relative;
+  border-radius: 18px;
+  padding: 28px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+  min-height: 290px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.gift-certificate-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.25);
+}
+
+.gc-card-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.gc-card-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Card Themes */
+.gift-certificate-card.theme-vintage-paris {
+  background: linear-gradient(135deg, #1c150c 0%, #2e2213 50%, #151009 100%);
+  border-color: #d4af37;
+  color: #fef3c7;
+}
+
+.gift-certificate-card.theme-michelin-luxe {
+  background: linear-gradient(135deg, #141417 0%, #1d1d24 50%, #0d0d10 100%);
+  border-color: #f59e0b;
+  color: #f3f4f6;
+}
+
+.gift-certificate-card.theme-midnight-champagne {
+  background: linear-gradient(135deg, #091a3e 0%, #102454 50%, #060e22 100%);
+  border-color: #60a5fa;
+  color: #eff6ff;
+}
+
+/* Card Header */
+.gc-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+}
+
+.gc-brand-seal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gc-seal-icon {
+  font-size: 1.4rem;
+}
+
+.gc-seal-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+.gc-card-val-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.val-currency {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+.val-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Card Body */
+.gc-card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.gc-passport-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  color: #d4af37;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.gc-recipient-block {
+  margin-bottom: 12px;
+}
+
+.gc-recipient-lbl {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.gc-recipient-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.gc-card-msg {
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #d1d5db;
+  line-height: 1.4;
+  margin-bottom: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.gc-sender-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gc-sender-lbl {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: #9ca3af;
+}
+
+.gc-sender-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #d4af37;
+}
+
+/* Card Footer */
+.gc-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 14px;
+  margin-top: 18px;
+}
+
+.gc-code-box,
+.gc-validity-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.code-lbl,
+.valid-lbl {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.code-val {
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fef08a;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.valid-val {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+/* Summary Card */
+.gc-actions-card {
+  margin-top: 24px;
+  background: rgba(18, 20, 26, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.gc-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin-bottom: 10px;
+}
+
+.gc-summary-row strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.gc-summary-row.total-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+  margin-top: 12px;
+  font-size: 1.05rem;
+  color: #e5e7eb;
+}
+
+.gc-total-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem !important;
+  color: #d4af37 !important;
+}
+
+.gc-button-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.gc-btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #d4af37 0%, #b89324 100%);
+  color: #0b0c10;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.gc-btn-primary:hover {
+  background: linear-gradient(135deg, #fef08a 0%, #d4af37 100%);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px);
+}
+
+.gc-sub-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.gc-btn-secondary {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e5e7eb;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gc-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #d4af37;
+  color: #fff;
+}
+
+/* Certificate Preview Modal */
+.gift-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.gift-modal-backdrop[hidden] {
+  display: none;
+}
+
+.gift-modal-dialog {
+  background: #111319;
+  border: 1px solid #d4af37;
+  border-radius: 20px;
+  max-width: 650px;
+  width: 100%;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gift-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: #d4af37;
+  font-weight: 700;
+  display: block;
+}
+
+.modal-title-wrap h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: #fff;
+  margin: 4px 0 0;
+}
+
+.gift-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: #9ca3af;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.gift-modal-close:hover {
+  color: #fff;
+}
+
+.gift-modal-body {
+  padding: 24px;
+}
+
+.modal-card-stage {
+  margin-bottom: 16px;
+}
+
+.modal-print-instructions {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.gift-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.gift-modal-footer .gc-btn-secondary,
+.gift-modal-footer .gc-btn-primary {
+  width: auto;
+  padding: 10px 20px;
+}
+
+/* Print Optimization */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #modalCardStage,
+  #modalCardStage * {
+    visibility: visible;
+  }
+  #modalCardStage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 650px;
+  }
+}
+
+@media (max-width: 900px) {
+  .gift-customizer-grid {
+    grid-template-columns: 1fr;
+  }
+  .gc-preview-sticky {
     position: static;
   }
 }

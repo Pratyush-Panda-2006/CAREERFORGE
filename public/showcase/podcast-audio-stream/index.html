@@ -17,6 +17,7 @@
     <div class="player-controls">
       <button class="play-btn" id="hero-play-btn" onclick="playEpisode('Ep 142')">▶ Play Latest Episode (#142)</button>
       <button id="speed-btn" class="speed-btn" onclick="toggleSpeed()" aria-label="Playback speed: 1x" title="Cycle playback speed">1x</button>
+      <button type="button" id="hero-sleep-timer-btn" class="speed-btn sleep-timer-btn" title="Set sleep timer" aria-label="Sleep timer">🌙 Sleep</button>
     </div>
   </header>
 
@@ -63,6 +64,73 @@
     </div>
     <div class="bookmarks-tray" id="bookmarks-tray" aria-label="Saved episode bookmarks"></div>
   </section>
+
+  <!-- ===== Playback Speed & Pitch Correction Engine (Issue #418) START ===== -->
+  <section class="sp-section" id="speed-pitch-section" aria-labelledby="sp-title">
+    <div class="sp-container">
+      <div class="sp-header">
+        <div class="sp-header-left">
+          <div class="tag">🎛️ SPEED &amp; PITCH ENGINE</div>
+          <h2 id="sp-title">Playback Pitch &amp; Speed</h2>
+          <p>Run episodes from 0.5x to 3.0x while a granular delay network pulls voices back to their natural pitch.</p>
+        </div>
+        <div class="sp-readout" aria-live="off">
+          <span class="sp-readout-label">Playback speed</span>
+          <strong class="sp-readout-value" id="sp-speed-value">1x</strong>
+          <span class="sp-readout-state" id="sp-correction-badge">Pitch correction on</span>
+        </div>
+      </div>
+
+      <div class="sp-console">
+        <div class="sp-row">
+          <span class="sp-row-label" id="sp-presets-label">Presets</span>
+          <div class="sp-presets" id="sp-presets" role="group" aria-labelledby="sp-presets-label">
+            <button type="button" class="sp-preset-btn" data-speed="1" aria-pressed="true">1x</button>
+            <button type="button" class="sp-preset-btn" data-speed="1.25" aria-pressed="false">1.25x</button>
+            <button type="button" class="sp-preset-btn" data-speed="1.5" aria-pressed="false">1.5x</button>
+            <button type="button" class="sp-preset-btn" data-speed="2" aria-pressed="false">2x</button>
+          </div>
+        </div>
+
+        <div class="sp-row">
+          <label class="sp-row-label" for="sp-slider">Fine tune</label>
+          <div class="sp-slider-wrap">
+            <span class="sp-slider-end" aria-hidden="true">0.5x</span>
+            <input type="range" class="sp-slider" id="sp-slider" min="0.5" max="3" step="0.05" value="1" aria-valuetext="1x speed" />
+            <span class="sp-slider-end" aria-hidden="true">3.0x</span>
+          </div>
+        </div>
+
+        <div class="sp-row sp-row-actions">
+          <label class="sp-toggle" for="sp-correction">
+            <input type="checkbox" id="sp-correction" checked />
+            <span class="sp-toggle-track" aria-hidden="true"></span>
+            <span class="sp-toggle-text">Pitch correction</span>
+          </label>
+          <button type="button" class="sp-audition-btn" id="sp-audition" aria-pressed="false">▶ Audition test voice</button>
+        </div>
+      </div>
+
+      <dl class="sp-meters" id="sp-meters">
+        <div class="sp-meter"><dt>Pitch shift applied</dt><dd id="sp-meter-shift">0.0 st</dd></div>
+        <div class="sp-meter"><dt>Grain window</dt><dd id="sp-meter-grain">100 ms</dd></div>
+        <div class="sp-meter"><dt>Delay sweep</dt><dd id="sp-meter-sweep">0 ms</dd></div>
+        <div class="sp-meter"><dt>Added latency</dt><dd id="sp-meter-latency">0 ms</dd></div>
+      </dl>
+
+      <div class="sp-viz">
+        <canvas id="sp-canvas" class="sp-canvas" width="800" height="200" role="img" aria-label="Frequency response of the test voice"></canvas>
+        <ul class="sp-legend" aria-hidden="true">
+          <li><i class="sp-key sp-key-raw"></i>Raw speed-up</li>
+          <li><i class="sp-key sp-key-fixed"></i>After correction</li>
+          <li><i class="sp-key sp-key-live"></i>Live output</li>
+        </ul>
+      </div>
+      <p class="sp-hint">The episode player here is a simulation with no audio file, so the Audition button plays a synthesized test voice (not a recording) through the real Web Audio chain. The curves are modelled from the speed setting, the live bars come from the audio output. Use Tab to reach each control and the arrow keys on the slider.</p>
+      <p class="sp-status" id="sp-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+  <!-- ===== Playback Speed & Pitch Correction Engine (Issue #418) END ===== -->
 
   <!-- ===== Audio Equalizer Preset Selector (Issue #205) START ===== -->
   <section class="eq-section" id="eq-section" aria-labelledby="eq-title">
@@ -238,6 +306,67 @@
     <div class="queue-actions"><button type="button" id="queue-next">Play next now</button><button type="button" id="queue-clear">Clear upcoming</button></div>
     <p id="queue-status" role="status" aria-live="polite"></p>
   </dialog>
+
+  <!-- ===== Sleep Timer Modal (Issue #299) START ===== -->
+  <dialog class="sleep-timer-modal" id="sleep-timer-modal" aria-labelledby="sleep-timer-title">
+    <div class="sleep-modal-content">
+      <div class="sleep-modal-header">
+        <div class="sleep-modal-title-wrap">
+          <span class="sleep-modal-icon">🌙</span>
+          <h3 id="sleep-timer-title">Audio Sleep Timer</h3>
+        </div>
+        <button type="button" class="sleep-modal-close" id="close-sleep-timer-modal" aria-label="Close sleep timer dialog">&times;</button>
+      </div>
+
+      <p class="sleep-modal-subtitle">Automatically pauses playback and gently fades out volume so you can drift off without losing your place.</p>
+
+      <div class="sleep-active-status" id="sleep-active-status" hidden>
+        <div class="sleep-status-pulse"></div>
+        <div class="sleep-status-info">
+          <span class="status-label">ACTIVE TIMER</span>
+          <span class="status-time" id="sleep-countdown-display">30:00 remaining</span>
+        </div>
+        <button type="button" class="sleep-cancel-btn" id="sleep-cancel-btn">Turn Off</button>
+      </div>
+
+      <div class="sleep-options-grid" role="radiogroup" aria-label="Sleep timer durations">
+        <button type="button" class="sleep-preset-option" data-minutes="15">
+          <span class="preset-name">15 Minutes</span>
+          <span class="preset-desc">Quick power nap</span>
+        </button>
+        <button type="button" class="sleep-preset-option" data-minutes="30">
+          <span class="preset-name">30 Minutes</span>
+          <span class="preset-desc">Standard bedtime</span>
+        </button>
+        <button type="button" class="sleep-preset-option" data-minutes="45">
+          <span class="preset-name">45 Minutes</span>
+          <span class="preset-desc">Deep relaxation</span>
+        </button>
+        <button type="button" class="sleep-preset-option" data-minutes="60">
+          <span class="preset-name">60 Minutes</span>
+          <span class="preset-desc">Full hour listen</span>
+        </button>
+        <button type="button" class="sleep-preset-option" data-minutes="end">
+          <span class="preset-name">End of Episode</span>
+          <span class="preset-desc" id="preset-end-desc">Stops at end of audio</span>
+        </button>
+      </div>
+
+      <!-- Custom duration input -->
+      <div class="sleep-custom-row">
+        <label for="sleep-custom-minutes">Custom minutes:</label>
+        <div class="sleep-custom-input-wrap">
+          <input type="number" id="sleep-custom-minutes" min="1" max="180" placeholder="e.g. 25" />
+          <button type="button" class="sleep-custom-set-btn" id="sleep-custom-set-btn">Set</button>
+        </div>
+      </div>
+      
+      <div class="sleep-modal-footer">
+        <p class="sleep-fade-note">💡 Volume gradually fades out over the final 30 seconds before pausing playback.</p>
+      </div>
+    </div>
+  </dialog>
+  <!-- ===== Sleep Timer Modal (Issue #299) END ===== -->
   <script src="queue-logic.js"></script>
   <script src="player-logic.js"></script>
   <script src="share-logic.js"></script>
