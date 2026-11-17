@@ -3800,3 +3800,411 @@ var FraudDetector = (function () {
     setup();
   }
 })();
+
+/* ==========================================================================
+   Issue #289: Recurring Subscriptions Manager & Spend Breakdown
+   ========================================================================== */
+(function initSubscriptionManagerModule() {
+  function initSubscriptionManager() {
+    const section = document.getElementById('subscriptions-manager');
+    if (!section) return;
+
+    // Helper to calculate date offsets relative to today
+    function getOffsetDate(daysAhead) {
+      const d = new Date();
+      d.setDate(d.getDate() + daysAhead);
+      return d.toISOString().split('T')[0];
+    }
+
+    // Initial Dataset
+    let subscriptions = [
+      {
+        id: 'sub-aws',
+        name: 'AWS Cloud Services',
+        icon: '☁️',
+        category: 'Cloud Infrastructure',
+        price: 142.50,
+        cycle: 'monthly',
+        renewalDate: getOffsetDate(4),
+        reminder: true
+      },
+      {
+        id: 'sub-chatgpt',
+        name: 'OpenAI ChatGPT Team',
+        icon: '🤖',
+        category: 'AI & DevTools',
+        price: 40.00,
+        cycle: 'monthly',
+        renewalDate: getOffsetDate(2),
+        reminder: true
+      },
+      {
+        id: 'sub-github',
+        name: 'GitHub Enterprise Suite',
+        icon: '🐙',
+        category: 'AI & DevTools',
+        price: 39.00,
+        cycle: 'monthly',
+        renewalDate: getOffsetDate(18),
+        reminder: false
+      },
+      {
+        id: 'sub-netflix',
+        name: 'Netflix 4K Ultra Plan',
+        icon: '🎬',
+        category: 'Entertainment & Media',
+        price: 22.99,
+        cycle: 'monthly',
+        renewalDate: getOffsetDate(6),
+        reminder: true
+      },
+      {
+        id: 'sub-spotify',
+        name: 'Spotify Premium Family',
+        icon: '🎵',
+        category: 'Entertainment & Media',
+        price: 19.99,
+        cycle: 'monthly',
+        renewalDate: getOffsetDate(14),
+        reminder: false
+      },
+      {
+        id: 'sub-figma',
+        name: 'Figma Organization',
+        icon: '🎨',
+        category: 'Productivity & Workspace',
+        price: 540.00,
+        cycle: 'annual',
+        renewalDate: getOffsetDate(35),
+        reminder: true
+      },
+      {
+        id: 'sub-notion',
+        name: 'Notion Plus & AI Add-on',
+        icon: '📝',
+        category: 'Productivity & Workspace',
+        price: 144.00,
+        cycle: 'annual',
+        renewalDate: getOffsetDate(78),
+        reminder: false
+      }
+    ];
+
+    let currentFilter = 'all';
+
+    // DOM References
+    const monthlyBurnEl = document.getElementById('subMonthlyBurn');
+    const annualCommitEl = document.getElementById('subAnnualCommit');
+    const activeCountEl = document.getElementById('subActiveCount');
+    const urgentCountEl = document.getElementById('subUrgentCount');
+    const urgentSpendEl = document.getElementById('subUrgentSpend');
+    const reminderActiveCountEl = document.getElementById('subReminderActiveCount');
+    const tableBody = document.getElementById('subscriptionsTableBody');
+    const filterTabs = section.querySelectorAll('.sub-tab');
+    const tabCountAll = document.getElementById('tabCountAll');
+    const tabCountUrgent = document.getElementById('tabCountUrgent');
+    const reminderCallout = document.getElementById('subReminderCallout');
+
+    // Add Form Toggle
+    const toggleFormBtn = document.getElementById('toggleAddSubFormBtn');
+    const formWrap = document.getElementById('addSubFormWrap');
+    const closeFormBtn = document.getElementById('closeAddSubFormBtn');
+    const newSubForm = document.getElementById('newSubscriptionForm');
+    const renewalInput = document.getElementById('subRenewalInput');
+
+    if (renewalInput) {
+      renewalInput.value = getOffsetDate(30);
+    }
+
+    function calculateDaysRemaining(dateStr) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(dateStr);
+      target.setHours(0, 0, 0, 0);
+      const diffTime = target - today;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    function formatMoney(amount) {
+      return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function renderSummaryAndKPIs() {
+      let totalMonthly = 0;
+      let totalAnnual = 0;
+      let urgentCount = 0;
+      let urgentCost = 0;
+      let activeReminders = 0;
+
+      subscriptions.forEach((sub) => {
+        const monthly = sub.cycle === 'annual' ? sub.price / 12 : sub.price;
+        const annual = sub.cycle === 'annual' ? sub.price : sub.price * 12;
+
+        totalMonthly += monthly;
+        totalAnnual += annual;
+
+        const days = calculateDaysRemaining(sub.renewalDate);
+        if (days <= 7) {
+          urgentCount += 1;
+          urgentCost += monthly;
+        }
+
+        if (sub.reminder) {
+          activeReminders += 1;
+        }
+      });
+
+      if (monthlyBurnEl) monthlyBurnEl.textContent = formatMoney(totalMonthly);
+      if (annualCommitEl) annualCommitEl.textContent = formatMoney(totalAnnual);
+      if (activeCountEl) activeCountEl.textContent = `${subscriptions.length} Active Subscriptions`;
+      if (urgentCountEl) urgentCountEl.textContent = String(urgentCount);
+      if (urgentSpendEl) urgentSpendEl.textContent = `${formatMoney(urgentCost)} renewing in 7 days`;
+      if (reminderActiveCountEl) reminderActiveCountEl.textContent = `${activeReminders} Active`;
+
+      if (tabCountAll) tabCountAll.textContent = String(subscriptions.length);
+      if (tabCountUrgent) tabCountUrgent.textContent = String(urgentCount);
+
+      if (reminderCallout) {
+        reminderCallout.hidden = activeReminders === 0;
+      }
+    }
+
+    function renderTable() {
+      if (!tableBody) return;
+      tableBody.replaceChildren();
+
+      const filtered = subscriptions.filter((sub) => {
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'urgent') return calculateDaysRemaining(sub.renewalDate) <= 7;
+        if (currentFilter === 'monthly') return sub.cycle === 'monthly';
+        if (currentFilter === 'annual') return sub.cycle === 'annual';
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        const emptyRow = document.createElement('tr');
+        const emptyCell = document.createElement('td');
+        emptyCell.colSpan = 7;
+        emptyCell.className = 'sub-empty-cell';
+        emptyCell.textContent = 'No subscriptions match the selected filter criteria.';
+        emptyRow.appendChild(emptyCell);
+        tableBody.appendChild(emptyRow);
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      filtered.forEach((sub) => {
+        const tr = document.createElement('tr');
+        const days = calculateDaysRemaining(sub.renewalDate);
+        const monthly = sub.cycle === 'annual' ? sub.price / 12 : sub.price;
+        const annual = sub.cycle === 'annual' ? sub.price : sub.price * 12;
+
+        // 1. Service & Category
+        const tdService = document.createElement('td');
+        const svcWrap = document.createElement('div');
+        svcWrap.className = 'sub-service-cell';
+
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'sub-service-icon';
+        iconSpan.textContent = sub.icon || '💳';
+
+        const nameGroup = document.createElement('div');
+        const nameStrong = document.createElement('strong');
+        nameStrong.className = 'sub-service-name';
+        nameStrong.textContent = sub.name;
+
+        const catSpan = document.createElement('span');
+        catSpan.className = 'sub-category-tag';
+        catSpan.textContent = sub.category;
+
+        nameGroup.append(nameStrong, catSpan);
+        svcWrap.append(iconSpan, nameGroup);
+        tdService.appendChild(svcWrap);
+
+        // 2. Billing Cycle Pill
+        const tdCycle = document.createElement('td');
+        const cyclePill = document.createElement('span');
+        cyclePill.className = `sub-cycle-pill ${sub.cycle}`;
+        cyclePill.textContent = sub.cycle === 'annual' ? 'Annual (Billed Yearly)' : 'Monthly';
+        tdCycle.appendChild(cyclePill);
+
+        // 3. Monthly Equivalent
+        const tdMonthly = document.createElement('td');
+        const monthlySpan = document.createElement('strong');
+        monthlySpan.className = 'sub-amount-cell';
+        monthlySpan.textContent = formatMoney(monthly);
+        tdMonthly.appendChild(monthlySpan);
+
+        // 4. Annual Total
+        const tdAnnual = document.createElement('td');
+        const annualSpan = document.createElement('span');
+        annualSpan.className = 'sub-annual-cell';
+        annualSpan.textContent = formatMoney(annual);
+        tdAnnual.appendChild(annualSpan);
+
+        // 5. Renewal Date & Urgency Badge
+        const tdRenewal = document.createElement('td');
+        const renewalDateWrap = document.createElement('div');
+        renewalDateWrap.className = 'sub-renewal-cell';
+
+        const dateTxt = document.createElement('span');
+        dateTxt.textContent = sub.renewalDate;
+
+        const badge = document.createElement('span');
+        if (days <= 0) {
+          badge.className = 'sub-badge badge-due-today';
+          badge.textContent = 'Renews Today';
+        } else if (days <= 3) {
+          badge.className = 'sub-badge badge-urgent-red';
+          badge.textContent = `Renews in ${days}d`;
+        } else if (days <= 7) {
+          badge.className = 'sub-badge badge-urgent-amber';
+          badge.textContent = `Renews in ${days}d`;
+        } else {
+          badge.className = 'sub-badge badge-normal';
+          badge.textContent = `in ${days} days`;
+        }
+
+        renewalDateWrap.append(dateTxt, badge);
+        tdRenewal.appendChild(renewalDateWrap);
+
+        // 6. Reminder Alert Toggle
+        const tdReminder = document.createElement('td');
+        const toggleLabel = document.createElement('label');
+        toggleLabel.className = 'sub-toggle-switch';
+
+        const toggleInput = document.createElement('input');
+        toggleInput.type = 'checkbox';
+        toggleInput.checked = Boolean(sub.reminder);
+        toggleInput.setAttribute('aria-label', `Toggle cancel reminder for ${sub.name}`);
+        toggleInput.addEventListener('change', () => {
+          sub.reminder = toggleInput.checked;
+          renderSummaryAndKPIs();
+        });
+
+        const toggleSlider = document.createElement('span');
+        toggleSlider.className = 'sub-toggle-slider';
+
+        toggleLabel.append(toggleInput, toggleSlider);
+        tdReminder.appendChild(toggleLabel);
+
+        // 7. Actions (Delete)
+        const tdAction = document.createElement('td');
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'btn-sub-delete';
+        delBtn.setAttribute('aria-label', `Remove subscription: ${sub.name}`);
+        delBtn.textContent = '✕ Cancel';
+        delBtn.addEventListener('click', () => {
+          subscriptions = subscriptions.filter((s) => s.id !== sub.id);
+          renderSummaryAndKPIs();
+          renderTable();
+        });
+        tdAction.appendChild(delBtn);
+
+        tr.append(tdService, tdCycle, tdMonthly, tdAnnual, tdRenewal, tdReminder, tdAction);
+        fragment.appendChild(tr);
+      });
+
+      tableBody.appendChild(fragment);
+    }
+
+    // Filter Tab Handlers
+    filterTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        filterTabs.forEach((t) => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        currentFilter = tab.getAttribute('data-filter') || 'all';
+        renderTable();
+      });
+    });
+
+    // Form Toggle Logic
+    if (toggleFormBtn && formWrap) {
+      toggleFormBtn.addEventListener('click', () => {
+        const isHidden = formWrap.hidden;
+        formWrap.hidden = !isHidden;
+        toggleFormBtn.textContent = isHidden ? '✕ Close Form' : '+ Add Subscription';
+        if (isHidden) {
+          const firstInput = document.getElementById('subNameInput');
+          if (firstInput) firstInput.focus();
+        }
+      });
+    }
+
+    if (closeFormBtn && formWrap && toggleFormBtn) {
+      closeFormBtn.addEventListener('click', () => {
+        formWrap.hidden = true;
+        toggleFormBtn.textContent = '+ Add Subscription';
+      });
+    }
+
+    // New Subscription Form Submission
+    if (newSubForm) {
+      newSubForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nameInput = document.getElementById('subNameInput');
+        const priceInput = document.getElementById('subPriceInput');
+        const cycleSelect = document.getElementById('subCycleInput');
+        const catSelect = document.getElementById('subCategoryInput');
+        const dateInput = document.getElementById('subRenewalInput');
+
+        if (!nameInput || !priceInput || !dateInput) return;
+
+        const name = nameInput.value.trim();
+        const price = parseFloat(priceInput.value);
+        const cycle = cycleSelect ? cycleSelect.value : 'monthly';
+        const category = catSelect ? catSelect.value : 'AI & DevTools';
+        const renewalDate = dateInput.value;
+
+        if (!name || Number.isNaN(price) || price <= 0 || !renewalDate) {
+          alert('Please provide a valid subscription name, positive amount, and renewal date.');
+          return;
+        }
+
+        const iconMap = {
+          'AI & DevTools': '⚡',
+          'Cloud Infrastructure': '🌐',
+          'Entertainment & Media': '🎧',
+          'Productivity & Workspace': '💼',
+          'Finance & Security': '🔒'
+        };
+
+        const newSub = {
+          id: `sub-${Date.now()}`,
+          name,
+          icon: iconMap[category] || '📦',
+          category,
+          price,
+          cycle,
+          renewalDate,
+          reminder: true
+        };
+
+        subscriptions.unshift(newSub);
+        newSubForm.reset();
+        if (renewalInput) renewalInput.value = getOffsetDate(30);
+        if (formWrap) formWrap.hidden = true;
+        if (toggleFormBtn) toggleFormBtn.textContent = '+ Add Subscription';
+
+        renderSummaryAndKPIs();
+        renderTable();
+      });
+    }
+
+    // Initial Execution
+    renderSummaryAndKPIs();
+    renderTable();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSubscriptionManager);
+  } else {
+    initSubscriptionManager();
+  }
+})();

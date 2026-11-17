@@ -17,6 +17,7 @@
     <div class="player-controls">
       <button class="play-btn" id="hero-play-btn" onclick="playEpisode('Ep 142')">▶ Play Latest Episode (#142)</button>
       <button id="speed-btn" class="speed-btn" onclick="toggleSpeed()" aria-label="Playback speed: 1x" title="Cycle playback speed">1x</button>
+      <button type="button" id="hero-sleep-timer-btn" class="speed-btn sleep-timer-btn" title="Set sleep timer" aria-label="Sleep timer">🌙 Sleep</button>
     </div>
   </header>
 
@@ -41,6 +42,7 @@
           <button type="button" class="dock-speed-pill dock-eq-pill" id="dock-eq-pill" title="Open the equalizer" aria-label="Equalizer preset: Flat. Open equalizer">EQ Flat</button>
           <button type="button" class="dock-speed-pill dock-chapters-btn" id="dock-chapters-btn" title="Scroll to chapter navigator" aria-label="Open chapter navigator">📑 Chapters (<span id="dock-chapter-badge">Ch 1/5</span>)</button>
           <button type="button" class="dock-speed-pill dock-transcript-btn" id="dock-transcript-btn" title="View interactive karaoke transcript">📖 Transcript</button>
+          <button type="button" class="dock-speed-pill" id="dock-share-btn" aria-label="Share current episode">↗ Share</button>
         </div>
 
         <div class="dock-scrubber-row">
@@ -266,15 +268,32 @@
         <h3>The Future of Agentic AI &amp; Spatial Compute</h3>
         <div class="episode-meta"><span class="episode-duration">48 min</span><span class="episode-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
         <p>Guest: Dr. Aris Thorne (OpenAI Lead)</p>
+        <button type="button" class="episode-share-btn" data-share-episode="142" aria-label="Share episode 142">↗ Share episode</button>
       </div>
       <div class="card" id="card-141" onclick="playEpisode('Ep 141')" style="cursor: pointer;">
         <div class="ep-num">EP 141</div>
         <h3>Scaling Vector Databases to 10 Billion Chunks</h3>
         <div class="episode-meta"><span class="episode-duration">54 min</span><span class="episode-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
         <p>Guest: Marcus Vance (ChromaDB Creator)</p>
+        <button type="button" class="episode-share-btn" data-share-episode="141" aria-label="Share episode 141">↗ Share episode</button>
       </div>
     </div>
   </main>
+  <dialog id="episode-share-dialog" class="episode-share-dialog" aria-labelledby="episode-share-title">
+    <div class="share-wave" aria-hidden="true">▁▃▆█▆▃▁ ▂▅▇▅▂</div>
+    <h2 id="episode-share-title">Share this episode</h2>
+    <p id="episode-share-name"></p>
+    <label class="share-timestamp"><input type="checkbox" id="share-with-timestamp" /> Start at current timestamp <span id="share-time-label"></span></label>
+    <label class="share-link-label" for="share-link">Episode link</label>
+    <input id="share-link" type="text" readonly />
+    <div class="share-actions">
+      <button type="button" id="share-copy-btn">Copy link</button>
+      <a id="share-email-link" href="#">Email</a>
+      <a id="share-whatsapp-link" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <button type="button" id="share-close-btn">Close</button>
+    </div>
+    <p id="share-status" role="status" aria-live="polite"></p>
+  </dialog>
   <section class="queue-entry" aria-label="Playback queue">
     <button type="button" id="queue-open">Playback queue (0)</button>
     <p id="queue-announcement" role="status" aria-live="polite"></p>
@@ -287,9 +306,70 @@
     <div class="queue-actions"><button type="button" id="queue-next">Play next now</button><button type="button" id="queue-clear">Clear upcoming</button></div>
     <p id="queue-status" role="status" aria-live="polite"></p>
   </dialog>
+
+  <!-- ===== Sleep Timer Modal (Issue #299) START ===== -->
+  <dialog class="sleep-timer-modal" id="sleep-timer-modal" aria-labelledby="sleep-timer-title">
+    <div class="sleep-modal-content">
+      <div class="sleep-modal-header">
+        <div class="sleep-modal-title-wrap">
+          <span class="sleep-modal-icon">🌙</span>
+          <h3 id="sleep-timer-title">Audio Sleep Timer</h3>
+        </div>
+        <button type="button" class="sleep-modal-close" id="close-sleep-timer-modal" aria-label="Close sleep timer dialog">&times;</button>
+      </div>
+
+      <p class="sleep-modal-subtitle">Automatically pauses playback and gently fades out volume so you can drift off without losing your place.</p>
+
+      <div class="sleep-active-status" id="sleep-active-status" hidden>
+        <div class="sleep-status-pulse"></div>
+        <div class="sleep-status-info">
+          <span class="status-label">ACTIVE TIMER</span>
+          <span class="status-time" id="sleep-countdown-display">30:00 remaining</span>
+        </div>
+        <button type="button" class="sleep-cancel-btn" id="sleep-cancel-btn">Turn Off</button>
+      </div>
+
+      <div class="sleep-options-grid" role="radiogroup" aria-label="Sleep timer durations">
+        <button type="button" class="sleep-preset-option" data-minutes="15">
+          <span class="preset-name">15 Minutes</span>
+          <span class="preset-desc">Quick power nap</span>
+        </button>
+        <button type="button" class="sleep-preset-option" data-minutes="30">
+          <span class="preset-name">30 Minutes</span>
+          <span class="preset-desc">Standard bedtime</span>
+        </button>
+        <button type="button" class="sleep-preset-option" data-minutes="45">
+          <span class="preset-name">45 Minutes</span>
+          <span class="preset-desc">Deep relaxation</span>
+        </button>
+        <button type="button" class="sleep-preset-option" data-minutes="60">
+          <span class="preset-name">60 Minutes</span>
+          <span class="preset-desc">Full hour listen</span>
+        </button>
+        <button type="button" class="sleep-preset-option" data-minutes="end">
+          <span class="preset-name">End of Episode</span>
+          <span class="preset-desc" id="preset-end-desc">Stops at end of audio</span>
+        </button>
+      </div>
+
+      <!-- Custom duration input -->
+      <div class="sleep-custom-row">
+        <label for="sleep-custom-minutes">Custom minutes:</label>
+        <div class="sleep-custom-input-wrap">
+          <input type="number" id="sleep-custom-minutes" min="1" max="180" placeholder="e.g. 25" />
+          <button type="button" class="sleep-custom-set-btn" id="sleep-custom-set-btn">Set</button>
+        </div>
+      </div>
+      
+      <div class="sleep-modal-footer">
+        <p class="sleep-fade-note">💡 Volume gradually fades out over the final 30 seconds before pausing playback.</p>
+      </div>
+    </div>
+  </dialog>
+  <!-- ===== Sleep Timer Modal (Issue #299) END ===== -->
   <script src="queue-logic.js"></script>
   <script src="player-logic.js"></script>
-  <script src="speed-pitch-logic.js"></script>
+  <script src="share-logic.js"></script>
   <script src="script.js"></script>
   <script src="queue-manager.js"></script>
 </body>

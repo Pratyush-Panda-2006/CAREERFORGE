@@ -2582,7 +2582,6 @@
 })();
 /* ===== END Issue #413 ===== */
 
-
 // ==========================================================================
 // Issue #350: Interactive Superyacht Charter Route Customizer & Fuel Surcharge Estimator
 // ==========================================================================
@@ -2907,5 +2906,202 @@
     document.addEventListener('DOMContentLoaded', setup);
   } else {
     setup();
+  }
+})();
+
+/* ==========================================================================
+   Issue #295: Bespoke Onboard Catering Menu Customizer
+   ========================================================================== */
+(function initCateringModule() {
+  function initCateringCustomizer() {
+    const section = document.getElementById('cateringMenuSection');
+    if (!section) return;
+
+    const tierData = {
+      beluga: { name: 'Imperial Beluga Haute', price: 2850 },
+      kaiseki: { name: 'Organic Vegan Kaiseki', price: 1950 },
+      wagyu: { name: 'Blue Lobster & A5 Wagyu', price: 2400 },
+      nordic: { name: 'Arctic Char & Cloudberry', price: 1750 }
+    };
+
+    const state = {
+      tier: 'beluga',
+      guests: 4,
+      winePairing: true,
+      personalChef: true,
+      dietary: new Set(['halal']),
+      notes: ''
+    };
+
+    // DOM Elements
+    const tierCards = section.querySelectorAll('.catering-card');
+    const guestInput = document.getElementById('cateringGuestCount');
+    const minusBtn = document.getElementById('guestCountMinus');
+    const plusBtn = document.getElementById('guestCountPlus');
+    const wineCheckbox = document.getElementById('addonWinePairing');
+    const chefCheckbox = document.getElementById('addonPersonalChef');
+    const dietaryChips = section.querySelectorAll('.dietary-chip');
+    const notesInput = document.getElementById('cateringNotes');
+    const dietSummaryTags = document.getElementById('dietSummaryTags');
+
+    // Quote breakdown elements
+    const quoteTierLabel = document.getElementById('quoteTierLabel');
+    const quoteTierTotal = document.getElementById('quoteTierTotal');
+    const quoteWineLabel = document.getElementById('quoteWineLabel');
+    const quoteWineTotal = document.getElementById('quoteWineTotal');
+    const quoteChefTotal = document.getElementById('quoteChefTotal');
+    const quoteLogisticsTotal = document.getElementById('quoteLogisticsTotal');
+    const quoteGrandTotal = document.getElementById('quoteGrandTotal');
+    const confirmBtn = document.getElementById('btnConfirmCatering');
+
+    function formatCurrency(num) {
+      return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function calculateAndRender() {
+      const currentTier = tierData[state.tier] || tierData.beluga;
+      const tierSubtotal = currentTier.price * state.guests;
+      const wineSubtotal = state.winePairing ? 450 * state.guests : 0;
+      const chefSubtotal = state.personalChef ? 1200 : 0;
+      const subtotal = tierSubtotal + wineSubtotal + chefSubtotal;
+      const logisticsFee = subtotal * 0.085;
+      const grandTotal = subtotal + logisticsFee;
+
+      // Update Breakdown
+      if (quoteTierLabel) quoteTierLabel.textContent = `${currentTier.name} (×${state.guests}):`;
+      if (quoteTierTotal) quoteTierTotal.textContent = formatCurrency(tierSubtotal);
+      if (quoteWineLabel) quoteWineLabel.textContent = `Reserve Wine Flight (×${state.guests}):`;
+      if (quoteWineTotal) quoteWineTotal.textContent = formatCurrency(wineSubtotal);
+      if (quoteChefTotal) quoteChefTotal.textContent = formatCurrency(chefSubtotal);
+      if (quoteLogisticsTotal) quoteLogisticsTotal.textContent = formatCurrency(logisticsFee);
+      if (quoteGrandTotal) quoteGrandTotal.textContent = formatCurrency(grandTotal);
+
+      // Render dietary tags
+      if (dietSummaryTags) {
+        dietSummaryTags.replaceChildren();
+        if (state.dietary.size === 0) {
+          const emptySpan = document.createElement('span');
+          emptySpan.className = 'diet-empty';
+          emptySpan.textContent = 'Standard Executive Menu (No specific restrictions)';
+          dietSummaryTags.appendChild(emptySpan);
+        } else {
+          state.dietary.forEach((itemText) => {
+            const pill = document.createElement('span');
+            pill.className = 'diet-pill-active';
+            pill.textContent = itemText;
+            dietSummaryTags.appendChild(pill);
+          });
+        }
+      }
+    }
+
+    // Tier Card Clicks
+    tierCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        tierCards.forEach((c) => {
+          c.classList.remove('active');
+          c.setAttribute('aria-checked', 'false');
+        });
+        card.classList.add('active');
+        card.setAttribute('aria-checked', 'true');
+        state.tier = card.getAttribute('data-tier') || 'beluga';
+        calculateAndRender();
+      });
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.click();
+        }
+      });
+    });
+
+    // Guest Counter
+    if (minusBtn && guestInput) {
+      minusBtn.addEventListener('click', () => {
+        if (state.guests > 1) {
+          state.guests -= 1;
+          guestInput.value = String(state.guests);
+          calculateAndRender();
+        }
+      });
+    }
+
+    if (plusBtn && guestInput) {
+      plusBtn.addEventListener('click', () => {
+        if (state.guests < 16) {
+          state.guests += 1;
+          guestInput.value = String(state.guests);
+          calculateAndRender();
+        }
+      });
+    }
+
+    // Addons
+    if (wineCheckbox) {
+      wineCheckbox.addEventListener('change', (e) => {
+        state.winePairing = e.target.checked;
+        calculateAndRender();
+      });
+    }
+
+    if (chefCheckbox) {
+      chefCheckbox.addEventListener('change', (e) => {
+        state.personalChef = e.target.checked;
+        calculateAndRender();
+      });
+    }
+
+    // Dietary Chips
+    dietaryChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const text = chip.textContent.trim();
+        if (chip.classList.contains('active')) {
+          chip.classList.remove('active');
+          state.dietary.delete(text);
+        } else {
+          chip.classList.add('active');
+          state.dietary.add(text);
+        }
+        calculateAndRender();
+      });
+    });
+
+    // Notes
+    if (notesInput) {
+      notesInput.addEventListener('input', (e) => {
+        state.notes = e.target.value;
+      });
+    }
+
+    // Confirm Button
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', () => {
+        confirmBtn.textContent = '✓ Culinary Package Attached to Charter Manifest!';
+        confirmBtn.style.background = '#10b981';
+        confirmBtn.style.borderColor = '#10b981';
+
+        // Pre-fill concierge inquiry if modal exists
+        const conciergeInput = document.getElementById('conciergeGuests');
+        if (conciergeInput) {
+          conciergeInput.value = String(state.guests);
+        }
+
+        setTimeout(() => {
+          confirmBtn.textContent = '✦ Attach Culinary Brief to Inquiry';
+          confirmBtn.style.background = '';
+          confirmBtn.style.borderColor = '';
+        }, 3000);
+      });
+    }
+
+    // Initialize
+    calculateAndRender();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCateringCustomizer);
+  } else {
+    initCateringCustomizer();
   }
 })();

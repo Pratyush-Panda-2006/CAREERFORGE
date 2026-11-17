@@ -1,0 +1,287 @@
+/**
+ * Agritech Precision Farming - Offline Sync Stylesheet
+ * Pulse indicators, glassmorphic telemetry cards, and status styling.
+ */
+
+:root {
+  --agri-bg: #09130e;
+  --agri-surface: rgba(18, 38, 28, 0.7);
+  --agri-surface-border: rgba(52, 211, 153, 0.2);
+  --agri-emerald: #10b981;
+  --agri-emerald-glow: rgba(16, 185, 129, 0.35);
+  --agri-amber: #f59e0b;
+  --agri-amber-glow: rgba(245, 158, 11, 0.35);
+  --agri-red: #ef4444;
+  --agri-text-main: #f0fdf4;
+  --agri-text-muted: #86efac;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(circle at top right, #132e1f 0%, #060d09 100%);
+  color: var(--agri-text-main);
+  min-height: 100vh;
+}
+
+.sync-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+.sync-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--agri-surface-border);
+}
+
+.title-wrap h1 {
+  margin: 0 0 6px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #a7f3d0 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.title-wrap p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #a7f3d0;
+  opacity: 0.85;
+}
+
+.network-status-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.status-online {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid var(--agri-emerald);
+  color: #6ee7b7;
+  box-shadow: 0 0 14px var(--agri-emerald-glow);
+}
+
+.status-online::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  animation: pulse-green 1.8s infinite;
+}
+
+.status-offline {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--agri-red);
+  color: #fca5a5;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.3);
+}
+
+.status-offline::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f87171;
+}
+
+@keyframes pulse-green {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+.counter-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+  border: 1px solid var(--agri-amber);
+}
+
+.badge-idle {
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sync-actions-bar {
+  display: flex;
+  gap: 10px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+
+.btn-agri {
+  background: var(--agri-surface);
+  color: var(--agri-text-main);
+  border: 1px solid var(--agri-surface-border);
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-agri:hover {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: #34d399;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: #34d399;
+  color: #022c22;
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  box-shadow: 0 4px 16px var(--agri-emerald-glow);
+}
+
+.card-panel {
+  background: var(--agri-surface);
+  border: 1px solid var(--agri-surface-border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(8px);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+th {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(52, 211, 153, 0.25);
+  color: #6ee7b7;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cell-mono {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.8rem;
+  color: #93c5fd;
+}
+
+.chip-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.chip-pending {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+  border: 1px solid #f59e0b;
+}
+
+.chip-synced {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border: 1px solid #10b981;
+}
+
+.chip-failed {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid #ef4444;
+}
+
+.empty-notice {
+  text-align: center;
+  color: #86efac;
+  opacity: 0.75;
+  padding: 30px !important;
+}
+
+.log-console {
+  background: #040906;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 8px;
+  padding: 14px;
+  max-height: 160px;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.78rem;
+  color: #a7f3d0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.log-line {
+  line-height: 1.4;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #34d399;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .sync-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

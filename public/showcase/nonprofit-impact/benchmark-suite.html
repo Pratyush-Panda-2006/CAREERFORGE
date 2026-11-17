@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TerraInitia — Browser performance lab</title>
+  <link rel="stylesheet" href="benchmark-suite.css">
+  <script type="module" src="benchmark-suite.js"></script>
+</head>
+<body>
+  <main data-benchmark-suite>
+    <header><a href="index.html">TerraInitia ↗</a><span>LOCAL BROWSER LAB</span></header>
+    <p class="eyebrow">Measure, then improve</p>
+    <h1>How does your browser<br>handle a busy moment?</h1>
+    <p class="intro">Run a bounded, synthetic impact-data workload. These measurements describe this page on your device, not a live service.</p>
+    <section class="controls" aria-label="Benchmark controls">
+      <label>Operations<input type="number" min="1" max="50000" step="1" value="5000" data-iterations></label>
+      <label>Load pattern<select data-load><option value="1">Steady work</option><option value="8">Alternating 8× spikes</option><option value="32">Alternating 32× spikes</option></select></label>
+      <button type="button" data-run>Run benchmark</button><button type="button" class="secondary" data-stop disabled>Stop</button>
+    </section>
+    <p class="status" data-status role="status">Ready. No network requests or production data.</p>
+    <section class="metrics" aria-label="Measured browser metrics">
+      <article><h2>Frame throughput</h2><strong data-fps>—</strong><p>frames / second</p></article>
+      <article><h2>Work throughput</h2><strong data-throughput>—</strong><p>operations / second</p></article>
+      <article><h2>Page JS heap</h2><strong data-memory>Unavailable</strong><p>browser support varies</p></article>
+    </section>
+    <section class="run-detail" aria-label="Run progress">
+      <div><h2>Operations completed</h2><span data-count>0 / 0</span></div>
+      <progress max="1" value="0" aria-label="Benchmark completion"></progress>
+      <p><span data-phase>Steady</span> <span data-duration>0.00 seconds</span></p>
+    </section>
+    <section class="latencies" aria-labelledby="latency-title">
+      <h2 id="latency-title">Operation latency</h2>
+      <div><span>P50</span><span class="track"><i data-bar-p50></i></span><strong data-p50>— ms</strong></div>
+      <div><span>P95</span><span class="track"><i data-bar-p95></i></span><strong data-p95>— ms</strong></div>
+      <div><span>P99</span><span class="track"><i data-bar-p99></i></span><strong data-p99>— ms</strong></div>
+      <p>Nearest-rank percentiles of measured operation durations. Timer precision can round short operations to zero. Frame waiting is excluded from these samples.</p>
+    </section>
+    <footer>Up to 50,000 operations with a 10-second time budget per run. Work yields between frames; hiding this page stops the run. Heap measurements are page-wide snapshots where supported.</footer>
+  </main>
+</body>
+</html>

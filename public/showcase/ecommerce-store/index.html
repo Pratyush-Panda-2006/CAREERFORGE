@@ -37,6 +37,36 @@
           <span class="wish-count" id="wishCount" aria-hidden="true">0</span>
         </button>
         <!-- END issue #188 -->
+        <!-- Export Engine Dropdown Menu -->
+        <div class="export-engine-dropdown" id="exportEngineDropdown">
+          <button type="button" class="export-dropdown-trigger-btn" id="exportDropdownTriggerBtn" aria-expanded="false" aria-haspopup="true" title="Export Store Data">
+            <span class="export-btn-icon">📥</span>
+            <span class="export-btn-label">Export</span>
+          </button>
+          <div class="export-dropdown-menu" id="exportDropdownMenu" role="menu" aria-hidden="true">
+            <button type="button" class="export-menu-item" id="exportJsonBtn" role="menuitem">
+              <span class="export-item-icon">📋</span>
+              <div class="export-item-text">
+                <strong>Download JSON Data</strong>
+                <small>Full machine-readable state</small>
+              </div>
+            </button>
+            <button type="button" class="export-menu-item" id="exportCsvBtn" role="menuitem">
+              <span class="export-item-icon">📊</span>
+              <div class="export-item-text">
+                <strong>Export CSV Table</strong>
+                <small>Spreadsheet compatible items</small>
+              </div>
+            </button>
+            <button type="button" class="export-menu-item" id="exportMarkdownBtn" role="menuitem">
+              <span class="export-item-icon">📑</span>
+              <div class="export-item-text">
+                <strong>Copy Markdown Audit</strong>
+                <small>Clean formatted audit summary</small>
+              </div>
+            </button>
+          </div>
+        </div>
         <button class="cart-badge" id="cartBadge" onclick="toggleCartDrawer()">
           🛒 Cart (<span id="cartCount">0</span>)
         </button>
@@ -824,6 +854,30 @@
       </div>
     </section>
     <!-- ===== END issue #189 ===== -->
+
+    <!-- ===== BEGIN Issue #338: Recently Viewed Items Carousel with localStorage Sync ===== -->
+    <section class="recently-viewed-section" id="recentlyViewedSection" aria-labelledby="recentlyViewedTitle">
+      <div class="recently-viewed-container">
+        <div class="recently-viewed-header">
+          <div class="rv-title-wrap">
+            <div class="hero-tag">// BROWSING TELEMETRY &amp; MEMORY</div>
+            <h2 id="recentlyViewedTitle" class="rv-title">Recently Viewed Gear</h2>
+            <p class="rv-sub">Pick up right where you left off. Quick restore items to your cart or inspect specs with instant sync.</p>
+          </div>
+          <div class="rv-actions">
+            <button type="button" class="btn-rv-nav" id="btnRvScrollLeft" aria-label="Scroll left in recently viewed items">‹</button>
+            <button type="button" class="btn-rv-nav" id="btnRvScrollRight" aria-label="Scroll right in recently viewed items">›</button>
+            <button type="button" class="btn-rv-clear" id="btnRvClearHistory" title="Clear browsing history">Clear History</button>
+          </div>
+        </div>
+
+        <!-- Carousel Track Container -->
+        <div class="recently-viewed-carousel" id="recentlyViewedCarousel" role="region" aria-label="Recently viewed products carousel">
+          <!-- Dynamically populated from localStorage via JS -->
+        </div>
+      </div>
+    </section>
+    <!-- ===== END Issue #338 ===== -->
   </main>
 
   <!-- Slide-Over Cart Drawer & Backdrop -->
@@ -848,6 +902,11 @@
       <div class="empty-cart">Your cart is currently empty.</div>
     </div>
     <div class="drawer-footer">
+      <div class="shipping-progress" id="shippingProgress" aria-live="polite">
+        <div class="shipping-progress-message"><span aria-hidden="true">🚚</span> <span id="shippingProgressMessage">Add $150.00 to unlock Free Express Shipping!</span></div>
+        <div class="shipping-progress-track" id="shippingProgressTrack" role="progressbar" aria-label="Progress toward free shipping" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="shippingProgressFill"></span></div>
+        <span class="shipping-progress-badge" id="shippingProgressBadge" hidden>✦ Free shipping unlocked!</span>
+      </div>
       <form class="coupon-form" id="couponForm" novalidate>
         <label class="coupon-label" for="couponInput">Promo code</label>
         <div class="coupon-row">
@@ -1296,6 +1355,7 @@
     </div>
 
   <div id="toast" class="toast">Item added to cart!</div>
+  <script src="shipping-progress.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
