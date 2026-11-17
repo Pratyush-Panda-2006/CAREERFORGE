@@ -78,6 +78,18 @@ body {
 .pair { color: #94a3b8; font-size: 0.85rem; }
 .price { font-size: 1.6rem; font-weight: 800; color: #fff; }
 .green { color: #10b981; font-weight: 700; font-size: 0.9rem; }
+.ticker-card .change {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ticker-card .change[data-dir="up"] { color: #6ee7b7; background: rgba(16, 185, 129, 0.12); }
+.ticker-card .change[data-dir="down"] { color: #fda4af; background: rgba(244, 63, 94, 0.12); }
 
 /* ---------- Live market: candlestick chart + order book ---------- */
 .sr-only {
@@ -818,6 +830,26 @@ body {
   .token-market-table th, .token-market-table td { padding: 12px 6px; font-size: .73rem; }
   .token-market-table td:nth-child(2), .token-market-table thead th:nth-child(2) { display: none; }
 }
+/* Local simulated stream; kept separate from paper-order execution history. */
+.stream-connection { display:flex; flex-direction:column; gap:6px; max-width:100%; font:12px 'JetBrains Mono',monospace; }
+#stream-status { color:#fbbf24; }
+#stream-status::before { content:'● '; }
+#stream-status[data-state="connected"] { color:#4ade80; }
+#stream-status[data-state="stopped"], #stream-status[data-state="disconnected"] { color:#fda4af; }
+#stream-stats { color:#cbd5e1; font-size:11px; }
+.stream-lab { padding:22px; margin:24px 0; background:#0f172a; color:#e2e8f0; border:1px solid #334155; border-radius:14px; }
+.stream-lab h2 { font-size:20px; margin-bottom:10px; }
+.stream-lab h3 { font-size:14px; margin:18px 0 10px; }
+.stream-lab p { font-size:13px; line-height:1.7; margin:10px 0; }
+.stream-lab button { padding:10px 14px; margin:4px; color:#e2e8f0; background:#1e293b; border:1px solid #64748b; border-radius:6px; cursor:pointer; }
+.stream-lab button:disabled { opacity:.5; cursor:default; }
+.stream-lab button:focus-visible { outline:3px solid #22d3ee; outline-offset:3px; }
+#stream-tape { font:12px/1.8 'JetBrains Mono',monospace; list-style:none; overflow-wrap:anywhere; padding:0; min-height:108px; }
+@keyframes stream-tick { 50% { opacity:.5; } }
+.stream-tick { animation:stream-tick .3s ease; }
+@media (prefers-reduced-motion:reduce) { .stream-tick { animation:none; } }
+@media (max-width:600px) { .navbar { flex-wrap:wrap; gap:12px; } .stream-lab { padding:16px; } }
+
 
 /* ==========================================================
    Issue #391: Portfolio Allocation Rebalancer Styles
@@ -1738,3 +1770,602 @@ body {
   }
 }
 /* ===== END Issue #328 ===== */
+
+/* ==========================================================================
+   Issue #273: Interactive Leverage Slider & Liquidation Risk Calculator
+   ========================================================================== */
+.leverage-risk-section {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.leverage-card {
+  background: radial-gradient(circle at 10% 10%, rgba(0, 242, 254, 0.05), transparent 40%),
+              radial-gradient(circle at 90% 90%, rgba(239, 68, 68, 0.04), transparent 40%),
+              #0c121e;
+  border: 1px solid rgba(0, 242, 254, 0.22);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 242, 254, 0.08);
+}
+
+.leverage-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.leverage-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #00f2fe;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.leverage-head h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 8px;
+}
+
+.leverage-sub {
+  color: #94a3b8;
+  font-size: 0.88rem;
+  max-width: 680px;
+  line-height: 1.5;
+}
+
+/* Risk Badges */
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  transition: all 0.3s ease;
+}
+
+.risk-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+  animation: riskPulse 1.6s infinite ease-in-out;
+}
+
+@keyframes riskPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.5; }
+}
+
+.risk-badge-low {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid #10b981;
+  color: #10b981;
+}
+
+.risk-badge-med {
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid #00f2fe;
+  color: #00f2fe;
+}
+
+.risk-badge-high {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid #f59e0b;
+  color: #f59e0b;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+}
+
+.risk-badge-extreme {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  animation: dangerPulse 1.2s infinite alternate;
+}
+
+@keyframes dangerPulse {
+  from { box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+  to { box-shadow: 0 0 24px rgba(239, 68, 68, 0.7); }
+}
+
+/* Presets Row */
+.leverage-presets-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  margin-bottom: 28px;
+}
+
+.presets-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.presets-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preset-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  background: rgba(0, 242, 254, 0.1);
+  border-color: #00f2fe;
+  color: #ffffff;
+}
+
+.preset-btn.active {
+  background: rgba(0, 242, 254, 0.18);
+  border-color: #00f2fe;
+  color: #00f2fe;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
+}
+
+/* Main Grid Layout */
+.leverage-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 28px;
+}
+
+/* Inputs Column */
+.leverage-inputs-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Long / Short Toggle */
+.side-selector-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-side-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #64748b;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-side-toggle.long:hover {
+  color: #10b981;
+}
+
+.btn-side-toggle.short:hover {
+  color: #ef4444;
+}
+
+.btn-side-toggle.active.long {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #10b981;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+}
+
+.btn-side-toggle.active.short {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ef4444;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.25);
+}
+
+/* Input Duo Rows */
+.input-row-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.calc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calc-field label {
+  font-size: 0.76rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.field-label-split {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-calc-fill {
+  background: transparent;
+  border: none;
+  color: #00f2fe;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.btn-calc-fill:hover {
+  color: #38bdf8;
+}
+
+.notional-hint, .exit-pct-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.calc-select, .calc-input {
+  background: #080d16;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border-radius: 6px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.calc-select:focus, .calc-input:focus {
+  border-color: #00f2fe;
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
+}
+
+.calc-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-prefix {
+  position: absolute;
+  left: 10px;
+  color: #64748b;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+.calc-input-wrap .calc-input {
+  padding-left: 24px;
+}
+
+/* Leverage Slider Box */
+.leverage-slider-box {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.slider-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slider-header-row label {
+  font-size: 0.78rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.active-leverage-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lev-multiplier {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: #00f2fe;
+}
+
+.lev-imr-pill {
+  font-size: 0.74rem;
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #94a3b8;
+}
+
+.leverage-range-input {
+  width: 100%;
+  accent-color: #00f2fe;
+  cursor: pointer;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  outline: none;
+}
+
+.leverage-ticks {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.lev-tick {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #64748b;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lev-tick:hover {
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.lev-tick.active {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: #00f2fe;
+  color: #00f2fe;
+  font-weight: 700;
+}
+
+/* Results Column */
+.leverage-results-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Liquidation Callout */
+.liquidation-hero-card {
+  background: radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.1), transparent 70%),
+              #080d16;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #ef4444;
+}
+
+.dist-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.hero-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: -0.02em;
+}
+
+.hero-desc {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.risk-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.risk-bar-fill {
+  height: 100%;
+  background: #10b981;
+  border-radius: 3px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.risk-bar-fill.bar-low { background: #10b981; }
+.risk-bar-fill.bar-med { background: #00f2fe; }
+.risk-bar-fill.bar-high { background: #f59e0b; }
+.risk-bar-fill.bar-extreme { background: #ef4444; }
+
+/* Metrics KPI Grid */
+.metrics-kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.m-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.m-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.m-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.green-text {
+  color: #10b981 !important;
+}
+
+.red-text {
+  color: #ef4444 !important;
+}
+
+/* Actions Row */
+.calc-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-copy-risk {
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid #00f2fe;
+  color: #00f2fe;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-copy-risk:hover {
+  background: #00f2fe;
+  color: #070d18;
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+}
+
+.btn-reset-calc {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-calc:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.calc-feedback-msg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #10b981;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.calc-feedback-msg.visible {
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  .leverage-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .input-row-duo {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .leverage-head {
+    flex-direction: column;
+  }
+}

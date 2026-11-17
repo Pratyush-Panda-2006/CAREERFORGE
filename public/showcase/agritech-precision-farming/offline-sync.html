@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agritech Precision Farming — Resilient Offline Sync Engine</title>
+  <link rel="stylesheet" href="offline-sync.css">
+</head>
+<body>
+  <div class="sync-container">
+    <header class="sync-header">
+      <div class="title-wrap">
+        <h1>🌱 Offline Telemetry & Conflict-Free Sync Engine</h1>
+        <p>Autonomous state persistence with deterministic vector-clock conflict reconciliation for precision field sensors.</p>
+      </div>
+      <div class="network-status-panel">
+        <span id="connectionStatusBadge" class="status-badge status-online">ONLINE (4G/LTE FarmLink)</span>
+        <span id="pendingCountBadge" class="counter-badge badge-idle">0 pending</span>
+      </div>
+    </header>
+
+    <div class="sync-actions-bar">
+      <button type="button" id="toggleOnlineBtn" class="btn-agri">📡 Toggle Connectivity</button>
+      <button type="button" id="addSampleBtn" class="btn-agri">🚜 Generate Field Mutation</button>
+      <button type="button" id="syncNowBtn" class="btn-agri btn-primary">⚡ Sync Now</button>
+      <button type="button" id="clearQueueBtn" class="btn-agri">🗑️ Clear Buffer</button>
+    </div>
+
+    <section class="card-panel">
+      <h2>Buffered Field Telemetry Queue</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mutation ID</th>
+              <th>Type</th>
+              <th>Field Zone</th>
+              <th>Vector Clock</th>
+              <th>Retries</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="queueTableBody">
+            <!-- Dynamically rendered rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card-panel">
+      <h3>Sync Activity Audit Console</h3>
+      <div id="syncLogConsole" class="log-console" role="log" aria-live="polite">
+        <!-- Live logs -->
+      </div>
+    </section>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Agritech Precision Farming Showcase Dashboard</a>
+    </nav>
+  </div>
+
+  <script type="module" src="offline-sync.js"></script>
+</body>
+</html>

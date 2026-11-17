@@ -48,6 +48,31 @@
     </div>
   </main>
 
+  <section class="virtual-card-section" aria-labelledby="virtual-card-title">
+    <div class="virtual-card-container">
+      <div class="virtual-card-heading">
+        <div class="tag">// CARD CONTROLS</div>
+        <h2 id="virtual-card-title">Virtual card security</h2>
+        <p>Preview the card lock control in this showcase. No real transactions are processed.</p>
+      </div>
+      <div class="virtual-card-layout">
+        <div class="virtual-debit-card" id="virtual-debit-card" aria-label="Demo virtual debit card, active">
+          <div class="virtual-card-top"><span>APEXVAULT</span><span class="virtual-card-type">DEBIT · DEMO</span></div>
+          <div class="virtual-card-chip" aria-hidden="true"></div>
+          <div class="virtual-card-number">•••• &nbsp; •••• &nbsp; •••• &nbsp; 4829</div>
+          <div class="virtual-card-bottom"><span>DEMO CARD<br><strong>AV MEMBER</strong></span><span>VALID THRU<br><strong>12/29</strong></span></div>
+          <div class="virtual-card-lock" aria-hidden="true">🔒<span>FROZEN</span></div>
+        </div>
+        <div class="virtual-card-controls">
+          <p class="virtual-card-status" id="virtual-card-status" role="status">Card preview active</p>
+          <button type="button" id="virtual-card-toggle" class="virtual-card-toggle" aria-controls="virtual-debit-card" aria-pressed="false">Freeze demo card</button>
+          <p class="virtual-card-note">This is a visual demo. Freezing here does not block payments or change an account.</p>
+        </div>
+      </div>
+      <div class="virtual-card-toast" id="virtual-card-toast" role="status" aria-live="polite" hidden></div>
+    </div>
+  </section>
+
 
   <!-- Foreign Exchange Converter -->
   <section class="fx-section" id="currency-converter" aria-labelledby="fx-title">
@@ -1407,6 +1432,288 @@
       <p class="debt-disclaimer">Estimates assume fixed APRs, monthly interest, and consistent payments. Actual lender calculations, fees, and payment dates may differ; this planner is for educational purposes only.</p>
     </div>
   </section>
+
+  <!-- ===== BEGIN Issue #344: Interactive Loan Amortization Schedule Calculator & Extra Payment Comparison ===== -->
+  <section class="engine-section loan-amort-section" id="loan-amortization-calculator" aria-labelledby="loanCalcTitle">
+    <div class="engine-header">
+      <div class="tag-pill">// DEBT PAYOFF ACCELERATOR</div>
+      <h2 id="loanCalcTitle">LOAN AMORTIZATION &amp; EXTRA PRINCIPAL CALCULATOR</h2>
+      <p class="section-lead">
+        Model institutional mortgage and term loan amortization. Simulate additional monthly principal curtailment to compute total interest saved, accelerated debt-free horizons, and yearly balance schedules.
+      </p>
+    </div>
+
+    <!-- Loan Presets Strip -->
+    <div class="loan-presets-strip">
+      <span class="loan-presets-label">Load Financing Benchmark:</span>
+      <div class="loan-presets-buttons" role="group" aria-label="Financing Benchmark Presets">
+        <button type="button" class="btn-loan-preset active" data-amount="750000" data-rate="6.5" data-years="30" data-extra="300">
+          🏡 Jumbo Mortgage ($750k • 6.5% • 30Y • +$300/mo)
+        </button>
+        <button type="button" class="btn-loan-preset" data-amount="1250000" data-rate="7.2" data-years="15" data-extra="1000">
+          🏢 Commercial Facility ($1.25M • 7.2% • 15Y • +$1k/mo)
+        </button>
+        <button type="button" class="btn-loan-preset" data-amount="120000" data-rate="8.5" data-years="10" data-extra="150">
+          💼 Executive Term Loan ($120k • 8.5% • 10Y • +$150/mo)
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Grid: Left = Sliders & Term Selector, Right = Summary KPI Cards & Comparison -->
+    <div class="loan-workspace-grid">
+      <!-- Input Parameters Card -->
+      <div class="loan-card inputs-card">
+        <div class="loan-card-head">
+          <h3>Loan Parameters &amp; Curtailment</h3>
+          <span class="loan-status-tag" id="loanRateBadge">6.50% APR</span>
+        </div>
+
+        <!-- Loan Amount -->
+        <div class="loan-field">
+          <div class="field-label-row">
+            <label for="loanAmountInput">Principal Loan Amount</label>
+            <span class="field-val" id="loanAmountVal">$750,000</span>
+          </div>
+          <input type="range" id="loanAmountSlider" class="loan-slider" min="25000" max="2500000" step="25000" value="750000" />
+          <input type="number" id="loanAmountInput" class="loan-num-input" min="1000" max="10000000" step="5000" value="750000" />
+        </div>
+
+        <!-- Interest Rate -->
+        <div class="loan-field">
+          <div class="field-label-row">
+            <label for="loanRateInput">Annual Interest Rate (%)</label>
+            <span class="field-val" id="loanRateVal">6.50%</span>
+          </div>
+          <input type="range" id="loanRateSlider" class="loan-slider" min="2.0" max="15.0" step="0.1" value="6.5" />
+          <input type="number" id="loanRateInput" class="loan-num-input" min="0.5" max="25.0" step="0.05" value="6.5" />
+        </div>
+
+        <!-- Term Toggle (10, 15, 30 Years) -->
+        <div class="loan-field">
+          <label>Loan Amortization Term</label>
+          <div class="loan-term-toggles" role="group" aria-label="Loan Term Selection">
+            <button type="button" class="btn-term-toggle" data-term="10">10 Years</button>
+            <button type="button" class="btn-term-toggle" data-term="15">15 Years</button>
+            <button type="button" class="btn-term-toggle active" data-term="30">30 Years</button>
+          </div>
+        </div>
+
+        <!-- Extra Monthly Payment -->
+        <div class="loan-field highlight-field">
+          <div class="field-label-row">
+            <label for="extraPaymentInput">Extra Monthly Principal Curtailment</label>
+            <span class="field-val extra-val" id="extraPaymentVal">+$300 / mo</span>
+          </div>
+          <input type="range" id="extraPaymentSlider" class="loan-slider extra-slider" min="0" max="3000" step="50" value="300" />
+          <input type="number" id="extraPaymentInput" class="loan-num-input" min="0" max="25000" step="50" value="300" />
+          <small class="field-hint">Applied directly toward reducing loan principal balance every month.</small>
+        </div>
+      </div>
+
+      <!-- Comparison KPI & Savings Card -->
+      <div class="loan-card summary-card">
+        <div class="loan-card-head">
+          <h3>Payoff Speed &amp; Wealth Preservation</h3>
+          <span class="savings-chip" id="interestSavingsChip">+$114,842 Interest Saved</span>
+        </div>
+
+        <div class="loan-kpis-grid">
+          <div class="loan-kpi-box">
+            <span class="kpi-label">Baseline Monthly P&amp;I</span>
+            <strong class="kpi-val" id="kpiBaseMonthly">$4,740</strong>
+            <small class="kpi-sub" id="kpiEffectiveMonthly">Total Outlay: $5,040 / mo</small>
+          </div>
+
+          <div class="loan-kpi-box highlight-emerald">
+            <span class="kpi-label">Accelerated Payoff Timeline</span>
+            <strong class="kpi-val emerald" id="kpiPayoffYears">25.3 Years</strong>
+            <small class="kpi-sub" id="kpiTimeShortened">⚡ 4 Years 8 Months Early</small>
+          </div>
+
+          <div class="loan-kpi-box">
+            <span class="kpi-label">Baseline Total Interest</span>
+            <strong class="kpi-val" id="kpiBaseTotalInterest">$956,664</strong>
+            <small class="kpi-sub">Total of 360 payments</small>
+          </div>
+
+          <div class="loan-kpi-box highlight-gold">
+            <span class="kpi-label">Total Accelerated Interest</span>
+            <strong class="kpi-val gold" id="kpiAccelTotalInterest">$841,822</strong>
+            <small class="kpi-sub" id="kpiTotalPrincipalPaid">Principal: $750,000</small>
+          </div>
+        </div>
+
+        <!-- Visual Comparison Progress Bar -->
+        <div class="payoff-progress-box">
+          <div class="progress-labels">
+            <span>Payoff Duration Comparison:</span>
+            <strong id="progressCompareLabel">25.3 Years (Accelerated) vs 30.0 Years (Standard)</strong>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressBarFill" style="width: 84.3%;"></div>
+          </div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="loan-actions-row">
+          <button type="button" class="btn-loan-copy" id="btnCopyLoanMemo">Copy Underwriting Memo 📋</button>
+          <button type="button" class="btn-loan-download" id="btnDownloadAmortJson">Export Schedule (.JSON) ↓</button>
+        </div>
+        <div id="loanToast" class="loan-toast" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- Yearly Amortization Schedule Table -->
+    <div class="amort-table-container">
+      <div class="amort-table-header">
+        <h4>Year-by-Year Amortization Schedule (Accelerated Trajectory)</h4>
+        <span class="schedule-badge" id="scheduleBadge">30-Year Trajectory</span>
+      </div>
+      <div class="table-scroll-wrapper">
+        <table class="amort-schedule-table">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Starting Principal</th>
+              <th>Principal Paid</th>
+              <th>Interest Paid</th>
+              <th>Total Annual Outlay</th>
+              <th>Ending Balance</th>
+            </tr>
+          </thead>
+          <tbody id="loanAmortTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #344 ===== -->
+
+  <!-- ===== Issue #289: Recurring Subscriptions Manager & Spend Breakdown ===== -->
+  <section class="engine-section sub-section" id="subscriptions-manager" aria-labelledby="subManagerTitle">
+    <div class="engine-container">
+      <header class="section-header">
+        <div class="header-badge">RECURRING CASHFLOW OPTIMIZER</div>
+        <h2 id="subManagerTitle">Active Subscriptions Manager</h2>
+        <p>Monitor recurring SaaS, entertainment, and infrastructure overhead. Track upcoming renewals, calculate total annual commitments, and configure automatic cancellation reminder alerts.</p>
+      </header>
+
+      <!-- KPI Summary Cards -->
+      <div class="sub-kpi-grid">
+        <div class="sub-kpi-card">
+          <span class="sub-kpi-label">Monthly Burn Rate</span>
+          <div class="sub-kpi-val" id="subMonthlyBurn">$0.00</div>
+          <span class="sub-kpi-sub" id="subActiveCount">0 Active Subscriptions</span>
+        </div>
+        <div class="sub-kpi-card">
+          <span class="sub-kpi-label">Annual Commitment</span>
+          <div class="sub-kpi-val" id="subAnnualCommit">$0.00</div>
+          <span class="sub-kpi-sub">Projected 12-Month Outflow</span>
+        </div>
+        <div class="sub-kpi-card highlight-urgency">
+          <span class="sub-kpi-label">Renewing Within 7 Days</span>
+          <div class="sub-kpi-val text-amber" id="subUrgentCount">0</div>
+          <span class="sub-kpi-sub text-amber" id="subUrgentSpend">$0.00 imminent charges</span>
+        </div>
+        <div class="sub-kpi-card">
+          <span class="sub-kpi-label">Active Reminder Alerts</span>
+          <div class="sub-kpi-val text-cyan" id="subReminderActiveCount">0</div>
+          <span class="sub-kpi-sub">3-Day Prior Cancellation Notice</span>
+        </div>
+      </div>
+
+      <!-- Main Subscription Management Panel -->
+      <div class="sub-panel">
+        <div class="sub-toolbar">
+          <!-- Filter Tabs -->
+          <div class="sub-filter-tabs" role="tablist" aria-label="Subscription filters">
+            <button type="button" class="sub-tab active" data-filter="all" role="tab" aria-selected="true">All Services (<span id="tabCountAll">0</span>)</button>
+            <button type="button" class="sub-tab" data-filter="urgent" role="tab" aria-selected="false">⚠️ Renewing Soon (<span id="tabCountUrgent">0</span>)</button>
+            <button type="button" class="sub-tab" data-filter="monthly" role="tab" aria-selected="false">Monthly Cycle</button>
+            <button type="button" class="sub-tab" data-filter="annual" role="tab" aria-selected="false">Annual Cycle</button>
+          </div>
+
+          <!-- Add Subscription Toggle Button -->
+          <button type="button" class="btn-add-sub" id="toggleAddSubFormBtn">
+            <span>+ Add Subscription</span>
+          </button>
+        </div>
+
+        <!-- Add Custom Subscription Drawer / Collapsible Form -->
+        <div class="sub-add-form-wrap" id="addSubFormWrap" hidden>
+          <div class="sub-form-header">
+            <h4>Register Recurring Subscription</h4>
+            <button type="button" class="sub-form-close" id="closeAddSubFormBtn" aria-label="Close form">&times;</button>
+          </div>
+          <form id="newSubscriptionForm" class="sub-form-grid" novalidate>
+            <div class="form-group">
+              <label for="subNameInput">Service / Platform Name</label>
+              <input type="text" id="subNameInput" class="sub-input" placeholder="e.g. Claude Pro, Linear, Vercel" required maxlength="40" />
+            </div>
+            <div class="form-group">
+              <label for="subPriceInput">Amount ($)</label>
+              <input type="number" id="subPriceInput" class="sub-input" min="0.5" max="50000" step="0.01" placeholder="20.00" required />
+            </div>
+            <div class="form-group">
+              <label for="subCycleInput">Billing Frequency</label>
+              <select id="subCycleInput" class="sub-select">
+                <option value="monthly" selected>Monthly Billing</option>
+                <option value="annual">Annual Billing</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="subCategoryInput">Category</label>
+              <select id="subCategoryInput" class="sub-select">
+                <option value="AI & DevTools">AI &amp; DevTools</option>
+                <option value="Cloud Infrastructure">Cloud Infrastructure</option>
+                <option value="Entertainment & Media">Entertainment &amp; Media</option>
+                <option value="Productivity & Workspace">Productivity &amp; Workspace</option>
+                <option value="Finance & Security">Finance &amp; Security</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="subRenewalInput">Next Renewal Date</label>
+              <input type="date" id="subRenewalInput" class="sub-input" required />
+            </div>
+            <div class="form-group form-actions-cell">
+              <button type="submit" class="btn-submit-sub">Save &amp; Track</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Subscriptions Table -->
+        <div class="sub-table-container">
+          <table class="sub-table" id="subscriptionsTable">
+            <thead>
+              <tr>
+                <th>Service &amp; Category</th>
+                <th>Billing Cycle</th>
+                <th>Monthly Burn</th>
+                <th>Annual Total</th>
+                <th>Next Renewal</th>
+                <th>Reminder Alert</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="subscriptionsTableBody">
+              <!-- Populated dynamically and securely via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Reminder Alert Banner -->
+        <div class="sub-reminder-callout" id="subReminderCallout" hidden>
+          <div class="callout-icon">🔔</div>
+          <div class="callout-content">
+            <strong>Upcoming Cancellation Reminders Active</strong>
+            <p id="subReminderCalloutText">Alerts scheduled 3 days prior to renewal dates to avoid unintended auto-renews.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #289 ===== -->
 
   <footer class="footer">
     <div class="footer-content">

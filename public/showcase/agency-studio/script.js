@@ -1838,6 +1838,11 @@ function initInteractiveScopeEstimator() {
     const velEl = document.getElementById('scopeVelocityBadge');
     if (velEl) velEl.textContent = `${targetWeeks} Wk Target`;
 
+    const turnaroundEl = document.getElementById('summaryTurnaround');
+    if (turnaroundEl) turnaroundEl.textContent = activeServices.length
+      ? `⚡ ${targetWeeks}-week projected delivery · Discovery → Design → Build → Launch`
+      : 'Select a service to preview the delivery timeline.';
+
     const burnEl = document.getElementById('scopeBurnBadge');
     if (burnEl) burnEl.textContent = `~${formatUsd(weeklyBurn)} / wk`;
 
@@ -2508,3 +2513,561 @@ function initBrandMoodboard() {
   renderThemeCards(activeTheme);
   generateHarmonicPalette(themePresets[activeTheme].baseHue);
 }
+
+/* ===== BEGIN Issue #322: Multi-Step Project Kickoff Modal ===== */
+(function () {
+  'use strict';
+
+  function initKickoffWizard() {
+    const backdrop = document.getElementById('kickoffBackdrop');
+    const modal = document.getElementById('kickoffModal');
+    const openBtn = document.getElementById('btnOpenKickoffWizard');
+    const closeBtn = document.getElementById('btnCloseKickoffModal');
+
+    const progressBar = document.getElementById('stepperProgressBar');
+    const stepPills = document.querySelectorAll('.step-pill');
+    const stepViews = [
+      document.getElementById('kickoffStep1'),
+      document.getElementById('kickoffStep2'),
+      document.getElementById('kickoffStep3'),
+      document.getElementById('kickoffStep4')
+    ];
+
+    const prevBtn = document.getElementById('btnKickoffPrev');
+    const nextBtn = document.getElementById('btnKickoffNext');
+    const submitBtn = document.getElementById('btnKickoffSubmit');
+    const errorEl = document.getElementById('kickoffFormError');
+    const toast = document.getElementById('kickoffToast');
+
+    if (!modal) return;
+
+    let currentStep = 1;
+
+    // Selections state
+    let selectedDiscipline = 'Web3 & Fintech Experience';
+    let selectedStyle = 'Cyberpunk Kinetic & Dark Mode';
+    let selectedBudget = ' –  (Full Platform)';
+    let selectedTimeline = 'Standard Production (8–12 Weeks)';
+
+    function openModal() {
+      if (!modal || !backdrop) return;
+      backdrop.removeAttribute('hidden');
+      modal.removeAttribute('hidden');
+      goToStep(1);
+    }
+
+    function closeModal() {
+      if (modal) modal.setAttribute('hidden', '');
+      if (backdrop) backdrop.setAttribute('hidden', '');
+    }
+
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    // Discipline selection
+    const kChips = document.querySelectorAll('.k-chip');
+    kChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        kChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        selectedDiscipline = chip.getAttribute('data-type') || 'Web3 & Fintech';
+      });
+    });
+
+    // Checkbox styling toggle
+    const checkBoxes = document.querySelectorAll('.checkbox-box');
+    checkBoxes.forEach(box => {
+      const input = box.querySelector('input');
+      if (input) {
+        input.addEventListener('change', () => {
+          if (input.checked) box.classList.add('active');
+          else box.classList.remove('active');
+        });
+      }
+    });
+
+    // Style card selection
+    const styleCards = document.querySelectorAll('.style-card');
+    styleCards.forEach(card => {
+      card.addEventListener('click', () => {
+        styleCards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        selectedStyle = card.getAttribute('data-style') || 'Dark Kinetic';
+      });
+    });
+
+    // Resonance tags toggle
+    const resTags = document.querySelectorAll('.res-tag');
+    resTags.forEach(tag => {
+      tag.addEventListener('click', () => {
+        tag.classList.toggle('active');
+      });
+    });
+
+    // Budget chips
+    const bChips = document.querySelectorAll('.b-chip');
+    bChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        bChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        selectedBudget = chip.getAttribute('data-budget') || ' – ';
+      });
+    });
+
+    // Timeline chips
+    const tChips = document.querySelectorAll('.t-chip');
+    tChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        tChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        selectedTimeline = chip.getAttribute('data-time') || 'Standard (8–12 Weeks)';
+      });
+    });
+
+    function getSelectedObjectives() {
+      const checked = document.querySelectorAll('input[name= obj]:checked');
+      const objs = [];
+      checked.forEach(cb => objs.push(cb.value));
+      return objs.length > 0 ? objs.join(', ') : 'High-Ticket Conversion';
+    }
+
+    function getSelectedResonance() {
+      const activeTags = document.querySelectorAll('.res-tag.active');
+      const tags = [];
+      activeTags.forEach(t => tags.push(t.getAttribute('data-tag')));
+      return tags.length > 0 ? tags.join(', ') : 'Avant-Garde';
+    }
+
+    function validateCurrentStep() {
+      if (errorEl) errorEl.setAttribute('hidden', '');
+
+      if (currentStep === 1) {
+        return true;
+      } else if (currentStep === 2) {
+        return true;
+      } else if (currentStep === 3) {
+        const nameVal = (document.getElementById('kickoffClientName') || {}).value || '';
+        const companyVal = (document.getElementById('kickoffClientCompany') || {}).value || '';
+        const emailVal = (document.getElementById('kickoffClientEmail') || {}).value || '';
+
+        if (!nameVal.trim() || !companyVal.trim() || !emailVal.trim()) {
+          showError('Please complete your name, company, and email address.');
+          return false;
+        }
+        if (!emailVal.includes('@') || !emailVal.includes('.')) {
+          showError('Please enter a valid work email address.');
+          return false;
+        }
+        return true;
+      }
+      return true;
+    }
+
+    function showError(msg) {
+      if (!errorEl) return;
+      errorEl.textContent = msg;
+      errorEl.removeAttribute('hidden');
+    }
+
+    function updateSummaryCard() {
+      const discEl = document.getElementById('briefDiscipline');
+      const objEl = document.getElementById('briefObjectives');
+      const aesEl = document.getElementById('briefAesthetic');
+      const resEl = document.getElementById('briefResonance');
+      const budEl = document.getElementById('briefBudget');
+      const timEl = document.getElementById('briefTimeline');
+      const cliEl = document.getElementById('briefClient');
+
+      const nameVal = (document.getElementById('kickoffClientName') || {}).value || 'Executive Client';
+      const compVal = (document.getElementById('kickoffClientCompany') || {}).value || 'Stealth Project';
+
+      if (discEl) discEl.textContent = selectedDiscipline;
+      if (objEl) objEl.textContent = getSelectedObjectives();
+      if (aesEl) aesEl.textContent = selectedStyle;
+      if (resEl) resEl.textContent = getSelectedResonance();
+      if (budEl) budEl.textContent = selectedBudget;
+      if (timEl) timEl.textContent = selectedTimeline;
+      if (cliEl) cliEl.textContent = nameVal + ' (' + compVal + ')';
+    }
+
+    function goToStep(stepNum) {
+      currentStep = stepNum;
+
+      // Update progress bar
+      if (progressBar) progressBar.style.width = (currentStep * 25) + '%';
+
+      // Update pills
+      stepPills.forEach(pill => {
+        const step = parseInt(pill.getAttribute('data-step'), 10);
+        if (step === currentStep) {
+          pill.classList.add('active');
+          pill.classList.remove('completed');
+        } else if (step < currentStep) {
+          pill.classList.remove('active');
+          pill.classList.add('completed');
+        } else {
+          pill.classList.remove('active');
+          pill.classList.remove('completed');
+        }
+      });
+
+      // Update step views
+      stepViews.forEach((view, idx) => {
+        if (!view) return;
+        if (idx + 1 === currentStep) {
+          view.removeAttribute('hidden');
+          view.classList.add('active');
+        } else {
+          view.setAttribute('hidden', '');
+          view.classList.remove('active');
+        }
+      });
+
+      // Update footer buttons
+      if (prevBtn) prevBtn.disabled = currentStep === 1;
+
+      if (nextBtn && submitBtn) {
+        if (currentStep === 4) {
+          nextBtn.setAttribute('hidden', '');
+          submitBtn.removeAttribute('hidden');
+          updateSummaryCard();
+        } else {
+          nextBtn.removeAttribute('hidden');
+          submitBtn.setAttribute('hidden', '');
+          if (currentStep === 1) nextBtn.textContent = 'Continue to Visual Style →';
+          else if (currentStep === 2) nextBtn.textContent = 'Continue to Budget & Timing →';
+          else if (currentStep === 3) nextBtn.textContent = 'Review Discovery Brief →';
+        }
+      }
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (validateCurrentStep()) {
+          goToStep(currentStep + 1);
+        }
+      });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (currentStep > 1) {
+          goToStep(currentStep - 1);
+        }
+      });
+    }
+
+    stepPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const target = parseInt(pill.getAttribute('data-step'), 10);
+        if (target < currentStep || validateCurrentStep()) {
+          goToStep(target);
+        }
+      });
+    });
+
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 3500);
+    }
+
+    const copyBtn = document.getElementById('btnCopyBriefText');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const disc = (document.getElementById('briefDiscipline') || {}).textContent || '';
+        const obj = (document.getElementById('briefObjectives') || {}).textContent || '';
+        const aes = (document.getElementById('briefAesthetic') || {}).textContent || '';
+        const res = (document.getElementById('briefResonance') || {}).textContent || '';
+        const bud = (document.getElementById('briefBudget') || {}).textContent || '';
+        const tim = (document.getElementById('briefTimeline') || {}).textContent || '';
+        const cli = (document.getElementById('briefClient') || {}).textContent || '';
+
+        const summary = '✦ STUDIO PROJECT DISCOVERY BRIEF ✦\n' +
+          'Discipline: ' + disc + '\n' +
+          'Objectives: ' + obj + '\n' +
+          'Aesthetics: ' + aes + '\n' +
+          'Resonance: ' + res + '\n' +
+          'Investment Bracket: ' + bud + '\n' +
+          'Timeline: ' + tim + '\n' +
+          'Client: ' + cli;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(summary).then(() => {
+            showToast('Project Discovery Brief copied! 📋');
+          });
+        }
+      });
+    }
+
+    const downloadBtn = document.getElementById('btnDownloadBriefJson');
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', () => {
+        const data = {
+          title: 'Agency Studio Project Kickoff Discovery Brief',
+          version: '2026.1',
+          timestamp: new Date().toISOString(),
+          scope: {
+            discipline: selectedDiscipline,
+            objectives: getSelectedObjectives(),
+            vision: (document.getElementById('kickoffScopeVision') || {}).value || ''
+          },
+          aesthetic: {
+            archetype: selectedStyle,
+            resonanceTags: getSelectedResonance()
+          },
+          engagement: {
+            budgetBracket: selectedBudget,
+            timeline: selectedTimeline
+          },
+          client: {
+            name: (document.getElementById('kickoffClientName') || {}).value || '',
+            company: (document.getElementById('kickoffClientCompany') || {}).value || '',
+            email: (document.getElementById('kickoffClientEmail') || {}).value || ''
+          }
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'project-kickoff-brief.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        showToast('Exported discovery brief JSON! ↓');
+      });
+    }
+
+    if (submitBtn) {
+      submitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        showToast('Project Kickoff Brief submitted successfully! 🚀');
+        setTimeout(() => {
+          closeModal();
+        }, 1800);
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initKickoffWizard);
+  } else {
+    initKickoffWizard();
+  }
+})();
+/* ===== END Issue #322 ===== */
+
+/* ===== BEGIN Issue #575: AgencyStudioPreferenceManager ===== */
+class AgencyStudioPreferenceManager {
+  static STORAGE_KEY = 'agency_studio_preferences_v1';
+
+  static DEFAULTS = {
+    theme: 'dark',
+    viewLayout: 'grid',
+    soundCues: false,
+    highContrast: false,
+    metricUnits: 'metric',
+    reducedMotion: false
+  };
+
+  constructor(storage = null) {
+    this.storage = storage || (typeof window !== 'undefined' ? window.localStorage : null);
+    this.preferences = this.load();
+  }
+
+  load() {
+    if (!this.storage) {
+      return { ...AgencyStudioPreferenceManager.DEFAULTS };
+    }
+    try {
+      const raw = this.storage.getItem(AgencyStudioPreferenceManager.STORAGE_KEY);
+      if (!raw) return { ...AgencyStudioPreferenceManager.DEFAULTS };
+      const parsed = JSON.parse(raw);
+      return { ...AgencyStudioPreferenceManager.DEFAULTS, ...parsed };
+    } catch {
+      return { ...AgencyStudioPreferenceManager.DEFAULTS };
+    }
+  }
+
+  save(key, val) {
+    if (typeof key === 'string') {
+      this.preferences[key] = val;
+    } else if (typeof key === 'object' && key !== null) {
+      this.preferences = { ...this.preferences, ...key };
+    }
+    if (this.storage) {
+      try {
+        this.storage.setItem(
+          AgencyStudioPreferenceManager.STORAGE_KEY,
+          JSON.stringify(this.preferences)
+        );
+      } catch {}
+    }
+    this.applyToDOM();
+    return this.preferences;
+  }
+
+  get(key) {
+    return this.preferences[key];
+  }
+
+  resetDefaults() {
+    this.preferences = { ...AgencyStudioPreferenceManager.DEFAULTS };
+    if (this.storage) {
+      try {
+        this.storage.removeItem(AgencyStudioPreferenceManager.STORAGE_KEY);
+      } catch {}
+    }
+    this.applyToDOM();
+    return { ...this.preferences };
+  }
+
+  exportJSON() {
+    return JSON.stringify(this.preferences, null, 2);
+  }
+
+  importJSON(jsonString) {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (typeof parsed === 'object' && parsed !== null) {
+        this.preferences = { ...AgencyStudioPreferenceManager.DEFAULTS, ...parsed };
+        if (this.storage) {
+          this.storage.setItem(AgencyStudioPreferenceManager.STORAGE_KEY, JSON.stringify(this.preferences));
+        }
+        this.applyToDOM();
+        return true;
+      }
+    } catch {}
+    return false;
+  }
+
+  applyToDOM() {
+    if (typeof document === 'undefined' || !document.documentElement) return;
+    const root = document.documentElement;
+    if (this.preferences.highContrast) {
+      root.classList.add('high-contrast-mode');
+    } else {
+      root.classList.remove('high-contrast-mode');
+    }
+    if (this.preferences.theme) {
+      root.setAttribute('data-theme', this.preferences.theme);
+    }
+    if (this.preferences.viewLayout) {
+      root.setAttribute('data-layout', this.preferences.viewLayout);
+    }
+  }
+
+  initUI() {
+    if (typeof window === 'undefined' || !window.document || !window.document.getElementById) return;
+    const modal = document.getElementById('agency-studio-preferences-modal');
+    const openBtn = document.getElementById('agencyPreferencesTriggerBtn');
+    const closeBtn = document.getElementById('agencyPreferencesCloseBtn');
+    const resetBtn = document.getElementById('agencyResetPreferencesBtn');
+    const exportBtn = document.getElementById('agencyExportPreferencesBtn');
+
+    if (openBtn && modal) {
+      openBtn.addEventListener('click', () => {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+      });
+    }
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+          modal.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+
+    const soundToggle = document.getElementById('agencyPrefSoundCues');
+    if (soundToggle) {
+      soundToggle.checked = Boolean(this.preferences.soundCues);
+      soundToggle.addEventListener('change', (e) => {
+        this.save('soundCues', e.target.checked);
+      });
+    }
+
+    const contrastToggle = document.getElementById('agencyPrefHighContrast');
+    if (contrastToggle) {
+      contrastToggle.checked = Boolean(this.preferences.highContrast);
+      contrastToggle.addEventListener('change', (e) => {
+        this.save('highContrast', e.target.checked);
+      });
+    }
+
+    const layoutSelect = document.getElementById('agencyPrefViewLayout');
+    if (layoutSelect) {
+      layoutSelect.value = this.preferences.viewLayout || 'grid';
+      layoutSelect.addEventListener('change', (e) => {
+        this.save('viewLayout', e.target.value);
+      });
+    }
+
+    const unitsSelect = document.getElementById('agencyPrefMetricUnits');
+    if (unitsSelect) {
+      unitsSelect.value = this.preferences.metricUnits || 'metric';
+      unitsSelect.addEventListener('change', (e) => {
+        this.save('metricUnits', e.target.value);
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        this.resetDefaults();
+        if (soundToggle) soundToggle.checked = Boolean(this.preferences.soundCues);
+        if (contrastToggle) contrastToggle.checked = Boolean(this.preferences.highContrast);
+        if (layoutSelect) layoutSelect.value = this.preferences.viewLayout;
+        if (unitsSelect) unitsSelect.value = this.preferences.metricUnits;
+      });
+    }
+
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        const json = this.exportJSON();
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'agency-studio-preferences.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    this.applyToDOM();
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.AgencyStudioPreferenceManager = AgencyStudioPreferenceManager;
+  if (document && document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const prefManager = new AgencyStudioPreferenceManager();
+      prefManager.initUI();
+    });
+  }
+}
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.AgencyStudioPreferenceManager = AgencyStudioPreferenceManager;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { AgencyStudioPreferenceManager };
+}
+/* ===== END Issue #575 ===== */

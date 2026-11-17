@@ -529,6 +529,227 @@
   </section>
   <!-- END issue #193 / #405 -->
 
+  <!-- ===== BEGIN Issue #342: Soundstage Crowd Density Meter & Real-Time Heat Alerts ===== -->
+  <section class="crowd-density-section" id="stage-crowd-density-meter" aria-labelledby="crowd-density-title">
+    <div class="crowd-density-container">
+      <div class="density-header">
+        <div class="density-title-group">
+          <span class="density-eyebrow">// REAL-TIME VENUE TELEMETRY • IOT SENSORS</span>
+          <h2 id="crowd-density-title" class="density-title">SOUNDSTAGE CROWD DENSITY &amp; HEAT MAP</h2>
+          <p class="density-sub">
+            Monitor real-time stage occupancy, active acoustic pressure (dB), and pedestrian surge alerts across all 3 festival soundstages. Simulated sensor mesh auto-updates to prevent dangerous bottlenecks.
+          </p>
+        </div>
+
+        <div class="density-controls">
+          <button type="button" class="btn-density-ctrl active" id="btnToggleSim" aria-pressed="true">
+            <span class="ctrl-icon">📡</span> <span id="simToggleText">Live Pulse: ON</span>
+          </button>
+          <button type="button" class="btn-density-ctrl btn-density-surge" id="btnSimSurge">
+            <span class="ctrl-icon">⚡</span> Peak Surge Rush
+          </button>
+          <button type="button" class="btn-density-ctrl btn-density-reset" id="btnNormalizeFlow">
+            <span class="ctrl-icon">🔄</span> Balance Flow
+          </button>
+        </div>
+      </div>
+
+      <!-- Global Venue Telemetry Summary Strip -->
+      <div class="venue-telemetry-strip" id="venueTelemetryStrip">
+        <div class="telemetry-pill">
+          <span class="tel-label">Total Festival Load:</span>
+          <strong class="tel-val" id="totalVenueLoad">76%</strong>
+        </div>
+        <div class="telemetry-pill">
+          <span class="tel-label">Occupants Inside:</span>
+          <strong class="tel-val" id="totalHeadcount">18,240 / 24,000</strong>
+        </div>
+        <div class="telemetry-pill alert-pill" id="globalSurgePill">
+          <span class="tel-label">Active Surge Alerts:</span>
+          <strong class="tel-val alert-val" id="activeSurgeCount">1 Stage at Peak</strong>
+        </div>
+        <div class="telemetry-pill">
+          <span class="tel-label">Sensor Mesh:</span>
+          <strong class="tel-val green-val">Online • 100Hz</strong>
+        </div>
+      </div>
+
+      <!-- Real-Time Stage Density Cards Grid -->
+      <div class="stages-density-grid" id="stagesDensityGrid">
+        <!-- Main Cyber Stage -->
+        <article class="stage-density-card" id="card-stage-cyber" data-stage-id="cyber">
+          <div class="stage-card-top">
+            <div class="stage-meta">
+              <span class="stage-code">STAGE 01</span>
+              <h3 class="stage-name">Main Cyber Stage</h3>
+              <span class="stage-genre">Cyber EDM • Headliners</span>
+            </div>
+            <span class="density-status-tag status-surge" id="badge-cyber">⚠️ SURGE ALERT</span>
+          </div>
+
+          <div class="meter-block">
+            <div class="meter-labels">
+              <span class="meter-label">Live Density</span>
+              <strong class="meter-pct" id="pct-cyber">92%</strong>
+            </div>
+            <div class="density-bar-track">
+              <div class="density-bar-fill fill-surge" id="bar-cyber" style="width: 92%"></div>
+            </div>
+          </div>
+
+          <div class="stage-stats-row">
+            <div class="stat-col">
+              <span class="stat-label">HEADCOUNT</span>
+              <strong class="stat-val" id="headcount-cyber">11,040 / 12,000</strong>
+            </div>
+            <div class="stat-col">
+              <span class="stat-label">SOUND LEVEL</span>
+              <strong class="stat-val sound-loud" id="db-cyber">104 dB</strong>
+            </div>
+            <div class="stat-col">
+              <span class="stat-label">SAFETY LEVEL</span>
+              <strong class="stat-val red-text" id="safety-cyber">Restricted</strong>
+            </div>
+          </div>
+
+          <div class="stage-slider-row">
+            <label for="slider-cyber" class="slider-label">Simulate Load:</label>
+            <input type="range" id="slider-cyber" class="stage-range-slider" min="10" max="100" value="92" data-stage="cyber" />
+          </div>
+
+          <div class="stage-recommendation-box alert-box" id="rec-cyber">
+            <div class="rec-icon">💡</div>
+            <div class="rec-content">
+              <strong>Crowd Diversion Alert:</strong> High bottleneck risk! Head toward <button type="button" class="btn-rec-divert" data-target="oasis">Neon Oasis (45% load • 3 min walk)</button> for optimal viewing.
+            </div>
+          </div>
+        </article>
+
+        <!-- Neon Oasis -->
+        <article class="stage-density-card" id="card-stage-oasis" data-stage-id="oasis">
+          <div class="stage-card-top">
+            <div class="stage-meta">
+              <span class="stage-code">STAGE 02</span>
+              <h3 class="stage-name">Neon Oasis</h3>
+              <span class="stage-genre">Synthwave • Chillwave • Ambient</span>
+            </div>
+            <span class="density-status-tag status-comfortable" id="badge-oasis">COMFORTABLE</span>
+          </div>
+
+          <div class="meter-block">
+            <div class="meter-labels">
+              <span class="meter-label">Live Density</span>
+              <strong class="meter-pct" id="pct-oasis">45%</strong>
+            </div>
+            <div class="density-bar-track">
+              <div class="density-bar-fill fill-comfortable" id="bar-oasis" style="width: 45%"></div>
+            </div>
+          </div>
+
+          <div class="stage-stats-row">
+            <div class="stat-col">
+              <span class="stat-label">HEADCOUNT</span>
+              <strong class="stat-val" id="headcount-oasis">3,375 / 7,500</strong>
+            </div>
+            <div class="stat-col">
+              <span class="stat-label">SOUND LEVEL</span>
+              <strong class="stat-val sound-med" id="db-oasis">91 dB</strong>
+            </div>
+            <div class="stat-col">
+              <span class="stat-label">SAFETY LEVEL</span>
+              <strong class="stat-val green-text" id="safety-oasis">Optimal</strong>
+            </div>
+          </div>
+
+          <div class="stage-slider-row">
+            <label for="slider-oasis" class="slider-label">Simulate Load:</label>
+            <input type="range" id="slider-oasis" class="stage-range-slider" min="10" max="100" value="45" data-stage="oasis" />
+          </div>
+
+          <div class="stage-recommendation-box clear-box" id="rec-oasis">
+            <div class="rec-icon">✨</div>
+            <div class="rec-content">
+              <strong>Optimal Entry Zone:</strong> Excellent sound clarity and free beverage line movement. Recommended sanctuary stage.
+            </div>
+          </div>
+        </article>
+
+        <!-- Underground Vault -->
+        <article class="stage-density-card" id="card-stage-vault" data-stage-id="vault">
+          <div class="stage-card-top">
+            <div class="stage-meta">
+              <span class="stage-code">STAGE 03</span>
+              <h3 class="stage-name">Underground Vault</h3>
+              <span class="stage-genre">Industrial Techno • Hardstyle</span>
+            </div>
+            <span class="density-status-tag status-busy" id="badge-vault">BUSY</span>
+          </div>
+
+          <div class="meter-block">
+            <div class="meter-labels">
+              <span class="meter-label">Live Density</span>
+              <strong class="meter-pct" id="pct-vault">76%</strong>
+            </div>
+            <div class="density-bar-track">
+              <div class="density-bar-fill fill-busy" id="bar-vault" style="width: 76%"></div>
+            </div>
+          </div>
+
+          <div class="stage-stats-row">
+            <div class="stat-col">
+              <span class="stat-label">HEADCOUNT</span>
+              <strong class="stat-val" id="headcount-vault">3,420 / 4,500</strong>
+            </div>
+            <div class="stat-col">
+              <span class="stat-label">SOUND LEVEL</span>
+              <strong class="stat-val sound-loud" id="db-vault">99 dB</strong>
+            </div>
+            <div class="stat-col">
+              <span class="stat-label">SAFETY LEVEL</span>
+              <strong class="stat-val amber-text" id="safety-vault">Moderate</strong>
+            </div>
+          </div>
+
+          <div class="stage-slider-row">
+            <label for="slider-vault" class="slider-label">Simulate Load:</label>
+            <input type="range" id="slider-vault" class="stage-range-slider" min="10" max="100" value="76" data-stage="vault" />
+          </div>
+
+          <div class="stage-recommendation-box warn-box" id="rec-vault">
+            <div class="rec-icon">⚡</div>
+            <div class="rec-content">
+              <strong>High Density Flow:</strong> Entrance gate 2 queuing time approximately 6 mins. East side exits flowing smoothly.
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Live Advisory Log Strip -->
+      <div class="density-advisory-panel">
+        <div class="advisory-title-row">
+          <span class="advisory-indicator"></span>
+          <h4>REAL-TIME CROWD ADVISORY &amp; DISPATCH LOG</h4>
+          <span class="advisory-timestamp" id="advisoryTimestamp">Updated just now</span>
+        </div>
+        <ul class="advisory-log-list" id="advisoryLogList">
+          <li class="log-item surge-item">
+            <span class="log-time">[18:42]</span>
+            <span class="log-msg">⚠️ Main Cyber Stage reached 92% capacity. Flow diversion dispatched toward Neon Oasis.</span>
+          </li>
+          <li class="log-item">
+            <span class="log-time">[18:40]</span>
+            <span class="log-msg">ℹ️ Underground Vault entrance gate 2 experiencing slight line buildup (76% load).</span>
+          </li>
+          <li class="log-item ok-item">
+            <span class="log-time">[18:38]</span>
+            <span class="log-msg">✅ Neon Oasis open with plenty of dancefloor space and low beverage queue times.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #342 ===== -->
+
   <!-- Festival Survival Packing Checklist (Issue #287) -->
   <section class="packing-checklist-section" id="packing-checklist" aria-labelledby="packing-title">
     <div class="packing-header">

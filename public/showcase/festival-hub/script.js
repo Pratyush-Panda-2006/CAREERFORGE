@@ -1568,7 +1568,7 @@ function initMeetupLocator() {
   // Restore waypoints
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) waypoints = JSON.parse(raw);
+    if (raw) waypoints = sanitizeWaypoints(JSON.parse(raw));
   } catch {
     waypoints = [];
   }
@@ -1577,8 +1577,8 @@ function initMeetupLocator() {
   if (window.location.hash.startsWith('#meetup=')) {
     try {
       const dataStr = decodeURIComponent(window.location.hash.slice(8));
-      const parsed = JSON.parse(dataStr);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      const parsed = sanitizeWaypoints(JSON.parse(dataStr));
+      if (parsed.length > 0) {
         waypoints = parsed;
         saveWaypoints();
         showToast('Shared squad meetup waypoints loaded! 📍');
@@ -1594,6 +1594,31 @@ function initMeetupLocator() {
     } catch {
       // storage unavailable
     }
+  }
+
+  // The share link hash and localStorage are untrusted input: keep only well-formed pins.
+  function sanitizeWaypoints(list) {
+    if (!Array.isArray(list)) return [];
+    const MAX_WAYPOINTS = 50;
+    const clamp = (n) => Math.max(0, Math.min(100, n));
+    const clean = [];
+    list.forEach((item, i) => {
+      if (clean.length >= MAX_WAYPOINTS) return;
+      if (!item || typeof item !== 'object') return;
+      if (typeof item.name !== 'string') return;
+      if (!Object.prototype.hasOwnProperty.call(TYPE_META, item.type)) return;
+      if (typeof item.xPct !== 'number' || !Number.isFinite(item.xPct)) return;
+      if (typeof item.yPct !== 'number' || !Number.isFinite(item.yPct)) return;
+      clean.push({
+        id: typeof item.id === 'string' && item.id ? item.id.slice(0, 40) : 'pin-' + i,
+        name: item.name.slice(0, 60),
+        type: item.type,
+        xPct: clamp(item.xPct),
+        yPct: clamp(item.yPct),
+        timestamp: Number.isFinite(item.timestamp) ? item.timestamp : Date.now()
+      });
+    });
+    return clean;
   }
 
   function showToast(msg) {

@@ -4,18 +4,16 @@
 **Initiative:** Nexus Spring of Code 2026 (NSoC '26)  
 **Batch Scope:** **Strictly Level 2 (5 Points) & Level 3 (10 Points) Tasks**  
 **Catalog Size:** 20 Handcrafted Showcase Enhancements (10 Level 2 + 10 Level 3)  
-**Governance Policy:** Concurrency limit enforced (max 4 active Level 3 claims per user)  
 
 ---
 
 ## 📑 Table of Contents
 1. [Batch Overview & Scoring Rubric](#1-batch-overview--scoring-rubric)
-2. [Level 3 Concurrency Governance Rule](#2-level-3-concurrency-governance-rule)
-3. [Batch 8 Issues Distribution Matrix](#3-batch-8-issues-distribution-matrix)
-4. [Detailed Task Specifications (20 Issues)](#4-detailed-task-specifications)
+2. [Batch 8 Issues Distribution Matrix](#2-batch-8-issues-distribution-matrix)
+3. [Detailed Task Specifications (20 Issues)](#3-detailed-task-specifications)
    - [Level 2: Intermediate Tasks (10 Issues — 5 Points each)](#level-2-intermediate-tasks-10-issues--5-points)
    - [Level 3: Core Logic & Advanced Engines (10 Issues — 10 Points each)](#level-3-core-logic--advanced-engines-10-issues--10-points)
-5. [Automated Publishing Guide](#5-automated-publishing-guide)
+4. [Automated Publishing Guide](#4-automated-publishing-guide)
 
 ---
 
@@ -30,18 +28,7 @@ All tasks in Batch 8 adhere to the official Nexus Spring of Code 2026 scoring st
 
 ---
 
-## 2. Level 3 Concurrency Governance Rule
-
-> [!IMPORTANT]
-> To preserve equitable access to high-value tasks across the community, contributors are limited to a maximum of **4 concurrent Level 3 issues**.
-> 
-> - If a contributor currently has 4 active Level 3 issues claimed, subsequent `/claim` attempts on Level 3 issues will be blocked.
-> - The contributor must submit a linked PR and close at least one of their 4 active Level 3 issues before claiming another.
-> - Level 1 and Level 2 issues are **not** subject to this 4-issue cap.
-
----
-
-## 3. Batch 8 Issues Distribution Matrix
+## 2. Batch 8 Issues Distribution Matrix
 
 | # | Showcase Directory | Level 2 Task (5 pts) | Level 3 Task (10 pts) |
 |---|--------------------|----------------------|-----------------------|
@@ -58,7 +45,7 @@ All tasks in Batch 8 adhere to the official Nexus Spring of Code 2026 scoring st
 
 ---
 
-## 4. Detailed Task Specifications
+## 3. Detailed Task Specifications (20 Issues)
 
 ---
 
@@ -260,7 +247,7 @@ All tasks in Batch 8 adhere to the official Nexus Spring of Code 2026 scoring st
 
 ---
 
-## 5. Automated Publishing Guide
+## 4. Automated Publishing Guide
 
 Batch 8 issues can be published directly to GitHub via the automation script:
 

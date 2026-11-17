@@ -1,25 +1,463 @@
-// Cart state dictionary: { [id]: { name, price, qty, img } }
+// Cart state dictionary: { [id]: { id, name, price, qty, img, category } }
 const cart = {};
 
-// Promo coupon engine. type "percent" takes value off the subtotal,
-// type "freeship" waives the flat shipping fee.
-const COUPONS = {
-  CAREER20: { type: 'percent', value: 0.2, label: 'CAREER20: 20% off' },
-  FREESHIP: { type: 'freeship', value: 0, label: 'FREESHIP: free delivery' }
+const ITEM_META_FALLBACK = {
+  p1: { name: 'CyberDeck Pro Mechanical', price: 249.00, img: '⌨️', category: 'keyboards' },
+  p2: { name: 'Acoustic Pulse ANC Headset', price: 199.00, img: '🎧', category: 'audio' },
+  p3: { name: 'Horizon 32" Curved OLED', price: 899.00, img: '🖥️', category: 'displays' },
+  p4: { name: 'Nexus Neo 65% Low-Profile', price: 149.00, img: '⌨️', category: 'keyboards' },
+  p5: { name: 'Vortex Reference Studio Monitors', price: 349.00, img: '🔊', category: 'audio' },
+  p6: { name: 'Apex UltraWide 49" 240Hz', price: 1199.00, img: '🖥️', category: 'displays' },
+  p7: { name: 'HyperStream Studio Mic & Arm', price: 179.00, img: '🎙️', category: 'audio' },
+  p8: { name: 'Keychronix Ergo Alice Custom', price: 289.00, img: '⌨️', category: 'keyboards' }
 };
+
+/**
+ * Pure, stateless promotional discount, spend-tier, tax & shipping engine.
+ */
+class PromoDiscountEngine {
+  constructor(config = {}) {
+    this.tiers = config.tiers || [
+      { id: 'builder', name: 'Builder Tier', minSpend: 200, rate: 0.05 },
+      { id: 'studio', name: 'Studio Tier', minSpend: 500, rate: 0.10 },
+      { id: 'enterprise', name: 'Enterprise Rig Tier', minSpend: 1000, rate: 0.15 }
+    ];
+
+    this.coupons = config.coupons || {
+      CYBER20: {
+        code: 'CYBER20',
+        type: 'percent',
+        value: 0.20,
+        minSubtotal: 0,
+        categories: null,
+        label: 'CYBER20: 20% off entire cart',
+        conditionText: 'Any order subtotal'
+      },
+      FREESHIP: {
+        code: 'FREESHIP',
+        type: 'freeship',
+        value: 0,
+        minSubtotal: 100,
+        categories: null,
+        label: 'FREESHIP: Free ground shipping ($100+)',
+        conditionText: 'Subtotal ≥ $100.00'
+      },
+      BUNDLE3: {
+        code: 'BUNDLE3',
+        type: 'bogo',
+        buyQty: 2,
+        getQty: 1,
+        minSubtotal: 0,
+        categories: null,
+        label: 'BUNDLE3: Buy 2, Get 1 Free (lowest unit free)',
+        conditionText: 'Cart quantity ≥ 3 items'
+      },
+      KEYB15: {
+        code: 'KEYB15',
+        type: 'category_percent',
+        value: 0.15,
+        minSubtotal: 150,
+        categories: ['keyboards'],
+        label: 'KEYB15: 15% off Keyboards ($150+)',
+        conditionText: 'Keyboards subtotal ≥ $150.00'
+      },
+      AUDIO25: {
+        code: 'AUDIO25',
+        type: 'category_fixed',
+        value: 25,
+        minSubtotal: 180,
+        categories: ['audio'],
+        label: 'AUDIO25: $25 off Audio gear ($180+)',
+        conditionText: 'Audio subtotal ≥ $180.00'
+      },
+      CAREER20: {
+        code: 'CAREER20',
+        type: 'percent',
+        value: 0.20,
+        minSubtotal: 0,
+        categories: null,
+        label: 'CAREER20: 20% off developer gear',
+        conditionText: 'Any order subtotal'
+      }
+    };
+
+    this.taxJurisdictions = config.taxJurisdictions || {
+      CA: { code: 'CA', label: 'California (CA)', rate: 0.0825, baseShipping: 12.00 },
+      NY: { code: 'NY', label: 'New York (NY)', rate: 0.08875, baseShipping: 12.00 },
+      TX: { code: 'TX', label: 'Texas (TX)', rate: 0.0625, baseShipping: 12.00 },
+      WA: { code: 'WA', label: 'Washington (WA)', rate: 0.065, baseShipping: 12.00 },
+      OR: { code: 'OR', label: 'Oregon (OR)', rate: 0.00, baseShipping: 14.00 },
+      DE: { code: 'DE', label: 'Delaware (DE)', rate: 0.00, baseShipping: 14.00 },
+      'EU-DE': { code: 'EU-DE', label: 'Germany / EU (VAT)', rate: 0.19, baseShipping: 28.00 },
+      UK: { code: 'UK', label: 'United Kingdom (VAT)', rate: 0.20, baseShipping: 26.00 }
+    };
+
+    this.vipFreeShipThreshold = 1200;
+  }
+
+  normalizeCart(cartInput) {
+    const rawList = Array.isArray(cartInput)
+      ? cartInput
+      : Object.values(cartInput || {});
+
+    return rawList
+      .filter((item) => item && Number(item.qty) > 0 && Number(item.price) >= 0)
+      .map((item) => {
+        const meta = ITEM_META_FALLBACK[item.id] || {};
+        return {
+          id: String(item.id || meta.name || 'item'),
+          name: String(item.name || meta.name || 'Hardware Item'),
+          category: String(item.category || meta.category || 'general').toLowerCase(),
+          price: Number(item.price || meta.price || 0),
+          qty: Math.max(1, Math.floor(Number(item.qty || 1))),
+          img: item.img || meta.img || '📦'
+        };
+      });
+  }
+
+  evaluateTierDiscount(subtotal) {
+    const cleanSubtotal = Math.max(0, Number(subtotal) || 0);
+    let activeTier = null;
+    for (let i = this.tiers.length - 1; i >= 0; i -= 1) {
+      if (cleanSubtotal >= this.tiers[i].minSpend) {
+        activeTier = this.tiers[i];
+        break;
+      }
+    }
+
+    const nextTier = this.tiers.find((t) => cleanSubtotal < t.minSpend) || null;
+    const rate = activeTier ? activeTier.rate : 0;
+    const discountAmount = Math.round(cleanSubtotal * rate * 100) / 100;
+    const topThreshold = this.tiers[this.tiers.length - 1].minSpend;
+
+    return {
+      tierId: activeTier ? activeTier.id : 'standard',
+      tierName: activeTier ? activeTier.name : 'Standard',
+      rate,
+      discountAmount,
+      minSpend: activeTier ? activeTier.minSpend : 0,
+      nextTierName: nextTier ? nextTier.name : null,
+      nextTierRate: nextTier ? nextTier.rate : null,
+      nextTierThreshold: nextTier ? nextTier.minSpend : null,
+      amountToNextTier: nextTier ? Math.max(0, Math.round((nextTier.minSpend - cleanSubtotal) * 100) / 100) : 0,
+      progressPercent: Math.min(100, Math.round((cleanSubtotal / topThreshold) * 100)),
+      tiers: this.tiers
+    };
+  }
+
+  applyCoupon(code, cartInput) {
+    const normalizedCode = String(code || '').trim().toUpperCase();
+    const items = this.normalizeCart(cartInput);
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const totalUnits = items.reduce((sum, item) => sum + item.qty, 0);
+
+    if (!normalizedCode) {
+      return {
+        valid: false,
+        code: '',
+        type: 'none',
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal: 0,
+        label: '',
+        reason: 'Enter a promo code to apply conditional rules.'
+      };
+    }
+
+    const rule = this.coupons[normalizedCode];
+    if (!rule) {
+      return {
+        valid: false,
+        code: normalizedCode,
+        type: 'unknown',
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal: 0,
+        label: '',
+        reason: `"${normalizedCode}" is not a valid promo code.`
+      };
+    }
+
+    if (items.length === 0 || subtotal <= 0) {
+      return {
+        valid: false,
+        code: normalizedCode,
+        type: rule.type,
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal: 0,
+        label: rule.label,
+        reason: `Add gear to your order before applying ${normalizedCode}.`
+      };
+    }
+
+    const eligibleItems = rule.categories
+      ? items.filter((item) => rule.categories.includes(item.category))
+      : items;
+    const eligibleSubtotal = eligibleItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+    if (rule.categories && eligibleItems.length === 0) {
+      return {
+        valid: false,
+        code: normalizedCode,
+        type: rule.type,
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal: 0,
+        label: rule.label,
+        reason: `${normalizedCode} requires items in category: ${rule.categories.join(', ')}.`
+      };
+    }
+
+    if (eligibleSubtotal < rule.minSubtotal) {
+      const gap = (rule.minSubtotal - eligibleSubtotal).toFixed(2);
+      return {
+        valid: false,
+        code: normalizedCode,
+        type: rule.type,
+        discountAmount: 0,
+        freeShipping: false,
+        freeItemsCount: 0,
+        freeUnits: [],
+        eligibleSubtotal,
+        label: rule.label,
+        reason: `${normalizedCode} requires $${rule.minSubtotal.toFixed(2)} eligible spend ($${gap} away).`
+      };
+    }
+
+    let discountAmount = 0;
+    let freeShipping = false;
+    let freeItemsCount = 0;
+    const freeUnits = [];
+
+    if (rule.type === 'percent' || rule.type === 'category_percent') {
+      discountAmount = Math.round(eligibleSubtotal * rule.value * 100) / 100;
+    } else if (rule.type === 'category_fixed') {
+      discountAmount = Math.min(eligibleSubtotal, rule.value);
+    } else if (rule.type === 'freeship') {
+      freeShipping = true;
+    } else if (rule.type === 'bogo') {
+      const groupSize = (rule.buyQty || 2) + (rule.getQty || 1);
+      if (totalUnits < groupSize) {
+        return {
+          valid: false,
+          code: normalizedCode,
+          type: rule.type,
+          discountAmount: 0,
+          freeShipping: false,
+          freeItemsCount: 0,
+          freeUnits: [],
+          eligibleSubtotal,
+          label: rule.label,
+          reason: `BUNDLE3 requires at least ${groupSize} items in cart (currently ${totalUnits}).`
+        };
+      }
+      const unitPool = [];
+      items.forEach((item) => {
+        for (let q = 0; q < item.qty; q += 1) {
+          unitPool.push({ id: item.id, name: item.name, price: item.price });
+        }
+      });
+      unitPool.sort((a, b) => a.price - b.price);
+      freeItemsCount = Math.floor(unitPool.length / groupSize) * (rule.getQty || 1);
+      for (let i = 0; i < freeItemsCount; i += 1) {
+        discountAmount += unitPool[i].price;
+        freeUnits.push(unitPool[i]);
+      }
+      discountAmount = Math.round(discountAmount * 100) / 100;
+    }
+
+    return {
+      valid: true,
+      code: normalizedCode,
+      type: rule.type,
+      discountAmount,
+      freeShipping,
+      freeItemsCount,
+      freeUnits,
+      eligibleSubtotal,
+      label: rule.label,
+      reason:
+        rule.type === 'bogo'
+          ? `${normalizedCode} applied: ${freeItemsCount} free unit(s) credited (-$${discountAmount.toFixed(2)}).`
+          : rule.type === 'freeship'
+            ? `${normalizedCode} applied: Standard shipping fee waived!`
+            : `${normalizedCode} applied: -$${discountAmount.toFixed(2)} saved.`
+    };
+  }
+
+  calculateTaxAndShipping(address, subtotal, options = {}) {
+    const cleanSubtotal = Math.max(0, Number(subtotal) || 0);
+    const discountTotal = Math.max(0, Number(options.discountTotal) || 0);
+    const addrObj =
+      typeof address === 'string'
+        ? { state: address }
+        : address || { state: 'CA', zip: '94107', shippingMethod: 'standard' };
+
+    const regionKey = String(addrObj.state || 'CA').toUpperCase();
+    const jurisdiction = this.taxJurisdictions[regionKey] || {
+      code: regionKey,
+      label: `${regionKey} Standard`,
+      rate: 0.08,
+      baseShipping: 12.00
+    };
+
+    const method = String(addrObj.shippingMethod || 'standard').toLowerCase();
+    const vipUnlocked = cleanSubtotal >= this.vipFreeShipThreshold;
+    const freeShipCoupon = Boolean(options.freeShipping);
+
+    let shippingAmount = 0;
+    let freeShippingReason = '';
+
+    if (cleanSubtotal > 0) {
+      if (method === 'express') {
+        shippingAmount = (freeShipCoupon || vipUnlocked ? 0 : jurisdiction.baseShipping) + 18.00;
+        if (freeShipCoupon || vipUnlocked) {
+          freeShippingReason = 'Base shipping waived; Express upgrade applied';
+        }
+      } else if (freeShipCoupon) {
+        shippingAmount = 0;
+        freeShippingReason = 'FREESHIP coupon ($100+ threshold)';
+      } else if (vipUnlocked) {
+        shippingAmount = 0;
+        freeShippingReason = 'VIP Order ≥ $1,200 Free Ground';
+      } else {
+        shippingAmount = jurisdiction.baseShipping;
+      }
+    }
+
+    const taxableAmount = Math.max(0, cleanSubtotal - discountTotal);
+    const taxAmount = Math.round(taxableAmount * jurisdiction.rate * 100) / 100;
+
+    return {
+      regionCode: jurisdiction.code,
+      regionLabel: jurisdiction.label,
+      zip: String(addrObj.zip || ''),
+      taxRate: jurisdiction.rate,
+      taxableAmount,
+      taxAmount,
+      shippingMethod: method,
+      shippingAmount: Math.round(shippingAmount * 100) / 100,
+      freeShippingApplied: cleanSubtotal > 0 && shippingAmount === 0,
+      freeShippingReason
+    };
+  }
+
+  evaluateMatrix(cartInput, activeCouponCode, address) {
+    const items = this.normalizeCart(cartInput);
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const tier = this.evaluateTierDiscount(subtotal);
+    const rows = [];
+
+    rows.push({
+      key: 'TIER',
+      title: `Auto Spend Tier (${tier.tierName})`,
+      condition: tier.nextTierThreshold
+        ? `Next unlock at $${tier.nextTierThreshold.toFixed(0)}`
+        : 'Max 15% tier unlocked',
+      status: tier.discountAmount > 0 ? 'ACTIVE' : 'LOCKED',
+      impact: tier.discountAmount,
+      applied: tier.discountAmount > 0
+    });
+
+    const matrixCodes = ['CYBER20', 'BUNDLE3', 'FREESHIP', 'KEYB15', 'AUDIO25'];
+    matrixCodes.forEach((code) => {
+      const rule = this.coupons[code];
+      const evalRes = this.applyCoupon(code, items);
+      const isSelected = String(activeCouponCode || '').toUpperCase() === code;
+      let status = 'LOCKED';
+      if (isSelected && evalRes.valid) status = 'ACTIVE';
+      else if (evalRes.valid) status = 'READY';
+
+      let potentialImpact = evalRes.discountAmount;
+      if (code === 'FREESHIP' && evalRes.valid) {
+        const taxShip = this.calculateTaxAndShipping(address, subtotal, { freeShipping: false });
+        potentialImpact = taxShip.shippingAmount > 0 ? 12.00 : 0;
+      }
+
+      rows.push({
+        key: code,
+        title: code,
+        condition: rule.conditionText,
+        status,
+        impact: potentialImpact,
+        applied: isSelected && evalRes.valid,
+        valid: evalRes.valid,
+        reason: evalRes.reason
+      });
+    });
+
+    return rows;
+  }
+
+  calculateOrderSummary(cartInput, couponCode, address, metadata = {}) {
+    const items = this.normalizeCart(cartInput);
+    const subtotal = Math.round(items.reduce((sum, item) => sum + item.price * item.qty, 0) * 100) / 100;
+    const tierResult = this.evaluateTierDiscount(subtotal);
+    const couponResult = this.applyCoupon(couponCode, items);
+    const rawDiscount = tierResult.discountAmount + (couponResult.valid ? couponResult.discountAmount : 0);
+    const totalDiscount = Math.min(subtotal, Math.round(rawDiscount * 100) / 100);
+
+    const taxAndShipping = this.calculateTaxAndShipping(address, subtotal, {
+      discountTotal: totalDiscount,
+      freeShipping: couponResult.valid && couponResult.freeShipping
+    });
+
+    const baseShipTax = this.calculateTaxAndShipping(address, subtotal, {
+      discountTotal: totalDiscount,
+      freeShipping: false
+    });
+    const shippingSaved = Math.max(0, Math.round((baseShipTax.shippingAmount - taxAndShipping.shippingAmount) * 100) / 100);
+    const grandTotal = Math.max(0, Math.round((subtotal - totalDiscount + taxAndShipping.shippingAmount + taxAndShipping.taxAmount) * 100) / 100);
+
+    return {
+      invoiceId: metadata.invoiceId || 'NX-2026-4340',
+      issuedAt: metadata.issuedAt || new Date(),
+      status: metadata.status || 'VERIFIED QUOTE',
+      customerName: (address && address.customerName) || metadata.customerName || 'Alex Rivera · Nexus Labs',
+      address: {
+        state: taxAndShipping.regionCode,
+        regionLabel: taxAndShipping.regionLabel,
+        zip: taxAndShipping.zip || '94107',
+        shippingMethod: taxAndShipping.shippingMethod
+      },
+      items,
+      subtotal,
+      tierResult,
+      couponResult,
+      totalDiscount,
+      shippingSaved,
+      totalSavings: Math.round((totalDiscount + shippingSaved) * 100) / 100,
+      taxAndShipping,
+      grandTotal,
+      matrixRows: this.evaluateMatrix(items, couponCode, address)
+    };
+  }
+}
+
+const promoEngine = new PromoDiscountEngine();
+window.PromoDiscountEngine = PromoDiscountEngine;
+
 const SHIPPING_FEE = 12;
-const TAX_RATE = 0.08;
 const COUPON_KEY = 'nexusStoreCoupon';
 let appliedCoupon = null;
 
 // Multi-currency exchange rate tables and locale configurations
 const CURRENCIES = {
   USD: { code: 'USD', symbol: '$', rate: 1.0, locale: 'en-US', digits: 2 },
-  EUR: { code: 'EUR', symbol: '€', rate: 0.92, locale: 'de-DE', digits: 2 },
-  GBP: { code: 'GBP', symbol: '£', rate: 0.78, locale: 'en-GB', digits: 2 },
-  JPY: { code: 'JPY', symbol: '¥', rate: 152.0, locale: 'ja-JP', digits: 0 },
+  EUR: { code: 'EUR', symbol: 'â‚¬', rate: 0.92, locale: 'de-DE', digits: 2 },
+  GBP: { code: 'GBP', symbol: 'Â£', rate: 0.78, locale: 'en-GB', digits: 2 },
+  JPY: { code: 'JPY', symbol: 'Â¥', rate: 152.0, locale: 'ja-JP', digits: 0 },
   CAD: { code: 'CAD', symbol: 'CA$', rate: 1.38, locale: 'en-CA', digits: 2 },
-  INR: { code: 'INR', symbol: '₹', rate: 83.5, locale: 'en-IN', digits: 2 },
+  INR: { code: 'INR', symbol: 'â‚¹', rate: 83.5, locale: 'en-IN', digits: 2 },
   AUD: { code: 'AUD', symbol: 'A$', rate: 1.52, locale: 'en-AU', digits: 2 }
 };
 const CURRENCY_STORAGE_KEY = 'nexus_currency_preference';
@@ -48,7 +486,7 @@ function normalizeCode(raw) {
 function loadSavedCoupon() {
   try {
     const saved = normalizeCode(localStorage.getItem(COUPON_KEY));
-    if (COUPONS[saved]) appliedCoupon = saved;
+    if (promoEngine.coupons[saved]) appliedCoupon = saved;
   } catch {
     appliedCoupon = null;
   }
@@ -63,12 +501,11 @@ function saveCoupon() {
   }
 }
 
-// Pure helper so the maths is in one place.
+// Pure helper so the maths uses PromoDiscountEngine consistently.
 function calculateTotals(subtotal, couponCode) {
   const coupon = COUPONS[couponCode] || null;
   const discount = coupon && coupon.type === 'percent' ? subtotal * coupon.value : 0;
-  let shipping = subtotal > 0 ? SHIPPING_FEE : 0;
-  if (coupon && coupon.type === 'freeship') shipping = 0;
+  const shipping = subtotal > 0 && !ShippingProgress.calculate(subtotal, couponCode).unlocked ? SHIPPING_FEE : 0;
   const tax = (subtotal - discount) * TAX_RATE;
   const total = subtotal - discount + shipping + tax;
   return { subtotal, discount, shipping, tax, total };
@@ -90,13 +527,21 @@ function applyCoupon(rawCode) {
     setCouponMessage('Enter a promo code first.', true);
     return false;
   }
-  if (!COUPONS[code]) {
+  if (!promoEngine.coupons[code]) {
     setCouponMessage(`"${code}" is not a valid promo code.`, true);
     return false;
   }
   if (appliedCoupon === code) {
     setCouponMessage(`${code} is already applied.`, true);
     return false;
+  }
+  const items = Object.values(cart);
+  if (items.length > 0) {
+    const check = promoEngine.applyCoupon(code, items);
+    if (!check.valid) {
+      setCouponMessage(check.reason, true);
+      return false;
+    }
   }
   appliedCoupon = code;
   saveCoupon();
@@ -133,8 +578,9 @@ function toggleCartDrawer() {
 }
 
 function addToCart(id, name, price, img) {
+  const meta = ITEM_META_FALLBACK[id] || {};
   if (!cart[id]) {
-    cart[id] = { id, name, price, qty: 1, img };
+    cart[id] = { id, name, price, qty: 1, img, category: meta.category || 'general' };
   } else {
     cart[id].qty += 1;
   }
@@ -172,7 +618,7 @@ function renderCart() {
     cartCountEl.innerText = totalItems;
   }
 
-  // Update order summary (subtotal, discount, shipping, tax, total)
+  // Update order summary (subtotal, tier discount, promo discount, shipping, tax, total)
   const totals = calculateTotals(totalPrice, appliedCoupon);
   const setText = (id, value) => {
     const el = document.getElementById(id);
@@ -180,23 +626,39 @@ function renderCart() {
   };
   setText('cartSubtotal', formatMoney(totals.subtotal));
   setText('cartDiscount', `-${formatMoney(totals.discount)}`);
-  setText('cartShipping', totals.shipping === 0 && appliedCoupon === 'FREESHIP' && totals.subtotal > 0 ? 'FREE' : formatMoney(totals.shipping));
+  setText('cartShipping', totals.shipping === 0 && totals.subtotal > 0 ? 'FREE' : formatMoney(totals.shipping));
   setText('cartTax', formatMoney(totals.tax));
   setText('cartTotal', formatMoney(totals.total));
 
+  const shippingProgress = ShippingProgress.calculate(totals.subtotal, appliedCoupon);
+  const progressTrack = document.getElementById('shippingProgressTrack');
+  const progressFill = document.getElementById('shippingProgressFill');
+  const progressBadge = document.getElementById('shippingProgressBadge');
+  const progressContainer = document.getElementById('shippingProgress');
+  if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(shippingProgress.percent));
+  if (progressFill) progressFill.style.width = `${shippingProgress.percent}%`;
+  if (progressBadge) progressBadge.hidden = !shippingProgress.unlocked;
+  if (progressContainer) progressContainer.classList.toggle('unlocked', shippingProgress.unlocked);
+  setText('shippingProgressMessage', shippingProgress.couponUnlocked
+    ? 'Free Express Shipping unlocked with FREESHIP!'
+    : shippingProgress.unlocked
+      ? 'Free Express Shipping unlocked!'
+      : `Add ${formatMoney(shippingProgress.remaining)} more to unlock Free Express Shipping!`);
+
   const discountRow = document.getElementById('discountRow');
-  if (discountRow) discountRow.hidden = !(totals.discount > 0);
-  setText('discountLabel', appliedCoupon ? `Discount (${appliedCoupon})` : 'Discount');
+  if (discountRow) discountRow.hidden = !(totals.couponDiscount > 0);
+  setText('discountLabel', appliedCoupon ? `Promo (${appliedCoupon})` : 'Discount');
 
   const chip = document.getElementById('promoChip');
   if (chip) {
     chip.hidden = !appliedCoupon;
-    if (appliedCoupon) setText('promoChipText', COUPONS[appliedCoupon].label);
+    if (appliedCoupon && promoEngine.coupons[appliedCoupon]) {
+      setText('promoChipText', promoEngine.coupons[appliedCoupon].label);
+    }
   }
 
-  // 2. Render Product Card Buttons / Quantity Controls
-  const productIds = ['p1', 'p2', 'p3'];
-  productIds.forEach((id) => {
+  // 2. Render Product Card Buttons / Quantity Controls for p1..p8
+  Object.keys(ITEM_META_FALLBACK).forEach((id) => {
     const container = document.getElementById(`action-${id}`);
     if (!container) return;
 
@@ -210,19 +672,18 @@ function renderCart() {
         </div>
       `;
     } else {
-      // Revert to original Add to Cart button
-      let name = 'Product';
-      let price = 0;
-      let img = '📦';
-      if (id === 'p1') { name = 'CyberDeck Pro Mechanical'; price = 249.00; img = '⌨️'; }
-      if (id === 'p2') { name = 'Acoustic Pulse ANC Headset'; price = 199.00; img = '🎧'; }
-      if (id === 'p3') { name = 'Horizon 32 Curved OLED'; price = 899.00; img = '🖥️'; }
-
+      const meta = ITEM_META_FALLBACK[id];
+      const safeName = meta.name.replace(/"/g, '&quot;');
       container.innerHTML = `
-        <button class="add-btn" onclick="addToCart('${id}', '${name}', ${price}, '${img}')">Add to Cart</button>
+        <button class="add-btn" onclick="addToCart('${id}', '${safeName}', ${meta.price}, '${meta.img}')">Add to Cart</button>
       `;
     }
   });
+
+  // Notify Promo Studio if initialized
+  if (typeof window.syncPromoStudioWithCart === 'function') {
+    window.syncPromoStudioWithCart();
+  }
 
   // 3. Render Drawer List
   const drawerBody = document.getElementById('cartItemsList');
@@ -252,7 +713,7 @@ function renderCart() {
           <span class="cart-item-icon">${item.img}</span>
           <div class="cart-item-details">
             <h4>${item.name}</h4>
-            <div class="price-sub">${formatMoney(item.price * item.qty)} (${formatMoney(item.price)} × ${item.qty})</div>
+            <div class="price-sub">${formatMoney(item.price * item.qty)} (${formatMoney(item.price)} Ã— ${item.qty})</div>
           </div>
         </div>
         <div class="qty-controls">
@@ -272,7 +733,10 @@ function checkout() {
     showToast('Your cart is empty!');
     return;
   }
-  showToast('Order placed successfully! Thank you for testing Nexus Store.');
+  if (typeof window.captureCheckoutInvoice === 'function') {
+    window.captureCheckoutInvoice(items, appliedCoupon);
+  }
+  showToast('Order placed! High-DPI Canvas Invoice updated.');
   Object.keys(cart).forEach((key) => delete cart[key]);
   renderCart();
   toggleCartDrawer();
@@ -320,10 +784,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Wireless split ergonomic keyboard engineered with hot-swappable sockets, south-facing RGB matrix, customizable OLED telemetry screen, and CNC anodized aluminum chassis.',
     thumbs: [
-      { icon: '⌨️', label: 'Front Split', title: 'Ergonomic Split Layout' },
-      { icon: '🖲️', label: '7° Tent', title: 'Integrated Tent Stand' },
-      { icon: '🔌', label: 'PCB Matrix', title: 'Hot-Swap Sockets' },
-      { icon: '📦', label: 'Unboxing', title: 'Braided Cable & Case' }
+      { icon: 'âŒ¨ï¸', label: 'Front Split', title: 'Ergonomic Split Layout' },
+      { icon: 'ðŸ–²ï¸', label: '7Â° Tent', title: 'Integrated Tent Stand' },
+      { icon: 'ðŸ”Œ', label: 'PCB Matrix', title: 'Hot-Swap Sockets' },
+      { icon: 'ðŸ“¦', label: 'Unboxing', title: 'Braided Cable & Case' }
     ],
     colors: [
       { id: 'black', name: 'Stealth Matte Black', hex: '#18181b' },
@@ -339,10 +803,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '⚡', text: 'Tri-Mode: 2.4G / BT 5.2 / USB-C' },
-      { icon: '🔋', text: '4,000 mAh Li-ion (200 hrs)' },
-      { icon: '⚙️', text: 'QMK & VIA Fully Programmable' },
-      { icon: '🛡️', text: 'Poron Gasket Acoustic Mount' }
+      { icon: 'âš¡', text: 'Tri-Mode: 2.4G / BT 5.2 / USB-C' },
+      { icon: 'ðŸ”‹', text: '4,000 mAh Li-ion (200 hrs)' },
+      { icon: 'âš™ï¸', text: 'QMK & VIA Fully Programmable' },
+      { icon: 'ðŸ›¡ï¸', text: 'Poron Gasket Acoustic Mount' }
     ]
   },
   p2: {
@@ -364,10 +828,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'low-stock',
     desc: 'Audiophile active noise-canceling studio headphones with ultra-low latency lossy spatial audio, custom 50mm beryllium biocellulose drivers, and broadcast-grade microphone.',
     thumbs: [
-      { icon: '🎧', label: 'Studio Front', title: 'Studio Acoustic Profile' },
-      { icon: '🎒', label: 'Folded', title: 'Foldable Travel Shell' },
-      { icon: '🔊', label: 'Beryllium', title: '50mm Drivers' },
-      { icon: '🎙️', label: 'Broadcast', title: 'Detachable Boom Mic' }
+      { icon: 'ðŸŽ§', label: 'Studio Front', title: 'Studio Acoustic Profile' },
+      { icon: 'ðŸŽ’', label: 'Folded', title: 'Foldable Travel Shell' },
+      { icon: 'ðŸ”Š', label: 'Beryllium', title: '50mm Drivers' },
+      { icon: 'ðŸŽ™ï¸', label: 'Broadcast', title: 'Detachable Boom Mic' }
     ],
     colors: [
       { id: 'black', name: 'Midnight Onyx Black', hex: '#0f172a' },
@@ -383,10 +847,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🔇', text: '40dB Hybrid Active Noise Cancel' },
-      { icon: '⏱️', text: '55-Hour Continuous Playback' },
-      { icon: '📶', text: 'Lossless 2.4GHz + Dual BT 5.3' },
-      { icon: '🎛️', text: 'Built-in 32-bit Quad DAC' }
+      { icon: 'ðŸ”‡', text: '40dB Hybrid Active Noise Cancel' },
+      { icon: 'â±ï¸', text: '55-Hour Continuous Playback' },
+      { icon: 'ðŸ“¶', text: 'Lossless 2.4GHz + Dual BT 5.3' },
+      { icon: 'ðŸŽ›ï¸', text: 'Built-in 32-bit Quad DAC' }
     ]
   },
   p3: {
@@ -408,10 +872,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Immersive 1800R curved 4K UHD Quantum-Dot OLED display calibrated with 240Hz refresh rate, 0.03ms response time, 99% DCI-P3 gamut, and 90W USB-C single-cable dock.',
     thumbs: [
-      { icon: '🖥️', label: '1800R Front', title: 'Panoramic 1800R Curve' },
-      { icon: '✨', label: 'Aura Halo', title: 'Ambient RGB Backlight' },
-      { icon: '📐', label: '4.5mm Slim', title: 'Razor-Thin OLED Panel' },
-      { icon: '⚡', label: '90W Hub', title: 'Single-Cable USB-C Hub' }
+      { icon: 'ðŸ–¥ï¸', label: '1800R Front', title: 'Panoramic 1800R Curve' },
+      { icon: 'âœ¨', label: 'Aura Halo', title: 'Ambient RGB Backlight' },
+      { icon: 'ðŸ“', label: '4.5mm Slim', title: 'Razor-Thin OLED Panel' },
+      { icon: 'âš¡', label: '90W Hub', title: 'Single-Cable USB-C Hub' }
     ],
     colors: [
       { id: 'silver', name: 'Space Gray Titanium', hex: '#94a3b8' },
@@ -425,10 +889,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🎯', text: '3840 x 2160 UHD @ 240Hz' },
-      { icon: '⚡', text: '0.03ms (GtG) Pixel Response' },
-      { icon: '🎨', text: '99% DCI-P3 & Delta E < 1' },
-      { icon: '🔌', text: '90W USB-C + Dual HDMI 2.1' }
+      { icon: 'ðŸŽ¯', text: '3840 x 2160 UHD @ 240Hz' },
+      { icon: 'âš¡', text: '0.03ms (GtG) Pixel Response' },
+      { icon: 'ðŸŽ¨', text: '99% DCI-P3 & Delta E < 1' },
+      { icon: 'ðŸ”Œ', text: '90W USB-C + Dual HDMI 2.1' }
     ]
   },
   p4: {
@@ -450,10 +914,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Ultra-thin mechanical keyboard with low-profile optical switches, PBT shine-through keycaps, and CNC aluminum chassis.',
     thumbs: [
-      { icon: '⌨️', label: 'Top View', title: '65% Compact Layout' },
-      { icon: '📐', label: 'Side Profile', title: '12mm Thin Chassis' },
-      { icon: '🔋', label: 'Battery', title: '120h Bluetooth Endurance' },
-      { icon: '📦', label: 'Travel Case', title: 'Magnetic Travel Sleeve' }
+      { icon: 'âŒ¨ï¸', label: 'Top View', title: '65% Compact Layout' },
+      { icon: 'ðŸ“', label: 'Side Profile', title: '12mm Thin Chassis' },
+      { icon: 'ðŸ”‹', label: 'Battery', title: '120h Bluetooth Endurance' },
+      { icon: 'ðŸ“¦', label: 'Travel Case', title: 'Magnetic Travel Sleeve' }
     ],
     colors: [
       { id: 'black', name: 'Stealth Black', hex: '#18181b' },
@@ -467,10 +931,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '⚡', text: 'Bluetooth 5.3 Low-Latency' },
-      { icon: '🔋', text: '120h Operating Time' },
-      { icon: '🪶', text: 'Ultra-slim 12mm Profile' },
-      { icon: '🛡️', text: 'CNC Anodized Aluminum Top' }
+      { icon: 'âš¡', text: 'Bluetooth 5.3 Low-Latency' },
+      { icon: 'ðŸ”‹', text: '120h Operating Time' },
+      { icon: 'ðŸª¶', text: 'Ultra-slim 12mm Profile' },
+      { icon: 'ðŸ›¡ï¸', text: 'CNC Anodized Aluminum Top' }
     ]
   },
   p5: {
@@ -492,10 +956,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Active bi-amplified studio reference speakers with DSP room correction and balanced TRS inputs.',
     thumbs: [
-      { icon: '🔊', label: 'Pair Front', title: 'Dual Bi-Amp Monoliths' },
-      { icon: '🎛️', label: 'Back DSP', title: 'Room Acoustics Equalizer' },
-      { icon: '🔌', label: 'Balanced I/O', title: 'XLR & TRS Balanced In' },
-      { icon: '📦', label: 'Isolation', title: 'Acoustic Foam Decouplers' }
+      { icon: 'ðŸ”Š', label: 'Pair Front', title: 'Dual Bi-Amp Monoliths' },
+      { icon: 'ðŸŽ›ï¸', label: 'Back DSP', title: 'Room Acoustics Equalizer' },
+      { icon: 'ðŸ”Œ', label: 'Balanced I/O', title: 'XLR & TRS Balanced In' },
+      { icon: 'ðŸ“¦', label: 'Isolation', title: 'Acoustic Foam Decouplers' }
     ],
     colors: [
       { id: 'black', name: 'Matte Studio Charcoal', hex: '#18181b' },
@@ -509,10 +973,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🔊', text: '100W Class-D Bi-Amplified' },
-      { icon: '📈', text: '38Hz – 24kHz Flat Response' },
-      { icon: '🎛️', text: 'Integrated 32-bit DSP Room EQ' },
-      { icon: '🔌', text: 'XLR, 1/4" TRS & USB-C DAC' }
+      { icon: 'ðŸ”Š', text: '100W Class-D Bi-Amplified' },
+      { icon: 'ðŸ“ˆ', text: '38Hz â€“ 24kHz Flat Response' },
+      { icon: 'ðŸŽ›ï¸', text: 'Integrated 32-bit DSP Room EQ' },
+      { icon: 'ðŸ”Œ', text: 'XLR, 1/4" TRS & USB-C DAC' }
     ]
   },
   p6: {
@@ -534,10 +998,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'low-stock',
     desc: 'Super ultrawide 32:9 dual QHD curved monitor with 1000R curvature and built-in KVM switch.',
     thumbs: [
-      { icon: '🖥️', label: 'Panoramic 32:9', title: 'Dual 1440p Workspace' },
-      { icon: '🔄', label: 'KVM Hub', title: 'Dual PC Control Matrix' },
-      { icon: '🌈', label: 'Mini-LED HDR', title: 'HDR 1000 Zone Dimming' },
-      { icon: '📦', label: 'Heavy Arm', title: 'Integrated Heavy-Duty Stand' }
+      { icon: 'ðŸ–¥ï¸', label: 'Panoramic 32:9', title: 'Dual 1440p Workspace' },
+      { icon: 'ðŸ”„', label: 'KVM Hub', title: 'Dual PC Control Matrix' },
+      { icon: 'ðŸŒˆ', label: 'Mini-LED HDR', title: 'HDR 1000 Zone Dimming' },
+      { icon: 'ðŸ“¦', label: 'Heavy Arm', title: 'Integrated Heavy-Duty Stand' }
     ],
     colors: [
       { id: 'black', name: 'Cosmic Black', hex: '#020617' },
@@ -551,10 +1015,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🎯', text: '5120 x 1440 Dual QHD @ 240Hz' },
-      { icon: '⚡', text: '0.03ms GtG Response Time' },
-      { icon: '🔄', text: 'Integrated USB-C KVM Switch' },
-      { icon: '✨', text: 'Quantum Dot Mini-LED 1000 nits' }
+      { icon: 'ðŸŽ¯', text: '5120 x 1440 Dual QHD @ 240Hz' },
+      { icon: 'âš¡', text: '0.03ms GtG Response Time' },
+      { icon: 'ðŸ”„', text: 'Integrated USB-C KVM Switch' },
+      { icon: 'âœ¨', text: 'Quantum Dot Mini-LED 1000 nits' }
     ]
   },
   p7: {
@@ -576,10 +1040,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: '24-bit 192kHz broadcast condenser microphone with dual polar patterns and metal boom arm.',
     thumbs: [
-      { icon: '🎙️', label: 'Capsule Front', title: '25mm Gold-Sputtered Capsule' },
-      { icon: '🦾', label: 'Boom Arm', title: 'Gas-Spring Low Profile Arm' },
-      { icon: '🔇', label: 'Tap Mute', title: 'Capacitive Tap-to-Mute' },
-      { icon: '📦', label: 'Full Kit', title: 'Shockmount & Pop Filter' }
+      { icon: 'ðŸŽ™ï¸', label: 'Capsule Front', title: '25mm Gold-Sputtered Capsule' },
+      { icon: 'ðŸ¦¾', label: 'Boom Arm', title: 'Gas-Spring Low Profile Arm' },
+      { icon: 'ðŸ”‡', label: 'Tap Mute', title: 'Capacitive Tap-to-Mute' },
+      { icon: 'ðŸ“¦', label: 'Full Kit', title: 'Shockmount & Pop Filter' }
     ],
     colors: [
       { id: 'black', name: 'Matte Cast Black', hex: '#18181b' },
@@ -593,10 +1057,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '🎙️', text: '24-bit / 192kHz Studio Recording' },
-      { icon: '🎯', text: 'Cardioid & Omnidirectional Modes' },
-      { icon: '🎧', text: 'Zero-Latency 3.5mm Headphone Jack' },
-      { icon: '🔌', text: 'Plug & Play USB-C Bus Powered' }
+      { icon: 'ðŸŽ™ï¸', text: '24-bit / 192kHz Studio Recording' },
+      { icon: 'ðŸŽ¯', text: 'Cardioid & Omnidirectional Modes' },
+      { icon: 'ðŸŽ§', text: 'Zero-Latency 3.5mm Headphone Jack' },
+      { icon: 'ðŸ”Œ', text: 'Plug & Play USB-C Bus Powered' }
     ]
   },
   p8: {
@@ -618,10 +1082,10 @@ const PRODUCT_CATALOG = {
     stockClass: 'in-stock',
     desc: 'Ergonomic Alice layout keyboard with rotary media knob, brass counterweight, and gasket mount.',
     thumbs: [
-      { icon: '⌨️', label: 'Split Angle', title: 'Natural Wrist Ergonomics' },
-      { icon: '🎛️', label: 'Rotary Knob', title: 'CNC Aluminum Volume Dial' },
-      { icon: '🪙', label: 'Brass Weight', title: '2.4kg Solid Brass Base' },
-      { icon: '📦', label: 'Carrying Case', title: 'Custom Hard EVA Case' }
+      { icon: 'âŒ¨ï¸', label: 'Split Angle', title: 'Natural Wrist Ergonomics' },
+      { icon: 'ðŸŽ›ï¸', label: 'Rotary Knob', title: 'CNC Aluminum Volume Dial' },
+      { icon: 'ðŸª™', label: 'Brass Weight', title: '2.4kg Solid Brass Base' },
+      { icon: 'ðŸ“¦', label: 'Carrying Case', title: 'Custom Hard EVA Case' }
     ],
     colors: [
       { id: 'violet', name: 'Nebula Violet', hex: '#7c3aed' },
@@ -637,10 +1101,10 @@ const PRODUCT_CATALOG = {
       ]
     },
     specs: [
-      { icon: '⚡', text: 'Tri-Mode: 2.4GHz / BT 5.1 / USB-C' },
-      { icon: '🪙', text: '2.4kg CNC Brass Weighted Case' },
-      { icon: '🎛️', text: 'Programmable Rotary Media Dial' },
-      { icon: '⚙️', text: 'VIA / QMK Full Key Remapping' }
+      { icon: 'âš¡', text: 'Tri-Mode: 2.4GHz / BT 5.1 / USB-C' },
+      { icon: 'ðŸª™', text: '2.4kg CNC Brass Weighted Case' },
+      { icon: 'ðŸŽ›ï¸', text: 'Programmable Rotary Media Dial' },
+      { icon: 'âš™ï¸', text: 'VIA / QMK Full Key Remapping' }
     ]
   }
 };
@@ -870,7 +1334,7 @@ function renderActiveChips() {
 
   if (facetState.minRating > 0) {
     chips.push({
-      label: `★ ${facetState.minRating}+ Rating`,
+      label: `â˜… ${facetState.minRating}+ Rating`,
       type: 'rating',
       action: () => {
         facetState.minRating = 0;
@@ -901,13 +1365,24 @@ function renderActiveChips() {
   }
 
   bar.style.display = 'flex';
-  container.innerHTML = '';
+  container.replaceChildren();
 
   chips.forEach(chip => {
     const chipEl = document.createElement('div');
     chipEl.className = 'filter-chip';
-    chipEl.innerHTML = `<span>${chip.label}</span><button type="button" class="chip-remove" aria-label="Remove filter ${chip.label}">✕</button>`;
-    chipEl.querySelector('.chip-remove').addEventListener('click', chip.action);
+
+    const lblSpan = document.createElement('span');
+    lblSpan.textContent = chip.label;
+
+    const rmBtn = document.createElement('button');
+    rmBtn.type = 'button';
+    rmBtn.className = 'chip-remove';
+    rmBtn.setAttribute('aria-label', `Remove filter ${chip.label}`);
+    rmBtn.textContent = '✕';
+    rmBtn.addEventListener('click', chip.action);
+
+    chipEl.appendChild(lblSpan);
+    chipEl.appendChild(rmBtn);
     container.appendChild(chipEl);
   });
 }
@@ -1477,11 +1952,11 @@ function addQuickViewToCart() {
   // Visual feedback on the button
   const btn = document.getElementById('qvAddToCartBtn');
   if (btn) {
-    const originalContent = btn.innerHTML;
-    btn.innerHTML = '<span>✓ Added to Cart!</span>';
+    const originalText = btn.textContent;
+    btn.textContent = '✓ Added to Cart!';
     btn.style.backgroundColor = '#22c55e';
     setTimeout(() => {
-      btn.innerHTML = originalContent;
+      btn.textContent = originalText;
       btn.style.backgroundColor = '';
     }, 1500);
   }
@@ -1687,7 +2162,7 @@ function getInitials(name) {
 
 function renderStarString(rating) {
   const full = Math.min(5, Math.max(0, Math.round(rating)));
-  return '★'.repeat(full) + '☆'.repeat(5 - full);
+  return 'â˜…'.repeat(full) + 'â˜†'.repeat(5 - full);
 }
 
 function calculateAnalytics(reviewsList) {
@@ -1771,7 +2246,7 @@ function updateAnalyticsCard() {
       row.setAttribute('tabindex', '0');
       row.setAttribute('aria-label', `Filter by ${star} star reviews, currently ${cnt} reviews (${pct}%)`);
       row.innerHTML = `
-        <span class="breakdown-star-label">${star} <span class="star-icon">★</span></span>
+        <span class="breakdown-star-label">${star} <span class="star-icon">â˜…</span></span>
         <div class="breakdown-track">
           <div class="breakdown-fill" style="width: ${pct}%"></div>
         </div>
@@ -1865,7 +2340,7 @@ function renderReviewsFeed() {
       if (reviewsState.searchTerm.trim() !== '') {
         filtersDesc.push(`Keyword "${reviewsState.searchTerm}"`);
       }
-      bannerText.textContent = `Filtering by: ${filtersDesc.join(' · ')} (${list.length} results)`;
+      bannerText.textContent = `Filtering by: ${filtersDesc.join(' Â· ')} (${list.length} results)`;
       banner.hidden = false;
     } else {
       banner.hidden = true;
@@ -1905,7 +2380,7 @@ function renderReviewsFeed() {
               <div class="reviewer-meta">
                 <div class="reviewer-name-row">
                   <span class="reviewer-name">${safeAuthor}</span>
-                  ${rev.verified ? '<span class="verified-badge"><span aria-hidden="true">✓</span> Verified Buyer</span>' : ''}
+                  ${rev.verified ? '<span class="verified-badge"><span aria-hidden="true">âœ“</span> Verified Buyer</span>' : ''}
                 </div>
                 ${safeRole ? `<span class="reviewer-role">${safeRole}</span>` : ''}
               </div>
@@ -1921,7 +2396,7 @@ function renderReviewsFeed() {
           <footer class="review-card-footer">
             <span>Was this telemetry helpful to you?</span>
             <button type="button" class="helpful-btn ${rev.userVoted ? 'voted' : ''}" onclick="voteReviewHelpful('${rev.id}')" aria-label="Mark review as helpful, currently ${rev.helpfulCount}">
-              <span>👍 Helpful</span>
+              <span>ðŸ‘ Helpful</span>
               <span class="helpful-count">(${rev.helpfulCount})</span>
             </button>
           </footer>
@@ -2052,11 +2527,11 @@ function closeWriteReviewModal() {
 }
 
 const RATING_DESCRIPTIONS = {
-  1: '1 / 5 — Poor (Needs Improvement)',
-  2: '2 / 5 — Fair (Below Expectation)',
-  3: '3 / 5 — Average (Adequate)',
-  4: '4 / 5 — Very Good (Recommended)',
-  5: '5 / 5 — Exceptional (Highly Recommended)'
+  1: '1 / 5 â€” Poor (Needs Improvement)',
+  2: '2 / 5 â€” Fair (Below Expectation)',
+  3: '3 / 5 â€” Average (Adequate)',
+  4: '4 / 5 â€” Very Good (Recommended)',
+  5: '5 / 5 â€” Exceptional (Highly Recommended)'
 };
 
 function setPickerRating(val) {
@@ -2458,7 +2933,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p1: {
       id: 'p1',
       name: 'CyberDeck Pro Mechanical',
-      img: '⌨️',
+      img: 'âŒ¨ï¸',
       price: 249.00,
       rating: 4.9,
       inStock: true,
@@ -2466,7 +2941,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$249.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.9 / 5.0 (72 reviews)',
+        'User Rating': 'â˜… 4.9 / 5.0 (72 reviews)',
         'Processor / Core': 'ARM Cortex-M4F 120MHz (QMK/VIA)',
         'Battery Life': '140 Hours (RGB Off) / 45 Hours (RGB On)',
         'Connectivity': 'Tri-Mode: 2.4GHz + Bluetooth 5.3 + USB-C',
@@ -2477,7 +2952,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p2: {
       id: 'p2',
       name: 'Acoustic Pulse ANC Headset',
-      img: '🎧',
+      img: 'ðŸŽ§',
       price: 199.00,
       rating: 4.8,
       inStock: true,
@@ -2485,7 +2960,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$199.00',
         'Availability': 'Only 3 Left',
-        'User Rating': '★ 4.8 / 5.0 (46 reviews)',
+        'User Rating': 'â˜… 4.8 / 5.0 (46 reviews)',
         'Processor / Core': 'Dual-Core 32-bit DSP + ANC Neural Engine',
         'Battery Life': '60 Hours (ANC On) / 100 Hours (ANC Off)',
         'Connectivity': 'Wireless 2.4GHz + Bluetooth 5.3 + 3.5mm',
@@ -2496,7 +2971,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p3: {
       id: 'p3',
       name: 'Horizon 32" Curved OLED',
-      img: '🖥️',
+      img: 'ðŸ–¥ï¸',
       price: 899.00,
       rating: 4.9,
       inStock: true,
@@ -2504,7 +2979,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$899.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.9 / 5.0 (30 reviews)',
+        'User Rating': 'â˜… 4.9 / 5.0 (30 reviews)',
         'Processor / Core': 'Quantum QD Neo Display Engine (240Hz)',
         'Battery Life': 'AC Powered (120W PSU, 0.5W Standby)',
         'Connectivity': '2x HDMI 2.1 + 1x DP 2.1 + USB-C PD 90W',
@@ -2515,7 +2990,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p4: {
       id: 'p4',
       name: 'Nexus Neo 65% Low-Profile',
-      img: '⌨️',
+      img: 'âŒ¨ï¸',
       price: 149.00,
       rating: 4.7,
       inStock: true,
@@ -2523,7 +2998,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$149.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.7 / 5.0 (54 reviews)',
+        'User Rating': 'â˜… 4.7 / 5.0 (54 reviews)',
         'Processor / Core': 'Nordic nRF52840 Ultra-Low-Power SoC',
         'Battery Life': '120 Hours Continuous Wireless',
         'Connectivity': 'Bluetooth 5.3 + USB-C Wired',
@@ -2534,7 +3009,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p5: {
       id: 'p5',
       name: 'Vortex Reference Studio Monitors',
-      img: '🔊',
+      img: 'ðŸ”Š',
       price: 349.00,
       rating: 4.6,
       inStock: true,
@@ -2542,7 +3017,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$349.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.6 / 5.0 (28 reviews)',
+        'User Rating': 'â˜… 4.6 / 5.0 (28 reviews)',
         'Processor / Core': 'Dual Class-D Bi-Amp + Room Correction DSP',
         'Battery Life': 'AC Studio Mains (2x 90W RMS)',
         'Connectivity': 'Balanced TRS + RCA + Optical S/PDIF',
@@ -2553,7 +3028,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p6: {
       id: 'p6',
       name: 'Apex UltraWide 49" 240Hz',
-      img: '🖥️',
+      img: 'ðŸ–¥ï¸',
       price: 1199.00,
       rating: 4.9,
       inStock: false,
@@ -2561,7 +3036,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$1,199.00',
         'Availability': 'Backorder',
-        'User Rating': '★ 4.9 / 5.0 (19 reviews)',
+        'User Rating': 'â˜… 4.9 / 5.0 (19 reviews)',
         'Processor / Core': 'Dual-Engine 5120x1440 240Hz KVM Controller',
         'Battery Life': 'AC Powered (Internal 240W PSU, USB-C PD)',
         'Connectivity': 'USB-C 96W + Dual HDMI 2.1 + DP 2.1 + KVM',
@@ -2572,7 +3047,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p7: {
       id: 'p7',
       name: 'HyperStream Studio Mic & Arm',
-      img: '🎙️',
+      img: 'ðŸŽ™ï¸',
       price: 179.00,
       rating: 4.5,
       inStock: true,
@@ -2580,7 +3055,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$179.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.5 / 5.0 (39 reviews)',
+        'User Rating': 'â˜… 4.5 / 5.0 (39 reviews)',
         'Processor / Core': '24-Bit / 192kHz Broadcast ADC + FET Preamp',
         'Battery Life': 'USB-C Bus Powered (Zero Battery Required)',
         'Connectivity': 'USB-C + 3.5mm Zero-Latency Monitor Out',
@@ -2591,7 +3066,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     p8: {
       id: 'p8',
       name: 'Keychronix Ergo Alice Custom',
-      img: '⌨️',
+      img: 'âŒ¨ï¸',
       price: 289.00,
       rating: 4.8,
       inStock: true,
@@ -2599,7 +3074,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       specs: {
         'Pricing': '$289.00',
         'Availability': 'In Stock',
-        'User Rating': '★ 4.8 / 5.0 (33 reviews)',
+        'User Rating': 'â˜… 4.8 / 5.0 (33 reviews)',
         'Processor / Core': 'STM32F402 + Gasket Poron Acoustic Matrix',
         'Battery Life': '180 Hours (4,000mAh Li-Po)',
         'Connectivity': 'Tri-Mode: 2.4GHz + BT 5.3 + USB-C',
@@ -2668,7 +3143,7 @@ window.handleReviewSubmit = handleReviewSubmit;
           compareBarThumbs.innerHTML = comparisonList
             .map((id) => {
               const p = PRODUCT_SPECS[id];
-              return `<span class="compare-thumb-pill" title="${p ? p.name : id}">${p ? p.img : '📦'}</span>`;
+              return `<span class="compare-thumb-pill" title="${p ? p.name : id}">${p ? p.img : 'ðŸ“¦'}</span>`;
             })
             .join('');
         }
@@ -2937,7 +3412,7 @@ window.handleReviewSubmit = handleReviewSubmit;
 
       const variantEmail = document.createElement('span');
       variantEmail.className = 'watchlist-variant-email';
-      variantEmail.textContent = `✉️ ${item.email || ''} • Added ${item.date || 'Recently'}`;
+      variantEmail.textContent = `âœ‰ï¸ ${item.email || ''} â€¢ Added ${item.date || 'Recently'}`;
 
       left.appendChild(prodName);
       left.appendChild(variantEmail);
@@ -2954,7 +3429,7 @@ window.handleReviewSubmit = handleReviewSubmit;
       removeBtn.className = 'watchlist-remove-btn';
       removeBtn.setAttribute('title', 'Cancel this alert');
       removeBtn.setAttribute('aria-label', `Cancel stock alert for ${item.productName || 'item'}`);
-      removeBtn.textContent = '✕';
+      removeBtn.textContent = 'âœ•';
       removeBtn.addEventListener('click', () => {
         removeAlert(idx);
       });
@@ -3016,10 +3491,10 @@ window.handleReviewSubmit = handleReviewSubmit;
     if (p) {
       if (previewName) previewName.textContent = p.name;
       if (previewPrice) {
-        previewPrice.textContent = `$${p.price.toFixed(2)} • ${p.inStock ? 'In Stock (Variants Available)' : 'Currently Backordered'}`;
+        previewPrice.textContent = `$${p.price.toFixed(2)} â€¢ ${p.inStock ? 'In Stock (Variants Available)' : 'Currently Backordered'}`;
       }
       if (previewIcon && p.thumbs && p.thumbs[0]) {
-        previewIcon.textContent = p.thumbs[0].icon || '🖥️';
+        previewIcon.textContent = p.thumbs[0].icon || 'ðŸ–¥ï¸';
       }
 
       let hasOptions = false;
@@ -3049,8 +3524,8 @@ window.handleReviewSubmit = handleReviewSubmit;
       }
     } else {
       if (previewName) previewName.textContent = 'Apex UltraWide 49" 240Hz';
-      if (previewPrice) previewPrice.textContent = '$1,199.00 • Currently Backordered';
-      if (previewIcon) previewIcon.textContent = '🖥️';
+      if (previewPrice) previewPrice.textContent = '$1,199.00 â€¢ Currently Backordered';
+      if (previewIcon) previewIcon.textContent = 'ðŸ–¥ï¸';
 
       const opt1 = document.createElement('option');
       opt1.value = 'Cosmic Black (Heavy-Duty Arm)';
@@ -3082,7 +3557,7 @@ window.handleReviewSubmit = handleReviewSubmit;
         statusText.className = 'validation-status-text';
       }
       if (errorHint) errorHint.style.display = 'none';
-      if (icon) icon.textContent = '✉️';
+      if (icon) icon.textContent = 'âœ‰ï¸';
       return false;
     }
 
@@ -3093,22 +3568,22 @@ window.handleReviewSubmit = handleReviewSubmit;
         wrap.classList.remove('is-invalid');
       }
       if (statusText) {
-        statusText.textContent = 'Valid Email Format ✓';
+        statusText.textContent = 'Valid Email Format âœ“';
         statusText.className = 'validation-status-text valid';
       }
       if (errorHint) errorHint.style.display = 'none';
-      if (icon) icon.textContent = '✅';
+      if (icon) icon.textContent = 'âœ…';
     } else {
       if (wrap) {
         wrap.classList.add('is-invalid');
         wrap.classList.remove('is-valid');
       }
       if (statusText) {
-        statusText.textContent = 'Invalid Email Format ✕';
+        statusText.textContent = 'Invalid Email Format âœ•';
         statusText.className = 'validation-status-text invalid';
       }
       if (errorHint) errorHint.style.display = 'block';
-      if (icon) icon.textContent = '⚠️';
+      if (icon) icon.textContent = 'âš ï¸';
     }
     return isValid;
   }
@@ -3207,7 +3682,7 @@ window.handleReviewSubmit = handleReviewSubmit;
     renderWatchlist();
     updateBadge();
 
-    const toastMsg = `🔔 Restock alert subscribed for ${prodName} (${variant})! Dispatch set to ${email}.`;
+    const toastMsg = `ðŸ”” Restock alert subscribed for ${prodName} (${variant})! Dispatch set to ${email}.`;
     if (typeof showToast === 'function') {
       showToast(toastMsg);
     } else {
@@ -3267,3 +3742,1217 @@ window.handleReviewSubmit = handleReviewSubmit;
   });
 })();
 /* ===== END Issue #401: Product Stock Inventory Alert Notification Modal ===== */
+
+/* ===== END Issue #283 ===== */
+
+/* ===== BEGIN Issue #434: Canvas Invoice Generator & Promo Matrix Controller ===== */
+function drawCanvasRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawReceiptBarcode(ctx, codeText, startX, startY, width, height) {
+  const seed = String(codeText || 'NX-2026-4340');
+  const bars = [];
+  for (let i = 0; i < seed.length; i += 1) {
+    const ch = seed.charCodeAt(i);
+    bars.push(2, (ch % 3) + 1, ((ch >> 2) % 2) + 1, ((ch >> 4) % 3) + 1);
+  }
+  // Start and end guard bars
+  const pattern = [2, 1, 2, 1, ...bars, 2, 1, 2];
+  const totalUnits = pattern.reduce((a, b) => a + b, 0);
+  const unitW = width / totalUnits;
+
+  let cursorX = startX;
+  pattern.forEach((units, idx) => {
+    const barW = units * unitW;
+    if (idx % 2 === 0) {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(cursorX, startY, Math.max(1, barW - 0.35), height);
+    }
+    cursorX += barW;
+  });
+
+  ctx.fillStyle = '#475569';
+  ctx.font = '600 11px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(`* ${seed} · AUTH-CRC94 *`, startX + width / 2, startY + height + 16);
+  ctx.textAlign = 'left';
+}
+
+function generateInvoiceReceipt(orderData, targetCanvas) {
+  const canvas = targetCanvas || document.getElementById('invoiceReceiptCanvas') || document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const data = orderData || promoEngine.calculateOrderSummary([], null, { state: 'CA', zip: '94107' });
+  const items = Array.isArray(data.items) ? data.items : [];
+  const dpr = Math.max(window.devicePixelRatio || 1, 2);
+  const logicalWidth = 460;
+  const rowHeight = 36;
+  const rowsCount = Math.max(1, items.length);
+  const logicalHeight = Math.max(660, 465 + rowsCount * rowHeight);
+
+  canvas.width = Math.round(logicalWidth * dpr);
+  canvas.height = Math.round(logicalHeight * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  // Crisp paper background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+  // Top amber accent header bar
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, logicalWidth, 82);
+  ctx.fillStyle = '#f59e0b';
+  ctx.fillRect(0, 78, logicalWidth, 4);
+
+  // Brand + Invoice badge
+  ctx.fillStyle = '#f59e0b';
+  ctx.font = '700 18px "Inter", sans-serif';
+  ctx.fillText('⚡ NEXUS STORE', 24, 34);
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '500 11px "JetBrains Mono", monospace';
+  ctx.fillText('NEXT-GEN DEVELOPER HARDWARE · SF, CA', 24, 54);
+
+  drawCanvasRoundRect(ctx, logicalWidth - 148, 22, 124, 28, 6);
+  ctx.fillStyle = data.status === 'PAID RECEIPT' ? '#059669' : '#f59e0b';
+  ctx.fill();
+  ctx.fillStyle = data.status === 'PAID RECEIPT' ? '#ffffff' : '#0f172a';
+  ctx.font = '700 10px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(data.status || 'VERIFIED QUOTE', logicalWidth - 86, 40);
+  ctx.textAlign = 'left';
+
+  // Metadata strip
+  let y = 106;
+  ctx.fillStyle = '#475569';
+  ctx.font = '600 10px "JetBrains Mono", monospace';
+  ctx.fillText('INVOICE ID', 24, y);
+  ctx.fillText('DATE ISSUED', 176, y);
+  ctx.fillText('DESTINATION', 320, y);
+
+  y += 16;
+  const dateObj = data.issuedAt instanceof Date ? data.issuedAt : new Date();
+  const formattedDate = dateObj.toISOString().slice(0, 10);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = '700 12px "JetBrains Mono", monospace';
+  ctx.fillText(String(data.invoiceId || 'NX-2026-4340'), 24, y);
+  ctx.fillText(formattedDate, 176, y);
+  ctx.fillText(`${data.address.state} ${data.address.zip || '94107'}`, 320, y);
+
+  y += 22;
+  ctx.fillStyle = '#475569';
+  ctx.font = '500 11px "Inter", sans-serif';
+  ctx.fillText(`Billed To: ${String(data.customerName || 'Alex Rivera · Nexus Labs').slice(0, 44)}`, 24, y);
+
+  // Dashed separator
+  y += 14;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(24, y);
+  ctx.lineTo(logicalWidth - 24, y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Table header
+  y += 22;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(24, y - 14, logicalWidth - 48, 24);
+  ctx.fillStyle = '#334155';
+  ctx.font = '700 10px "JetBrains Mono", monospace';
+  ctx.fillText('ITEM & CATEGORY', 30, y + 2);
+  ctx.textAlign = 'center';
+  ctx.fillText('QTY', 278, y + 2);
+  ctx.textAlign = 'right';
+  ctx.fillText('UNIT', 352, y + 2);
+  ctx.fillText('TOTAL', logicalWidth - 30, y + 2);
+  ctx.textAlign = 'left';
+
+  y += 26;
+  if (items.length === 0) {
+    ctx.fillStyle = '#64748b';
+    ctx.font = '500 12px "Inter", sans-serif';
+    ctx.fillText('No items in order. Add gear to generate receipt.', 30, y);
+    y += rowHeight;
+  } else {
+    items.forEach((item, idx) => {
+      if (idx % 2 === 1) {
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(24, y - 16, logicalWidth - 48, rowHeight - 2);
+      }
+      const lineTotal = item.price * item.qty;
+      const title = item.name.length > 29 ? `${item.name.slice(0, 27)}…` : item.name;
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '600 12px "Inter", sans-serif';
+      ctx.fillText(title, 30, y);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '500 9px "JetBrains Mono", monospace';
+      ctx.fillText(String(item.category || 'hardware').toUpperCase(), 30, y + 13);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '600 11px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`x${item.qty}`, 278, y + 4);
+      ctx.textAlign = 'right';
+      ctx.fillText(formatMoney(item.price), 352, y + 4);
+      ctx.fillText(formatMoney(lineTotal), logicalWidth - 30, y + 4);
+      ctx.textAlign = 'left';
+      y += rowHeight;
+    });
+  }
+
+  // Divider before summary
+  y += 6;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.beginPath();
+  ctx.moveTo(24, y);
+  ctx.lineTo(logicalWidth - 24, y);
+  ctx.stroke();
+
+  const drawSummaryRow = (label, value, color = '#0f172a', bold = false) => {
+    y += 22;
+    ctx.fillStyle = bold ? '#0f172a' : '#475569';
+    ctx.font = `${bold ? '700' : '500'} 12px "Inter", sans-serif`;
+    ctx.fillText(label, 28, y);
+    ctx.fillStyle = color;
+    ctx.font = `${bold ? '700' : '600'} 12px "JetBrains Mono", monospace`;
+    ctx.textAlign = 'right';
+    ctx.fillText(value, logicalWidth - 28, y);
+    ctx.textAlign = 'left';
+  };
+
+  drawSummaryRow('Order Subtotal', formatMoney(data.subtotal));
+
+  if (data.tierResult && data.tierResult.discountAmount > 0) {
+    drawSummaryRow(
+      `${data.tierResult.tierName} (${Math.round(data.tierResult.rate * 100)}% Off)`,
+      `-${formatMoney(data.tierResult.discountAmount)}`,
+      '#059669'
+    );
+  }
+
+  if (data.couponResult && data.couponResult.valid) {
+    const couponSuffix =
+      data.couponResult.type === 'bogo'
+        ? ` (${data.couponResult.freeItemsCount} Free Unit)`
+        : data.couponResult.type === 'freeship'
+          ? ' (Shipping Waived)'
+          : '';
+    drawSummaryRow(
+      `Promo Code: ${data.couponResult.code}${couponSuffix}`,
+      data.couponResult.discountAmount > 0 ? `-${formatMoney(data.couponResult.discountAmount)}` : 'FREE SHIP',
+      '#059669'
+    );
+  }
+
+  const shipText =
+    data.taxAndShipping.shippingAmount === 0 && data.subtotal > 0
+      ? 'FREE ($0.00)'
+      : formatMoney(data.taxAndShipping.shippingAmount);
+  drawSummaryRow(
+    `Shipping (${data.address.shippingMethod === 'express' ? 'Express' : 'Standard'})`,
+    shipText,
+    data.taxAndShipping.shippingAmount === 0 && data.subtotal > 0 ? '#059669' : '#0f172a'
+  );
+
+  const taxPct = (data.taxAndShipping.taxRate * 100).toFixed(2).replace(/\.00$/, '');
+  drawSummaryRow(`Est. Tax (${data.address.state} · ${taxPct}%)`, formatMoney(data.taxAndShipping.taxAmount));
+
+  // Grand total card
+  y += 18;
+  drawCanvasRoundRect(ctx, 24, y, logicalWidth - 48, 52, 10);
+  ctx.fillStyle = '#0f172a';
+  ctx.fill();
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '600 10px "JetBrains Mono", monospace';
+  ctx.fillText('GRAND TOTAL (USD)', 38, y + 20);
+
+  if (data.totalSavings > 0) {
+    ctx.fillStyle = '#34d399';
+    ctx.font = '600 11px "JetBrains Mono", monospace';
+    ctx.fillText(`YOU SAVED ${formatMoney(data.totalSavings)}`, 38, y + 39);
+  } else {
+    ctx.fillStyle = '#64748b';
+    ctx.font = '500 10px "Inter", sans-serif';
+    ctx.fillText('Add $200+ or promo code to save', 38, y + 39);
+  }
+
+  ctx.fillStyle = '#f59e0b';
+  ctx.font = '700 22px "JetBrains Mono", monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(formatMoney(data.grandTotal), logicalWidth - 38, y + 35);
+  ctx.textAlign = 'left';
+
+  // Barcode footer
+  y += 76;
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(24, y - 10);
+  ctx.lineTo(logicalWidth - 24, y - 10);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  drawReceiptBarcode(ctx, data.invoiceId, 70, y + 4, logicalWidth - 140, 44);
+
+  return {
+    canvas,
+    dataUrl: canvas.toDataURL('image/png'),
+    fileName: `nexus-invoice-${String(data.invoiceId || 'receipt').toLowerCase()}.png`
+  };
+}
+
+window.generateInvoiceReceipt = generateInvoiceReceipt;
+
+(function initPromoInvoiceStudioModule() {
+  const studioState = {
+    mode: 'preset',
+    presetName: 'bundle3',
+    couponCode: 'BUNDLE3',
+    invoiceId: 'NX-2026-4340',
+    status: 'VERIFIED QUOTE',
+    items: [
+      { id: 'p1', name: 'CyberDeck Pro Mechanical', category: 'keyboards', price: 249.00, qty: 2, img: '⌨️' },
+      { id: 'p4', name: 'Nexus Neo 65% Low-Profile', category: 'keyboards', price: 149.00, qty: 1, img: '⌨️' },
+      { id: 'p2', name: 'Acoustic Pulse ANC Headset', category: 'audio', price: 199.00, qty: 1, img: '🎧' }
+    ]
+  };
+
+  let lastRenderedInvoice = null;
+
+  function getAddressFromInputs() {
+    const nameEl = document.getElementById('estCustomerName');
+    const stateEl = document.getElementById('estStateSelect');
+    const zipEl = document.getElementById('estZipInput');
+    const shipEl = document.getElementById('estShippingSpeed');
+    return {
+      customerName: nameEl ? nameEl.value.trim() || 'Alex Rivera · Nexus Labs' : 'Alex Rivera · Nexus Labs',
+      state: stateEl ? stateEl.value : 'CA',
+      zip: zipEl ? zipEl.value.trim() || '94107' : '94107',
+      shippingMethod: shipEl ? shipEl.value : 'standard'
+    };
+  }
+
+  function getActiveOrderItems() {
+    if (studioState.mode === 'live') {
+      return Object.values(cart).map((item) => ({
+        ...item,
+        category: item.category || (ITEM_META_FALLBACK[item.id] ? ITEM_META_FALLBACK[item.id].category : 'general')
+      }));
+    }
+    return studioState.items;
+  }
+
+  function renderStudio() {
+    const itemsListEl = document.getElementById('studioItemsList');
+    if (!itemsListEl) return;
+
+    const items = getActiveOrderItems();
+    const address = getAddressFromInputs();
+    const summary = promoEngine.calculateOrderSummary(items, studioState.couponCode, address, {
+      invoiceId: studioState.invoiceId,
+      status: studioState.status
+    });
+
+    // 1. Tier Progress Bar & Hints
+    const tierBadge = document.getElementById('activeTierBadge');
+    const tierHint = document.getElementById('tierNextHint');
+    const tierSavings = document.getElementById('tierSavingsValue');
+    const tierMeter = document.getElementById('tierMeterFill');
+    const tierPct = Math.round(summary.tierResult.rate * 100);
+
+    if (tierBadge) tierBadge.textContent = `${summary.tierResult.tierName} · ${tierPct}%`;
+    if (tierSavings) tierSavings.textContent = `-${formatMoney(summary.tierResult.discountAmount)}`;
+    if (tierMeter) tierMeter.style.width = `${summary.tierResult.progressPercent}%`;
+    if (tierHint) {
+      tierHint.textContent = summary.tierResult.nextTierName
+        ? `Add ${formatMoney(summary.tierResult.amountToNextTier)} to unlock ${summary.tierResult.nextTierName} (${Math.round(summary.tierResult.nextTierRate * 100)}% off)`
+        : 'Maximum Enterprise Rig Tier (15% off) unlocked!';
+    }
+
+    document.querySelectorAll('.tier-milestone').forEach((el) => {
+      const tierKey = el.getAttribute('data-tier');
+      const tierObj = promoEngine.tiers.find((t) => t.id === tierKey);
+      el.classList.toggle('unlocked', Boolean(tierObj && summary.subtotal >= tierObj.minSpend));
+    });
+
+    // 2. Source pill & Line Items
+    const sourcePill = document.getElementById('orderSourcePill');
+    if (sourcePill) {
+      if (studioState.mode === 'live') {
+        sourcePill.textContent = `Live Store Cart (${items.length} SKU)`;
+      } else {
+        const labels = { bundle3: 'BUNDLE3 Trio', cyber20: 'CYBER20 Rig', freeship: 'FREESHIP Order' };
+        sourcePill.textContent = `Preset: ${labels[studioState.presetName] || 'Custom Builder'}`;
+      }
+    }
+
+    const freeUnitIds = new Set(
+      summary.couponResult.valid && summary.couponResult.freeUnits
+        ? summary.couponResult.freeUnits.map((u) => u.id)
+        : []
+    );
+
+    if (items.length === 0) {
+      const emptyRow = document.createElement('div');
+      emptyRow.className = 'studio-item-row';
+      const hint = document.createElement('span');
+      hint.className = 'tier-hint';
+      hint.textContent = 'No items in order yet. Click "+ Add Item" or select a preset above.';
+      emptyRow.appendChild(hint);
+      itemsListEl.replaceChildren(emptyRow);
+    } else {
+      itemsListEl.replaceChildren();
+      items.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'studio-item-row';
+
+        const left = document.createElement('div');
+        left.className = 'studio-item-left';
+
+        const emoji = document.createElement('span');
+        emoji.className = 'studio-item-emoji';
+        emoji.textContent = item.img || '📦';
+
+        const info = document.createElement('div');
+        const title = document.createElement('div');
+        title.className = 'studio-item-title';
+        title.textContent = item.name;
+
+        const meta = document.createElement('div');
+        meta.className = 'studio-item-meta';
+
+        const catTag = document.createElement('span');
+        catTag.className = 'studio-cat-tag';
+        catTag.textContent = item.category;
+
+        const priceSpan = document.createElement('span');
+        priceSpan.textContent = `${formatMoney(item.price)} ea`;
+
+        meta.appendChild(catTag);
+        meta.appendChild(priceSpan);
+
+        if (freeUnitIds.has(item.id)) {
+          const bogo = document.createElement('span');
+          bogo.className = 'studio-bogo-tag';
+          bogo.textContent = 'BOGO FREE UNIT';
+          meta.appendChild(bogo);
+        }
+
+        info.appendChild(title);
+        info.appendChild(meta);
+        left.appendChild(emoji);
+        left.appendChild(info);
+
+        const actions = document.createElement('div');
+        actions.className = 'studio-item-actions';
+
+        const qtyControls = document.createElement('div');
+        qtyControls.className = 'qty-controls';
+
+        const decBtn = document.createElement('button');
+        decBtn.type = 'button';
+        decBtn.className = 'qty-btn studio-qty-btn';
+        decBtn.setAttribute('data-id', item.id);
+        decBtn.setAttribute('data-delta', '-1');
+        decBtn.setAttribute('aria-label', `Decrease ${item.name} quantity`);
+        decBtn.textContent = '-';
+
+        const countSpan = document.createElement('span');
+        countSpan.className = 'qty-count';
+        countSpan.textContent = String(item.qty);
+
+        const incBtn = document.createElement('button');
+        incBtn.type = 'button';
+        incBtn.className = 'qty-btn studio-qty-btn';
+        incBtn.setAttribute('data-id', item.id);
+        incBtn.setAttribute('data-delta', '1');
+        incBtn.setAttribute('aria-label', `Increase ${item.name} quantity`);
+        incBtn.textContent = '+';
+
+        qtyControls.appendChild(decBtn);
+        qtyControls.appendChild(countSpan);
+        qtyControls.appendChild(incBtn);
+
+        const lineTotal = document.createElement('span');
+        lineTotal.className = 'studio-line-total';
+        lineTotal.textContent = formatMoney(item.price * item.qty);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'studio-remove-btn';
+        removeBtn.setAttribute('data-remove-id', item.id);
+        removeBtn.setAttribute('aria-label', `Remove ${item.name}`);
+        removeBtn.textContent = '×';
+
+        actions.appendChild(qtyControls);
+        actions.appendChild(lineTotal);
+        actions.appendChild(removeBtn);
+
+        row.appendChild(left);
+        row.appendChild(actions);
+
+        itemsListEl.appendChild(row);
+      });
+    }
+
+    // 3. Promo input, pills & feedback
+    const couponInput = document.getElementById('studioCouponInput');
+    if (couponInput && document.activeElement !== couponInput) {
+      couponInput.value = studioState.couponCode || '';
+    }
+
+    const promoBadge = document.getElementById('activePromoStatusBadge');
+    const feedbackEl = document.getElementById('studioCouponFeedback');
+    if (studioState.couponCode) {
+      if (summary.couponResult.valid) {
+        if (promoBadge) {
+          promoBadge.textContent = `${summary.couponResult.code} ACTIVE`;
+          promoBadge.classList.add('active');
+        }
+        if (feedbackEl) {
+          feedbackEl.textContent = summary.couponResult.reason;
+          feedbackEl.classList.remove('error');
+        }
+      } else {
+        if (promoBadge) {
+          promoBadge.textContent = `${studioState.couponCode} UNMET`;
+          promoBadge.classList.remove('active');
+        }
+        if (feedbackEl) {
+          feedbackEl.textContent = summary.couponResult.reason;
+          feedbackEl.classList.add('error');
+        }
+      }
+    } else {
+      if (promoBadge) {
+        promoBadge.textContent = 'No Code Applied';
+        promoBadge.classList.remove('active');
+      }
+      if (feedbackEl) {
+        feedbackEl.textContent = 'Select a quick promo chip or enter a custom code above.';
+        feedbackEl.classList.remove('error');
+      }
+    }
+
+    document.querySelectorAll('.coupon-quick-pill').forEach((pill) => {
+      pill.classList.toggle('active', pill.getAttribute('data-code') === studioState.couponCode);
+    });
+
+    // 4. Rule-Based Discount Matrix
+    const matrixBody = document.getElementById('discountMatrixBody');
+    if (matrixBody) {
+      matrixBody.replaceChildren();
+      summary.matrixRows.forEach((row) => {
+        const tr = document.createElement('tr');
+        if (row.applied) tr.className = 'rule-active';
+
+        const tdTitle = document.createElement('td');
+        const strong = document.createElement('strong');
+        strong.textContent = row.title;
+        tdTitle.appendChild(strong);
+
+        const tdCond = document.createElement('td');
+        tdCond.textContent = row.condition;
+
+        const tdStatus = document.createElement('td');
+        const pillCls = row.status === 'ACTIVE' ? 'active' : row.status === 'READY' ? 'ready' : 'locked';
+        const pill = document.createElement('span');
+        pill.className = `matrix-status-pill ${pillCls}`;
+        pill.textContent = row.status;
+        tdStatus.appendChild(pill);
+
+        const tdImpact = document.createElement('td');
+        tdImpact.className = `matrix-impact ${row.impact > 0 ? 'positive' : ''}`;
+        tdImpact.textContent = row.impact > 0 ? `-${formatMoney(row.impact)}` : '$0.00';
+
+        tr.appendChild(tdTitle);
+        tr.appendChild(tdCond);
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdImpact);
+
+        matrixBody.appendChild(tr);
+      });
+    }
+
+    // 5. Tax Pill & KPIs
+    const taxRatePill = document.getElementById('taxRatePill');
+    if (taxRatePill) {
+      const pct = (summary.taxAndShipping.taxRate * 100).toFixed(2).replace(/\.00$/, '');
+      taxRatePill.textContent = `${summary.address.state} · ${pct}%`;
+    }
+
+    const headerId = document.getElementById('invoiceHeaderId');
+    if (headerId) headerId.textContent = `Invoice #${summary.invoiceId}`;
+    const grossEl = document.getElementById('studioGrossTotal');
+    const savingsEl = document.getElementById('studioTotalSavings');
+    const taxShipEl = document.getElementById('studioTaxShipTotal');
+    const grandEl = document.getElementById('studioGrandTotal');
+
+    if (grossEl) grossEl.textContent = formatMoney(summary.subtotal);
+    if (savingsEl) savingsEl.textContent = `-${formatMoney(summary.totalSavings)}`;
+    if (taxShipEl) taxShipEl.textContent = formatMoney(summary.taxAndShipping.taxAmount + summary.taxAndShipping.shippingAmount);
+    if (grandEl) grandEl.textContent = formatMoney(summary.grandTotal);
+
+    // 6. Render High-DPI HTML5 Canvas Invoice
+    const canvas = document.getElementById('invoiceReceiptCanvas');
+    lastRenderedInvoice = generateInvoiceReceipt(summary, canvas);
+  }
+
+  function applyPreset(presetName) {
+    studioState.presetName = presetName;
+    studioState.status = 'VERIFIED QUOTE';
+    if (presetName === 'bundle3') {
+      studioState.mode = 'preset';
+      studioState.couponCode = 'BUNDLE3';
+      studioState.items = [
+        { id: 'p1', name: 'CyberDeck Pro Mechanical', category: 'keyboards', price: 249.00, qty: 2, img: '⌨️' },
+        { id: 'p4', name: 'Nexus Neo 65% Low-Profile', category: 'keyboards', price: 149.00, qty: 1, img: '⌨️' },
+        { id: 'p2', name: 'Acoustic Pulse ANC Headset', category: 'audio', price: 199.00, qty: 1, img: '🎧' }
+      ];
+    } else if (presetName === 'cyber20') {
+      studioState.mode = 'preset';
+      studioState.couponCode = 'CYBER20';
+      studioState.items = [
+        { id: 'p3', name: 'Horizon 32" Curved OLED', category: 'displays', price: 899.00, qty: 1, img: '🖥️' },
+        { id: 'p1', name: 'CyberDeck Pro Mechanical', category: 'keyboards', price: 249.00, qty: 1, img: '⌨️' },
+        { id: 'p5', name: 'Vortex Reference Studio Monitors', category: 'audio', price: 349.00, qty: 1, img: '🔊' }
+      ];
+    } else if (presetName === 'freeship') {
+      studioState.mode = 'preset';
+      studioState.couponCode = 'FREESHIP';
+      studioState.items = [
+        { id: 'p4', name: 'Nexus Neo 65% Low-Profile', category: 'keyboards', price: 149.00, qty: 1, img: '⌨️' },
+        { id: 'p7', name: 'HyperStream Studio Mic & Arm', category: 'audio', price: 179.00, qty: 1, img: '🎙️' }
+      ];
+    } else if (presetName === 'live') {
+      studioState.mode = 'live';
+      studioState.couponCode = appliedCoupon || '';
+    }
+
+    document.querySelectorAll('.promo-preset-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-preset') === presetName);
+    });
+    renderStudio();
+  }
+
+  function adjustStudioItemQty(id, delta) {
+    if (studioState.mode === 'live') {
+      updateQuantity(id, delta);
+      return;
+    }
+    const target = studioState.items.find((it) => it.id === id);
+    if (!target) return;
+    target.qty += delta;
+    if (target.qty <= 0) {
+      studioState.items = studioState.items.filter((it) => it.id !== id);
+    }
+    renderStudio();
+  }
+
+  function addItemToStudio(id) {
+    const meta = ITEM_META_FALLBACK[id];
+    if (!meta) return;
+    if (studioState.mode === 'live') {
+      addToCart(id, meta.name, meta.price, meta.img);
+      return;
+    }
+    const existing = studioState.items.find((it) => it.id === id);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      studioState.items.push({ id, name: meta.name, category: meta.category, price: meta.price, qty: 1, img: meta.img });
+    }
+    renderStudio();
+  }
+
+  function nextInvoiceSerial() {
+    const randomPart = Math.floor(1000 + Math.random() * 8999);
+    studioState.invoiceId = `NX-2026-${randomPart}`;
+  }
+
+  window.syncPromoStudioWithCart = function syncPromoStudioWithCart() {
+    const hasCartItems = Object.keys(cart).length > 0;
+    if (hasCartItems && studioState.mode !== 'live') {
+      studioState.mode = 'live';
+      studioState.couponCode = appliedCoupon || studioState.couponCode;
+      document.querySelectorAll('.promo-preset-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-preset') === 'live');
+      });
+    } else if (!hasCartItems && studioState.mode === 'live') {
+      applyPreset('bundle3');
+      return;
+    }
+    renderStudio();
+  };
+
+  window.captureCheckoutInvoice = function captureCheckoutInvoice(checkedOutItems, couponUsed) {
+    nextInvoiceSerial();
+    studioState.mode = 'preset';
+    studioState.presetName = 'checkout';
+    studioState.status = 'PAID RECEIPT';
+    studioState.couponCode = couponUsed || '';
+    studioState.items = checkedOutItems.map((it) => ({ ...it }));
+    document.querySelectorAll('.promo-preset-btn').forEach((btn) => btn.classList.remove('active'));
+    renderStudio();
+  };
+
+  function wireStudioEvents() {
+    const section = document.getElementById('promoInvoiceSection');
+    if (!section) return;
+
+    document.querySelectorAll('.promo-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const preset = btn.getAttribute('data-preset');
+        if (preset === 'live' && Object.keys(cart).length === 0) {
+          showToast('Live cart is empty — add items from catalog or click "Load Into Cart".');
+        }
+        applyPreset(preset);
+      });
+    });
+
+    const itemsListEl = document.getElementById('studioItemsList');
+    if (itemsListEl) {
+      itemsListEl.addEventListener('click', (event) => {
+        const qtyBtn = event.target.closest('.studio-qty-btn');
+        if (qtyBtn) {
+          adjustStudioItemQty(qtyBtn.getAttribute('data-id'), Number(qtyBtn.getAttribute('data-delta')));
+          return;
+        }
+        const remBtn = event.target.closest('.studio-remove-btn');
+        if (remBtn) {
+          const rid = remBtn.getAttribute('data-remove-id');
+          if (studioState.mode === 'live') {
+            if (cart[rid]) {
+              delete cart[rid];
+              renderCart();
+            }
+          } else {
+            studioState.items = studioState.items.filter((it) => it.id !== rid);
+            renderStudio();
+          }
+        }
+      });
+    }
+
+    const addBtn = document.getElementById('studioAddItemBtn');
+    const selectEl = document.getElementById('studioProductSelect');
+    if (addBtn && selectEl) {
+      addBtn.addEventListener('click', () => addItemToStudio(selectEl.value));
+    }
+
+    const applyBtn = document.getElementById('studioCouponApplyBtn');
+    const clearBtn = document.getElementById('studioCouponClearBtn');
+    const inputEl = document.getElementById('studioCouponInput');
+
+    if (applyBtn && inputEl) {
+      applyBtn.addEventListener('click', () => {
+        studioState.couponCode = normalizeCode(inputEl.value);
+        if (studioState.mode === 'live' && promoEngine.coupons[studioState.couponCode]) {
+          appliedCoupon = studioState.couponCode;
+          saveCoupon();
+          renderCart();
+        } else {
+          renderStudio();
+        }
+      });
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyBtn.click();
+        }
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        studioState.couponCode = '';
+        if (studioState.mode === 'live') {
+          removeCoupon();
+        } else {
+          renderStudio();
+        }
+      });
+    }
+
+    document.querySelectorAll('.coupon-quick-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const code = pill.getAttribute('data-code');
+        studioState.couponCode = code;
+        if (studioState.mode === 'live') {
+          applyCoupon(code);
+        } else {
+          renderStudio();
+        }
+      });
+    });
+
+    ['estCustomerName', 'estStateSelect', 'estZipInput', 'estShippingSpeed'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', renderStudio);
+        el.addEventListener('change', renderStudio);
+      }
+    });
+
+    const downloadBtn = document.getElementById('downloadInvoiceBtn');
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', () => {
+        renderStudio();
+        if (!lastRenderedInvoice || !lastRenderedInvoice.dataUrl) return;
+        const link = document.createElement('a');
+        link.href = lastRenderedInvoice.dataUrl;
+        link.download = lastRenderedInvoice.fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        showToast(`Downloaded ${lastRenderedInvoice.fileName}`);
+      });
+    }
+
+    const regenBtn = document.getElementById('regenInvoiceBtn');
+    if (regenBtn) {
+      regenBtn.addEventListener('click', () => {
+        nextInvoiceSerial();
+        renderStudio();
+        showToast(`Generated ${studioState.invoiceId}`);
+      });
+    }
+
+    const pushCartBtn = document.getElementById('pushOrderToCartBtn');
+    if (pushCartBtn) {
+      pushCartBtn.addEventListener('click', () => {
+        const items = getActiveOrderItems();
+        items.forEach((it) => {
+          cart[it.id] = { ...it };
+        });
+        if (studioState.couponCode && promoEngine.coupons[studioState.couponCode]) {
+          appliedCoupon = studioState.couponCode;
+          saveCoupon();
+        }
+        studioState.mode = 'live';
+        renderCart();
+        toggleCartDrawer();
+      });
+    }
+
+    renderStudio();
+  }
+
+  document.addEventListener('DOMContentLoaded', wireStudioEvents);
+})();
+/* ===== END Issue #434 ===== */
+
+// ===== Issue #338: Recently Viewed Items Carousel with localStorage Sync =====
+(function initRecentlyViewedCarousel() {
+  if (typeof document === 'undefined') return;
+
+  const STORAGE_KEY = 'cf_ecommerce_recently_viewed';
+  const MAX_ITEMS = 6;
+  const DEFAULT_ITEMS = ['p1', 'p2', 'p3', 'p6'];
+
+  function getHistory() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+    return [...DEFAULT_ITEMS];
+  }
+
+  function saveHistory(list) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch {
+      // Storage unavailable or disabled
+    }
+  }
+
+  function recordView(productId) {
+    if (!productId || typeof PRODUCT_CATALOG === 'undefined' || !PRODUCT_CATALOG[productId]) return;
+
+    let history = getHistory();
+    history = history.filter((id) => id !== productId);
+    history.unshift(productId);
+    if (history.length > MAX_ITEMS) {
+      history = history.slice(0, MAX_ITEMS);
+    }
+    saveHistory(history);
+    render();
+  }
+
+  function clearHistory() {
+    saveHistory([]);
+    render();
+    showToast('Recently viewed browsing history cleared.');
+  }
+
+  function render() {
+    const carousel = document.getElementById('recentlyViewedCarousel');
+    if (!carousel) return;
+
+    carousel.replaceChildren();
+
+    const history = getHistory();
+    const validProducts = history
+      .map((id) => (typeof PRODUCT_CATALOG !== 'undefined' ? PRODUCT_CATALOG[id] : null))
+      .filter(Boolean);
+
+    if (validProducts.length === 0) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'rv-empty-state';
+      emptyDiv.textContent = 'No recently viewed items. Browse our developer workstation gear above!';
+      carousel.appendChild(emptyDiv);
+      return;
+    }
+
+    validProducts.forEach((p) => {
+      const card = document.createElement('article');
+      card.className = 'rv-card';
+      card.setAttribute('data-product-id', p.id);
+
+      // Thumbnail
+      const thumbWrap = document.createElement('div');
+      thumbWrap.className = 'rv-thumb-wrap';
+      const icon = (p.thumbs && p.thumbs[0] && p.thumbs[0].icon) ? p.thumbs[0].icon : '📦';
+      thumbWrap.textContent = icon;
+      thumbWrap.addEventListener('click', () => {
+        openQuickView(p.id);
+      });
+
+      if (p.badge) {
+        const badge = document.createElement('span');
+        badge.className = 'rv-badge-pill';
+        badge.textContent = p.badge;
+        thumbWrap.appendChild(badge);
+      }
+
+      // Info
+      const info = document.createElement('div');
+      info.className = 'rv-card-info';
+
+      const cat = document.createElement('span');
+      cat.className = 'rv-category';
+      cat.textContent = p.categoryLabel || p.category || 'GEAR';
+
+      const name = document.createElement('h4');
+      name.className = 'rv-name';
+      name.textContent = p.name;
+      name.title = p.name;
+      name.addEventListener('click', () => {
+        openQuickView(p.id);
+      });
+
+      const priceRow = document.createElement('div');
+      priceRow.className = 'rv-price-row';
+
+      const price = document.createElement('span');
+      price.className = 'rv-price';
+      price.textContent = '$' + p.price.toFixed(2);
+
+      const rating = document.createElement('span');
+      rating.className = 'rv-rating';
+      rating.textContent = '★ ' + (p.rating || 4.8);
+
+      priceRow.appendChild(price);
+      priceRow.appendChild(rating);
+
+      info.appendChild(cat);
+      info.appendChild(name);
+      info.appendChild(priceRow);
+
+      // Actions row
+      const actions = document.createElement('div');
+      actions.className = 'rv-actions-row';
+
+      const btnInspect = document.createElement('button');
+      btnInspect.type = 'button';
+      btnInspect.className = 'btn-rv-inspect';
+      btnInspect.textContent = 'Quick View';
+      btnInspect.addEventListener('click', () => {
+        openQuickView(p.id);
+      });
+
+      const btnAdd = document.createElement('button');
+      btnAdd.type = 'button';
+      btnAdd.className = 'btn-rv-add';
+      btnAdd.textContent = '+ Add to Cart';
+      btnAdd.addEventListener('click', () => {
+        const itemImg = (p.thumbs && p.thumbs[0] && p.thumbs[0].icon) ? p.thumbs[0].icon : '📦';
+        addToCart(p.id, p.name, p.price, itemImg);
+      });
+
+      actions.appendChild(btnInspect);
+      actions.appendChild(btnAdd);
+
+      card.appendChild(thumbWrap);
+      card.appendChild(info);
+      card.appendChild(actions);
+
+      carousel.appendChild(card);
+    });
+  }
+
+  function setup() {
+    const root = document.getElementById('recentlyViewedSection');
+    if (!root) return;
+
+    const btnLeft = document.getElementById('btnRvScrollLeft');
+    const btnRight = document.getElementById('btnRvScrollRight');
+    const btnClear = document.getElementById('btnRvClearHistory');
+    const carousel = document.getElementById('recentlyViewedCarousel');
+
+    if (btnLeft && carousel) {
+      btnLeft.addEventListener('click', () => {
+        carousel.scrollBy({ left: -260, behavior: 'smooth' });
+      });
+    }
+
+    if (btnRight && carousel) {
+      btnRight.addEventListener('click', () => {
+        carousel.scrollBy({ left: 260, behavior: 'smooth' });
+      });
+    }
+
+    if (btnClear) {
+      btnClear.addEventListener('click', clearHistory);
+    }
+
+    // Wrap window.openQuickView to record view
+    if (typeof window.openQuickView === 'function') {
+      const origQuickView = window.openQuickView;
+      window.openQuickView = function(productId) {
+        recordView(productId);
+        return origQuickView.apply(this, arguments);
+      };
+    }
+
+    // Attach click listeners to catalog cards to capture views
+    const productsGrid = document.getElementById('productsGrid');
+    if (productsGrid) {
+      productsGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-product-id], .product-card');
+        if (card) {
+          const pid = card.getAttribute('data-product-id') || card.getAttribute('data-id');
+          if (pid) recordView(pid);
+        }
+      });
+    }
+
+    // Expose helper globally
+    window.recordRecentlyViewedProduct = recordView;
+
+    // Initial render
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
+
+// ============================================================================
+// EcommerceStoreExportEngine - Issue #574
+// Client-side export engine & formatted summary report generator
+// ============================================================================
+class EcommerceStoreExportEngine {
+  constructor(cart, catalog = []) {
+    this.cart = cart || null;
+    this.catalog = catalog || [];
+  }
+
+  escapeCSV(val) {
+    if (val === null || val === undefined) return '""';
+    const str = String(val);
+    if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return `"${str}"`;
+  }
+
+  getItems() {
+    if (this.cart) {
+      if (typeof this.cart.getItems === 'function') {
+        return this.cart.getItems();
+      }
+      if (Array.isArray(this.cart.items)) {
+        return this.cart.items;
+      }
+      if (typeof this.cart.items === 'object' && this.cart.items !== null) {
+        return Object.values(this.cart.items);
+      }
+    }
+    if (typeof window !== 'undefined' && window.cart && typeof window.cart.items === 'object') {
+      return Object.values(window.cart.items);
+    }
+    if (typeof window !== 'undefined' && Array.isArray(window.PRODUCTS)) {
+      return window.PRODUCTS.slice(0, 10).map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        quantity: 1
+      }));
+    }
+    return [];
+  }
+
+  toJSONBlob(data = null) {
+    const items = this.getItems();
+    const exportData = data || {
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+      cart: items,
+      totals: this.cart && typeof this.cart.getTotals === 'function' ? this.cart.getTotals() : null
+    };
+    const jsonStr = JSON.stringify(exportData, null, 2);
+    return new Blob([jsonStr], { type: 'application/json' });
+  }
+
+  toCSVString(items = null) {
+    const itemList = items || this.getItems();
+    const headers = ['id', 'name', 'price', 'quantity', 'subtotal'];
+    const rows = [headers.join(',')];
+    for (const item of itemList) {
+      const id = this.escapeCSV(item.id);
+      const name = this.escapeCSV(item.name || item.title || 'Item');
+      const price = Number(item.price || 0).toFixed(2);
+      const qty = Number(item.quantity || item.qty || 1);
+      const subtotal = (price * qty).toFixed(2);
+      rows.push([id, name, price, qty, subtotal].join(','));
+    }
+    return rows.join('\r\n');
+  }
+
+  toCSVBlob(items = null) {
+    const csvStr = this.toCSVString(items);
+    return new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+  }
+
+  toMarkdownAudit(items = null) {
+    const itemList = items || this.getItems();
+    let md = `# E-Commerce Store Export Audit Report\n\n`;
+    md += `_Generated on: ${new Date().toISOString()}_\n\n`;
+    md += `| ID | Item Name | Unit Price | Qty | Subtotal |\n`;
+    md += `|---|---|---|---|---|\n`;
+    let grandTotal = 0;
+    for (const item of itemList) {
+      const price = Number(item.price || 0);
+      const qty = Number(item.quantity || item.qty || 1);
+      const sub = price * qty;
+      grandTotal += sub;
+      md += `| ${item.id} | ${item.name || item.title || 'Item'} | $${price.toFixed(2)} | ${qty} | $${sub.toFixed(2)} |\n`;
+    }
+    md += `\n**Grand Total:** $${grandTotal.toFixed(2)}\n`;
+    return md;
+  }
+
+  triggerDownload(filename, blob, mimeType = 'application/octet-stream') {
+    if (typeof window === 'undefined' || !window.document || !window.document.createElement) return false;
+    const finalBlob = blob instanceof Blob ? blob : new Blob([blob], { type: mimeType });
+    const url = URL.createObjectURL(finalBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    return true;
+  }
+
+  initUI() {
+    if (typeof window === 'undefined' || !window.document || !window.document.getElementById) return;
+    const triggerBtn = document.getElementById('exportDropdownTriggerBtn');
+    const dropdownMenu = document.getElementById('exportDropdownMenu');
+    const jsonBtn = document.getElementById('exportJsonBtn');
+    const csvBtn = document.getElementById('exportCsvBtn');
+    const mdBtn = document.getElementById('exportMarkdownBtn');
+
+    if (triggerBtn && dropdownMenu) {
+      triggerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = dropdownMenu.classList.toggle('active');
+        triggerBtn.setAttribute('aria-expanded', String(isOpen));
+        dropdownMenu.setAttribute('aria-hidden', String(!isOpen));
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!triggerBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+          dropdownMenu.classList.remove('active');
+          triggerBtn.setAttribute('aria-expanded', 'false');
+          dropdownMenu.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+
+    if (jsonBtn) {
+      jsonBtn.addEventListener('click', () => {
+        const blob = this.toJSONBlob();
+        this.triggerDownload(`store-export-${Date.now()}.json`, blob, 'application/json');
+        if (dropdownMenu) dropdownMenu.classList.remove('active');
+      });
+    }
+
+    if (csvBtn) {
+      csvBtn.addEventListener('click', () => {
+        const blob = this.toCSVBlob();
+        this.triggerDownload(`store-export-${Date.now()}.csv`, blob, 'text/csv');
+        if (dropdownMenu) dropdownMenu.classList.remove('active');
+      });
+    }
+
+    if (mdBtn) {
+      mdBtn.addEventListener('click', () => {
+        const mdText = this.toMarkdownAudit();
+        if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(mdText).catch(() => {});
+        }
+        const blob = new Blob([mdText], { type: 'text/markdown;charset=utf-8;' });
+        this.triggerDownload(`store-audit-${Date.now()}.md`, blob, 'text/markdown');
+        if (dropdownMenu) dropdownMenu.classList.remove('active');
+      });
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.EcommerceStoreExportEngine = EcommerceStoreExportEngine;
+  if (document && document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const engine = new EcommerceStoreExportEngine();
+      engine.initUI();
+    });
+  }
+}
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.EcommerceStoreExportEngine = EcommerceStoreExportEngine;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { EcommerceStoreExportEngine };
+}
+
+

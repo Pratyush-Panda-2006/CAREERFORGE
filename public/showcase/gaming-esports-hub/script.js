@@ -2689,3 +2689,243 @@ if (document.readyState === 'loading') {
   }
 })();
 /* ===== END Issue #409: Esports Tournament Match Replay Video Chapter Navigator ===== */
+
+// ==========================================================================
+// Issue #346: Pro Player Crosshair & Sensitivity Converter
+// ==========================================================================
+(function initCrosshairSensitivityLab() {
+  if (typeof document === 'undefined') return;
+
+  function setup() {
+    var section = document.getElementById('crosshair-sensitivity-lab');
+    if (!section) return;
+
+    // Sens inputs
+    var sourceGameSelect = document.getElementById('sourceGameSelect');
+    var mouseDpiInput = document.getElementById('mouseDpiInput');
+    var sensValueInput = document.getElementById('sensValueInput');
+    var cm360Badge = document.getElementById('cm360Badge');
+
+    var valSensEl = document.getElementById('valTargetSens');
+    var valEdpiEl = document.getElementById('valTargetEdpi');
+    var csSensEl = document.getElementById('cs2TargetSens');
+    var csEdpiEl = document.getElementById('cs2TargetEdpi');
+    var apexSensEl = document.getElementById('apexTargetSens');
+    var apexEdpiEl = document.getElementById('apexTargetEdpi');
+    var owSensEl = document.getElementById('owTargetSens');
+    var owEdpiEl = document.getElementById('owTargetEdpi');
+
+    // Reticle inputs
+    var colorSelect = document.getElementById('reticleColorSelect');
+    var lengthSlider = document.getElementById('reticleLengthSlider');
+    var thicknessSlider = document.getElementById('reticleThicknessSlider');
+    var gapSlider = document.getElementById('reticleGapSlider');
+    var lengthVal = document.getElementById('reticleLengthVal');
+    var thicknessVal = document.getElementById('reticleThicknessVal');
+    var gapVal = document.getElementById('reticleGapVal');
+
+    // SVG elements
+    var svgCrosshair = document.getElementById('svgCrosshairPreview');
+    var dotEl = document.getElementById('reticleDot');
+    var topEl = document.getElementById('reticleTop');
+    var bottomEl = document.getElementById('reticleBottom');
+    var leftEl = document.getElementById('reticleLeft');
+    var rightEl = document.getElementById('reticleRight');
+
+    var fireBtn = document.getElementById('btnFirePulse');
+    var backdropStage = document.getElementById('stageBackdrop');
+    var bgButtons = section.querySelectorAll('.btn-bg-toggle');
+    var proButtons = section.querySelectorAll('.btn-pro-preset');
+    var reticleCodeInput = document.getElementById('reticleCodeInput');
+    var copyCodeBtn = document.getElementById('btnCopyCrosshairCode');
+    var toast = document.getElementById('aimToast');
+
+    function showToast(msg) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function () { toast.classList.remove('show'); }, 2400);
+    }
+
+    // Game yaw definitions (deg/count)
+    var YAW = {
+      valorant: 0.07,
+      cs2: 0.022,
+      apex: 0.022,
+      overwatch: 0.0066
+    };
+
+    function recalculateSensitivity() {
+      var sourceGame = sourceGameSelect ? sourceGameSelect.value : 'valorant';
+      var dpi = Math.max(100, parseFloat(mouseDpiInput ? mouseDpiInput.value : '800') || 800);
+      var sens = Math.max(0.01, parseFloat(sensValueInput ? sensValueInput.value : '0.35') || 0.35);
+
+      var sourceYaw = YAW[sourceGame] || 0.07;
+      var totalAnglePerCount = sens * sourceYaw;
+
+      // cm / 360 = (360 * 2.54) / (dpi * totalAnglePerCount)
+      var cm360 = (360 * 2.54) / (dpi * totalAnglePerCount);
+      if (cm360Badge) cm360Badge.textContent = cm360.toFixed(1) + ' cm / 360°';
+
+      // Equivalent sensitivities
+      var valSens = totalAnglePerCount / YAW.valorant;
+      var csSens = totalAnglePerCount / YAW.cs2;
+      var apexSens = totalAnglePerCount / YAW.apex;
+      var owSens = totalAnglePerCount / YAW.overwatch;
+
+      if (valSensEl) valSensEl.textContent = valSens.toFixed(3);
+      if (valEdpiEl) valEdpiEl.textContent = Math.round(valSens * dpi) + ' eDPI';
+
+      if (csSensEl) csSensEl.textContent = csSens.toFixed(3);
+      if (csEdpiEl) csEdpiEl.textContent = Math.round(csSens * dpi) + ' eDPI';
+
+      if (apexSensEl) apexSensEl.textContent = apexSens.toFixed(3);
+      if (apexEdpiEl) apexEdpiEl.textContent = Math.round(apexSens * dpi) + ' eDPI';
+
+      if (owSensEl) owSensEl.textContent = owSens.toFixed(3);
+      if (owEdpiEl) owEdpiEl.textContent = Math.round(owSens * dpi).toLocaleString('en-US') + ' eDPI';
+    }
+
+    function updateReticleSvg() {
+      var color = colorSelect ? colorSelect.value : '#00f2fe';
+      var length = parseInt(lengthSlider ? lengthSlider.value : '8', 10);
+      var thickness = parseInt(thicknessSlider ? thicknessSlider.value : '2', 10);
+      var gap = parseInt(gapSlider ? gapSlider.value : '8', 10);
+
+      if (lengthVal) lengthVal.textContent = length + 'px';
+      if (thicknessVal) thicknessVal.textContent = thickness + 'px';
+      if (gapVal) gapVal.textContent = gap + 'px';
+
+      var halfGap = gap / 2;
+      var center = 60;
+
+      if (dotEl) {
+        dotEl.setAttribute('fill', color);
+        dotEl.setAttribute('r', '1.5');
+      }
+
+      if (topEl) {
+        topEl.setAttribute('stroke', color);
+        topEl.setAttribute('stroke-width', String(thickness));
+        topEl.setAttribute('x1', String(center));
+        topEl.setAttribute('y1', String(center - halfGap));
+        topEl.setAttribute('x2', String(center));
+        topEl.setAttribute('y2', String(center - halfGap - length));
+      }
+
+      if (bottomEl) {
+        bottomEl.setAttribute('stroke', color);
+        bottomEl.setAttribute('stroke-width', String(thickness));
+        bottomEl.setAttribute('x1', String(center));
+        bottomEl.setAttribute('y1', String(center + halfGap));
+        bottomEl.setAttribute('x2', String(center));
+        bottomEl.setAttribute('y2', String(center + halfGap + length));
+      }
+
+      if (leftEl) {
+        leftEl.setAttribute('stroke', color);
+        leftEl.setAttribute('stroke-width', String(thickness));
+        leftEl.setAttribute('x1', String(center - halfGap));
+        leftEl.setAttribute('y1', String(center));
+        leftEl.setAttribute('x2', String(center - halfGap - length));
+        leftEl.setAttribute('y2', String(center));
+      }
+
+      if (rightEl) {
+        rightEl.setAttribute('stroke', color);
+        rightEl.setAttribute('stroke-width', String(thickness));
+        rightEl.setAttribute('x1', String(center + halfGap));
+        rightEl.setAttribute('y1', String(center));
+        rightEl.setAttribute('x2', String(center + halfGap + length));
+        rightEl.setAttribute('y2', String(center));
+      }
+
+      // Generate realistic profile code string
+      if (reticleCodeInput) {
+        reticleCodeInput.value = '0;P;c;5;h;0;d;1;z;2;0l;' + length + ';0v;' + length + ';0g;' + gap + ';0t;' + thickness;
+      }
+    }
+
+    var PRO_PRESETS = {
+      tenz: { game: 'valorant', dpi: 800, sens: 0.35, color: '#00f2fe', length: 8, thickness: 2, gap: 6 },
+      s1mple: { game: 'cs2', dpi: 400, sens: 3.09, color: '#00ff88', length: 6, thickness: 2, gap: 4 },
+      shroud: { game: 'apex', dpi: 450, sens: 2.40, color: '#ffe600', length: 10, thickness: 2, gap: 8 },
+      profit: { game: 'overwatch', dpi: 800, sens: 6.00, color: '#ffffff', length: 7, thickness: 2, gap: 6 }
+    };
+
+    function applyProPreset(key) {
+      var p = PRO_PRESETS[key];
+      if (!p) return;
+      if (sourceGameSelect) sourceGameSelect.value = p.game;
+      if (mouseDpiInput) mouseDpiInput.value = p.dpi;
+      if (sensValueInput) sensValueInput.value = p.sens;
+      if (colorSelect) colorSelect.value = p.color;
+      if (lengthSlider) lengthSlider.value = p.length;
+      if (thicknessSlider) thicknessSlider.value = p.thickness;
+      if (gapSlider) gapSlider.value = p.gap;
+
+      proButtons.forEach(function (btn) {
+        btn.classList.toggle('active', btn.dataset.pro === key);
+      });
+
+      recalculateSensitivity();
+      updateReticleSvg();
+      showToast('Loaded ' + key.toUpperCase() + ' pro aim profile');
+    }
+
+    // Listeners
+    if (sourceGameSelect) sourceGameSelect.addEventListener('change', recalculateSensitivity);
+    if (mouseDpiInput) mouseDpiInput.addEventListener('input', recalculateSensitivity);
+    if (sensValueInput) sensValueInput.addEventListener('input', recalculateSensitivity);
+
+    [colorSelect, lengthSlider, thicknessSlider, gapSlider].forEach(function (el) {
+      if (el) el.addEventListener('input', updateReticleSvg);
+    });
+
+    proButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        applyProPreset(btn.dataset.pro);
+      });
+    });
+
+    bgButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        bgButtons.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var bg = btn.dataset.bg;
+        if (backdropStage) {
+          backdropStage.className = 'stage-backdrop backdrop-' + bg;
+        }
+      });
+    });
+
+    if (fireBtn) {
+      fireBtn.addEventListener('click', function () {
+        if (!svgCrosshair) return;
+        svgCrosshair.classList.add('firing');
+        setTimeout(function () {
+          svgCrosshair.classList.remove('firing');
+        }, 120);
+      });
+    }
+
+    if (copyCodeBtn) {
+      copyCodeBtn.addEventListener('click', function () {
+        if (reticleCodeInput && navigator.clipboard) {
+          navigator.clipboard.writeText(reticleCodeInput.value);
+        }
+        showToast('Reticle profile code copied to clipboard! 🎯');
+      });
+    }
+
+    // Initial calculation
+    recalculateSensitivity();
+    updateReticleSvg();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();

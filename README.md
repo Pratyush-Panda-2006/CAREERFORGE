@@ -30,14 +30,13 @@ All issues and pull requests in this repository follow the official **Nexus Spri
 > [!TIP]
 > - Our automated GitHub bots immediately attach the **`nsoc26`** label to any new issue and pull request.
 > - Maintainers assign the corresponding difficulty level tag (`level1`, `level2`, or `level3`) to reflect the points awarded upon merging.
-> - **Level 3 Claim Cap:** To ensure fair distribution of high-value tasks, contributors may claim at most **4 concurrent Level 3 issues**. A 5th Level 3 issue can only be claimed once one of the active 4 is closed via a merged PR.
 > - Contributor rankings and merged metrics are automatically updated every 12 hours (at 12:00 PM noon and midnight UTC) on the live platform [Leaderboard](https://careerforge.live/leaderboard).
 
 ---
 
 ## 🌟 Key Features & Highlights
 
-- 🏢 **Single-Repository Showcase Architecture**: 20 isolated static website project templates hosted in `public/showcase/` with live preview capabilities.
+- 🏢 **Single-Repository Showcase Architecture**: 40 isolated static website project templates hosted in `public/showcase/` with multi-file support (HTML, CSS, JS, tests, and assets) and live preview capabilities.
 - ⚡ **Zero-Database 12h Leaderboard**: Automated 12-hour synchronization via GitHub Actions (`scripts/generate-leaderboard.mjs`) fetching merged PR metrics and publishing to `public/leaderboard.json`.
 - 🔒 **Automated PR Gatekeeper**: Scope enforcement (`.github/workflows/pr-gatekeeper.yml`) preventing unauthorized modifications to core `src/` files and auto-closing invalid PRs.
 - 🛡️ **CodeQL Vulnerability Scanning**: Continuous static application security testing (SAST) for JavaScript & TypeScript.
@@ -61,7 +60,7 @@ carrers-frontend/
 │       └── semgrep.yml              # Semgrep Client-Side SAST Security Scanner
 ├── public/
 │   ├── leaderboard.json             # Flat-JSON Daily Leaderboard Data
-│   └── showcase/                    # 20 Standalone Website Templates
+│   └── showcase/                    # 40 Standalone Website Templates (1 or more HTML/CSS/JS files per app)
 │       ├── ecommerce-store/
 │       ├── agency-studio/
 │       ├── festival-hub/
@@ -95,7 +94,9 @@ carrers-frontend/
 
 ---
 
-## 🚀 20 Standalone Showcase Projects
+## 🚀 40 Standalone Showcase Projects
+
+Each showcase template represents an autonomous web application. Contributors can add **one or more HTML, CSS, and JavaScript files** inside their chosen directory:
 
 | Project Slug | Domain / Category | Live Local Preview Path |
 |---|---|---|
@@ -119,6 +120,26 @@ carrers-frontend/
 | `showcase/cybersecurity-sentinel` | Zero-Trust SIEM Shield | `/showcase/cybersecurity-sentinel/index.html` |
 | `showcase/luxury-realms` | Jet & Island Concierge | `/showcase/luxury-realms/index.html` |
 | `showcase/crypto-exchange-pro` | Perpetual DEX Trading | `/showcase/crypto-exchange-pro/index.html` |
+| `showcase/aerospace-orbiter` | Mission Control & Orbital Mechanics | `/showcase/aerospace-orbiter/index.html` |
+| `showcase/quantum-forge` | Quantum Circuit & Qubit State Simulator | `/showcase/quantum-forge/index.html` |
+| `showcase/biotech-genomics` | CRISPR-Cas9 & DNA Sequence Workbench | `/showcase/biotech-genomics/index.html` |
+| `showcase/smart-iot-nexus` | Industrial IoT Sensor Grid & Telemetry | `/showcase/smart-iot-nexus/index.html` |
+| `showcase/defi-yield-matrix` | DeFi Liquidity & APY Compounding Matrix | `/showcase/defi-yield-matrix/index.html` |
+| `showcase/virtual-museum-3d` | Curated Antiquities & 3D Artifact Gallery | `/showcase/virtual-museum-3d/index.html` |
+| `showcase/renewable-microgrid` | Clean Energy Microgrid Load Balancer | `/showcase/renewable-microgrid/index.html` |
+| `showcase/vr-metaverse-hub` | WebXR Spatial Computing Lounge | `/showcase/vr-metaverse-hub/index.html` |
+| `showcase/supply-chain-logistics` | Global Intermodal Freight & Port Transit | `/showcase/supply-chain-logistics/index.html` |
+| `showcase/robotics-automata` | Robotic Arm Inverse Kinematics Simulator | `/showcase/robotics-automata/index.html` |
+| `showcase/neurotech-interface` | Neural EEG Waveform Monitor & Focus BCI | `/showcase/neurotech-interface/index.html` |
+| `showcase/weather-radar-atlas` | Severe Doppler Radar & Barometric Stream | `/showcase/weather-radar-atlas/index.html` |
+| `showcase/streaming-cinema-hub` | Indie Cinema & 4K Watch Party Lounge | `/showcase/streaming-cinema-hub/index.html` |
+| `showcase/fitness-crossfit-pro` | Functional HIIT & Calorie Expenditure WOD | `/showcase/fitness-crossfit-pro/index.html` |
+| `showcase/charity-microloans` | Global Peer-to-Peer Microfinance Network | `/showcase/charity-microloans/index.html` |
+| `showcase/drone-delivery-skyway` | Urban Autonomous Drone Air Corridor | `/showcase/drone-delivery-skyway/index.html` |
+| `showcase/music-daw-studio` | 16-Step Drum Sequencer & Polyphonic Synth | `/showcase/music-daw-studio/index.html` |
+| `showcase/pet-adoption-haven` | Animal Rescue & Foster Matching Network | `/showcase/pet-adoption-haven/index.html` |
+| `showcase/legal-smart-contracts` | Smart Legal Contract Clause & Escrow Machine | `/showcase/legal-smart-contracts/index.html` |
+| `showcase/agritech-precision-farming` | Precision Agriculture & Drone Crop Telemetry | `/showcase/agritech-precision-farming/index.html` |
 
 ---
 
