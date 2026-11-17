@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VR Metaverse Hub - Dynamic Search & Filter</title>
+  <link rel="stylesheet" href="search-filter.css">
+</head>
+<body>
+  <div class="vr-filter-container">
+    <header class="filter-header">
+      <h2>Metaverse Realms & Portals Explorer</h2>
+      <p>Search, tag filter, and multi-column sort real-time 3D VR destinations.</p>
+    </header>
+
+    <div class="filter-controls">
+      <div class="search-box-row">
+        <input type="text" id="search-filter-input" placeholder="Search realms by name, biome or status..." aria-label="Search realms">
+        <button id="search-clear-btn" type="button" aria-label="Clear search">Clear</button>
+      </div>
+
+      <div class="sort-row">
+        <label for="sort-select">Sort by:</label>
+        <select id="sort-select">
+          <option value="name:asc">Name (A-Z)</option>
+          <option value="name:desc">Name (Z-A)</option>
+          <option value="userCount:desc">Active Users (High-Low)</option>
+          <option value="userCount:asc">Active Users (Low-High)</option>
+          <option value="fps:desc">Framerate (High-Low)</option>
+        </select>
+      </div>
+
+      <div class="tag-chips-wrapper" id="tag-chips-container">
+        <span class="chips-label">Tags:</span>
+        <button type="button" class="filter-chip" data-tag="popular">popular</button>
+        <button type="button" class="filter-chip" data-tag="social">social</button>
+        <button type="button" class="filter-chip" data-tag="gaming">gaming</button>
+        <button type="button" class="filter-chip" data-tag="chill">chill</button>
+        <button type="button" class="filter-chip" data-tag="event">event</button>
+        <button type="button" class="filter-chip" data-tag="zero-g">zero-g</button>
+      </div>
+    </div>
+
+    <div id="empty-state-alert" class="empty-state" style="display: none;">
+      <p>No Metaverse realms match your search or selected tags.</p>
+    </div>
+
+    <div id="results-list" class="results-grid"></div>
+  </div>
+
+  <script type="module" src="search-filter.js"></script>
+</body>
+</html>
