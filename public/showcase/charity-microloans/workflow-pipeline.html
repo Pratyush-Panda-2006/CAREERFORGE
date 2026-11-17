@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charity Microloans - Workflow Pipeline Engine</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body>
+  <div class="pipeline-container">
+    <header class="pipeline-header">
+      <div class="pipeline-title">
+        <h1>🌱 Microloan Application Pipeline</h1>
+        <p>Interactive Kanban task execution engine with WIP threshold controls & state persistence</p>
+      </div>
+      <div class="header-actions">
+        <button id="openNewTaskModal" class="btn btn-primary">+ New Loan Review</button>
+        <button id="exportPipelineBtn" class="btn btn-outline">📥 Export State JSON</button>
+      </div>
+    </header>
+
+    <main id="kanbanBoard" class="kanban-board">
+      <!-- Columns rendered via workflow-pipeline.js -->
+    </main>
+  </div>
+
+  <!-- New Task Modal -->
+  <div id="taskModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Create Microfinance Evaluation Task</h3>
+        <button id="closeModalBtn" class="btn btn-outline" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <form id="newTaskForm">
+        <div class="form-group">
+          <label for="taskColSelect">Initial Column</label>
+          <select id="taskColSelect">
+            <option value="backlog">Application Intake</option>
+            <option value="in_progress">Community Due Diligence</option>
+            <option value="review">Credit Committee Approval</option>
+            <option value="completed">Disbursed & Active</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskTitleInput">Task / Loan Title</label>
+          <input type="text" id="taskTitleInput" required placeholder="e.g. Village Solar Mill Cooperative Expansion">
+        </div>
+        <div class="form-group">
+          <label for="taskDescInput">Details & Financial Specs</label>
+          <textarea id="taskDescInput" placeholder="Specify requested capital, peer guarantor circle members, and repayment terms..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="taskPrioritySelect">Priority Level</label>
+          <select id="taskPrioritySelect">
+            <option value="high">High</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskAssigneeInput">Target Unit / Assignee</label>
+          <input type="text" id="taskAssigneeInput" placeholder="e.g. Field Officer / Regional Underwriter">
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancelModalBtn" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Schedule Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="workflow-pipeline.js"></script>
+</body>
+</html>
