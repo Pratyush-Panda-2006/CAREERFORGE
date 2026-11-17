@@ -4793,3 +4793,187 @@ window.generateInvoiceReceipt = generateInvoiceReceipt;
     setup();
   }
 })();
+
+// ============================================================================
+// EcommerceStoreExportEngine - Issue #574
+// Client-side export engine & formatted summary report generator
+// ============================================================================
+class EcommerceStoreExportEngine {
+  constructor(cart, catalog = []) {
+    this.cart = cart || null;
+    this.catalog = catalog || [];
+  }
+
+  escapeCSV(val) {
+    if (val === null || val === undefined) return '""';
+    const str = String(val);
+    if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return `"${str}"`;
+  }
+
+  getItems() {
+    if (this.cart) {
+      if (typeof this.cart.getItems === 'function') {
+        return this.cart.getItems();
+      }
+      if (Array.isArray(this.cart.items)) {
+        return this.cart.items;
+      }
+      if (typeof this.cart.items === 'object' && this.cart.items !== null) {
+        return Object.values(this.cart.items);
+      }
+    }
+    if (typeof window !== 'undefined' && window.cart && typeof window.cart.items === 'object') {
+      return Object.values(window.cart.items);
+    }
+    if (typeof window !== 'undefined' && Array.isArray(window.PRODUCTS)) {
+      return window.PRODUCTS.slice(0, 10).map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        quantity: 1
+      }));
+    }
+    return [];
+  }
+
+  toJSONBlob(data = null) {
+    const items = this.getItems();
+    const exportData = data || {
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+      cart: items,
+      totals: this.cart && typeof this.cart.getTotals === 'function' ? this.cart.getTotals() : null
+    };
+    const jsonStr = JSON.stringify(exportData, null, 2);
+    return new Blob([jsonStr], { type: 'application/json' });
+  }
+
+  toCSVString(items = null) {
+    const itemList = items || this.getItems();
+    const headers = ['id', 'name', 'price', 'quantity', 'subtotal'];
+    const rows = [headers.join(',')];
+    for (const item of itemList) {
+      const id = this.escapeCSV(item.id);
+      const name = this.escapeCSV(item.name || item.title || 'Item');
+      const price = Number(item.price || 0).toFixed(2);
+      const qty = Number(item.quantity || item.qty || 1);
+      const subtotal = (price * qty).toFixed(2);
+      rows.push([id, name, price, qty, subtotal].join(','));
+    }
+    return rows.join('\r\n');
+  }
+
+  toCSVBlob(items = null) {
+    const csvStr = this.toCSVString(items);
+    return new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+  }
+
+  toMarkdownAudit(items = null) {
+    const itemList = items || this.getItems();
+    let md = `# E-Commerce Store Export Audit Report\n\n`;
+    md += `_Generated on: ${new Date().toISOString()}_\n\n`;
+    md += `| ID | Item Name | Unit Price | Qty | Subtotal |\n`;
+    md += `|---|---|---|---|---|\n`;
+    let grandTotal = 0;
+    for (const item of itemList) {
+      const price = Number(item.price || 0);
+      const qty = Number(item.quantity || item.qty || 1);
+      const sub = price * qty;
+      grandTotal += sub;
+      md += `| ${item.id} | ${item.name || item.title || 'Item'} | $${price.toFixed(2)} | ${qty} | $${sub.toFixed(2)} |\n`;
+    }
+    md += `\n**Grand Total:** $${grandTotal.toFixed(2)}\n`;
+    return md;
+  }
+
+  triggerDownload(filename, blob, mimeType = 'application/octet-stream') {
+    if (typeof window === 'undefined' || !window.document || !window.document.createElement) return false;
+    const finalBlob = blob instanceof Blob ? blob : new Blob([blob], { type: mimeType });
+    const url = URL.createObjectURL(finalBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    return true;
+  }
+
+  initUI() {
+    if (typeof window === 'undefined' || !window.document || !window.document.getElementById) return;
+    const triggerBtn = document.getElementById('exportDropdownTriggerBtn');
+    const dropdownMenu = document.getElementById('exportDropdownMenu');
+    const jsonBtn = document.getElementById('exportJsonBtn');
+    const csvBtn = document.getElementById('exportCsvBtn');
+    const mdBtn = document.getElementById('exportMarkdownBtn');
+
+    if (triggerBtn && dropdownMenu) {
+      triggerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = dropdownMenu.classList.toggle('active');
+        triggerBtn.setAttribute('aria-expanded', String(isOpen));
+        dropdownMenu.setAttribute('aria-hidden', String(!isOpen));
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!triggerBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+          dropdownMenu.classList.remove('active');
+          triggerBtn.setAttribute('aria-expanded', 'false');
+          dropdownMenu.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+
+    if (jsonBtn) {
+      jsonBtn.addEventListener('click', () => {
+        const blob = this.toJSONBlob();
+        this.triggerDownload(`store-export-${Date.now()}.json`, blob, 'application/json');
+        if (dropdownMenu) dropdownMenu.classList.remove('active');
+      });
+    }
+
+    if (csvBtn) {
+      csvBtn.addEventListener('click', () => {
+        const blob = this.toCSVBlob();
+        this.triggerDownload(`store-export-${Date.now()}.csv`, blob, 'text/csv');
+        if (dropdownMenu) dropdownMenu.classList.remove('active');
+      });
+    }
+
+    if (mdBtn) {
+      mdBtn.addEventListener('click', () => {
+        const mdText = this.toMarkdownAudit();
+        if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(mdText).catch(() => {});
+        }
+        const blob = new Blob([mdText], { type: 'text/markdown;charset=utf-8;' });
+        this.triggerDownload(`store-audit-${Date.now()}.md`, blob, 'text/markdown');
+        if (dropdownMenu) dropdownMenu.classList.remove('active');
+      });
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.EcommerceStoreExportEngine = EcommerceStoreExportEngine;
+  if (document && document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const engine = new EcommerceStoreExportEngine();
+      engine.initUI();
+    });
+  }
+}
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.EcommerceStoreExportEngine = EcommerceStoreExportEngine;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { EcommerceStoreExportEngine };
+}
+
+
