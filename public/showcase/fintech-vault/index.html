@@ -1590,6 +1590,131 @@
   </section>
   <!-- ===== END Issue #344 ===== -->
 
+  <!-- ===== Issue #289: Recurring Subscriptions Manager & Spend Breakdown ===== -->
+  <section class="engine-section sub-section" id="subscriptions-manager" aria-labelledby="subManagerTitle">
+    <div class="engine-container">
+      <header class="section-header">
+        <div class="header-badge">RECURRING CASHFLOW OPTIMIZER</div>
+        <h2 id="subManagerTitle">Active Subscriptions Manager</h2>
+        <p>Monitor recurring SaaS, entertainment, and infrastructure overhead. Track upcoming renewals, calculate total annual commitments, and configure automatic cancellation reminder alerts.</p>
+      </header>
+
+      <!-- KPI Summary Cards -->
+      <div class="sub-kpi-grid">
+        <div class="sub-kpi-card">
+          <span class="sub-kpi-label">Monthly Burn Rate</span>
+          <div class="sub-kpi-val" id="subMonthlyBurn">$0.00</div>
+          <span class="sub-kpi-sub" id="subActiveCount">0 Active Subscriptions</span>
+        </div>
+        <div class="sub-kpi-card">
+          <span class="sub-kpi-label">Annual Commitment</span>
+          <div class="sub-kpi-val" id="subAnnualCommit">$0.00</div>
+          <span class="sub-kpi-sub">Projected 12-Month Outflow</span>
+        </div>
+        <div class="sub-kpi-card highlight-urgency">
+          <span class="sub-kpi-label">Renewing Within 7 Days</span>
+          <div class="sub-kpi-val text-amber" id="subUrgentCount">0</div>
+          <span class="sub-kpi-sub text-amber" id="subUrgentSpend">$0.00 imminent charges</span>
+        </div>
+        <div class="sub-kpi-card">
+          <span class="sub-kpi-label">Active Reminder Alerts</span>
+          <div class="sub-kpi-val text-cyan" id="subReminderActiveCount">0</div>
+          <span class="sub-kpi-sub">3-Day Prior Cancellation Notice</span>
+        </div>
+      </div>
+
+      <!-- Main Subscription Management Panel -->
+      <div class="sub-panel">
+        <div class="sub-toolbar">
+          <!-- Filter Tabs -->
+          <div class="sub-filter-tabs" role="tablist" aria-label="Subscription filters">
+            <button type="button" class="sub-tab active" data-filter="all" role="tab" aria-selected="true">All Services (<span id="tabCountAll">0</span>)</button>
+            <button type="button" class="sub-tab" data-filter="urgent" role="tab" aria-selected="false">⚠️ Renewing Soon (<span id="tabCountUrgent">0</span>)</button>
+            <button type="button" class="sub-tab" data-filter="monthly" role="tab" aria-selected="false">Monthly Cycle</button>
+            <button type="button" class="sub-tab" data-filter="annual" role="tab" aria-selected="false">Annual Cycle</button>
+          </div>
+
+          <!-- Add Subscription Toggle Button -->
+          <button type="button" class="btn-add-sub" id="toggleAddSubFormBtn">
+            <span>+ Add Subscription</span>
+          </button>
+        </div>
+
+        <!-- Add Custom Subscription Drawer / Collapsible Form -->
+        <div class="sub-add-form-wrap" id="addSubFormWrap" hidden>
+          <div class="sub-form-header">
+            <h4>Register Recurring Subscription</h4>
+            <button type="button" class="sub-form-close" id="closeAddSubFormBtn" aria-label="Close form">&times;</button>
+          </div>
+          <form id="newSubscriptionForm" class="sub-form-grid" novalidate>
+            <div class="form-group">
+              <label for="subNameInput">Service / Platform Name</label>
+              <input type="text" id="subNameInput" class="sub-input" placeholder="e.g. Claude Pro, Linear, Vercel" required maxlength="40" />
+            </div>
+            <div class="form-group">
+              <label for="subPriceInput">Amount ($)</label>
+              <input type="number" id="subPriceInput" class="sub-input" min="0.5" max="50000" step="0.01" placeholder="20.00" required />
+            </div>
+            <div class="form-group">
+              <label for="subCycleInput">Billing Frequency</label>
+              <select id="subCycleInput" class="sub-select">
+                <option value="monthly" selected>Monthly Billing</option>
+                <option value="annual">Annual Billing</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="subCategoryInput">Category</label>
+              <select id="subCategoryInput" class="sub-select">
+                <option value="AI & DevTools">AI &amp; DevTools</option>
+                <option value="Cloud Infrastructure">Cloud Infrastructure</option>
+                <option value="Entertainment & Media">Entertainment &amp; Media</option>
+                <option value="Productivity & Workspace">Productivity &amp; Workspace</option>
+                <option value="Finance & Security">Finance &amp; Security</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="subRenewalInput">Next Renewal Date</label>
+              <input type="date" id="subRenewalInput" class="sub-input" required />
+            </div>
+            <div class="form-group form-actions-cell">
+              <button type="submit" class="btn-submit-sub">Save &amp; Track</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Subscriptions Table -->
+        <div class="sub-table-container">
+          <table class="sub-table" id="subscriptionsTable">
+            <thead>
+              <tr>
+                <th>Service &amp; Category</th>
+                <th>Billing Cycle</th>
+                <th>Monthly Burn</th>
+                <th>Annual Total</th>
+                <th>Next Renewal</th>
+                <th>Reminder Alert</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="subscriptionsTableBody">
+              <!-- Populated dynamically and securely via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Reminder Alert Banner -->
+        <div class="sub-reminder-callout" id="subReminderCallout" hidden>
+          <div class="callout-icon">🔔</div>
+          <div class="callout-content">
+            <strong>Upcoming Cancellation Reminders Active</strong>
+            <p id="subReminderCalloutText">Alerts scheduled 3 days prior to renewal dates to avoid unintended auto-renews.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #289 ===== -->
+
   <footer class="footer">
     <div class="footer-content">
       <div class="brand">💎 APEXVAULT</div>
