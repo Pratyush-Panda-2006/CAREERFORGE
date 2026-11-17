@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotics Automata - Prioritized Toast Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+</head>
+<body class="robotics-hub-body">
+  <header class="hub-header">
+    <div class="hub-title-wrapper">
+      <span class="hub-logo-icon">🤖</span>
+      <h1>Robotics Automata Telemetry Alert &amp; Toast Stream</h1>
+    </div>
+    <div class="hub-controls">
+      <button type="button" id="clearAllBtn" class="btn btn-secondary">Clear Active Stream</button>
+    </div>
+  </header>
+
+  <main class="hub-main">
+    <section class="simulator-panel">
+      <h2>Simulate Telemetry Alerts</h2>
+      <div class="simulator-buttons">
+        <button type="button" id="triggerCriticalBtn" class="btn btn-critical">🚨 Critical: Joint Over-Torque</button>
+        <button type="button" id="triggerWarningBtn" class="btn btn-warning">⚠️ Warning: Lidar Packet Loss</button>
+        <button type="button" id="triggerSuccessBtn" class="btn btn-success">✅ Success: Kinematic Solved</button>
+        <button type="button" id="triggerInfoBtn" class="btn btn-info">ℹ️ Info: Battery at 88%</button>
+      </div>
+    </section>
+
+    <section class="log-panel">
+      <h2>Actionable Notification Log</h2>
+      <div class="notification-log-list" id="notificationLogList"></div>
+    </section>
+  </main>
+
+  <!-- Viewport anchor for toasts -->
+  <aside class="toast-viewport" id="toastViewport" aria-live="polite" aria-atomic="true"></aside>
+
+  <script type="module" src="notification-hub.js"></script>
+</body>
+</html>
