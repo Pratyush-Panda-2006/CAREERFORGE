@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VR Metaverse Hub - Automated WCAG Accessibility Inspector</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+</head>
+<body>
+  <div class="a11y-container">
+    <header class="a11y-header">
+      <span class="a11y-badge">Inclusive Spatial UI</span>
+      <h1>🥽 Automated WCAG Contrast & Keyboard Accessibility Inspector</h1>
+      <p>Self-contained accessibility auditing sub-module inspecting DOM contrast ratios, calculating relative luminance, and scoring compliance against WCAG 2.1 AA/AAA standards</p>
+    </header>
+
+    <section class="calculator-card">
+      <h2>Color Contrast Ratio Calculator</h2>
+      <div class="color-inputs-grid">
+        <div class="color-input-col">
+          <label for="fgColorInput">Foreground / Text Color (Hex)</label>
+          <div class="picker-row">
+            <input type="color" id="fgColorPicker" value="#38bdf8">
+            <input type="text" id="fgColorInput" value="#38bdf8" maxlength="7">
+          </div>
+        </div>
+        <div class="color-input-col">
+          <label for="bgColorInput">Background Color (Hex)</label>
+          <div class="picker-row">
+            <input type="color" id="bgColorPicker" value="#070913">
+            <input type="text" id="bgColorInput" value="#070913" maxlength="7">
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-box" id="contrastPreviewBox">
+        <p class="preview-text" id="previewText">Spatial VR Interface Text Preview</p>
+      </div>
+    </section>
+
+    <section class="scorecard-grid">
+      <div class="score-card">
+        <span class="score-label">Contrast Ratio</span>
+        <span id="contrastRatioVal" class="score-val">-- : 1</span>
+      </div>
+      <div class="score-card">
+        <span class="score-label">WCAG AA Normal (&ge; 4.5:1)</span>
+        <span id="aaNormalPill" class="status-pill status-pass">PASS</span>
+      </div>
+      <div class="score-card">
+        <span class="score-label">WCAG AA Large (&ge; 3.0:1)</span>
+        <span id="aaLargePill" class="status-pill status-pass">PASS</span>
+      </div>
+      <div class="score-card">
+        <span class="score-label">WCAG AAA Normal (&ge; 7.0:1)</span>
+        <span id="aaaNormalPill" class="status-pill status-pass">PASS</span>
+      </div>
+    </section>
+
+    <main class="audit-checklist-card">
+      <h3>Spatial Accessibility & Keyboard Navigation Checklist</h3>
+      <ul class="checklist" id="checklistContainer">
+        <li class="check-item"><span class="check-icon">✓</span> Focus visible ring active across all interactive mesh elements</li>
+        <li class="check-item"><span class="check-icon">✓</span> Keyboard TabIndex order matches visual spatial depth traversal</li>
+        <li class="check-item"><span class="check-icon">✓</span> ARIA role="region" and aria-live="polite" established on chat stream</li>
+        <li class="check-item"><span class="check-icon">✓</span> Non-text contrast (&ge; 3:1) verified for 3D navigation reticle</li>
+      </ul>
+    </main>
+  </div>
+
+  <script type="module" src="accessibility-assistant.js"></script>
+</body>
+</html>
