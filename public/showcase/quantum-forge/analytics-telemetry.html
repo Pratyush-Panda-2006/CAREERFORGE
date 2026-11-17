@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge - Qubit Circuit Telemetry</title>
+  <link rel="stylesheet" href="analytics-telemetry.css">
+</head>
+<body class="analytics-body">
+  <div class="analytics-container">
+    <header class="analytics-header">
+      <div class="header-info">
+        <h1 class="analytics-title">⚛️ Quantum Forge Qubit Telemetry</h1>
+        <p class="analytics-subtitle">Zero third-party trackers, in-memory quantum circuit telemetry with automated PII scrubbing</p>
+      </div>
+      <div class="header-actions">
+        <button id="export-report-btn" class="btn btn-primary">Export Quantum Telemetry JSON</button>
+      </div>
+    </header>
+
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Active Circuit Time</span>
+        <span class="kpi-val" id="kpi-duration">0s</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Max Canvas Scroll</span>
+        <span class="kpi-val" id="kpi-scroll">0%</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Gate Events Logged</span>
+        <span class="kpi-val" id="kpi-events">0</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Qubit Clicks</span>
+        <span class="kpi-val" id="kpi-clicks">0</span>
+      </div>
+    </section>
+
+    <section class="simulator-panel">
+      <h2>Simulate Quantum Circuit Gates</h2>
+      <div class="sim-buttons">
+        <button id="btn-hadamard" class="btn btn-chip" data-label="Hadamard H-Gate">🔲 Hadamard (H)</button>
+        <button id="btn-cnot" class="btn btn-chip" data-label="Controlled-NOT CX">🔗 CNOT Gate</button>
+        <button id="btn-phase" class="btn btn-chip" data-label="Phase S-Gate">🌀 Phase Rotation</button>
+        <button id="btn-measure" class="btn btn-chip" data-label="Z-Basis Measurement">📊 Measurement</button>
+      </div>
+    </section>
+
+    <main class="stream-panel">
+      <div class="panel-header">
+        <h3>Live Quantum Telemetry Ticker & Privacy Stream</h3>
+        <span class="badge-live">CRYOGENIC BUS LIVE</span>
+      </div>
+      <div class="event-stream" id="event-stream">
+        <!-- Event rows populated here -->
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { QuantumForgeAnalyticsEngine } from './analytics-telemetry.js';
+
+    const engine = new QuantumForgeAnalyticsEngine();
+
+    function updateKPIs() {
+      const durationSec = Math.floor(engine.computeSessionDuration() / 1000);
+      document.getElementById('kpi-duration').textContent = `${durationSec}s`;
+      document.getElementById('kpi-scroll').textContent = `${engine.getScrollDepthPercentage()}%`;
+      document.getElementById('kpi-events').textContent = engine.events.length;
+      document.getElementById('kpi-clicks').textContent = engine.clicks.length;
+    }
+
+    function renderStream() {
+      const streamEl = document.getElementById('event-stream');
+      streamEl.innerHTML = '';
+      if (engine.events.length === 0) {
+        streamEl.innerHTML = '<div class="empty-state">No quantum gate telemetry recorded yet.</div>';
+        return;
+      }
+
+      engine.events.slice().reverse().forEach(evt => {
+        const row = document.createElement('div');
+        row.className = 'event-ticker-row';
+        row.innerHTML = `
+          <div class="ticker-left">
+            <span class="chip-name">${escapeHtml(evt.name)}</span>
+            <span class="ticker-time">${new Date(evt.timestamp).toLocaleTimeString()}</span>
+          </div>
+          <div class="ticker-data">${escapeHtml(JSON.stringify(evt.data))}</div>
+        `;
+        streamEl.appendChild(row);
+      });
+      updateKPIs();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    document.querySelectorAll('.sim-buttons .btn-chip').forEach(btn => {
+      btn.onclick = () => {
+        const label = btn.dataset.label;
+        engine.recordClick(btn);
+        engine.trackEvent('quantum_gate_applied', {
+          gate: label,
+          targetQubit: Math.floor(Math.random() * 8),
+          gateFidelity: (0.995 + Math.random() * 0.004).toFixed(4)
+        });
+        renderStream();
+      };
+    });
+
+    window.addEventListener('scroll', () => {
+      engine.updateScrollDepth(window.scrollY, document.documentElement.scrollHeight, window.innerHeight);
+      updateKPIs();
+    });
+
+    document.getElementById('export-report-btn').onclick = () => {
+      const json = engine.exportReportJSON();
+      navigator.clipboard.writeText(json).then(() => alert('Quantum Telemetry report copied to clipboard!'));
+    };
+
+    setInterval(updateKPIs, 1000);
+
+    // Initial event
+    engine.trackEvent('quantum_circuit_init', { backend: 'Superconducting Transmon 16Q', temperatureMilliKelvin: 15 });
+    renderStream();
+  </script>
+</body>
+</html>
