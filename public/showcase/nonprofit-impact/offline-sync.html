@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TerraInitia — Offline field notebook</title>
+  <link rel="stylesheet" href="offline-sync.css">
+  <script type="module" src="offline-sync.js"></script>
+</head>
+<body>
+  <main data-offline-sync>
+    <header><a href="index.html">TerraInitia ↗</a><span class="demo">Local demo · no live service</span></header>
+    <p class="eyebrow">Keep the work moving</p>
+    <h1>A field notebook,<br>even off the grid.</h1>
+    <p class="intro">Save a planting or volunteer plan on this device. Reconnect to reconcile it with a simulated cloud copy.</p>
+    <p class="connection" data-connection>Checking device storage…</p>
+    <section class="editor" aria-labelledby="edit-title">
+      <h2 id="edit-title">Add a field edit</h2>
+      <form data-edit-form>
+        <label>Record ID<input name="recordId" value="planting-plan" required maxlength="64" pattern="[a-zA-Z0-9_-]+" autocomplete="off"></label>
+        <label>Plan or note<input name="value" placeholder="Plant 40 native saplings on Saturday" required maxlength="200" autocomplete="off"></label>
+        <button type="submit">Save edit on device</button>
+      </form>
+      <div class="controls">
+        <label class="check"><input type="checkbox" data-pause-network> Simulate offline</label>
+        <label class="check"><input type="checkbox" data-fail-next> Fail next delivery</label>
+        <button type="button" class="secondary" data-remote-edit>Simulate a cloud edit</button>
+      </div>
+      <p class="hint">Cloud edits use a separate device clock. Concurrent versions resolve consistently; both clocks are retained. Use sample notes only.</p>
+    </section>
+    <section aria-labelledby="queue-title">
+      <div class="section-heading"><h2 id="queue-title">Pending edits <span data-pending-count>0</span></h2><button type="button" data-sync-now disabled>Sync now</button></div>
+      <div class="table-scroll"><table><caption>Edits are sent in the order they were saved.</caption><thead><tr><th scope="col">Record</th><th scope="col">Value</th><th scope="col">Attempts</th><th scope="col">Delivery</th></tr></thead><tbody data-queue-rows></tbody></table></div>
+      <p class="status" role="status" data-sync-status>Nothing has been sent.</p>
+    </section>
+    <section class="records" aria-labelledby="records-title"><h2 id="records-title">Current notebook</h2><ul data-records></ul></section>
+    <footer>This demo retries with capped backoff. Saved edits survive a page reload; local browser storage must be available.</footer>
+  </main>
+</body>
+</html>
