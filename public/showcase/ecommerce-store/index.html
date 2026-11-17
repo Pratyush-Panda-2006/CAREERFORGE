@@ -30,6 +30,7 @@
           </select>
         </div>
         <!-- BEGIN issue #188: wishlist nav button -->
+        <button type="button" class="icon-btn pref-nav-btn" id="openPreferencesBtn" title="Preferences & User Settings" aria-label="Open settings">⚙️</button>
         <button type="button" class="wish-nav-btn" id="wishNavBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="wishDrawer" aria-label="Wishlist, 0 items">
           <svg class="wish-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           <span class="wish-nav-text">Wishlist</span>
@@ -1192,6 +1193,107 @@
     </div>
   </div>
   <!-- ===== END Issue #401 ===== -->
+
+    <!-- E-Commerce Store Preferences Drawer Modal (Issue #571) -->
+    <div id="ecommerce-store-preferences-modal" class="preferences-drawer-modal" aria-hidden="true" role="dialog" aria-labelledby="prefModalTitle">
+      <div class="preferences-backdrop" id="prefBackdrop"></div>
+      <div class="preferences-drawer-content">
+        <div class="preferences-drawer-header">
+          <div class="pref-title-row">
+            <span class="pref-icon">⚙️</span>
+            <h3 id="prefModalTitle">User Settings &amp; Preferences</h3>
+          </div>
+          <button type="button" class="pref-close-btn" id="closePreferencesBtn" aria-label="Close preferences">&times;</button>
+        </div>
+
+        <div class="preferences-drawer-body">
+          <!-- Theme Setting -->
+          <div class="pref-setting-group">
+            <label class="pref-label" for="prefThemeSelect">Interface Theme</label>
+            <p class="pref-desc">Choose between dark aesthetic, daytime high-clarity, or system setting.</p>
+            <select id="prefThemeSelect" class="pref-select">
+              <option value="dark">Dark Cosmos (Default)</option>
+              <option value="light">Daylight High-Clarity</option>
+              <option value="system">Follow System OS</option>
+            </select>
+          </div>
+
+          <!-- Product Layout Setting -->
+          <div class="pref-setting-group">
+            <label class="pref-label" for="prefLayoutSelect">Catalog View Layout</label>
+            <p class="pref-desc">Arrange product cards in standard grid, compact gallery, or detailed list.</p>
+            <select id="prefLayoutSelect" class="pref-select">
+              <option value="grid">Multi-Column Grid (Default)</option>
+              <option value="compact">Compact Dense Matrix</option>
+              <option value="list">Single Column Detailed List</option>
+            </select>
+          </div>
+
+          <!-- Currency Setting -->
+          <div class="pref-setting-group">
+            <label class="pref-label" for="prefCurrencySelect">Display Currency</label>
+            <p class="pref-desc">Convert live price values automatically with localized symbols.</p>
+            <select id="prefCurrencySelect" class="pref-select">
+              <option value="USD">USD ($ - US Dollar)</option>
+              <option value="EUR">EUR (€ - Euro)</option>
+              <option value="GBP">GBP (£ - British Pound)</option>
+              <option value="JPY">JPY (¥ - Japanese Yen)</option>
+            </select>
+          </div>
+
+          <!-- Items Per Page -->
+          <div class="pref-setting-group">
+            <label class="pref-label" for="prefItemsPerPage">Catalog Density (Items / Page)</label>
+            <select id="prefItemsPerPage" class="pref-select">
+              <option value="12">12 Items (Standard)</option>
+              <option value="24">24 Items (Dense)</option>
+              <option value="48">48 Items (Maximum)</option>
+            </select>
+          </div>
+
+          <!-- Toggle Switches -->
+          <div class="pref-toggle-list">
+            <div class="pref-toggle-item">
+              <div class="pref-toggle-info">
+                <span class="pref-toggle-title">Sound Effects</span>
+                <span class="pref-toggle-sub">Audio clicks on cart addition and coupons</span>
+              </div>
+              <label class="pref-switch">
+                <input type="checkbox" id="prefSoundToggle" checked />
+                <span class="pref-slider"></span>
+              </label>
+            </div>
+
+            <div class="pref-toggle-item">
+              <div class="pref-toggle-info">
+                <span class="pref-toggle-title">High-Contrast Mode</span>
+                <span class="pref-toggle-sub">Enhanced edge borders for accessibility</span>
+              </div>
+              <label class="pref-switch">
+                <input type="checkbox" id="prefContrastToggle" />
+                <span class="pref-slider"></span>
+              </label>
+            </div>
+
+            <div class="pref-toggle-item">
+              <div class="pref-toggle-info">
+                <span class="pref-toggle-title">Auto-Save Cart</span>
+                <span class="pref-toggle-sub">Persist pending cart items across sessions</span>
+              </div>
+              <label class="pref-switch">
+                <input type="checkbox" id="prefAutoSaveToggle" checked />
+                <span class="pref-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="preferences-drawer-footer">
+          <button type="button" class="pref-btn secondary" id="prefResetBtn">Reset Defaults</button>
+          <button type="button" class="pref-btn primary" id="prefExportBtn">Export JSON</button>
+        </div>
+      </div>
+    </div>
 
   <div id="toast" class="toast">Item added to cart!</div>
   <script src="script.js"></script>

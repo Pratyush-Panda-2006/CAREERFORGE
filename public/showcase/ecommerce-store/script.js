@@ -4566,3 +4566,261 @@ window.generateInvoiceReceipt = generateInvoiceReceipt;
   document.addEventListener('DOMContentLoaded', wireStudioEvents);
 })();
 /* ===== END Issue #434 ===== */
+
+
+// ==========================================================================
+// Issue #571: Adaptive User Settings & Preference Persistence State Engine
+// ==========================================================================
+
+const ECOMMERCE_DEFAULT_PREFERENCES = {
+  theme: 'dark',
+  layout: 'grid',
+  soundEffects: true,
+  highContrast: false,
+  currency: 'USD',
+  itemsPerPage: 12,
+  autoSaveCart: true
+};
+
+class EcommerceStorePreferenceManager {
+  constructor(storage = (typeof localStorage !== 'undefined' ? localStorage : null)) {
+    this.storage = storage;
+    this.storageKey = 'ecommerce_store_user_preferences_v1';
+    this.preferences = { ...ECOMMERCE_DEFAULT_PREFERENCES };
+    this.listeners = new Set();
+    this.load();
+  }
+
+  load() {
+    if (!this.storage) return this.preferences;
+    try {
+      const raw = this.storage.getItem(this.storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'object' && parsed !== null) {
+          this.preferences = { ...ECOMMERCE_DEFAULT_PREFERENCES, ...parsed };
+        }
+      }
+    } catch {
+      // Fallback to memory
+    }
+    this.applyToDOM();
+    return this.preferences;
+  }
+
+  get(key) {
+    return this.preferences[key] !== undefined ? this.preferences[key] : ECOMMERCE_DEFAULT_PREFERENCES[key];
+  }
+
+  getAll() {
+    return { ...this.preferences };
+  }
+
+  save(key, val) {
+    if (key in ECOMMERCE_DEFAULT_PREFERENCES) {
+      this.preferences[key] = val;
+      this.persist();
+      this.applyToDOM();
+      this.notify(key, val);
+      return true;
+    }
+    return false;
+  }
+
+  persist() {
+    if (!this.storage) return;
+    try {
+      this.storage.setItem(this.storageKey, JSON.stringify(this.preferences));
+    } catch {
+      // Storage quota or unavailable
+    }
+  }
+
+  resetDefaults() {
+    this.preferences = { ...ECOMMERCE_DEFAULT_PREFERENCES };
+    this.persist();
+    this.applyToDOM();
+    this.notify('*', this.preferences);
+    return { ...this.preferences };
+  }
+
+  exportJSON() {
+    return JSON.stringify({
+      ...this.preferences,
+      exportedAt: new Date().toISOString(),
+      store: 'Nexus E-Commerce Showcase'
+    }, null, 2);
+  }
+
+  importJSON(jsonString) {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (typeof parsed !== 'object' || parsed === null) return false;
+      let updated = false;
+      for (const [k, v] of Object.entries(parsed)) {
+        if (k in ECOMMERCE_DEFAULT_PREFERENCES) {
+          this.preferences[k] = v;
+          updated = true;
+        }
+      }
+      if (updated) {
+        this.persist();
+        this.applyToDOM();
+        this.notify('*', this.preferences);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  subscribe(callback) {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
+
+  notify(key, val) {
+    for (const cb of this.listeners) {
+      try { cb(key, val, this.preferences); } catch {}
+    }
+  }
+
+  applyToDOM() {
+    if (typeof document === 'undefined') return;
+    const body = document.body;
+    if (!body) return;
+
+    if (this.preferences.highContrast) {
+      body.classList.add('high-contrast-mode');
+    } else {
+      body.classList.remove('high-contrast-mode');
+    }
+
+    if (this.preferences.theme && document.documentElement) {
+      document.documentElement.setAttribute('data-theme', this.preferences.theme);
+    }
+
+    if (this.preferences.layout) {
+      const catalogGrid = document.querySelector('.products-grid, .product-grid, #productsGrid');
+      if (catalogGrid) {
+        catalogGrid.setAttribute('data-layout', this.preferences.layout);
+      }
+    }
+  }
+}
+
+function initEcommercePreferencesUI() {
+  if (typeof document === 'undefined') return;
+
+  const prefManager = new EcommerceStorePreferenceManager();
+  window.ecommerceStorePreferenceManager = prefManager;
+
+  const modal = document.getElementById('ecommerce-store-preferences-modal');
+  const openBtn = document.getElementById('openPreferencesBtn');
+  const closeBtn = document.getElementById('closePreferencesBtn');
+  const backdrop = document.getElementById('prefBackdrop');
+
+  if (!modal) return;
+
+  function openModal() {
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    syncInputs();
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  function syncInputs() {
+    const p = prefManager.getAll();
+    const themeSel = document.getElementById('prefThemeSelect');
+    const layoutSel = document.getElementById('prefLayoutSelect');
+    const currSel = document.getElementById('prefCurrencySelect');
+    const itemsSel = document.getElementById('prefItemsPerPage');
+    const soundTgl = document.getElementById('prefSoundToggle');
+    const contrastTgl = document.getElementById('prefContrastToggle');
+    const autoSaveTgl = document.getElementById('prefAutoSaveToggle');
+
+    if (themeSel) themeSel.value = p.theme;
+    if (layoutSel) layoutSel.value = p.layout;
+    if (currSel) currSel.value = p.currency;
+    if (itemsSel) itemsSel.value = String(p.itemsPerPage);
+    if (soundTgl) soundTgl.checked = Boolean(p.soundEffects);
+    if (contrastTgl) contrastTgl.checked = Boolean(p.highContrast);
+    if (autoSaveTgl) autoSaveTgl.checked = Boolean(p.autoSaveCart);
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      closeModal();
+    }
+  });
+
+  const themeSel = document.getElementById('prefThemeSelect');
+  if (themeSel) themeSel.addEventListener('change', () => prefManager.save('theme', themeSel.value));
+
+  const layoutSel = document.getElementById('prefLayoutSelect');
+  if (layoutSel) layoutSel.addEventListener('change', () => prefManager.save('layout', layoutSel.value));
+
+  const currSel = document.getElementById('prefCurrencySelect');
+  if (currSel) currSel.addEventListener('change', () => {
+    prefManager.save('currency', currSel.value);
+    if (typeof setCurrency === 'function') {
+      setCurrency(currSel.value);
+    }
+  });
+
+  const itemsSel = document.getElementById('prefItemsPerPage');
+  if (itemsSel) itemsSel.addEventListener('change', () => prefManager.save('itemsPerPage', Number(itemsSel.value)));
+
+  const soundTgl = document.getElementById('prefSoundToggle');
+  if (soundTgl) soundTgl.addEventListener('change', () => prefManager.save('soundEffects', soundTgl.checked));
+
+  const contrastTgl = document.getElementById('prefContrastToggle');
+  if (contrastTgl) contrastTgl.addEventListener('change', () => prefManager.save('highContrast', contrastTgl.checked));
+
+  const autoSaveTgl = document.getElementById('prefAutoSaveToggle');
+  if (autoSaveTgl) autoSaveTgl.addEventListener('change', () => prefManager.save('autoSaveCart', autoSaveTgl.checked));
+
+  const resetBtn = document.getElementById('prefResetBtn');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    prefManager.resetDefaults();
+    syncInputs();
+    if (typeof showToast === 'function') showToast('Preferences reset to defaults.');
+  });
+
+  const exportBtn = document.getElementById('prefExportBtn');
+  if (exportBtn) exportBtn.addEventListener('click', () => {
+    const jsonStr = prefManager.exportJSON();
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexus-preferences-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    if (typeof showToast === 'function') showToast('Preferences exported successfully.');
+  });
+
+  syncInputs();
+}
+
+window.EcommerceStorePreferenceManager = EcommerceStorePreferenceManager;
+window.initEcommercePreferencesUI = initEcommercePreferencesUI;
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEcommercePreferencesUI);
+  } else {
+    initEcommercePreferencesUI();
+  }
+}
