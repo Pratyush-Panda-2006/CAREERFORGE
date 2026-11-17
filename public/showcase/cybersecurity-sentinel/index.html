@@ -723,6 +723,41 @@
   </section>
   <!-- ===== END Issue #332 ===== -->
 
+  <section id="siem-workspace" aria-labelledby="siem-title">
+    <header><p class="siem-eyebrow">SOC TRAINING WORKSPACE</p><h2 id="siem-title">Correlate signals. Triage incidents.</h2>
+      <p>Local sample telemetry only. Rules group events by source; signals from different hosts never combine. No real system is monitored.</p></header>
+    <div class="siem-grid">
+      <form id="siem-rule-form" class="siem-panel">
+        <h3>Detection rule builder</h3>
+        <label>Rule name<input id="siem-name" maxlength="80" required value="Custom detection"></label>
+        <div class="siem-fields"><label>Boolean logic<select id="siem-logic"><option>AND</option><option>OR</option></select></label>
+          <label>Window (seconds)<input id="siem-window" type="number" min="1" max="300" step="1" value="60" required></label>
+          <label>Severity<select id="siem-severity"><option value="high">High</option><option value="critical">Critical</option></select></label></div>
+        <fieldset><legend>Condition A</legend><label>Event type<select id="siem-condition-a" data-siem-event-type></select></label>
+          <label>Minimum events<input id="siem-count-a" type="number" min="1" max="20" step="1" value="5" required></label></fieldset>
+        <fieldset><legend>Condition B</legend><label>Event type<select id="siem-condition-b" data-siem-event-type></select></label>
+          <label>Minimum events<input id="siem-count-b" type="number" min="1" max="20" step="1" value="1" required></label></fieldset>
+        <button type="submit">Add detection rule</button>
+        <p>AND requires both thresholds; OR requires either. Adding a rule also checks the current event window.</p>
+      </form>
+      <div class="siem-panel"><h3>Active rules</h3><ul id="siem-rules"></ul>
+        <p>One incident is raised per rule/source while its condition stays true. Acknowledgment records triage; it does not remove evidence or re-arm detection.</p></div>
+      <div class="siem-panel"><h3>Sample event stream</h3><p>Simulation clock: <output id="siem-clock">0s</output></p>
+        <form id="siem-event-form"><label>Source<select id="siem-source"><option>workstation-a</option><option>workstation-b</option></select></label>
+          <label>Event type<select id="siem-event-type" data-siem-event-type></select></label><button type="submit">Inject sample event</button></form>
+        <div class="siem-actions"><button id="siem-scenario" type="button">Simulate brute force + privilege change</button>
+          <button id="siem-stream" type="button" aria-pressed="false">Start sample stream</button>
+          <button id="siem-advance" type="button">Advance clock 61 seconds</button></div>
+        <p>Stream adds one event every 2 seconds and pauses when the tab is hidden. The clock advances only through these controls or the running stream.</p>
+        <p id="siem-event-empty">No sample events yet.</p><ol id="siem-events" aria-label="Latest 20 sample events"></ol>
+      </div>
+      <div class="siem-panel"><h3>Incident triage</h3><p id="siem-count"></p><p id="siem-empty">No correlated incidents. Run the sample scenario to exercise the default rule.</p>
+        <div id="siem-incidents"></div></div>
+    </div>
+    <p id="siem-message" role="status" aria-live="polite" aria-atomic="true"></p>
+    <p>Session-only workspace. Reload resets rules and incidents. Up to 20 rules, 1,000 events over 5 minutes and 100 incident snapshots are retained.</p>
+  </section>
+  <script type="module" src="siem-ui.js"></script>
   <script src="script.js"></script>
   <dialog id="audit-dialog" aria-labelledby="audit-title">
     <h2 id="audit-title">Generate simulated audit report</h2>
