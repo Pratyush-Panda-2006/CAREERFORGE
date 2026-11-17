@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Prioritized Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+</head>
+<body class="notif-body">
+  <div class="notif-container">
+    <header class="notif-header">
+      <div class="header-info">
+        <h1 class="notif-title">🔔 Festival Alert & Notification Stream</h1>
+        <p class="notif-subtitle">Prioritized dispatch coordinator with automated eviction & persistent event logs</p>
+      </div>
+      <div class="header-actions">
+        <button id="clear-active-btn" class="btn btn-secondary">Clear Active Toasts</button>
+        <button id="clear-log-btn" class="btn btn-danger">Clear History Log</button>
+      </div>
+    </header>
+
+    <section class="simulator-toolbar">
+      <span class="toolbar-label">Dispatch Event Simulator:</span>
+      <button class="sim-btn sim-critical" data-type="critical">🚨 Critical Alert</button>
+      <button class="sim-btn sim-warning" data-type="warning">⚠️ Warning Notice</button>
+      <button class="sim-btn sim-success" data-type="success">✅ Success Confirmation</button>
+      <button class="sim-btn sim-info" data-type="info">ℹ️ General Info</button>
+    </section>
+
+    <main class="dashboard-grid">
+      <section class="panel-section">
+        <div class="panel-head">
+          <h2>Active Stream Queue (Max 5)</h2>
+          <span class="queue-badge" id="active-count-badge">0 Active</span>
+        </div>
+        <div class="active-list" id="active-list">
+          <!-- Active stream cards -->
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <div class="panel-head">
+          <h2>Actionable Event Log</h2>
+          <span class="queue-badge badge-neutral" id="log-count-badge">0 Logged</span>
+        </div>
+        <div class="log-list" id="log-list">
+          <!-- Event log rows -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Floating Toast Viewport Anchor -->
+    <div class="toast-viewport" id="toast-viewport">
+      <!-- Toasts dynamically rendered here with countdown bars -->
+    </div>
+  </div>
+
+  <script type="module">
+    import { FestivalHubNotificationHub } from './notification-hub.js';
+
+    const hub = new FestivalHubNotificationHub({ maxQueueSize: 5 });
+
+    const presets = {
+      critical: [
+        'Main Stage Generator Overload: Voltage Fluctuations Detected',
+        'Weather Radar Warning: Severe Thunderstorm within 5 miles',
+        'Perimeter Breach: North Gate Fence Integrity Compromised'
+      ],
+      warning: [
+        'Audio Rig Heat Advisory: Amp Rack approaching 78°C',
+        'Bar 4 Beverage Inventory below 15% safety threshold',
+        'Turnstile Scanner #6 encountering intermittent Wi-Fi latency'
+      ],
+      success: [
+        'Headliner Sound Check Passed with 0 phase anomalies',
+        'Emergency Exit Lighting test successfully certified',
+        'Cashless RFID Top-Up transaction volume synced to cloud'
+      ],
+      info: [
+        'Artist Hospitality Shuttle departing Terminal 2 at 18:30',
+        'Drone Fleet battery charging cycle complete for night show',
+        'Volunteer shift change commencing in 20 minutes'
+      ]
+    };
+
+    function render() {
+      const active = hub.getActiveQueue();
+      const log = hub.getLog();
+
+      document.getElementById('active-count-badge').textContent = `${active.length} / 5 Active`;
+      document.getElementById('log-count-badge').textContent = `${log.length} Logged`;
+
+      // Render Active List
+      const activeListEl = document.getElementById('active-list');
+      activeListEl.innerHTML = '';
+      if (active.length === 0) {
+        activeListEl.innerHTML = '<div class="empty-state">No active notifications in stream.</div>';
+      } else {
+        active.forEach(item => {
+          const card = document.createElement('div');
+          card.className = `alert-item priority-${item.priority}`;
+          card.innerHTML = `
+            <div class="alert-meta">
+              <span class="priority-tag tag-${item.priority}">${item.priority.toUpperCase()}</span>
+              <span class="time-tag">${new Date(item.timestamp).toLocaleTimeString()}</span>
+            </div>
+            <div class="alert-msg">${escapeHtml(item.message)}</div>
+            <button class="btn-dismiss" data-id="${item.id}">Dismiss</button>
+          `;
+          card.querySelector('.btn-dismiss').onclick = () => hub.dismiss(item.id, 'manual');
+          activeListEl.appendChild(card);
+        });
+      }
+
+      // Render Floating Toasts
+      const toastViewport = document.getElementById('toast-viewport');
+      toastViewport.innerHTML = '';
+      active.forEach(item => {
+        const toast = document.createElement('div');
+        toast.className = `toast-card toast-${item.priority}`;
+        toast.innerHTML = `
+          <div class="toast-head">
+            <span class="toast-type">${item.priority.toUpperCase()}</span>
+            <button class="toast-close" data-id="${item.id}">&times;</button>
+          </div>
+          <div class="toast-body">${escapeHtml(item.message)}</div>
+          <div class="toast-progress"><div class="progress-bar" style="animation-duration: ${item.duration}ms"></div></div>
+        `;
+        toast.querySelector('.toast-close').onclick = () => hub.dismiss(item.id, 'manual');
+        toastViewport.appendChild(toast);
+      });
+
+      // Render Log
+      const logListEl = document.getElementById('log-list');
+      logListEl.innerHTML = '';
+      if (log.length === 0) {
+        logListEl.innerHTML = '<div class="empty-state">No events logged yet.</div>';
+      } else {
+        log.slice().reverse().forEach(entry => {
+          const row = document.createElement('div');
+          row.className = 'log-row';
+          row.innerHTML = `
+            <span class="log-dot dot-${entry.priority}"></span>
+            <span class="log-time">${new Date(entry.timestamp).toLocaleTimeString()}</span>
+            <span class="log-msg">${escapeHtml(entry.message)}</span>
+            <span class="log-reason">${entry.dismissedReason || 'dismissed'}</span>
+          `;
+          logListEl.appendChild(row);
+        });
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    hub.subscribe(() => render());
+
+    document.querySelectorAll('.sim-btn').forEach(btn => {
+      btn.onclick = () => {
+        const type = btn.dataset.type;
+        const pool = presets[type];
+        const msg = pool[Math.floor(Math.random() * pool.length)];
+        hub.enqueue(msg, type, type, 4500);
+      };
+    });
+
+    document.getElementById('clear-active-btn').onclick = () => hub.clearActive();
+    document.getElementById('clear-log-btn').onclick = () => {
+      hub.clearLog();
+      render();
+    };
+
+    // Seed initial notifications
+    hub.enqueue('Sound check routine completed', 'info', 'info', 6000);
+    hub.enqueue('Stage 2 Audio Limiter Clapped', 'warning', 'warning', 7000);
+    hub.enqueue('Main Stage Pyrotechnics Pre-Check Verified', 'success', 'success', 8000);
+  </script>
+</body>
+</html>
