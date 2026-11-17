@@ -170,6 +170,37 @@
     <p class="portfolio-sub">Explore our comprehensive engineering case studies, product challenges, and validated business impact.</p>
   </div>
 
+  <!-- Agency Studio Dynamic Search, Filter & Multi-Column Sorting Toolbar - Issue #576 -->
+  <div class="agency-filter-toolbar" id="agencyFilterToolbar">
+    <div class="agency-search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="agencySearchInput" class="agency-search-input" placeholder="Search case studies by keyword, tech, or impact..." aria-label="Search case studies">
+      <button type="button" id="agencySearchClear" class="agency-search-clear" style="display: none;" aria-label="Clear search">✕</button>
+    </div>
+
+    <div class="agency-filter-chips" id="agencyFilterChips">
+      <button type="button" class="agency-filter-chip active" data-tag="all">All Disciplines</button>
+      <button type="button" class="agency-filter-chip" data-tag="Web3 Fintech">Web3 Fintech</button>
+      <button type="button" class="agency-filter-chip" data-tag="AI SaaS">AI SaaS</button>
+      <button type="button" class="agency-filter-chip" data-tag="Mobile Architecture">Mobile</button>
+      <button type="button" class="agency-filter-chip" data-tag="WebGL 3D">WebGL 3D</button>
+    </div>
+
+    <div class="agency-sort-wrap">
+      <label for="agencySortSelect" class="sr-only">Sort Case Studies</label>
+      <select id="agencySortSelect" class="agency-sort-select">
+        <option value="title-asc">Title (A - Z)</option>
+        <option value="title-desc">Title (Z - A)</option>
+        <option value="rating-desc">Highest Impact</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="agencyEmptyFilterAlert" class="agency-empty-filter-alert" style="display: none;" role="status">
+    <span class="alert-icon">✦</span>
+    <p>No matching case studies found. Try adjusting your search query or active filter tags.</p>
+  </div>
+
   <form id="ripple-controls" class="ripple-controls" aria-label="Portfolio ripple settings">
     <label><input type="checkbox" id="ripple-enabled" checked> Enable liquid ripple</label>
     <label>Frequency <select name="frequency"><option value="3">Wide waves</option><option value="6" selected>Medium waves</option><option value="12">Fine waves</option></select></label>

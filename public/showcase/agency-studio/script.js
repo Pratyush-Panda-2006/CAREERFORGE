@@ -2860,3 +2860,195 @@ function initBrandMoodboard() {
   }
 })();
 /* ===== END Issue #322 ===== */
+
+/* ===== BEGIN Issue #576: AgencyStudioFilterEngine ===== */
+class AgencyStudioFilterEngine {
+  constructor(items = []) {
+    this.items = [...items];
+    this.searchQuery = '';
+    this.selectedTags = new Set();
+    this.sortField = null;
+    this.sortDirection = 'asc';
+  }
+
+  setItems(items) {
+    this.items = [...items];
+  }
+
+  filterByKeyword(query) {
+    this.searchQuery = typeof query === 'string' ? query.trim().toLowerCase() : '';
+    return this.getFilteredItems();
+  }
+
+  toggleTag(tag) {
+    if (!tag) return this.getFilteredItems();
+    if (this.selectedTags.has(tag)) {
+      this.selectedTags.delete(tag);
+    } else {
+      this.selectedTags.add(tag);
+    }
+    return this.getFilteredItems();
+  }
+
+  setTags(tags) {
+    this.selectedTags = new Set(Array.isArray(tags) ? tags : []);
+    return this.getFilteredItems();
+  }
+
+  clearTags() {
+    this.selectedTags.clear();
+    return this.getFilteredItems();
+  }
+
+  sort(field, direction = 'asc') {
+    this.sortField = field || null;
+    this.sortDirection = direction.toLowerCase() === 'desc' ? 'desc' : 'asc';
+    return this.getFilteredItems();
+  }
+
+  getFilteredItems() {
+    let result = [...this.items];
+
+    if (this.searchQuery) {
+      result = result.filter(item => {
+        const title = (item.title || item.name || '').toLowerCase();
+        const desc = (item.description || item.desc || '').toLowerCase();
+        const tags = Array.isArray(item.tags)
+          ? item.tags.join(' ').toLowerCase()
+          : '';
+        return title.includes(this.searchQuery) ||
+               desc.includes(this.searchQuery) ||
+               tags.includes(this.searchQuery);
+      });
+    }
+
+    if (this.selectedTags.size > 0) {
+      const activeTags = Array.from(this.selectedTags);
+      result = result.filter(item => {
+        if (!Array.isArray(item.tags)) return false;
+        return activeTags.every(t => item.tags.includes(t));
+      });
+    }
+
+    if (this.sortField) {
+      const field = this.sortField;
+      const dir = this.sortDirection === 'desc' ? -1 : 1;
+      result.sort((a, b) => {
+        const valA = a[field] !== undefined ? a[field] : '';
+        const valB = b[field] !== undefined ? b[field] : '';
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          return (valA - valB) * dir;
+        }
+        return String(valA).localeCompare(String(valB)) * dir;
+      });
+    }
+
+    return result;
+  }
+
+  initUI() {
+    if (typeof window === 'undefined' || !window.document || !window.document.getElementById) return;
+    const searchInput = document.getElementById('agencySearchInput');
+    const searchClear = document.getElementById('agencySearchClear');
+    const sortSelect = document.getElementById('agencySortSelect');
+    const chipsContainer = document.getElementById('agencyFilterChips');
+    const emptyState = document.getElementById('agencyEmptyFilterAlert');
+    const grid = document.querySelector('.portfolio .grid');
+
+    if (!grid) return;
+
+    const cardElements = Array.from(grid.querySelectorAll('.project-card'));
+    const domItems = cardElements.map(card => {
+      const tags = Array.from(card.querySelectorAll('.project-tags .tag')).map(t => t.textContent.trim());
+      const title = card.querySelector('h3') ? card.querySelector('h3').textContent.trim() : '';
+      const desc = card.querySelector('.project-desc') ? card.querySelector('.project-desc').textContent.trim() : '';
+      const id = card.getAttribute('data-project-id') || '';
+      return { id, title, desc, tags, element: card };
+    });
+    this.setItems(domItems);
+
+    const updateDOM = () => {
+      const filtered = this.getFilteredItems();
+      const visibleIds = new Set(filtered.map(f => f.id));
+      cardElements.forEach(card => {
+        const id = card.getAttribute('data-project-id');
+        if (visibleIds.has(id)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      if (emptyState) {
+        emptyState.style.display = filtered.length === 0 ? 'block' : 'none';
+      }
+    };
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        this.filterByKeyword(e.target.value);
+        if (searchClear) {
+          searchClear.style.display = e.target.value ? 'block' : 'none';
+        }
+        updateDOM();
+      });
+    }
+
+    if (searchClear) {
+      searchClear.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        searchClear.style.display = 'none';
+        this.filterByKeyword('');
+        updateDOM();
+      });
+    }
+
+    if (sortSelect) {
+      sortSelect.addEventListener('change', (e) => {
+        const [field, direction] = e.target.value.split('-');
+        this.sort(field, direction || 'asc');
+        updateDOM();
+      });
+    }
+
+    if (chipsContainer) {
+      const chips = chipsContainer.querySelectorAll('.agency-filter-chip');
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const tag = chip.getAttribute('data-tag');
+          if (tag === 'all') {
+            this.clearTags();
+            chips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+          } else {
+            chipsContainer.querySelector('[data-tag="all"]')?.classList.remove('active');
+            chip.classList.toggle('active');
+            this.toggleTag(tag);
+            if (this.selectedTags.size === 0) {
+              chipsContainer.querySelector('[data-tag="all"]')?.classList.add('active');
+            }
+          }
+          updateDOM();
+        });
+      });
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.AgencyStudioFilterEngine = AgencyStudioFilterEngine;
+  if (document && document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterEngine = new AgencyStudioFilterEngine();
+      filterEngine.initUI();
+    });
+  }
+}
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.AgencyStudioFilterEngine = AgencyStudioFilterEngine;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { AgencyStudioFilterEngine };
+}
+/* ===== END Issue #576 ===== */
