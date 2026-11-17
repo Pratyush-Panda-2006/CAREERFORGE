@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Crossfit Pro - Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+</head>
+<body>
+  <div class="diff-wrapper">
+    <header class="diff-header">
+      <div>
+        <h1>🏋️ WOD & Telemetry Diff Inspector</h1>
+        <p>Visual line-by-line CrossFit workout prescribed vs performed telemetry comparison</p>
+      </div>
+      <div>
+        <button id="loadSampleDiffBtn" class="btn btn-outline">Load Benchmark WOD Example</button>
+      </div>
+    </header>
+
+    <section class="metrics-bar">
+      <div class="metric-card">
+        <span class="metric-label">Added Lines</span>
+        <span id="statAddedLines" class="metric-value added">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Removed Lines</span>
+        <span id="statRemovedLines" class="metric-value removed">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Unchanged</span>
+        <span id="statUnchangedLines" class="metric-value unchanged">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Total Delta %</span>
+        <span id="statChangePercent" class="metric-value percent">0%</span>
+      </div>
+    </section>
+
+    <section class="diff-inputs">
+      <div class="input-column">
+        <label for="origTextInput">Prescribed Workout (Original)</label>
+        <textarea id="origTextInput" placeholder="Paste prescribed WOD workout schema here..."></textarea>
+      </div>
+      <div class="input-column">
+        <label for="modTextInput">Performed Log / Scaled (Modified)</label>
+        <textarea id="modTextInput" placeholder="Paste athlete performed or scaled workout data here..."></textarea>
+      </div>
+    </section>
+
+    <div class="actions-bar">
+      <button id="compareDiffBtn" class="btn btn-primary">Run Diff Analysis</button>
+    </div>
+
+    <main class="diff-output-panel">
+      <div id="diffOutputContainer">
+        <!-- Rendered by diff-viewer.js -->
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="diff-viewer.js"></script>
+</body>
+</html>
