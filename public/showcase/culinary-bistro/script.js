@@ -1150,10 +1150,13 @@ function initTastingMenuTimeline() {
                 </div>
               </div>
 
-              <div class="dietary-notices">
-                <span class="dietary-title">Allergens:</span>
-                ${c.allergens.map(a => `<span class="allergen-pill">${a}</span>`).join('')}
-              </div>
+              <details class="dietary-notices">
+                <summary>⚠️ Contains: ${c.allergens.join(', ')}</summary>
+                <div class="dietary-allergen-list">
+                  ${c.allergens.map(a => `<span class="allergen-pill">${a}</span>`).join('')}
+                </div>
+                <p>Ask staff to confirm ingredients and cross-contact before ordering.</p>
+              </details>
             </div>
           </div>
         </div>
