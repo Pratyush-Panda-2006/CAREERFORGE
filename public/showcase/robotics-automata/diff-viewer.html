@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotics Automata - Kinematics & URDF Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+</head>
+<body class="robotics-diff-body">
+  <header class="diff-header">
+    <div class="diff-title-wrapper">
+      <span class="diff-logo-icon">🤖</span>
+      <h1>Kinematic Model &amp; URDF State Diff Inspector</h1>
+    </div>
+    <div class="metrics-bar" id="metricsBar">
+      <div class="metric-pill pill-added">Added: <span id="statAddedLines">0</span></div>
+      <div class="metric-pill pill-removed">Removed: <span id="statRemovedLines">0</span></div>
+      <div class="metric-pill pill-unchanged">Unchanged: <span id="statUnchangedLines">0</span></div>
+      <div class="metric-pill pill-percent">Diff Ratio: <span id="statChangePercent">0%</span></div>
+    </div>
+  </header>
+
+  <main class="diff-main">
+    <section class="diff-inputs-panel">
+      <div class="input-card">
+        <label for="origTextInput">Baseline URDF / Joint Limits Specification</label>
+        <textarea id="origTextInput" placeholder="Enter baseline URDF link definitions or joint limits..."></textarea>
+      </div>
+      <div class="input-card">
+        <label for="modTextInput">Updated URDF / Joint Limits Specification</label>
+        <textarea id="modTextInput" placeholder="Enter updated URDF link definitions or joint limits..."></textarea>
+      </div>
+    </section>
+
+    <div class="diff-actions">
+      <button type="button" id="compareDiffBtn" class="btn btn-primary">Run Diff Analysis</button>
+      <button type="button" id="loadSampleDiffBtn" class="btn btn-secondary">Load Robot Sample</button>
+    </div>
+
+    <section class="diff-output-panel">
+      <div class="diff-output-header">
+        <h2>Comparison Inspection View</h2>
+      </div>
+      <div class="diff-scroll-panel" id="diffOutputContainer"></div>
+    </section>
+  </main>
+
+  <script type="module" src="diff-viewer.js"></script>
+</body>
+</html>
