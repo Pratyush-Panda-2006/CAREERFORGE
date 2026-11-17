@@ -1,0 +1,231 @@
+:root {
+  --bg-primary: #070913;
+  --bg-surface: #0e1224;
+  --bg-card: #151b36;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-purple: #a855f7;
+  --accent-cyan: #06b6d4;
+  --status-pass: #10b981;
+  --status-fail: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  padding: 2rem 1.5rem;
+  min-height: 100vh;
+}
+
+.a11y-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.a11y-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.a11y-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 9999px;
+  margin-bottom: 0.75rem;
+}
+
+.a11y-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #38bdf8, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.a11y-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.calculator-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.calculator-card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1.25rem;
+}
+
+.color-inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .color-inputs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.color-input-col label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.picker-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.picker-row input[type="color"] {
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  background: transparent;
+}
+
+.picker-row input[type="text"] {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.preview-box {
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.preview-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.scorecard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 800px) {
+  .scorecard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.score-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.score-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.score-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: var(--accent-cyan);
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 0.25rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-pass {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--status-pass);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-fail {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--status-fail);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.audit-checklist-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.audit-checklist-card h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.checklist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.check-icon {
+  color: var(--status-pass);
+  font-weight: bold;
+}
