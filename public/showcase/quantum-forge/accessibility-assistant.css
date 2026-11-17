@@ -1,0 +1,183 @@
+/* Quantum Forge - Accessibility Assistant Styles */
+:root {
+  --qf-primary: #8b5cf6;
+  --qf-accent: #06b6d4;
+  --qf-bg: #0b0f19;
+  --qf-panel-bg: rgba(17, 24, 39, 0.85);
+  --qf-border: #1f2937;
+  --qf-text: #f3f4f6;
+  --qf-text-muted: #9ca3af;
+  --qf-success: #10b981;
+  --qf-danger: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--qf-bg);
+  color: var(--qf-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body.qf-high-contrast {
+  --qf-bg: #000000;
+  --qf-panel-bg: #000000;
+  --qf-border: #ffffff;
+  --qf-text: #ffffff;
+  --qf-text-muted: #ffff00;
+  --qf-primary: #00ffff;
+  --qf-accent: #ffff00;
+}
+
+.a11y-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--qf-panel-bg);
+  border: 1px solid var(--qf-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
+}
+
+.a11y-header {
+  border-bottom: 1px solid var(--qf-border);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.a11y-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.a11y-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .a11y-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.color-picker-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.color-picker-group label {
+  font-size: 0.85rem;
+  color: var(--qf-text-muted);
+  text-transform: uppercase;
+}
+
+.color-picker-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.color-picker-row input[type="color"] {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--qf-border);
+  border-radius: 6px;
+  cursor: pointer;
+  background: none;
+}
+
+.color-picker-row input[type="text"] {
+  flex: 1;
+  padding: 0.6rem;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #fff;
+  font-family: monospace;
+}
+
+.preview-card {
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid var(--qf-border);
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.preview-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+}
+
+.preview-card p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.metric-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ratio-display {
+  text-align: center;
+  background: rgba(30, 41, 59, 0.5);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--qf-border);
+}
+
+.ratio-display .ratio-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--qf-accent);
+}
+
+.status-badges {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.status-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.status-badge.pass {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--qf-success);
+  border: 1px solid var(--qf-success);
+}
+
+.status-badge.fail {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--qf-danger);
+  border: 1px solid var(--qf-danger);
+}
+
+.btn-toggle {
+  padding: 0.6rem 1rem;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid var(--qf-primary);
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
