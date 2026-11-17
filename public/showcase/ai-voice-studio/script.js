@@ -1,11 +1,11 @@
-﻿// Sonora AI Voice Studio & Neural Tuner Engine
+// Sonora AI Voice Studio & Neural Tuner Engine
 // Real-time Pitch, Speed & Emotion Modulation
 
 const VOICE_MODELS = {
   aria: {
     id: 'aria',
     name: 'Aria',
-    tagline: 'Studio Warmth â€¢ Conversational',
+    tagline: 'Studio Warmth • Conversational',
     lang: 'en-US',
     basePitch: 1.0,
     baseSpeed: 1.0,
@@ -15,7 +15,7 @@ const VOICE_MODELS = {
   marcus: {
     id: 'marcus',
     name: 'Marcus',
-    tagline: 'Deep Broadcast â€¢ Narration',
+    tagline: 'Deep Broadcast • Narration',
     lang: 'en-GB',
     basePitch: 0.85,
     baseSpeed: 0.95,
@@ -25,7 +25,7 @@ const VOICE_MODELS = {
   elena: {
     id: 'elena',
     name: 'Elena',
-    tagline: 'Cybernetic Synth â€¢ AI Assistant',
+    tagline: 'Cybernetic Synth • AI Assistant',
     lang: 'en-US',
     basePitch: 1.15,
     baseSpeed: 1.05,
@@ -35,7 +35,7 @@ const VOICE_MODELS = {
   leo: {
     id: 'leo',
     name: 'Leo',
-    tagline: 'Energetic Streamer â€¢ Dynamic',
+    tagline: 'Energetic Streamer • Dynamic',
     lang: 'en-US',
     basePitch: 1.25,
     baseSpeed: 1.20,
@@ -48,25 +48,25 @@ const EMOTION_PRESETS = {
   neutral: {
     pitch: 1.00,
     speed: 1.00,
-    title: 'Neutral ðŸ˜',
+    title: 'Neutral 😐',
     feedback: 'Neutral emotion applied: balanced fundamental frequency and natural conversational pacing.'
   },
   cheerful: {
     pitch: 1.25,
     speed: 1.15,
-    title: 'Cheerful ðŸ˜Š',
+    title: 'Cheerful 😊',
     feedback: 'Cheerful emotion applied: +3.9 semitone pitch contour and bright, uplifted tempo.'
   },
   professional: {
     pitch: 0.90,
     speed: 0.95,
-    title: 'Professional ðŸ‘”',
+    title: 'Professional 👔',
     feedback: 'Professional emotion applied: measured cadence with authoritative, grounded acoustic resonance.'
   },
   energetic: {
     pitch: 1.35,
     speed: 1.30,
-    title: 'Energetic âš¡',
+    title: 'Energetic ⚡',
     feedback: 'Energetic emotion applied: high-impact pitch shift with rapid, dynamic speech rhythm.'
   }
 };
@@ -125,7 +125,7 @@ function initVoiceStudioTuner() {
   function resetSampleButton(button) {
     if (!button) return;
     button.classList.remove('playing');
-    button.querySelector('.sample-play-icon').textContent = 'â–¶';
+    button.querySelector('.sample-play-icon').textContent = '▶';
     button.querySelector('.sample-play-label').textContent = 'Play sample';
     const modelName = VOICE_MODELS[button.dataset.playSample]?.name || 'voice';
     button.title = 'Play ' + modelName + ' voice sample';
@@ -169,11 +169,11 @@ function initVoiceStudioTuner() {
     activeSampleButton = button;
     activeSampleUtterance = utterance;
     button.classList.add('playing');
-    button.querySelector('.sample-play-icon').textContent = 'â– ';
-    button.querySelector('.sample-play-label').textContent = 'Playingâ€¦';
+    button.querySelector('.sample-play-icon').textContent = '■';
+    button.querySelector('.sample-play-label').textContent = 'Playing…';
     button.title = 'Stop ' + model.name + ' voice sample';
     button.setAttribute('aria-label', 'Stop ' + model.name + ' voice sample');
-    feedbackEl.textContent = 'Playing ' + model.name + ' voice sampleâ€¦';
+    feedbackEl.textContent = 'Playing ' + model.name + ' voice sample…';
 
     const finish = () => {
       if (activeSampleUtterance !== utterance) return;
@@ -250,7 +250,7 @@ function initVoiceStudioTuner() {
       }
     });
 
-    activeModelNameEl.textContent = `${model.name} (${model.tagline.split('â€¢')[0].trim()})`;
+    activeModelNameEl.textContent = `${model.name} (${model.tagline.split('•')[0].trim()})`;
     feedbackEl.textContent = `Active voice model switched to ${model.name}. Adjust Pitch and Speed sliders to calibrate voice output.`;
 
     updateSliderDisplay();
@@ -296,7 +296,7 @@ function initVoiceStudioTuner() {
       slider.value = settings.volume;
       output.textContent = `${Math.round(settings.volume * 100)}%`;
 
-      muteBtn.textContent = settings.muted ? 'ðŸ”‡ Unmute' : 'ðŸ”Š Mute';
+      muteBtn.textContent = settings.muted ? '🔇 Unmute' : '🔊 Mute';
       muteBtn.setAttribute('aria-pressed', String(settings.muted));
       muteBtn.setAttribute(
         'aria-label',
@@ -382,7 +382,7 @@ function initVoiceStudioTuner() {
 
     if (!matched) {
       currentEmotion = 'custom';
-      activeEmotionNameEl.textContent = 'Custom ðŸŽ›ï¸';
+      activeEmotionNameEl.textContent = 'Custom 🎛️';
     }
   }
 
@@ -514,7 +514,7 @@ function initVoiceStudioTuner() {
       ttsRate.dispatchEvent(new Event('input', { bubbles: true }));
       ttsPitch.dispatchEvent(new Event('input', { bubbles: true }));
 
-      feedbackEl.textContent = `âœ“ Tuner settings synced to Text-to-Speech Studio (Rate: ${speedInput.value}x, Pitch: ${pitchInput.value}x).`;
+      feedbackEl.textContent = `✓ Tuner settings synced to Text-to-Speech Studio (Rate: ${speedInput.value}x, Pitch: ${pitchInput.value}x).`;
 
       // Smooth scroll down to TTS studio
       const studioSection = document.getElementById('studio');
@@ -1039,7 +1039,7 @@ function initMultiTrackWaveform() {
     if (playBtn) {
       playBtn.classList.toggle('is-playing', isPlaying);
       if (playLabel) playLabel.textContent = isPlaying ? 'Pause Real-Time Stream' : 'Start Real-Time Stream';
-      if (playIcon) playIcon.textContent = isPlaying ? 'â¸' : 'â–¶';
+      if (playIcon) playIcon.textContent = isPlaying ? '⏸' : '▶';
     }
   }
 
@@ -1058,7 +1058,7 @@ function initMultiTrackWaveform() {
     freezeBtn.addEventListener('click', () => {
       isFrozen = !isFrozen;
       freezeBtn.classList.toggle('is-frozen', isFrozen);
-      freezeBtn.querySelector('span').textContent = isFrozen ? 'â–¶ Unfreeze' : 'â„ï¸ Freeze';
+      freezeBtn.querySelector('span').textContent = isFrozen ? '▶ Unfreeze' : '❄️ Freeze';
     });
   }
 
@@ -1467,7 +1467,7 @@ function initDawTimeline() {
     }
 
     state.isPlaying = true;
-    playIcon.textContent = 'â¸';
+    playIcon.textContent = '⏸';
     playText.textContent = 'Pause';
     statusBar.textContent = 'Playing multi-track timeline...';
 
@@ -1499,7 +1499,7 @@ function initDawTimeline() {
     state.isPlaying = false;
     stopAudio();
     if (animId) cancelAnimationFrame(animId);
-    playIcon.textContent = 'â–¶';
+    playIcon.textContent = '▶';
     playText.textContent = 'Resume Timeline';
     statusBar.textContent = `Paused at ${state.currentTime.toFixed(2)}s.`;
   }
@@ -1510,7 +1510,7 @@ function initDawTimeline() {
     if (animId) cancelAnimationFrame(animId);
     state.currentTime = 0.0;
     updateTimecode();
-    playIcon.textContent = 'â–¶';
+    playIcon.textContent = '▶';
     playText.textContent = 'Play Timeline';
     statusBar.textContent = 'Timeline stopped and rewound to 00:00.00.';
   }
@@ -2405,7 +2405,7 @@ function initModulationLab() {
     }
     if (auditionBtn) {
       auditionBtn.classList.remove('playing');
-      if (playIcon) playIcon.textContent = 'â–¶';
+      if (playIcon) playIcon.textContent = '▶';
       if (playText) playText.textContent = 'Audition Modulated Voice';
     }
     if (ledDsp) ledDsp.classList.add('active');
@@ -2506,7 +2506,7 @@ function initModulationLab() {
 
     if (auditionBtn) {
       auditionBtn.classList.add('playing');
-      if (playIcon) playIcon.textContent = 'â¹';
+      if (playIcon) playIcon.textContent = '⏹';
       if (playText) playText.textContent = 'Stop DSP Audition';
     }
 
