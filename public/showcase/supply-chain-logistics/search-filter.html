@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Logistics - Dynamic Search & Filter</title>
+  <link rel="stylesheet" href="search-filter.css">
+</head>
+<body>
+  <div class="logistics-filter-container">
+    <header class="filter-header">
+      <h2>Freight & Consignment Intelligence Explorer</h2>
+      <p>Search, tag filter, and multi-column sort real-time multi-modal logistics shipments.</p>
+    </header>
+
+    <div class="filter-controls">
+      <div class="search-box-row">
+        <input type="text" id="search-filter-input" placeholder="Search by tracking number, origin, destination or carrier..." aria-label="Search shipments">
+        <button id="search-clear-btn" type="button" aria-label="Clear search">Clear</button>
+      </div>
+
+      <div class="sort-row">
+        <label for="sort-select">Sort by:</label>
+        <select id="sort-select">
+          <option value="trackingNumber:asc">Tracking # (A-Z)</option>
+          <option value="trackingNumber:desc">Tracking # (Z-A)</option>
+          <option value="weightKg:desc">Payload Weight (High-Low)</option>
+          <option value="weightKg:asc">Payload Weight (Low-High)</option>
+          <option value="etaHours:asc">ETA Hours (Earliest First)</option>
+          <option value="etaHours:desc">ETA Hours (Latest First)</option>
+        </select>
+      </div>
+
+      <div class="tag-chips-wrapper" id="tag-chips-container">
+        <span class="chips-label">Tags:</span>
+        <button type="button" class="filter-chip" data-tag="express">express</button>
+        <button type="button" class="filter-chip" data-tag="priority">priority</button>
+        <button type="button" class="filter-chip" data-tag="international">international</button>
+        <button type="button" class="filter-chip" data-tag="cold-chain">cold-chain</button>
+        <button type="button" class="filter-chip" data-tag="intermodal">intermodal</button>
+        <button type="button" class="filter-chip" data-tag="eco-friendly">eco-friendly</button>
+      </div>
+    </div>
+
+    <div id="empty-state-alert" class="empty-state" style="display: none;">
+      <p>No shipments match your search criteria or selected tags.</p>
+    </div>
+
+    <div id="results-list" class="results-grid"></div>
+  </div>
+
+  <script type="module" src="search-filter.js"></script>
+</body>
+</html>
