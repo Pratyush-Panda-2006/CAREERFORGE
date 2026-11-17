@@ -1,0 +1,240 @@
+/**
+ * Agritech Precision Farming - Cryptographic Audit Trail Styling
+ * Chronological timeline, SHA-256 hash chips, and status glow indicators.
+ */
+
+:root {
+  --audit-bg: #070e0a;
+  --audit-card: rgba(14, 28, 19, 0.7);
+  --audit-border: rgba(34, 197, 94, 0.22);
+  --audit-emerald: #22c55e;
+  --audit-emerald-glow: rgba(34, 197, 94, 0.35);
+  --audit-red: #ef4444;
+  --audit-cyan: #38bdf8;
+  --audit-amber: #f59e0b;
+  --audit-text-main: #f0fdf4;
+  --audit-text-muted: #86efac;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(circle at top right, #11281a 0%, #050a07 100%);
+  color: var(--audit-text-main);
+  min-height: 100vh;
+}
+
+.audit-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+.audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--audit-border);
+}
+
+.title-wrap h1 {
+  margin: 0 0 6px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #86efac 0%, #22c55e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.title-wrap p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #86efac;
+  opacity: 0.85;
+}
+
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.status-valid {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid var(--audit-emerald);
+  color: #86efac;
+  box-shadow: 0 0 14px var(--audit-emerald-glow);
+}
+
+.status-invalid {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid var(--audit-red);
+  color: #fca5a5;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
+}
+
+.controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  background: var(--audit-card);
+  color: var(--audit-text-main);
+  border: 1px solid var(--audit-border);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.btn-audit {
+  background: var(--audit-card);
+  color: var(--audit-text-main);
+  border: 1px solid var(--audit-border);
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-audit:hover {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: var(--audit-emerald);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #052e16;
+  border-color: #4ade80;
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  box-shadow: 0 4px 14px var(--audit-emerald-glow);
+}
+
+.timeline-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.timeline-item {
+  background: var(--audit-card);
+  border: 1px solid var(--audit-border);
+  border-left: 4px solid var(--audit-emerald);
+  border-radius: 10px;
+  padding: 16px 20px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.timeline-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip-index {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #cbd5e1;
+}
+
+.chip-action {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.action-genesis_init { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid var(--audit-cyan); }
+.action-soil_telemetry { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid var(--audit-emerald); }
+.action-drone_survey { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid var(--audit-amber); }
+.action-irrigation_dispatch { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid #c084fc; }
+
+.time-label {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.timeline-payload {
+  background: #030805;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.78rem;
+  color: #bbf7d0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.timeline-hashes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+}
+
+.hash-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mono-hash {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.74rem;
+  color: #67e8f9;
+  word-break: break-all;
+}
+
+.mono-hash.text-muted {
+  color: #64748b;
+}
+
+.empty-msg {
+  text-align: center;
+  padding: 40px;
+  color: #86efac;
+  opacity: 0.7;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 24px;
+  color: var(--audit-emerald);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
