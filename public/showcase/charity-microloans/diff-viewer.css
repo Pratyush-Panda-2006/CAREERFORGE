@@ -1,0 +1,230 @@
+:root {
+  --bg-primary: #091312;
+  --bg-secondary: #102220;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-emerald: #10b981;
+  --diff-add-bg: rgba(16, 185, 129, 0.15);
+  --diff-add-border: #10b981;
+  --diff-add-text: #a7f3d0;
+  --diff-del-bg: rgba(239, 68, 68, 0.15);
+  --diff-del-border: #ef4444;
+  --diff-del-text: #fca5a5;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+}
+
+.diff-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.diff-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.diff-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent-emerald), #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.diff-header p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.metrics-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.metric-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.metric-value.added { color: var(--diff-add-border); }
+.metric-value.removed { color: var(--diff-del-border); }
+.metric-value.unchanged { color: var(--text-muted); }
+.metric-value.percent { color: var(--accent-emerald); }
+
+.diff-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .diff-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.input-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-column label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.input-column textarea {
+  width: 100%;
+  height: 180px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  color: var(--text-main);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+
+.actions-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--accent-emerald);
+  color: #091312;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.diff-output-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+}
+
+.diff-row {
+  line-height: 1.6;
+}
+
+.diff-row.row-added {
+  background: var(--diff-add-bg);
+  color: var(--diff-add-text);
+}
+
+.diff-row.row-removed {
+  background: var(--diff-del-bg);
+  color: var(--diff-del-text);
+}
+
+.diff-row.row-unchanged {
+  color: var(--text-muted);
+}
+
+.line-num {
+  width: 45px;
+  text-align: right;
+  padding: 0.15rem 0.6rem;
+  user-select: none;
+  color: rgba(255, 255, 255, 0.25);
+  border-right: 1px solid var(--border-color);
+}
+
+.diff-sign {
+  width: 25px;
+  text-align: center;
+  user-select: none;
+  font-weight: 700;
+}
+
+.diff-text {
+  padding: 0.15rem 0.85rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.empty-diff {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-muted);
+}
