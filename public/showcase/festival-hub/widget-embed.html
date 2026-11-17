@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Embeddable Widget Bridge</title>
+  <link rel="stylesheet" href="widget-embed.css">
+</head>
+<body>
+  <div class="widget-container">
+    <div class="widget-header">
+      <h1 class="widget-title">
+        Festival Hub Embeddable Stage Bridge
+        <span class="widget-badge">Issue #732</span>
+      </h1>
+      <p class="widget-description">
+        Cross-origin iframe postMessage bridge synchronizing live stage lineups, performance schedules, and crowd density alerts.
+      </p>
+    </div>
+
+    <div class="status-bar">
+      <span>Bridge Status:</span>
+      <span id="connection-status-badge" class="status-pill status-disconnected">Disconnected (Awaiting Handshake)</span>
+    </div>
+
+    <div class="controls-row">
+      <button id="send-ping-btn" class="btn-primary">Send Handshake Ping</button>
+      <button id="send-stage-update-btn" class="btn-secondary">Emit Stage Update Event</button>
+    </div>
+
+    <div class="log-section">
+      <h3>Message Traffic Log</h3>
+      <div id="bridge-message-log" class="log-container"></div>
+    </div>
+  </div>
+
+  <script type="module" src="widget-embed.js"></script>
+</body>
+</html>
