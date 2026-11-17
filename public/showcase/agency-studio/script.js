@@ -2861,6 +2861,217 @@ function initBrandMoodboard() {
 })();
 /* ===== END Issue #322 ===== */
 
+/* ===== BEGIN Issue #575: AgencyStudioPreferenceManager ===== */
+class AgencyStudioPreferenceManager {
+  static STORAGE_KEY = 'agency_studio_preferences_v1';
+
+  static DEFAULTS = {
+    theme: 'dark',
+    viewLayout: 'grid',
+    soundCues: false,
+    highContrast: false,
+    metricUnits: 'metric',
+    reducedMotion: false
+  };
+
+  constructor(storage = null) {
+    this.storage = storage || (typeof window !== 'undefined' ? window.localStorage : null);
+    this.preferences = this.load();
+  }
+
+  load() {
+    if (!this.storage) {
+      return { ...AgencyStudioPreferenceManager.DEFAULTS };
+    }
+    try {
+      const raw = this.storage.getItem(AgencyStudioPreferenceManager.STORAGE_KEY);
+      if (!raw) return { ...AgencyStudioPreferenceManager.DEFAULTS };
+      const parsed = JSON.parse(raw);
+      return { ...AgencyStudioPreferenceManager.DEFAULTS, ...parsed };
+    } catch {
+      return { ...AgencyStudioPreferenceManager.DEFAULTS };
+    }
+  }
+
+  save(key, val) {
+    if (typeof key === 'string') {
+      this.preferences[key] = val;
+    } else if (typeof key === 'object' && key !== null) {
+      this.preferences = { ...this.preferences, ...key };
+    }
+    if (this.storage) {
+      try {
+        this.storage.setItem(
+          AgencyStudioPreferenceManager.STORAGE_KEY,
+          JSON.stringify(this.preferences)
+        );
+      } catch {}
+    }
+    this.applyToDOM();
+    return this.preferences;
+  }
+
+  get(key) {
+    return this.preferences[key];
+  }
+
+  resetDefaults() {
+    this.preferences = { ...AgencyStudioPreferenceManager.DEFAULTS };
+    if (this.storage) {
+      try {
+        this.storage.removeItem(AgencyStudioPreferenceManager.STORAGE_KEY);
+      } catch {}
+    }
+    this.applyToDOM();
+    return { ...this.preferences };
+  }
+
+  exportJSON() {
+    return JSON.stringify(this.preferences, null, 2);
+  }
+
+  importJSON(jsonString) {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (typeof parsed === 'object' && parsed !== null) {
+        this.preferences = { ...AgencyStudioPreferenceManager.DEFAULTS, ...parsed };
+        if (this.storage) {
+          this.storage.setItem(AgencyStudioPreferenceManager.STORAGE_KEY, JSON.stringify(this.preferences));
+        }
+        this.applyToDOM();
+        return true;
+      }
+    } catch {}
+    return false;
+  }
+
+  applyToDOM() {
+    if (typeof document === 'undefined' || !document.documentElement) return;
+    const root = document.documentElement;
+    if (this.preferences.highContrast) {
+      root.classList.add('high-contrast-mode');
+    } else {
+      root.classList.remove('high-contrast-mode');
+    }
+    if (this.preferences.theme) {
+      root.setAttribute('data-theme', this.preferences.theme);
+    }
+    if (this.preferences.viewLayout) {
+      root.setAttribute('data-layout', this.preferences.viewLayout);
+    }
+  }
+
+  initUI() {
+    if (typeof window === 'undefined' || !window.document || !window.document.getElementById) return;
+    const modal = document.getElementById('agency-studio-preferences-modal');
+    const openBtn = document.getElementById('agencyPreferencesTriggerBtn');
+    const closeBtn = document.getElementById('agencyPreferencesCloseBtn');
+    const resetBtn = document.getElementById('agencyResetPreferencesBtn');
+    const exportBtn = document.getElementById('agencyExportPreferencesBtn');
+
+    if (openBtn && modal) {
+      openBtn.addEventListener('click', () => {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+      });
+    }
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+          modal.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+
+    const soundToggle = document.getElementById('agencyPrefSoundCues');
+    if (soundToggle) {
+      soundToggle.checked = Boolean(this.preferences.soundCues);
+      soundToggle.addEventListener('change', (e) => {
+        this.save('soundCues', e.target.checked);
+      });
+    }
+
+    const contrastToggle = document.getElementById('agencyPrefHighContrast');
+    if (contrastToggle) {
+      contrastToggle.checked = Boolean(this.preferences.highContrast);
+      contrastToggle.addEventListener('change', (e) => {
+        this.save('highContrast', e.target.checked);
+      });
+    }
+
+    const layoutSelect = document.getElementById('agencyPrefViewLayout');
+    if (layoutSelect) {
+      layoutSelect.value = this.preferences.viewLayout || 'grid';
+      layoutSelect.addEventListener('change', (e) => {
+        this.save('viewLayout', e.target.value);
+      });
+    }
+
+    const unitsSelect = document.getElementById('agencyPrefMetricUnits');
+    if (unitsSelect) {
+      unitsSelect.value = this.preferences.metricUnits || 'metric';
+      unitsSelect.addEventListener('change', (e) => {
+        this.save('metricUnits', e.target.value);
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        this.resetDefaults();
+        if (soundToggle) soundToggle.checked = Boolean(this.preferences.soundCues);
+        if (contrastToggle) contrastToggle.checked = Boolean(this.preferences.highContrast);
+        if (layoutSelect) layoutSelect.value = this.preferences.viewLayout;
+        if (unitsSelect) unitsSelect.value = this.preferences.metricUnits;
+      });
+    }
+
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        const json = this.exportJSON();
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'agency-studio-preferences.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    this.applyToDOM();
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.AgencyStudioPreferenceManager = AgencyStudioPreferenceManager;
+  if (document && document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const prefManager = new AgencyStudioPreferenceManager();
+      prefManager.initUI();
+    });
+  }
+}
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.AgencyStudioPreferenceManager = AgencyStudioPreferenceManager;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { AgencyStudioPreferenceManager };
+}
+/* ===== END Issue #575 ===== */
+
 /* ===== BEGIN Issue #576: AgencyStudioFilterEngine ===== */
 class AgencyStudioFilterEngine {
   constructor(items = []) {
@@ -3049,6 +3260,9 @@ if (typeof globalThis !== 'undefined') {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { AgencyStudioFilterEngine };
+  module.exports = {
+    ...module.exports,
+    AgencyStudioFilterEngine
+  };
 }
 /* ===== END Issue #576 ===== */

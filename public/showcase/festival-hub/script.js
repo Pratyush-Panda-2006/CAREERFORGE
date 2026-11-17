@@ -1866,368 +1866,44 @@ function initMeetupLocator() {
 
 
 
+// Festival attendee FAQ: category and keyword filters keep the disclosure
+// controls native buttons, so keyboard users can expand every visible answer.
+(function initFestivalFaq() {
+  const search = document.getElementById('faq-search');
+  if (!search) return;
+  const filters = Array.from(document.querySelectorAll('[data-faq-filter]'));
+  const items = Array.from(document.querySelectorAll('.faq-item'));
+  const results = document.getElementById('faq-results');
+  let category = 'all';
 
-// ===== Issue #342: Soundstage Crowd Density Meter & Real-Time Heat Alerts =====
-(function initCrowdDensityMeter() {
-  if (typeof document === 'undefined') return;
-
-  function setup() {
-    const root = document.getElementById('stage-crowd-density-meter');
-    if (!root) return;
-
-    const stages = {
-      cyber: {
-        id: 'cyber',
-        name: 'Main Cyber Stage',
-        maxCap: 12000,
-        pct: 92,
-        baseDb: 104,
-        altTarget: 'oasis',
-        altName: 'Neon Oasis'
-      },
-      oasis: {
-        id: 'oasis',
-        name: 'Neon Oasis',
-        maxCap: 7500,
-        pct: 45,
-        baseDb: 91,
-        altTarget: 'vault',
-        altName: 'Underground Vault'
-      },
-      vault: {
-        id: 'vault',
-        name: 'Underground Vault',
-        maxCap: 4500,
-        pct: 76,
-        baseDb: 99,
-        altTarget: 'oasis',
-        altName: 'Neon Oasis'
-      }
-    };
-
-    let simActive = true;
-    let simInterval = null;
-
-    // Elements
-    const btnToggleSim = document.getElementById('btnToggleSim');
-    const simToggleText = document.getElementById('simToggleText');
-    const btnSimSurge = document.getElementById('btnSimSurge');
-    const btnNormalize = document.getElementById('btnNormalizeFlow');
-
-    const totalVenueLoadEl = document.getElementById('totalVenueLoad');
-    const totalHeadcountEl = document.getElementById('totalHeadcount');
-    const activeSurgeCountEl = document.getElementById('activeSurgeCount');
-    const advisoryTimestampEl = document.getElementById('advisoryTimestamp');
-    const advisoryLogList = document.getElementById('advisoryLogList');
-
-    function formatTime(d) {
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      return '[' + hh + ':' + mm + ']';
-    }
-
-    function addLogEntry(msg, type) {
-      if (!advisoryLogList) return;
-      const li = document.createElement('li');
-      li.className = 'log-item' + (type === 'surge' ? ' surge-item' : type === 'ok' ? ' ok-item' : '');
-
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'log-time';
-      timeSpan.textContent = formatTime(new Date());
-
-      const msgSpan = document.createElement('span');
-      msgSpan.className = 'log-msg';
-      msgSpan.textContent = msg;
-
-      li.appendChild(timeSpan);
-      li.appendChild(msgSpan);
-
-      advisoryLogList.insertBefore(li, advisoryLogList.firstChild);
-      while (advisoryLogList.children.length > 5) {
-        advisoryLogList.removeChild(advisoryLogList.lastChild);
-      }
-
-      if (advisoryTimestampEl) {
-        advisoryTimestampEl.textContent = 'Updated just now';
-      }
-    }
-
-    function updateStageUI(st) {
-      const card = document.getElementById('card-stage-' + st.id);
-      const badge = document.getElementById('badge-' + st.id);
-      const pctEl = document.getElementById('pct-' + st.id);
-      const bar = document.getElementById('bar-' + st.id);
-      const headcountEl = document.getElementById('headcount-' + st.id);
-      const dbEl = document.getElementById('db-' + st.id);
-      const safetyEl = document.getElementById('safety-' + st.id);
-      const slider = document.getElementById('slider-' + st.id);
-      const recBox = document.getElementById('rec-' + st.id);
-
-      const headcount = Math.round((st.pct / 100) * st.maxCap);
-      const liveDb = Math.round(st.baseDb + ((st.pct - 50) * 0.12));
-
-      if (pctEl) pctEl.textContent = st.pct + '%';
-      if (bar) {
-        bar.style.width = st.pct + '%';
-        bar.className = 'density-bar-fill';
-      }
-      if (headcountEl) headcountEl.textContent = headcount.toLocaleString('en-US') + ' / ' + st.maxCap.toLocaleString('en-US');
-      if (dbEl) dbEl.textContent = liveDb + ' dB';
-      if (slider && parseInt(slider.value, 10) !== st.pct) {
-        slider.value = String(st.pct);
-      }
-
-      if (card) card.classList.remove('surge-active');
-      if (badge) badge.className = 'density-status-tag';
-
-      // Categorize flow states
-      if (st.pct >= 90) {
-        if (card) card.classList.add('surge-active');
-        if (badge) {
-          badge.classList.add('status-surge');
-          badge.textContent = '⚠️ SURGE ALERT';
-        }
-        if (bar) bar.classList.add('fill-surge');
-        if (safetyEl) {
-          safetyEl.className = 'stat-val red-text';
-          safetyEl.textContent = 'Restricted';
-        }
-
-        // Alternate stage recommendation
-        if (recBox) {
-          recBox.className = 'stage-recommendation-box alert-box';
-          recBox.replaceChildren();
-
-          const icon = document.createElement('div');
-          icon.className = 'rec-icon';
-          icon.textContent = '⚠️';
-
-          const content = document.createElement('div');
-          content.className = 'rec-content';
-
-          const strong = document.createElement('strong');
-          strong.textContent = 'Crowd Diversion Alert: ';
-
-          const spanMsg = document.createElement('span');
-          spanMsg.textContent = 'Critical bottlenecks detected! Redirect toward ';
-
-          const divertBtn = document.createElement('button');
-          divertBtn.type = 'button';
-          divertBtn.className = 'btn-rec-divert';
-          divertBtn.setAttribute('data-target', st.altTarget);
-          divertBtn.textContent = st.altName + ' (' + stages[st.altTarget].pct + '% load • 3 min walk)';
-          divertBtn.addEventListener('click', () => {
-            const targetCard = document.getElementById('card-stage-' + st.altTarget);
-            if (targetCard) targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          });
-
-          content.appendChild(strong);
-          content.appendChild(spanMsg);
-          content.appendChild(divertBtn);
-
-          recBox.appendChild(icon);
-          recBox.appendChild(content);
-        }
-      } else if (st.pct >= 70) {
-        if (badge) {
-          badge.classList.add('status-busy');
-          badge.textContent = 'BUSY';
-        }
-        if (bar) bar.classList.add('fill-busy');
-        if (safetyEl) {
-          safetyEl.className = 'stat-val amber-text';
-          safetyEl.textContent = 'Moderate';
-        }
-
-        if (recBox) {
-          recBox.className = 'stage-recommendation-box warn-box';
-          recBox.replaceChildren();
-
-          const icon = document.createElement('div');
-          icon.className = 'rec-icon';
-          icon.textContent = '⚡';
-
-          const content = document.createElement('div');
-          content.className = 'rec-content';
-
-          const strong = document.createElement('strong');
-          strong.textContent = 'Moderate Flow: ';
-
-          const spanMsg = document.createElement('span');
-          spanMsg.textContent = 'Gate queues ~4 mins. Side aisles unobstructed.';
-
-          content.appendChild(strong);
-          content.appendChild(spanMsg);
-          recBox.appendChild(icon);
-          recBox.appendChild(content);
-        }
-      } else {
-        if (badge) {
-          badge.classList.add('status-comfortable');
-          badge.textContent = 'COMFORTABLE';
-        }
-        if (bar) bar.classList.add('fill-comfortable');
-        if (safetyEl) {
-          safetyEl.className = 'stat-val green-text';
-          safetyEl.textContent = 'Optimal';
-        }
-
-        if (recBox) {
-          recBox.className = 'stage-recommendation-box clear-box';
-          recBox.replaceChildren();
-
-          const icon = document.createElement('div');
-          icon.className = 'rec-icon';
-          icon.textContent = '✨';
-
-          const content = document.createElement('div');
-          content.className = 'rec-content';
-
-          const strong = document.createElement('strong');
-          strong.textContent = 'Optimal Zone: ';
-
-          const spanMsg = document.createElement('span');
-          spanMsg.textContent = 'Excellent acoustic fidelity and free bar access. Sanctuary zone.';
-
-          content.appendChild(strong);
-          content.appendChild(spanMsg);
-          recBox.appendChild(icon);
-          recBox.appendChild(content);
-        }
-      }
-    }
-
-    function updateVenueTotals() {
-      let totalOccupants = 0;
-      let totalCapacity = 0;
-      let surgeCount = 0;
-
-      Object.values(stages).forEach((st) => {
-        const occ = Math.round((st.pct / 100) * st.maxCap);
-        totalOccupants += occ;
-        totalCapacity += st.maxCap;
-        if (st.pct >= 90) surgeCount++;
-        updateStageUI(st);
-      });
-
-      const overallPct = Math.round((totalOccupants / totalCapacity) * 100);
-
-      if (totalVenueLoadEl) totalVenueLoadEl.textContent = overallPct + '%';
-      if (totalHeadcountEl) {
-        totalHeadcountEl.textContent = totalOccupants.toLocaleString('en-US') + ' / ' + totalCapacity.toLocaleString('en-US');
-      }
-
-      if (activeSurgeCountEl) {
-        if (surgeCount > 0) {
-          activeSurgeCountEl.textContent = surgeCount + ' Stage' + (surgeCount > 1 ? 's' : '') + ' at Peak';
-          activeSurgeCountEl.className = 'tel-val alert-val';
-        } else {
-          activeSurgeCountEl.textContent = 'None • All Flow Clear';
-          activeSurgeCountEl.className = 'tel-val green-val';
-        }
-      }
-    }
-
-    // Step simulation tick
-    function simTick() {
-      if (!simActive) return;
-
-      Object.values(stages).forEach((st) => {
-        const delta = Math.floor(Math.random() * 5) - 2; // -2 to +2
-        st.pct = Math.max(15, Math.min(98, st.pct + delta));
-      });
-
-      updateVenueTotals();
-    }
-
-    function startSim() {
-      if (simInterval) clearInterval(simInterval);
-      simInterval = setInterval(simTick, 3500);
-      simActive = true;
-      if (btnToggleSim) {
-        btnToggleSim.classList.add('active');
-        btnToggleSim.setAttribute('aria-pressed', 'true');
-      }
-      if (simToggleText) simToggleText.textContent = 'Live Pulse: ON';
-    }
-
-    function pauseSim() {
-      if (simInterval) {
-        clearInterval(simInterval);
-        simInterval = null;
-      }
-      simActive = false;
-      if (btnToggleSim) {
-        btnToggleSim.classList.remove('active');
-        btnToggleSim.setAttribute('aria-pressed', 'false');
-      }
-      if (simToggleText) simToggleText.textContent = 'Live Pulse: PAUSED';
-    }
-
-    // Event listeners
-    if (btnToggleSim) {
-      btnToggleSim.addEventListener('click', () => {
-        if (simActive) {
-          pauseSim();
-          addLogEntry('Sensor pulse stream paused by operator.', 'info');
-        } else {
-          startSim();
-          addLogEntry('Sensor pulse stream resumed (100Hz IoT mesh).', 'ok');
-        }
-      });
-    }
-
-    if (btnSimSurge) {
-      btnSimSurge.addEventListener('click', () => {
-        pauseSim();
-        stages.cyber.pct = 97;
-        stages.vault.pct = 88;
-        stages.oasis.pct = 40;
-        updateVenueTotals();
-        addLogEntry('🚨 PEAK SURGE RUSH SIMULATED: Cyber Stage at 97% capacity! Diversion active.', 'surge');
-      });
-    }
-
-    if (btnNormalize) {
-      btnNormalize.addEventListener('click', () => {
-        pauseSim();
-        stages.cyber.pct = 54;
-        stages.vault.pct = 58;
-        stages.oasis.pct = 52;
-        updateVenueTotals();
-        addLogEntry('✅ Venue flow normalized across all soundstages.', 'ok');
-      });
-    }
-
-    // Stage Range Sliders
-    Object.keys(stages).forEach((stageId) => {
-      const slider = document.getElementById('slider-' + stageId);
-      if (slider) {
-        slider.addEventListener('input', (e) => {
-          pauseSim();
-          stages[stageId].pct = parseInt(e.target.value, 10) || 50;
-          updateVenueTotals();
-        });
-      }
+  function render() {
+    let visible = 0;
+    items.forEach(item => {
+      const match = FestivalFaqFilter.matches({
+        category: item.dataset.faqCategory,
+        text: item.textContent
+      }, category, search.value);
+      item.hidden = !match;
+      if (match) visible += 1;
     });
-
-    // Wire existing detour buttons
-    root.querySelectorAll('.btn-rec-divert').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-target');
-        const targetCard = document.getElementById('card-stage-' + targetId);
-        if (targetCard) targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-    });
-
-    // Initial render & start timer
-    updateVenueTotals();
-    startSim();
+    results.textContent = visible ? `Showing ${visible} of ${items.length} questions` : 'No questions match. Try another keyword or category.';
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setup);
-  } else {
-    setup();
-  }
+  filters.forEach(button => button.addEventListener('click', () => {
+    category = button.dataset.faqFilter;
+    filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+    render();
+  }));
+  search.addEventListener('input', render);
+  items.forEach(item => {
+    const button = item.querySelector('button[aria-controls]');
+    const answer = document.getElementById(button.getAttribute('aria-controls'));
+    button.addEventListener('click', () => {
+      const expanded = button.getAttribute('aria-expanded') === 'true';
+      button.setAttribute('aria-expanded', String(!expanded));
+      answer.setAttribute('aria-hidden', String(expanded));
+      answer.classList.toggle('is-open', !expanded);
+    });
+  });
+  render();
 })();

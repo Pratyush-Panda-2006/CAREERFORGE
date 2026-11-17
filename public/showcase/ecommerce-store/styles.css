@@ -392,6 +392,35 @@ body {
   background: rgba(15, 23, 42, 0.95);
 }
 
+.shipping-progress {
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.shipping-progress-message { margin-bottom: 10px; font-size: 0.85rem; font-weight: 700; }
+.shipping-progress-track { height: 8px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.14); }
+.shipping-progress-track > span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #facc15);
+  transition: width 350ms ease;
+}
+.shipping-progress-badge { display: inline-block; margin-top: 10px; color: #86efac; font-size: 0.8rem; font-weight: 800; }
+.shipping-progress-badge[hidden] { display: none; }
+.shipping-progress.unlocked { border-color: #4ade80; background: rgba(74, 222, 128, 0.08); }
+.shipping-progress.unlocked .shipping-progress-track > span { background: linear-gradient(90deg, #22c55e, #86efac); }
+.shipping-progress.unlocked .shipping-progress-badge { animation: shipping-unlocked 350ms ease-out; }
+@keyframes shipping-unlocked { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .shipping-progress-track > span { transition: none; }
+  .shipping-progress.unlocked .shipping-progress-badge { animation: none; }
+}
+
 .total-row {
   display: flex;
   justify-content: space-between;
@@ -4626,3 +4655,108 @@ details[open] .facet-chevron {
   border: 1px dashed rgba(255, 255, 255, 0.08);
 }
 /* ===== END Issue #338 ===== */
+
+/* ==========================================================================
+   EcommerceStoreExportEngine - Issue #574
+   Client-side export engine & formatted summary report generator
+   ========================================================================== */
+.export-engine-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.export-dropdown-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.5rem 0.85rem;
+  color: #f1f5f9;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.export-dropdown-trigger-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+  transform: translateY(-1px);
+}
+
+.export-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 230px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+  display: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 1000;
+  animation: exportDropdownFadeIn 0.2s ease-out;
+}
+
+.export-dropdown-menu.active {
+  display: flex;
+}
+
+@keyframes exportDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.export-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  color: #e2e8f0;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.export-menu-item:hover {
+  background: rgba(99, 102, 241, 0.15);
+  color: #ffffff;
+}
+
+.export-item-icon {
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.export-item-text strong {
+  display: block;
+  font-size: 0.825rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.export-item-text small {
+  display: block;
+  font-size: 0.725rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Adoption Haven — Matching Algorithm Stress & Benchmark Suite</title>
+  <link rel="stylesheet" href="benchmark-suite.css">
+</head>
+<body>
+  <div class="bench-container">
+    <header class="bench-header">
+      <div class="bench-title">
+        <h1>⚡ Pet Compatibility Stress & Telemetry Benchmark Suite</h1>
+        <p>Evaluates multi-trait personality matching throughput, shelter application search latency, and client frame budget.</p>
+      </div>
+      <div class="fps-badge fps-good" id="liveFpsMeter">60 FPS</div>
+    </header>
+
+    <div class="bench-controls-bar">
+      <div class="input-group">
+        <label for="iterationCountInput">Iterations:</label>
+        <input type="number" id="iterationCountInput" value="2500" min="100" max="20000" step="500">
+      </div>
+      <button type="button" id="runBenchmarkBtn" class="btn-bench btn-primary">🚀 Start Benchmark Suite</button>
+      <button type="button" id="resetBenchmarkBtn" class="btn-bench">🔄 Reset Metrics</button>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Throughput</div>
+        <div class="kpi-value teal" id="statOpsPerSec">0 ops/s</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Average Latency</div>
+        <div class="kpi-value green" id="statAvgLatency">0 ms</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Median Latency (P50)</div>
+        <div class="kpi-value teal" id="statP50">0 ms</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Memory Footprint</div>
+        <div class="kpi-value gold" id="statMemoryUsage">N/A</div>
+      </div>
+    </div>
+
+    <!-- Latency Percentiles Profile -->
+    <section class="panel-card">
+      <h2>Compatibility Engine Latency Profile</h2>
+      <div class="percentile-track">
+        <div class="percentile-row">
+          <div class="percentile-header">
+            <span>P50 (Median Standard Latency)</span>
+            <span id="labelP50">Target: &lt; 0.05 ms</span>
+          </div>
+          <div class="bar-bg">
+            <div id="barP50" class="bar-fill fill-p50"></div>
+          </div>
+        </div>
+
+        <div class="percentile-row">
+          <div class="percentile-header">
+            <span>P95 (95th Percentile Burst Peak)</span>
+            <span id="statP95">0 ms</span>
+          </div>
+          <div class="bar-bg">
+            <div id="barP95" class="bar-fill fill-p95"></div>
+          </div>
+        </div>
+
+        <div class="percentile-row">
+          <div class="percentile-header">
+            <span>P99 (99th Percentile Worst Case)</span>
+            <span id="statP99">0 ms</span>
+          </div>
+          <div class="bar-bg">
+            <div id="barP99" class="bar-fill fill-p99"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Pet Adoption Haven Showcase Dashboard</a>
+    </nav>
+  </div>
+
+  <script type="module" src="benchmark-suite.js"></script>
+</body>
+</html>
