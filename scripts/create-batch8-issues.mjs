@@ -324,7 +324,7 @@ ${item.suggestions.map((s, idx) => `${idx + 1}. ${s}`).join("\n")}
 - **Scope Restriction:** All code changes **MUST** reside exclusively inside \`public/showcase/${item.project}/\`.
 - **Protected Core:** Never modify, reformat, or alter files in \`src/\`, \`package.json\`, \`.github/\`, or top-level project configs.
 - **PR Description Keyword:** Ensure your PR description includes a closing keyword referencing this issue (e.g. \`Closes #<issue-id>\` or \`Fixes #<issue-id>\`).
-- **Claiming & Level 3 Limit:** Reply with \`/claim\` to be assigned (3-day timer). Note: Contributors may hold at most **4 active Level 3 claims** simultaneously.
+- **Claiming:** Reply with \`/claim\` to be assigned (3-day timer).
 
 Happy Coding! 🚀`;
 }
