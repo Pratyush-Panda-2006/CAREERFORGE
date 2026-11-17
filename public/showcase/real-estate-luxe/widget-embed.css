@@ -1,0 +1,114 @@
+/* Real Estate Luxe - Embeddable Widget Styles */
+:root {
+  --widget-accent: #d4af37;
+  --widget-accent-glow: rgba(212, 175, 55, 0.4);
+  --widget-bg: #0c0a09;
+  --widget-card-bg: rgba(28, 25, 23, 0.9);
+  --widget-border: #44403c;
+  --widget-text: #fafaf9;
+  --widget-text-muted: #d6d3d1;
+}
+
+:root[data-theme="light"] {
+  --widget-bg: #fafaf9;
+  --widget-card-bg: #ffffff;
+  --widget-border: #e7e5e4;
+  --widget-text: #0c0a09;
+  --widget-text-muted: #78716c;
+}
+
+body {
+  margin: 0;
+  padding: 1rem;
+  background-color: var(--widget-bg);
+  color: var(--widget-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  user-select: none;
+}
+
+.embed-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--widget-border);
+  padding-bottom: 0.75rem;
+}
+
+.widget-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.vip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(212, 175, 55, 0.2);
+  color: var(--widget-accent);
+  border: 1px solid var(--widget-accent);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.vip-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--widget-accent);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.property-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.property-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--widget-card-bg);
+  border: 1px solid var(--widget-border);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.property-card:hover {
+  border-color: var(--widget-accent);
+  box-shadow: 0 0 12px var(--widget-accent-glow);
+  transform: translateY(-1px);
+}
+
+.property-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.property-price {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--widget-accent);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
