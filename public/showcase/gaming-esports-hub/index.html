@@ -1045,6 +1045,186 @@
   </div>
   <!-- ===== END Issue #409 ===== -->
 
+  <!-- ===== BEGIN Issue #346: Pro Player Crosshair & Sensitivity Converter ===== -->
+  <section class="crosshair-lab-section" id="crosshair-sensitivity-lab" aria-labelledby="crosshairLabTitle">
+    <div class="crosshair-container">
+      <div class="crosshair-header">
+        <span class="crosshair-kicker">🎯 COMPETITIVE AIM LAB // PRECISION MECHANICS</span>
+        <h2 id="crosshairLabTitle">Pro Crosshair &amp; Mouse Sensitivity Converter</h2>
+        <p class="crosshair-subtitle">
+          Translate mouse sensitivities and calculate exact eDPI &amp; cm/360° across Valorant, CS2, Overwatch 2, and Apex Legends. Design and test custom competitive SVG reticles against high-contrast tactical backdrops.
+        </p>
+      </div>
+
+      <!-- Pro Player Presets Bar -->
+      <div class="pro-presets-strip">
+        <span class="presets-label">Load Pro Player Profile:</span>
+        <div class="pro-presets-buttons" role="group" aria-label="Pro Player Aim Presets">
+          <button type="button" class="btn-pro-preset active" data-pro="tenz">
+            <span class="pro-tag">VAL</span> <strong>TenZ</strong> <small>(800 DPI • 0.35)</small>
+          </button>
+          <button type="button" class="btn-pro-preset" data-pro="s1mple">
+            <span class="pro-tag">CS2</span> <strong>s1mple</strong> <small>(400 DPI • 3.09)</small>
+          </button>
+          <button type="button" class="btn-pro-preset" data-pro="shroud">
+            <span class="pro-tag">APEX</span> <strong>shroud</strong> <small>(450 DPI • 2.40)</small>
+          </button>
+          <button type="button" class="btn-pro-preset" data-pro="profit">
+            <span class="pro-tag">OW2</span> <strong>Profit</strong> <small>(800 DPI • 6.00)</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Lab Grid: Left = Sensitivity Converter, Right = Crosshair Customizer & Live Reticle -->
+      <div class="crosshair-lab-grid">
+        <!-- Col 1: Sensitivity & eDPI Matrix -->
+        <div class="aim-card sens-converter-card">
+          <div class="aim-card-header">
+            <h3>Sensitivity &amp; eDPI Matrix</h3>
+            <span class="aim-chip" id="cm360Badge">46.6 cm / 360°</span>
+          </div>
+
+          <div class="sens-inputs-row">
+            <div class="aim-input-group">
+              <label for="sourceGameSelect">Source Game:</label>
+              <select id="sourceGameSelect" class="aim-select">
+                <option value="valorant">Valorant</option>
+                <option value="cs2">Counter-Strike 2 / CS:GO</option>
+                <option value="apex">Apex Legends</option>
+                <option value="overwatch">Overwatch 2</option>
+              </select>
+            </div>
+
+            <div class="aim-input-group">
+              <label for="mouseDpiInput">Mouse Hardware DPI:</label>
+              <input type="number" id="mouseDpiInput" class="aim-num-input" min="200" max="16000" step="50" value="800" />
+            </div>
+
+            <div class="aim-input-group">
+              <label for="sensValueInput">Game In-Game Sens:</label>
+              <input type="number" id="sensValueInput" class="aim-num-input" min="0.01" max="50" step="0.01" value="0.35" />
+            </div>
+          </div>
+
+          <!-- Calculated Game Sensitivities Table -->
+          <div class="sens-conversion-table">
+            <div class="table-head-row">
+              <span>Target FPS Title</span>
+              <span>Equivalent Sens</span>
+              <span>True eDPI</span>
+            </div>
+            <div class="table-data-row highlight">
+              <span class="game-name"><i class="dot val-dot"></i> Valorant</span>
+              <strong class="target-sens" id="valTargetSens">0.350</strong>
+              <span class="target-edpi" id="valTargetEdpi">280 eDPI</span>
+            </div>
+            <div class="table-data-row">
+              <span class="game-name"><i class="dot cs-dot"></i> Counter-Strike 2</span>
+              <strong class="target-sens" id="cs2TargetSens">1.114</strong>
+              <span class="target-edpi" id="cs2TargetEdpi">891 eDPI</span>
+            </div>
+            <div class="table-data-row">
+              <span class="game-name"><i class="dot apex-dot"></i> Apex Legends</span>
+              <strong class="target-sens" id="apexTargetSens">1.114</strong>
+              <span class="target-edpi" id="apexTargetEdpi">891 eDPI</span>
+            </div>
+            <div class="table-data-row">
+              <span class="game-name"><i class="dot ow-dot"></i> Overwatch 2</span>
+              <strong class="target-sens" id="owTargetSens">3.712</strong>
+              <span class="target-edpi" id="owTargetEdpi">2,970 eDPI</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 2: Crosshair Customizer & Live Reticle Stage -->
+        <div class="aim-card reticle-card">
+          <div class="aim-card-header">
+            <h3>SVG Reticle Studio &amp; Ballistics</h3>
+            <div class="reticle-actions-header">
+              <button type="button" class="btn-fire-pulse" id="btnFirePulse">💥 Fire Weapon</button>
+            </div>
+          </div>
+
+          <!-- Live Crosshair Viewport Stage -->
+          <div class="crosshair-viewport-stage" id="crosshairViewportStage">
+            <div class="stage-backdrop backdrop-ascent" id="stageBackdrop">
+              <!-- Tactical Target Background Texture -->
+              <div class="target-bullseye"></div>
+            </div>
+
+            <!-- SVG Reticle Drawing -->
+            <svg id="svgCrosshairPreview" class="svg-crosshair" width="120" height="120" viewBox="0 0 120 120" aria-label="Live Crosshair Reticle">
+              <!-- Center Dot -->
+              <circle id="reticleDot" cx="60" cy="60" r="1.5" fill="#00f2fe" />
+              <!-- Top Line -->
+              <line id="reticleTop" x1="60" y1="52" x2="60" y2="44" stroke="#00f2fe" stroke-width="2" stroke-linecap="square" />
+              <!-- Bottom Line -->
+              <line id="reticleBottom" x1="60" y1="68" x2="60" y2="76" stroke="#00f2fe" stroke-width="2" stroke-linecap="square" />
+              <!-- Left Line -->
+              <line id="reticleLeft" x1="52" y1="60" x2="44" y2="60" stroke="#00f2fe" stroke-width="2" stroke-linecap="square" />
+              <!-- Right Line -->
+              <line id="reticleRight" x1="68" y1="60" x2="76" y2="60" stroke="#00f2fe" stroke-width="2" stroke-linecap="square" />
+            </svg>
+
+            <!-- Backdrop Switcher -->
+            <div class="backdrop-switcher">
+              <button type="button" class="btn-bg-toggle active" data-bg="ascent">Ascent Green</button>
+              <button type="button" class="btn-bg-toggle" data-bg="dust">CS Dust</button>
+              <button type="button" class="btn-bg-toggle" data-bg="dark">Tactical Dark</button>
+            </div>
+          </div>
+
+          <!-- Sliders & Color Picker Controls -->
+          <div class="reticle-controls-grid">
+            <div class="control-col">
+              <label for="reticleColorSelect">Color:</label>
+              <select id="reticleColorSelect" class="aim-select-sm">
+                <option value="#00f2fe">Cyan Luminescence</option>
+                <option value="#00ff88">Neon Emerald</option>
+                <option value="#ffe600">High-Viz Amber</option>
+                <option value="#ff007f">Cyberpunk Magenta</option>
+                <option value="#ffffff">Pure White</option>
+              </select>
+            </div>
+
+            <div class="control-col">
+              <div class="slider-label-row">
+                <label for="reticleLengthSlider">Length:</label>
+                <span id="reticleLengthVal">8px</span>
+              </div>
+              <input type="range" id="reticleLengthSlider" min="2" max="20" step="1" value="8" class="aim-range" />
+            </div>
+
+            <div class="control-col">
+              <div class="slider-label-row">
+                <label for="reticleThicknessSlider">Thickness:</label>
+                <span id="reticleThicknessVal">2px</span>
+              </div>
+              <input type="range" id="reticleThicknessSlider" min="1" max="6" step="1" value="2" class="aim-range" />
+            </div>
+
+            <div class="control-col">
+              <div class="slider-label-row">
+                <label for="reticleGapSlider">Center Gap:</label>
+                <span id="reticleGapVal">8px</span>
+              </div>
+              <input type="range" id="reticleGapSlider" min="0" max="24" step="1" value="8" class="aim-range" />
+            </div>
+          </div>
+
+          <!-- Reticle Import/Export Bar -->
+          <div class="reticle-code-strip">
+            <span class="code-label">Crosshair Profile Code:</span>
+            <input type="text" id="reticleCodeInput" class="reticle-code-input" readonly value="0;P;c;5;h;0;d;1;z;2;0l;8;0v;8;0g;8;0a;1" />
+            <button type="button" class="btn-copy-code" id="btnCopyCrosshairCode">Copy Reticle 📋</button>
+          </div>
+        </div>
+      </div>
+      <div id="aimToast" class="aim-toast" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+  <!-- ===== END Issue #346 ===== -->
+
   <section id="tactical-simulator" class="tactical-simulator" aria-labelledby="tactical-title">
     <p class="tactical-kicker">TACTICAL LAB / SYNTHETIC MATCH</p>
     <h2 id="tactical-title">Aurora vs Umbra</h2>
