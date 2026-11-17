@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Exchange Pro - Monte Carlo Multi-Scenario Simulator</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+</head>
+<body>
+  <div class="sim-container">
+    <header class="sim-header">
+      <div class="badge-tag">Asset Volatility Risk Engine</div>
+      <h1>Crypto Price Path Monte Carlo Simulator & Risk Forecaster</h1>
+      <p>Autonomous numerical simulation engine executing 1,000 iterative Monte Carlo runs to project cryptocurrency price dispersion, standard deviation, and downside liquidation confidence bands.</p>
+    </header>
+
+    <div class="sim-grid">
+      <section class="sim-controls-panel">
+        <h2>Simulation Parameters</h2>
+        <div class="control-group">
+          <label for="trialSlider">Trial Iterations: <span id="trialVal">1000</span> runs</label>
+          <input type="range" id="trialSlider" min="100" max="5000" step="100" value="1000">
+        </div>
+
+        <div class="control-group">
+          <label for="volatilitySlider">Asset Volatility (σ): <span id="volatilityVal">0.35</span></label>
+          <input type="range" id="volatilitySlider" min="0.05" max="0.80" step="0.01" value="0.35">
+        </div>
+
+        <div class="control-group">
+          <label for="basePriceSlider">Base Asset Spot Price: $<span id="basePriceVal">90000</span></label>
+          <input type="range" id="basePriceSlider" min="1000" max="150000" step="1000" value="90000">
+        </div>
+
+        <div class="control-actions">
+          <button id="runSimBtn" class="btn-primary">Execute Monte Carlo Runs</button>
+        </div>
+      </section>
+
+      <section class="sim-summary-panel">
+        <h2>Forecasting Confidence Bounds</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Expected Price (Mean)</span>
+            <span class="metric-value" id="meanMetric">--</span>
+            <span class="metric-unit">USD</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Standard Deviation</span>
+            <span class="metric-value" id="stdDevMetric">--</span>
+            <span class="metric-unit">USD</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Median (P50)</span>
+            <span class="metric-value" id="p50Metric">--</span>
+            <span class="metric-unit">USD</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Upside Tail (P95)</span>
+            <span class="metric-value" id="p95Metric">--</span>
+            <span class="metric-unit">USD</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Extreme Upside (P99)</span>
+            <span class="metric-value" id="p99Metric">--</span>
+            <span class="metric-unit">USD</span>
+          </div>
+        </div>
+
+        <div class="distribution-section">
+          <h3>Simulated Price Density Distribution</h3>
+          <div class="distribution-bars" id="distributionBarContainer"></div>
+          <div class="dist-axis">
+            <span>Downside Risk (P10)</span>
+            <span>Target Price (P50)</span>
+            <span>Extreme Tail (P99)</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="simulation-sandbox.js"></script>
+</body>
+</html>
