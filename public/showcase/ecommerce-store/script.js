@@ -503,42 +503,12 @@ function saveCoupon() {
 
 // Pure helper so the maths uses PromoDiscountEngine consistently.
 function calculateTotals(subtotal, couponCode) {
-  const items = Object.values(cart);
-  if (items.length === 0) {
-    const tierEmpty = promoEngine.evaluateTierDiscount(subtotal);
-    const couponFallback = couponCode && promoEngine.coupons[couponCode] ? promoEngine.coupons[couponCode] : null;
-    const couponDisc = couponFallback && couponFallback.type === 'percent' ? subtotal * couponFallback.value : 0;
-    let shipping = subtotal > 0 ? SHIPPING_FEE : 0;
-    if (couponFallback && couponFallback.type === 'freeship' && subtotal >= 100) shipping = 0;
-    const totalDisc = Math.min(subtotal, tierEmpty.discountAmount + couponDisc);
-    const tax = Math.max(0, subtotal - totalDisc) * 0.08;
-    return {
-      subtotal,
-      tierDiscount: tierEmpty.discountAmount,
-      tierName: tierEmpty.tierName,
-      couponDiscount: couponDisc,
-      discount: totalDisc,
-      shipping,
-      tax,
-      taxRate: 0.08,
-      total: Math.max(0, subtotal - totalDisc + shipping + tax),
-      couponResult: null
-    };
-  }
-
-  const summary = promoEngine.calculateOrderSummary(items, couponCode, { state: 'CA', zip: '94107', shippingMethod: 'standard' });
-  return {
-    subtotal: summary.subtotal,
-    tierDiscount: summary.tierResult.discountAmount,
-    tierName: summary.tierResult.tierName,
-    couponDiscount: summary.couponResult.valid ? summary.couponResult.discountAmount : 0,
-    discount: summary.totalDiscount,
-    shipping: summary.taxAndShipping.shippingAmount,
-    tax: summary.taxAndShipping.taxAmount,
-    taxRate: summary.taxAndShipping.taxRate,
-    total: summary.grandTotal,
-    couponResult: summary.couponResult
-  };
+  const coupon = COUPONS[couponCode] || null;
+  const discount = coupon && coupon.type === 'percent' ? subtotal * coupon.value : 0;
+  const shipping = subtotal > 0 && !ShippingProgress.calculate(subtotal, couponCode).unlocked ? SHIPPING_FEE : 0;
+  const tax = (subtotal - discount) * TAX_RATE;
+  const total = subtotal - discount + shipping + tax;
+  return { subtotal, discount, shipping, tax, total };
 }
 
 function setCouponMessage(text, isError) {
@@ -655,16 +625,25 @@ function renderCart() {
     if (el) el.textContent = value;
   };
   setText('cartSubtotal', formatMoney(totals.subtotal));
-  setText('cartTierDiscount', `-${formatMoney(totals.tierDiscount)}`);
-  setText('cartDiscount', `-${formatMoney(totals.couponDiscount)}`);
+  setText('cartDiscount', `-${formatMoney(totals.discount)}`);
   setText('cartShipping', totals.shipping === 0 && totals.subtotal > 0 ? 'FREE' : formatMoney(totals.shipping));
-  setText('cartTaxLabel', `Est. tax (${(totals.taxRate * 100).toFixed(2).replace(/\.00$/, '')}%)`);
   setText('cartTax', formatMoney(totals.tax));
   setText('cartTotal', formatMoney(totals.total));
 
-  const tierRow = document.getElementById('tierDiscountRow');
-  if (tierRow) tierRow.hidden = !(totals.tierDiscount > 0);
-  setText('tierDiscountLabel', totals.tierName ? `${totals.tierName}` : 'Tier Discount');
+  const shippingProgress = ShippingProgress.calculate(totals.subtotal, appliedCoupon);
+  const progressTrack = document.getElementById('shippingProgressTrack');
+  const progressFill = document.getElementById('shippingProgressFill');
+  const progressBadge = document.getElementById('shippingProgressBadge');
+  const progressContainer = document.getElementById('shippingProgress');
+  if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(shippingProgress.percent));
+  if (progressFill) progressFill.style.width = `${shippingProgress.percent}%`;
+  if (progressBadge) progressBadge.hidden = !shippingProgress.unlocked;
+  if (progressContainer) progressContainer.classList.toggle('unlocked', shippingProgress.unlocked);
+  setText('shippingProgressMessage', shippingProgress.couponUnlocked
+    ? 'Free Express Shipping unlocked with FREESHIP!'
+    : shippingProgress.unlocked
+      ? 'Free Express Shipping unlocked!'
+      : `Add ${formatMoney(shippingProgress.remaining)} more to unlock Free Express Shipping!`);
 
   const discountRow = document.getElementById('discountRow');
   if (discountRow) discountRow.hidden = !(totals.couponDiscount > 0);
