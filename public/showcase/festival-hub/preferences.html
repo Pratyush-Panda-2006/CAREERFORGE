@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - User Settings & Preferences</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body class="festival-preferences-standalone">
+  <div class="festival-preferences-wrapper">
+    <header class="festival-preferences-topbar">
+      <h2>🌸 Festival Hub Experience Manager</h2>
+      <button type="button" class="festival-pref-trigger-btn" id="festivalHubPreferencesTriggerBtn">
+        ⚙ Open Experience Settings
+      </button>
+    </header>
+
+    <!-- Modal Drawer - Issue #579 -->
+    <div class="festival-preferences-modal active" id="festival-hub-preferences-modal" role="dialog" aria-modal="true" aria-hidden="false">
+      <div class="festival-preferences-content">
+        <div class="festival-preferences-header">
+          <div class="pref-title-wrap">
+            <span class="pref-icon">🎛</span>
+            <h3>Festival Hub Preferences</h3>
+          </div>
+          <button type="button" class="festival-pref-close-btn" id="festivalHubPreferencesCloseBtn" aria-label="Close preferences">✕</button>
+        </div>
+
+        <div class="festival-preferences-body">
+          <div class="pref-setting-row">
+            <div class="pref-info">
+              <label for="festivalPrefSoundCues" class="pref-label">Acoustic Cues & Stage Beeps</label>
+              <p class="pref-desc">Subtle ambient stage audio feedback during live countdowns</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="festivalPrefSoundCues">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="pref-setting-row">
+            <div class="pref-info">
+              <label for="festivalPrefHighContrast" class="pref-label">High-Contrast Festival Mode</label>
+              <p class="pref-desc">Elevate stage lighting luminescence and text readability</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="festivalPrefHighContrast">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="pref-setting-row">
+            <div class="pref-info">
+              <label for="festivalPrefLineupNotif" class="pref-label">Live Lineup Stage Alerts</label>
+              <p class="pref-desc">Automatic heads-up 10 minutes prior to headliner entry</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="festivalPrefLineupNotif" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="pref-setting-row">
+            <div class="pref-info">
+              <label for="festivalPrefViewLayout" class="pref-label">Stage View Layout</label>
+              <p class="pref-desc">Default lineup arrangement on interactive grounds map</p>
+            </div>
+            <select id="festivalPrefViewLayout" class="pref-select">
+              <option value="grid">Grid (Default)</option>
+              <option value="timeline">Stage Timeline</option>
+              <option value="map">Interactive Grounds Map</option>
+              <option value="compact">Compact Schedule</option>
+            </select>
+          </div>
+
+          <div class="pref-setting-row">
+            <div class="pref-info">
+              <label for="festivalPrefMetricUnits" class="pref-label">Grounds Distance Metric Units</label>
+              <p class="pref-desc">Coordinate distance markers across festival pavilions</p>
+            </div>
+            <select id="festivalPrefMetricUnits" class="pref-select">
+              <option value="metric">Meters (SI)</option>
+              <option value="imperial">Feet / Yards (US)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="festival-preferences-footer">
+          <button type="button" class="pref-btn pref-btn-secondary" id="festivalHubResetPreferencesBtn">Reset Defaults</button>
+          <button type="button" class="pref-btn pref-btn-primary" id="festivalHubExportPreferencesBtn">Export Config (JSON)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
