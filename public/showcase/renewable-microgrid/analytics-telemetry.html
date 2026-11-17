@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renewable Microgrid - Privacy-Preserving Analytics</title>
+  <link rel="stylesheet" href="analytics-telemetry.css">
+</head>
+<body class="analytics-body">
+  <div class="analytics-container">
+    <header class="analytics-header">
+      <div class="header-info">
+        <h1 class="analytics-title">🌱 Microgrid Telemetry & Interaction Analytics</h1>
+        <p class="analytics-subtitle">Zero third-party trackers, in-memory event stream with automated PII scrubbing</p>
+      </div>
+      <div class="header-actions">
+        <button id="export-report-btn" class="btn btn-primary">Export Telemetry JSON</button>
+      </div>
+    </header>
+
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Active Session Time</span>
+        <span class="kpi-val" id="kpi-duration">0s</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Max Scroll Depth</span>
+        <span class="kpi-val" id="kpi-scroll">0%</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Events Logged</span>
+        <span class="kpi-val" id="kpi-events">0</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Click Targets</span>
+        <span class="kpi-val" id="kpi-clicks">0</span>
+      </div>
+    </section>
+
+    <section class="simulator-panel">
+      <h2>Simulate Microgrid Interactions</h2>
+      <div class="sim-buttons">
+        <button id="btn-solar" class="btn btn-chip" data-label="Solar Array Toggle">☀️ Solar Output</button>
+        <button id="btn-wind" class="btn btn-chip" data-label="Wind Turbine Telemetry">💨 Wind Turbine</button>
+        <button id="btn-battery" class="btn btn-chip" data-label="BESS State of Charge">🔋 Battery Bank</button>
+        <button id="btn-grid" class="btn btn-chip" data-label="Substation Islanding">⚡ Grid Island Mode</button>
+      </div>
+    </section>
+
+    <main class="stream-panel">
+      <div class="panel-header">
+        <h3>Real-time Privacy-Preserved Event Ticker</h3>
+        <span class="badge-live">LIVE IN-MEMORY</span>
+      </div>
+      <div class="event-stream" id="event-stream">
+        <!-- Event rows populated here -->
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { RenewableMicrogridAnalyticsEngine } from './analytics-telemetry.js';
+
+    const engine = new RenewableMicrogridAnalyticsEngine();
+
+    function updateKPIs() {
+      const durationSec = Math.floor(engine.computeSessionDuration() / 1000);
+      document.getElementById('kpi-duration').textContent = `${durationSec}s`;
+      document.getElementById('kpi-scroll').textContent = `${engine.getScrollDepthPercentage()}%`;
+      document.getElementById('kpi-events').textContent = engine.events.length;
+      document.getElementById('kpi-clicks').textContent = engine.clicks.length;
+    }
+
+    function renderStream() {
+      const streamEl = document.getElementById('event-stream');
+      streamEl.innerHTML = '';
+      if (engine.events.length === 0) {
+        streamEl.innerHTML = '<div class="empty-state">No telemetry recorded yet.</div>';
+        return;
+      }
+
+      engine.events.slice().reverse().forEach(evt => {
+        const row = document.createElement('div');
+        row.className = 'event-ticker-row';
+        row.innerHTML = `
+          <div class="ticker-left">
+            <span class="chip-name">${escapeHtml(evt.name)}</span>
+            <span class="ticker-time">${new Date(evt.timestamp).toLocaleTimeString()}</span>
+          </div>
+          <div class="ticker-data">${escapeHtml(JSON.stringify(evt.data))}</div>
+        `;
+        streamEl.appendChild(row);
+      });
+      updateKPIs();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    document.querySelectorAll('.sim-buttons .btn-chip').forEach(btn => {
+      btn.onclick = () => {
+        const label = btn.dataset.label;
+        engine.recordClick(btn);
+        engine.trackEvent('microgrid_control_click', { action: label, powerKw: (Math.random() * 250).toFixed(1) });
+        renderStream();
+      };
+    });
+
+    window.addEventListener('scroll', () => {
+      engine.updateScrollDepth(window.scrollY, document.documentElement.scrollHeight, window.innerHeight);
+      updateKPIs();
+    });
+
+    document.getElementById('export-report-btn').onclick = () => {
+      const json = engine.exportReportJSON();
+      navigator.clipboard.writeText(json).then(() => alert('Telemetry report copied to clipboard!'));
+    };
+
+    setInterval(updateKPIs, 1000);
+
+    // Initial events
+    engine.trackEvent('session_init', { userAgentScrubbed: true, clientMode: 'local_microgrid' });
+    renderStream();
+  </script>
+</body>
+</html>
