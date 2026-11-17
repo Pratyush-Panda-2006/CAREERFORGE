@@ -3601,3 +3601,435 @@ body {
   }
 }
 /* ===== END Issue #424 ===== */
+
+/* ===== Issue #423: Travel Immunization & Health Advisory Risk Matrix ===== */
+.immunization-matrix-section {
+  padding: 4.5rem 1.5rem;
+  background: linear-gradient(180deg, #07101d 0%, #0c182c 50%, #07101d 100%);
+  color: #e2e8f0;
+  border-top: 1px solid rgba(56, 189, 248, 0.15);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.matrix-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.matrix-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.matrix-header .section-tag {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  margin-bottom: 0.75rem;
+}
+
+.matrix-header h2 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.85rem;
+}
+
+.matrix-subtitle {
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+.matrix-controls-card {
+  background: #0f1c33;
+  border: 1px solid #1e355b;
+  border-radius: 12px;
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.control-group select,
+.control-group input[type="date"] {
+  background: #091322;
+  border: 1px solid #233b66;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.control-group select:focus,
+.control-group input[type="date"]:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+.lead-time-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: rgba(30, 53, 91, 0.5);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  transition: all 0.3s ease;
+}
+
+.lead-time-banner.status-danger {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+}
+
+.lead-time-banner.status-warning {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+}
+
+.lead-time-banner.status-success {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+}
+
+.lead-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.lead-content strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #fff;
+  margin-bottom: 0.2rem;
+}
+
+.lead-content p {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.matrix-results-layout {
+  display: grid;
+  grid-template-columns: 1.65fr 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.advisories-col,
+.sidebar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.advisory-card,
+.sidebar-card {
+  background: #0f1c33;
+  border: 1px solid #1e355b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.card-title-row h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-icon {
+  font-size: 1.25rem;
+}
+
+.badge-mandatory {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.checklist-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.checklist-progress-wrap span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #38bdf8;
+}
+
+.checklist-progress-bar {
+  width: 100px;
+  height: 8px;
+  background: #091322;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid #233b66;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+  transition: width 0.3s ease;
+}
+
+.advisory-items-list,
+.vaccine-checklist,
+.routine-items-list,
+.clinics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.advisory-item,
+.routine-item {
+  background: #091322;
+  border: 1px solid #1c2e4a;
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+}
+
+.advisory-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.35rem;
+}
+
+.advisory-item-header strong {
+  color: #fff;
+  font-size: 0.92rem;
+}
+
+.advisory-item-header span {
+  font-size: 0.72rem;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.advisory-item-detail {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.vaccine-item {
+  background: #091322;
+  border: 1px solid #1c2e4a;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  transition: border-color 0.2s ease;
+}
+
+.vaccine-item:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.vaccine-item.checked {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.vaccine-checkbox {
+  margin-top: 3px;
+  accent-color: #10b981;
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+}
+
+.vaccine-info {
+  flex: 1;
+}
+
+.vaccine-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.vaccine-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.vaccine-type {
+  font-size: 0.7rem;
+  background: #1e355b;
+  color: #93c5fd;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.vaccine-desc {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.malaria-details {
+  background: #091322;
+  border: 1px solid #1c2e4a;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-size: 0.82rem;
+}
+
+.malaria-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.malaria-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #f59e0b;
+}
+
+.malaria-val {
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+.clinic-item {
+  background: #091322;
+  border: 1px solid #1c2e4a;
+  border-radius: 8px;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.clinic-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.clinic-loc {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.clinic-phone {
+  font-size: 0.82rem;
+  color: #38bdf8;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  margin: 0.2rem 0;
+}
+
+.clinic-phone:hover {
+  text-decoration: underline;
+}
+
+.clinic-caps {
+  font-size: 0.72rem;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.btn-health-export {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+
+.btn-health-export:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5);
+}
+
+.toast-feedback {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+@media (max-width: 900px) {
+  .matrix-results-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== END Issue #423 ===== */

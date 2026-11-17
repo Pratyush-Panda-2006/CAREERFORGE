@@ -1477,6 +1477,116 @@
   </section>
   <!-- ===== END Issue #424 ===== -->
 
+  <!-- ===== Issue #423: Travel Immunization & Health Advisory Risk Matrix ===== -->
+  <section class="immunization-matrix-section" id="immunization-matrix" aria-labelledby="immunization-title">
+    <div class="matrix-container">
+      <div class="matrix-header">
+        <span class="section-tag">🩺 EXPEDITION HEALTH &amp; IMMUNIZATION DESK</span>
+        <h2 id="immunization-title">Travel Immunization &amp; Health Risk Advisory Matrix</h2>
+        <p class="matrix-subtitle">
+          Select your expedition destination country and planned departure date to review mandatory entry certificates, recommended pathogen vaccines, malaria prophylaxis regimens, and 24/7 medevac emergency clinic coordinates.
+        </p>
+      </div>
+
+      <div class="matrix-controls-card">
+        <div class="controls-grid">
+          <div class="control-group">
+            <label for="health-country-select">🌍 Expedition Destination Region</label>
+            <select id="health-country-select">
+              <option value="sub-saharan-africa">Sub-Saharan Africa (Kenya, Tanzania, DR Congo, Ghana)</option>
+              <option value="amazon-basin">Amazon Rainforest Basin (Brazil, Peru, Colombia, Ecuador)</option>
+              <option value="himalayas">Himalayan High Altitude (Nepal, Bhutan, Tibet, Ladakh)</option>
+              <option value="southeast-asia">Southeast Asia Valleys (Thailand, Vietnam, Cambodia, Indonesia)</option>
+              <option value="arctic-polar">Arctic &amp; Polar Wilderness (Svalbard, Greenland, Antarctica)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="health-departure-date">📅 Planned Departure Date</label>
+            <input type="date" id="health-departure-date">
+          </div>
+        </div>
+
+        <div class="lead-time-banner" id="lead-time-banner" role="status" aria-live="polite">
+          <span class="lead-icon" id="lead-status-icon">⏱️</span>
+          <div class="lead-content">
+            <strong id="lead-status-text">Select departure date to calculate preparation schedule</strong>
+            <p id="lead-detail-text">Clinical lead times range from 4 to 12 weeks for optimal vaccine antibody seroconversion.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="matrix-results-layout">
+        <!-- Main Advisories Column -->
+        <div class="advisories-col">
+          <!-- Mandatory Clearance -->
+          <div class="advisory-card mandatory-card">
+            <div class="card-title-row">
+              <span class="card-icon">⚠️</span>
+              <h3>Mandatory Entry Requirements &amp; Clearance</h3>
+              <span class="badge-mandatory" id="mandatory-count-badge">1 Required</span>
+            </div>
+            <div class="advisory-items-list" id="mandatory-items-list"></div>
+          </div>
+
+          <!-- Recommended Vaccines Checklist -->
+          <div class="advisory-card recommended-card">
+            <div class="card-title-row">
+              <span class="card-icon">🛡️</span>
+              <h3>Recommended Expedition Immunizations</h3>
+              <div class="checklist-progress-wrap">
+                <span id="checklist-progress-text">0 / 0 Completed</span>
+                <div class="checklist-progress-bar">
+                  <div class="progress-fill" id="vaccine-progress-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="vaccine-checklist" id="recommended-items-list"></div>
+          </div>
+
+          <!-- Routine Boosters -->
+          <div class="advisory-card routine-card">
+            <div class="card-title-row">
+              <span class="card-icon">💉</span>
+              <h3>Routine Adult Boosters (Check Records)</h3>
+            </div>
+            <div class="routine-items-list" id="routine-items-list"></div>
+          </div>
+        </div>
+
+        <!-- Sidebar: Vector Prophylaxis & Emergency Medevac -->
+        <div class="sidebar-col">
+          <!-- Malaria & Vector Guidance -->
+          <div class="sidebar-card malaria-card">
+            <div class="card-title-row">
+              <span class="card-icon">🦟</span>
+              <h3>Vector &amp; Malaria Prophylaxis</h3>
+            </div>
+            <div class="malaria-details" id="malaria-details-box"></div>
+          </div>
+
+          <!-- Emergency Clinics & Medevac -->
+          <div class="sidebar-card clinics-card">
+            <div class="card-title-row">
+              <span class="card-icon">🏥</span>
+              <h3>24/7 Emergency Clinics &amp; Medevac</h3>
+            </div>
+            <div class="clinics-list" id="emergency-clinics-list"></div>
+          </div>
+
+          <!-- Actions -->
+          <div class="sidebar-card actions-card">
+            <button type="button" class="btn-health-export" id="btn-export-health-brief">
+              📋 Copy Medical Advisory Brief
+            </button>
+            <div class="toast-feedback" id="health-copy-toast" hidden>✓ Advisory brief copied to clipboard!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END Issue #423 ===== -->
+
   <section id="flight-planner" class="flight-planner" aria-labelledby="flight-title">
     <p class="flight-kicker">EXPEDITION TRANSIT DESK</p>
     <h2 id="flight-title">Flight route &amp; layover planner</h2>
