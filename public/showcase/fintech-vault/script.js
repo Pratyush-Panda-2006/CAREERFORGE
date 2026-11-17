@@ -1,5 +1,5 @@
-﻿/**
- * ApexVault â€” Compound Interest Retirement Growth Projection Engine
+/**
+ * ApexVault — Compound Interest Retirement Growth Projection Engine
  * Interactive SVG Chart, Dynamic Path Generation, & Milestone Calculations
  */
 
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const milestoneTableContainer = document.getElementById('milestoneTableContainer');
   const milestoneTableBody = document.getElementById('milestoneTableBody');
 
-  // Currency Support Config ($ USD, â‚¬ EUR, Â£ GBP)
+  // Currency Support Config ($ USD, € EUR, £ GBP)
   const CURRENCY_MAP = {
     USD: {
       symbol: '$',
@@ -67,38 +67,38 @@ document.addEventListener('DOMContentLoaded', () => {
       initialMarks: ['$0', '$50k', '$150k', '$250k+'],
       monthlyMarks: ['$0', '$2,500', '$5,000', '$10,000+'],
       presets: [
-        '$500/mo â€¢ 8.5% â€¢ 25 Yrs',
-        '$1.2k/mo â€¢ 11.5% â€¢ 30 Yrs',
-        '$2.5k/mo â€¢ 9.0% â€¢ 15 Yrs',
-        '$250/mo â€¢ 5.2% â€¢ 10 Yrs'
+        '$500/mo • 8.5% • 25 Yrs',
+        '$1.2k/mo • 11.5% • 30 Yrs',
+        '$2.5k/mo • 9.0% • 15 Yrs',
+        '$250/mo • 5.2% • 10 Yrs'
       ]
     },
     EUR: {
-      symbol: 'â‚¬',
+      symbol: '€',
       code: 'EUR',
       name: 'Euro',
       rate: 0.92,
-      initialMarks: ['â‚¬0', 'â‚¬50k', 'â‚¬150k', 'â‚¬250k+'],
-      monthlyMarks: ['â‚¬0', 'â‚¬2,500', 'â‚¬5,000', 'â‚¬10,000+'],
+      initialMarks: ['€0', '€50k', '€150k', '€250k+'],
+      monthlyMarks: ['€0', '€2,500', '€5,000', '€10,000+'],
       presets: [
-        'â‚¬500/mo â€¢ 8.5% â€¢ 25 Yrs',
-        'â‚¬1.2k/mo â€¢ 11.5% â€¢ 30 Yrs',
-        'â‚¬2.5k/mo â€¢ 9.0% â€¢ 15 Yrs',
-        'â‚¬250/mo â€¢ 5.2% â€¢ 10 Yrs'
+        '€500/mo • 8.5% • 25 Yrs',
+        '€1.2k/mo • 11.5% • 30 Yrs',
+        '€2.5k/mo • 9.0% • 15 Yrs',
+        '€250/mo • 5.2% • 10 Yrs'
       ]
     },
     GBP: {
-      symbol: 'Â£',
+      symbol: '£',
       code: 'GBP',
       name: 'British Pound',
       rate: 0.79,
-      initialMarks: ['Â£0', 'Â£50k', 'Â£150k', 'Â£250k+'],
-      monthlyMarks: ['Â£0', 'Â£2,500', 'Â£5,000', 'Â£10,000+'],
+      initialMarks: ['£0', '£50k', '£150k', '£250k+'],
+      monthlyMarks: ['£0', '£2,500', '£5,000', '£10,000+'],
       presets: [
-        'Â£500/mo â€¢ 8.5% â€¢ 25 Yrs',
-        'Â£1.2k/mo â€¢ 11.5% â€¢ 30 Yrs',
-        'Â£2.5k/mo â€¢ 9.0% â€¢ 15 Yrs',
-        'Â£250/mo â€¢ 5.2% â€¢ 10 Yrs'
+        '£500/mo • 8.5% • 25 Yrs',
+        '£1.2k/mo • 11.5% • 30 Yrs',
+        '£2.5k/mo • 9.0% • 15 Yrs',
+        '£250/mo • 5.2% • 10 Yrs'
       ]
     }
   };
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
       formatCurrency(currentProjection.finalWealth);
 
     finalWealthSub.textContent =
-      `At Year ${years} â€¢ Compounded ${
+      `At Year ${years} • Compounded ${
         compoundingFrequency === 12 ? 'Monthly' : 'Annually'
       }`;
 
@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
       currencyActiveTag.textContent = `${config.code} (${config.symbol})`;
     }
     if (currencyRateInfo) {
-      currencyRateInfo.textContent = `Reference FX: 1 USD â‰ˆ ${config.rate.toFixed(2)} ${config.code}`;
+      currencyRateInfo.textContent = `Reference FX: 1 USD ≈ ${config.rate.toFixed(2)} ${config.code}`;
     }
 
     // 3. Update Input Parameter Labels
@@ -637,7 +637,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 7. Update Portfolio Balance in Navbar (if not masked)
-    if (portfolioBalance && !portfolioBalance.textContent.includes('â€¢')) {
+    if (portfolioBalance && !portfolioBalance.textContent.includes('•')) {
       const basePortfolioUsd = 128450;
       const convertedPortfolio = basePortfolioUsd * config.rate;
       portfolioBalance.textContent = `${config.symbol}${Math.round(convertedPortfolio).toLocaleString('en-US')}.00`;
@@ -664,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isHidden ? 'block' : 'none';
 
       if (toggleArrow) {
-        toggleArrow.textContent = isHidden ? 'â–²' : 'â–¼';
+        toggleArrow.textContent = isHidden ? '▲' : '▼';
       }
 
       toggleBreakdownBtn.classList.toggle('expanded', isHidden);
@@ -757,7 +757,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tooltipYear.textContent =
         pt.year === 0
           ? 'Starting Point (Year 0)'
-          : `Projection Milestone â€” Year ${pt.year}`;
+          : `Projection Milestone — Year ${pt.year}`;
 
       tooltipWealth.textContent = formatCurrency(pt.wealth);
       tooltipPrincipal.textContent = formatCurrency(pt.principal);
@@ -851,11 +851,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const fxCurrencyMeta = {
-    USD: { flag: 'ðŸ‡ºðŸ‡¸', locale: 'en-US' },
-    EUR: { flag: 'ðŸ‡ªðŸ‡º', locale: 'de-DE' },
-    GBP: { flag: 'ðŸ‡¬ðŸ‡§', locale: 'en-GB' },
-    JPY: { flag: 'ðŸ‡¯ðŸ‡µ', locale: 'ja-JP' },
-    CAD: { flag: 'ðŸ‡¨ðŸ‡¦', locale: 'en-CA' }
+    USD: { flag: '🇺🇸', locale: 'en-US' },
+    EUR: { flag: '🇪🇺', locale: 'de-DE' },
+    GBP: { flag: '🇬🇧', locale: 'en-GB' },
+    JPY: { flag: '🇯🇵', locale: 'ja-JP' },
+    CAD: { flag: '🇨🇦', locale: 'en-CA' }
   };
 
   const fxFeeRate = 0.005;
@@ -907,11 +907,11 @@ document.addEventListener('DOMContentLoaded', () => {
       fxCurrencyMeta[to].flag;
 
     document.getElementById('fxRateLine').textContent =
-      `1 ${from} = ${formatFxRate(midRate)} ${to} Â· indicative mid-market rate`;
+      `1 ${from} = ${formatFxRate(midRate)} ${to} · indicative mid-market rate`;
 
     if (!validAmount) {
       fxError.hidden = false;
-      fxReceiveAmount.textContent = 'â€”';
+      fxReceiveAmount.textContent = '—';
 
       [
         'fxMidRate',
@@ -920,7 +920,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'fxBankFee',
         'fxNetAmount'
       ].forEach(id => {
-        document.getElementById(id).textContent = 'â€”';
+        document.getElementById(id).textContent = '—';
       });
 
       return;
@@ -945,7 +945,7 @@ document.addEventListener('DOMContentLoaded', () => {
       formatFxCurrency(grossAmount, to);
 
     document.getElementById('fxBankFee').textContent =
-      `âˆ’ ${formatFxCurrency(bankFee, to)}`;
+      `− ${formatFxCurrency(bankFee, to)}`;
 
     document.getElementById('fxNetAmount').textContent =
       formatFxCurrency(netAmount, to);
@@ -1050,13 +1050,13 @@ window.confirmDeposit = function confirmDeposit() {
   let hidden = false;
   button.addEventListener('click', () => {
     hidden = !hidden;
-    amount.textContent = hidden ? 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' : original;
+    amount.textContent = hidden ? '••••••••' : original;
     if (hidden) amount.setAttribute('aria-label', 'Balance hidden');
     else amount.removeAttribute('aria-label');
     button.setAttribute('aria-pressed', String(hidden));
     button.setAttribute('aria-label', hidden ? 'Show balance' : 'Hide balance');
     button.title = hidden ? 'Show balance' : 'Hide balance';
-    button.firstElementChild.textContent = hidden ? 'â—Ž' : 'â—‰';
+    button.firstElementChild.textContent = hidden ? '◎' : '◉';
   });
 })();
 
@@ -1969,7 +1969,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'stash-1',
       name: 'Emergency Safety Stash',
       category: 'Security',
-      icon: 'ðŸ›¡ï¸',
+      icon: '🛡️',
       target: 25000,
       current: 14500,
       weekly: 250,
@@ -1979,7 +1979,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'stash-2',
       name: 'Prime Real Estate Down Payment',
       category: 'Real Estate',
-      icon: 'ðŸ™ï¸',
+      icon: '🏙️',
       target: 120000,
       current: 42000,
       weekly: 500,
@@ -1989,7 +1989,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'stash-3',
       name: 'Tech Angel Investment Seed',
       category: 'Growth',
-      icon: 'ðŸš€',
+      icon: '🚀',
       target: 50000,
       current: 18000,
       weekly: 350,
@@ -2270,18 +2270,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const weekly = parseFloat(document.getElementById('stashWeekly').value) || 100;
 
         const iconMap = {
-          'Real Estate': 'ðŸ™ï¸',
-          'Security': 'ðŸ›¡ï¸',
-          'Growth': 'ðŸš€',
-          'Vehicle': 'ðŸŽï¸',
-          'Travel': 'âœˆï¸'
+          'Real Estate': '🏙️',
+          'Security': '🛡️',
+          'Growth': '🚀',
+          'Vehicle': '🏎️',
+          'Travel': '✈️'
         };
 
         const newStash = {
           id: 'stash-' + Date.now(),
           name: name || 'Custom Goal',
           category,
-          icon: iconMap[category] || 'ðŸ’°',
+          icon: iconMap[category] || '💰',
           target,
           current: initial,
           weekly,
@@ -2878,13 +2878,13 @@ var FraudDetector = (function () {
     btc: {
       id: 'btc',
       name: 'Bitcoin (BTC)',
-      symbol: 'â‚¿',
+      symbol: '₿',
       color: '#f59e0b',
       gradStop0: 'rgba(245, 158, 11, 0.4)',
       gradStop1: 'rgba(245, 158, 11, 0.08)',
       annualCagr: 0.452,
       basePrice: 65000,
-      badgeText: '+45.2% Hist. CAGR â€¢ High Volatility',
+      badgeText: '+45.2% Hist. CAGR • High Volatility',
       alphaTitle: 'DCA Volatility Smoothing Advantage (Bitcoin)',
       alphaDesc: 'Weekly recurring purchases smoothed entry across Bitcoin market corrections, reducing peak drawdown risk by 28.4% compared to an all-in lump sum.',
       alphaBadge: '+28.4% Volatility Smoothing',
@@ -2897,13 +2897,13 @@ var FraudDetector = (function () {
     sp500: {
       id: 'sp500',
       name: 'S&P 500 Index (SPY)',
-      symbol: 'ðŸ“ˆ',
+      symbol: '📈',
       color: '#10b981',
       gradStop0: 'rgba(16, 185, 129, 0.4)',
       gradStop1: 'rgba(16, 185, 129, 0.08)',
       annualCagr: 0.124,
       basePrice: 520,
-      badgeText: '+12.4% Hist. CAGR â€¢ Steady Compound',
+      badgeText: '+12.4% Hist. CAGR • Steady Compound',
       alphaTitle: 'Steady Dollar-Cost Accumulation (S&P 500)',
       alphaDesc: 'Consistent recurring index investing captures long-term corporate earnings growth while eliminating emotional market-timing stress.',
       alphaBadge: '+12.4% Compound Pace',
@@ -2916,13 +2916,13 @@ var FraudDetector = (function () {
     eth: {
       id: 'eth',
       name: 'Ethereum (ETH)',
-      symbol: 'Îž',
+      symbol: 'Ξ',
       color: '#8b5cf6',
       gradStop0: 'rgba(139, 92, 246, 0.4)',
       gradStop1: 'rgba(139, 92, 246, 0.08)',
       annualCagr: 0.386,
       basePrice: 3400,
-      badgeText: '+38.6% Hist. CAGR â€¢ High Beta',
+      badgeText: '+38.6% Hist. CAGR • High Beta',
       alphaTitle: 'Smart-Contract Ecosystem Compounding (Ethereum)',
       alphaDesc: 'High-beta recurring accumulation captures decentralized protocol growth cycles with resilient cost-basis averaging.',
       alphaBadge: '+24.1% Cost-Basis Edge',
@@ -3453,7 +3453,7 @@ var FraudDetector = (function () {
     toggleTableBtn.addEventListener('click', () => {
       const isHidden = tableContainer.style.display === 'none';
       tableContainer.style.display = isHidden ? 'block' : 'none';
-      toggleArrow.textContent = isHidden ? 'â–²' : 'â–¼';
+      toggleArrow.textContent = isHidden ? '▲' : '▼';
     });
 
     // Initial render
