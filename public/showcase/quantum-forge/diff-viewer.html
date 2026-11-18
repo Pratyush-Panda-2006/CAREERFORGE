@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge - Circuit & Schedule Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="qf-diff-container">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Quantum Circuit & State Diff Inspector</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Analyze gate decompositions, OpenQASM modifications, and pulse schedules.</p>
+    </header>
+
+    <section class="qf-diff-inputs" aria-label="Input comparison text">
+      <div class="qf-diff-textarea-group">
+        <label for="orig-code">Original Circuit / State Specification</label>
+        <textarea id="orig-code" class="qf-diff-textarea">// Original Quantum Circuit
+qubit[2] q;
+h q[0];
+cx q[0], q[1];
+measure q;</textarea>
+      </div>
+
+      <div class="qf-diff-textarea-group">
+        <label for="mod-code">Transpiled / Optimized Circuit</label>
+        <textarea id="mod-code" class="qf-diff-textarea">// Optimized Quantum Circuit
+qubit[2] q;
+rz(pi/2) q[0];
+sx q[0];
+rz(pi/2) q[0];
+cx q[0], q[1];
+measure q;</textarea>
+      </div>
+    </section>
+
+    <section class="qf-diff-toolbar" aria-label="Diff viewer actions">
+      <span style="font-size: 0.85rem; color: #94a3b8;">Unified Diff Output</span>
+      <button id="btn-recompute" style="padding: 0.4rem 0.85rem; background: #3b82f6; border: none; border-radius: 5px; color: #fff; cursor: pointer; font-weight: 600;">Recompute Diff</button>
+    </section>
+
+    <section id="diff-output" aria-live="polite">
+      <!-- Diff lines dynamically rendered -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { QuantumForgeDiffInspector } from './diff-viewer.js';
+
+    const origInput = document.getElementById('orig-code');
+    const modInput = document.getElementById('mod-code');
+    const outputContainer = document.getElementById('diff-output');
+    const recomputeBtn = document.getElementById('btn-recompute');
+
+    const inspector = new QuantumForgeDiffInspector();
+
+    function update() {
+      inspector.computeDiff(origInput.value, modInput.value);
+      inspector.render(outputContainer);
+    }
+
+    origInput.addEventListener('input', update);
+    modInput.addEventListener('input', update);
+    recomputeBtn.addEventListener('click', update);
+
+    update();
+  </script>
+</body>
+</html>
