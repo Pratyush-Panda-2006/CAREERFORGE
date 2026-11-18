@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar - Reactive Toast Notification Queue</title>
+  <link rel="stylesheet" href="event-notifier.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #090d16;
+      color: #f8fafc;
+      padding: 2rem;
+      margin: 0;
+    }
+    .demo-panel {
+      max-width: 600px;
+      margin: 2rem auto;
+      background: #111827;
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+    }
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-warning { background: #f97316; color: #fff; }
+    .btn-success { background: #22c55e; color: #fff; }
+    .btn-info { background: #38bdf8; color: #000; }
+  </style>
+</head>
+<body>
+  <div class="demo-panel">
+    <h2>Automotive Hypercar Telemetry Dispatcher</h2>
+    <p>Simulate powertrain, battery thermal, active aero, and kinetic telemetry alerts.</p>
+    <div class="btn-row">
+      <button class="btn-danger" onclick="window.AutomotiveHypercarNotifier.dispatch('danger', 'Thermal Warning', 'Motor inverter exceeds 115°C critical threshold')">Critical Alert</button>
+      <button class="btn-warning" onclick="window.AutomotiveHypercarNotifier.dispatch('warning', 'Downforce Reduction', 'Rear active wing trim angle adjusted for drag reduction')">Warning Alert</button>
+      <button class="btn-success" onclick="window.AutomotiveHypercarNotifier.dispatch('success', 'Launch Control Active', 'Torque vectoring initialized at 1,800 Nm peak')">Success Alert</button>
+      <button class="btn-info" onclick="window.AutomotiveHypercarNotifier.dispatch('info', 'Track Telemetry Synced', 'Lap time delta: -0.42s sector 2')">Info Alert</button>
+    </div>
+  </div>
+
+  <div class="hypercar-toast-container" id="hypercarToastContainer"></div>
+
+  <script type="module" src="event-notifier.js"></script>
+</body>
+</html>

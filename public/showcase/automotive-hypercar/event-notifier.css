@@ -1,0 +1,101 @@
+/* Automotive Hypercar - Reactive Toast Notification Queue Styles */
+
+:root {
+  --hypercar-toast-bg: rgba(15, 23, 42, 0.95);
+  --hypercar-toast-border: #334155;
+  --hypercar-toast-text: #f8fafc;
+  --hypercar-accent-red: #ef4444;
+  --hypercar-accent-orange: #f97316;
+  --hypercar-accent-green: #22c55e;
+  --hypercar-accent-blue: #38bdf8;
+}
+
+.hypercar-toast-container {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 380px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.hypercar-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--hypercar-toast-bg);
+  border: 1px solid var(--hypercar-toast-border);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.hypercar-toast.toast-danger {
+  border-left: 4px solid var(--hypercar-accent-red);
+}
+
+.hypercar-toast.toast-warning {
+  border-left: 4px solid var(--hypercar-accent-orange);
+}
+
+.hypercar-toast.toast-success {
+  border-left: 4px solid var(--hypercar-accent-green);
+}
+
+.hypercar-toast.toast-info {
+  border-left: 4px solid var(--hypercar-accent-blue);
+}
+
+.toast-content {
+  flex: 1;
+  margin-right: 0.5rem;
+}
+
+.toast-title {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--hypercar-toast-text);
+  margin-bottom: 0.25rem;
+}
+
+.toast-message {
+  margin: 0;
+  font-size: 0.825rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  margin: -0.25rem 0 0 0;
+  transition: color 0.15s ease;
+}
+
+.toast-close:hover {
+  color: var(--hypercar-toast-text);
+}
