@@ -3,69 +3,65 @@ import assert from 'node:assert/strict';
 import { NeurotechInterfaceGeoRadarEngine } from './geo-tracker.js';
 
 describe('NeurotechInterfaceGeoRadarEngine', () => {
-  it('initializes with default neural nodes and coordinates', () => {
+  it('initializes with default neurotech facility locations', () => {
     const engine = new NeurotechInterfaceGeoRadarEngine();
-    assert.ok(Array.isArray(engine.nodes));
-    assert.ok(engine.nodes.length >= 4);
-    assert.equal(engine.userCoord.lat, 37.7749);
-    assert.equal(engine.userCoord.lon, -122.4194);
+    assert.ok(Array.isArray(engine.locations));
+    assert.strictEqual(engine.locations.length, 5);
   });
 
-  it('calculates Haversine distance with spherical trigonometry accuracy', () => {
+  it('accurately computes Haversine great-circle distance between two coordinates', () => {
     const engine = new NeurotechInterfaceGeoRadarEngine();
-    // Distance between identical points is 0
-    assert.equal(engine.calculateHaversineDistance(0, 0, 0, 0), 0);
+    // Distance between SF (37.7749, -122.4194) and UCSF Surgical Wing (37.7631, -122.4580)
+    const distance = engine.calculateHaversineDistance(37.7749, -122.4194, 37.7631, -122.4580);
+    assert.ok(distance > 3.0 && distance < 4.5, `Expected ~3.6 km, got ${distance}`);
 
-    // Distance across equator 1 degree ~ 111.19 km
-    const dist1Deg = engine.calculateHaversineDistance(0, 0, 0, 1);
-    assert.ok(dist1Deg > 110 && dist1Deg < 112);
+    // Identical coordinates return 0 km
+    const zeroDistance = engine.calculateHaversineDistance(37.7749, -122.4194, 37.7749, -122.4194);
+    assert.strictEqual(zeroDistance, 0);
   });
 
-  it('handles boundary coordinate validations correctly', () => {
+  it('computes forward azimuth bearing within 0-360 degrees', () => {
     const engine = new NeurotechInterfaceGeoRadarEngine();
-    assert.throws(() => {
-      engine.calculateHaversineDistance('invalid', 0, 10, 10);
-    }, /Valid numerical coordinates required/);
+    const start = { lat: 37.7749, lon: -122.4194 };
+    const end = { lat: 37.7631, lon: -122.4580 }; // Heading South-West
+    const bearing = engine.computeBearing(start, end);
 
-    assert.throws(() => {
-      engine.computeBearing(null, { lat: 10, lon: 10 });
-    }, /Valid start and end coordinates required/);
+    assert.ok(bearing >= 0 && bearing <= 360);
+    assert.ok(bearing > 230 && bearing < 265, `Expected ~247 degrees, got ${bearing}`);
   });
 
-  it('computes forward bearing and compass headings', () => {
+  it('sorts neurotech locations in ascending order by distance to user coordinates', () => {
     const engine = new NeurotechInterfaceGeoRadarEngine();
-    const north = engine.computeBearing({ lat: 0, lon: 0 }, { lat: 10, lon: 0 });
-    assert.equal(north, 0);
-    assert.equal(engine.getCompassDirection(north), 'N');
+    const userCoord = { lat: 37.7812, lon: -122.4045 }; // Exact SOMA Neural Link
+    const sorted = engine.sortNearestNodes(userCoord);
 
-    const south = engine.computeBearing({ lat: 10, lon: 0 }, { lat: 0, lon: 0 });
-    assert.equal(south, 180);
-    assert.equal(engine.getCompassDirection(south), 'S');
+    assert.strictEqual(sorted.length, 5);
+    assert.strictEqual(sorted[0].id, 'bci-neural-link');
+    assert.strictEqual(sorted[0].distanceKm, 0);
+
+    for (let i = 0; i < sorted.length - 1; i++) {
+      assert.ok(sorted[i].distanceKm <= sorted[i + 1].distanceKm);
+    }
   });
 
-  it('sorts nodes by proximity and calculates telemetry metrics', () => {
-    const customNodes = [
-      { id: 'far', name: 'Distant Uplink', lat: 39.0, lon: -120.0, status: 'idle' },
-      { id: 'close', name: 'Close Node', lat: 37.776, lon: -122.418, status: 'online' }
-    ];
-    const engine = new NeurotechInterfaceGeoRadarEngine({ nodes: customNodes });
-    const sorted = engine.sortNearestNodes({ lat: 37.7749, lon: -122.4194 });
-
-    assert.equal(sorted.length, 2);
-    assert.equal(sorted[0].id, 'close');
-    assert.equal(sorted[1].id, 'far');
-    assert.ok(sorted[0].distanceKm < sorted[1].distanceKm);
-    assert.ok(typeof sorted[0].compass === 'string');
+  it('throws helpful error when invalid user coordinates are supplied', () => {
+    const engine = new NeurotechInterfaceGeoRadarEngine();
+    assert.throws(() => engine.sortNearestNodes(null), /Invalid user coordinates/);
+    assert.throws(() => engine.sortNearestNodes({ lat: 'invalid', lon: 10 }), /Invalid user coordinates/);
   });
 
-  it('updates location and notifies observers', () => {
-    const engine = new NeurotechInterfaceGeoRadarEngine();
-    let updatedCoord = null;
-    engine.subscribe((coord) => {
-      updatedCoord = coord;
+  it('supports adding custom neural laboratory facilities to registry', () => {
+    const engine = new NeurotechInterfaceGeoRadarEngine([]);
+    engine.addLocation({
+      id: 'custom-bci-hub',
+      name: 'Custom Cortical Lab',
+      lat: 34.0522,
+      lon: -118.2437,
+      category: 'Cortical Lab'
     });
-
-    engine.setUserCoord(37.79, -122.41);
-    assert.deepEqual(updatedCoord, { lat: 37.79, lon: -122.41 });
+    assert.strictEqual(engine.locations.length, 1);
+    const sorted = engine.sortNearestNodes({ lat: 34.0522, lon: -118.2437 });
+    assert.strictEqual(sorted[0].id, 'custom-bci-hub');
+    assert.strictEqual(sorted[0].distanceKm, 0);
   });
 });
