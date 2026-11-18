@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Audio Stream - Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+  <style>
+    body {
+      background: #0d1117;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .pas-preset-selector {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .pas-select {
+      padding: 8px 14px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Podcast Audio & Feed Diff Inspector</h1>
+  <div class="pas-preset-selector">
+    <label for="preset-dropdown">Select Feed/Audio Revision:</label>
+    <select id="preset-dropdown" class="pas-select">
+      <option value="rssFeedUpdate">RSS 2.0 Feed Evolution</option>
+      <option value="hlsPlaylistRevision">HLS Bitrate Ladder</option>
+      <option value="masteringFilter">Broadcast Loudness & EQ</option>
+    </select>
+  </div>
+
+  <div id="diff-root"></div>
+
+  <script type="module">
+    import { PodcastAudioStreamDiffInspector } from './diff-viewer.js';
+
+    const inspector = new PodcastAudioStreamDiffInspector();
+    const root = document.getElementById('diff-root');
+    const select = document.getElementById('preset-dropdown');
+
+    const update = (key) => {
+      const preset = inspector.getPreset(key);
+      if (preset) {
+        const diff = inspector.computeDiff(preset.left, preset.right);
+        inspector.render(root, diff);
+      }
+    };
+
+    select.addEventListener('change', (e) => update(e.target.value));
+    update('rssFeedUpdate');
+  </script>
+</body>
+</html>
