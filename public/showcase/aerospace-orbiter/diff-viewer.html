@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter - Flight Profile & Telemetry Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="ao-diff-container">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Flight Profile & Telemetry Diff Inspector</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Analyze trajectory burn schedules, apogee/perigee trim modifications, and attitude changes.</p>
+    </header>
+
+    <section class="ao-diff-inputs" aria-label="Input comparison text">
+      <div class="ao-diff-textarea-group">
+        <label for="orig-code">Nominal Flight Trajectory Plan</label>
+        <textarea id="orig-code" class="ao-diff-textarea">// Flight Plan Alpha: LEO to MEO
+target_apogee = 20200; // km
+target_perigee = 420;  // km
+inclination = 28.5;    // deg
+stage1_burn_time = 162; // s
+stage2_burn_time = 380; // s</textarea>
+      </div>
+
+      <div class="ao-diff-textarea-group">
+        <label for="mod-code">Updated Mission Profile</label>
+        <textarea id="mod-code" class="ao-diff-textarea">// Flight Plan Alpha: LEO to GEO Direct
+target_apogee = 35786; // km
+target_perigee = 420;  // km
+inclination = 0.0;     // deg equatorial
+stage1_burn_time = 162; // s
+stage2_burn_time = 415; // s
+apogee_kick_motor = 180; // s</textarea>
+      </div>
+    </section>
+
+    <section class="ao-diff-toolbar" aria-label="Diff viewer actions">
+      <span style="font-size: 0.85rem; color: #94a3b8;">Unified Diff Telemetry</span>
+      <button id="btn-recompute" style="padding: 0.4rem 0.85rem; background: #0284c7; border: none; border-radius: 5px; color: #fff; cursor: pointer; font-weight: 600;">Recompute Diff</button>
+    </section>
+
+    <section id="diff-output" aria-live="polite">
+      <!-- Diff lines dynamically rendered -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { AerospaceOrbiterDiffInspector } from './diff-viewer.js';
+
+    const origInput = document.getElementById('orig-code');
+    const modInput = document.getElementById('mod-code');
+    const outputContainer = document.getElementById('diff-output');
+    const recomputeBtn = document.getElementById('btn-recompute');
+
+    const inspector = new AerospaceOrbiterDiffInspector();
+
+    function update() {
+      inspector.computeDiff(origInput.value, modInput.value);
+      inspector.render(outputContainer);
+    }
+
+    origInput.addEventListener('input', update);
+    modInput.addEventListener('input', update);
+    recomputeBtn.addEventListener('click', update);
+
+    update();
+  </script>
+</body>
+</html>
