@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart IoT Nexus — Cryptographic Audit Trail</title>
+  <link rel="stylesheet" href="audit-trail.css">
+</head>
+<body class="audit-body">
+  <div class="audit-container">
+    <header class="audit-header">
+      <span class="badge">IOT SENSOR MESH</span>
+      <h1>🛡️ Smart IoT Nexus Autonomous State History & Audit Trail</h1>
+      <p>Edge sensor telemetry, MQTT packet routing, zigbee mesh health, and device firmware updates backed by cryptographic SHA hash-chained verification.</p>
+    </header>
+
+    <div class="audit-card">
+      <div class="status-row">
+        <div class="status-group">
+          <span class="label">Ledger Integrity</span>
+          <span id="integrityBadge" class="status-badge status-valid">Cryptographically Verified</span>
+        </div>
+        <div class="status-group">
+          <span class="label">Filter Action</span>
+          <select id="filterActionSelect" class="filter-select">
+            <option value="ALL">All Actions</option>
+            <option value="SENSOR_TELEMETRY_PACKET">SENSOR_TELEMETRY_PACKET</option>
+            <option value="MQTT_BROKER_PUBLISH">MQTT_BROKER_PUBLISH</option>
+          </select>
+        </div>
+        <div class="btn-group">
+          <button type="button" id="logEvent1Btn" class="btn btn-secondary">Record SENSOR_TELEMETRY_PACKET</button>
+          <button type="button" id="logEvent2Btn" class="btn btn-secondary">Record MQTT_BROKER_PUBLISH</button>
+          <button type="button" id="verifyChainBtn" class="btn btn-primary">Verify Integrity</button>
+          <button type="button" id="clearChainBtn" class="btn btn-danger">Clear</button>
+        </div>
+      </div>
+
+      <div class="timeline-section">
+        <h3>Sequential State Mutation Timeline</h3>
+        <div id="auditTimelineContainer" class="timeline-container"></div>
+      </div>
+    </div>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Smart IoT Nexus Showcase</a>
+    </nav>
+  </div>
+
+  <script type="module" src="audit-trail.js"></script>
+</body>
+</html>
