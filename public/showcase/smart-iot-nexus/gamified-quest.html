@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart IoT Nexus - Milestone Gamification & Achievement Badges</title>
+  <link rel="stylesheet" href="gamified-quest.css">
+</head>
+<body>
+  <div class="quest-container">
+    <header class="quest-header">
+      <div class="badge-pill">Smart IoT Nexus Showcase</div>
+      <h1>IoT Contributor Milestone Gamification & Badge Engine</h1>
+      <p>Autonomous interaction engine tracking grid deployment milestones, awarding tier badges, and celebrating telemetry achievements.</p>
+    </header>
+
+    <!-- XP & Level Card -->
+    <section class="level-card">
+      <div class="level-header">
+        <div class="level-badge" id="levelBadge">Level 1</div>
+        <div class="xp-stats">
+          <span class="xp-title">Telemetry Experience (XP):</span>
+          <span class="xp-values" id="xpValues">0 / 60 XP</span>
+        </div>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="xpProgressBar" style="width: 0%"></div>
+      </div>
+      <div class="level-footer">
+        <span id="levelProgressText">0% towards Level 2</span>
+        <button id="resetEngineBtn" class="btn-ghost">Reset Progress</button>
+      </div>
+    </section>
+
+    <!-- Badges Showcase -->
+    <section class="section-block">
+      <h2>Contributor Achievement Badges</h2>
+      <div class="badges-grid" id="badgesGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Quest Objectives -->
+    <section class="section-block">
+      <h2>Active Deployment Quests & Milestones</h2>
+      <div class="quests-grid" id="questsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Glassmorphic Unlock Celebration Modal -->
+    <div class="unlock-modal-overlay" id="unlockModal">
+      <div class="unlock-modal-content">
+        <div class="unlock-sparkle">✨</div>
+        <div class="unlock-icon" id="unlockIcon">🏆</div>
+        <h3 id="unlockTitle">Achievement Unlocked!</h3>
+        <p id="unlockDescription">You have earned a new badge.</p>
+        <button id="closeModalBtn" class="btn-primary">Claim Honor</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { SmartIotNexusQuestEngine } from './gamified-quest.js';
+
+    const engine = new SmartIotNexusQuestEngine();
+    const badgesGrid = document.getElementById('badgesGrid');
+    const questsGrid = document.getElementById('questsGrid');
+    const levelBadge = document.getElementById('levelBadge');
+    const xpValues = document.getElementById('xpValues');
+    const xpProgressBar = document.getElementById('xpProgressBar');
+    const levelProgressText = document.getElementById('levelProgressText');
+    const unlockModal = document.getElementById('unlockModal');
+    const unlockIcon = document.getElementById('unlockIcon');
+    const unlockTitle = document.getElementById('unlockTitle');
+    const unlockDescription = document.getElementById('unlockDescription');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const resetEngineBtn = document.getElementById('resetEngineBtn');
+
+    function renderUI() {
+      const overview = engine.getOverview();
+      const { levelInfo, quests, badges, xp } = overview;
+
+      // Update XP & Level
+      levelBadge.textContent = `Level ${levelInfo.level}`;
+      xpValues.textContent = `${xp} / ${levelInfo.nextLevelXp} XP`;
+      xpProgressBar.style.width = `${levelInfo.progressPercent}%`;
+      levelProgressText.textContent = `${levelInfo.progressPercent}% towards Level ${levelInfo.level + 1}`;
+
+      // Render Badges
+      badgesGrid.innerHTML = badges.map(badge => `
+        <div class="badge-card tier-${badge.tier.toLowerCase()} ${badge.unlocked ? 'is-unlocked' : 'is-locked'}">
+          <div class="badge-icon-wrapper">
+            <span class="badge-icon">${badge.icon}</span>
+          </div>
+          <div class="badge-tier-tag">${badge.tier} Tier</div>
+          <h4 class="badge-name">${badge.name}</h4>
+          <p class="badge-desc">${badge.description}</p>
+          <div class="badge-meta">
+            <span>Required: ${badge.minXp} XP</span>
+            <span>${badge.unlocked ? '✅ Unlocked' : `${badge.progressPercent}%`}</span>
+          </div>
+          <div class="badge-progress-track">
+            <div class="badge-progress-bar" style="width: ${badge.progressPercent}%"></div>
+          </div>
+        </div>
+      `).join('');
+
+      // Render Quests
+      questsGrid.innerHTML = quests.map(quest => `
+        <div class="quest-card ${quest.completed ? 'is-completed' : ''}">
+          <div class="quest-info">
+            <div class="quest-status-tag">${quest.completed ? '🎉 Completed' : 'In Progress'}</div>
+            <h4 class="quest-title">${quest.title}</h4>
+            <p class="quest-desc">${quest.description}</p>
+            <div class="quest-reward">+${quest.xpReward} XP Reward</div>
+          </div>
+          <div class="quest-progress-box">
+            <div class="quest-counter">${quest.current} / ${quest.target}</div>
+            <div class="quest-track">
+              <div class="quest-fill" style="width: ${quest.progressPercent}%"></div>
+            </div>
+            <button class="quest-action-btn" data-quest-id="${quest.id}" ${quest.completed ? 'disabled' : ''}>
+              ${quest.completed ? 'Finished' : 'Perform Task (+1)'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Interactive event delegation
+    questsGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.quest-action-btn');
+      if (!btn || btn.disabled) return;
+      const questId = btn.getAttribute('data-quest-id');
+      if (questId) {
+        engine.recordProgress(questId, 1);
+      }
+    });
+
+    engine.on((event) => {
+      renderUI();
+      if (event.newlyUnlockedBadges && event.newlyUnlockedBadges.length > 0) {
+        const topBadge = event.newlyUnlockedBadges[0];
+        unlockIcon.textContent = topBadge.icon;
+        unlockTitle.textContent = `${topBadge.tier} Badge Unlocked!`;
+        unlockDescription.textContent = `Congratulations! You unlocked "${topBadge.name}" (${topBadge.minXp} XP milestone).`;
+        unlockModal.classList.add('is-active');
+      }
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      unlockModal.classList.remove('is-active');
+    });
+
+    resetEngineBtn.addEventListener('click', () => {
+      engine.reset();
+      renderUI();
+    });
+
+    renderUI();
+  </script>
+</body>
+</html>
