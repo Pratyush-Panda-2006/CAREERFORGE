@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agritech Precision Farming - Dynamic Search & Filter</title>
+  <link rel="stylesheet" href="search-filter.css">
+</head>
+<body>
+  <div class="filter-page-container">
+    <div class="filter-header">
+      <h1>
+        Field Telemetry & Sensor Search
+        <span class="filter-badge">Issue #719</span>
+      </h1>
+      <p>In-memory multi-column filtering and multi-attribute sorting engine with tag chips.</p>
+    </div>
+
+    <div class="controls-toolbar">
+      <div class="search-row">
+        <div class="search-input-wrapper">
+          <input type="text" id="search-filter-input" class="search-input" placeholder="Search by crop, sector, or category...">
+          <button id="search-clear-btn" class="clear-btn" title="Clear search">&times;</button>
+        </div>
+
+        <select id="sort-select" class="sort-select">
+          <option value="name:asc">Name (A-Z)</option>
+          <option value="name:desc">Name (Z-A)</option>
+          <option value="moisture:desc">Soil Moisture (High to Low)</option>
+          <option value="moisture:asc">Soil Moisture (Low to High)</option>
+          <option value="ph:asc">pH Level (Low to High)</option>
+        </select>
+      </div>
+
+      <div class="chip-row" id="tag-chips-container">
+        <span class="chip-label">Filter Tags:</span>
+        <span class="filter-chip" data-tag="active">active</span>
+        <span class="filter-chip" data-tag="critical">critical</span>
+        <span class="filter-chip" data-tag="optimal">optimal</span>
+        <span class="filter-chip" data-tag="warning">warning</span>
+        <span class="filter-chip" data-tag="field">field</span>
+        <span class="filter-chip" data-tag="indoor">indoor</span>
+      </div>
+    </div>
+
+    <div class="results-grid" id="results-list"></div>
+
+    <div id="empty-state-alert" class="empty-state">
+      <h3>No matching sensor zones found</h3>
+      <p>Try clearing active tags or adjusting your search keyword.</p>
+    </div>
+  </div>
+
+  <script type="module" src="search-filter.js"></script>
+</body>
+</html>
