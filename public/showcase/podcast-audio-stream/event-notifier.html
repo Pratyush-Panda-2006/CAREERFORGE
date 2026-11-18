@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Audio Stream - Reactive Toast Notification Queue</title>
+  <link rel="stylesheet" href="./event-notifier.css">
+</head>
+<body class="podcast-toast-theme">
+  <div class="toast-hub-container">
+    <header class="toast-header">
+      <div class="branding-group">
+        <span class="bell-icon">🔔</span>
+        <h2>Podcast Stream Audio & Reactive Notification Hub</h2>
+      </div>
+      <div class="header-controls">
+        <label class="toggle-audio-label">
+          <input type="checkbox" id="toggleAudioFeedback" checked>
+          <span>Audio Chimes</span>
+        </label>
+      </div>
+    </header>
+
+    <div class="triggers-panel">
+      <h3>Dispatch Test Notifications</h3>
+      <div class="trigger-buttons-row">
+        <button class="btn-trigger btn-info" data-toast-type="info" data-toast-title="Stream Queued" data-toast-msg="Episode 42 buffered and ready for offline listening.">Info Toast</button>
+        <button class="btn-trigger btn-success" data-toast-type="success" data-toast-title="Sync Complete" data-toast-msg="All subscribed podcasts synced successfully.">Success Toast</button>
+        <button class="btn-trigger btn-warning" data-toast-type="warning" data-toast-title="High Bitrate" data-toast-msg="Audio streaming at 320kbps over cellular connection.">Warning Toast</button>
+        <button class="btn-trigger btn-danger" data-toast-type="danger" data-toast-title="Stream Interrupted" data-toast-msg="Buffer underrun detected. Reconnecting stream...">Danger Toast</button>
+      </div>
+    </div>
+
+    <!-- Active Toast Viewport -->
+    <div id="toastNotificationViewport" class="toast-viewport-stack" aria-live="polite">
+      <!-- Toasts dynamically appended here -->
+    </div>
+  </div>
+
+  <script type="module" src="./event-notifier.js"></script>
+</body>
+</html>
