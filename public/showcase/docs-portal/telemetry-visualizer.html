@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Metrics Telemetry & Sparkline Visualizer</title>
+  <link rel="stylesheet" href="telemetry-visualizer.css">
+</head>
+<body class="docs-telemetry-view">
+  <main class="telemetry-container">
+    <div class="telemetry-card">
+      <!-- Card Header -->
+      <div class="telemetry-header">
+        <div class="headings">
+          <span class="badge-pill">Search & Cache Telemetry</span>
+          <h2>Documentation Index Query Throughput & Cache Hit Ratio</h2>
+          <p>Real-time query performance curves and interactive mouseover coordinate tracking.</p>
+        </div>
+
+        <!-- Time Window Selectors (Issue #593) -->
+        <div class="time-controls">
+          <button type="button" class="docs-time-btn" data-window="1H">1H</button>
+          <button type="button" class="docs-time-btn active" data-window="24H">24H</button>
+          <button type="button" class="docs-time-btn" data-window="7D">7D</button>
+        </div>
+      </div>
+
+      <!-- Canvas Element (Issue #593) -->
+      <div class="canvas-wrapper">
+        <canvas id="docs-portal-telemetry-canvas" width="650" height="260"></canvas>
+        <div id="docsTelemetryTooltip" class="telemetry-tooltip" style="display: none;"></div>
+      </div>
+
+      <!-- Footer Statistics -->
+      <div class="telemetry-footer">
+        <div class="status-indicator">
+          <span class="pulse-dot"></span>
+          <span>Index Node: docs-search-shard-01 (Operational)</span>
+        </div>
+        <div class="metric-tags">
+          <span class="metric-pill">Cache Hit Ratio: <strong>98.7%</strong></span>
+          <span class="metric-pill">P99 Search Latency: <strong>4.2ms</strong></span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="telemetry-visualizer.js"></script>
+</body>
+</html>
