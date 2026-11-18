@@ -1,0 +1,315 @@
+/* AI Voice Studio - Event Notifier Styles */
+:root {
+  --bg-gradient: radial-gradient(circle at 10% 20%, #030712, #0f172a 50%, #020617);
+  --glass-bg: rgba(15, 23, 42, 0.75);
+  --glass-border: rgba(168, 85, 247, 0.25);
+  --info-color: #38bdf8;
+  --success-color: #34d399;
+  --warning-color: #fbbf24;
+  --danger-color: #f87171;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+body.notifier-body {
+  margin: 0;
+  padding: 2rem;
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.notifier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.notifier-title {
+  margin: 0 0 0.4rem 0;
+  font-size: 1.85rem;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.notifier-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.header-controls {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.volume-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.trigger-matrix {
+  margin-bottom: 2rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.trigger-matrix h2 {
+  margin-top: 0;
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.button-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s ease, filter 0.2s ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary { background: #334155; color: #f8fafc; }
+.btn-info { background: #0284c7; color: #ffffff; }
+.btn-success { background: #059669; color: #ffffff; }
+.btn-warning { background: #d97706; color: #ffffff; }
+.btn-danger { background: #dc2626; color: #ffffff; }
+
+.notifier-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .notifier-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.queue-panel, .history-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  min-height: 300px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.5rem;
+}
+
+.panel-head h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.status-pill {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+}
+
+.status-pill.neutral {
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--text-muted);
+}
+
+.stack-list, .history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stack-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(15, 23, 42, 0.9);
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #94a3b8;
+}
+
+.stack-item.item-info { border-left-color: var(--info-color); }
+.stack-item.item-success { border-left-color: var(--success-color); }
+.stack-item.item-warning { border-left-color: var(--warning-color); }
+.stack-item.item-danger { border-left-color: var(--danger-color); }
+
+.item-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.item-content {
+  flex: 1;
+}
+
+.item-content strong {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.2rem;
+}
+
+.item-content p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.btn-dismiss {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.btn-dismiss:hover {
+  color: #ffffff;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.history-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-info { background: var(--info-color); }
+.dot-success { background: var(--success-color); }
+.dot-warning { background: var(--warning-color); }
+.dot-danger { background: var(--danger-color); }
+
+.history-time {
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.history-title {
+  flex: 1;
+}
+
+.history-reason {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.empty-state {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Toast Viewport */
+.toast-stack-viewport {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast-toast {
+  pointer-events: auto;
+  width: 320px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  border-left: 4px solid #94a3b8;
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.toast-toast.toast-info { border-left-color: var(--info-color); }
+.toast-toast.toast-success { border-left-color: var(--success-color); }
+.toast-toast.toast-warning { border-left-color: var(--warning-color); }
+.toast-toast.toast-danger { border-left-color: var(--danger-color); }
+
+.toast-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.toast-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--info-color);
+}
+
+.toast-close-x {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.toast-close-x:hover {
+  color: #fff;
+}
+
+.toast-headline {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.toast-bodytext {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
