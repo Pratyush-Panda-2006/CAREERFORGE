@@ -1,0 +1,225 @@
+/* Robotics Automata - Preferences & Configuration Drawer Styling */
+
+.pref-page-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #fffbeb;
+}
+
+.pref-header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.25);
+  padding-bottom: 1rem;
+}
+
+.pref-header h1 {
+  font-size: 1.75rem;
+  color: #f59e0b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pref-badge {
+  font-size: 0.8rem;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid #f59e0b;
+  color: #fcd34d;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+}
+
+.pref-trigger-btn {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  color: #0f172a;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pref-trigger-btn:hover {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* Glassmorphic Preferences Modal */
+.robotics-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.robotics-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.robotics-modal-card {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 158, 11, 0.2);
+  width: 90%;
+  max-width: 520px;
+  padding: 2rem;
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.robotics-modal-overlay.active .robotics-modal-card {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+  padding-bottom: 1rem;
+}
+
+.modal-header-row h2 {
+  font-size: 1.3rem;
+  margin: 0;
+  color: #fcd34d;
+}
+
+.close-x-btn {
+  background: transparent;
+  border: none;
+  color: #fde68a;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.pref-field-group {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pref-field-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fef3c7;
+}
+
+.pref-select {
+  background: #0f172a;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fffbeb;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.pref-select:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+}
+
+.pref-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.pref-toggle-row span {
+  font-size: 0.95rem;
+  color: #fef3c7;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #334155;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #fffbeb;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+input:checked + .slider {
+  background-color: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: #334155;
+  border: 1px solid #475569;
+  color: #fef3c7;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-primary {
+  flex: 1;
+  background: #f59e0b;
+  border: none;
+  color: #0f172a;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}

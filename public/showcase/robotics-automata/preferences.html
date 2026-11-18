@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotics Automata - User Preferences</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body>
+  <div class="pref-page-container">
+    <div class="pref-header">
+      <h1>
+        Robotics Automata Rig
+        <span class="pref-badge">Issue #687</span>
+      </h1>
+      <p>Adaptive kinematics model settings, telemetry calibration, and persistent hardware preferences.</p>
+    </div>
+
+    <button id="open-preferences-btn" class="pref-trigger-btn">
+      ⚙️ Open Robot Configuration Drawer
+    </button>
+  </div>
+
+  <!-- Preferences Modal / Drawer -->
+  <div id="robotics-automata-preferences-modal" class="robotics-modal-overlay">
+    <div class="robotics-modal-card">
+      <div class="modal-header-row">
+        <h2>Robot Rig Preferences</h2>
+        <button id="close-preferences-btn" class="close-x-btn">&times;</button>
+      </div>
+
+      <div class="pref-field-group">
+        <label for="pref-kinematics">Kinematics Solver Engine</label>
+        <select id="pref-kinematics" class="pref-select">
+          <option value="inverse-6dof">Inverse Kinematics (6-DOF Arm)</option>
+          <option value="forward-cartesian">Forward Cartesian Pathing</option>
+          <option value="neural-rl-motion">Neural RL Trajectory Planner</option>
+        </select>
+      </div>
+
+      <div class="pref-field-group">
+        <label for="pref-units">Telemetry Units</label>
+        <select id="pref-units" class="pref-select">
+          <option value="rad-sec">Radians & Meters / sec</option>
+          <option value="deg-sec">Degrees & mm / sec</option>
+        </select>
+      </div>
+
+      <div class="pref-toggle-row">
+        <span>Collision Warning Audio</span>
+        <label class="switch">
+          <input type="checkbox" id="pref-collision-audio">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="pref-toggle-row">
+        <span>Haptic Controller Feedback</span>
+        <label class="switch">
+          <input type="checkbox" id="pref-haptic">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button id="reset-preferences-btn" class="btn-secondary">Reset Defaults</button>
+        <button id="export-preferences-btn" class="btn-primary">Export Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
