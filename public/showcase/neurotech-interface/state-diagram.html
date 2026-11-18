@@ -3,20 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neurotech Interface - Finite State Machine & Synaptic Visualizer</title>
-  <link rel="stylesheet" href="./state-diagram.css">
+  <title>Neurotech Interface - Finite State Machine Visualizer</title>
+  <link rel="stylesheet" href="state-diagram.css">
 </head>
 <body>
-  <div id="fsm-app-container"></div>
+  <div class="fsm-container">
+    <header class="fsm-header">
+      <h1>Neurotech Interface - Neural FSM Visualizer</h1>
+      <p>Finite state machine modeling BCI electrode connection, synaptic calibration, and artifact suppression</p>
+    </header>
 
-  <script type="module">
-    import { NeurotechInterfaceFsmVisualizer } from './state-diagram.js';
+    <div class="current-state-panel">
+      <div>
+        <span style="color: var(--neuro-dim); font-size: 0.9rem; text-transform: uppercase;">BCI State: </span>
+        <span id="current-state-badge" class="state-badge">NEURAL_DISCONNECTED</span>
+      </div>
+      <button id="reset-fsm-btn" class="reset-btn">Reset FSM</button>
+    </div>
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('fsm-app-container');
-      const fsm = new NeurotechInterfaceFsmVisualizer();
-      fsm.renderToDOM(container);
-    });
-  </script>
+    <div class="fsm-grid">
+      <div class="fsm-card">
+        <h3>BCI Interface States</h3>
+        <div id="nodes-container" class="nodes-container"></div>
+
+        <h3>Dispatch Neural Event</h3>
+        <div id="event-triggers" class="event-triggers"></div>
+      </div>
+
+      <div class="fsm-card">
+        <h3>Mermaid.js State Diagram</h3>
+        <div id="mermaid-output" class="mermaid-box"></div>
+
+        <h3>Neural Event Log</h3>
+        <ul id="history-log" class="history-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="state-diagram.js"></script>
 </body>
 </html>

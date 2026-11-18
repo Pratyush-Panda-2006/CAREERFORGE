@@ -1,384 +1,189 @@
 /**
- * NeurotechInterfaceFsmVisualizer
- * In-browser finite state machine (FSM) transition mapper and workflow visualizer
- * for neural interface lifecycle states, synaptic event dispatches, and Mermaid.js diagram generation.
+ * Neurotech Interface - Node-Based Finite State Machine & BCI Lifecycle Visualizer
+ * Models brain-computer interface telemetry states, validates event-driven transitions,
+ * maintains event logs, and exports diagrams to Mermaid.js stateDiagram-v2 format.
  */
+
 export class NeurotechInterfaceFsmVisualizer {
-  constructor(options = {}) {
-    this.initialState = options.initialState || 'STANDBY';
-    this.currentState = this.initialState;
+  constructor(initialState = 'NEURAL_DISCONNECTED') {
+    this.initialState = initialState;
+    this.currentState = initialState;
+    this.states = new Set([
+      'NEURAL_DISCONNECTED',
+      'ELECTRODE_IMPEDANCE_CHECK',
+      'SYNAPTIC_CALIBRATION',
+      'ACTIVE_BCI_STREAM',
+      'ARTIFACT_SUPPRESSION',
+      'NEURAL_SLEEP'
+    ]);
     this.transitions = [];
     this.history = [];
-    this.listeners = [];
 
-    if (options.transitions && Array.isArray(options.transitions)) {
-      options.transitions.forEach((t) => this.addTransition(t.from, t.event, t.to));
-    } else {
-      this.initDefaultNeurotechWorkflow();
-    }
-
-    this.recordHistory(null, null, this.currentState, 'Initial neural state initialized');
+    this.registerDefaultTransitions();
   }
 
-  initDefaultNeurotechWorkflow() {
-    const defaultTransitions = [
-      { from: 'STANDBY', event: 'INIT_CALIBRATION', to: 'CALIBRATING_SENSORS' },
-      { from: 'CALIBRATING_SENSORS', event: 'IMPEDANCE_CHECK_PASS', to: 'SYNAPTIC_SYNC' },
-      { from: 'SYNAPTIC_SYNC', event: 'SYNC_LOCKED', to: 'NEURAL_TELEPATHY_ACTIVE' },
-      { from: 'NEURAL_TELEPATHY_ACTIVE', event: 'TRIGGER_FEEDBACK', to: 'NEURO_FEEDBACK_LOOP' },
-      { from: 'NEURO_FEEDBACK_LOOP', event: 'EQUILIBRIUM_RESTORED', to: 'NEURAL_TELEPATHY_ACTIVE' },
-      { from: 'NEURAL_TELEPATHY_ACTIVE', event: 'HIGH_NOISE_DETECTED', to: 'ARTIFACT_FILTERING' },
-      { from: 'ARTIFACT_FILTERING', event: 'SIGNAL_CLEARED', to: 'NEURAL_TELEPATHY_ACTIVE' },
-      { from: 'NEURAL_TELEPATHY_ACTIVE', event: 'ELECTRODE_DISCONNECT', to: 'ERROR_DECOUPLING' },
-      { from: 'ERROR_DECOUPLING', event: 'SAFETY_RECONNECT', to: 'STANDBY' },
-      { from: 'NEURAL_TELEPATHY_ACTIVE', event: 'SESSION_END', to: 'STANDBY' }
-    ];
-
-    defaultTransitions.forEach((t) => this.addTransition(t.from, t.event, t.to));
+  registerDefaultTransitions() {
+    this.addTransition('NEURAL_DISCONNECTED', 'CONNECT_HEADSET', 'ELECTRODE_IMPEDANCE_CHECK');
+    this.addTransition('ELECTRODE_IMPEDANCE_CHECK', 'IMPEDANCE_PASS', 'SYNAPTIC_CALIBRATION');
+    this.addTransition('SYNAPTIC_CALIBRATION', 'CALIBRATION_SYNC', 'ACTIVE_BCI_STREAM');
+    this.addTransition('ACTIVE_BCI_STREAM', 'DETECT_OCULAR_ARTIFACT', 'ARTIFACT_SUPPRESSION');
+    this.addTransition('ARTIFACT_SUPPRESSION', 'FILTER_CLEARED', 'ACTIVE_BCI_STREAM');
+    this.addTransition('ACTIVE_BCI_STREAM', 'STANDBY_MODE', 'NEURAL_SLEEP');
+    this.addTransition('NEURAL_SLEEP', 'WAKE_PATIENT', 'ACTIVE_BCI_STREAM');
+    this.addTransition('ACTIVE_BCI_STREAM', 'DISCONNECT', 'NEURAL_DISCONNECTED');
+    this.addTransition('ELECTRODE_IMPEDANCE_CHECK', 'ABORT', 'NEURAL_DISCONNECTED');
   }
 
+  /**
+   * Registers a transition rule between two states given an event trigger.
+   */
   addTransition(from, event, to) {
     if (!from || !event || !to) {
-      throw new Error('From state, event, and to state are strictly required');
+      throw new Error('Invalid transition definition: from, event, and to must be specified');
     }
-
-    const trimmedFrom = String(from).trim().toUpperCase();
-    const trimmedEvent = String(event).trim().toUpperCase();
-    const trimmedTo = String(to).trim().toUpperCase();
-
-    const exists = this.transitions.some(
-      (t) => t.from === trimmedFrom && t.event === trimmedEvent && t.to === trimmedTo
-    );
-
-    if (!exists) {
-      this.transitions.push({ from: trimmedFrom, event: trimmedEvent, to: trimmedTo });
-    }
-
-    return this;
+    this.states.add(from);
+    this.states.add(to);
+    this.transitions.push({ from, event, to });
   }
 
-  getAvailableEvents(state = this.currentState) {
-    return this.transitions
-      .filter((t) => t.from === state)
-      .map((t) => ({ event: t.event, targetState: t.to }));
-  }
-
+  /**
+   * Dispatches an event from the active state, transitioning if allowed.
+   */
   dispatch(event) {
-    if (!event) {
-      throw new Error('Event parameter is required to dispatch transition');
-    }
-
-    const trimmedEvent = String(event).trim().toUpperCase();
-    const validTransition = this.transitions.find(
-      (t) => t.from === this.currentState && t.event === trimmedEvent
-    );
-
-    if (!validTransition) {
-      const err = new Error(
-        `Invalid transition: Event "${trimmedEvent}" cannot be dispatched from state "${this.currentState}"`
-      );
-      this.notifyError(err);
-      throw err;
+    const match = this.transitions.find(t => t.from === this.currentState && t.event === event);
+    if (!match) {
+      return {
+        success: false,
+        error: `Cannot dispatch event "${event}" from state "${this.currentState}"`,
+        currentState: this.currentState
+      };
     }
 
     const previousState = this.currentState;
-    this.currentState = validTransition.to;
-    this.recordHistory(previousState, trimmedEvent, this.currentState, 'Neural transition successful');
-    this.notify();
+    this.currentState = match.to;
+    this.history.push({
+      timestamp: new Date().toISOString(),
+      from: previousState,
+      event,
+      to: this.currentState
+    });
 
     return {
-      previousState,
-      event: trimmedEvent,
-      currentState: this.currentState
+      success: true,
+      from: previousState,
+      event,
+      to: this.currentState
     };
   }
 
-  recordHistory(from, event, to, note) {
-    this.history.unshift({
-      timestamp: new Date().toISOString(),
-      from,
-      event,
-      to,
-      note
-    });
-
-    if (this.history.length > 50) {
-      this.history.pop();
-    }
+  /**
+   * Returns available events callable from the current state.
+   */
+  getAvailableEvents() {
+    return this.transitions
+      .filter(t => t.from === this.currentState)
+      .map(t => t.event);
   }
 
-  reset(initialState = this.initialState) {
-    const prev = this.currentState;
-    this.currentState = initialState.toUpperCase();
-    this.recordHistory(prev, 'RESET', this.currentState, 'FSM reset to standby state');
-    this.notify();
-    return this.currentState;
-  }
-
+  /**
+   * Exports the state machine schema as Mermaid.js stateDiagram-v2 definition.
+   */
   exportMermaid() {
     const lines = ['stateDiagram-v2'];
-    lines.push(`    [*] --> ${this.initialState}`);
+    lines.push(`  [*] --> ${this.initialState}`);
 
-    this.transitions.forEach((t) => {
-      lines.push(`    ${t.from} --> ${t.to}: ${t.event}`);
+    this.transitions.forEach(t => {
+      lines.push(`  ${t.from} --> ${t.to} : ${t.event}`);
     });
 
     return lines.join('\n');
   }
 
-  getState() {
-    return this.currentState;
+  /**
+   * Resets machine back to default state and clears history log.
+   */
+  reset() {
+    this.currentState = this.initialState;
+    this.history = [];
   }
+}
 
-  getTransitions() {
-    return [...this.transitions];
-  }
+// Browser DOM initializer for interactive neural state workbench
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const fsm = new NeurotechInterfaceFsmVisualizer();
 
-  getHistory() {
-    return [...this.history];
-  }
+    const currentStateElem = document.getElementById('current-state-badge');
+    const nodesContainer = document.getElementById('nodes-container');
+    const triggersContainer = document.getElementById('event-triggers');
+    const historyList = document.getElementById('history-log');
+    const mermaidExport = document.getElementById('mermaid-output');
+    const resetBtn = document.getElementById('reset-fsm-btn');
 
-  getAllStates() {
-    const stateSet = new Set();
-    stateSet.add(this.initialState);
-    stateSet.add(this.currentState);
-    this.transitions.forEach((t) => {
-      stateSet.add(t.from);
-      stateSet.add(t.to);
-    });
-    return Array.from(stateSet);
-  }
-
-  subscribe(listener) {
-    if (typeof listener === 'function') {
-      this.listeners.push(listener);
-    }
-  }
-
-  notify() {
-    this.listeners.forEach((fn) => {
-      try {
-        fn(this.currentState, this.getAvailableEvents(), this.history);
-      } catch (e) {
-        console.error('FSM listener execution error:', e);
+    function updateView() {
+      if (currentStateElem) {
+        currentStateElem.textContent = fsm.currentState;
       }
-    });
-  }
 
-  notifyError(error) {
-    this.listeners.forEach((fn) => {
-      try {
-        if (typeof fn.onError === 'function') {
-          fn.onError(error);
-        }
-      } catch (e) {
-        console.error('FSM error callback error:', e);
-      }
-    });
-  }
+      if (nodesContainer) {
+        nodesContainer.replaceChildren();
+        Array.from(fsm.states).forEach(state => {
+          const card = document.createElement('div');
+          card.className = `state-node-card ${state === fsm.currentState ? 'active' : ''}`;
 
-  renderToDOM(container) {
-    if (!container || typeof container.appendChild !== 'function') {
-      throw new Error('Valid DOM container element is required');
-    }
+          const dot = document.createElement('span');
+          dot.className = 'state-dot';
 
-    container.replaceChildren();
+          const label = document.createElement('span');
+          label.textContent = state;
 
-    const rootWrapper = document.createElement('div');
-    rootWrapper.className = 'fsm-workbench-root';
-
-    // Header
-    const header = document.createElement('header');
-    header.className = 'fsm-header';
-    const title = document.createElement('h2');
-    title.textContent = 'Neurotech Interface — Finite State Machine & Synaptic Visualizer';
-    const subtitle = document.createElement('p');
-    subtitle.textContent =
-      'Real-time neural lifecycle transitions, event dispatching engine, and Mermaid.js topology exporter.';
-    header.append(title, subtitle);
-
-    // Current State Banner
-    const statusBanner = document.createElement('div');
-    statusBanner.className = 'fsm-status-banner';
-    const statusLabel = document.createElement('span');
-    statusLabel.className = 'fsm-status-label';
-    statusLabel.textContent = 'Active Neural State:';
-    const statusBadge = document.createElement('span');
-    statusBadge.className = 'fsm-status-badge';
-    statusBadge.textContent = this.currentState;
-    statusBanner.append(statusLabel, statusBadge);
-
-    // Main layout
-    const mainGrid = document.createElement('div');
-    mainGrid.className = 'fsm-main-grid';
-
-    // State Topology Visualization Panel
-    const topologyPanel = document.createElement('div');
-    topologyPanel.className = 'fsm-panel fsm-topology-panel';
-    const topoHeading = document.createElement('h3');
-    topoHeading.textContent = 'Neural State Nodes';
-    const nodesContainer = document.createElement('div');
-    nodesContainer.className = 'fsm-nodes-container';
-
-    // Event Trigger Panel
-    const actionsPanel = document.createElement('div');
-    actionsPanel.className = 'fsm-panel fsm-actions-panel';
-    const actHeading = document.createElement('h3');
-    actHeading.textContent = 'Available Synaptic Dispatches';
-    const eventButtonsContainer = document.createElement('div');
-    eventButtonsContainer.className = 'fsm-event-buttons';
-
-    // Custom Transition Form
-    const customForm = document.createElement('div');
-    customForm.className = 'fsm-custom-form';
-    const customTitle = document.createElement('h4');
-    customTitle.textContent = 'Inject Custom Synaptic Transition';
-    const inputFrom = document.createElement('input');
-    inputFrom.placeholder = 'From State (e.g. SLEEP_MODE)';
-    const inputEvent = document.createElement('input');
-    inputEvent.placeholder = 'Event (e.g. REM_DETECTED)';
-    const inputTo = document.createElement('input');
-    inputTo.placeholder = 'To State (e.g. LUCID_DREAMING)';
-    const addBtn = document.createElement('button');
-    addBtn.textContent = 'Add Transition';
-    addBtn.className = 'fsm-btn fsm-btn-primary';
-
-    customForm.append(customTitle, inputFrom, inputEvent, inputTo, addBtn);
-
-    // Event History & Mermaid Export Panel
-    const sidebarPanel = document.createElement('div');
-    sidebarPanel.className = 'fsm-panel fsm-sidebar-panel';
-
-    const mermaidHeading = document.createElement('h3');
-    mermaidHeading.textContent = 'Mermaid.js Topology Code';
-    const mermaidTextarea = document.createElement('textarea');
-    mermaidTextarea.className = 'fsm-mermaid-box';
-    mermaidTextarea.readOnly = true;
-
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'fsm-btn fsm-btn-secondary';
-    copyBtn.textContent = 'Copy Mermaid Definition';
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard?.writeText(mermaidTextarea.value);
-      copyBtn.textContent = 'Copied!';
-      setTimeout(() => {
-        copyBtn.textContent = 'Copy Mermaid Definition';
-      }, 1500);
-    });
-
-    const historyHeading = document.createElement('h3');
-    historyHeading.textContent = 'Neural Transition Log';
-    const historyList = document.createElement('ul');
-    historyList.className = 'fsm-history-list';
-
-    sidebarPanel.append(mermaidHeading, mermaidTextarea, copyBtn, historyHeading, historyList);
-
-    // DOM Update Function
-    const updateUI = () => {
-      statusBadge.textContent = this.currentState;
-      statusBadge.setAttribute('data-state', this.currentState);
-
-      // Render Nodes
-      nodesContainer.replaceChildren();
-      const allStates = this.getAllStates();
-      allStates.forEach((state) => {
-        const nodeCard = document.createElement('div');
-        nodeCard.className = 'fsm-state-node';
-        if (state === this.currentState) {
-          nodeCard.classList.add('fsm-state-active');
-        }
-
-        const nodeTitle = document.createElement('div');
-        nodeTitle.className = 'fsm-node-title';
-        nodeTitle.textContent = state;
-
-        const outgoing = this.transitions.filter((t) => t.from === state);
-        const nodeSub = document.createElement('div');
-        nodeSub.className = 'fsm-node-outgoing';
-        nodeSub.textContent = `${outgoing.length} outgoing link(s)`;
-
-        nodeCard.append(nodeTitle, nodeSub);
-        nodesContainer.append(nodeCard);
-      });
-
-      // Render Event Buttons
-      eventButtonsContainer.replaceChildren();
-      const available = this.getAvailableEvents();
-      if (available.length === 0) {
-        const noEvents = document.createElement('p');
-        noEvents.className = 'fsm-muted';
-        noEvents.textContent = 'No outgoing transitions from current state (Terminal state).';
-        eventButtonsContainer.append(noEvents);
-      } else {
-        available.forEach((ev) => {
-          const btn = document.createElement('button');
-          btn.className = 'fsm-btn fsm-event-btn';
-          btn.textContent = `Dispatch ${ev.event} → [${ev.targetState}]`;
-          btn.addEventListener('click', () => {
-            try {
-              this.dispatch(ev.event);
-            } catch (err) {
-              alert(err.message);
-            }
-          });
-          eventButtonsContainer.append(btn);
+          card.append(dot, label);
+          nodesContainer.append(card);
         });
       }
 
-      // Reset Button
-      const resetBtn = document.createElement('button');
-      resetBtn.className = 'fsm-btn fsm-btn-warning';
-      resetBtn.textContent = 'Safety Reset to STANDBY';
-      resetBtn.addEventListener('click', () => this.reset());
-      eventButtonsContainer.append(resetBtn);
-
-      // Mermaid Export
-      mermaidTextarea.value = this.exportMermaid();
-
-      // History
-      historyList.replaceChildren();
-      this.history.forEach((h) => {
-        const li = document.createElement('li');
-        li.className = 'fsm-history-item';
-        const timeSpan = document.createElement('span');
-        timeSpan.className = 'fsm-hist-time';
-        timeSpan.textContent = h.timestamp.split('T')[1].split('.')[0];
-
-        const descSpan = document.createElement('span');
-        descSpan.className = 'fsm-hist-desc';
-        if (h.from) {
-          descSpan.textContent = `[${h.from}] --(${h.event})--> [${h.to}]`;
+      if (triggersContainer) {
+        triggersContainer.replaceChildren();
+        const available = fsm.getAvailableEvents();
+        if (available.length === 0) {
+          const empty = document.createElement('p');
+          empty.textContent = 'No forward transitions available from current state.';
+          triggersContainer.append(empty);
         } else {
-          descSpan.textContent = `[${h.to}] : ${h.note}`;
+          available.forEach(evt => {
+            const btn = document.createElement('button');
+            btn.className = 'neuro-trigger-btn';
+            btn.textContent = `Trigger: ${evt}`;
+            btn.addEventListener('click', () => {
+              fsm.dispatch(evt);
+              updateView();
+            });
+            triggersContainer.append(btn);
+          });
         }
-
-        li.append(timeSpan, descSpan);
-        historyList.append(li);
-      });
-    };
-
-    addBtn.addEventListener('click', () => {
-      const fromVal = inputFrom.value.trim();
-      const eventVal = inputEvent.value.trim();
-      const toVal = inputTo.value.trim();
-      if (fromVal && eventVal && toVal) {
-        this.addTransition(fromVal, eventVal, toVal);
-        inputFrom.value = '';
-        inputEvent.value = '';
-        inputTo.value = '';
-        updateUI();
       }
-    });
 
-    this.subscribe(updateUI);
+      if (historyList) {
+        historyList.replaceChildren();
+        fsm.history.slice(-8).reverse().forEach(entry => {
+          const item = document.createElement('li');
+          item.textContent = `[${entry.timestamp.split('T')[1].slice(0, 8)}] ${entry.from} -> (${entry.event}) -> ${entry.to}`;
+          historyList.append(item);
+        });
+      }
 
-    topologyPanel.append(topoHeading, nodesContainer);
-    actionsPanel.append(actHeading, eventButtonsContainer, customForm);
-    mainGrid.append(topologyPanel, actionsPanel, sidebarPanel);
-    rootWrapper.append(header, statusBanner, mainGrid);
-    container.append(rootWrapper);
+      if (mermaidExport) {
+        mermaidExport.textContent = fsm.exportMermaid();
+      }
+    }
 
-    updateUI();
-    return rootWrapper;
-  }
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        fsm.reset();
+        updateView();
+      });
+    }
+
+    updateView();
+  });
 }
