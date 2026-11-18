@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Yield Matrix - Interactive Feature Spotlight Onboarding Tour</title>
+  <link rel="stylesheet" href="virtual-tour.css">
+</head>
+<body>
+  <div class="tour-app-container">
+    <header class="dashboard-header">
+      <div>
+        <div class="badge-pill">DeFi Yield Matrix Onboarding</div>
+        <h1>Interactive Feature Spotlight & Guided Tour Sandbox</h1>
+        <p>Interactive tour guide orchestrating viewport spotlights, boundary-aware tooltip positioning, and protocol onboarding steps.</p>
+      </div>
+      <div class="header-actions">
+        <button id="startTourBtn" class="btn-primary">Start Protocol Walkthrough</button>
+      </div>
+    </header>
+
+    <!-- Simulated DeFi Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Section 1: Liquidity Vaults -->
+      <section id="vaultOverviewSection" class="dashboard-card target-section">
+        <div class="card-header">
+          <span class="card-tag">Concentrated Pools</span>
+          <span class="status-indicator">● Active TVL</span>
+        </div>
+        <h3>USDC / ETH Multi-Vault</h3>
+        <p>Dynamic automated market maker liquidity pool with active range tick orders maximizing trading fee yields.</p>
+        <div class="card-metrics">
+          <div class="metric"><span class="m-val">$18.4M</span><span class="m-lbl">TVL Locked</span></div>
+          <div class="metric"><span class="m-val">22.4%</span><span class="m-lbl">Fee APY</span></div>
+          <div class="metric"><span class="m-val">0.05%</span><span class="m-lbl">Pool Tier</span></div>
+        </div>
+      </section>
+
+      <!-- Section 2: Yield Matrix Engine -->
+      <section id="yieldMatrixSection" class="dashboard-card target-section">
+        <div class="card-header">
+          <span class="card-tag">Yield Optimizer</span>
+          <span class="status-indicator">● Compounding</span>
+        </div>
+        <h3>Auto-Compound Routing Matrix</h3>
+        <p>Multi-protocol yield aggregator harvesting and re-investing staking distributions into principal capital.</p>
+        <div class="card-metrics">
+          <div class="metric"><span class="m-val">Every 4H</span><span class="m-lbl">Epoch Cycle</span></div>
+          <div class="metric"><span class="m-val">+4.2%</span><span class="m-lbl">Boost Multiplier</span></div>
+          <div class="metric"><span class="m-val">99.98%</span><span class="m-lbl">Harvest Success</span></div>
+        </div>
+      </section>
+
+      <!-- Section 3: Risk Hedging -->
+      <section id="riskHedgeSection" class="dashboard-card target-section">
+        <div class="card-header">
+          <span class="card-tag">Delta Neutrality</span>
+          <span class="status-indicator">● Protected</span>
+        </div>
+        <h3>Automated Impermanent Loss Hedge</h3>
+        <p>Algorithmic short positioning on perpetual markets buffering deposited liquidity against asset volatility.</p>
+        <div class="card-metrics">
+          <div class="metric"><span class="m-val">0.12%</span><span class="m-lbl">Max Drawdown</span></div>
+          <div class="metric"><span class="m-val">100%</span><span class="m-lbl">Collateralized</span></div>
+          <div class="metric"><span class="m-val">Delta 0.0</span><span class="m-lbl">Net Exposure</span></div>
+        </div>
+      </section>
+
+      <!-- Section 4: Governance & DAO -->
+      <section id="governanceSection" class="dashboard-card target-section">
+        <div class="card-header">
+          <span class="card-tag">DAO Governance</span>
+          <span class="status-indicator">● Active Proposal</span>
+        </div>
+        <h3>Matrix Staking & Protocol Votes</h3>
+        <p>Vote on fee distribution parameters, new pool whitelists, and earn protocol revenue-sharing distributions.</p>
+        <div class="action-buttons-group">
+          <button class="btn-secondary" id="voteActionBtn">Vote Proposal #42</button>
+          <button class="btn-ghost" id="stakeActionBtn">Stake Governance</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tour Overlay Components -->
+    <div id="tourScrim" class="tour-scrim"></div>
+    <div id="tourHighlightRing" class="tour-highlight-ring"></div>
+
+    <!-- Floating Tour Tooltip Balloon -->
+    <div id="tourTooltip" class="tour-tooltip" role="dialog" aria-modal="true">
+      <div class="tooltip-arrow"></div>
+      <div class="tooltip-header">
+        <span class="tooltip-step-label" id="tooltipStepCount">Step 1 of 4</span>
+        <button id="tooltipCloseBtn" class="tooltip-close" aria-label="Close Tour">&times;</button>
+      </div>
+      <h4 class="tooltip-title" id="tooltipTitle">Feature Spotlight</h4>
+      <p class="tooltip-desc" id="tooltipDesc">Guiding description goes here.</p>
+
+      <!-- Dots indicator -->
+      <div class="tooltip-dots" id="tooltipDots"></div>
+
+      <div class="tooltip-footer">
+        <button id="tourPrevBtn" class="btn-ghost">Previous</button>
+        <div class="tooltip-right-buttons">
+          <button id="tourSkipBtn" class="btn-ghost">Skip</button>
+          <button id="tourNextBtn" class="btn-primary">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { DefiYieldMatrixTourGuide } from './virtual-tour.js';
+
+    const guide = new DefiYieldMatrixTourGuide();
+    const startTourBtn = document.getElementById('startTourBtn');
+    const tourScrim = document.getElementById('tourScrim');
+    const tourHighlightRing = document.getElementById('tourHighlightRing');
+    const tourTooltip = document.getElementById('tourTooltip');
+    const tooltipStepCount = document.getElementById('tooltipStepCount');
+    const tooltipTitle = document.getElementById('tooltipTitle');
+    const tooltipDesc = document.getElementById('tooltipDesc');
+    const tooltipDots = document.getElementById('tooltipDots');
+    const tourPrevBtn = document.getElementById('tourPrevBtn');
+    const tourNextBtn = document.getElementById('tourNextBtn');
+    const tourSkipBtn = document.getElementById('tourSkipBtn');
+    const tooltipCloseBtn = document.getElementById('tooltipCloseBtn');
+
+    function renderTourState() {
+      const stepInfo = guide.getCurrentStep();
+      if (!stepInfo || !guide.isActive) {
+        tourScrim.classList.remove('is-active');
+        tourHighlightRing.classList.remove('is-active');
+        tourTooltip.classList.remove('is-active');
+        return;
+      }
+
+      tourScrim.classList.add('is-active');
+      tourHighlightRing.classList.add('is-active');
+      tourTooltip.classList.add('is-active');
+
+      const targetEl = document.getElementById(stepInfo.targetId);
+      if (!targetEl) return;
+
+      const rect = targetEl.getBoundingClientRect();
+
+      // Position highlight pulse ring around target
+      tourHighlightRing.style.top = `${rect.top - 6}px`;
+      tourHighlightRing.style.left = `${rect.left - 6}px`;
+      tourHighlightRing.style.width = `${rect.width + 12}px`;
+      tourHighlightRing.style.height = `${rect.height + 12}px`;
+
+      // Update text
+      tooltipStepCount.textContent = `Step ${stepInfo.stepIndex + 1} of ${stepInfo.totalSteps}`;
+      tooltipTitle.textContent = stepInfo.title;
+      tooltipDesc.textContent = stepInfo.content;
+
+      // Update dots
+      tooltipDots.innerHTML = guide.steps.map((_, i) => `
+        <span class="step-dot ${i === stepInfo.stepIndex ? 'is-active' : ''}"></span>
+      `).join('');
+
+      // Update buttons
+      tourPrevBtn.disabled = stepInfo.isFirst;
+      tourNextBtn.textContent = stepInfo.isLast ? 'Finish Tour' : 'Next Step';
+
+      // Position tooltip with boundary-aware collision avoidance
+      const tooltipRect = { width: 340, height: 210 };
+      const viewport = { width: window.innerWidth, height: window.innerHeight };
+      const coords = guide.calculateTooltipCoords(rect, tooltipRect, viewport, stepInfo.placement);
+
+      tourTooltip.style.top = `${coords.top}px`;
+      tourTooltip.style.left = `${coords.left}px`;
+      tourTooltip.setAttribute('data-placement', coords.placement);
+    }
+
+    guide.on(() => {
+      renderTourState();
+    });
+
+    startTourBtn.addEventListener('click', () => {
+      guide.startTour();
+    });
+
+    tourNextBtn.addEventListener('click', () => {
+      guide.nextStep();
+    });
+
+    tourPrevBtn.addEventListener('click', () => {
+      guide.prevStep();
+    });
+
+    tourSkipBtn.addEventListener('click', () => {
+      guide.skipTour();
+    });
+
+    tooltipCloseBtn.addEventListener('click', () => {
+      guide.skipTour();
+    });
+
+    window.addEventListener('resize', () => {
+      if (guide.isActive) renderTourState();
+    });
+  </script>
+</body>
+</html>
