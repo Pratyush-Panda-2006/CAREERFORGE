@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Yield Matrix - Simulated WebSocket & RPC Streaming Hub</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+</head>
+<body>
+  <div class="socket-container">
+    <header class="socket-header">
+      <div class="badge-tag">Real-Time Pub/Sub Infrastructure</div>
+      <h1>Simulated Bi-Directional WebSocket & RPC Hub</h1>
+      <p>Self-contained streaming client emulator delivering real-time pool telemetry, heartbeat ping monitors, and automated dropout reconnection backoff.</p>
+    </header>
+
+    <div class="socket-grid">
+      <section class="socket-card controls-card">
+        <h2>Connection Telemetry</h2>
+        <div class="status-grid">
+          <div class="status-box">
+            <span class="status-label">Socket State</span>
+            <span id="connectionStatusPill" class="status-pill status-connected">CONNECTED</span>
+          </div>
+          <div class="status-box">
+            <span class="status-label">RPC Latency</span>
+            <span class="status-val" id="latencyVal">24 ms</span>
+          </div>
+          <div class="status-box">
+            <span class="status-label">Packets Streamed</span>
+            <span class="status-val" id="packetsSentVal">0</span>
+          </div>
+          <div class="status-box">
+            <span class="status-label">Dropped Packets</span>
+            <span class="status-val" id="droppedPacketsVal">0</span>
+          </div>
+        </div>
+
+        <div class="socket-actions">
+          <button id="publishYieldPingBtn" class="btn-action">Publish Yield Broadcast (USDC-ETH)</button>
+          <button id="publishOrderbookBtn" class="btn-action">Publish Orderbook Snapshot (WBTC)</button>
+          <button id="simulateDropoutBtn" class="btn-danger">Simulate Network Dropout (1.5s)</button>
+        </div>
+      </section>
+
+      <section class="socket-card log-card">
+        <h2>Live Monospace Packet Stream</h2>
+        <div class="packet-log" id="socketPacketLog">
+          <!-- Real-time packets render here -->
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="mock-websocket.js"></script>
+</body>
+</html>
