@@ -12,38 +12,129 @@ interface Contributor {
 const fallbackContributors: Contributor[] = [
   {
     rank: 1,
-    name: 'Alex Rivera',
-    handle: '@arivera_os',
-    avatar: 'AR',
-    mergedPRs: 34,
+    name: 'AdityaNarayanPadhi',
+    handle: '@AdityaNarayanPadhi',
+    avatar: 'AN',
+    mergedPRs: 487,
   },
   {
     rank: 2,
-    name: 'Elena Rostova',
-    handle: '@elena_dev',
-    avatar: 'ER',
-    mergedPRs: 22,
+    name: 'souravranjanmirdha-sudo',
+    handle: '@souravranjanmirdha-sudo',
+    avatar: 'SR',
+    mergedPRs: 362,
   },
   {
     rank: 3,
-    name: 'Marcus Chen',
-    handle: '@marcus_c',
-    avatar: 'MC',
-    mergedPRs: 18,
+    name: 'Harshit214713',
+    handle: '@Harshit214713',
+    avatar: 'HB',
+    mergedPRs: 107,
   },
   {
     rank: 4,
-    name: 'Siddharth Kapoor',
-    handle: '@sid_kapoor',
-    avatar: 'SK',
-    mergedPRs: 14,
+    name: 'Sarbajit-Sengupta',
+    handle: '@Sarbajit-Sengupta',
+    avatar: 'SS',
+    mergedPRs: 35,
   },
   {
     rank: 5,
-    name: 'Sophia Nguyen',
-    handle: '@sophia_code',
-    avatar: 'SN',
+    name: 'Anshuu2004',
+    handle: '@Anshuu2004',
+    avatar: 'AC',
+    mergedPRs: 33,
+  },
+  {
+    rank: 6,
+    name: 'SwatiManjari',
+    handle: '@SwatiManjari',
+    avatar: 'SM',
+    mergedPRs: 27,
+  },
+  {
+    rank: 7,
+    name: 'divyanshAgarwal123',
+    handle: '@divyanshAgarwal123',
+    avatar: 'DA',
+    mergedPRs: 20,
+  },
+  {
+    rank: 8,
+    name: 'chanchall26',
+    handle: '@chanchall26',
+    avatar: 'C2',
+    mergedPRs: 14,
+  },
+  {
+    rank: 9,
+    name: 'aush5895',
+    handle: '@aush5895',
+    avatar: 'AG',
     mergedPRs: 11,
+  },
+  {
+    rank: 10,
+    name: 'kunal-yelgate',
+    handle: '@kunal-yelgate',
+    avatar: 'KY',
+    mergedPRs: 4,
+  },
+  {
+    rank: 11,
+    name: 'jay23606',
+    handle: '@jay23606',
+    avatar: 'J2',
+    mergedPRs: 4,
+  },
+  {
+    rank: 12,
+    name: 'Akanksha7Dixit',
+    handle: '@Akanksha7Dixit',
+    avatar: 'AD',
+    mergedPRs: 3,
+  },
+  {
+    rank: 13,
+    name: 'bhavyasingh-sa',
+    handle: '@bhavyasingh-sa',
+    avatar: 'BS',
+    mergedPRs: 2,
+  },
+  {
+    rank: 14,
+    name: 'Aaqibhafeezkhan',
+    handle: '@Aaqibhafeezkhan',
+    avatar: 'AK',
+    mergedPRs: 2,
+  },
+  {
+    rank: 15,
+    name: 'harshbok69-bit',
+    handle: '@harshbok69-bit',
+    avatar: 'HB',
+    mergedPRs: 2,
+  },
+  {
+    rank: 16,
+    name: 'yash-sharmaji',
+    handle: '@yash-sharmaji',
+    avatar: 'YS',
+    mergedPRs: 1,
+  },
+  {
+    rank: 17,
+    name: 'mohdmunis161',
+    handle: '@mohdmunis161',
+    avatar: 'MM',
+    mergedPRs: 1,
+  },
+  {
+    rank: 18,
+    name: 'Pallav-Biyala',
+    handle: '@Pallav-Biyala',
+    avatar: 'PB',
+    mergedPRs: 1,
   },
 ];
 
@@ -53,7 +144,7 @@ export default function Leaderboard() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/leaderboard.json')
+    fetch(`/leaderboard.json?t=${Date.now()}`, { cache: 'no-store' })
       .then((res) => {
         if (!res.ok) throw new Error('Network error');
         return res.json();

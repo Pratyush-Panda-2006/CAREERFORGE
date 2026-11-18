@@ -1,4 +1,4 @@
-name: Real-Time PR Merge Sync & Leaderboard
+name: PR Merge Issue Closer
 
 on:
   pull_request_target:
@@ -6,32 +6,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
   issues: write
   pull-requests: write
 
 jobs:
-  handle-merged-pr:
-    name: Close Issue and Sync Leaderboard on Merge
+  close-linked-issue:
+    name: Close Linked Issue on PR Merge
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci || npm install
-
       - name: Close Linked Issue(s)
         uses: actions/github-script@v7
         with:
@@ -102,22 +86,3 @@ jobs:
                 console.warn(`Could not close issue #${issueNum}: ${err.message}`);
               }
             }
-
-      - name: Update Real-Time Leaderboard
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          node scripts/generate-leaderboard.mjs
-
-      - name: Commit & Push Updated Leaderboard
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/leaderboard.json
-          if git diff --staged --quiet; then
-            echo "Leaderboard already up to date."
-          else
-            git commit -m "chore(leaderboard): real-time update on PR #${{ github.event.pull_request.number }} merge [skip ci]"
-            git push origin main
-          fi
