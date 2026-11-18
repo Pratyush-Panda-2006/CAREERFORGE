@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charity Microloans - Feature Spotlight Tour</title>
+  <link rel="stylesheet" href="./virtual-tour.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #18181b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #tour-root {
+      max-width: 800px;
+      width: 100%;
+    }
+    .mock-loans-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      max-width: 800px;
+      width: 100%;
+    }
+    .mock-card {
+      padding: 1.5rem;
+      background: rgba(39, 39, 42, 0.5);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 8px;
+      color: #cbd5e1;
+    }
+    .mock-card h4 {
+      margin: 0 0 0.5rem 0;
+      color: #34d399;
+    }
+  </style>
+</head>
+<body>
+  <div id="tour-root"></div>
+
+  <div class="mock-loans-grid">
+    <div id="vetting-card" class="mock-card">
+      <h4>Borrower Vetting</h4>
+      <p>Community impact rating and verified micro-enterprise profiles.</p>
+    </div>
+    <div id="syndicate-card" class="mock-card">
+      <h4>Lending Syndicate</h4>
+      <p>Fractional crowdfunding contributions starting at $25.</p>
+    </div>
+    <div id="repayment-card" class="mock-card">
+      <h4>Repayment Ledger</h4>
+      <p>Mobile wallet payment schedule and guarantor milestones.</p>
+    </div>
+    <div id="reinvestment-card" class="mock-card">
+      <h4>Reinvestment Engine</h4>
+      <p>Re-allocating repaid principal into newly funded entrepreneurs.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { CharityMicroloansTourGuide } from './virtual-tour.js';
+
+    const root = document.getElementById('tour-root');
+    const guide = new CharityMicroloansTourGuide();
+    guide.renderToDOM(root);
+  </script>
+</body>
+</html>
