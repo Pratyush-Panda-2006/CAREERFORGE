@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Culinary Bistro - Kitchen Operations Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+  <style>
+    body {
+      background: #140d0b;
+      color: #f5f5f4;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kitchen Expediting & Order Flow Pipeline</h1>
+  <div id="pipeline-root"></div>
+
+  <script type="module">
+    import { CulinaryBistroPipelineEngine } from './workflow-pipeline.js';
+
+    const pipeline = new CulinaryBistroPipelineEngine();
+    const root = document.getElementById('pipeline-root');
+
+    pipeline.subscribe(() => {
+      pipeline.renderToDOM(root);
+    });
+
+    pipeline.renderToDOM(root);
+  </script>
+</body>
+</html>
