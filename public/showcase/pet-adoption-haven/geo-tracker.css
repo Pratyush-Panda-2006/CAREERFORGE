@@ -1,0 +1,261 @@
+/**
+ * Pet Adoption Haven - Geospatial Radar Styles
+ */
+.geo-radar-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: radial-gradient(circle at center, #261b17, #0d0908);
+  border-radius: 12px;
+  color: #fef3c7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+.geo-radar-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.geo-radar-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #d1d5db;
+}
+
+.geo-radar-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .geo-radar-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.geo-radar-visual-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.geo-radar-screen {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, #211511, #0d0908);
+  border-radius: 50%;
+  border: 2px solid #d97706;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+  overflow: hidden;
+}
+
+.geo-radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(245, 158, 11, 0.3);
+}
+
+.ring-1 { width: 33%; height: 33%; }
+.ring-2 { width: 66%; height: 66%; }
+.ring-3 { width: 95%; height: 95%; }
+
+.geo-radar-crosshair-x {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.geo-radar-crosshair-y {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.geo-radar-sweep-beam {
+  position: absolute;
+  width: 125px;
+  height: 125px;
+  top: 0;
+  left: 125px;
+  background: conic-gradient(from 0deg, rgba(245, 158, 11, 0.6) 0deg, transparent 60deg);
+  transform-origin: 0% 100%;
+  animation: radar-sweep 3s linear infinite;
+}
+
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.geo-radar-blips-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.geo-radar-blip {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #34d399;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px #34d399, 0 0 16px rgba(52, 211, 153, 0.6);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.geo-radar-blip:hover {
+  transform: translate(-50%, -50%) scale(1.5);
+  background: #ffffff;
+}
+
+.geo-radar-legend {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.geo-radar-controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.geo-input-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(45, 30, 24, 0.5);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.geo-input-group label {
+  font-size: 0.8rem;
+  color: #fde68a;
+}
+
+.geo-input-group input {
+  background: rgba(18, 12, 10, 0.8);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 6px;
+  color: #fffbeb;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.85rem;
+  width: 90px;
+}
+
+.geo-input-group input:focus {
+  outline: none;
+  border-color: #fbbf24;
+}
+
+.geo-btn {
+  background: rgba(60, 42, 34, 0.6);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fef3c7;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.geo-btn:hover {
+  background: rgba(85, 58, 46, 0.8);
+  border-color: #f59e0b;
+}
+
+.geo-btn-primary {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  border: none;
+  color: #1f1206;
+  font-weight: 600;
+}
+
+.geo-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.geo-radar-controls-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #fef3c7;
+}
+
+.geo-nodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.geo-node-card {
+  background: rgba(45, 30, 24, 0.4);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.geo-node-card:hover {
+  background: rgba(45, 30, 24, 0.7);
+  border-color: #f59e0b;
+  transform: translateX(3px);
+}
+
+.geo-node-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.geo-node-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #fffbeb;
+}
+
+.geo-node-dist {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.geo-node-card-sub {
+  font-size: 0.75rem;
+  color: #d1d5db;
+}
