@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Esports Hub - Live Alert Stream</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #080811;
+      color: #f1f5f9;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+    .demo-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .demo-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      background: #181829;
+      color: #c4b5fd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Esports Tournament & Server Telemetry Stream</h1>
+  <div class="demo-controls">
+    <button class="demo-btn" id="btn-critical">Trigger Anti-Cheat Violation</button>
+    <button class="demo-btn" id="btn-warning">Trigger Tickrate Drop Warning</button>
+    <button class="demo-btn" id="btn-success">Trigger Bracket Lock Success</button>
+    <button class="demo-btn" id="btn-info">Trigger Server Patch Info</button>
+  </div>
+  <div id="notification-root"></div>
+
+  <script type="module">
+    import { GamingEsportsNotificationHub } from './notification-hub.js';
+
+    const hub = new GamingEsportsNotificationHub();
+    const root = document.getElementById('notification-root');
+
+    hub.subscribe(() => {
+      hub.renderToDOM(root);
+    });
+
+    // Initial alert items
+    hub.enqueue('Kernel Anti-Cheat: Ring0 signature anomaly detected on Pod 7. Instant match pause triggered.', 'critical', 'critical');
+    hub.enqueue('Sub-tick mismatch warning: Server NA-East-3 tickrate fell to 92Hz during smoke grenade barrage.', 'warning', 'warning');
+    hub.enqueue('Upper Bracket Round 2 confirmed: Cloud9 vs G2 Esports broadcast live on Main Arena.', 'success', 'success');
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Integrity Violation: DLL hook injected into client memory process. Player disqualified.', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Packet loss alert: EU-Central datacenter experiencing 4.2% jitter burst.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Grand Finals roster check completed with 10/10 verified tournament identities.', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Client netcode update 2.14 synchronized across all tournament dedicated servers.', 'info', 'info');
+    });
+  </script>
+</body>
+</html>
