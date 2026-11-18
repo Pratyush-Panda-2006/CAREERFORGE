@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Cryptographic Audit Trail</title>
+  <link rel="stylesheet" href="audit-trail.css">
+</head>
+<body>
+  <div class="audit-container">
+    <div class="audit-header">
+      <h1 class="audit-title">
+        Enterprise Governance & Security Audit Trail
+        <span class="audit-badge">Issue #733</span>
+      </h1>
+      <p class="audit-desc">
+        Cryptographically chained SHA-256 state ledger capturing tenant configurations, RBAC permissions, and API key lifecycles.
+      </p>
+    </div>
+
+    <div class="audit-toolbar">
+      <div class="toolbar-left">
+        <select id="audit-action-select" class="audit-select">
+          <option value="ROLE_PERMISSIONS_UPDATED">ROLE_PERMISSIONS_UPDATED</option>
+          <option value="API_KEY_ROTATED">API_KEY_ROTATED</option>
+          <option value="TENANT_SUBSCRIPTION_UPGRADED">TENANT_SUBSCRIPTION_UPGRADED</option>
+          <option value="SSO_PROVIDER_CONFIGURED">SSO_PROVIDER_CONFIGURED</option>
+        </select>
+        <button id="add-audit-btn" class="audit-btn">Record Event</button>
+      </div>
+
+      <div class="toolbar-right">
+        <button id="verify-audit-btn" class="audit-btn">Verify Chain Integrity</button>
+        <span id="verify-status" class="status-pill status-valid">Valid (Genesis)</span>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Index</th>
+            <th>Timestamp</th>
+            <th>Action</th>
+            <th>Details</th>
+            <th>Block Hash</th>
+          </tr>
+        </thead>
+        <tbody id="audit-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module" src="audit-trail.js"></script>
+</body>
+</html>
