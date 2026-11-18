@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Sentinel - Threat Search & Filter Engine</title>
+  <link rel="stylesheet" href="filter-engine.css">
+</head>
+<body>
+  <div class="sentinel-filter-container">
+    <header class="filter-header">
+      <div class="header-titles">
+        <span class="filter-badge">SOC Threat Explorer</span>
+        <h1 class="filter-title">SIEM Incident & CVE Filter Engine</h1>
+        <p class="filter-subtitle">In-memory zero-latency search and multi-column sorting across threat vectors and IOC signatures.</p>
+      </div>
+    </header>
+
+    <!-- Controls Bar: Search & Sort -->
+    <section class="controls-panel">
+      <div class="search-box-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="threatSearchInput" class="search-input" placeholder="Search by threat title, vector, IP address..." autocomplete="off">
+        <button type="button" id="clearThreatSearchBtn" class="btn-clear" aria-label="Clear search">
+          &times;
+        </button>
+      </div>
+
+      <div class="sort-box-wrapper">
+        <label for="sortSelect" class="sort-label">Sort By:</label>
+        <select id="sortSelect" class="sort-select">
+          <option value="cvssScore-desc">CVSS Score (Highest Severity)</option>
+          <option value="cvssScore-asc">CVSS Score (Lowest Severity)</option>
+          <option value="eventsCount-desc">Event Count (Highest First)</option>
+          <option value="eventsCount-asc">Event Count (Lowest First)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Tag Chips -->
+    <section class="tags-panel">
+      <span class="tags-label">Signatures:</span>
+      <div class="chips-row">
+        <button type="button" class="filter-chip" data-tag="brute-force">Brute Force</button>
+        <button type="button" class="filter-chip" data-tag="sqli">SQL Injection</button>
+        <button type="button" class="filter-chip" data-tag="web">Web Application</button>
+        <button type="button" class="filter-chip" data-tag="priv-esc">Priv Escalation</button>
+        <button type="button" class="filter-chip" data-tag="ransomware">Ransomware</button>
+        <button type="button" class="filter-chip" data-tag="dns">DNS Tunneling</button>
+      </div>
+    </section>
+
+    <!-- Summary Bar -->
+    <div class="results-bar">
+      <span id="resultCount" class="results-count">Loading security incidents...</span>
+      <button type="button" id="resetFiltersBtn" class="btn-reset-filters">Reset Filters</button>
+    </div>
+
+    <!-- Results Grid -->
+    <main id="threatResultsGrid" class="threat-grid"></main>
+
+    <!-- Empty State Alert -->
+    <div id="emptyStateAlert" class="empty-state-alert hidden">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+      </svg>
+      <h3>No Threats Detected</h3>
+      <p>No active security incidents matched your active filters and search query.</p>
+    </div>
+  </div>
+
+  <script type="module" src="filter-engine.js"></script>
+</body>
+</html>
