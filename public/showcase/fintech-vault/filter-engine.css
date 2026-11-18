@@ -1,0 +1,321 @@
+/**
+ * Fintech Vault - Filter Engine Styles
+ * Dark cyber glassmorphism with neon emerald (#10b981) accents & responsive asset cards
+ */
+
+:root {
+  --fintech-bg: #030712;
+  --fintech-card-bg: rgba(17, 24, 39, 0.75);
+  --fintech-card-border: rgba(16, 185, 129, 0.22);
+  --fintech-emerald: #10b981;
+  --fintech-emerald-glow: rgba(16, 185, 129, 0.35);
+  --fintech-emerald-hover: #059669;
+  --fintech-cyan: #06b6d4;
+  --fintech-text-main: #f9fafb;
+  --fintech-text-muted: #9ca3af;
+  --fintech-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --fintech-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--fintech-bg);
+  font-family: var(--fintech-font-family);
+  color: var(--fintech-text-main);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.vault-filter-container {
+  width: 100%;
+  max-width: 960px;
+  background: var(--fintech-card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--fintech-card-border);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 24px rgba(16, 185, 129, 0.08);
+}
+
+.vault-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.vault-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--fintech-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  margin-bottom: 8px;
+}
+
+.filter-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: #fff;
+}
+
+.filter-subtitle {
+  font-size: 0.88rem;
+  color: var(--fintech-text-muted);
+  margin: 0;
+}
+
+.results-pill {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 20px;
+  color: var(--fintech-emerald);
+}
+
+.filter-controls-bar {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--fintech-text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(10, 15, 28, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 12px 40px 12px 42px;
+  font-size: 0.92rem;
+  color: #fff;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  border-color: var(--fintech-emerald);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--fintech-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.clear-search-btn:hover {
+  color: #fff;
+}
+
+.sort-select {
+  background: rgba(10, 15, 28, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.92rem;
+  color: #fff;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.sort-select:focus {
+  border-color: var(--fintech-emerald);
+}
+
+.tag-chips-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.tags-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fintech-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tag-chips-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vault-tag-chip {
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--fintech-text-muted);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vault-tag-chip:hover {
+  border-color: var(--fintech-emerald);
+  color: #fff;
+}
+
+.vault-tag-chip.active {
+  background: var(--fintech-emerald);
+  color: #000;
+  border-color: var(--fintech-emerald);
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+}
+
+.tag-count {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.asset-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.vault-asset-card {
+  background: rgba(31, 41, 55, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.vault-asset-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.asset-class {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fintech-text-muted);
+  font-weight: 600;
+}
+
+.asset-apy {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--fintech-emerald);
+}
+
+.asset-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  color: #fff;
+}
+
+.asset-protocol {
+  font-size: 0.82rem;
+  color: var(--fintech-text-muted);
+  margin: 0;
+}
+
+.asset-specs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #d1d5db;
+  padding-top: 4px;
+}
+
+.asset-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.badge-tag {
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--fintech-text-muted);
+}
+
+.empty-state-card {
+  text-align: center;
+  padding: 48px 24px;
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.empty-state-card svg {
+  color: var(--fintech-text-muted);
+  margin-bottom: 12px;
+}
+
+.empty-state-card h3 {
+  font-size: 1.1rem;
+  margin: 0 0 6px 0;
+  color: #fff;
+}
+
+.empty-state-card p {
+  font-size: 0.85rem;
+  color: var(--fintech-text-muted);
+  margin: 0;
+}
+
+@media (max-width: 680px) {
+  .filter-controls-bar {
+    flex-direction: column;
+  }
+}
