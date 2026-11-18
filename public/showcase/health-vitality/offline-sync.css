@@ -1,0 +1,125 @@
+/* Health Vitality - Offline Data Persistence Styles */
+:root {
+  --hv-primary: #10b981;
+  --hv-primary-glow: rgba(16, 185, 129, 0.3);
+  --hv-accent: #06b6d4;
+  --hv-bg: #042f2e;
+  --hv-card-bg: rgba(6, 78, 59, 0.6);
+  --hv-border: #115e59;
+  --hv-text: #f0fdfa;
+  --hv-text-muted: #99f6e4;
+  --hv-warning: #f59e0b;
+  --hv-danger: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--hv-bg);
+  color: var(--hv-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+.sync-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(13, 148, 136, 0.15);
+  border: 1px solid var(--hv-border);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px var(--hv-primary-glow);
+}
+
+.sync-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--hv-border);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sync-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  color: #fff;
+}
+
+.status-pill {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.status-pill.online {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid var(--hv-primary);
+  color: #a7f3d0;
+}
+
+.status-pill.offline {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid var(--hv-warning);
+  color: #fde68a;
+}
+
+.actions-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn-action {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--hv-border);
+  background: var(--hv-card-bg);
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.btn-action.primary {
+  background: linear-gradient(135deg, var(--hv-primary), var(--hv-accent));
+  color: #042f2e;
+  border: none;
+}
+
+.btn-action:hover {
+  filter: brightness(1.15);
+}
+
+.queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--hv-card-bg);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.queue-table th, .queue-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--hv-border);
+}
+
+.queue-table th {
+  background: rgba(4, 47, 46, 0.8);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--hv-text-muted);
+}
+
+.badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.badge.pending { background: rgba(245, 158, 11, 0.2); color: var(--hv-warning); }
+.badge.retrying { background: rgba(6, 182, 212, 0.2); color: var(--hv-accent); }
+.badge.failed { background: rgba(239, 68, 68, 0.2); color: var(--hv-danger); }
