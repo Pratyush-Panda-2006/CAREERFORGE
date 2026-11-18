@@ -5048,3 +5048,191 @@ body.high-contrast-mode .cart-item,
 body.high-contrast-mode .preferences-drawer-content {
   border: 2px solid #38bdf8 !important;
 }
+
+
+
+/* ==========================================================================
+   Issue #572: Dynamic Search, Tag Filtering & Multi-Column Sorting Engine
+   ========================================================================== */
+
+.dynamic-filter-toolbar {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.dynamic-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 2px 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dynamic-search-wrapper:focus-within {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+}
+
+.dynamic-search-icon {
+  font-size: 1rem;
+  margin-right: 8px;
+  opacity: 0.7;
+}
+
+.dynamic-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f8fafc;
+  font-size: 0.9rem;
+  padding: 8px 0;
+  font-family: inherit;
+}
+
+.dynamic-search-input::placeholder {
+  color: #64748b;
+}
+
+.dynamic-search-clear {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.dynamic-search-clear:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dynamic-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dynamic-tag-chips-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.dynamic-filter-label {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.dynamic-tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.catalog-tag-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.catalog-tag-chip:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #f0f9ff;
+  transform: translateY(-1px);
+}
+
+.catalog-tag-chip.active {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.3), rgba(14, 165, 233, 0.3));
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.dynamic-sort-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dynamic-sort-label {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.dynamic-sort-select {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f8fafc;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.dynamic-sort-select:focus,
+.dynamic-sort-select:hover {
+  border-color: #38bdf8;
+}
+
+.dynamic-empty-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #fca5a5;
+  animation: fadeInEmpty 0.2s ease;
+}
+
+.dynamic-empty-alert strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #f87171;
+  margin-bottom: 2px;
+}
+
+.dynamic-empty-alert p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #fecdd3;
+}
+
+@keyframes fadeInEmpty {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

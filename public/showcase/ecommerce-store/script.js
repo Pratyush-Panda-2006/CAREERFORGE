@@ -5246,3 +5246,194 @@ if (typeof document !== 'undefined') {
     initEcommercePreferencesUI();
   }
 }
+
+
+
+// ==========================================================================
+// Issue #572: Dynamic Search, Tag Filtering & Multi-Column Sorting Engine
+// ==========================================================================
+
+class EcommerceStoreFilterEngine {
+  constructor(items = []) {
+    this.initialItems = Array.isArray(items) ? [...items] : [];
+    this.keyword = '';
+    this.activeTags = new Set();
+    this.sortField = 'popularity';
+    this.sortDirection = 'desc';
+  }
+
+  setItems(items) {
+    this.initialItems = Array.isArray(items) ? [...items] : [];
+  }
+
+  filterByKeyword(query) {
+    this.keyword = (query || '').trim().toLowerCase();
+    return this.getFilteredItems();
+  }
+
+  toggleTag(tag) {
+    const normalized = (tag || '').trim().toLowerCase();
+    if (!normalized) return this.getFilteredItems();
+    if (this.activeTags.has(normalized)) {
+      this.activeTags.delete(normalized);
+    } else {
+      this.activeTags.add(normalized);
+    }
+    return this.getFilteredItems();
+  }
+
+  setTags(tags) {
+    this.activeTags.clear();
+    if (Array.isArray(tags)) {
+      tags.forEach(t => {
+        if (t) this.activeTags.add(String(t).trim().toLowerCase());
+      });
+    }
+    return this.getFilteredItems();
+  }
+
+  clearTags() {
+    this.activeTags.clear();
+    return this.getFilteredItems();
+  }
+
+  getActiveTags() {
+    return Array.from(this.activeTags);
+  }
+
+  sort(field, direction = 'asc') {
+    this.sortField = field || 'popularity';
+    this.sortDirection = direction === 'desc' ? 'desc' : 'asc';
+    return this.getFilteredItems();
+  }
+
+  getSortState() {
+    return { field: this.sortField, direction: this.sortDirection };
+  }
+
+  reset() {
+    this.keyword = '';
+    this.activeTags.clear();
+    this.sortField = 'popularity';
+    this.sortDirection = 'desc';
+    return this.getFilteredItems();
+  }
+
+  getFilteredItems() {
+    let result = this.initialItems.slice();
+
+    if (this.keyword) {
+      result = result.filter(item => {
+        const name = (item.name || '').toLowerCase();
+        const category = (item.category || '').toLowerCase();
+        const desc = (item.description || item.desc || '').toLowerCase();
+        const tags = Array.isArray(item.tags) ? item.tags.join(' ').toLowerCase() : '';
+        return name.includes(this.keyword) ||
+               category.includes(this.keyword) ||
+               desc.includes(this.keyword) ||
+               tags.includes(this.keyword);
+      });
+    }
+
+    if (this.activeTags.size > 0) {
+      result = result.filter(item => {
+        const itemTags = (Array.isArray(item.tags) ? item.tags : [])
+          .map(t => String(t).toLowerCase());
+        const cat = (item.category || '').toLowerCase();
+        return Array.from(this.activeTags).every(reqTag =>
+          itemTags.includes(reqTag) || cat === reqTag
+        );
+      });
+    }
+
+    const dir = this.sortDirection === 'desc' ? -1 : 1;
+    result.sort((a, b) => {
+      let valA = a[this.sortField];
+      let valB = b[this.sortField];
+
+      if (valA === undefined) valA = 0;
+      if (valB === undefined) valB = 0;
+
+      if (typeof valA === 'string') {
+        return dir * valA.localeCompare(String(valB));
+      }
+      return dir * (valA - valB);
+    });
+
+    return result;
+  }
+}
+
+function initEcommerceFilterUI() {
+  if (typeof document === 'undefined') return;
+
+  const catalogItems = typeof products !== 'undefined' && Array.isArray(products)
+    ? products
+    : (typeof CATALOG_ITEMS !== 'undefined' ? CATALOG_ITEMS : []);
+
+  const filterEngine = new EcommerceStoreFilterEngine(catalogItems);
+  window.ecommerceStoreFilterEngine = filterEngine;
+
+  const searchInput = document.getElementById('catalogDynamicSearchInput');
+  const searchClear = document.getElementById('catalogDynamicSearchClear');
+  const tagChips = document.querySelectorAll('.catalog-tag-chip');
+  const sortSelect = document.getElementById('catalogMultiSortSelect');
+
+  function renderFiltered() {
+    const filtered = filterEngine.getFilteredItems();
+    const countEl = document.getElementById('filteredProductsCount');
+    if (countEl) countEl.textContent = `${filtered.length} products found`;
+
+    const emptyAlert = document.getElementById('filterEmptyAlert');
+    if (emptyAlert) {
+      emptyAlert.hidden = filtered.length > 0;
+    }
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      filterEngine.filterByKeyword(searchInput.value);
+      if (searchClear) searchClear.hidden = !searchInput.value;
+      renderFiltered();
+    });
+  }
+
+  if (searchClear) {
+    searchClear.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      filterEngine.filterByKeyword('');
+      searchClear.hidden = true;
+      renderFiltered();
+    });
+  }
+
+  if (tagChips) {
+    tagChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const tag = chip.dataset.tag || chip.textContent.trim();
+        filterEngine.toggleTag(tag);
+        chip.classList.toggle('active', filterEngine.activeTags.has(tag.toLowerCase()));
+        renderFiltered();
+      });
+    });
+  }
+
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      const [field, dir] = sortSelect.value.split('-');
+      filterEngine.sort(field, dir || 'asc');
+      renderFiltered();
+    });
+  }
+}
+
+window.EcommerceStoreFilterEngine = EcommerceStoreFilterEngine;
+window.initEcommerceFilterUI = initEcommerceFilterUI;
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEcommerceFilterUI);
+  } else {
+    initEcommerceFilterUI();
+  }
+}
