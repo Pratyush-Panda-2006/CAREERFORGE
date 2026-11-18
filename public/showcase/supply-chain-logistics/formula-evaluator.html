@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Explore shipment KPI formulas with local variables and live arithmetic results." />
+    <title>Formula workbench | FreightFlow</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="formula-evaluator.css" />
+    <script type="module" src="formula-evaluator.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workbench">Skip to calculator</a>
+    <header class="site-header">
+      <a class="brand" href="index.html">FreightFlow</a>
+      <span>Supply chain &amp; logistics</span>
+      <a href="index.html">Back to showcase</a>
+    </header>
+    <main id="workbench" data-formula-calculator>
+      <div class="intro">
+        <h1>Calculate a shipment KPI.</h1>
+        <p>Write your formula, then adjust the inputs. This example calculates the percentage of shipments delivered on time.</p>
+      </div>
+      <div class="workspace">
+        <section class="expression-panel" aria-labelledby="formula-heading">
+          <h2 id="formula-heading">Your formula</h2>
+          <label for="formula">Arithmetic expression</label>
+          <input id="formula" type="text" value="on_time / shipments * 100" maxlength="2048" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="syntax-help formula-error" />
+          <div class="operator-bar" role="group" aria-label="Insert an operator">
+            <button type="button" data-insert=" + " aria-label="Insert plus">+</button>
+            <button type="button" data-insert=" - " aria-label="Insert minus">−</button>
+            <button type="button" data-insert=" * " aria-label="Insert multiply">×</button>
+            <button type="button" data-insert=" / " aria-label="Insert divide">÷</button>
+            <button type="button" data-insert="^" aria-label="Insert exponent">^</button>
+            <button type="button" data-insert="(" aria-label="Insert opening parenthesis">(</button>
+            <button type="button" data-insert=")" aria-label="Insert closing parenthesis">)</button>
+          </div>
+          <p id="syntax-help" class="help">Use numbers, variable names and + − × ÷ ^. Parentheses group operations; ^ means exponentiation, so −2^2 is −4. Write multiplication explicitly: <code>2 * shipments</code>.</p>
+          <button class="primary-button" type="button" id="calculate">Calculate</button>
+          <div class="result-panel" role="status" aria-live="polite" aria-atomic="true">
+            <span>Result</span>
+            <output id="result" for="formula">—</output>
+          </div>
+          <p id="formula-error" class="error" role="alert" hidden></p>
+          <p class="help result-note">Results use approximate decimal arithmetic. Demo inputs stay in this tab and reset on refresh.</p>
+        </section>
+        <section class="variables-panel" aria-labelledby="variables-heading">
+          <div class="section-heading">
+            <h2 id="variables-heading">Variables</h2>
+            <span>Adjust your inputs</span>
+          </div>
+          <div id="variable-rows"></div>
+          <form id="add-variable" novalidate>
+            <h3>Add a variable</h3>
+            <label for="variable-name">Name</label>
+            <input id="variable-name" type="text" placeholder="distance_km" maxlength="32" autocomplete="off" spellcheck="false" aria-describedby="variable-name-help add-error" />
+            <p id="variable-name-help" class="help">Names are case-sensitive. Use letters, digits or underscores; start with a letter or underscore.</p>
+            <label for="variable-value">Value</label>
+            <input id="variable-value" type="number" value="0" min="-1000000000" max="1000000000" step="any" />
+            <button type="submit" class="secondary-button">Add variable</button>
+            <p id="add-error" class="error" role="alert" hidden></p>
+          </form>
+        </section>
+      </div>
+    </main>
+    <footer>FreightFlow formula workbench · CAREERFORGE showcase</footer>
+  </body>
+</html>
