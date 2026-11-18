@@ -1,0 +1,180 @@
+/**
+ * Festival Hub - Event Notifier & Toast Stack Styles
+ * Issue #883
+ */
+
+.festival-notifier-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 24px;
+  background: #0f172a;
+  border-radius: 12px;
+  color: #f8fafc;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.notifier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.notifier-branding h2 {
+  margin: 0 0 6px 0;
+  font-size: 1.4rem;
+  color: #38bdf8;
+}
+
+.notifier-branding p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.toggle-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+}
+
+.notifier-actions h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  color: #cbd5e1;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-info {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.btn-success {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.btn-warning {
+  background: #d97706;
+  color: #ffffff;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* Toast Stacking Viewport */
+.toast-stack-viewport {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 99999;
+  max-width: 360px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  border-left: 5px solid #94a3b8;
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  color: #f1f5f9;
+}
+
+.toast-item.toast-info {
+  border-left-color: #38bdf8;
+}
+
+.toast-item.toast-success {
+  border-left-color: #4ade80;
+}
+
+.toast-item.toast-warning {
+  border-left-color: #fbbf24;
+}
+
+.toast-item.toast-danger {
+  border-left-color: #f87171;
+}
+
+.toast-body strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+  color: #ffffff;
+}
+
+.toast-body p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 0 0 10px;
+  line-height: 1;
+}
+
+.toast-close:hover {
+  color: #ffffff;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
