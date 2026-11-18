@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edtech Academy - Curriculum Workflow Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .ed-pipeline-controls {
+      display: flex;
+      gap: 12px;
+    }
+    .ed-btn {
+      padding: 8px 16px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>Edtech Curriculum & Certification Pipeline</h1>
+  <div class="ed-pipeline-controls">
+    <button class="ed-btn" id="btn-add-task">+ Schedule Curriculum Module</button>
+  </div>
+  <div id="pipeline-root"></div>
+
+  <script type="module">
+    import { EdtechAcademyPipelineEngine } from './workflow-pipeline.js';
+
+    const engine = new EdtechAcademyPipelineEngine();
+    const root = document.getElementById('pipeline-root');
+
+    document.getElementById('btn-add-task').addEventListener('click', () => {
+      engine.addTask({
+        title: `Interactive Lab Development #${Math.floor(Math.random() * 1000)}`,
+        description: 'Auto-scheduled pedagogical module authoring task.',
+        columnId: 'course-authoring',
+        priority: 'high',
+        assignee: 'Course Author',
+        durationEst: '2d'
+      });
+      engine.render(root);
+    });
+
+    engine.render(root);
+  </script>
+</body>
+</html>
