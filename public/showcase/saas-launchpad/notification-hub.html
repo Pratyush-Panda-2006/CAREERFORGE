@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Operational Alerts Showcase</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 32px 16px;
+      background: radial-gradient(circle at 10% 20%, #0f172a, #020617 90%);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .wrapper {
+      width: 100%;
+      max-width: 720px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div id="hub-root"></div>
+  </div>
+
+  <script type="module">
+    import { SaasLaunchpadNotificationHub } from './notification-hub.js';
+
+    const hub = new SaasLaunchpadNotificationHub();
+    hub.enqueue('CRITICAL: Stripe billing webhook failure on tenant acme-corp', 'critical', 'billing');
+    hub.enqueue('WARNING: Organization API quota reached 88% on Enterprise tier', 'warning', 'quota');
+    hub.enqueue('SUCCESS: New annual seat expansion purchased by Stellar Inc.', 'success', 'subscription');
+
+    const root = document.getElementById('hub-root');
+    hub.renderToDOM(root);
+  </script>
+</body>
+</html>
