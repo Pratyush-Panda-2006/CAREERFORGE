@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biotech Genomics - Adaptive User Preferences</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body class="biotech-preferences-body">
+  <div class="biotech-page-wrapper">
+    <header class="biotech-header">
+      <div class="biotech-badge">GENOME LAB WORKSPACE</div>
+      <h1>Biotech Genomics Lab</h1>
+      <p>Precision CRISPR-Cas9 analysis, chromosomal variant mapping, and interactive nucleotide workbench.</p>
+      <button id="btn-open-preferences" class="biotech-primary-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Open Preferences Drawer</span>
+      </button>
+    </header>
+
+    <!-- Modal Drawer -->
+    <div id="biotech-genomics-preferences-modal" class="biotech-modal-drawer" role="dialog" aria-labelledby="pref-drawer-title" aria-hidden="true">
+      <div class="biotech-drawer-backdrop" id="drawer-backdrop"></div>
+      <div class="biotech-drawer-content">
+        <div class="biotech-drawer-header">
+          <div>
+            <span class="biotech-tag">WORKSPACE CALIBRATION</span>
+            <h2 id="pref-drawer-title">Lab Preferences</h2>
+          </div>
+          <button id="btn-close-preferences" class="biotech-close-btn" aria-label="Close preferences">✕</button>
+        </div>
+
+        <div class="biotech-drawer-body">
+          <!-- Theme Setting -->
+          <div class="biotech-form-group">
+            <label for="pref-theme">Interface Theme</label>
+            <select id="pref-theme" class="biotech-select">
+              <option value="emerald-matrix">Emerald Matrix (Default)</option>
+              <option value="cyan-helix">Cyan DNA Helix</option>
+              <option value="high-contrast-bio">High-Contrast Bio Audit</option>
+            </select>
+          </div>
+
+          <!-- Alignment Layout -->
+          <div class="biotech-form-group">
+            <label for="pref-layout">Sequence Alignment Layout</label>
+            <select id="pref-layout" class="biotech-select">
+              <option value="split-ribbon">Split-Ribbon Dual Track</option>
+              <option value="circular-chord">Circular Chord Diagram</option>
+              <option value="linear-track">Linear Chromosomal Track</option>
+            </select>
+          </div>
+
+          <!-- Metric Units -->
+          <div class="biotech-form-group">
+            <label for="pref-metrics">Genomic Metric Units</label>
+            <select id="pref-metrics" class="biotech-select">
+              <option value="base-pairs">Base Pairs (bp)</option>
+              <option value="kilo-bases">Kilobases (kb)</option>
+              <option value="mega-bases">Megabases (Mb)</option>
+            </select>
+          </div>
+
+          <!-- Toggles -->
+          <div class="biotech-toggle-group">
+            <div class="biotech-toggle-item">
+              <div>
+                <strong>Audio Diagnostic Cues</strong>
+                <p>Auditory notifications for sequencing errors</p>
+              </div>
+              <label class="biotech-switch">
+                <input type="checkbox" id="pref-audio" checked>
+                <span class="biotech-slider"></span>
+              </label>
+            </div>
+
+            <div class="biotech-toggle-item">
+              <div>
+                <strong>High-Contrast Sequence Mode</strong>
+                <p>Increase contrast on adenine and thymine bases</p>
+              </div>
+              <label class="biotech-switch">
+                <input type="checkbox" id="pref-high-contrast">
+                <span class="biotech-slider"></span>
+              </label>
+            </div>
+
+            <div class="biotech-toggle-item">
+              <div>
+                <strong>CRISPR Target Highlights</strong>
+                <p>Overlay PAM motifs and guide RNA binding zones</p>
+              </div>
+              <label class="biotech-switch">
+                <input type="checkbox" id="pref-crispr" checked>
+                <span class="biotech-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="biotech-drawer-footer">
+          <button id="btn-export-config" class="biotech-secondary-btn">
+            Export JSON Config
+          </button>
+          <button id="btn-reset-defaults" class="biotech-outline-btn">
+            Reset Defaults
+          </button>
+          <button id="btn-save-preferences" class="biotech-primary-btn">
+            Save Preferences
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { BiotechGenomicsPreferenceManager } from './preferences.js';
+    const manager = new BiotechGenomicsPreferenceManager();
+
+    const modal = document.getElementById('biotech-genomics-preferences-modal');
+    const openBtn = document.getElementById('btn-open-preferences');
+    const closeBtn = document.getElementById('btn-close-preferences');
+    const backdrop = document.getElementById('drawer-backdrop');
+
+    const themeSelect = document.getElementById('pref-theme');
+    const layoutSelect = document.getElementById('pref-layout');
+    const metricsSelect = document.getElementById('pref-metrics');
+    const audioCheckbox = document.getElementById('pref-audio');
+    const contrastCheckbox = document.getElementById('pref-high-contrast');
+    const crisprCheckbox = document.getElementById('pref-crispr');
+
+    function syncUIFromState() {
+      const s = manager.state;
+      if (themeSelect) themeSelect.value = s.theme;
+      if (layoutSelect) layoutSelect.value = s.sequenceAlignmentLayout;
+      if (metricsSelect) metricsSelect.value = s.metricUnits;
+      if (audioCheckbox) audioCheckbox.checked = !!s.audioAlertsEnabled;
+      if (contrastCheckbox) contrastCheckbox.checked = !!s.highContrastMode;
+      if (crisprCheckbox) crisprCheckbox.checked = !!s.crisprOverlayHighlight;
+    }
+
+    openBtn?.addEventListener('click', () => {
+      syncUIFromState();
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    });
+
+    const closeModal = () => {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    };
+
+    closeBtn?.addEventListener('click', closeModal);
+    backdrop?.addEventListener('click', closeModal);
+
+    document.getElementById('btn-save-preferences')?.addEventListener('click', () => {
+      manager.save({
+        theme: themeSelect.value,
+        sequenceAlignmentLayout: layoutSelect.value,
+        metricUnits: metricsSelect.value,
+        audioAlertsEnabled: audioCheckbox.checked,
+        highContrastMode: contrastCheckbox.checked,
+        crisprOverlayHighlight: crisprCheckbox.checked
+      });
+      closeModal();
+    });
+
+    document.getElementById('btn-reset-defaults')?.addEventListener('click', () => {
+      manager.resetDefaults();
+      syncUIFromState();
+    });
+
+    document.getElementById('btn-export-config')?.addEventListener('click', () => {
+      const json = manager.exportJSON();
+      const blob = new Blob([json], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'biotech-genomics-config.json';
+      a.click();
+    });
+  </script>
+</body>
+</html>
