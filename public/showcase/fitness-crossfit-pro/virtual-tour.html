@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrossFit Pro - Feature Spotlight Tour</title>
+  <link rel="stylesheet" href="./virtual-tour.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #111827;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #tour-root {
+      max-width: 800px;
+      width: 100%;
+    }
+    .mock-wod-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      max-width: 800px;
+      width: 100%;
+    }
+    .mock-card {
+      padding: 1.5rem;
+      background: rgba(31, 41, 55, 0.6);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      color: #cbd5e1;
+    }
+    .mock-card h4 {
+      margin: 0 0 0.5rem 0;
+      color: #f87171;
+    }
+  </style>
+</head>
+<body>
+  <div id="tour-root"></div>
+
+  <div class="mock-wod-grid">
+    <div id="wod-board-card" class="mock-card">
+      <h4>Daily WOD Board</h4>
+      <p>Today: "Murph" 1-mile run, 100 pull-ups, 200 push-ups, 300 squats.</p>
+    </div>
+    <div id="timer-card" class="mock-card">
+      <h4>Interval & EMOM Clocks</h4>
+      <p>Custom interval workout clocks with audible round transition beeps.</p>
+    </div>
+    <div id="leaderboard-card" class="mock-card">
+      <h4>Box Leaderboard & 1RM PRs</h4>
+      <p>Track your snatch, clean, and deadlift numbers against gym benchmarks.</p>
+    </div>
+    <div id="recovery-card" class="mock-card">
+      <h4>HRV & Recovery</h4>
+      <p>Biometric strain score, sleep tracking, and active mobility routines.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { FitnessCrossfitProTourGuide } from './virtual-tour.js';
+
+    const root = document.getElementById('tour-root');
+    const guide = new FitnessCrossfitProTourGuide();
+    guide.renderToDOM(root);
+  </script>
+</body>
+</html>
