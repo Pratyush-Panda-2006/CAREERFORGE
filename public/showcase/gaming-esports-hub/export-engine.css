@@ -1,0 +1,285 @@
+/**
+ * Gaming Esports Hub - Client-Side Export Engine Styles
+ * Cyberpunk neon aesthetics with purple & cyan accents, glassmorphic dropdowns, and responsive preview
+ */
+
+:root {
+  --gaming-bg: #090613;
+  --gaming-card-bg: rgba(22, 16, 38, 0.85);
+  --gaming-card-border: rgba(168, 85, 247, 0.28);
+  --gaming-purple: #a855f7;
+  --gaming-purple-glow: rgba(168, 85, 247, 0.45);
+  --gaming-purple-hover: #9333ea;
+  --gaming-cyan: #06b6d4;
+  --gaming-cyan-glow: rgba(6, 182, 212, 0.35);
+  --gaming-pink: #ec4899;
+  --gaming-text-main: #f5f3ff;
+  --gaming-text-muted: #a78bfa;
+  --gaming-surface-dark: #0f0a1c;
+  --gaming-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --gaming-font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--gaming-bg);
+  font-family: var(--gaming-font-family);
+  color: var(--gaming-text-main);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.gaming-export-container {
+  width: 100%;
+  max-width: 880px;
+  background: var(--gaming-card-bg);
+  border: 1px solid var(--gaming-card-border);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 30px var(--gaming-purple-glow);
+  backdrop-filter: blur(14px);
+  position: relative;
+}
+
+.gaming-export-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.header-titles {
+  flex: 1;
+  min-width: 260px;
+}
+
+.export-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--gaming-purple);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+
+.export-title {
+  margin: 0 0 6px 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #ffffff;
+}
+
+.export-subtitle {
+  margin: 0;
+  color: var(--gaming-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Dropdown Menu Styles */
+.dropdown-wrapper {
+  position: relative;
+}
+
+.btn-dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--gaming-purple), var(--gaming-purple-hover));
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px var(--gaming-purple-glow);
+}
+
+.btn-dropdown-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.6);
+}
+
+.dropdown-chevron {
+  transition: transform 0.2s ease;
+}
+
+.dropdown-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: #140d25;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px var(--gaming-purple-glow);
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 100;
+  backdrop-filter: blur(16px);
+}
+
+.dropdown-popover.open {
+  display: flex;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--gaming-text-main);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.menu-item:hover {
+  background: rgba(168, 85, 247, 0.18);
+  transform: translateX(2px);
+}
+
+.menu-item svg {
+  flex-shrink: 0;
+  stroke: var(--gaming-cyan);
+}
+
+.menu-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-text strong {
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.menu-text span {
+  font-size: 11px;
+  color: var(--gaming-text-muted);
+  line-height: 1.3;
+}
+
+/* Preview Card */
+.export-preview-card {
+  background: var(--gaming-surface-dark);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(22, 16, 38, 0.9);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.preview-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.preview-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--gaming-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preview-tab:hover {
+  color: #ffffff;
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.preview-tab.active {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #ffffff;
+}
+
+.preview-indicator {
+  font-size: 11px;
+  color: var(--gaming-cyan);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.preview-code-block {
+  margin: 0;
+  padding: 18px;
+  max-height: 420px;
+  overflow: auto;
+  font-family: var(--gaming-font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: #c4b5fd;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Toast Notification */
+.export-toast {
+  position: absolute;
+  bottom: 24px;
+  right: 28px;
+  background: rgba(16, 185, 129, 0.92);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 200;
+}
+
+.export-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .gaming-export-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dropdown-popover {
+    width: 100%;
+    right: 0;
+  }
+}
