@@ -61,3 +61,17 @@ test('VirtualMuseum3dAuditChain - filter action returns subset of audit blocks',
   assert.equal(filtered[0].action, 'ARTIFACT_3D_SCAN_INGEST');
   assert.equal(filtered[1].action, 'ARTIFACT_3D_SCAN_INGEST');
 });
+
+test('VirtualMuseum3dAuditChain - clearChain resets chain to new genesis block', () => {
+  const chain = new VirtualMuseum3dAuditChain({
+    storageKey: 'test_audit_chain_' + Date.now()
+  });
+
+  chain.recordEvent('ARTIFACT_3D_SCAN_INGEST', { id: 101 });
+  assert.equal(chain.getChain().length, 2);
+
+  chain.clearChain();
+  assert.equal(chain.getChain().length, 1);
+  assert.equal(chain.getChain()[0].action, 'GENESIS_INIT');
+  assert.equal(chain.verifyChainIntegrity().isValid, true);
+});
