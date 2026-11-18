@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart IoT Nexus - Interactive Feature Spotlight Onboarding Tour</title>
+  <link rel="stylesheet" href="virtual-tour.css">
+</head>
+<body>
+  <div class="tour-app-container">
+    <header class="dashboard-header">
+      <div>
+        <div class="badge-pill">Smart IoT Nexus Onboarding</div>
+        <h1>Interactive Feature Spotlight & Guided Tour Sandbox</h1>
+        <p>Interactive tour guide orchestrating viewport spotlights, boundary-aware tooltip positioning, and onboarding steps.</p>
+      </div>
+      <div class="header-actions">
+        <button id="startTourBtn" class="btn-primary">Start Guided Walkthrough</button>
+      </div>
+    </header>
+
+    <!-- Simulated IoT Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Section 1: Edge Gateway -->
+      <section id="gatewaySection" class="dashboard-card target-section">
+        <div class="card-header">
+          <span class="card-tag">Gateway Telemetry</span>
+          <span class="status-indicator">● Active</span>
+        </div>
+        <h3>LoRaWAN Sector Gateways</h3>
+        <p>Telemetry packet streams operating across 8 multichannel frequency hops with sub-millisecond dispatch.</p>
+        <div class="card-metrics">
+          <div class="metric"><span class="m-val">99.98%</span><span class="m-lbl">Packet Rate</span></div>
+          <div class="metric"><span class="m-val">12 ms</span><span class="m-lbl">Latency</span></div>
+          <div class="metric"><span class="m-val">8 / 8</span><span class="m-lbl">Channels</span></div>
+        </div>
+      </section>
+
+      <!-- Section 2: Sensor Mesh -->
+      <section id="sensorGridSection" class="dashboard-card target-section">
+        <div class="card-header">
+          <span class="card-tag">Sensor Mesh</span>
+          <span class="status-indicator">● Calibrated</span>
+        </div>
+        <h3>Environmental Probes Cluster</h3>
+        <p>Distributed telemetry sensors capturing voltage, ambient temperature, humidity, and barometric variance.</p>
+        <div class="card-metrics">
+          <div class="metric"><span class="m-val">48 Nodes</span><span class="m-lbl">Connected</span></div>
+          <div class="metric"><span class="m-val">0.02%</span><span class="m-lbl">Drift Error</span></div>
+          <div class="metric"><span class="m-val">3.3 V</span><span class="m-lbl">Bus Voltage</span></div>
+        </div>
+      </section>
+
+      <!-- Section 3: KPI Analytics -->
+      <section id="analyticsSection" class="dashboard-card target-section">
+        <div class="card-header">
+          <span class="card-tag">KPI Diagnostics</span>
+          <span class="status-indicator">● Optimal</span>
+        </div>
+        <h3>Grid Health & SLA Analytics</h3>
+        <p>Automated anomaly detection computing variance thresholds against the 99.9% uptime compliance commitment.</p>
+        <div class="card-metrics">
+          <div class="metric"><span class="m-val">99.95%</span><span class="m-lbl">SLA Compliance</span></div>
+          <div class="metric"><span class="m-val">0.001%</span><span class="m-lbl">Loss Ratio</span></div>
+          <div class="metric"><span class="m-val">Healthy</span><span class="m-lbl">Core State</span></div>
+        </div>
+      </section>
+
+      <!-- Section 4: Fleet Controls -->
+      <section id="actionsSection" class="dashboard-card target-section">
+        <div class="card-header">
+          <span class="card-tag">Command Dispatch</span>
+          <span class="status-indicator">● Ready</span>
+        </div>
+        <h3>Fleet Command & Actions</h3>
+        <p>Dispatch over-the-air firmware updates, trigger remote diagnostics, and re-balance sensor workloads.</p>
+        <div class="action-buttons-group">
+          <button class="btn-secondary" id="otaActionBtn">Deploy OTA Update</button>
+          <button class="btn-ghost" id="rebootActionBtn">Ping Fleet</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tour Overlay Components -->
+    <div id="tourScrim" class="tour-scrim"></div>
+    <div id="tourHighlightRing" class="tour-highlight-ring"></div>
+
+    <!-- Floating Tour Tooltip Balloon -->
+    <div id="tourTooltip" class="tour-tooltip" role="dialog" aria-modal="true">
+      <div class="tooltip-arrow"></div>
+      <div class="tooltip-header">
+        <span class="tooltip-step-label" id="tooltipStepCount">Step 1 of 4</span>
+        <button id="tooltipCloseBtn" class="tooltip-close" aria-label="Close Tour">&times;</button>
+      </div>
+      <h4 class="tooltip-title" id="tooltipTitle">Feature Spotlight</h4>
+      <p class="tooltip-desc" id="tooltipDesc">Guiding description goes here.</p>
+
+      <!-- Dots indicator -->
+      <div class="tooltip-dots" id="tooltipDots"></div>
+
+      <div class="tooltip-footer">
+        <button id="tourPrevBtn" class="btn-ghost">Previous</button>
+        <div class="tooltip-right-buttons">
+          <button id="tourSkipBtn" class="btn-ghost">Skip</button>
+          <button id="tourNextBtn" class="btn-primary">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { SmartIotNexusTourGuide } from './virtual-tour.js';
+
+    const guide = new SmartIotNexusTourGuide();
+    const startTourBtn = document.getElementById('startTourBtn');
+    const tourScrim = document.getElementById('tourScrim');
+    const tourHighlightRing = document.getElementById('tourHighlightRing');
+    const tourTooltip = document.getElementById('tourTooltip');
+    const tooltipStepCount = document.getElementById('tooltipStepCount');
+    const tooltipTitle = document.getElementById('tooltipTitle');
+    const tooltipDesc = document.getElementById('tooltipDesc');
+    const tooltipDots = document.getElementById('tooltipDots');
+    const tourPrevBtn = document.getElementById('tourPrevBtn');
+    const tourNextBtn = document.getElementById('tourNextBtn');
+    const tourSkipBtn = document.getElementById('tourSkipBtn');
+    const tooltipCloseBtn = document.getElementById('tooltipCloseBtn');
+
+    function renderTourState() {
+      const stepInfo = guide.getCurrentStep();
+      if (!stepInfo || !guide.isActive) {
+        tourScrim.classList.remove('is-active');
+        tourHighlightRing.classList.remove('is-active');
+        tourTooltip.classList.remove('is-active');
+        return;
+      }
+
+      tourScrim.classList.add('is-active');
+      tourHighlightRing.classList.add('is-active');
+      tourTooltip.classList.add('is-active');
+
+      const targetEl = document.getElementById(stepInfo.targetId);
+      if (!targetEl) return;
+
+      const rect = targetEl.getBoundingClientRect();
+
+      // Position highlight pulse ring around target
+      tourHighlightRing.style.top = `${rect.top - 6}px`;
+      tourHighlightRing.style.left = `${rect.left - 6}px`;
+      tourHighlightRing.style.width = `${rect.width + 12}px`;
+      tourHighlightRing.style.height = `${rect.height + 12}px`;
+
+      // Update text
+      tooltipStepCount.textContent = `Step ${stepInfo.stepIndex + 1} of ${stepInfo.totalSteps}`;
+      tooltipTitle.textContent = stepInfo.title;
+      tooltipDesc.textContent = stepInfo.content;
+
+      // Update dots
+      tooltipDots.innerHTML = guide.steps.map((_, i) => `
+        <span class="step-dot ${i === stepInfo.stepIndex ? 'is-active' : ''}"></span>
+      `).join('');
+
+      // Update buttons
+      tourPrevBtn.disabled = stepInfo.isFirst;
+      tourNextBtn.textContent = stepInfo.isLast ? 'Finish Tour' : 'Next Step';
+
+      // Position tooltip with boundary-aware collision avoidance
+      const tooltipRect = { width: 340, height: 210 };
+      const viewport = { width: window.innerWidth, height: window.innerHeight };
+      const coords = guide.calculateTooltipCoords(rect, tooltipRect, viewport, stepInfo.placement);
+
+      tourTooltip.style.top = `${coords.top}px`;
+      tourTooltip.style.left = `${coords.left}px`;
+      tourTooltip.setAttribute('data-placement', coords.placement);
+    }
+
+    guide.on(() => {
+      renderTourState();
+    });
+
+    startTourBtn.addEventListener('click', () => {
+      guide.startTour();
+    });
+
+    tourNextBtn.addEventListener('click', () => {
+      guide.nextStep();
+    });
+
+    tourPrevBtn.addEventListener('click', () => {
+      guide.prevStep();
+    });
+
+    tourSkipBtn.addEventListener('click', () => {
+      guide.skipTour();
+    });
+
+    tooltipCloseBtn.addEventListener('click', () => {
+      guide.skipTour();
+    });
+
+    window.addEventListener('resize', () => {
+      if (guide.isActive) renderTourState();
+    });
+  </script>
+</body>
+</html>
