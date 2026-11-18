@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Odyssey - Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+    }
+    .to-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .to-btn {
+      padding: 8px 16px;
+      border: 1px solid rgba(14, 165, 233, 0.4);
+      background: rgba(30, 41, 59, 0.8);
+      color: #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .to-btn:hover {
+      background: rgba(14, 165, 233, 0.25);
+      border-color: #0284c7;
+    }
+  </style>
+</head>
+<body>
+  <h1>Travel Odyssey Alerts & Disruptions Queue</h1>
+  <div class="to-controls">
+    <button class="to-btn" id="btn-critical">Flight Diverted (Critical)</button>
+    <button class="to-btn" id="btn-warning">Visa Expiry Imminent (Warning)</button>
+    <button class="to-btn" id="btn-success">Hotel Checked In (Success)</button>
+    <button class="to-btn" id="btn-info">FX Rate Shift (Info)</button>
+    <button class="to-btn" id="btn-clear">Clear All</button>
+  </div>
+
+  <div id="hub-root" class="to-notification-hub-container"></div>
+
+  <script type="module">
+    import { TravelOdysseyNotificationHub } from './notification-hub.js';
+
+    const hub = new TravelOdysseyNotificationHub();
+    const container = document.getElementById('hub-root');
+
+    hub.subscribe(() => {
+      hub.render(container);
+    });
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Flight LH-402 to Frankfurt cancelled due to North Sea adverse storm system!', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Schengen 90-day tourist visa window expires in 14 days. Ensure departure booked.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Kyoto Ryokan reservation confirmed. Digital room key saved to Apple Wallet.', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Mid-market FX rate update: 1 USD = 154.20 JPY (+0.8%).', 'info', 'info');
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hub.clearQueue();
+    });
+
+    hub.render(container);
+  </script>
+</body>
+</html>
