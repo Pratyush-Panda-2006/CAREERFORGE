@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge — Offline Data Persistence & Queue Engine</title>
+  <link rel="stylesheet" href="offline-sync.css">
+</head>
+<body class="quantum-sync-body">
+  <div class="sync-container">
+    <header class="sync-header">
+      <span class="badge">OFFLINE QUEUE & VECTOR CLOCKS</span>
+      <h1>⚛️ Quantum Forge Resilient Offline Data Persistence</h1>
+      <p>Deterministic client-side queue engine buffering quantum circuit mutations and gate adjustments during cloud QPU disconnects.</p>
+    </header>
+
+    <div class="sync-card">
+      <div class="status-row">
+        <div class="status-group">
+          <span class="label">QPU Cloud Link</span>
+          <span id="connection-status-badge" class="status-badge online">Online (QPU Linked)</span>
+        </div>
+        <div class="status-group">
+          <span class="label">Buffered Circuit Gates</span>
+          <span class="queue-num"><span id="queue-count">0</span> items</span>
+        </div>
+        <button type="button" id="sync-now-btn" class="btn btn-primary">Sync Now</button>
+      </div>
+
+      <div class="info-section">
+        <h3>Queue Synchronization Characteristics</h3>
+        <ul class="feature-list">
+          <li><strong>Vector Clock Reconciliation:</strong> Causally deterministic resolution prevents state overwrites across concurrent hybrid classical-quantum runtimes.</li>
+          <li><strong>Exponential Retry Backoff:</strong> Protects cryo-controller networks with formula: <code>baseBackoff * 2^retries</code>.</li>
+          <li><strong>FIFO Persistence:</strong> Guaranteed chronological gate compilation sequencing across hardware reconnects.</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Quantum Forge Showcase</a>
+    </nav>
+  </div>
+
+  <script type="module" src="offline-sync.js"></script>
+</body>
+</html>
