@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edtech Academy - Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .ed-preset-selector {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .ed-select {
+      padding: 8px 14px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Edtech Curriculum & Rubrics Diff Inspector</h1>
+  <div class="ed-preset-selector">
+    <label for="preset-dropdown">Select Curriculum Component:</label>
+    <select id="preset-dropdown" class="ed-select">
+      <option value="syllabusRevision">Syllabus Annual Revision</option>
+      <option value="quizQuestionTuning">Quiz Bloom Taxonomy</option>
+      <option value="rubricCriteria">Grading Rubric Criteria</option>
+    </select>
+  </div>
+
+  <div id="diff-root"></div>
+
+  <script type="module">
+    import { EdtechAcademyDiffInspector } from './diff-viewer.js';
+
+    const inspector = new EdtechAcademyDiffInspector();
+    const root = document.getElementById('diff-root');
+    const select = document.getElementById('preset-dropdown');
+
+    const update = (key) => {
+      const preset = inspector.getPreset(key);
+      if (preset) {
+        const diff = inspector.computeDiff(preset.left, preset.right);
+        inspector.render(root, diff);
+      }
+    };
+
+    select.addEventListener('change', (e) => update(e.target.value));
+    update('syllabusRevision');
+  </script>
+</body>
+</html>
