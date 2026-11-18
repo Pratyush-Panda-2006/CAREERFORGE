@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Culinary Bistro - Recipe & Science Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+  <style>
+    body {
+      background: #140d0b;
+      color: #f5f5f4;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h1>Culinary Science & Recipe Vault</h1>
+  <div id="vault-root"></div>
+
+  <script type="module">
+    import { CulinaryBistroSnippetVault } from './snippet-vault.js';
+
+    const vault = new CulinaryBistroSnippetVault();
+    const root = document.getElementById('vault-root');
+    vault.renderToDOM(root, (snippet) => {
+      console.log('Selected culinary formula:', snippet.title);
+    });
+  </script>
+</body>
+</html>
