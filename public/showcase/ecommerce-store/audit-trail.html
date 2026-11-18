@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Commerce Store - Cryptographic Audit Trail</title>
+  <link rel="stylesheet" href="audit-trail.css">
+</head>
+<body>
+  <div class="audit-container">
+    <div class="audit-header">
+      <h1 class="audit-title">
+        Cryptographic Order & Inventory Audit Trail
+        <span class="audit-badge">Issue #721</span>
+      </h1>
+      <p class="audit-desc">
+        Tamper-evident SHA-256 hash-chained state history recording checkout sessions, inventory allocations, and refund transactions.
+      </p>
+    </div>
+
+    <div class="audit-toolbar">
+      <div class="toolbar-left">
+        <select id="audit-action-select" class="audit-select">
+          <option value="CHECKOUT_COMPLETED">CHECKOUT_COMPLETED</option>
+          <option value="PAYMENT_CAPTURED">PAYMENT_CAPTURED</option>
+          <option value="INVENTORY_RESERVED">INVENTORY_RESERVED</option>
+          <option value="ORDER_REFUNDED">ORDER_REFUNDED</option>
+        </select>
+        <button id="add-audit-btn" class="audit-btn">Record Event</button>
+      </div>
+
+      <div class="toolbar-right">
+        <button id="verify-audit-btn" class="audit-btn">Verify Integrity</button>
+        <span id="verify-status" class="status-pill status-valid">Valid (Genesis)</span>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Index</th>
+            <th>Timestamp</th>
+            <th>Action</th>
+            <th>Payload</th>
+            <th>Block Hash</th>
+          </tr>
+        </thead>
+        <tbody id="audit-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module" src="audit-trail.js"></script>
+</body>
+</html>
