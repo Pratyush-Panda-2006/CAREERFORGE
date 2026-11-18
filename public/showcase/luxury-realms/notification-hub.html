@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxury Realms - Private Concierge Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="lr-notification-container">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Luxury Realms VIP Concierge Hub</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Private estate escrow deadlines, private auction alerts, and bespoke viewing dispatches.</p>
+    </header>
+
+    <section class="lr-controls" aria-label="Concierge alert triggers">
+      <button id="btn-critical" class="lr-btn lr-btn-critical">Escrow Expiration (Critical)</button>
+      <button id="btn-warning" class="lr-btn lr-btn-warning">Auction Outbid (Warning)</button>
+      <button id="btn-success" class="lr-btn lr-btn-success">Viewing Confirmed (Success)</button>
+      <button id="btn-info" class="lr-btn lr-btn-info">Helipad Logged (Info)</button>
+      <button id="btn-clear" class="lr-btn lr-btn-clear">Clear Active Notices</button>
+    </section>
+
+    <section id="toast-viewport" class="lr-toast-viewport" aria-live="polite">
+      <!-- Toasts dynamically appended via LuxuryRealmsNotificationHub -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { LuxuryRealmsNotificationHub } from './notification-hub.js';
+
+    const hub = new LuxuryRealmsNotificationHub();
+    const viewport = document.getElementById('toast-viewport');
+
+    hub.subscribe(() => {
+      hub.render(viewport);
+    });
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Escrow Deadline Warning: Swiss Alpine Chalet 10% earnest deposit window closes in 2 hours!', 'critical', 'critical', 6000);
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Auction Outbid: Competing high bid placed ($42,500,000) on Central Park Tower Penthouse.', 'warning', 'warning', 5000);
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Private Viewing Booked: VIP yacht transfer and tasting confirmed at Villa d\'Este, Lake Como.', 'success', 'success', 4000);
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Concierge Service Logged: Bespoke helicopter charter transfer requested from Nice Airport (LFMN).', 'info', 'info', 3000);
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hub.clearQueue();
+    });
+
+    hub.render(viewport);
+  </script>
+</body>
+</html>
