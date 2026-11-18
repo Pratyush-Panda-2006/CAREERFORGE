@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxury Realms - Estate Valuation & Term Sheet Snippet Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="lr-vault-wrapper">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Luxury Estate Financial Models & Term Sheet Vault</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Preset island valuation calculators, progressive stamp duty models, and anonymous trust escrow schedules.</p>
+    </header>
+
+    <section class="lr-vault-searchbar" aria-label="Search and filter snippets">
+      <input type="search" id="vault-search" class="lr-search-input" placeholder="Search valuation, island cap rates, escrow terms, or tags...">
+      <div id="filter-chips" class="lr-filter-chips">
+        <button class="lr-chip active" data-tag="all">All Presets</button>
+      </div>
+    </section>
+
+    <section id="snippet-grid" class="lr-vault-grid" aria-live="polite">
+      <!-- Snippet cards dynamically populated -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { LuxuryRealmsSnippetVault } from './snippet-vault.js';
+
+    const vault = new LuxuryRealmsSnippetVault();
+    const grid = document.getElementById('snippet-grid');
+    const searchInput = document.getElementById('vault-search');
+    const filterChips = document.getElementById('filter-chips');
+
+    let activeTag = 'all';
+
+    function renderChips() {
+      const tags = vault.getAllTags();
+      filterChips.replaceChildren();
+
+      const allBtn = document.createElement('button');
+      allBtn.className = `lr-chip ${activeTag === 'all' ? 'active' : ''}`;
+      allBtn.textContent = 'All Presets';
+      allBtn.dataset.tag = 'all';
+      allBtn.addEventListener('click', () => setTag('all'));
+      filterChips.append(allBtn);
+
+      for (const tag of tags) {
+        const chip = document.createElement('button');
+        chip.className = `lr-chip ${activeTag === tag ? 'active' : ''}`;
+        chip.textContent = `#${tag}`;
+        chip.dataset.tag = tag;
+        chip.addEventListener('click', () => setTag(tag));
+        filterChips.append(chip);
+      }
+    }
+
+    function setTag(tag) {
+      activeTag = tag;
+      renderChips();
+      updateView();
+    }
+
+    function updateView() {
+      let filtered = vault.filterByTag(activeTag);
+      const query = searchInput.value;
+      if (query && query.trim()) {
+        const tokens = query.trim().toLowerCase().split(/\s+/);
+        filtered = filtered.filter(item => {
+          const text = `${item.title} ${item.description} ${item.tags.join(' ')} ${item.code}`.toLowerCase();
+          return tokens.every(t => text.includes(t));
+        });
+      }
+      vault.render(grid, { items: filtered });
+    }
+
+    searchInput.addEventListener('input', updateView);
+    renderChips();
+    updateView();
+  </script>
+</body>
+</html>
