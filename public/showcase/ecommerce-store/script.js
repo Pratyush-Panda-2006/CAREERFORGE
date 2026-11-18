@@ -5246,3 +5246,254 @@ if (typeof document !== 'undefined') {
     initEcommercePreferencesUI();
   }
 }
+
+
+
+// ==========================================================================
+// Issue #573: Interactive SVG / Canvas Metrics Telemetry & Sparkline Visualizer
+// ==========================================================================
+
+class EcommerceStoreTelemetryVisualizer {
+  constructor(canvas = null, options = {}) {
+    this.canvas = canvas;
+    this.ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+    this.timeWindow = options.timeWindow || '24H';
+    this.padding = options.padding || 24;
+    this.cursor = null;
+
+    this.datasets = {
+      '1H': [120, 135, 128, 142, 160, 155, 172, 168, 190, 210, 205, 230],
+      '24H': [450, 480, 420, 510, 590, 640, 720, 700, 780, 840, 910, 960, 1020, 1100],
+      '7D': [2800, 3100, 2950, 3400, 3900, 4200, 4800, 5100, 5600, 6200]
+    };
+  }
+
+  getDataForWindow(windowKey) {
+    return this.datasets[windowKey] || this.datasets['24H'];
+  }
+
+  setTimeWindow(windowKey) {
+    if (this.datasets[windowKey]) {
+      this.timeWindow = windowKey;
+      this.render();
+    }
+  }
+
+  normalizeData(values) {
+    if (!Array.isArray(values) || values.length === 0) return [];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    if (min === max) return values.map(() => 0.5);
+    return values.map(v => (v - min) / (max - min));
+  }
+
+  interpolatePoints(points, targetCount = 30) {
+    if (!Array.isArray(points) || points.length === 0) return [];
+    if (points.length >= targetCount || points.length === 1) return [...points];
+
+    const result = [];
+    const step = (points.length - 1) / (targetCount - 1);
+
+    for (let i = 0; i < targetCount; i++) {
+      const idx = i * step;
+      const lower = Math.floor(idx);
+      const upper = Math.min(points.length - 1, Math.ceil(idx));
+      const fraction = idx - lower;
+      const interpolated = points[lower] + (points[upper] - points[lower]) * fraction;
+      result.push(Number(interpolated.toFixed(2)));
+    }
+    return result;
+  }
+
+  calculateCoordinates(normalizedPoints, width, height, padding = this.padding) {
+    if (!Array.isArray(normalizedPoints) || normalizedPoints.length === 0) return [];
+    const drawWidth = width - padding * 2;
+    const drawHeight = height - padding * 2;
+    const count = normalizedPoints.length;
+
+    return normalizedPoints.map((normY, i) => {
+      const x = padding + (i / Math.max(1, count - 1)) * drawWidth;
+      const y = padding + (1.0 - normY) * drawHeight;
+      return { x, y };
+    });
+  }
+
+  findNearestPoint(mouseX, rawPoints, width, padding = this.padding) {
+    if (!Array.isArray(rawPoints) || rawPoints.length === 0) return null;
+    const drawWidth = width - padding * 2;
+    const count = rawPoints.length;
+
+    let clampedX = Math.max(padding, Math.min(width - padding, mouseX));
+    const ratio = (clampedX - padding) / drawWidth;
+    const exactIndex = ratio * (count - 1);
+    const index = Math.round(Math.max(0, Math.min(count - 1, exactIndex)));
+
+    return {
+      index,
+      value: rawPoints[index],
+      ratio
+    };
+  }
+
+  render() {
+    if (!this.canvas || !this.ctx) return;
+    const { canvas, ctx } = this;
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = this.padding;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const rawData = this.getDataForWindow(this.timeWindow);
+    const normalized = this.normalizeData(rawData);
+    const coords = this.calculateCoordinates(normalized, width, height, padding);
+    if (coords.length < 2) return;
+
+    // Draw subtle grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+    ctx.lineWidth = 1;
+    for (let y = padding; y <= height - padding; y += (height - padding * 2) / 4) {
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(width - padding, y);
+      ctx.stroke();
+    }
+
+    // Gradient fill under the curve
+    const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
+    gradient.addColorStop(0, 'rgba(56, 189, 248, 0.35)');
+    gradient.addColorStop(1, 'rgba(56, 189, 248, 0.01)');
+
+    ctx.beginPath();
+    ctx.moveTo(coords[0].x, height - padding);
+    ctx.lineTo(coords[0].x, coords[0].y);
+    for (let i = 1; i < coords.length; i++) {
+      ctx.lineTo(coords[i].x, coords[i].y);
+    }
+    ctx.lineTo(coords[coords.length - 1].x, height - padding);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Glowing stroke line
+    ctx.beginPath();
+    ctx.moveTo(coords[0].x, coords[0].y);
+    for (let i = 1; i < coords.length; i++) {
+      ctx.lineTo(coords[i].x, coords[i].y);
+    }
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = 'rgba(56, 189, 248, 0.6)';
+    ctx.shadowBlur = 8;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Draw data circles
+    coords.forEach((c) => {
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+
+    // Draw hover cursor line & dot if active
+    if (this.cursor) {
+      const nearest = this.findNearestPoint(this.cursor.x, rawData, width, padding);
+      if (nearest) {
+        const pointCoord = coords[nearest.index];
+
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(pointCoord.x, padding);
+        ctx.lineTo(pointCoord.x, height - padding);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.beginPath();
+        ctx.arc(pointCoord.x, pointCoord.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function initEcommerceTelemetryUI() {
+  if (typeof document === 'undefined') return;
+
+  const canvas = document.getElementById('ecommerce-store-telemetry-canvas');
+  if (!canvas) return;
+
+  const visualizer = new EcommerceStoreTelemetryVisualizer(canvas);
+  window.ecommerceStoreTelemetryVisualizer = visualizer;
+
+  const tooltip = document.getElementById('telemetryTooltip');
+  const buttons = document.querySelectorAll('.telemetry-win-btn');
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width > 0) {
+      canvas.width = rect.width * (window.devicePixelRatio || 1);
+      canvas.height = (rect.height || 220) * (window.devicePixelRatio || 1);
+      const ctx = canvas.getContext('2d');
+      if (ctx) ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+      visualizer.render();
+    }
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      visualizer.setTimeWindow(btn.dataset.window);
+    });
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    visualizer.cursor = { x, y };
+    visualizer.render();
+
+    if (tooltip) {
+      const raw = visualizer.getDataForWindow(visualizer.timeWindow);
+      const nearest = visualizer.findNearestPoint(x, raw, rect.width, visualizer.padding);
+      if (nearest) {
+        tooltip.hidden = false;
+        tooltip.style.left = `${x + 12}px`;
+        tooltip.style.top = `${y - 20}px`;
+        tooltip.innerHTML = `<strong>Volume: $${nearest.value.toLocaleString()}</strong><span>Snapshot #${nearest.index + 1}</span>`;
+      }
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    visualizer.cursor = null;
+    visualizer.render();
+    if (tooltip) tooltip.hidden = true;
+  });
+
+  visualizer.render();
+}
+
+window.EcommerceStoreTelemetryVisualizer = EcommerceStoreTelemetryVisualizer;
+window.initEcommerceTelemetryUI = initEcommerceTelemetryUI;
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEcommerceTelemetryUI);
+  } else {
+    initEcommerceTelemetryUI();
+  }
+}
