@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Field proximity radar · TERRA-AGRI</title>
+    <link rel="stylesheet" href="geo-tracker.css" />
+    <script type="module" src="geo-tracker.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html">TERRA-AGRI / Field tools</a
+      ><span>PROXIMITY RADAR</span>
+    </header>
+    <main>
+      <div class="intro">
+        <p class="eyebrow">Coordinate workbench / 01</p>
+        <h1>Know what’s<br />within reach.</h1>
+        <p>
+          Locate sample farm sensors and stations by distance and direction from
+          your coordinates.
+        </p>
+      </div>
+      <div class="workspace">
+        <section class="controls" aria-labelledby="origin-title">
+          <h2 id="origin-title">Set your origin</h2>
+          <form id="radar-controls">
+            <label for="latitude">Latitude <small>−90 to 90</small></label
+            ><input
+              id="latitude"
+              name="latitude"
+              type="number"
+              min="-90"
+              max="90"
+              step="any"
+              required
+              value="18.5204"
+            />
+            <label for="longitude">Longitude <small>−180 to 180</small></label
+            ><input
+              id="longitude"
+              name="longitude"
+              type="number"
+              min="-180"
+              max="180"
+              step="any"
+              required
+              value="73.8567"
+            />
+            <label for="range">Reach <small>kilometres</small></label
+            ><input
+              id="range"
+              name="range"
+              type="number"
+              min="0.01"
+              max="20020"
+              step="any"
+              required
+              value="5"
+            />
+            <div class="actions">
+              <button type="submit">Locate nodes</button
+              ><button id="reset-origin" type="button">Reset</button>
+            </div>
+          </form>
+          <p class="note">
+            Sample coordinates near Pune. These are demonstration nodes, not
+            live telemetry. Distances use a spherical Earth approximation;
+            bearings are initial directions, not routing guidance.
+          </p>
+        </section>
+        <section class="plot" aria-label="Radar results">
+          <div id="radar" role="group" aria-label="Farm proximity radar">
+            <span class="north">N</span>
+            <div class="sweep" aria-hidden="true"></div>
+            <span class="origin" aria-hidden="true">+</span>
+            <div id="blips"></div>
+          </div>
+          <p id="radar-status" role="status" aria-live="polite"></p>
+        </section>
+        <section class="results" aria-labelledby="nodes-title">
+          <h2 id="nodes-title">Nearest nodes</h2>
+          <p class="eyebrow">Distance / initial bearing</p>
+          <ol id="node-list"></ol>
+          <p id="empty" hidden>
+            No nodes in range. Increase your reach or change the origin.
+          </p>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
