@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Sentinel - Firewall ACL & Rule Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="cs-diff-container">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Firewall ACL & Threat Signature Diff Inspector</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Inspect visual line-by-line differences across iptables rules, Snort signatures, and perimeter policies.</p>
+    </header>
+
+    <section class="cs-diff-inputs" aria-label="Input comparison text">
+      <div class="cs-diff-textarea-group">
+        <label for="orig-code">Active Perimeter Firewall ACL</label>
+        <textarea id="orig-code" class="cs-diff-textarea"># DMZ Edge Ingress Policy
+iptables -A INPUT -p tcp --dport 22 -s 10.0.0.0/8 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -j ACCEPT
+iptables -P INPUT DROP</textarea>
+      </div>
+
+      <div class="cs-diff-textarea-group">
+        <label for="mod-code">Staged Zero-Trust Lockdown Policy</label>
+        <textarea id="mod-code" class="cs-diff-textarea"># DMZ Edge Zero-Trust Policy
+iptables -A INPUT -p tcp --dport 22 -s 10.0.1.50/32 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
+iptables -P INPUT DROP
+iptables -P FORWARD DROP</textarea>
+      </div>
+    </section>
+
+    <section class="cs-diff-toolbar" aria-label="Diff viewer actions">
+      <span style="font-size: 0.85rem; color: #94a3b8;">Unified Diff Telemetry</span>
+      <button id="btn-recompute" style="padding: 0.4rem 0.85rem; background: #dc2626; border: none; border-radius: 5px; color: #fff; cursor: pointer; font-weight: 600;">Recompute Diff</button>
+    </section>
+
+    <section id="diff-output" aria-live="polite">
+      <!-- Diff lines dynamically rendered -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { CybersecuritySentinelDiffInspector } from './diff-viewer.js';
+
+    const origInput = document.getElementById('orig-code');
+    const modInput = document.getElementById('mod-code');
+    const outputContainer = document.getElementById('diff-output');
+    const recomputeBtn = document.getElementById('btn-recompute');
+
+    const inspector = new CybersecuritySentinelDiffInspector();
+
+    function update() {
+      inspector.computeDiff(origInput.value, modInput.value);
+      inspector.render(outputContainer);
+    }
+
+    origInput.addEventListener('input', update);
+    modInput.addEventListener('input', update);
+    recomputeBtn.addEventListener('click', update);
+
+    update();
+  </script>
+</body>
+</html>
