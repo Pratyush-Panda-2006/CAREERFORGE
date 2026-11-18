@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter - Flight Mission Pipeline & Workflow Engine</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="ao-pipeline-wrapper">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Orbital Mission Operations Pipeline</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Kanban flight status engine coordinating trajectory planning, thermal simulations, and orbit insertion.</p>
+    </header>
+
+    <section class="ao-pipeline-toolbar" aria-label="Pipeline controls">
+      <div style="font-size: 0.85rem; color: #94a3b8;">
+        Drag mission flight cards across stages to record flight milestones.
+      </div>
+      <div class="ao-board-actions">
+        <button id="btn-add-task" class="ao-board-btn">+ New Flight Task</button>
+        <button id="btn-export-json" class="ao-board-btn" style="background: #475569;">Export JSON</button>
+      </div>
+    </section>
+
+    <section id="pipeline-container" aria-live="polite">
+      <!-- Kanban board dynamically mounted here -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { AerospaceOrbiterPipelineEngine } from './workflow-pipeline.js';
+
+    const container = document.getElementById('pipeline-container');
+    const engine = new AerospaceOrbiterPipelineEngine();
+
+    function update() {
+      engine.render(container, () => {
+        // Updated state callback
+      });
+    }
+
+    document.getElementById('btn-add-task').addEventListener('click', () => {
+      const title = prompt('Enter Flight Task Title:', 'Deep Space Maneuver Delta-V Burn');
+      if (title && title.trim()) {
+        try {
+          engine.addCard('trajectory', {
+            title: title.trim(),
+            priority: 'high',
+            flightLead: 'Flight-Dir',
+            apogeeKm: 500
+          });
+          update();
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+    });
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const json = engine.exportPipelineJSON();
+      navigator.clipboard.writeText(json);
+      alert('Flight pipeline JSON exported to clipboard!');
+    });
+
+    update();
+  </script>
+</body>
+</html>
