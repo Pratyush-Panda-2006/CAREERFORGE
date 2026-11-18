@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar - Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+  <style>
+    body {
+      background: #050811;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .ah-preset-selector {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .ah-select {
+      padding: 8px 14px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hypercar ECU & Telemetry Diff Inspector</h1>
+  <div class="ah-preset-selector">
+    <label for="preset-dropdown">Select Telemetry Comparison:</label>
+    <select id="preset-dropdown" class="ah-select">
+      <option value="aeroBalance">Monza vs Spa Aero</option>
+      <option value="torqueVectoring">Dry Track vs Wet Surface Yaw</option>
+      <option value="damperKinematics">Damper Bump & Rebound</option>
+    </select>
+  </div>
+
+  <div id="diff-root"></div>
+
+  <script type="module">
+    import { AutomotiveHypercarDiffInspector } from './diff-viewer.js';
+
+    const inspector = new AutomotiveHypercarDiffInspector();
+    const root = document.getElementById('diff-root');
+    const select = document.getElementById('preset-dropdown');
+
+    const update = (key) => {
+      const preset = inspector.getPreset(key);
+      if (preset) {
+        const diff = inspector.computeDiff(preset.left, preset.right);
+        inspector.render(root, diff);
+      }
+    };
+
+    select.addEventListener('change', (e) => update(e.target.value));
+    update('aeroBalance');
+  </script>
+</body>
+</html>
