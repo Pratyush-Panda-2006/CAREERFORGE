@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Vitality - Biometric & Clinical Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #0b132b;
+      color: #f1f5f9;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+    .demo-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .demo-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: #1c2541;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Biometric & Vital Alert Stream</h1>
+  <div class="demo-controls">
+    <button class="demo-btn" id="btn-critical">Trigger Critical Tachycardia Alert</button>
+    <button class="demo-btn" id="btn-warning">Trigger Hydration Warning</button>
+    <button class="demo-btn" id="btn-success">Trigger Recovery Peak Success</button>
+    <button class="demo-btn" id="btn-info">Trigger Biomarker Sync Info</button>
+  </div>
+  <div id="notification-root"></div>
+
+  <script type="module">
+    import { HealthVitalityNotificationHub } from './notification-hub.js';
+
+    const hub = new HealthVitalityNotificationHub();
+    const root = document.getElementById('notification-root');
+
+    hub.subscribe(() => {
+      hub.renderToDOM(root);
+    });
+
+    // Initial alert items
+    hub.enqueue('Resting Heart Rate exceeds 112 bpm during non-exertion period. Initiate relaxation breathing.', 'critical', 'critical');
+    hub.enqueue('Hydration Deficit: Target water intake 850ml behind daily athletic target.', 'warning', 'warning');
+    hub.enqueue('Optimal REM sleep cycle detected (2.4h). Recovery readiness score 94%.', 'success', 'success');
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Arrhythmia Alert: Elevated pulse variability detected during workout recovery.', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Electrolyte depletion risk: Session duration exceeded 75 mins at high ambient temp.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Daily aerobic threshold achieved: 10,000 steps and 45 active zone minutes.', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Continuous Glucose Monitor (CGM) calibrated successfully with baseline fasting glucose.', 'info', 'info');
+    });
+  </script>
+</body>
+</html>
