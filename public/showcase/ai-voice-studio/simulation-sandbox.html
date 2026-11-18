@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - Monte Carlo Simulation Sandbox</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+</head>
+<body>
+  <div class="sim-container">
+    <div class="header-section">
+      <h1>Voice Synthesis Monte Carlo Simulator</h1>
+      <p>Multi-Scenario Numerical Trials &amp; Latency Risk Variance Forecaster</p>
+    </div>
+
+    <div class="params-grid">
+      <div class="param-group">
+        <label for="trialsInput">Trial Iterations</label>
+        <input type="number" id="trialsInput" value="1000" min="100" max="20000" step="100">
+      </div>
+      <div class="param-group">
+        <label for="volatilityInput">Jitter Volatility (σ)</label>
+        <input type="number" id="volatilityInput" value="0.12" min="0.01" max="1.0" step="0.01">
+      </div>
+      <div class="param-group">
+        <label for="baseLatencyInput">Baseline Latency (ms)</label>
+        <input type="number" id="baseLatencyInput" value="120" min="10" max="1000" step="5">
+      </div>
+      <button class="run-btn" id="runSimulationBtn">Run Simulation</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Projected Mean Latency</div>
+        <div class="stat-value" id="statMean">-- ms</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Standard Deviation (σ)</div>
+        <div class="stat-value" id="statStdDev">-- ms</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Median (p50)</div>
+        <div class="stat-value" id="statP50">-- ms</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">95th Percentile (p95)</div>
+        <div class="stat-value" id="statP95">-- ms</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">99th Percentile (p99)</div>
+        <div class="stat-value" id="statP99">-- ms</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Min / Max Range</div>
+        <div class="stat-value" id="statMinMax">-- ms</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="simulation-sandbox.js"></script>
+</body>
+</html>
