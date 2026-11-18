@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Client Stress & Telemetry Benchmark</title>
+  <link rel="stylesheet" href="benchmark-suite.css">
+</head>
+<body>
+  <div class="bench-container">
+    <div class="bench-header">
+      <h1 class="bench-title">
+        SaaS Telemetry & Rate-Limit Benchmark Engine
+        <span class="bench-badge">Issue #734</span>
+      </h1>
+      <p class="bench-description">
+        Client-side latency profiling and throughput stress testing for multi-tenant token buckets, claim verification, and quota metering.
+      </p>
+    </div>
+
+    <div class="controls-card">
+      <div class="input-group">
+        <label for="benchmark-iterations">Test Iterations</label>
+        <input type="number" id="benchmark-iterations" value="2500" min="100" max="100000" step="100">
+      </div>
+      <button id="run-benchmark-btn" class="bench-btn">Run Benchmark Engine</button>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Throughput</div>
+        <div class="metric-value highlight" id="metric-ops">-- ops/s</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Median (p50)</div>
+        <div class="metric-value" id="metric-p50">-- ms</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">95th Percentile</div>
+        <div class="metric-value" id="metric-p95">-- ms</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">99th Percentile</div>
+        <div class="metric-value" id="metric-p99">-- ms</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Average Latency</div>
+        <div class="metric-value" id="metric-avg">-- ms</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="benchmark-suite.js"></script>
+</body>
+</html>
