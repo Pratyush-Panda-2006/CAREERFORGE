@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Record immutable JSON snapshots, inspect state changes and import or export a bounded replay." />
+    <title>State replay workbench | Terra Agri</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="state-debugger.css" />
+    <script type="module" src="state-debugger.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#recorder">Skip to state recorder</a>
+    <header><a class="brand" href="index.html">Terra Agri</a><span>Precision farming</span><a href="index.html">Back to showcase</a></header>
+    <main id="recorder" data-state-debugger>
+      <div class="intro"><h1>State replay workbench</h1><p>Record JSON states, inspect their differences and revisit earlier snapshots. The sample telemetry is local demo data; no farm equipment is connected.</p></div>
+      <div class="timeline-panel"><div class="timeline-label"><h2>Snapshot timeline</h2><output id="step-position" for="timeline" aria-live="polite"></output></div><input id="timeline" type="range" aria-label="Snapshot timeline" min="0" max="0" value="0" step="1" /><div class="controls"><button type="button" id="previous-step">Previous step</button><button type="button" id="play-replay">Play replay</button><button type="button" id="next-step">Next step</button></div></div>
+      <p id="debugger-error" class="error" role="alert" hidden></p>
+      <div class="workspace">
+        <section class="editor-panel" aria-labelledby="editor-heading"><h2 id="editor-heading">Record a snapshot</h2><label for="action-label">Action label</label><input id="action-label" type="text" maxlength="80" autocomplete="off" /><label for="state-json">State as JSON</label><textarea id="state-json" rows="11" maxlength="64000" spellcheck="false" aria-describedby="state-help"></textarea><p id="state-help" class="help">Numbers, strings, booleans, null, objects and arrays are supported. Recording from an earlier step appends a new snapshot and keeps the existing history.</p><button type="button" id="record-snapshot" class="primary-button">Record snapshot</button></section>
+        <section class="diff-panel" aria-labelledby="diff-heading"><h2 id="diff-heading">State changes</h2><p class="help">Paths use escaped JSON Pointer notation. Red shows the previous value; green shows the new value.</p><div class="table-scroll"><table class="diff-table"><thead><tr><th scope="col">Path</th><th scope="col">Before</th><th scope="col">After</th></tr></thead><tbody id="diff-rows"></tbody></table></div><p id="no-diff" class="help" hidden>No values changed between these snapshots.</p><div id="diff-controls" class="diff-controls" hidden><span id="diff-count" aria-live="polite"></span><button type="button" id="previous-changes">Previous changes</button><button type="button" id="next-changes">Next changes</button></div></section>
+      </div>
+      <section class="history-panel" aria-labelledby="history-heading"><h2 id="history-heading">Recorded actions</h2><p id="empty-history" class="help" hidden>No snapshots yet. Enter a state and record your first snapshot.</p><div class="table-scroll"><table class="history-table"><thead><tr><th scope="col">Step</th><th scope="col">Action</th><th scope="col">Recorded time</th></tr></thead><tbody id="history-rows"></tbody></table></div></section>
+      <section class="replay-files" aria-labelledby="files-heading"><div><h2 id="files-heading">Keep a replay</h2><p class="help">History stays in memory. Export before closing this tab; exports contain recorded snapshots only. Imported action labels never execute code.</p><p class="help">Limits: 100 snapshots, 64 KB per state, 2 MB per replay, 2,048 values and 24 nesting levels per state. State keys can contain at most 128 characters.</p></div><div class="file-controls"><button type="button" id="export-replay">Export replay</button><label for="import-replay">Import a UTF-8 JSON replay</label><input id="import-replay" type="file" accept=".json,application/json" /><button type="button" id="clear-history" class="danger-button">Clear history</button></div></section>
+    </main>
+    <footer>Terra Agri state recorder · CAREERFORGE showcase</footer>
+  </body>
+</html>
