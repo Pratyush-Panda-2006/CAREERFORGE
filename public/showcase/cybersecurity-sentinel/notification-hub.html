@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Sentinel - SOC Threat Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="cs-notification-container">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Cybersecurity Sentinel Incident Dispatch Hub</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Real-time intrusion detection, critical CVE alerts, brute-force containment, and SIEM feeds.</p>
+    </header>
+
+    <section class="cs-controls" aria-label="SOC threat alert triggers">
+      <button id="btn-critical" class="cs-btn cs-btn-critical">Zero-Day RCE Exploit (Critical)</button>
+      <button id="btn-warning" class="cs-btn cs-btn-warning">SSH Brute-Force Wave (Warning)</button>
+      <button id="btn-success" class="cs-btn cs-btn-success">Host Quarantined (Success)</button>
+      <button id="btn-info" class="cs-btn cs-btn-info">MITRE Sync (Info)</button>
+      <button id="btn-clear" class="cs-btn cs-btn-clear">Clear Active Threats</button>
+    </section>
+
+    <section id="toast-viewport" class="cs-toast-viewport" aria-live="polite">
+      <!-- Toasts dynamically appended via CybersecuritySentinelNotificationHub -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { CybersecuritySentinelNotificationHub } from './notification-hub.js';
+
+    const hub = new CybersecuritySentinelNotificationHub();
+    const viewport = document.getElementById('toast-viewport');
+
+    hub.subscribe(() => {
+      hub.render(viewport);
+    });
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('CRITICAL INTRUSION: Remote Code Execution detected on DMZ Gateway (CVE-2026-9182). Immediate containment executed!', 'critical', 'critical', 6000);
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Brute-Force Anomaly: 842 failed SSH attempts logged from subnet 198.51.100.0/24 in 60 seconds.', 'warning', 'warning', 5000);
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Asset Quarantined: Compromised workstation 10.0.4.118 isolated via zero-trust policy block.', 'success', 'success', 4000);
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Threat Intelligence Synchronized: MITRE ATT&CK v15 enterprise signatures updated.', 'info', 'info', 3000);
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hub.clearQueue();
+    });
+
+    hub.render(viewport);
+  </script>
+</body>
+</html>
