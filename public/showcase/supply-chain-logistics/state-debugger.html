@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Logistics - Time-Travel State Debugger</title>
+  <link rel="stylesheet" href="state-debugger.css">
+</head>
+<body>
+  <div class="debugger-container">
+    <header class="debugger-header">
+      <div class="header-titles">
+        <h2>📦 Supply Chain Time-Travel State Debugger</h2>
+        <p>Immutable shipment event state snapshots, timeline replay & telemetry delta diff viewer</p>
+      </div>
+      <button id="btnExportReplay" class="btn btn-export">Export Replay JSON</button>
+    </header>
+
+    <div class="scrubber-bar">
+      <button id="btnStepBack" class="btn-step" title="Step Back">◀</button>
+      <input type="range" id="playheadSlider" min="0" max="0" value="0" class="playhead-slider">
+      <button id="btnStepForward" class="btn-step" title="Step Forward">▶</button>
+      <span id="stepIndicator" class="step-indicator">Step 1 of 1</span>
+    </div>
+
+    <div class="debugger-actions">
+      <h3>Simulate Supply Chain Transitions</h3>
+      <div class="btn-row">
+        <button id="btnLogWaypoint" class="btn btn-action">Log Transit Waypoint</button>
+        <button id="btnUpdateStatus" class="btn btn-action">Progress Transit Status</button>
+      </div>
+    </div>
+
+    <div class="debugger-grid">
+      <section class="panel timeline-panel">
+        <h3>Shipment History</h3>
+        <div id="actionHistoryList" class="action-history-list">
+          <!-- Shipment logs render here -->
+        </div>
+      </section>
+
+      <section class="panel inspector-panel">
+        <h3>Current Snapshot State</h3>
+        <pre id="stateInspectorView" class="json-code-view">// State JSON</pre>
+      </section>
+
+      <section class="panel diff-panel">
+        <h3>Step Delta Diff</h3>
+        <pre id="diffInspectorView" class="json-code-view">// Delta diff</pre>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="state-debugger.js"></script>
+</body>
+</html>
