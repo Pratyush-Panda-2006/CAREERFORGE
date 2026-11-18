@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nonprofit Impact - Actionable Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+    }
+    .np-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .np-btn {
+      padding: 8px 16px;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      background: rgba(30, 41, 59, 0.8);
+      color: #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .np-btn:hover {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: #10b981;
+    }
+  </style>
+</head>
+<body>
+  <h1>Nonprofit Impact Notification Queue</h1>
+  <div class="np-controls">
+    <button class="np-btn" id="btn-critical">Relief Fund Depleted (Critical)</button>
+    <button class="np-btn" id="btn-warning">Reforestation Deficit (Warning)</button>
+    <button class="np-btn" id="btn-success">Grant Matched $50k (Success)</button>
+    <button class="np-btn" id="btn-info">Registry Ledger Synced (Info)</button>
+    <button class="np-btn" id="btn-clear">Clear All</button>
+  </div>
+
+  <div id="hub-root" class="np-notification-hub-container"></div>
+
+  <script type="module">
+    import { NonprofitImpactNotificationHub } from './notification-hub.js';
+
+    const hub = new NonprofitImpactNotificationHub();
+    const container = document.getElementById('hub-root');
+
+    hub.subscribe(() => {
+      hub.render(container);
+    });
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Emergency food distribution reserves in Sector 4 below 12-hour buffer!', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Q1 sapling reforestation target lagging by 14% due to delayed seedling transit.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('$50,000 philanthropic grant 1:1 match unlocked by community donors!', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Verra carbon credit registry cryptographic batch sync verified.', 'info', 'info');
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hub.clearQueue();
+    });
+
+    hub.render(container);
+  </script>
+</body>
+</html>
