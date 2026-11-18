@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Culinary Bistro - Kitchen Pass Alert Stream</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #140d0b;
+      color: #f5f5f4;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+    .demo-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .demo-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      background: #291e1a;
+      color: #fdba74;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kitchen Pass & Tasting Service Alert Stream</h1>
+  <div class="demo-controls">
+    <button class="demo-btn" id="btn-critical">Trigger Severe Allergen Stop</button>
+    <button class="demo-btn" id="btn-warning">Trigger Wine Cellar Climate Warning</button>
+    <button class="demo-btn" id="btn-success">Trigger VIP Tasting Menu Complete</button>
+    <button class="demo-btn" id="btn-info">Trigger Daily Fresh Catch Sync</button>
+  </div>
+  <div id="notification-root"></div>
+
+  <script type="module">
+    import { CulinaryBistroNotificationHub } from './notification-hub.js';
+
+    const hub = new CulinaryBistroNotificationHub();
+    const root = document.getElementById('notification-root');
+
+    hub.subscribe(() => {
+      hub.renderToDOM(root);
+    });
+
+    // Initial alert items
+    hub.enqueue('Severe Allergen Flag: Table 4 Guest anaphylactic shellfish allergy reported. Expediter pass halt activated.', 'critical', 'critical');
+    hub.enqueue('Wine Cellar Warning: Grand Cru climate sensor rose to 16.5°C (Ideal target: 12.0°C).', 'warning', 'warning');
+    hub.enqueue('VIP Tasting Service: Table 1 completed 9-course sommelier pairing with 100% pacing score.', 'success', 'success');
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Thermal Abuse Hazard: Sous-vide water bath dropped below pasteurization threshold (54.5°C).', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Inventory Stock Depletion: A5 Wagyu striploin inventory down to last 3 portions.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Second Dinner Turn: All 24 tables turned and sanitized within 8-minute turnaround target.', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Farm-to-table arrival: Fresh Périgord truffles and Breton oysters inspected and logged.', 'info', 'info');
+    });
+  </script>
+</body>
+</html>
