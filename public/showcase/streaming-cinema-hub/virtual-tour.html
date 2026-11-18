@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming Cinema Hub - Feature Spotlight Tour</title>
+  <link rel="stylesheet" href="./virtual-tour.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #09090e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #tour-root {
+      max-width: 800px;
+      width: 100%;
+    }
+    .mock-cinema-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      max-width: 800px;
+      width: 100%;
+    }
+    .mock-card {
+      padding: 1.5rem;
+      background: rgba(26, 26, 36, 0.6);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 8px;
+      color: #cbd5e1;
+    }
+    .mock-card h4 {
+      margin: 0 0 0.5rem 0;
+      color: #c084fc;
+    }
+  </style>
+</head>
+<body>
+  <div id="tour-root"></div>
+
+  <div class="mock-cinema-grid">
+    <div id="player-card" class="mock-card">
+      <h4>4K HDR Player</h4>
+      <p>Dolby Vision and AV1 video stream with adaptive bitrates.</p>
+    </div>
+    <div id="audio-card" class="mock-card">
+      <h4>Dolby Atmos Audio</h4>
+      <p>Spatial audio decoding and 7.1.4 lossless surround sound.</p>
+    </div>
+    <div id="watchlist-card" class="mock-card">
+      <h4>Cinephile Watchlists</h4>
+      <p>Curated movie collections and synchronized virtual watch parties.</p>
+    </div>
+    <div id="telemetry-card" class="mock-card">
+      <h4>CDN Stream Telemetry</h4>
+      <p>Real-time edge server bitrate and buffer health metrics.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { StreamingCinemaHubTourGuide } from './virtual-tour.js';
+
+    const root = document.getElementById('tour-root');
+    const guide = new StreamingCinemaHubTourGuide();
+    guide.renderToDOM(root);
+  </script>
+</body>
+</html>
