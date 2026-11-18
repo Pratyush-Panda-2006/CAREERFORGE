@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - Accessibility Assistant</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+</head>
+<body>
+  <div class="assistant-container">
+    <div class="header-section">
+      <h1>AI Voice Studio Accessibility Inspector</h1>
+      <p>Automated WCAG 2.1 Contrast &amp; Interface Inspector for High-Fidelity Audio Controls</p>
+    </div>
+
+    <div class="controls-grid">
+      <div class="control-group">
+        <label for="fgColorPicker">Foreground / Waveform Color</label>
+        <div class="color-input-wrapper">
+          <input type="color" id="fgColorPicker" value="#a855f7">
+          <input type="text" id="fgColorInput" value="#a855f7" aria-label="Foreground Hex Code">
+        </div>
+      </div>
+      <div class="control-group">
+        <label for="bgColorPicker">Background / Deck Plate Color</label>
+        <div class="color-input-wrapper">
+          <input type="color" id="bgColorPicker" value="#0f172a">
+          <input type="text" id="bgColorInput" value="#0f172a" aria-label="Background Hex Code">
+        </div>
+      </div>
+    </div>
+
+    <div class="presets-container">
+      <span>Studio Presets:</span>
+      <button class="preset-btn" data-fg="#a855f7" data-bg="#0f172a">Synth Violet on Slate</button>
+      <button class="preset-btn" data-fg="#f8fafc" data-bg="#0f172a">Clean High-Contrast</button>
+      <button class="preset-btn" data-fg="#38bdf8" data-bg="#020617">Spectral Cyan</button>
+      <button class="preset-btn" data-fg="#64748b" data-bg="#0f172a">Muted Fader (Low)</button>
+    </div>
+
+    <div class="preview-card" id="contrastPreviewBox">
+      <div class="preview-text" id="previewText">AI Studio Voice Synthesis Node Active</div>
+      <p class="preview-subtext">Sampling 48kHz / 24-bit PCM Neural Stream. Frequency bands balanced.</p>
+    </div>
+
+    <div class="audit-results-grid">
+      <div class="result-card">
+        <div class="result-label">Contrast Ratio</div>
+        <div class="result-value" id="contrastRatioVal">-- : 1</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">WCAG AA Normal</div>
+        <div class="result-value"><span id="aaNormalPill" class="status-pill status-pass">--</span></div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">WCAG AA Large</div>
+        <div class="result-value"><span id="aaLargePill" class="status-pill status-pass">--</span></div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">WCAG AAA Normal</div>
+        <div class="result-value"><span id="aaaNormalPill" class="status-pill status-pass">--</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="accessibility-assistant.js"></script>
+</body>
+</html>
