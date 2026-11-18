@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fintech Vault - Financial Alerts Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f1f5f9;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+    .demo-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .demo-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      border: 1px solid rgba(234, 179, 8, 0.4);
+      background: #1e293b;
+      color: #fde047;
+    }
+  </style>
+</head>
+<body>
+  <h1>Institutional Financial & Compliance Alert Stream</h1>
+  <div class="demo-controls">
+    <button class="demo-btn" id="btn-critical">Trigger AML Sanction Alert</button>
+    <button class="demo-btn" id="btn-warning">Trigger Nostro Buffer Warning</button>
+    <button class="demo-btn" id="btn-success">Trigger RTGS Settlement Success</button>
+    <button class="demo-btn" id="btn-info">Trigger SOC2 Audit Info</button>
+  </div>
+  <div id="notification-root"></div>
+
+  <script type="module">
+    import { FintechVaultNotificationHub } from './notification-hub.js';
+
+    const hub = new FintechVaultNotificationHub();
+    const root = document.getElementById('notification-root');
+
+    hub.subscribe(() => {
+      hub.renderToDOM(root);
+    });
+
+    // Initial alert items
+    hub.enqueue('AML Hit: Outbound SWIFT payment flagged against OFAC SDN List. Account quarantined.', 'critical', 'critical');
+    hub.enqueue('Liquidity Alert: Nostro EUR clearing reserve dipped to 7.4% (Threshold: 10.0%).', 'warning', 'warning');
+    hub.enqueue('Fedwire Real-Time Gross Settlement Batch #9021 confirmed with zero reconciliation exceptions.', 'success', 'success');
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Fraud Spike: High-velocity velocity velocity check triggered on corporate card gateway.', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Collateral margin call warning: Prime broker margin ratio reached 112%.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('SEPA Instant Credit Transfer execution verified: 45,000 transactions posted.', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Cryptographic double-entry ledger end-of-day merkle root verified and notarized.', 'info', 'info');
+    });
+  </script>
+</body>
+</html>
