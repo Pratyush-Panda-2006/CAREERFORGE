@@ -263,6 +263,56 @@
 
       <!-- Main Store Catalog Area -->
       <div class="store-catalog-main">
+        <!-- Dynamic Search, Tag Filtering & Multi-Column Sorting Engine (Issue #572) -->
+        <div class="dynamic-filter-toolbar" id="dynamicFilterToolbar">
+          <div class="dynamic-search-wrapper">
+            <span class="dynamic-search-icon">🔍</span>
+            <input
+              type="text"
+              id="catalogDynamicSearchInput"
+              class="dynamic-search-input"
+              placeholder="Search products by keyword, category, or tag (e.g. OLED, wireless, RGB)..."
+              aria-label="Search products"
+            />
+            <button type="button" class="dynamic-search-clear" id="catalogDynamicSearchClear" hidden title="Clear search">✕</button>
+          </div>
+
+          <div class="dynamic-filter-row">
+            <div class="dynamic-tag-chips-wrapper">
+              <span class="dynamic-filter-label">Quick Tags:</span>
+              <div class="dynamic-tag-chips" id="dynamicTagChips">
+                <button type="button" class="catalog-tag-chip" data-tag="wireless">Wireless</button>
+                <button type="button" class="catalog-tag-chip" data-tag="rgb">RGB</button>
+                <button type="button" class="catalog-tag-chip" data-tag="pro">Pro Edition</button>
+                <button type="button" class="catalog-tag-chip" data-tag="mechanical">Mechanical</button>
+                <button type="button" class="catalog-tag-chip" data-tag="oled">OLED</button>
+                <button type="button" class="catalog-tag-chip" data-tag="studio">Studio</button>
+                <button type="button" class="catalog-tag-chip" data-tag="anc">ANC</button>
+              </div>
+            </div>
+
+            <div class="dynamic-sort-wrapper">
+              <label for="catalogMultiSortSelect" class="dynamic-sort-label">Sort:</label>
+              <select id="catalogMultiSortSelect" class="dynamic-sort-select">
+                <option value="popularity-desc">Popularity (High to Low)</option>
+                <option value="price-asc">Price (Low to High)</option>
+                <option value="price-desc">Price (High to Low)</option>
+                <option value="rating-desc">Rating (High to Low)</option>
+                <option value="name-asc">Name (A to Z)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Empty state alert card -->
+          <div class="dynamic-empty-alert" id="filterEmptyAlert" hidden>
+            <span class="empty-icon">🔎</span>
+            <div class="empty-text">
+              <strong>No matching products found</strong>
+              <p>Try searching for a different keyword or toggle off active tag filters.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Catalog Status Bar -->
         <div class="catalog-status-bar">
           <div class="results-tally">
