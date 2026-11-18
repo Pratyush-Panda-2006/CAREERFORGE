@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Museum 3D - WebSocket & RPC Streaming Hub</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+</head>
+<body>
+  <div class="ws-container">
+    <header class="ws-header">
+      <div class="badge-tag">Virtual Museum 3D RPC Stream</div>
+      <h1>Simulated WebSocket & Telemetry Streaming Hub</h1>
+      <p>Self-contained WebSocket streaming emulator simulating real-time visitor telemetry, pub/sub channels, and heartbeat pings.</p>
+    </header>
+
+    <div class="ws-grid">
+      <section class="ws-panel controls-panel">
+        <div class="conn-status-bar">
+          <div class="status-indicator">
+            <span class="status-dot connected" id="statusDot"></span>
+            <span class="status-text" id="statusText">Connected (127.0.0.1:ws)</span>
+          </div>
+          <span class="ping-badge" id="pingBadge">12ms</span>
+        </div>
+
+        <h2>Stream Channels</h2>
+        <div class="channel-pills">
+          <button class="channel-pill active" data-channel="museum.visitor.presence">museum.visitor.presence</button>
+          <button class="channel-pill active" data-channel="museum.gallery.updates">museum.gallery.updates</button>
+          <button class="channel-pill active" data-channel="system.heartbeat">system.heartbeat</button>
+        </div>
+
+        <h2>Simulate Traffic & Faults</h2>
+        <div class="actions-group">
+          <button id="sendPacketBtn" class="btn-action">Publish Custom Telemetry Packet</button>
+          <button id="simulateHeartbeatBtn" class="btn-action">Send RPC Heartbeat Ping</button>
+          <button id="simulateDropoutBtn" class="btn-warning">Simulate 2s Network Dropout</button>
+        </div>
+      </section>
+
+      <section class="ws-panel stream-panel">
+        <div class="stream-header">
+          <h2>Live Socket Packet Feed</h2>
+          <button id="clearStreamBtn" class="btn-text">Clear Stream</button>
+        </div>
+
+        <div class="packet-feed" id="packetFeed"></div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="mock-websocket.js"></script>
+</body>
+</html>
