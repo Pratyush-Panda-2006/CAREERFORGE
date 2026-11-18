@@ -1,0 +1,221 @@
+/**
+ * Cybersecurity Sentinel - Telemetry Visualizer Styles
+ * Dark cyber-terminal glassmorphic container with glowing phosphor green (#10b981) line strokes & floating tooltip
+ */
+
+:root {
+  --sentinel-bg: #07090e;
+  --sentinel-card-bg: rgba(14, 20, 32, 0.75);
+  --sentinel-card-border: rgba(16, 185, 129, 0.28);
+  --sentinel-green: #10b981;
+  --sentinel-green-glow: rgba(16, 185, 129, 0.4);
+  --sentinel-green-hover: #059669;
+  --sentinel-red: #ef4444;
+  --sentinel-amber: #f59e0b;
+  --sentinel-cyan: #06b6d4;
+  --sentinel-text-main: #f0fdf4;
+  --sentinel-text-muted: #86efac;
+  --sentinel-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+  --transition-speed: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--sentinel-bg);
+  font-family: var(--sentinel-font-family);
+  color: var(--sentinel-text-main);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.sentinel-telemetry-container {
+  width: 100%;
+  max-width: 840px;
+  background: var(--sentinel-card-bg);
+  border: 1px solid var(--sentinel-card-border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 25px var(--sentinel-green-glow);
+  backdrop-filter: blur(14px);
+  position: relative;
+}
+
+/* Header */
+.telemetry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.header-titles {
+  flex: 1;
+  min-width: 240px;
+}
+
+.telemetry-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--sentinel-green);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+.telemetry-title {
+  margin: 0 0 6px 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.telemetry-subtitle {
+  margin: 0;
+  color: var(--sentinel-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Time Window Buttons */
+.time-window-controls {
+  display: flex;
+  background: rgba(7, 9, 14, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.time-window-btn {
+  background: transparent;
+  border: none;
+  color: var(--sentinel-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-speed);
+}
+
+.time-window-btn:hover {
+  color: #ffffff;
+}
+
+.time-window-btn.active {
+  background: var(--sentinel-green);
+  color: #04140e;
+  font-weight: 700;
+  box-shadow: 0 2px 8px var(--sentinel-green-glow);
+}
+
+/* Stats Bar */
+.telemetry-stats-bar {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  background: rgba(7, 9, 14, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 18px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--sentinel-text-muted);
+  letter-spacing: 0.5px;
+}
+
+.stat-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 2px;
+}
+
+.stat-val.highlight {
+  color: var(--sentinel-green);
+}
+
+/* Canvas Wrapper */
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background: rgba(7, 9, 14, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#cybersecurity-sentinel-telemetry-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+/* Tooltip */
+.telemetry-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(14, 20, 32, 0.95);
+  border: 1px solid var(--sentinel-green);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #ffffff;
+  transform: translate(-50%, -100%);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.telemetry-tooltip strong {
+  color: var(--sentinel-green);
+}
+
+.telemetry-tooltip span {
+  font-size: 10px;
+  color: var(--sentinel-text-muted);
+}
+
+.telemetry-tooltip.visible {
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .telemetry-header {
+    flex-direction: column;
+  }
+  .time-window-controls {
+    align-self: flex-start;
+  }
+}
