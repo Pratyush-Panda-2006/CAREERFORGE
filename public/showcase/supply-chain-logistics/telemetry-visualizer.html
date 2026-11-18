@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Logistics - Telemetry & Sparkline Visualizer</title>
+  <link rel="stylesheet" href="telemetry-visualizer.css">
+</head>
+<body class="scl-telemetry-body">
+  <div class="scl-visualizer-container">
+    <header class="scl-telemetry-header">
+      <div class="scl-badge">INTERMODAL METRICS TELEMETRY</div>
+      <h2>Fleet Transit & Throughput Telemetry</h2>
+      <p>Live stream of multi-region logistics latency, customs clearance velocity, and container dispatch efficiency.</p>
+    </header>
+
+    <div class="scl-controls-bar">
+      <div class="scl-time-selectors" role="group" aria-label="Time Window Range">
+        <button class="scl-time-btn" data-window="1H">1H</button>
+        <button class="scl-time-btn active" data-window="24H">24H</button>
+        <button class="scl-time-btn" data-window="7D">7D</button>
+      </div>
+
+      <div class="scl-live-indicator">
+        <span class="scl-pulse-dot"></span>
+        <span>TELEMETRY STREAM ACTIVE</span>
+      </div>
+    </div>
+
+    <div class="scl-canvas-wrapper" id="scl-canvas-container">
+      <canvas id="supply-chain-logistics-telemetry-canvas" width="680" height="280"></canvas>
+      <div class="scl-tooltip" id="scl-hover-tooltip" style="display: none;">
+        <span class="scl-tooltip-val">96.5%</span>
+        <span class="scl-tooltip-meta">Throughput Index</span>
+      </div>
+    </div>
+
+    <div class="scl-metrics-summary" id="scl-summary-grid">
+      <div class="scl-metric-card">
+        <span class="scl-metric-label">Current Velocity</span>
+        <strong class="scl-metric-val" id="metric-current">99.1%</strong>
+      </div>
+      <div class="scl-metric-card">
+        <span class="scl-metric-label">Peak Efficiency</span>
+        <strong class="scl-metric-val" id="metric-peak">99.1%</strong>
+      </div>
+      <div class="scl-metric-card">
+        <span class="scl-metric-label">Window Average</span>
+        <strong class="scl-metric-val" id="metric-avg">87.4%</strong>
+      </div>
+      <div class="scl-metric-card">
+        <span class="scl-metric-label">Fleet Latency</span>
+        <strong class="scl-metric-val" id="metric-latency">14.2 ms</strong>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { SupplyChainLogisticsTelemetryVisualizer } from './telemetry-visualizer.js';
+    const visualizer = new SupplyChainLogisticsTelemetryVisualizer();
+
+    const canvas = document.getElementById('supply-chain-logistics-telemetry-canvas');
+    const tooltip = document.getElementById('scl-hover-tooltip');
+    const timeBtns = document.querySelectorAll('.scl-time-btn');
+
+    function updateView() {
+      visualizer.render(canvas);
+      const metrics = visualizer.getSummaryMetrics();
+      document.getElementById('metric-current').textContent = metrics.current + '%';
+      document.getElementById('metric-peak').textContent = metrics.max + '%';
+      document.getElementById('metric-avg').textContent = metrics.average + '%';
+    }
+
+    timeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        timeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const win = btn.getAttribute('data-window');
+        visualizer.setTimeWindow(win);
+        updateView();
+      });
+    });
+
+    canvas?.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const pixelX = e.clientX - rect.left;
+      const coords = visualizer.mapCoordinates(visualizer.currentData, canvas.width, canvas.height, visualizer.padding);
+      const pt = visualizer.findNearestPoint(pixelX, coords);
+
+      if (pt) {
+        tooltip.style.display = 'block';
+        tooltip.style.left = `${pt.x}px`;
+        tooltip.style.top = `${pt.y - 45}px`;
+        tooltip.querySelector('.scl-tooltip-val').textContent = `${pt.value}%`;
+      }
+    });
+
+    canvas?.addEventListener('mouseleave', () => {
+      tooltip.style.display = 'none';
+    });
+
+    updateView();
+  </script>
+</body>
+</html>
