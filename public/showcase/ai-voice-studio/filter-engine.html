@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - Dynamic Voice Search & Filter Engine</title>
+  <link rel="stylesheet" href="filter-engine.css">
+</head>
+<body>
+  <div class="voice-filter-container">
+    <header class="filter-header">
+      <div class="header-titles">
+        <span class="filter-badge">Neural Model Catalog</span>
+        <h1 class="filter-title">Voice Preset & Neural Filter Engine</h1>
+        <p class="filter-subtitle">In-memory zero-latency search and multi-column sorting across audio models and accents.</p>
+      </div>
+    </header>
+
+    <!-- Controls Bar: Search & Sort -->
+    <section class="controls-panel">
+      <div class="search-box-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="voiceSearchInput" class="search-input" placeholder="Search by voice name, accent, character, style..." autocomplete="off">
+        <button type="button" id="clearVoiceSearchBtn" class="btn-clear" aria-label="Clear search">
+          &times;
+        </button>
+      </div>
+
+      <div class="sort-box-wrapper">
+        <label for="sortSelect" class="sort-label">Sort By:</label>
+        <select id="sortSelect" class="sort-select">
+          <option value="clarityScore-desc">Clarity Score (Highest First)</option>
+          <option value="clarityScore-asc">Clarity Score (Lowest First)</option>
+          <option value="latencyMs-asc">Latency (Fastest First)</option>
+          <option value="latencyMs-desc">Latency (Slowest First)</option>
+          <option value="sampleRate-desc">DSP Sample Rate (Highest First)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Tag Chips -->
+    <section class="tags-panel">
+      <span class="tags-label">Styles:</span>
+      <div class="chips-row">
+        <button type="button" class="filter-chip" data-tag="broadcast">Broadcast</button>
+        <button type="button" class="filter-chip" data-tag="conversational">Conversational</button>
+        <button type="button" class="filter-chip" data-tag="cinematic">Cinematic</button>
+        <button type="button" class="filter-chip" data-tag="calm">Calm Meditation</button>
+        <button type="button" class="filter-chip" data-tag="commercial">Commercial</button>
+        <button type="button" class="filter-chip" data-tag="assistant">AI Assistant</button>
+        <button type="button" class="filter-chip" data-tag="studio">Studio Mastering</button>
+      </div>
+    </section>
+
+    <!-- Summary Bar -->
+    <div class="results-bar">
+      <span id="resultCount" class="results-count">Loading neural voices...</span>
+      <button type="button" id="resetFiltersBtn" class="btn-reset-filters">Reset Filters</button>
+    </div>
+
+    <!-- Results Grid -->
+    <main id="voiceResultsGrid" class="voice-grid"></main>
+
+    <!-- Empty State Alert -->
+    <div id="emptyStateAlert" class="empty-state-alert hidden">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+      </svg>
+      <h3>No Neural Voices Found</h3>
+      <p>No audio models matched your active filters and search query.</p>
+    </div>
+  </div>
+
+  <script type="module" src="filter-engine.js"></script>
+</body>
+</html>
