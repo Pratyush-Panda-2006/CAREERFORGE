@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar - Engineering Workflow Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+  <style>
+    body {
+      background: #050811;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .ah-pipeline-controls {
+      display: flex;
+      gap: 12px;
+    }
+    .ah-btn {
+      padding: 8px 16px;
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hypercar Engineering Pipeline</h1>
+  <div class="ah-pipeline-controls">
+    <button class="ah-btn" id="btn-add-task">+ Schedule Engineering Task</button>
+  </div>
+  <div id="pipeline-root"></div>
+
+  <script type="module">
+    import { AutomotiveHypercarPipelineEngine } from './workflow-pipeline.js';
+
+    const engine = new AutomotiveHypercarPipelineEngine();
+    const root = document.getElementById('pipeline-root');
+
+    document.getElementById('btn-add-task').addEventListener('click', () => {
+      engine.addTask({
+        title: `Aero & Powertrain Test Run #${Math.floor(Math.random() * 1000)}`,
+        description: 'Scheduled automated dynamic test cycle.',
+        columnId: 'cfd-aerodynamics',
+        priority: 'high',
+        assignee: 'Race Engineer',
+        durationEst: '2.0h'
+      });
+      engine.render(root);
+    });
+
+    engine.render(root);
+  </script>
+</body>
+</html>
