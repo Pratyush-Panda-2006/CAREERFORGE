@@ -3,64 +3,80 @@ import assert from 'node:assert/strict';
 import { WeatherRadarAtlasFsmVisualizer } from './state-diagram.js';
 
 describe('WeatherRadarAtlasFsmVisualizer', () => {
-  it('initializes with default IDLE_SURVEILLANCE state and radar transitions', () => {
+  it('initializes with default RADAR_STANDBY state and radar states', () => {
     const fsm = new WeatherRadarAtlasFsmVisualizer();
-    assert.equal(fsm.getState(), 'IDLE_SURVEILLANCE');
-    assert.ok(fsm.getTransitions().length >= 10);
-    const available = fsm.getAvailableEvents();
-    assert.ok(available.some((e) => e.event === 'BEGIN_SCAN'));
+    assert.strictEqual(fsm.currentState, 'RADAR_STANDBY');
+    assert.ok(fsm.states.has('AZIMUTH_SWEEPING'));
+    assert.ok(fsm.states.has('DOPPLER_PROCESSING'));
+    assert.ok(fsm.states.has('STORM_CELL_ALERT'));
   });
 
-  it('updates state upon valid dispatched radar transitions', () => {
+  it('executes valid sequential transitions along radar sweep lifecycle', () => {
     const fsm = new WeatherRadarAtlasFsmVisualizer();
-    const result1 = fsm.dispatch('BEGIN_SCAN');
-    assert.equal(result1.previousState, 'IDLE_SURVEILLANCE');
-    assert.equal(result1.currentState, 'VOLUME_SCAN');
-    assert.equal(fsm.getState(), 'VOLUME_SCAN');
 
-    const result2 = fsm.dispatch('ECHO_DETECTED');
-    assert.equal(result2.currentState, 'PRECIPITATION_DETECTED');
-    assert.equal(fsm.getState(), 'PRECIPITATION_DETECTED');
+    const res1 = fsm.dispatch('START_SCAN');
+    assert.strictEqual(res1.success, true);
+    assert.strictEqual(fsm.currentState, 'AZIMUTH_SWEEPING');
+
+    const res2 = fsm.dispatch('TILT_ANTENNA');
+    assert.strictEqual(res2.success, true);
+    assert.strictEqual(fsm.currentState, 'ELEVATION_TILTING');
+
+    const res3 = fsm.dispatch('PROCESS_PULSE');
+    assert.strictEqual(res3.success, true);
+    assert.strictEqual(fsm.currentState, 'DOPPLER_PROCESSING');
+
+    const res4 = fsm.dispatch('SEVERE_DETECTION');
+    assert.strictEqual(res4.success, true);
+    assert.strictEqual(fsm.currentState, 'STORM_CELL_ALERT');
+
+    const res5 = fsm.dispatch('CLEAR_ALERT');
+    assert.strictEqual(res5.success, true);
+    assert.strictEqual(fsm.currentState, 'AZIMUTH_SWEEPING');
   });
 
-  it('enforces guards against invalid transition dispatches', () => {
+  it('rejects invalid transitions with error payload while protecting state', () => {
     const fsm = new WeatherRadarAtlasFsmVisualizer();
-    assert.throws(() => {
-      fsm.dispatch('ROTATION_SIGNATURE');
-    }, /Invalid transition/);
-    assert.equal(fsm.getState(), 'IDLE_SURVEILLANCE');
+    assert.strictEqual(fsm.currentState, 'RADAR_STANDBY');
+
+    const invalid = fsm.dispatch('PROCESS_PULSE');
+    assert.strictEqual(invalid.success, false);
+    assert.strictEqual(fsm.currentState, 'RADAR_STANDBY');
+    assert.match(invalid.error, /Cannot dispatch event/);
   });
 
-  it('supports custom transition additions and cyclic graph execution', () => {
-    const fsm = new WeatherRadarAtlasFsmVisualizer({
-      initialState: 'CLEAR_SKY',
-      transitions: []
-    });
-    fsm.addTransition('CLEAR_SKY', 'STORM_FRONT', 'STORM');
-    fsm.addTransition('STORM', 'FRONT_PASSES', 'CLEAR_SKY');
+  it('supports custom transition additions and cyclic execution', () => {
+    const fsm = new WeatherRadarAtlasFsmVisualizer();
+    fsm.addTransition('RADAR_STANDBY', 'SATELLITE_SYNC', 'SATELLITE_UPLINK');
+    fsm.addTransition('SATELLITE_UPLINK', 'SYNC_COMPLETE', 'RADAR_STANDBY');
 
-    assert.equal(fsm.getState(), 'CLEAR_SKY');
-    fsm.dispatch('STORM_FRONT');
-    assert.equal(fsm.getState(), 'STORM');
-    fsm.dispatch('FRONT_PASSES');
-    assert.equal(fsm.getState(), 'CLEAR_SKY');
+    const res1 = fsm.dispatch('SATELLITE_SYNC');
+    assert.strictEqual(res1.success, true);
+    assert.strictEqual(fsm.currentState, 'SATELLITE_UPLINK');
+
+    const res2 = fsm.dispatch('SYNC_COMPLETE');
+    assert.strictEqual(res2.success, true);
+    assert.strictEqual(fsm.currentState, 'RADAR_STANDBY');
   });
 
   it('exports valid Mermaid.js stateDiagram-v2 definition', () => {
     const fsm = new WeatherRadarAtlasFsmVisualizer();
     const mermaid = fsm.exportMermaid();
+
     assert.ok(mermaid.startsWith('stateDiagram-v2'));
-    assert.ok(mermaid.includes('[*] --> IDLE_SURVEILLANCE'));
-    assert.ok(mermaid.includes('IDLE_SURVEILLANCE --> VOLUME_SCAN: BEGIN_SCAN'));
+    assert.ok(mermaid.includes('[*] --> RADAR_STANDBY'));
+    assert.ok(mermaid.includes('RADAR_STANDBY --> AZIMUTH_SWEEPING : START_SCAN'));
   });
 
-  it('records transition audit log and resets safely', () => {
+  it('maintains history log and resets state reliably', () => {
     const fsm = new WeatherRadarAtlasFsmVisualizer();
-    fsm.dispatch('BEGIN_SCAN');
+    fsm.dispatch('START_SCAN');
+    fsm.dispatch('TILT_ANTENNA');
+
+    assert.strictEqual(fsm.history.length, 2);
     fsm.reset();
-    assert.equal(fsm.getState(), 'IDLE_SURVEILLANCE');
-    const history = fsm.getHistory();
-    assert.ok(history.length >= 3);
-    assert.equal(history[0].event, 'RESET');
+
+    assert.strictEqual(fsm.currentState, 'RADAR_STANDBY');
+    assert.strictEqual(fsm.history.length, 0);
   });
 });
