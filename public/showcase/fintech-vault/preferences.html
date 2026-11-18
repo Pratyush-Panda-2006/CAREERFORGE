@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fintech Vault - Adaptive User Settings</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body>
+  <div class="fintech-page-wrapper">
+    <div class="fintech-demo-card">
+      <h1 class="fintech-title">Fintech Vault Security Console</h1>
+      <p class="fintech-desc">Institutional decentralized asset vault, cryptographic custody, and treasury state management.</p>
+      <button type="button" id="openPreferencesBtn" class="fintech-primary-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Security Preferences</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="fintech-vault-preferences-modal" class="fintech-modal-backdrop">
+    <div class="fintech-drawer">
+      <div class="fintech-drawer-header">
+        <div class="header-titles">
+          <span class="fintech-emerald-badge">Security Node</span>
+          <h2>Vault Preferences</h2>
+          <p>Configure cryptographic custody, telemetry, and terminal parameters</p>
+        </div>
+        <button type="button" id="closePreferencesBtn" class="fintech-icon-btn" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="fintech-drawer-body">
+        <div class="pref-group">
+          <label for="prefTheme" class="pref-label">Console Theme</label>
+          <select id="prefTheme" class="fintech-select">
+            <option value="cyber-dark">Cyber Dark Obsidian</option>
+            <option value="neon-emerald">Neon Emerald Terminal</option>
+            <option value="matrix-code">Matrix High-Contrast</option>
+            <option value="light-clean">Minimal Arctic</option>
+          </select>
+        </div>
+
+        <div class="pref-group">
+          <label for="prefLayout" class="pref-label">Vault Viewport Layout</label>
+          <select id="prefLayout" class="fintech-select">
+            <option value="dashboard">Multi-Tile Ledger Dashboard</option>
+            <option value="compact">Compact Trading Terminal</option>
+            <option value="audit-feed">Sequential Audit Stream</option>
+          </select>
+        </div>
+
+        <div class="pref-group-row">
+          <div class="pref-group">
+            <label for="prefCurrency" class="pref-label">Settlement Currency</label>
+            <select id="prefCurrency" class="fintech-select">
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="SGD">SGD (S$)</option>
+              <option value="BTC">BTC (₿)</option>
+            </select>
+          </div>
+
+          <div class="pref-group">
+            <label for="prefSecurity" class="pref-label">Policy Strictness</label>
+            <select id="prefSecurity" class="fintech-select">
+              <option value="standard">Standard Threshold</option>
+              <option value="strict">Strict Biometric</option>
+              <option value="maximum">Maximum Hardware Enclave</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pref-toggle-group">
+          <div class="toggle-info">
+            <span class="toggle-title">Mask Balance Values</span>
+            <span class="toggle-desc">Conceal fiat and token valuations with asterisks in public workspaces</span>
+          </div>
+          <label class="fintech-switch">
+            <input type="checkbox" id="prefMaskBalances" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="pref-toggle-group">
+          <div class="toggle-info">
+            <span class="toggle-title">Acoustic Handshake Cues</span>
+            <span class="toggle-desc">Subtle frequency chimes on signature confirmation & ledger broadcasts</span>
+          </div>
+          <label class="fintech-switch">
+            <input type="checkbox" id="prefSoundCues" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="pref-toggle-group">
+          <div class="toggle-info">
+            <span class="toggle-title">High-Contrast Telemetry</span>
+            <span class="toggle-desc">Sharp monochrome vectors for trading terminal monitors</span>
+          </div>
+          <label class="fintech-switch">
+            <input type="checkbox" id="prefHighContrast">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="fintech-drawer-footer">
+        <button type="button" id="resetPreferencesBtn" class="fintech-secondary-btn">Reset Defaults</button>
+        <button type="button" id="exportPreferencesBtn" class="fintech-accent-btn">Export Config</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
