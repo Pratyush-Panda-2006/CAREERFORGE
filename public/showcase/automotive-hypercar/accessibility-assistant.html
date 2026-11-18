@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar - Accessibility Assistant</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+</head>
+<body>
+  <div class="assistant-container">
+    <div class="header-section">
+      <h1>Hypercar Cockpit Accessibility Inspector</h1>
+      <p>Automated WCAG 2.1 Contrast &amp; Dashboard HUD Readability Inspector</p>
+    </div>
+
+    <div class="controls-grid">
+      <div class="control-group">
+        <label for="fgColorPicker">Telemetry HUD / Gauge Font Color</label>
+        <div class="color-input-wrapper">
+          <input type="color" id="fgColorPicker" value="#ef4444">
+          <input type="text" id="fgColorInput" value="#ef4444" aria-label="Foreground Hex Code">
+        </div>
+      </div>
+      <div class="control-group">
+        <label for="bgColorPicker">OLED Cluster Background Color</label>
+        <div class="color-input-wrapper">
+          <input type="color" id="bgColorPicker" value="#090d16">
+          <input type="text" id="bgColorInput" value="#090d16" aria-label="Background Hex Code">
+        </div>
+      </div>
+    </div>
+
+    <div class="presets-container">
+      <span>Cockpit Presets:</span>
+      <button class="preset-btn" data-fg="#ef4444" data-bg="#090d16">Corsa Rosso</button>
+      <button class="preset-btn" data-fg="#22c55e" data-bg="#090d16">Green Energy Mode</button>
+      <button class="preset-btn" data-fg="#38bdf8" data-bg="#020617">Aero Night Cruise</button>
+      <button class="preset-btn" data-fg="#64748b" data-bg="#090d16">Low Glare Dimmed</button>
+    </div>
+
+    <div class="preview-card" id="contrastPreviewBox">
+      <div class="preview-text" id="previewText">348 KM/H | 12,400 RPM | GEAR 7</div>
+      <p class="preview-subtext">Active downforce: 1,420 kg @ 300 km/h. Motor coil temp: 88°C.</p>
+    </div>
+
+    <div class="audit-results-grid">
+      <div class="result-card">
+        <div class="result-label">Contrast Ratio</div>
+        <div class="result-value" id="contrastRatioVal">-- : 1</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">WCAG AA Normal</div>
+        <div class="result-value"><span id="aaNormalPill" class="status-pill status-pass">--</span></div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">WCAG AA Large</div>
+        <div class="result-value"><span id="aaLargePill" class="status-pill status-pass">--</span></div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">WCAG AAA Normal</div>
+        <div class="result-value"><span id="aaaNormalPill" class="status-pill status-pass">--</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="accessibility-assistant.js"></script>
+</body>
+</html>
