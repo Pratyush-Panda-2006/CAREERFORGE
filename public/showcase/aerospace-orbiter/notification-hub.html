@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter - Prioritized Flight Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="ao-notification-container">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Aerospace Orbiter Flight Telemetry Hub</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Real-time orbital dynamics, trajectory alerts, and ground mission control feed.</p>
+    </header>
+
+    <section class="ao-controls" aria-label="Flight alert triggers">
+      <button id="btn-critical" class="ao-btn ao-btn-critical">Collision Conjunction (Critical)</button>
+      <button id="btn-warning" class="ao-btn ao-btn-warning">RCS Thruster Low Pressure (Warning)</button>
+      <button id="btn-success" class="ao-btn ao-btn-success">Docking Lock Acquired (Success)</button>
+      <button id="btn-info" class="ao-btn ao-btn-info">DSN Telemetry Ping (Info)</button>
+      <button id="btn-clear" class="ao-btn ao-btn-clear">Clear Active Alerts</button>
+    </section>
+
+    <section id="toast-viewport" class="ao-toast-viewport" aria-live="polite">
+      <!-- Toasts dynamically appended via AerospaceOrbiterNotificationHub -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { AerospaceOrbiterNotificationHub } from './notification-hub.js';
+
+    const hub = new AerospaceOrbiterNotificationHub();
+    const viewport = document.getElementById('toast-viewport');
+
+    hub.subscribe(() => {
+      hub.render(viewport);
+    });
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Conjunction Warning: Debris object 48291 closing range < 180m. Collision avoidance burn required!', 'critical', 'critical', 6000);
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('RCS Pressure Warning: Manifold B delta-P dropped below 1.2 MPa.', 'warning', 'warning', 5000);
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Docking Lock Confirmed: Soft capture latches engaged with ISS PMA-2 port.', 'success', 'success', 4000);
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Telemetry Downlink: Goldstone Deep Space Network 34m dish lock verified.', 'info', 'info', 3000);
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hub.clearQueue();
+    });
+
+    hub.render(viewport);
+  </script>
+</body>
+</html>
