@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Logistics - Monte Carlo Multi-Scenario Simulator</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+</head>
+<body>
+  <div class="sim-container">
+    <header class="sim-header">
+      <div class="badge-tag">Logistics Risk Variance Forecaster</div>
+      <h1>Freight Transit & Customs Monte Carlo Simulation Engine</h1>
+      <p>Autonomous numerical simulation running iterative trials to forecast route lead times, customs hold probability, and fuel surcharge volatility.</p>
+    </header>
+
+    <div class="sim-grid">
+      <section class="sim-controls-panel">
+        <h2>Simulation Parameters</h2>
+        <div class="control-group">
+          <label for="trialSlider">Trial Iterations: <span id="trialVal">1000</span> runs</label>
+          <input type="range" id="trialSlider" min="100" max="5000" step="100" value="1000">
+        </div>
+
+        <div class="control-group">
+          <label for="volatilitySlider">Freight Volatility (σ): <span id="volatilityVal">0.18</span></label>
+          <input type="range" id="volatilitySlider" min="0.05" max="0.50" step="0.01" value="0.18">
+        </div>
+
+        <div class="control-group">
+          <label for="baseDaysSlider">Base Transit Lead Time: <span id="baseDaysVal">14</span> days</label>
+          <input type="range" id="baseDaysSlider" min="3" max="60" step="1" value="14">
+        </div>
+
+        <div class="control-actions">
+          <button id="runSimBtn" class="btn-primary">Execute Monte Carlo Runs</button>
+        </div>
+      </section>
+
+      <section class="sim-summary-panel">
+        <h2>Forecasting Confidence Bounds</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Expected Lead Time (Mean)</span>
+            <span class="metric-value" id="meanMetric">--</span>
+            <span class="metric-unit">days</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Standard Deviation (σ)</span>
+            <span class="metric-value" id="stdDevMetric">--</span>
+            <span class="metric-unit">days</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Median (P50)</span>
+            <span class="metric-value" id="p50Metric">--</span>
+            <span class="metric-unit">days</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Risk Exposure (P95)</span>
+            <span class="metric-value" id="p95Metric">--</span>
+            <span class="metric-unit">days</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Worst Case Tail (P99)</span>
+            <span class="metric-value" id="p99Metric">--</span>
+            <span class="metric-unit">days</span>
+          </div>
+        </div>
+
+        <div class="distribution-section">
+          <h3>Transit Delay Probability Density Distribution</h3>
+          <div class="distribution-bars" id="distributionBarContainer"></div>
+          <div class="dist-axis">
+            <span>Optimistic (P10)</span>
+            <span>Target (P50)</span>
+            <span>Severe Delay (P99)</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="simulation-sandbox.js"></script>
+</body>
+</html>
