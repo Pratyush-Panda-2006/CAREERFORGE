@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart IoT Nexus - Split-Pane Markdown Documentation Sandbox</title>
+  <link rel="stylesheet" href="markdown-editor.css">
+</head>
+<body>
+  <div class="editor-container">
+    <header class="editor-header">
+      <div class="badge-pill">Smart IoT Nexus Documentation</div>
+      <h1>Split-Pane Markdown Documentation & Live Preview Sandbox</h1>
+      <p>High-performance in-browser technical documentation workstation with real-time parsing, XSS sanitization, and reading telemetry metrics.</p>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="tool-btn" data-action="h1" title="Heading 1">H1</button>
+        <button class="tool-btn" data-action="h2" title="Heading 2">H2</button>
+        <button class="tool-btn" data-action="bold" title="Bold"><strong>B</strong></button>
+        <button class="tool-btn" data-action="italic" title="Italic"><em>I</em></button>
+        <button class="tool-btn" data-action="code" title="Inline Code">&lt;/&gt;</button>
+        <button class="tool-btn" data-action="quote" title="Blockquote">&ldquo;&rdquo;</button>
+        <button class="tool-btn" data-action="list" title="Unordered List">&#8226; List</button>
+      </div>
+      <div class="toolbar-group">
+        <button class="tool-btn btn-secondary" id="loadSampleBtn">Load IoT Spec Sample</button>
+        <button class="tool-btn btn-secondary" id="copyHtmlBtn">Copy HTML</button>
+        <button class="tool-btn btn-danger" id="clearEditorBtn">Clear</button>
+      </div>
+    </div>
+
+    <!-- Split-Pane Workspace -->
+    <div class="split-pane">
+      <!-- Editor Panel -->
+      <section class="pane editor-pane">
+        <div class="pane-header">
+          <span class="pane-title">Markdown Source</span>
+          <span class="pane-tag">Live Input</span>
+        </div>
+        <textarea id="markdownInput" class="source-textarea" placeholder="Type or paste Markdown here... (e.g. # IoT Gateway Architecture)"></textarea>
+      </section>
+
+      <!-- Preview Panel -->
+      <section class="pane preview-pane">
+        <div class="pane-header">
+          <span class="pane-title">HTML Live Preview</span>
+          <span class="pane-tag">Sanitized</span>
+        </div>
+        <div id="previewOutput" class="preview-content"></div>
+      </section>
+    </div>
+
+    <!-- Telemetry Status Bar -->
+    <footer class="status-bar">
+      <div class="status-item">
+        <span class="status-label">Words:</span>
+        <span class="status-value" id="wordCount">0</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Characters:</span>
+        <span class="status-value" id="charCount">0</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Reading Time:</span>
+        <span class="status-value" id="readingTime">0 min read</span>
+      </div>
+      <div class="status-item status-right">
+        <span class="status-indicator">●</span>
+        <span>Real-time AST Parser Online</span>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { SmartIotNexusMarkdownParser } from './markdown-editor.js';
+
+    const parser = new SmartIotNexusMarkdownParser();
+    const markdownInput = document.getElementById('markdownInput');
+    const previewOutput = document.getElementById('previewOutput');
+    const wordCount = document.getElementById('wordCount');
+    const charCount = document.getElementById('charCount');
+    const readingTime = document.getElementById('readingTime');
+    const copyHtmlBtn = document.getElementById('copyHtmlBtn');
+    const loadSampleBtn = document.getElementById('loadSampleBtn');
+    const clearEditorBtn = document.getElementById('clearEditorBtn');
+
+    const sampleDoc = `# Smart IoT Nexus Gateway Architecture
+
+Autonomous edge gateway telemetry and distributed mesh coordination platform.
+
+## Key Capabilities
+- **Real-time Ingestion:** Sub-millisecond packet telemetry via LoRaWAN.
+- **Failover Consensus:** Dynamic heartbeat re-routing when node health dips below *95%*.
+- **Local Analytics:** On-device edge inference computing sensor drift curves.
+
+> "Resilient edge infrastructure is the backbone of mission-critical IoT automation."
+
+### Node Configuration
+Run gateway inspection using the command:
+\`iot-ctl mesh --inspect --cluster sector-alpha\`
+
+\`\`\`json
+{
+  "clusterId": "sector-alpha",
+  "nodesActive": 24,
+  "telemetrySLA": "99.98%"
+}
+\`\`\`
+
+Explore full telemetry logs at [Smart IoT Nexus Atlas](https://iot.nexus/atlas).`;
+
+    function updateEditor() {
+      const rawText = markdownInput.value;
+      const htmlOutput = parser.parseMarkdown(rawText);
+      previewOutput.innerHTML = htmlOutput || '<div class="preview-empty">Rendered Markdown preview will appear here in real-time...</div>';
+
+      const metrics = parser.computeReadingTime(rawText);
+      wordCount.textContent = metrics.words;
+      charCount.textContent = metrics.characters;
+      readingTime.textContent = metrics.formattedTime;
+    }
+
+    markdownInput.addEventListener('input', updateEditor);
+
+    // Toolbar actions
+    document.querySelectorAll('.tool-btn[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.getAttribute('data-action');
+        const start = markdownInput.selectionStart;
+        const end = markdownInput.selectionEnd;
+        const selected = markdownInput.value.substring(start, end);
+        let replacement = '';
+
+        switch (action) {
+          case 'h1': replacement = `# ${selected || 'Heading 1'}\n`; break;
+          case 'h2': replacement = `## ${selected || 'Heading 2'}\n`; break;
+          case 'bold': replacement = `**${selected || 'bold text'}**`; break;
+          case 'italic': replacement = `*${selected || 'italic text'}*`; break;
+          case 'code': replacement = `\`${selected || 'code'}\``; break;
+          case 'quote': replacement = `> ${selected || 'Quote'}\n`; break;
+          case 'list': replacement = `- ${selected || 'List item'}\n`; break;
+        }
+
+        markdownInput.setRangeText(replacement, start, end, 'end');
+        markdownInput.focus();
+        updateEditor();
+      });
+    });
+
+    loadSampleBtn.addEventListener('click', () => {
+      markdownInput.value = sampleDoc;
+      updateEditor();
+    });
+
+    clearEditorBtn.addEventListener('click', () => {
+      markdownInput.value = '';
+      updateEditor();
+    });
+
+    copyHtmlBtn.addEventListener('click', async () => {
+      const html = parser.parseMarkdown(markdownInput.value);
+      try {
+        await navigator.clipboard.writeText(html);
+        const originalText = copyHtmlBtn.textContent;
+        copyHtmlBtn.textContent = 'Copied!';
+        setTimeout(() => { copyHtmlBtn.textContent = originalText; }, 1800);
+      } catch {
+        // Fallback
+      }
+    });
+
+    // Initial load
+    markdownInput.value = sampleDoc;
+    updateEditor();
+  </script>
+</body>
+</html>
