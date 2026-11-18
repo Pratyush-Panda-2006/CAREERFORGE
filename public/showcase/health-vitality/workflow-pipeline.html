@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Vitality - Clinical Workflow Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+  <style>
+    body {
+      background: #090e1a;
+      color: #f1f5f9;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h1>Clinical Vitals & Regimen Pipeline</h1>
+  <div id="pipeline-root"></div>
+
+  <script type="module">
+    import { HealthVitalityPipelineEngine } from './workflow-pipeline.js';
+
+    const pipeline = new HealthVitalityPipelineEngine();
+    const root = document.getElementById('pipeline-root');
+
+    pipeline.subscribe(() => {
+      pipeline.renderToDOM(root);
+    });
+
+    pipeline.renderToDOM(root);
+  </script>
+</body>
+</html>
