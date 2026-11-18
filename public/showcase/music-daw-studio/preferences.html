@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music DAW Studio - Audio Preferences</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body>
+  <div class="pref-page-container">
+    <div class="pref-header">
+      <h1>
+        Music DAW Studio Preferences
+        <span class="pref-badge">Issue #709</span>
+      </h1>
+      <p>Configure DSP sample rate, audio buffer latency, metronome cues, and grid snapping.</p>
+    </div>
+
+    <button id="open-preferences-btn" class="pref-trigger-btn">
+      🎛️ Open Studio Audio Settings
+    </button>
+  </div>
+
+  <!-- Preferences Modal / Drawer -->
+  <div id="music-daw-studio-preferences-modal" class="music-modal-overlay">
+    <div class="music-modal-card">
+      <div class="modal-header-row">
+        <h2>Audio Engine Settings</h2>
+        <button id="close-preferences-btn" class="close-x-btn">&times;</button>
+      </div>
+
+      <div class="pref-field-group">
+        <label for="pref-sample-rate">Audio Engine Sample Rate</label>
+        <select id="pref-sample-rate" class="pref-select">
+          <option value="44.1">44.1 kHz (CD Quality)</option>
+          <option value="48">48.0 kHz (Studio Standard)</option>
+          <option value="96">96.0 kHz (Hi-Res Audio)</option>
+        </select>
+      </div>
+
+      <div class="pref-field-group">
+        <label for="pref-buffer-size">I/O Buffer Size (Latency)</label>
+        <select id="pref-buffer-size" class="pref-select">
+          <option value="128">128 samples (Ultra-Low Latency, 2.7ms)</option>
+          <option value="256">256 samples (Balanced, 5.3ms)</option>
+          <option value="512">512 samples (Mixing, 10.7ms)</option>
+          <option value="1024">1024 samples (Mastering Safe)</option>
+        </select>
+      </div>
+
+      <div class="pref-toggle-row">
+        <span>Metronome Audio Click</span>
+        <label class="switch">
+          <input type="checkbox" id="pref-metronome">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="pref-toggle-row">
+        <span>Timeline Snap To Grid (1/16)</span>
+        <label class="switch">
+          <input type="checkbox" id="pref-snap-grid">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button id="reset-preferences-btn" class="btn-secondary">Reset Defaults</button>
+        <button id="export-preferences-btn" class="btn-primary">Export Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
