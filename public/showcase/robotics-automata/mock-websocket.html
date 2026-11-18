@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robotics Automata - WebSocket Streaming Hub</title>
+  <link rel="stylesheet" href="./mock-websocket.css" />
+</head>
+<body class="automata-socket-theme">
+  <div class="socket-hub-container">
+    <header class="socket-hub-header">
+      <div class="header-branding">
+        <span class="pulsing-radar-dot"></span>
+        <h2>Robotics Automata WebSocket & RPC Stream</h2>
+      </div>
+      <div class="status-indicator-bar">
+        <span id="connectionStatusBadge" class="status-pill status-connected">CONNECTED</span>
+      </div>
+    </header>
+
+    <div class="telemetry-metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">Delivered Packets</span>
+        <span id="deliveredCountVal" class="metric-value">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Dropped Packets</span>
+        <span id="droppedCountVal" class="metric-value">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Packet Drop Rate</span>
+        <span id="dropRateVal" class="metric-value">0%</span>
+      </div>
+    </div>
+
+    <div class="action-controls-bar">
+      <button id="btnPublishJoint" class="control-btn action-primary">Publish Joint Telemetry</button>
+      <button id="btnSimulateHeartbeat" class="control-btn action-secondary">Send Heartbeat</button>
+      <button id="btnSimulateDropout" class="control-btn action-warning">Simulate Dropout (3s)</button>
+      <button id="btnClearLog" class="control-btn action-ghost">Clear Log</button>
+    </div>
+
+    <section class="stream-panel">
+      <div class="panel-header">
+        <h3>Live Telemetry Stream</h3>
+      </div>
+      <div id="packetLogContainer" class="packet-stream-log">
+        <div class="empty-log-placeholder">Waiting for telemetry packets...</div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="./mock-websocket.js"></script>
+</body>
+</html>
