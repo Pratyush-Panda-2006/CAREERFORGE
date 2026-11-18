@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Portfolio - Adaptive Preferences & State Engine</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body class="developer-portfolio-prefs-view">
+  <div class="developer-portfolio-layout">
+    <!-- Top Bar -->
+    <header class="portfolio-header">
+      <div class="brand">
+        <span class="badge-pill">Developer Hub</span>
+        <h1>Developer Portfolio Workspace</h1>
+        <p>Configurable client-side personalization engine with persistent LocalStorage state machine.</p>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="btnOpenPreferences" class="btn btn-primary">
+          <span class="icon">⚙</span>
+          <span>Preferences & Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Interactive Demonstration Canvas -->
+    <section class="demo-workspace">
+      <div class="code-preview-card">
+        <div class="code-header">
+          <span class="file-name">App.developer.ts</span>
+          <span class="badge-live">Active Theme: Applied</span>
+        </div>
+        <pre class="code-body"><code>// Sample Developer Portfolio Snippet
+export const devConfig = {
+  stack: ["TypeScript", "WebAssembly", "Rust", "Node.js"],
+  metrics: { commits: 1420, velocity: 94.6 },
+  status: "Deploying production release..."
+};</code></pre>
+      </div>
+    </section>
+
+    <!-- Preferences Modal Drawer (Issue #587) -->
+    <div id="developer-portfolio-preferences-modal" class="modal-overlay">
+      <div class="modal-drawer">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span class="icon-gear">⚙</span>
+            <h3>Workspace Preferences</h3>
+          </div>
+          <button type="button" id="btnClosePreferences" class="btn-close" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Theme Settings -->
+          <div class="pref-group">
+            <label for="prefTheme">Color Theme</label>
+            <select id="prefTheme" class="custom-select">
+              <option value="dark">Dark (Default)</option>
+              <option value="light">Light</option>
+              <option value="dracula">Dracula</option>
+              <option value="nord">Nord</option>
+              <option value="cyberpunk">Cyberpunk Neon</option>
+            </select>
+          </div>
+
+          <!-- Layout Mode -->
+          <div class="pref-group">
+            <label for="prefLayout">Portfolio Project Layout</label>
+            <select id="prefLayout" class="custom-select">
+              <option value="grid">Responsive Grid</option>
+              <option value="list">Compact List</option>
+              <option value="masonry">Dynamic Masonry</option>
+            </select>
+          </div>
+
+          <!-- Syntax Theme -->
+          <div class="pref-group">
+            <label for="prefSyntaxTheme">Code Syntax Highlighter</label>
+            <select id="prefSyntaxTheme" class="custom-select">
+              <option value="dracula">Dracula</option>
+              <option value="monokai">Monokai Pro</option>
+              <option value="github-dark">GitHub Dark</option>
+              <option value="one-dark">Atom One Dark</option>
+            </select>
+          </div>
+
+          <!-- Code Font Size Slider -->
+          <div class="pref-group">
+            <div class="slider-header">
+              <label for="prefCodeFontSize">Editor Font Size</label>
+              <span id="fontSizeDisplay" class="slider-val">14px</span>
+            </div>
+            <input type="range" id="prefCodeFontSize" class="custom-range" min="11" max="22" value="14">
+          </div>
+
+          <!-- Toggle Switches -->
+          <div class="pref-toggles">
+            <label class="toggle-row">
+              <span class="toggle-label">High-Contrast Mode</span>
+              <input type="checkbox" id="prefHighContrast" class="toggle-checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+
+            <label class="toggle-row">
+              <span class="toggle-label">Interactive Sound Cues</span>
+              <input type="checkbox" id="prefSoundCues" class="toggle-checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+
+            <label class="toggle-row">
+              <span class="toggle-label">Display Performance Sparklines</span>
+              <input type="checkbox" id="prefShowMetrics" class="toggle-checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="footer-left">
+            <button type="button" id="btnResetPreferences" class="btn btn-secondary">Restore Defaults</button>
+          </div>
+          <div class="footer-right">
+            <button type="button" id="btnExportPreferences" class="btn btn-primary">Export JSON</button>
+            <label class="btn btn-outline" for="importPreferencesFile">
+              Import
+              <input type="file" id="importPreferencesFile" accept=".json" style="display:none;">
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="preferencesToast" class="toast-popup"></div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
