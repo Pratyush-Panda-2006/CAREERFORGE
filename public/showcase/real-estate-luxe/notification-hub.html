@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Estate Luxe - Estate & Escrow Alerts</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #0d0d12;
+      color: #f8fafc;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+    .demo-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .demo-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      background: #1c1c24;
+      color: #fef08a;
+    }
+  </style>
+</head>
+<body>
+  <h1>Luxury Portfolio & Escrow Alert Stream</h1>
+  <div class="demo-controls">
+    <button class="demo-btn" id="btn-critical">Trigger Title Deed Lien Alert</button>
+    <button class="demo-btn" id="btn-warning">Trigger Earnest Deposit Warning</button>
+    <button class="demo-btn" id="btn-success">Trigger Private Viewing Success</button>
+    <button class="demo-btn" id="btn-info">Trigger Appraisal Update Info</button>
+  </div>
+  <div id="notification-root"></div>
+
+  <script type="module">
+    import { RealEstateLuxeNotificationHub } from './notification-hub.js';
+
+    const hub = new RealEstateLuxeNotificationHub();
+    const root = document.getElementById('notification-root');
+
+    hub.subscribe(() => {
+      hub.renderToDOM(root);
+    });
+
+    // Initial alert items
+    hub.enqueue('Title Lien Conflict: Secondary mortgage encumbrance flagged on Bel Air Estate deed. Escrow paused.', 'critical', 'critical');
+    hub.enqueue('Earnest Deposit Due: $500,000 wire deadline expires in 4 hours for Miami Waterfront Villa.', 'warning', 'warning');
+    hub.enqueue('Private VIP Viewing Confirmed: Monaco Penthouse walkthrough scheduled with Principal Buyer.', 'success', 'success');
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Zoning Violation: Coastal commission setback dispute halts closing for Malibu Bluff Mansion.', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Inspection Contingency: Geotechnical slope stability report requested by Buyer legal counsel.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('All-Cash Purchase Agreement signed at \$24,500,000 without financing contingency.', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Market appraisal updated: Aspen Alpine Chalet re-evaluated at \$18,400,000 (+6.2% YoY).', 'info', 'info');
+    });
+  </script>
+</body>
+</html>
