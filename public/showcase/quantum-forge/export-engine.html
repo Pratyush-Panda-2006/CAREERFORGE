@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge - Export Engine</title>
+  <link rel="stylesheet" href="export-engine.css">
+</head>
+<body class="export-engine-body">
+  <div class="qf-export-container" id="quantum-forge-export-container">
+    <header class="qf-export-header">
+      <div class="qf-export-badge">DIAGNOSTIC MATRIX EXPORT</div>
+      <h2>Telemetry & State Serialization</h2>
+      <p>Export live qubit coherent state registers, gate fidelities, and entanglement telemetry across diverse open standard formats.</p>
+    </header>
+
+    <div class="qf-export-actions">
+      <button class="qf-export-btn qf-btn-primary" id="btn-export-dropdown" aria-haspopup="true" aria-expanded="false">
+        <svg viewBox="0 0 24 24" class="qf-export-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Export Data Matrix</span>
+        <svg viewBox="0 0 24 24" class="qf-caret-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <div class="qf-export-dropdown-menu" id="qf-export-menu" role="menu">
+        <button class="qf-dropdown-item" role="menuitem" data-action="json">
+          <span class="qf-item-icon">{}</span>
+          <div class="qf-item-meta">
+            <strong>Download JSON Data</strong>
+            <small>Full structural state tree & register schema</small>
+          </div>
+        </button>
+
+        <button class="qf-dropdown-item" role="menuitem" data-action="csv">
+          <span class="qf-item-icon">📊</span>
+          <div class="qf-item-meta">
+            <strong>Export CSV Table</strong>
+            <small>Tabular matrix format for data science pipelines</small>
+          </div>
+        </button>
+
+        <button class="qf-dropdown-item" role="menuitem" data-action="markdown">
+          <span class="qf-item-icon">📝</span>
+          <div class="qf-item-meta">
+            <strong>Copy Markdown Audit</strong>
+            <small>Formatted diagnostic report with summary tables</small>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div class="qf-export-status" id="qf-export-status-banner" aria-live="polite">
+      <span>Ready for export serialization</span>
+    </div>
+  </div>
+
+  <script type="module">
+    import { QuantumForgeExportEngine } from './export-engine.js';
+    const engine = new QuantumForgeExportEngine();
+
+    const triggerBtn = document.getElementById('btn-export-dropdown');
+    const menu = document.getElementById('qf-export-menu');
+    const statusBanner = document.getElementById('qf-export-status-banner');
+
+    triggerBtn?.addEventListener('click', () => {
+      const isExpanded = triggerBtn.getAttribute('aria-expanded') === 'true';
+      triggerBtn.setAttribute('aria-expanded', String(!isExpanded));
+      menu.classList.toggle('active', !isExpanded);
+    });
+
+    menu?.querySelectorAll('.qf-dropdown-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const action = item.getAttribute('data-action');
+        if (action === 'json') {
+          const res = engine.toJSONBlob();
+          engine.triggerDownload('quantum-forge-matrix.json', res.content, 'application/json');
+          if (statusBanner) statusBanner.innerHTML = '<span>JSON state matrix downloaded successfully.</span>';
+        } else if (action === 'csv') {
+          const csv = engine.toCSVString();
+          engine.triggerDownload('quantum-forge-telemetry.csv', csv, 'text/csv');
+          if (statusBanner) statusBanner.innerHTML = '<span>CSV tabular dataset downloaded successfully.</span>';
+        } else if (action === 'markdown') {
+          const md = engine.toMarkdownSummary();
+          navigator.clipboard?.writeText(md).catch(() => {});
+          if (statusBanner) statusBanner.innerHTML = '<span>Markdown audit report copied to clipboard.</span>';
+        }
+        menu.classList.remove('active');
+        triggerBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  </script>
+</body>
+</html>
