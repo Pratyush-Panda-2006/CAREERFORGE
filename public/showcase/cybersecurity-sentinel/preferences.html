@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Sentinel - SOC Settings & Preferences</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body>
+  <div class="sentinel-container">
+    <header class="sentinel-header">
+      <div class="header-content">
+        <span class="sentinel-badge">SOC Threat Command</span>
+        <h1 class="sentinel-title">Cybersecurity Sentinel Hub</h1>
+        <p class="sentinel-subtitle">Real-time intrusion detection, SIEM log telemetry, and autonomous threat mitigation.</p>
+      </div>
+      <button type="button" id="openPreferencesBtn" class="btn-open-preferences">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>SOC Configuration</span>
+      </button>
+    </header>
+
+    <main class="sentinel-dashboard-preview">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Threat Level</div>
+          <div class="metric-value">DEFCON 4 <span class="metric-unit">Guarded</span></div>
+          <div class="metric-trend positive">Zero critical anomalies in 24h</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Ingested Events</div>
+          <div class="metric-value">14.8M <span class="metric-unit">/ day</span></div>
+          <div class="metric-trend neutral">99.98% pipeline parsing efficiency</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Automated Blocks</div>
+          <div class="metric-value">1,482 <span class="metric-unit">IPs</span></div>
+          <div class="metric-trend positive">Distributed DDoS mitigated</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Preferences Modal Drawer -->
+    <div id="cybersecurity-sentinel-preferences-modal" class="preferences-modal">
+      <div class="modal-backdrop"></div>
+      <div class="modal-dialog">
+        <header class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-badge">SOC Settings</span>
+            <h2 class="modal-title">Sentinel Threat Environment</h2>
+          </div>
+          <button type="button" id="closePreferencesBtn" class="btn-close-modal" aria-label="Close modal">
+            &times;
+          </button>
+        </header>
+
+        <form class="modal-body">
+          <div class="form-group">
+            <label for="prefTheme" class="form-label">SOC Display Theme</label>
+            <select id="prefTheme" class="form-select">
+              <option value="cyber-terminal">Cyber Terminal (Default)</option>
+              <option value="matrix-green">Matrix Green Phosphor</option>
+              <option value="neon-red-alert">Crimson Red Alert</option>
+              <option value="stealth-obsidian">Stealth Obsidian</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="prefViewLayout" class="form-label">SOC Dashboard Layout</label>
+            <select id="prefViewLayout" class="form-select">
+              <option value="threat-matrix">Threat Matrix Grid</option>
+              <option value="compact-audit">Condensed Incident Audit Log</option>
+              <option value="siem-stream">Real-Time SIEM Stream</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="prefAlertThreshold" class="form-label">Alert Severity Filter Threshold</label>
+            <select id="prefAlertThreshold" class="form-select">
+              <option value="low">Low (Info & Minor Anomaly)</option>
+              <option value="medium">Medium (Suspicious Behavior)</option>
+              <option value="high">High (Active Exploit Attempt)</option>
+              <option value="critical">Critical (Privilege Escalation Only)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="prefPollingInterval" class="form-label">Telemetry Polling Interval</label>
+            <select id="prefPollingInterval" class="form-select">
+              <option value="5">Every 5 Seconds (Real-time)</option>
+              <option value="15">Every 15 Seconds (Standard)</option>
+              <option value="30">Every 30 Seconds (Balanced)</option>
+              <option value="60">Every 60 Seconds (Low Load)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="prefLogDensity" class="form-label">SIEM Log Ingestion Density</label>
+            <select id="prefLogDensity" class="form-select">
+              <option value="compact">Compact (Timestamp & Threat Code)</option>
+              <option value="detailed">Detailed (Full Packet Headers & Hashes)</option>
+              <option value="raw">Raw (Hexdump & Raw Syslog JSON)</option>
+            </select>
+          </div>
+
+          <div class="toggle-group">
+            <div class="toggle-info">
+              <span class="toggle-title">Incident Audio Alarms</span>
+              <span class="toggle-desc">Sound klaxon cues on High and Critical incident triggers</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="prefSoundCues" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="toggle-group">
+            <div class="toggle-info">
+              <span class="toggle-title">High Contrast Terminal</span>
+              <span class="toggle-desc">Sharpen CRT phosphor scanlines and border contrast</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="prefHighContrast">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="toggle-group">
+            <div class="toggle-info">
+              <span class="toggle-title">Automated Firewall Mitigation</span>
+              <span class="toggle-desc">Auto-nullroute malicious source IPs on repetitive brute force</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="prefAutoMitigation">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </form>
+
+        <footer class="modal-footer">
+          <button type="button" id="btnResetPrefs" class="btn-secondary">
+            Reset Defaults
+          </button>
+          <button type="button" id="btnExportPrefs" class="btn-primary">
+            Export JSON
+          </button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="prefToast" class="pref-toast"></div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
