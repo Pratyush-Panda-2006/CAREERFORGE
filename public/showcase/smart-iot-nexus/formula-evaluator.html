@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart IoT Nexus - Mathematical Formula & KPI Calculator</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+</head>
+<body>
+  <div class="calculator-container">
+    <header class="calculator-header">
+      <div class="badge-pill">Smart IoT Nexus Telemetry</div>
+      <h1>Mathematical KPI Formula Evaluator & Expression Calculator</h1>
+      <p>Safe in-browser mathematical expression tokenizer and evaluator computing custom IoT performance equations with live variable parameter injection.</p>
+    </header>
+
+    <!-- Preset Formula Chips -->
+    <div class="presets-bar">
+      <span class="presets-label">Preset IoT KPI Formulas:</span>
+      <button class="preset-chip" data-formula="(active_nodes / total_nodes) * 100">Node Availability (%)</button>
+      <button class="preset-chip" data-formula="voltage * current - 0.5">Net Power Output (W)</button>
+      <button class="preset-chip" data-formula="100 - (packet_loss * 1.5)">SLA Health Score</button>
+      <button class="preset-chip" data-formula="(battery_capacity / (current * 24)) * 0.85">Battery Life (Days)</button>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="workspace-grid">
+      <!-- Input Panel -->
+      <section class="calc-panel">
+        <div class="panel-header">
+          <h3>Equation & Syntax</h3>
+          <span class="syntax-status" id="syntaxStatus">Syntax Valid</span>
+        </div>
+
+        <div class="form-group">
+          <label for="formulaInput">Mathematical Expression:</label>
+          <input type="text" id="formulaInput" class="formula-input" value="(active_nodes / total_nodes) * 100" placeholder="e.g. (voltage * current) / 1000">
+        </div>
+
+        <!-- Syntax Helper Pills -->
+        <div class="syntax-pills">
+          <button class="syntax-pill" data-insert="+">+</button>
+          <button class="syntax-pill" data-insert="-">-</button>
+          <button class="syntax-pill" data-insert="*">&times;</button>
+          <button class="syntax-pill" data-insert="/">&divide;</button>
+          <button class="syntax-pill" data-insert="^">^</button>
+          <button class="syntax-pill" data-insert="%">%</button>
+          <button class="syntax-pill" data-insert="(">(</button>
+          <button class="syntax-pill" data-insert=")">)</button>
+        </div>
+
+        <!-- Error Banner -->
+        <div id="errorBanner" class="error-banner"></div>
+
+        <!-- Variable Definition Sliders -->
+        <div class="variables-section">
+          <h4>Variable Parameter Injection</h4>
+          <div class="sliders-list">
+            <div class="slider-row">
+              <div class="slider-labels">
+                <span class="var-name">active_nodes:</span>
+                <span class="var-val" id="val_active_nodes">48</span>
+              </div>
+              <input type="range" class="param-slider" id="param_active_nodes" min="1" max="100" value="48">
+            </div>
+
+            <div class="slider-row">
+              <div class="slider-labels">
+                <span class="var-name">total_nodes:</span>
+                <span class="var-val" id="val_total_nodes">50</span>
+              </div>
+              <input type="range" class="param-slider" id="param_total_nodes" min="10" max="100" value="50">
+            </div>
+
+            <div class="slider-row">
+              <div class="slider-labels">
+                <span class="var-name">voltage (V):</span>
+                <span class="var-val" id="val_voltage">12</span>
+              </div>
+              <input type="range" class="param-slider" id="param_voltage" min="1" max="48" value="12">
+            </div>
+
+            <div class="slider-row">
+              <div class="slider-labels">
+                <span class="var-name">current (A):</span>
+                <span class="var-val" id="val_current">1.5</span>
+              </div>
+              <input type="range" class="param-slider" id="param_current" min="0.1" max="10" step="0.1" value="1.5">
+            </div>
+
+            <div class="slider-row">
+              <div class="slider-labels">
+                <span class="var-name">packet_loss (%):</span>
+                <span class="var-val" id="val_packet_loss">0.4</span>
+              </div>
+              <input type="range" class="param-slider" id="param_packet_loss" min="0" max="10" step="0.1" value="0.4">
+            </div>
+
+            <div class="slider-row">
+              <div class="slider-labels">
+                <span class="var-name">battery_capacity (mAh):</span>
+                <span class="var-val" id="val_battery_capacity">3200</span>
+              </div>
+              <input type="range" class="param-slider" id="param_battery_capacity" min="500" max="10000" step="100" value="3200">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Output Display Card -->
+      <section class="calc-panel result-panel">
+        <div class="panel-header">
+          <h3>Calculated KPI Metric</h3>
+          <span class="card-tag">Real-Time Output</span>
+        </div>
+
+        <div class="result-card">
+          <div class="result-glow-circle">
+            <span class="result-number" id="resultValue">96.00</span>
+          </div>
+          <div class="result-equation" id="resultEquation">(48 / 50) * 100 = 96.00</div>
+          <div class="result-status-tag" id="resultStatus">Optimal Range</div>
+        </div>
+
+        <!-- Token Inspector -->
+        <div class="token-inspector">
+          <h4>Parsed Expression Tokens</h4>
+          <div class="tokens-list" id="tokensList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module">
+    import { SmartIotNexusFormulaParser } from './formula-evaluator.js';
+
+    const parser = new SmartIotNexusFormulaParser();
+    const formulaInput = document.getElementById('formulaInput');
+    const syntaxStatus = document.getElementById('syntaxStatus');
+    const errorBanner = document.getElementById('errorBanner');
+    const resultValue = document.getElementById('resultValue');
+    const resultEquation = document.getElementById('resultEquation');
+    const resultStatus = document.getElementById('resultStatus');
+    const tokensList = document.getElementById('tokensList');
+
+    const variables = {
+      active_nodes: 48,
+      total_nodes: 50,
+      voltage: 12,
+      current: 1.5,
+      packet_loss: 0.4,
+      battery_capacity: 3200
+    };
+
+    function recalculate() {
+      const expr = formulaInput.value.trim();
+      const validation = parser.validateSyntax(expr);
+
+      if (!validation.valid) {
+        syntaxStatus.textContent = 'Syntax Error';
+        syntaxStatus.className = 'syntax-status is-error';
+        errorBanner.textContent = validation.error;
+        errorBanner.classList.add('is-visible');
+        resultValue.textContent = 'NaN';
+        resultEquation.textContent = 'Invalid Formula';
+        resultStatus.textContent = 'Formula Blocked';
+        resultStatus.className = 'result-status-tag is-error';
+        tokensList.innerHTML = '<span class="token-error">Tokenization suspended</span>';
+        return;
+      }
+
+      syntaxStatus.textContent = 'Syntax Valid';
+      syntaxStatus.className = 'syntax-status is-valid';
+      errorBanner.classList.remove('is-visible');
+
+      // Tokens visualization
+      try {
+        const tokens = parser.tokenize(expr);
+        tokensList.innerHTML = tokens.map(t => `
+          <span class="token-badge type-${t.type}">${t.value}</span>
+        `).join('');
+
+        const result = parser.evaluate(expr, variables);
+        const formatted = Number.isInteger(result) ? result : result.toFixed(2);
+        resultValue.textContent = formatted;
+        resultEquation.textContent = `${expr} = ${formatted}`;
+
+        resultStatus.textContent = result >= 0 ? 'Optimal Telemetry Value' : 'Negative Variance Alert';
+        resultStatus.className = `result-status-tag ${result >= 0 ? 'is-valid' : 'is-warning'}`;
+      } catch (err) {
+        errorBanner.textContent = err.message;
+        errorBanner.classList.add('is-visible');
+        resultValue.textContent = 'Error';
+        resultEquation.textContent = err.message;
+        resultStatus.textContent = 'Evaluation Guard Triggered';
+        resultStatus.className = 'result-status-tag is-error';
+      }
+    }
+
+    formulaInput.addEventListener('input', recalculate);
+
+    // Setup slider listeners
+    Object.keys(variables).forEach(key => {
+      const slider = document.getElementById(`param_${key}`);
+      const valLabel = document.getElementById(`val_${key}`);
+      if (slider && valLabel) {
+        slider.addEventListener('input', () => {
+          const val = parseFloat(slider.value);
+          variables[key] = val;
+          valLabel.textContent = val;
+          recalculate();
+        });
+      }
+    });
+
+    // Preset buttons
+    document.querySelectorAll('.preset-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        formulaInput.value = btn.getAttribute('data-formula');
+        recalculate();
+      });
+    });
+
+    // Syntax pills
+    document.querySelectorAll('.syntax-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const symbol = btn.getAttribute('data-insert');
+        formulaInput.value += ` ${symbol} `;
+        formulaInput.focus();
+        recalculate();
+      });
+    });
+
+    recalculate();
+  </script>
+</body>
+</html>
