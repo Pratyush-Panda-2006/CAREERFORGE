@@ -1,0 +1,163 @@
+/* Music DAW Studio - Voice Commander Styles */
+
+:root {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent: #8b5cf6;
+  --border-subtle: #334155;
+  --success: #22c55e;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  padding: 2rem;
+  line-height: 1.5;
+}
+
+.commander-container {
+  max-width: 850px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+.header-section {
+  text-align: center;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.header-section h1 {
+  margin: 0 0 0.5rem 0;
+  color: var(--accent);
+  font-size: 1.75rem;
+}
+
+.header-section p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.mic-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.mic-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 4px solid rgba(59, 130, 246, 0.3);
+  color: #fff;
+  font-size: 1.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+.mic-btn.recording {
+  animation: pulseMic 1.5s infinite;
+  background: #dc2626;
+  border-color: #fff;
+}
+
+@keyframes pulseMic {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+  70% { transform: scale(1.08); box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.status-text {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.input-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.input-bar input {
+  flex: 1;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.btn-submit {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.history-box {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1.25rem;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.cmd-item {
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  border-left: 4px solid var(--border-subtle);
+  background: var(--bg-secondary);
+}
+
+.cmd-item.cmd-success {
+  border-left-color: var(--success);
+}
+
+.cmd-item.cmd-fail {
+  border-left-color: var(--accent);
+}
+
+.cmd-transcript {
+  font-weight: 700;
+  color: var(--text-main);
+  margin-right: 0.75rem;
+}
+
+.cmd-action {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bg-primary);
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.cmd-response {
+  margin: 0.35rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
