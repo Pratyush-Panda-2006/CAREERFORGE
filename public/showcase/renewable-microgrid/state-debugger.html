@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renewable Microgrid - Time-Travel State Debugger</title>
+  <link rel="stylesheet" href="state-debugger.css">
+</head>
+<body>
+  <div class="debugger-container">
+    <header class="debugger-header">
+      <div class="badge-tag">Renewable Microgrid Time-Travel</div>
+      <h1>State History & Event Snapshot Replay</h1>
+      <p>Isolated time-travel state recorder capturing power distribution snapshots, battery state history, and JSON diffs.</p>
+    </header>
+
+    <div class="debugger-grid">
+      <section class="debugger-panel timeline-panel">
+        <h2>Snapshot Timeline</h2>
+        <div class="scrubber-controls">
+          <button id="stepBackBtn" class="btn-ctrl">&laquo; Step Back</button>
+          <span id="stepIndicator">Step 0 / 0</span>
+          <button id="stepForwardBtn" class="btn-ctrl">Step Forward &raquo;</button>
+        </div>
+
+        <input type="range" id="timelineScrubber" min="0" max="0" value="0" class="timeline-slider">
+
+        <div class="action-buttons">
+          <button id="recordAction1Btn" class="btn-action">Engage Solar Array 4</button>
+          <button id="recordAction2Btn" class="btn-action">Dispatch BESS Reserve</button>
+          <button id="exportReplayBtn" class="btn-secondary">Export Replay JSON</button>
+        </div>
+
+        <h3>Action History</h3>
+        <div class="action-history-table-container">
+          <table class="action-table" id="actionHistoryTable">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Action</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="actionTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="debugger-panel diff-panel">
+        <div class="panel-header-row">
+          <h2>State JSON Diff Inspector</h2>
+          <span id="activeActionLabel" class="action-pill">No snapshot</span>
+        </div>
+
+        <div class="state-viewer">
+          <div class="diff-summary" id="diffSummaryBox">
+            <span class="diff-add" id="diffAddCount">+0 additions</span>
+            <span class="diff-del" id="diffDelCount">-0 deletions</span>
+            <span class="diff-mod" id="diffModCount">~0 modified</span>
+          </div>
+
+          <pre class="json-display" id="stateJsonDisplay">{}</pre>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="state-debugger.js"></script>
+</body>
+</html>
