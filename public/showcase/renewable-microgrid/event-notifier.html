@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renewable Microgrid - Event & Alarm Notifier</title>
+  <link rel="stylesheet" href="event-notifier.css">
+</head>
+<body class="notifier-body">
+  <div class="notifier-container">
+    <header class="notifier-header">
+      <div class="header-info">
+        <h1 class="notifier-title">⚡ Microgrid Fault & Event Notifier</h1>
+        <p class="notifier-subtitle">Prioritized electrical fault stream with Web Audio alerts & automated timeout eviction</p>
+      </div>
+      <div class="header-controls">
+        <label class="volume-switch">
+          <input type="checkbox" id="audio-toggle" checked>
+          <span class="slider"></span>
+          <span class="label-text">Audio Alerts</span>
+        </label>
+        <button id="clear-all-btn" class="btn btn-secondary">Clear All Alarms</button>
+      </div>
+    </header>
+
+    <section class="trigger-matrix">
+      <h2>Simulate Electrical Grid Events</h2>
+      <div class="button-row">
+        <button class="btn btn-info" data-type="info">ℹ️ Inverter Telemetry</button>
+        <button class="btn btn-success" data-type="success">✅ Substation Lock</button>
+        <button class="btn btn-warning" data-type="warning">⚠️ High Harmonic Distortion</button>
+        <button class="btn btn-danger" data-type="danger">🚨 Transformer Trip</button>
+      </div>
+    </section>
+
+    <main class="notifier-layout">
+      <section class="queue-panel">
+        <div class="panel-head">
+          <h3>Active Notification Stack</h3>
+          <span class="status-pill" id="stack-count">0 active</span>
+        </div>
+        <div class="stack-list" id="active-stack">
+          <!-- Active stack list -->
+        </div>
+      </section>
+
+      <section class="history-panel">
+        <div class="panel-head">
+          <h3>Archived Event History</h3>
+          <span class="status-pill neutral" id="history-count">0 logs</span>
+        </div>
+        <div class="history-list" id="history-stream">
+          <!-- History log -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Floating Toast Viewport -->
+    <div class="toast-stack-viewport" id="toast-viewport"></div>
+  </div>
+
+  <script type="module">
+    import { RenewableMicrogridNotificationManager } from './event-notifier.js';
+
+    const notifier = new RenewableMicrogridNotificationManager({ maxQueueSize: 5 });
+
+    const presets = {
+      info: { title: 'Solar Peak Generation', msg: 'Rooftop array generation reached 164.2 kW; feeder load balanced.' },
+      success: { title: 'Feeder Sync Verified', msg: 'Main circuit breaker synchronized to national grid frequency (50.01 Hz).' },
+      warning: { title: 'BESS Temperature Warning', msg: 'Battery container HVAC unit reporting ambient temperature of 38.5°C.' },
+      danger: { title: 'Ground Fault Breaker Trip', msg: 'Zero-sequence overcurrent detected on Substation 4B; islanding activated.' }
+    };
+
+    function render() {
+      const active = notifier.getActiveQueue();
+      const history = notifier.getHistory();
+
+      document.getElementById('stack-count').textContent = `${active.length} / 5 active`;
+      document.getElementById('history-count').textContent = `${history.length} logged`;
+
+      // Render Active Stack Cards
+      const stackContainer = document.getElementById('active-stack');
+      stackContainer.innerHTML = '';
+      if (active.length === 0) {
+        stackContainer.innerHTML = '<div class="empty-state">No active grid alarms.</div>';
+      } else {
+        active.forEach(item => {
+          const el = document.createElement('div');
+          el.className = `stack-item item-${item.type}`;
+          el.innerHTML = `
+            <div class="item-badge">${item.type.toUpperCase()}</div>
+            <div class="item-content">
+              <strong>${escapeHtml(item.title)}</strong>
+              <p>${escapeHtml(item.message)}</p>
+            </div>
+            <button class="btn-dismiss" data-id="${item.id}">&times;</button>
+          `;
+          el.querySelector('.btn-dismiss').onclick = () => notifier.dismiss(item.id, 'manual');
+          stackContainer.appendChild(el);
+        });
+      }
+
+      // Render Floating Toasts
+      const viewport = document.getElementById('toast-viewport');
+      viewport.innerHTML = '';
+      active.forEach(item => {
+        const toast = document.createElement('div');
+        toast.className = `toast-toast toast-${item.type}`;
+        toast.innerHTML = `
+          <div class="toast-title-bar">
+            <span class="toast-tag">${item.type.toUpperCase()}</span>
+            <span class="toast-close-x" data-id="${item.id}">&times;</span>
+          </div>
+          <div class="toast-headline">${escapeHtml(item.title)}</div>
+          <div class="toast-bodytext">${escapeHtml(item.message)}</div>
+        `;
+        toast.querySelector('.toast-close-x').onclick = () => notifier.dismiss(item.id, 'manual');
+        viewport.appendChild(toast);
+      });
+
+      // Render History Log
+      const histContainer = document.getElementById('history-stream');
+      histContainer.innerHTML = '';
+      if (history.length === 0) {
+        histContainer.innerHTML = '<div class="empty-state">No archived alarms.</div>';
+      } else {
+        history.slice().reverse().forEach(h => {
+          const row = document.createElement('div');
+          row.className = 'history-row';
+          row.innerHTML = `
+            <span class="history-dot dot-${h.type}"></span>
+            <span class="history-time">${new Date(h.timestamp).toLocaleTimeString()}</span>
+            <span class="history-title">${escapeHtml(h.title)}</span>
+            <span class="history-reason">${h.reason}</span>
+          `;
+          histContainer.appendChild(row);
+        });
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    notifier.subscribe(() => render());
+
+    document.querySelectorAll('.trigger-matrix .btn').forEach(btn => {
+      btn.onclick = () => {
+        const type = btn.dataset.type;
+        const preset = presets[type];
+        notifier.dispatch(type, preset.title, preset.msg, { duration: 4000 });
+      };
+    });
+
+    document.getElementById('audio-toggle').onchange = (e) => {
+      notifier.audioEnabled = e.target.checked;
+    };
+
+    document.getElementById('clear-all-btn').onclick = () => notifier.clear();
+
+    // Seed initial notifications
+    notifier.dispatch('info', 'Microgrid Online', 'Local microgrid controllers communicating via Modbus TCP.', { duration: 5000 });
+    notifier.dispatch('success', 'Storage Bank Charged', '100 kWh battery pack fully charged from solar excess.', { duration: 6000 });
+  </script>
+</body>
+</html>
