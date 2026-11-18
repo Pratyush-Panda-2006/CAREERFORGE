@@ -1,268 +1,200 @@
 /**
- * Neurotech Interface - Finite State Machine Visualizer Styles
+ * Neurotech Interface - State Machine & Workflow Visualizer Styles
  */
-.fsm-workbench-root {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background: radial-gradient(circle at 10% 20%, rgba(20, 15, 38, 0.95), rgba(7, 5, 18, 0.98));
-  border-radius: 12px;
-  color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(167, 139, 250, 0.25);
+
+:root {
+  --neuro-neon: #7c4dff;
+  --neuro-cyan: #00e5ff;
+  --neuro-dark: #0a0815;
+  --neuro-card: #151128;
+  --neuro-border: #28214a;
+  --neuro-text: #ede7f6;
+  --neuro-dim: #b39ddb;
 }
 
-.fsm-header h2 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #c084fc;
-  letter-spacing: -0.02em;
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--neuro-dark);
+  color: var(--neuro-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.fsm-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fsm-header {
+  border-bottom: 2px solid var(--neuro-border);
+  padding-bottom: 16px;
+}
+
+.fsm-header h1 {
+  margin: 0 0 6px 0;
+  color: var(--neuro-neon);
+  font-size: 1.8rem;
 }
 
 .fsm-header p {
   margin: 0;
-  font-size: 0.9rem;
-  color: #94a3b8;
+  color: var(--neuro-dim);
+  font-size: 0.95rem;
 }
 
-.fsm-status-banner {
+.current-state-panel {
+  background: var(--neuro-card);
+  border: 1px solid var(--neuro-border);
+  border-radius: 8px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1.25rem;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(192, 132, 252, 0.3);
-  border-radius: 8px;
+  justify-content: space-between;
 }
 
-.fsm-status-label {
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.fsm-status-badge {
-  padding: 0.35rem 0.85rem;
-  background: linear-gradient(135deg, #7c3aed, #9333ea);
-  color: #ffffff;
-  border-radius: 6px;
+.state-badge {
+  background: var(--neuro-neon);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
   font-weight: 700;
-  font-family: monospace;
-  font-size: 1rem;
-  box-shadow: 0 0 12px rgba(192, 132, 252, 0.5);
-  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 12px rgba(124, 77, 255, 0.4);
 }
 
-.fsm-main-grid {
+.fsm-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.2fr;
-  gap: 1.25rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-@media (max-width: 900px) {
-  .fsm-main-grid {
+@media (max-width: 768px) {
+  .fsm-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.fsm-panel {
-  background: rgba(30, 27, 50, 0.6);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.fsm-card {
+  background: var(--neuro-card);
+  border: 1px solid var(--neuro-border);
   border-radius: 8px;
-  padding: 1rem;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 14px;
 }
 
-.fsm-panel h3 {
+.fsm-card h3 {
   margin: 0;
-  font-size: 1rem;
-  color: #c084fc;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 0.5rem;
+  font-size: 1.1rem;
+  color: var(--neuro-cyan);
 }
 
-.fsm-nodes-container {
+.nodes-container {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  max-height: 380px;
-  overflow-y: auto;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.fsm-state-node {
-  padding: 0.75rem;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.state-node-card {
+  background: #1e1838;
+  border: 1px solid var(--neuro-border);
   border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--neuro-dim);
   transition: all 0.25s ease;
 }
 
-.fsm-state-node.fsm-state-active {
-  border-color: #c084fc;
-  background: rgba(168, 85, 247, 0.15);
-  box-shadow: 0 0 16px rgba(192, 132, 252, 0.4);
-  transform: scale(1.02);
+.state-node-card.active {
+  background: #311b92;
+  border-color: var(--neuro-neon);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(124, 77, 255, 0.5);
 }
 
-.fsm-node-title {
-  font-weight: 700;
-  font-family: monospace;
-  font-size: 0.95rem;
-  color: #f1f5f9;
+.state-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4527a0;
 }
 
-.fsm-state-active .fsm-node-title {
-  color: #c084fc;
+.state-node-card.active .state-dot {
+  background: var(--neuro-cyan);
+  box-shadow: 0 0 8px var(--neuro-cyan);
 }
 
-.fsm-node-outgoing {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  margin-top: 0.2rem;
-}
-
-.fsm-event-buttons {
+.event-triggers {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.fsm-btn {
-  padding: 0.6rem 0.9rem;
+.neuro-trigger-btn {
+  background: #231b42;
+  border: 1px solid var(--neuro-border);
+  color: #fff;
+  padding: 8px 14px;
   border-radius: 6px;
-  border: 1px solid transparent;
   cursor: pointer;
-  font-size: 0.85rem;
   font-weight: 600;
+  font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 
-.fsm-event-btn {
-  background: rgba(168, 85, 247, 0.2);
-  color: #d8b4fe;
-  border-color: rgba(192, 132, 252, 0.4);
-  text-align: left;
+.neuro-trigger-btn:hover {
+  background: var(--neuro-neon);
+  border-color: var(--neuro-neon);
+  transform: translateY(-1px);
 }
 
-.fsm-event-btn:hover {
-  background: rgba(168, 85, 247, 0.35);
-  border-color: #c084fc;
-  transform: translateX(4px);
-}
-
-.fsm-btn-primary {
-  background: #7c3aed;
-  color: #ffffff;
-}
-
-.fsm-btn-primary:hover {
-  background: #6d28d9;
-}
-
-.fsm-btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: #cbd5e1;
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.fsm-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.fsm-btn-warning {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.3);
-  margin-top: 0.5rem;
-}
-
-.fsm-btn-warning:hover {
-  background: rgba(239, 68, 68, 0.3);
-}
-
-.fsm-custom-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
-}
-
-.fsm-custom-form h4 {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #cbd5e1;
-}
-
-.fsm-custom-form input {
-  padding: 0.5rem;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
-  color: #f8fafc;
-  font-size: 0.8rem;
-}
-
-.fsm-custom-form input:focus {
-  outline: none;
-  border-color: #c084fc;
-}
-
-.fsm-mermaid-box {
-  background: #0d0a1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  color: #c084fc;
-  font-family: monospace;
-  font-size: 0.75rem;
-  padding: 0.75rem;
-  height: 120px;
-  resize: vertical;
-}
-
-.fsm-history-list {
+.history-list {
   list-style: none;
   padding: 0;
   margin: 0;
   max-height: 140px;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.fsm-history-item {
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  background: rgba(15, 23, 42, 0.4);
-  padding: 0.35rem 0.5rem;
-  border-radius: 4px;
-}
-
-.fsm-hist-time {
-  color: #94a3b8;
   font-family: monospace;
-}
-
-.fsm-hist-desc {
-  color: #e2e8f0;
-  font-family: monospace;
-}
-
-.fsm-muted {
-  color: #94a3b8;
   font-size: 0.8rem;
-  font-style: italic;
+  color: var(--neuro-dim);
+}
+
+.history-list li {
+  padding: 4px 0;
+  border-bottom: 1px solid #231b42;
+}
+
+.mermaid-box {
+  background: #07050e;
+  border: 1px solid var(--neuro-border);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #b388ff;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.reset-btn {
+  background: #231b42;
+  border: 1px solid var(--neuro-border);
+  color: var(--neuro-dim);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reset-btn:hover {
+  color: #fff;
+  background: #311b92;
 }
