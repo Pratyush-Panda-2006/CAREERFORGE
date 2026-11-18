@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Portfolio - Metrics Telemetry & Sparkline Visualizer</title>
+  <link rel="stylesheet" href="telemetry-visualizer.css">
+</head>
+<body class="dev-telemetry-view">
+  <main class="telemetry-container">
+    <div class="telemetry-card">
+      <!-- Card Header -->
+      <div class="telemetry-header">
+        <div class="headings">
+          <span class="badge-pill">Live Telemetry</span>
+          <h2>CI / CD Deployment Velocity & Execution Latency</h2>
+          <p>Real-time sparkline telemetry trajectory and interactive mouseover coordinate tracking.</p>
+        </div>
+
+        <!-- Time Window Selectors (Issue #589) -->
+        <div class="time-controls">
+          <button type="button" class="dev-time-btn" data-window="1H">1H</button>
+          <button type="button" class="dev-time-btn active" data-window="24H">24H</button>
+          <button type="button" class="dev-time-btn" data-window="7D">7D</button>
+        </div>
+      </div>
+
+      <!-- Canvas Element (Issue #589) -->
+      <div class="canvas-wrapper">
+        <canvas id="developer-portfolio-telemetry-canvas" width="650" height="260"></canvas>
+        <div id="devTelemetryTooltip" class="telemetry-tooltip" style="display: none;"></div>
+      </div>
+
+      <!-- Footer Statistics -->
+      <div class="telemetry-footer">
+        <div class="status-indicator">
+          <span class="pulse-dot"></span>
+          <span>Pipeline Runner: Cluster-US-West (Active)</span>
+        </div>
+        <div class="metric-tags">
+          <span class="metric-pill">Success Rate: <strong>99.4%</strong></span>
+          <span class="metric-pill">Avg Build Time: <strong>42s</strong></span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="telemetry-visualizer.js"></script>
+</body>
+</html>
