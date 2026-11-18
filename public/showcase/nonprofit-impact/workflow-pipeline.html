@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nonprofit Impact - Field Program Workflow Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .np-pipeline-controls {
+      display: flex;
+      gap: 12px;
+    }
+    .np-btn {
+      padding: 8px 16px;
+      background: #059669;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>Nonprofit Grants & Field Ops Pipeline</h1>
+  <div class="np-pipeline-controls">
+    <button class="np-btn" id="btn-add-task">+ Schedule Field Task</button>
+  </div>
+  <div id="pipeline-root"></div>
+
+  <script type="module">
+    import { NonprofitImpactPipelineEngine } from './workflow-pipeline.js';
+
+    const engine = new NonprofitImpactPipelineEngine();
+    const root = document.getElementById('pipeline-root');
+
+    document.getElementById('btn-add-task').addEventListener('click', () => {
+      engine.addTask({
+        title: `Community Outreach Milestone #${Math.floor(Math.random() * 1000)}`,
+        description: 'Scheduled field implementation milestone.',
+        columnId: 'grant-application',
+        priority: 'high',
+        assignee: 'Project Lead',
+        durationEst: '3d'
+      });
+      engine.render(root);
+    });
+
+    engine.render(root);
+  </script>
+</body>
+</html>
