@@ -1,0 +1,206 @@
+/* Podcast Audio Stream - Privacy-Preserving Client Analytics & Telemetry Styles */
+
+:root {
+  --podcast-bg: #0d1117;
+  --podcast-card-bg: rgba(22, 27, 34, 0.75);
+  --podcast-border: rgba(240, 246, 252, 0.1);
+  --podcast-accent: #f0883e;
+  --podcast-success: #3fb950;
+  --podcast-text: #f0f6fc;
+  --podcast-text-muted: #8b949e;
+}
+
+body.podcast-analytics-theme {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--podcast-bg);
+  color: var(--podcast-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.analytics-dashboard-container {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--podcast-card-bg);
+  border: 1px solid var(--podcast-border);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.branding-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.branding-group h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.live-pulse-indicator {
+  width: 12px;
+  height: 12px;
+  background-color: var(--podcast-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--podcast-accent);
+  animation: podcast-pulse 2s infinite ease-in-out;
+}
+
+@keyframes podcast-pulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.metrics-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: var(--podcast-card-bg);
+  border: 1px solid var(--podcast-border);
+  padding: 16px 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  backdrop-filter: blur(6px);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--podcast-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--podcast-text);
+  font-family: monospace;
+}
+
+.stat-value.active-status {
+  font-size: 0.95rem;
+  color: var(--podcast-success);
+}
+
+.simulation-actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.action-btn.export-btn {
+  background: var(--podcast-accent);
+  color: #fff;
+}
+.action-btn.export-btn:hover {
+  background: #d97706;
+}
+
+.action-btn.trigger-btn {
+  background: #21262d;
+  color: var(--podcast-text);
+  border-color: var(--podcast-border);
+}
+.action-btn.trigger-btn:hover {
+  background: #30363d;
+  border-color: var(--podcast-accent);
+}
+
+.telemetry-log-panel {
+  background: var(--podcast-card-bg);
+  border: 1px solid var(--podcast-border);
+  border-radius: 12px;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+
+.panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--podcast-border);
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--podcast-text-muted);
+}
+
+.event-stream-scroll {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty-state {
+  color: var(--podcast-text-muted);
+  text-align: center;
+  padding: 32px 0;
+  font-style: italic;
+}
+
+.telemetry-event-row {
+  background: rgba(33, 38, 45, 0.8);
+  border: 1px solid var(--podcast-border);
+  border-left: 3px solid var(--podcast-accent);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: monospace;
+}
+
+.telemetry-event-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.telemetry-badge {
+  color: var(--podcast-accent);
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.telemetry-time {
+  color: var(--podcast-text-muted);
+  font-size: 0.75rem;
+}
+
+.telemetry-data {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #c9d1d9;
+  white-space: pre-wrap;
+}
