@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Radar Atlas — Cryptographic Audit Trail</title>
+  <link rel="stylesheet" href="audit-trail.css">
+</head>
+<body class="audit-body">
+  <div class="audit-container">
+    <header class="audit-header">
+      <span class="badge">DOPPLER RADAR TELEMETRY</span>
+      <h1>🛡️ Weather Radar Atlas Autonomous State History & Audit Trail</h1>
+      <p>Doppler radar reflectivity (dBZ), precipitation volume, storm cell tracking, and barometric isobar grids backed by cryptographic SHA hash-chained verification.</p>
+    </header>
+
+    <div class="audit-card">
+      <div class="status-row">
+        <div class="status-group">
+          <span class="label">Ledger Integrity</span>
+          <span id="integrityBadge" class="status-badge status-valid">Cryptographically Verified</span>
+        </div>
+        <div class="status-group">
+          <span class="label">Filter Action</span>
+          <select id="filterActionSelect" class="filter-select">
+            <option value="ALL">All Actions</option>
+            <option value="DOPPLER_REFLECTIVITY_SWEEP">DOPPLER_REFLECTIVITY_SWEEP</option>
+            <option value="STORM_CELL_TRACK_UPDATE">STORM_CELL_TRACK_UPDATE</option>
+          </select>
+        </div>
+        <div class="btn-group">
+          <button type="button" id="logEvent1Btn" class="btn btn-secondary">Record DOPPLER_REFLECTIVITY_SWEEP</button>
+          <button type="button" id="logEvent2Btn" class="btn btn-secondary">Record STORM_CELL_TRACK_UPDATE</button>
+          <button type="button" id="verifyChainBtn" class="btn btn-primary">Verify Integrity</button>
+          <button type="button" id="clearChainBtn" class="btn btn-danger">Clear</button>
+        </div>
+      </div>
+
+      <div class="timeline-section">
+        <h3>Sequential State Mutation Timeline</h3>
+        <div id="auditTimelineContainer" class="timeline-container"></div>
+      </div>
+    </div>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Weather Radar Atlas Showcase</a>
+    </nav>
+  </div>
+
+  <script type="module" src="audit-trail.js"></script>
+</body>
+</html>
