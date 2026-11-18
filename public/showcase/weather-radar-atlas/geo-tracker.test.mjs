@@ -3,69 +3,65 @@ import assert from 'node:assert/strict';
 import { WeatherRadarAtlasGeoRadarEngine } from './geo-tracker.js';
 
 describe('WeatherRadarAtlasGeoRadarEngine', () => {
-  it('initializes with default weather radar nodes and coordinates', () => {
+  it('initializes with default weather radar station locations', () => {
     const engine = new WeatherRadarAtlasGeoRadarEngine();
-    assert.ok(Array.isArray(engine.nodes));
-    assert.ok(engine.nodes.length >= 4);
-    assert.equal(engine.userCoord.lat, 37.7749);
-    assert.equal(engine.userCoord.lon, -122.4194);
+    assert.ok(Array.isArray(engine.locations));
+    assert.strictEqual(engine.locations.length, 5);
   });
 
-  it('calculates Haversine distance with spherical trigonometry accuracy', () => {
+  it('accurately computes Haversine great-circle distance between two coordinates', () => {
     const engine = new WeatherRadarAtlasGeoRadarEngine();
-    // Distance between identical points is 0
-    assert.equal(engine.calculateHaversineDistance(0, 0, 0, 0), 0);
+    // Distance between SF (37.7749, -122.4194) and KMUX Mount Umunhum (37.1569, -121.8986)
+    const distance = engine.calculateHaversineDistance(37.7749, -122.4194, 37.1569, -121.8986);
+    assert.ok(distance > 70 && distance < 85, `Expected ~82 km, got ${distance}`);
 
-    // Distance across equator 1 degree ~ 111.19 km
-    const dist1Deg = engine.calculateHaversineDistance(0, 0, 0, 1);
-    assert.ok(dist1Deg > 110 && dist1Deg < 112);
+    // Identical coordinates return 0 km
+    const zeroDistance = engine.calculateHaversineDistance(37.7749, -122.4194, 37.7749, -122.4194);
+    assert.strictEqual(zeroDistance, 0);
   });
 
-  it('handles boundary coordinate validations correctly', () => {
+  it('computes forward azimuth bearing within 0-360 degrees', () => {
     const engine = new WeatherRadarAtlasGeoRadarEngine();
-    assert.throws(() => {
-      engine.calculateHaversineDistance('invalid', 0, 10, 10);
-    }, /Valid numerical coordinates required/);
+    const start = { lat: 37.7749, lon: -122.4194 };
+    const end = { lat: 37.1569, lon: -121.8986 }; // Heading South-East
+    const bearing = engine.computeBearing(start, end);
 
-    assert.throws(() => {
-      engine.computeBearing(null, { lat: 10, lon: 10 });
-    }, /Valid start and end coordinates required/);
+    assert.ok(bearing >= 0 && bearing <= 360);
+    assert.ok(bearing > 130 && bearing < 160, `Expected ~145 degrees, got ${bearing}`);
   });
 
-  it('computes forward bearing and compass headings', () => {
+  it('sorts weather radar locations in ascending order by distance to user coordinates', () => {
     const engine = new WeatherRadarAtlasGeoRadarEngine();
-    const north = engine.computeBearing({ lat: 0, lon: 0 }, { lat: 10, lon: 0 });
-    assert.equal(north, 0);
-    assert.equal(engine.getCompassDirection(north), 'N');
+    const userCoord = { lat: 37.6190, lon: -122.3748 }; // Exact SFO TDWR
+    const sorted = engine.sortNearestNodes(userCoord);
 
-    const south = engine.computeBearing({ lat: 10, lon: 0 }, { lat: 0, lon: 0 });
-    assert.equal(south, 180);
-    assert.equal(engine.getCompassDirection(south), 'S');
+    assert.strictEqual(sorted.length, 5);
+    assert.strictEqual(sorted[0].id, 'rad-sfo-terminal');
+    assert.strictEqual(sorted[0].distanceKm, 0);
+
+    for (let i = 0; i < sorted.length - 1; i++) {
+      assert.ok(sorted[i].distanceKm <= sorted[i + 1].distanceKm);
+    }
   });
 
-  it('sorts nodes by proximity and calculates telemetry metrics', () => {
-    const customNodes = [
-      { id: 'far', name: 'Distant Radar', lat: 39.0, lon: -120.0, status: 'idle' },
-      { id: 'close', name: 'Close Radar', lat: 37.776, lon: -122.418, status: 'active' }
-    ];
-    const engine = new WeatherRadarAtlasGeoRadarEngine({ nodes: customNodes });
-    const sorted = engine.sortNearestNodes({ lat: 37.7749, lon: -122.4194 });
-
-    assert.equal(sorted.length, 2);
-    assert.equal(sorted[0].id, 'close');
-    assert.equal(sorted[1].id, 'far');
-    assert.ok(sorted[0].distanceKm < sorted[1].distanceKm);
-    assert.ok(typeof sorted[0].compass === 'string');
+  it('throws helpful error when invalid user coordinates are supplied', () => {
+    const engine = new WeatherRadarAtlasGeoRadarEngine();
+    assert.throws(() => engine.sortNearestNodes(null), /Invalid user coordinates/);
+    assert.throws(() => engine.sortNearestNodes({ lat: 'invalid', lon: 10 }), /Invalid user coordinates/);
   });
 
-  it('updates location and notifies observers', () => {
-    const engine = new WeatherRadarAtlasGeoRadarEngine();
-    let updatedCoord = null;
-    engine.subscribe((coord) => {
-      updatedCoord = coord;
+  it('supports adding custom meteorological radar towers to registry', () => {
+    const engine = new WeatherRadarAtlasGeoRadarEngine([]);
+    engine.addLocation({
+      id: 'custom-radar',
+      name: 'Custom Doppler Node',
+      lat: 34.0522,
+      lon: -118.2437,
+      category: 'Doppler Radar'
     });
-
-    engine.setUserCoord(37.79, -122.41);
-    assert.deepEqual(updatedCoord, { lat: 37.79, lon: -122.41 });
+    assert.strictEqual(engine.locations.length, 1);
+    const sorted = engine.sortNearestNodes({ lat: 34.0522, lon: -118.2437 });
+    assert.strictEqual(sorted[0].id, 'custom-radar');
+    assert.strictEqual(sorted[0].distanceKm, 0);
   });
 });
