@@ -1,0 +1,56 @@
+<div class="quantum-filter-container" id="quantum-filter-engine-widget">
+  <div class="quantum-filter-toolbar">
+    <div class="quantum-search-box">
+      <svg class="quantum-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="text"
+        id="quantum-search-input"
+        class="quantum-search-input"
+        placeholder="Search quantum algorithms by name, problem domain, or tags (e.g. VQE, Shor, NISQ)..."
+        aria-label="Search quantum algorithms"
+      >
+      <button type="button" id="quantum-search-clear" class="quantum-clear-btn" aria-label="Clear search" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="quantum-sort-box">
+      <label for="quantum-sort-select" class="quantum-sort-label">Sort:</label>
+      <select id="quantum-sort-select" class="quantum-sort-select" aria-label="Sort quantum circuits">
+        <option value="qubitCount:desc">Qubit Register (Largest)</option>
+        <option value="qubitCount:asc">Qubit Register (Smallest)</option>
+        <option value="circuitDepth:desc">Circuit Depth (Deepest)</option>
+        <option value="circuitDepth:asc">Circuit Depth (Shallowest)</option>
+        <option value="fidelityEstimate:desc">Estimated Fidelity (Highest)</option>
+        <option value="name:asc">Algorithm Name (A-Z)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="quantum-tag-strip" id="quantum-tag-chips" role="group" aria-label="Filter by quantum paradigm tags">
+    <button type="button" class="quantum-tag-chip" data-tag="nisq">NISQ</button>
+    <button type="button" class="quantum-tag-chip" data-tag="variational">Variational</button>
+    <button type="button" class="quantum-tag-chip" data-tag="fault-tolerant">Fault-Tolerant</button>
+    <button type="button" class="quantum-tag-chip" data-tag="foundational">Foundational</button>
+    <button type="button" class="quantum-tag-chip" data-tag="optimization">Optimization</button>
+    <button type="button" class="quantum-tag-chip" data-tag="chemistry">Chemistry</button>
+    <button type="button" class="quantum-tag-chip" data-tag="oracle">Oracle</button>
+  </div>
+
+  <div class="quantum-filter-status">
+    <span id="quantum-results-count" class="quantum-count-pill">Showing 8 benchmark circuits</span>
+    <button type="button" id="quantum-reset-filters-btn" class="quantum-reset-link" style="display:none;">Reset circuit filters</button>
+  </div>
+
+  <div id="quantum-empty-state" class="quantum-empty-card" style="display:none;">
+    <div class="quantum-empty-icon">⊗</div>
+    <h4>No Quantum Circuits Found</h4>
+    <p>No circuit templates match your active keyword or paradigm filters. Adjust your criteria.</p>
+  </div>
+</div>
