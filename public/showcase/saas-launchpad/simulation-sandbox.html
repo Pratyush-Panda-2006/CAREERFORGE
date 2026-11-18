@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Monte Carlo Simulation Sandbox</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+</head>
+<body>
+  <div class="sim-container">
+    <header class="sim-header">
+      <h2>📈 SaaS Launchpad Monte Carlo Multi-Scenario Simulator</h2>
+      <p>Simulate 1,000+ iterative MRR trajectories with variance analysis and confidence bounds</p>
+    </header>
+
+    <div class="sim-grid">
+      <div class="sim-card controls-card">
+        <h3>Simulation Parameters</h3>
+        <div class="form-group">
+          <label for="sim-trials">Iteration Runs (Trials):</label>
+          <input type="number" id="sim-trials" value="1000" min="50" max="10000" step="50">
+        </div>
+        <div class="form-group">
+          <label for="sim-volatility">Churn / Growth Volatility (σ):</label>
+          <input type="number" id="sim-volatility" value="0.18" min="0.01" max="1.0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label for="sim-base">Base MRR Target ($):</label>
+          <input type="number" id="sim-base" value="50000" min="1000" max="1000000" step="1000">
+        </div>
+        <button id="btn-run-sim" class="btn btn-simulate">Run Monte Carlo</button>
+      </div>
+
+      <div class="sim-card results-card">
+        <h3>Forecasted Risk & Confidence Bounds</h3>
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="lbl">Expected Mean MRR</span>
+            <span id="metric-mean" class="val">$50,000</span>
+          </div>
+          <div class="metric-box">
+            <span class="lbl">Standard Deviation</span>
+            <span id="metric-stddev" class="val">±$0</span>
+          </div>
+          <div class="metric-box">
+            <span class="lbl">50th Percentile (Median)</span>
+            <span id="metric-p50" class="val">$50,000</span>
+          </div>
+          <div class="metric-box">
+            <span class="lbl">95th Percentile (Bull Case)</span>
+            <span id="metric-p95" class="val">$50,000</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="simulation-sandbox.js"></script>
+</body>
+</html>
