@@ -1,0 +1,191 @@
+/* Supply Chain Logistics - Telemetry & Sparkline Visualizer Styling */
+
+.scl-telemetry-body {
+  margin: 0;
+  padding: 30px 20px;
+  background-color: #090a0f;
+  color: #f8fafc;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.scl-visualizer-container {
+  max-width: 740px;
+  margin: 0 auto;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(20, 184, 166, 0.25);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 32px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(20, 184, 166, 0.2);
+}
+
+.scl-telemetry-header {
+  margin-bottom: 24px;
+}
+
+.scl-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2dd4bf;
+  background: rgba(20, 184, 166, 0.12);
+  border: 1px solid rgba(20, 184, 166, 0.35);
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.scl-telemetry-header h2 {
+  font-size: 1.6rem;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.scl-telemetry-header p {
+  color: #94a3b8;
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.scl-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.scl-time-selectors {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.scl-time-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scl-time-btn:hover {
+  color: #ffffff;
+}
+
+.scl-time-btn.active {
+  background: #14b8a6;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.4);
+}
+
+.scl-live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #2dd4bf;
+}
+
+.scl-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #14b8a6;
+  box-shadow: 0 0 8px #14b8a6;
+  animation: sclPulse 1.8s infinite;
+}
+
+@keyframes sclPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.scl-canvas-wrapper {
+  position: relative;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+#supply-chain-logistics-telemetry-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+
+.scl-tooltip {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(20, 184, 166, 0.5);
+  border-radius: 8px;
+  padding: 6px 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  z-index: 20;
+}
+
+.scl-tooltip-val {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #2dd4bf;
+}
+
+.scl-tooltip-meta {
+  display: block;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.scl-metrics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+}
+
+.scl-metric-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scl-metric-label {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.scl-metric-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+}
