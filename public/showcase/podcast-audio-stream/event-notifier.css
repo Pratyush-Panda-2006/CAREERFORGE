@@ -1,0 +1,177 @@
+/* Podcast Audio Stream - Reactive Toast Notification Queue Styles */
+
+:root {
+  --podcast-toast-bg: #0d1117;
+  --podcast-toast-panel: rgba(22, 27, 34, 0.85);
+  --podcast-toast-border: rgba(240, 246, 252, 0.12);
+  --podcast-toast-accent: #f0883e;
+  --toast-info-border: #58a6ff;
+  --toast-success-border: #3fb950;
+  --toast-warning-border: #d29922;
+  --toast-danger-border: #f85149;
+  --podcast-text: #f0f6fc;
+  --podcast-text-muted: #8b949e;
+}
+
+body.podcast-toast-theme {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--podcast-toast-bg);
+  color: var(--podcast-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.toast-hub-container {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.toast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--podcast-toast-panel);
+  border: 1px solid var(--podcast-toast-border);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.branding-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.branding-group h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.bell-icon {
+  font-size: 1.5rem;
+}
+
+.toggle-audio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--podcast-text-muted);
+}
+
+.triggers-panel {
+  background: var(--podcast-toast-panel);
+  border: 1px solid var(--podcast-toast-border);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(8px);
+}
+
+.triggers-panel h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--podcast-text-muted);
+}
+
+.trigger-buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-trigger {
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.btn-info { background: #1f6feb; }
+.btn-info:hover { background: #388bfd; }
+
+.btn-success { background: #238636; }
+.btn-success:hover { background: #2ea043; }
+
+.btn-warning { background: #9e6a03; }
+.btn-warning:hover { background: #bb8009; }
+
+.btn-danger { background: #da3633; }
+.btn-danger:hover { background: #f85149; }
+
+.toast-viewport-stack {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  z-index: 9999;
+  max-width: 360px;
+  width: 100%;
+}
+
+.toast-card {
+  background: rgba(22, 27, 34, 0.95);
+  border: 1px solid var(--podcast-toast-border);
+  border-left: 4px solid var(--podcast-toast-accent);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  animation: slide-in 0.25s ease-out;
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.toast-card.toast-info { border-left-color: var(--toast-info-border); }
+.toast-card.toast-success { border-left-color: var(--toast-success-border); }
+.toast-card.toast-warning { border-left-color: var(--toast-warning-border); }
+.toast-card.toast-danger { border-left-color: var(--toast-danger-border); }
+
+.toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toast-title {
+  font-size: 0.9rem;
+  color: var(--podcast-text);
+}
+
+.toast-message {
+  font-size: 0.8rem;
+  color: var(--podcast-text-muted);
+}
+
+.toast-close-btn {
+  background: none;
+  border: none;
+  color: var(--podcast-text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+.toast-close-btn:hover {
+  color: var(--podcast-text);
+}
