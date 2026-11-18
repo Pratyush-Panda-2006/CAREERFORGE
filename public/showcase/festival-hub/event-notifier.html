@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Event Notifier & Audio Chimes</title>
+  <link rel="stylesheet" href="event-notifier.css">
+</head>
+<body>
+  <div class="festival-notifier-container">
+    <header class="notifier-header">
+      <div class="notifier-branding">
+        <h2>🎪 Festival Hub Real-Time Toast & Audio Dispatcher</h2>
+        <p>Reactive alert stack with prioritized queuing and synthesized Web Audio chimes</p>
+      </div>
+      <div class="notifier-controls">
+        <label class="toggle-control">
+          <input type="checkbox" id="toggle-audio" checked>
+          <span>Audio Chimes</span>
+        </label>
+      </div>
+    </header>
+
+    <div class="notifier-actions">
+      <h3>Trigger Festival Announcements</h3>
+      <div class="button-row">
+        <button class="btn btn-info" data-festival-toast="info" data-title="Lineup Update" data-msg="Headliner starts in 15 minutes at Solar Stage.">Info Toast</button>
+        <button class="btn btn-success" data-festival-toast="success" data-title="VIP Access Granted" data-msg="Your wristband NFC pass has been successfully verified.">Success Toast</button>
+        <button class="btn btn-warning" data-festival-toast="warning" data-title="Weather Alert" data-msg="High winds reported near Main Arena. Stay clear of rigging.">Warning Toast</button>
+        <button class="btn btn-danger" data-festival-toast="danger" data-title="Emergency Evacuation" data-msg="Follow security stewards toward the Northern exit gates.">Danger Toast</button>
+      </div>
+    </div>
+
+    <!-- Active Toast Viewport -->
+    <div id="festival-toast-stack" class="toast-stack-viewport" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <script type="module" src="event-notifier.js"></script>
+</body>
+</html>
