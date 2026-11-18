@@ -1,8 +1,11 @@
-name: Automated Leaderboard Sync (12h)
+name: Automated Leaderboard Sync (12 PM & 12 AM)
 
 on:
   schedule:
-    - cron: '0 0,12 * * *' # Runs every 12 hours (at 00:00 midnight and 12:00 noon UTC)
+    # 12:00 PM IST & 12:00 AM IST (UTC 06:30 & 18:30)
+    - cron: '30 6,18 * * *'
+    # 12:00 PM UTC & 12:00 AM UTC (UTC 12:00 & 00:00)
+    - cron: '0 0,12 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub UI / CLI
 
 permissions:
@@ -16,6 +19,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -41,5 +46,5 @@ jobs:
             echo "No changes in leaderboard.json to commit."
           else
             git commit -m "chore(leaderboard): automated 12h leaderboard update [skip ci]"
-            git push
+            git push origin main
           fi
