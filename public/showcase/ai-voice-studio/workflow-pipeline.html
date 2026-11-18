@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - Production Workflow Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+  <style>
+    body {
+      background: #090d16;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .av-pipeline-controls {
+      display: flex;
+      gap: 12px;
+    }
+    .av-btn {
+      padding: 8px 16px;
+      background: #7e22ce;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Voice Studio Production Pipeline</h1>
+  <div class="av-pipeline-controls">
+    <button class="av-btn" id="btn-add-task">+ Create New Audio Task</button>
+  </div>
+  <div id="pipeline-root"></div>
+
+  <script type="module">
+    import { AiVoiceStudioPipelineEngine } from './workflow-pipeline.js';
+
+    const engine = new AiVoiceStudioPipelineEngine();
+    const root = document.getElementById('pipeline-root');
+
+    document.getElementById('btn-add-task').addEventListener('click', () => {
+      engine.addTask({
+        title: `Neural Track Synthesis #${Math.floor(Math.random() * 1000)}`,
+        description: 'Auto-scheduled audio generation job via pipeline scheduler.',
+        columnId: 'script-drafting',
+        priority: 'high',
+        assignee: 'Audio Engineer',
+        durationEst: '1.5h'
+      });
+      engine.render(root);
+    });
+
+    engine.render(root);
+  </script>
+</body>
+</html>
