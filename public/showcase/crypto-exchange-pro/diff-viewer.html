@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Exchange Pro - Order & Strategy Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="cep-diff-container">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Trading Algorithm & Order Config Diff Inspector</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Inspect visual line-by-line differences between bot parameters, order routing rules, and JSON strategies.</p>
+    </header>
+
+    <section class="cep-diff-inputs" aria-label="Input comparison text">
+      <div class="cep-diff-textarea-group">
+        <label for="orig-code">Active Production Strategy Config</label>
+        <textarea id="orig-code" class="cep-diff-textarea">{
+  "pair": "BTC/USDT",
+  "leverage": 5,
+  "maxSlippagePercent": 0.5,
+  "stopLossPercent": 2.0,
+  "takeProfitPercent": 6.0
+}</textarea>
+      </div>
+
+      <div class="cep-diff-textarea-group">
+        <label for="mod-code">Staged Optimization Parameters</label>
+        <textarea id="mod-code" class="cep-diff-textarea">{
+  "pair": "BTC/USDT",
+  "leverage": 10,
+  "maxSlippagePercent": 0.35,
+  "stopLossPercent": 1.5,
+  "takeProfitPercent": 8.0,
+  "trailingStopPercent": 0.75
+}</textarea>
+      </div>
+    </section>
+
+    <section class="cep-diff-toolbar" aria-label="Diff viewer actions">
+      <span style="font-size: 0.85rem; color: #94a3b8;">Unified Diff Telemetry</span>
+      <button id="btn-recompute" style="padding: 0.4rem 0.85rem; background: #059669; border: none; border-radius: 5px; color: #fff; cursor: pointer; font-weight: 600;">Recompute Diff</button>
+    </section>
+
+    <section id="diff-output" aria-live="polite">
+      <!-- Diff lines dynamically rendered -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { CryptoExchangeProDiffInspector } from './diff-viewer.js';
+
+    const origInput = document.getElementById('orig-code');
+    const modInput = document.getElementById('mod-code');
+    const outputContainer = document.getElementById('diff-output');
+    const recomputeBtn = document.getElementById('btn-recompute');
+
+    const inspector = new CryptoExchangeProDiffInspector();
+
+    function update() {
+      inspector.computeDiff(origInput.value, modInput.value);
+      inspector.render(outputContainer);
+    }
+
+    origInput.addEventListener('input', update);
+    modInput.addEventListener('input', update);
+    recomputeBtn.addEventListener('click', update);
+
+    update();
+  </script>
+</body>
+</html>
