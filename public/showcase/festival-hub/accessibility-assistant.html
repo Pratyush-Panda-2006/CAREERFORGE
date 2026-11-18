@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Accessibility Assistant</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+</head>
+<body>
+  <div class="a11y-container">
+    <header class="a11y-header">
+      <div class="header-content">
+        <h2>🎪 Festival Hub WCAG Contrast & Keyboard Accessibility Inspector</h2>
+        <p>Real-time relative luminance, WCAG 2.1 compliance checker, and keyboard navigation evaluator</p>
+      </div>
+      <button id="toggle-hc-btn" class="btn-toggle-hc" aria-label="Toggle High Contrast Mode">Enable High Contrast</button>
+    </header>
+
+    <div class="a11y-grid">
+      <section class="card config-card" aria-labelledby="config-heading">
+        <h3 id="config-heading">Color Contrast Analyzer</h3>
+        <div class="color-picker-group">
+          <label for="fg-color">Foreground (Text) Color:
+            <input type="text" id="fg-color" value="#ffffff" aria-label="Foreground Color Value">
+          </label>
+          <label for="bg-color">Background Color:
+            <input type="text" id="bg-color" value="#6d28d9" aria-label="Background Color Value">
+          </label>
+        </div>
+
+        <div class="ratio-results">
+          <div class="ratio-box">
+            <span class="ratio-label">Contrast Ratio</span>
+            <span id="contrast-ratio" class="ratio-val">--</span>
+          </div>
+          <div class="badges">
+            <span id="badge-aa" class="status-badge" aria-live="polite">AA Pass</span>
+            <span id="badge-aaa" class="status-badge" aria-live="polite">AAA Pass</span>
+          </div>
+        </div>
+
+        <div class="preview-container">
+          <h4>Visual Preview</h4>
+          <div id="preview-box" class="preview-box" tabindex="0">
+            Festival Hub Headline & Event Registration CTA
+          </div>
+        </div>
+      </section>
+
+      <section class="card checklist-card" aria-labelledby="checklist-heading">
+        <h3 id="checklist-heading">WCAG 2.1 Compliance Checklist</h3>
+        <ul class="a11y-checklist">
+          <li>
+            <span class="check-icon">✓</span>
+            <div class="check-text">
+              <strong>1.4.3 Contrast (Minimum - AA)</strong>
+              <p>Visual presentation of text and images of text has a contrast ratio of at least 4.5:1.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <div class="check-text">
+              <strong>1.4.6 Contrast (Enhanced - AAA)</strong>
+              <p>Visual presentation of text and images of text has a contrast ratio of at least 7:1.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <div class="check-text">
+              <strong>2.1.1 Keyboard Navigable</strong>
+              <p>All functional stage schedules, ticket selectors, and modals are operable through keyboard interface.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <div class="check-text">
+              <strong>2.4.7 Focus Visible</strong>
+              <p>Any keyboard operable user interface has a mode of operation where keyboard focus indicator is clearly visible.</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="accessibility-assistant.js"></script>
+</body>
+</html>
