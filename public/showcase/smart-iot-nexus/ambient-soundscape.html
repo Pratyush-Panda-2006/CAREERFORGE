@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ambient mixer · Smart IoT Nexus</title>
+    <link rel="stylesheet" href="ambient-soundscape.css" />
+    <script type="module" src="ambient-soundscape.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html">SMART IOT NEXUS / Tools</a
+      ><span>PROCEDURAL AUDIO MIXER</span>
+    </header>
+    <main>
+      <div class="intro">
+        <p class="eyebrow">A quiet workspace</p>
+        <h1>Build your own<br />background sound.</h1>
+        <p>
+          Mix generated rain, filtered wind, white noise and soft chimes. No
+          recordings, microphone access or audio uploads.
+        </p>
+      </div>
+      <div class="workspace">
+        <section class="transport" aria-label="Playback">
+          <div class="state-line">
+            <span>Audio context</span><strong id="audio-state">idle</strong>
+          </div>
+          <div class="meter" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span
+            ><span></span><span></span><span></span><span></span><span></span
+            ><span></span><span></span><span></span><span></span><span></span
+            ><span></span>
+          </div>
+          <div class="actions">
+            <button id="play" type="button">Play</button
+            ><button id="pause" type="button" disabled>Pause</button
+            ><button id="stop" type="button" disabled>
+              Stop &amp; release
+            </button>
+          </div>
+          <p id="audio-status" role="status" aria-live="polite">
+            Audio starts only when you press Play.
+          </p>
+          <p class="note">
+            Start at a low volume. The activity meter reads the generated mix.
+            This is a sound tool, with no medical or therapeutic claims.
+            Switching tabs pauses playback.
+          </p>
+        </section>
+        <fieldset id="mixer-controls">
+          <legend>Shape the mix</legend>
+          <label for="preset">Preset</label
+          ><select id="preset">
+            <option value="rain">Rain break</option>
+            <option value="wind">Night wind</option>
+            <option value="workshop">Workshop</option>
+            <option value="custom" disabled>Custom mix</option>
+          </select>
+          <div class="channel master">
+            <label for="master"
+              >Master volume
+              <output id="master-value" for="master">20%</output></label
+            ><input
+              id="master"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.2"
+            />
+          </div>
+          <div class="channel">
+            <label for="rain"
+              >Rain <output id="rain-value" for="rain">50%</output></label
+            ><input
+              id="rain"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.5"
+            />
+            <p>White noise through a low-pass filter.</p>
+          </div>
+          <div class="channel">
+            <label for="wind"
+              >Wind <output id="wind-value" for="wind">12%</output></label
+            ><input
+              id="wind"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.12"
+            />
+            <p>Octave-layered pink noise, softly filtered.</p>
+          </div>
+          <div class="channel">
+            <label for="white"
+              >White noise
+              <output id="white-value" for="white">0%</output></label
+            ><input
+              id="white"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0"
+            />
+            <p>A broad, even noise texture.</p>
+          </div>
+          <div class="channel">
+            <label for="chimes"
+              >Chimes <output id="chimes-value" for="chimes">8%</output></label
+            ><input
+              id="chimes"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.08"
+            />
+            <p>Occasional synthesized notes with a gentle decay.</p>
+          </div>
+        </fieldset>
+      </div>
+    </main>
+  </body>
+</html>
