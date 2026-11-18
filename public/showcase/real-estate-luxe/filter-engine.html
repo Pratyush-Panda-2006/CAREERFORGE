@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Estate Luxe - Estate Filter Engine</title>
+  <link rel="stylesheet" href="filter-engine.css">
+</head>
+<body>
+  <div class="luxe-filter-container">
+    <header class="luxe-filter-header">
+      <div class="header-titles">
+        <span class="luxe-badge">Portfolio Discovery</span>
+        <h2 class="filter-title">Ultra-Luxury Real Estate Search</h2>
+        <p class="filter-subtitle">Search, compound tag filter, and multi-sort premier architectural estates</p>
+      </div>
+      <div class="header-meta">
+        <span id="luxeResultsCount" class="results-pill">Loading...</span>
+      </div>
+    </header>
+
+    <div class="filter-controls-bar">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="luxeSearchInput" class="search-input" placeholder="Search estates by title, location, type, or amenities...">
+        <button type="button" id="clearSearchBtn" class="clear-search-btn" style="display: none;" aria-label="Clear Search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sort-wrapper">
+        <select id="luxeSortSelect" class="sort-select">
+          <option value="title:asc">Title (A - Z)</option>
+          <option value="title:desc">Title (Z - A)</option>
+          <option value="price:desc">Valuation (Highest First)</option>
+          <option value="price:asc">Valuation (Lowest First)</option>
+          <option value="sqft:desc">Surface Area (Largest First)</option>
+          <option value="rating:desc">Architectural Rating</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="tag-chips-section">
+      <span class="tags-label">Amenities & Features:</span>
+      <div id="luxeTagChips" class="tag-chips-container"></div>
+    </div>
+
+    <div id="luxeEstateCards" class="estate-cards-grid"></div>
+
+    <div id="luxeEmptyState" class="empty-state-card" style="display: none;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <line x1="8" y1="11" x2="14" y2="11"></line>
+      </svg>
+      <h3>No matching properties found</h3>
+      <p>Try refining your search keyword or clearing selected amenity tags.</p>
+    </div>
+  </div>
+
+  <script type="module" src="filter-engine.js"></script>
+</body>
+</html>
