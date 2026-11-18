@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Implement resilient offline data persistence & conflict-free queue engine — Resilient Offline Sync Engine</title>
+  <link rel="stylesheet" href="offline-sync.css">
+</head>
+<body>
+  <div class="sync-container">
+    <header class="sync-header">
+      <div class="title-wrap">
+        <h1>🌱 Audio Bookmarks Offline & Conflict-Free Sync Engine</h1>
+        <p>Implement an independent offline sync module for Podcast Audio Stream queuing offline audio chunk downloads and playback bookmark mutations.</p>
+      </div>
+      <div class="network-status-panel">
+        <span id="connectionStatusBadge" class="status-badge status-online">ONLINE</span>
+        <span id="pendingCountBadge" class="counter-badge badge-idle">0 pending</span>
+      </div>
+    </header>
+
+    <div class="sync-actions-bar">
+      <button type="button" id="toggleOnlineBtn" class="btn-sync">📡 Toggle Connectivity</button>
+      <button type="button" id="addSampleBtn" class="btn-sync">+ Generate Playback Bookmark Mutation</button>
+      <button type="button" id="syncNowBtn" class="btn-sync btn-primary">⚡ Sync Now</button>
+      <button type="button" id="clearQueueBtn" class="btn-sync">🗑️ Clear Buffer</button>
+    </div>
+
+    <section class="card-panel">
+      <h2>Buffered Mutations Queue</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mutation ID</th>
+              <th>Type</th>
+              <th>Vector Clock</th>
+              <th>Retries</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="queueTableBody">
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Implement resilient offline data persistence & conflict-free queue engine Dashboard</a>
+    </nav>
+  </div>
+
+  <script type="module" src="offline-sync.js"></script>
+</body>
+</html>
