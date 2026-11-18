@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nonprofit Impact - Client Analytics & Telemetry</title>
+  <link rel="stylesheet" href="./analytics-telemetry.css">
+</head>
+<body class="nonprofit-analytics-theme">
+  <div class="analytics-dashboard-container">
+    <header class="analytics-header">
+      <div class="branding-group">
+        <span class="live-pulse-indicator"></span>
+        <h2>Nonprofit Impact Analytics & Interaction Heatmap</h2>
+      </div>
+      <button id="btnExportTelemetry" class="action-btn export-btn">Export Telemetry Report</button>
+    </header>
+
+    <div class="metrics-cards-grid">
+      <div class="stat-card">
+        <span class="stat-label">Active Session Duration</span>
+        <span id="sessionDurationDisplay" class="stat-value">00:00</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Tracked Impact Events</span>
+        <span id="eventCountDisplay" class="stat-value">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Privacy Sanitizer</span>
+        <span class="stat-value active-status">Active (GDPR/PII Compliant)</span>
+      </div>
+    </div>
+
+    <div class="simulation-actions-bar">
+      <button class="action-btn trigger-btn" data-analytics-event="campaign_donation_click">Simulate Campaign Donation</button>
+      <button class="action-btn trigger-btn" data-analytics-event="volunteer_form_focus">Simulate Volunteer Signup</button>
+      <button class="action-btn trigger-btn" data-analytics-event="annual_report_view">Simulate View Annual Report</button>
+    </div>
+
+    <section class="telemetry-log-panel">
+      <div class="panel-header">
+        <h3>Real-Time Event Stream Log</h3>
+      </div>
+      <div id="analyticsStreamLog" class="event-stream-scroll">
+        <div class="empty-state">No events recorded yet. Click actions above to log telemetry.</div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="./analytics-telemetry.js"></script>
+</body>
+</html>
