@@ -1,0 +1,56 @@
+<div class="crypto-filter-container" id="crypto-filter-engine-widget">
+  <div class="crypto-filter-toolbar">
+    <div class="crypto-search-box">
+      <svg class="crypto-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="text"
+        id="crypto-search-input"
+        class="crypto-search-input"
+        placeholder="Search pairs by ticker symbol, asset name, or category (e.g. BTC, Solana, DeFi)..."
+        aria-label="Search crypto pairs"
+      >
+      <button type="button" id="crypto-search-clear" class="crypto-clear-btn" aria-label="Clear search" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="crypto-sort-box">
+      <label for="crypto-sort-select" class="crypto-sort-label">Sort:</label>
+      <select id="crypto-sort-select" class="crypto-sort-select" aria-label="Sort markets">
+        <option value="volume24h:desc">24h Volume (Highest)</option>
+        <option value="volume24h:asc">24h Volume (Lowest)</option>
+        <option value="change24h:desc">24h Gainers (%)</option>
+        <option value="change24h:asc">24h Losers (%)</option>
+        <option value="lastPrice:desc">Price (Highest)</option>
+        <option value="symbol:asc">Ticker (A-Z)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="crypto-tag-strip" id="crypto-tag-chips" role="group" aria-label="Filter by market sectors">
+    <button type="button" class="crypto-tag-chip" data-tag="l1">Layer 1</button>
+    <button type="button" class="crypto-tag-chip" data-tag="defi">DeFi</button>
+    <button type="button" class="crypto-tag-chip" data-tag="layer-2">Layer 2</button>
+    <button type="button" class="crypto-tag-chip" data-tag="ai">AI & Compute</button>
+    <button type="button" class="crypto-tag-chip" data-tag="top-10">Top 10</button>
+    <button type="button" class="crypto-tag-chip" data-tag="high-liquidity">High Liquidity</button>
+    <button type="button" class="crypto-tag-chip" data-tag="oracle">Oracle</button>
+  </div>
+
+  <div class="crypto-filter-status">
+    <span id="crypto-results-count" class="crypto-count-pill">Tracking 8 active trading pairs</span>
+    <button type="button" id="crypto-reset-filters-btn" class="crypto-reset-link" style="display:none;">Reset filters</button>
+  </div>
+
+  <div id="crypto-empty-state" class="crypto-empty-card" style="display:none;">
+    <div class="crypto-empty-icon">⊘</div>
+    <h4>No Market Pairs Found</h4>
+    <p>No active instruments match your search criteria. Try modifying your filters or keyword.</p>
+  </div>
+</div>
