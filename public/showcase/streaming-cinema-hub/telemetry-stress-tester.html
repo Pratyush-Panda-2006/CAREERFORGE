@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming Cinema Hub - Telemetry Stress Benchmark</title>
+  <link rel="stylesheet" href="telemetry-stress-tester.css">
+</head>
+<body>
+  <div class="benchmark-container">
+    <div class="header-section">
+      <h1>Cinema Hub Rendering &amp; Buffer Stress Tester</h1>
+      <p>Client-Side 4K Video Stream Jitter &amp; Memory Allocation Benchmark</p>
+    </div>
+
+    <div class="control-panel">
+      <div class="input-group">
+        <label for="iterationsInput">Stress Iterations</label>
+        <input type="number" id="iterationsInput" value="1000" min="100" max="10000" step="100">
+      </div>
+      <button class="btn-benchmark" id="startBenchmarkBtn">Run Benchmark</button>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="benchmarkProgress"></div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Composite Index</div>
+        <div class="metric-value" id="compositeScoreVal">--</div>
+        <div><span class="status-badge optimal" id="ratingBadge">READY</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Effective FPS</div>
+        <div class="metric-value" id="fpsVal">-- FPS</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Frame Jitter</div>
+        <div class="metric-value" id="jitterVal">-- ms</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Heap Allocation</div>
+        <div class="metric-value" id="memoryVal">-- MB</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="telemetry-stress-tester.js"></script>
+</body>
+</html>
