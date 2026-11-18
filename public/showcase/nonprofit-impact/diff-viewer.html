@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nonprofit Impact - Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .np-preset-selector {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .np-select {
+      padding: 8px 14px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Nonprofit Grants & Carbon Metrics Diff Inspector</h1>
+  <div class="np-preset-selector">
+    <label for="preset-dropdown">Select Impact Audit Model:</label>
+    <select id="preset-dropdown" class="np-select">
+      <option value="carbonMethodology">Carbon Accounting Standard</option>
+      <option value="grantBudget">Grant Budget Reallocation</option>
+      <option value="treeCanopyAudit">Canopy Verification</option>
+    </select>
+  </div>
+
+  <div id="diff-root"></div>
+
+  <script type="module">
+    import { NonprofitImpactDiffInspector } from './diff-viewer.js';
+
+    const inspector = new NonprofitImpactDiffInspector();
+    const root = document.getElementById('diff-root');
+    const select = document.getElementById('preset-dropdown');
+
+    const update = (key) => {
+      const preset = inspector.getPreset(key);
+      if (preset) {
+        const diff = inspector.computeDiff(preset.left, preset.right);
+        inspector.render(root, diff);
+      }
+    };
+
+    select.addEventListener('change', (e) => update(e.target.value));
+    update('carbonMethodology');
+  </script>
+</body>
+</html>
