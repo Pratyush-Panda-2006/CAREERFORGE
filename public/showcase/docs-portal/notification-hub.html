@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - API & Schema Alerts Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+    .demo-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .demo-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      background: #1e293b;
+      color: #93c5fd;
+    }
+  </style>
+</head>
+<body>
+  <h1>API Schema & Developer Operations Stream</h1>
+  <div class="demo-controls">
+    <button class="demo-btn" id="btn-critical">Trigger Schema Breaking Change</button>
+    <button class="demo-btn" id="btn-warning">Trigger Endpoint Deprecation</button>
+    <button class="demo-btn" id="btn-success">Trigger OpenAPI Validation</button>
+    <button class="demo-btn" id="btn-info">Trigger SDK Registry Sync</button>
+  </div>
+  <div id="notification-root"></div>
+
+  <script type="module">
+    import { DocsPortalNotificationHub } from './notification-hub.js';
+
+    const hub = new DocsPortalNotificationHub();
+    const root = document.getElementById('notification-root');
+
+    hub.subscribe(() => {
+      hub.renderToDOM(root);
+    });
+
+    // Initial alert items
+    hub.enqueue('Breaking Schema Anomaly: POST /v2/transfers payload dropped required field "destination_id".', 'critical', 'critical');
+    hub.enqueue('Deprecation Advisory: Legacy XML RPC endpoints scheduled for termination on Dec 31.', 'warning', 'warning');
+    hub.enqueue('OpenAPI 3.1.0 Validation: All 88 documentation paths verified with zero schema mismatch.', 'success', 'success');
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Schema Failure: Response property "balance" type changed from float to integer string.', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Rate Limit Notice: Sandbox organization reached 85% of monthly request allowance.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Multi-language SDK Generation complete: Python, TypeScript, Go, and Java packages built.', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Search Index Refreshed: Algolia documentation index synced with 4,200 indexed symbols.', 'info', 'info');
+    });
+  </script>
+</body>
+</html>
