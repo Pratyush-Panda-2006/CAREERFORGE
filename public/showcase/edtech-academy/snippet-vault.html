@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edtech Academy - Preset Snippet Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .selected-preview {
+      width: 100%;
+      max-width: 820px;
+      padding: 14px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px dashed #3b82f6;
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Edtech Curriculum & Learning Presets Vault</h1>
+  <div id="selection-display" class="selected-preview">Selected Configuration: None</div>
+  <div id="vault-root"></div>
+
+  <script type="module">
+    import { EdtechAcademySnippetVault } from './snippet-vault.js';
+
+    const vault = new EdtechAcademySnippetVault();
+    const container = document.getElementById('vault-root');
+    const display = document.getElementById('selection-display');
+
+    vault.render(container, (snippet) => {
+      display.textContent = `Applied Preset: "${snippet.title}" (${snippet.category}) - ${snippet.code.slice(0, 60)}...`;
+    });
+  </script>
+</body>
+</html>
