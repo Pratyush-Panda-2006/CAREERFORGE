@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Audio Stream - Client Analytics & Telemetry</title>
+  <link rel="stylesheet" href="./analytics-telemetry.css">
+</head>
+<body class="podcast-analytics-theme">
+  <div class="analytics-dashboard-container">
+    <header class="analytics-header">
+      <div class="branding-group">
+        <span class="live-pulse-indicator"></span>
+        <h2>Podcast Audio Stream Analytics & Interaction Heatmap</h2>
+      </div>
+      <button id="btnExportTelemetry" class="action-btn export-btn">Export Telemetry Report</button>
+    </header>
+
+    <div class="metrics-cards-grid">
+      <div class="stat-card">
+        <span class="stat-label">Active Session Duration</span>
+        <span id="sessionDurationDisplay" class="stat-value">00:00</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Tracked Events</span>
+        <span id="eventCountDisplay" class="stat-value">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Privacy Sanitizer</span>
+        <span class="stat-value active-status">Active (GDPR/PII Compliant)</span>
+      </div>
+    </div>
+
+    <div class="simulation-actions-bar">
+      <button class="action-btn trigger-btn" data-analytics-event="episode_play_start">Simulate Episode Play</button>
+      <button class="action-btn trigger-btn" data-analytics-event="audio_scrub_forward">Simulate Scrub 30s</button>
+      <button class="action-btn trigger-btn" data-analytics-event="playlist_subscribe">Simulate Subscribe</button>
+    </div>
+
+    <section class="telemetry-log-panel">
+      <div class="panel-header">
+        <h3>Real-Time Event Stream Log</h3>
+      </div>
+      <div id="analyticsStreamLog" class="event-stream-scroll">
+        <div class="empty-state">No events recorded yet. Click actions above to log telemetry.</div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="./analytics-telemetry.js"></script>
+</body>
+</html>
