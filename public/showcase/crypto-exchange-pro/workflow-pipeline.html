@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Exchange Pro - Trading Strategy Pipeline & Workflow Engine</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="cep-pipeline-wrapper">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Quantitative Strategy & Risk Pipeline</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Kanban strategy workflow governing alpha models, risk committee approvals, and live capital allocation.</p>
+    </header>
+
+    <section class="cep-pipeline-toolbar" aria-label="Pipeline controls">
+      <div style="font-size: 0.85rem; color: #94a3b8;">
+        Drag strategy cards between stages to advance risk status and deploy capital.
+      </div>
+      <div class="cep-board-actions">
+        <button id="btn-add-task" class="cep-board-btn">+ New Trading Model</button>
+        <button id="btn-export-json" class="cep-board-btn" style="background: #475569;">Export JSON</button>
+      </div>
+    </section>
+
+    <section id="pipeline-container" aria-live="polite">
+      <!-- Kanban board dynamically mounted here -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { CryptoExchangeProPipelineEngine } from './workflow-pipeline.js';
+
+    const container = document.getElementById('pipeline-container');
+    const engine = new CryptoExchangeProPipelineEngine();
+
+    function update() {
+      engine.render(container, () => {
+        // Updated state callback
+      });
+    }
+
+    document.getElementById('btn-add-task').addEventListener('click', () => {
+      const title = prompt('Enter Strategy Title:', 'Statistical Arbitrage Mean-Reversion');
+      if (title && title.trim()) {
+        try {
+          engine.addCard('alpha-research', {
+            title: title.trim(),
+            priority: 'high',
+            quantLead: 'Quant-Lead',
+            allocatedCapital: 60000
+          });
+          update();
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+    });
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const json = engine.exportPipelineJSON();
+      navigator.clipboard.writeText(json);
+      alert('Strategy pipeline JSON exported to clipboard!');
+    });
+
+    update();
+  </script>
+</body>
+</html>
