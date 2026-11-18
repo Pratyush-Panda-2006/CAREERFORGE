@@ -3266,3 +3266,225 @@ if (typeof module !== 'undefined' && module.exports) {
   };
 }
 /* ===== END Issue #576 ===== */
+
+
+
+/* ===== BEGIN Issue #577: AgencyStudioTelemetryVisualizer ===== */
+class AgencyStudioTelemetryVisualizer {
+  constructor(canvasElement = null, options = {}) {
+    this.canvas = canvasElement;
+    this.ctx = canvasElement && canvasElement.getContext ? canvasElement.getContext('2d') : null;
+    this.padding = options.padding || { top: 30, right: 30, bottom: 40, left: 50 };
+    this.activeWindow = '24H';
+    this.hoverPoint = null;
+
+    this.datasets = {
+      '1H': [42, 48, 55, 62, 58, 64, 71, 68, 75, 82, 79, 88],
+      '24H': [30, 45, 42, 60, 55, 70, 65, 80, 78, 85, 92, 95],
+      '7D': [120, 145, 138, 165, 190, 210, 240, 230, 275, 290, 310, 340]
+    };
+  }
+
+  normalizeData(data) {
+    if (!Array.isArray(data) || data.length === 0) return [];
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    if (min === max) {
+      return data.map(() => 0.5);
+    }
+    return data.map(val => (val - min) / (max - min));
+  }
+
+  interpolatePoints(p0, p1, t) {
+    return {
+      x: p0.x + (p1.x - p0.x) * t,
+      y: p0.y + (p1.y - p0.y) * t
+    };
+  }
+
+  calculateCoordinates(data, width = 600, height = 240) {
+    const normalized = this.normalizeData(data);
+    if (normalized.length === 0) return [];
+
+    const effectiveWidth = Math.max(1, width - this.padding.left - this.padding.right);
+    const effectiveHeight = Math.max(1, height - this.padding.top - this.padding.bottom);
+    const step = normalized.length > 1 ? effectiveWidth / (normalized.length - 1) : 0;
+
+    return normalized.map((normVal, idx) => ({
+      x: this.padding.left + idx * step,
+      y: this.padding.top + (1 - normVal) * effectiveHeight,
+      raw: data[idx],
+      normalized: normVal
+    }));
+  }
+
+  findNearestPoint(coords, mouseX) {
+    if (!Array.isArray(coords) || coords.length === 0) return null;
+    let closest = coords[0];
+    let minDiff = Math.abs(mouseX - closest.x);
+
+    for (let i = 1; i < coords.length; i++) {
+      const diff = Math.abs(mouseX - coords[i].x);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = coords[i];
+      }
+    }
+    return closest;
+  }
+
+  setTimeWindow(windowKey) {
+    if (this.datasets[windowKey]) {
+      this.activeWindow = windowKey;
+      this.render();
+      return true;
+    }
+    return false;
+  }
+
+  render() {
+    if (!this.canvas || !this.ctx) return;
+    const width = this.canvas.width || 600;
+    const height = this.canvas.height || 220;
+    const ctx = this.ctx;
+    const data = this.datasets[this.activeWindow] || this.datasets['24H'];
+    const coords = this.calculateCoordinates(data, width, height);
+
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      const y = this.padding.top + ((height - this.padding.top - this.padding.bottom) / 3) * i;
+      ctx.beginPath();
+      ctx.moveTo(this.padding.left, y);
+      ctx.lineTo(width - this.padding.right, y);
+      ctx.stroke();
+    }
+
+    if (coords.length < 2) return;
+
+    const areaGradient = ctx.createLinearGradient(0, this.padding.top, 0, height - this.padding.bottom);
+    areaGradient.addColorStop(0, 'rgba(99, 102, 241, 0.35)');
+    areaGradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+    ctx.beginPath();
+    ctx.moveTo(coords[0].x, coords[0].y);
+    for (let i = 0; i < coords.length - 1; i++) {
+      const curr = coords[i];
+      const next = coords[i + 1];
+      const mid = this.interpolatePoints(curr, next, 0.5);
+      ctx.quadraticCurveTo(curr.x, curr.y, mid.x, mid.y);
+    }
+    const last = coords[coords.length - 1];
+    ctx.lineTo(last.x, last.y);
+    ctx.lineTo(last.x, height - this.padding.bottom);
+    ctx.lineTo(coords[0].x, height - this.padding.bottom);
+    ctx.closePath();
+    ctx.fillStyle = areaGradient;
+    ctx.fill();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(coords[0].x, coords[0].y);
+    for (let i = 0; i < coords.length - 1; i++) {
+      const curr = coords[i];
+      const next = coords[i + 1];
+      const mid = this.interpolatePoints(curr, next, 0.5);
+      ctx.quadraticCurveTo(curr.x, curr.y, mid.x, mid.y);
+    }
+    ctx.lineTo(last.x, last.y);
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = 'rgba(99, 102, 241, 0.7)';
+    ctx.shadowBlur = 8;
+    ctx.stroke();
+    ctx.restore();
+
+    if (this.hoverPoint) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(this.hoverPoint.x, this.hoverPoint.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#6366f1';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = '#6366f1';
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  initUI() {
+    if (typeof window === 'undefined' || !window.document || !window.document.getElementById) return;
+    const canvas = document.getElementById('agency-studio-telemetry-canvas');
+    if (canvas) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext ? canvas.getContext('2d') : null;
+    }
+    const overlay = document.getElementById('agencyTelemetryTooltip');
+    const buttons = document.querySelectorAll('.agency-telemetry-window-btn');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const win = btn.getAttribute('data-window');
+        this.setTimeWindow(win);
+      });
+    });
+
+    if (this.canvas) {
+      this.canvas.addEventListener('mousemove', (e) => {
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+        const data = this.datasets[this.activeWindow] || this.datasets['24H'];
+        const coords = this.calculateCoordinates(data, this.canvas.width, this.canvas.height);
+        const nearest = this.findNearestPoint(coords, mouseX);
+
+        if (nearest) {
+          this.hoverPoint = nearest;
+          this.render();
+          if (overlay) {
+            overlay.style.display = 'block';
+            overlay.style.left = `${(nearest.x / this.canvas.width) * 100}%`;
+            overlay.style.top = `${(nearest.y / this.canvas.height) * 100}%`;
+            overlay.innerHTML = `<strong>${nearest.raw}</strong> req/s`;
+          }
+        }
+      });
+
+      this.canvas.addEventListener('mouseleave', () => {
+        this.hoverPoint = null;
+        this.render();
+        if (overlay) overlay.style.display = 'none';
+      });
+
+      this.render();
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.AgencyStudioTelemetryVisualizer = AgencyStudioTelemetryVisualizer;
+  if (document && document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const visualizer = new AgencyStudioTelemetryVisualizer();
+      visualizer.initUI();
+    });
+  }
+}
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.AgencyStudioTelemetryVisualizer = AgencyStudioTelemetryVisualizer;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    ...module.exports,
+    AgencyStudioTelemetryVisualizer
+  };
+}
+/* ===== END Issue #577 ===== */
+
