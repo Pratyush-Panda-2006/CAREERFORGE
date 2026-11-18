@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Adaptive Preferences & Reader State Engine</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body class="docs-portal-prefs-view">
+  <div class="docs-portal-layout">
+    <!-- Top Bar -->
+    <header class="docs-header">
+      <div class="brand">
+        <span class="badge-pill">Knowledge Core</span>
+        <h1>Documentation Portal Reader Hub</h1>
+        <p>Configurable client-side reader personalization engine with persistent LocalStorage state machine.</p>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="btnOpenPreferences" class="btn btn-primary">
+          <span class="icon">⚙</span>
+          <span>Reader Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Reading Preview Section -->
+    <section class="docs-preview-workspace">
+      <article class="doc-article">
+        <div class="article-meta">
+          <span class="category-tag">API Reference</span>
+          <span class="badge-live">Reader Configuration Applied</span>
+        </div>
+        <h2>Getting Started with Docs Portal Core</h2>
+        <p class="lead">
+          The Docs Portal provides sub-millisecond full-text search, live API exploration, and rich markdown parsing with syntax highlighting across documentation nodes.
+        </p>
+        <p>
+          Customize your reading preferences including font scaling, typography themes, and accessibility contrast settings. Your settings persist automatically in LocalStorage across browser sessions.
+        </p>
+      </article>
+    </section>
+
+    <!-- Preferences Modal Drawer (Issue #591) -->
+    <div id="docs-portal-preferences-modal" class="modal-overlay">
+      <div class="modal-drawer">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span class="icon-gear">⚙</span>
+            <h3>Documentation Reader Preferences</h3>
+          </div>
+          <button type="button" id="btnClosePreferences" class="btn-close" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Theme Settings -->
+          <div class="pref-group">
+            <label for="prefTheme">Color Theme</label>
+            <select id="prefTheme" class="custom-select">
+              <option value="dark">Dark (Default)</option>
+              <option value="light">Light Paper</option>
+              <option value="sepia">Warm Sepia</option>
+              <option value="dracula">Dracula Dark</option>
+              <option value="nord">Nord Frost</option>
+            </select>
+          </div>
+
+          <!-- Reader Typography -->
+          <div class="pref-group">
+            <label for="prefReaderFont">Reader Typography</label>
+            <select id="prefReaderFont" class="custom-select">
+              <option value="inter">Inter (Clean Sans)</option>
+              <option value="serif">Merriweather (Editorial Serif)</option>
+              <option value="mono">Fira Code (Developer Mono)</option>
+              <option value="dyslexic">OpenDyslexic (Accessible)</option>
+            </select>
+          </div>
+
+          <!-- Reading Layout Density -->
+          <div class="pref-group">
+            <label for="prefLayout">Reading Layout Density</label>
+            <select id="prefLayout" class="custom-select">
+              <option value="comfortable">Comfortable (Optimal Margins)</option>
+              <option value="compact">Compact (Dense View)</option>
+              <option value="wide">Full-Width Canvas</option>
+            </select>
+          </div>
+
+          <!-- Font Scaling Slider -->
+          <div class="pref-group">
+            <div class="slider-header">
+              <label for="prefFontSize">Reading Font Size</label>
+              <span id="fontSizeDisplay" class="slider-val">16px</span>
+            </div>
+            <input type="range" id="prefFontSize" class="custom-range" min="12" max="24" value="16">
+          </div>
+
+          <!-- Toggles -->
+          <div class="pref-toggles">
+            <label class="toggle-row">
+              <span class="toggle-label">High-Contrast Mode</span>
+              <input type="checkbox" id="prefHighContrast" class="toggle-checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+
+            <label class="toggle-row">
+              <span class="toggle-label">Show Sticky Table of Contents</span>
+              <input type="checkbox" id="prefShowToc" class="toggle-checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+
+            <label class="toggle-row">
+              <span class="toggle-label">Auto-Expand Code Blocks</span>
+              <input type="checkbox" id="prefAutoExpandCode" class="toggle-checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="footer-left">
+            <button type="button" id="btnResetPreferences" class="btn btn-secondary">Restore Defaults</button>
+          </div>
+          <div class="footer-right">
+            <button type="button" id="btnExportPreferences" class="btn btn-primary">Export JSON</button>
+            <label class="btn btn-outline" for="importPreferencesFile">
+              Import
+              <input type="file" id="importPreferencesFile" accept=".json" style="display:none;">
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="preferencesToast" class="toast-popup"></div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
