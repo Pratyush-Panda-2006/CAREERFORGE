@@ -1,0 +1,152 @@
+/* AerospaceOrbiterNotificationHub Styles */
+.ao-notification-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 680px;
+  margin: 1.5rem auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: #e2e8f0;
+}
+
+.ao-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  background: #0f172a;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+}
+
+.ao-btn {
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  color: #ffffff;
+}
+
+.ao-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.ao-btn-critical { background-color: #ef4444; }
+.ao-btn-warning { background-color: #f59e0b; color: #1e1e2f; }
+.ao-btn-success { background-color: #10b981; }
+.ao-btn-info { background-color: #3b82f6; }
+.ao-btn-clear { background-color: #475569; }
+
+.ao-toast-viewport {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 120px;
+}
+
+.ao-empty-hub {
+  text-align: center;
+  padding: 2rem;
+  background: #090d16;
+  border: 1px dashed #334155;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.ao-toast {
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  animation: aoSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  border-left: 4px solid #94a3b8;
+}
+
+.ao-toast-critical { border-left-color: #ef4444; background: #2a1215; }
+.ao-toast-warning { border-left-color: #f59e0b; background: #2d2109; }
+.ao-toast-success { border-left-color: #10b981; background: #0c251d; }
+.ao-toast-info { border-left-color: #3b82f6; background: #0f2038; }
+
+.ao-toast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.ao-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.ao-badge-critical { background: #7f1d1d; color: #fecaca; }
+.ao-badge-warning { background: #78350f; color: #fef3c7; }
+.ao-badge-success { background: #064e3b; color: #a7f3d0; }
+.ao-badge-info { background: #1e3a8a; color: #bfdbfe; }
+
+.ao-toast-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.ao-toast-close {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0.25rem;
+}
+
+.ao-toast-close:hover {
+  color: #ffffff;
+}
+
+.ao-toast-message {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #f1f5f9;
+}
+
+.ao-toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ao-toast-progress-fill {
+  height: 100%;
+  width: 100%;
+  background: currentColor;
+  animation: aoProgressLinear linear forwards;
+}
+
+@keyframes aoSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes aoProgressLinear {
+  from { width: 100%; }
+  to { width: 0%; }
+}
