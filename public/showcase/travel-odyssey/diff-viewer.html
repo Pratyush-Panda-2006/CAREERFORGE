@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Odyssey - Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .to-preset-selector {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .to-select {
+      padding: 8px 14px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid rgba(14, 165, 233, 0.4);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Travel Itinerary & Visa Policy Diff Inspector</h1>
+  <div class="to-preset-selector">
+    <label for="preset-dropdown">Select Itinerary / Policy Revision:</label>
+    <select id="preset-dropdown" class="to-select">
+      <option value="itineraryEvolution">Tokyo 7-Day Itinerary</option>
+      <option value="visaPolicyChange">EU ETIAS Visa Policy</option>
+      <option value="flightReschedule">Flight Schedule Retime</option>
+    </select>
+  </div>
+
+  <div id="diff-root"></div>
+
+  <script type="module">
+    import { TravelOdysseyDiffInspector } from './diff-viewer.js';
+
+    const inspector = new TravelOdysseyDiffInspector();
+    const root = document.getElementById('diff-root');
+    const select = document.getElementById('preset-dropdown');
+
+    const update = (key) => {
+      const preset = inspector.getPreset(key);
+      if (preset) {
+        const diff = inspector.computeDiff(preset.left, preset.right);
+        inspector.render(root, diff);
+      }
+    };
+
+    select.addEventListener('change', (e) => update(e.target.value));
+    update('itineraryEvolution');
+  </script>
+</body>
+</html>
