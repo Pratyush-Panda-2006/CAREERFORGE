@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Culinary Bistro - Adaptive Preferences & State Engine</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body class="culinary-bistro-prefs-view">
+  <div class="culinary-bistro-layout">
+    <!-- Top Bar -->
+    <header class="bistro-header">
+      <div class="brand">
+        <span class="badge-pill">Bistro Hospitality</span>
+        <h1>Culinary Bistro Management Hub</h1>
+        <p>Configurable dining hall, sommelier cellar, and kitchen preference state machine with LocalStorage persistence.</p>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="btnOpenPreferences" class="btn btn-primary">
+          <span class="icon">⚙</span>
+          <span>Bistro Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Dining Showcase Workspace -->
+    <section class="bistro-preview-workspace">
+      <article class="bistro-card">
+        <div class="card-meta">
+          <span class="category-tag">Chef's Table Reservation</span>
+          <span class="badge-live">Preferences Applied</span>
+        </div>
+        <h2>Private Cellar & Sommelier Experience</h2>
+        <p class="lead">
+          Real-time table state management, cellar vintage temperature auditing, and dynamic guest dietary requirement filters.
+        </p>
+        <p>
+          Configure dining display units, high-contrast menus for accessible guest ordering, and kitchen alert sound cues.
+        </p>
+      </article>
+    </section>
+
+    <!-- Preferences Modal Drawer (Issue #595) -->
+    <div id="culinary-bistro-preferences-modal" class="modal-overlay">
+      <div class="modal-drawer">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span class="icon-gear">⚙</span>
+            <h3>Bistro Experience Preferences</h3>
+          </div>
+          <button type="button" id="btnClosePreferences" class="btn-close" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Theme Settings -->
+          <div class="pref-group">
+            <label for="prefTheme">Ambiance Theme</label>
+            <select id="prefTheme" class="custom-select">
+              <option value="dark">Midnight Velvet (Default)</option>
+              <option value="light">Bistro Daybreak</option>
+              <option value="vintage">Oak Cellar Warm</option>
+              <option value="emerald">Botanical Garden</option>
+            </select>
+          </div>
+
+          <!-- Temperature Unit -->
+          <div class="pref-group">
+            <label for="prefTempUnit">Cellar Temperature Scale</label>
+            <select id="prefTempUnit" class="custom-select">
+              <option value="celsius">Celsius (°C)</option>
+              <option value="fahrenheit">Fahrenheit (°F)</option>
+            </select>
+          </div>
+
+          <!-- Currency Format -->
+          <div class="pref-group">
+            <label for="prefCurrency">Menu Currency Symbol</label>
+            <select id="prefCurrency" class="custom-select">
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="JPY">JPY (¥)</option>
+            </select>
+          </div>
+
+          <!-- Table Density -->
+          <div class="pref-group">
+            <label for="prefTableDensity">Dining Floor Density</label>
+            <select id="prefTableDensity" class="custom-select">
+              <option value="spacious">Spacious (Fine Dining)</option>
+              <option value="standard">Standard Bistro</option>
+              <option value="compact">High Capacity Lounge</option>
+            </select>
+          </div>
+
+          <!-- Toggles -->
+          <div class="pref-toggles">
+            <label class="toggle-row">
+              <span class="toggle-label">High-Contrast Accessible Menu</span>
+              <input type="checkbox" id="prefHighContrast" class="toggle-checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+
+            <label class="toggle-row">
+              <span class="toggle-label">Kitchen Order Audio Chimes</span>
+              <input type="checkbox" id="prefSoundCues" class="toggle-checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+
+            <label class="toggle-row">
+              <span class="toggle-label">Allergen & Dietary Warning Badges</span>
+              <input type="checkbox" id="prefDietaryAlerts" class="toggle-checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="footer-left">
+            <button type="button" id="btnResetPreferences" class="btn btn-secondary">Restore Defaults</button>
+          </div>
+          <div class="footer-right">
+            <button type="button" id="btnExportPreferences" class="btn btn-primary">Export JSON</button>
+            <label class="btn btn-outline" for="importPreferencesFile">
+              Import
+              <input type="file" id="importPreferencesFile" accept=".json" style="display:none;">
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="preferencesToast" class="toast-popup"></div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
