@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Esports Hub - Tournament Filter Engine</title>
+  <link rel="stylesheet" href="filter-engine.css">
+</head>
+<body>
+  <div class="esports-filter-container">
+    <header class="esports-filter-header">
+      <div class="header-titles">
+        <span class="esports-badge">Arena Hub</span>
+        <h2 class="filter-title">Competitive Tournament Discovery</h2>
+        <p class="filter-subtitle">Search, compound tag filter, and multi-sort premier championship matches and prize pools</p>
+      </div>
+      <div class="header-meta">
+        <span id="esportsResultsCount" class="results-pill">Loading...</span>
+      </div>
+    </header>
+
+    <div class="filter-controls-bar">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="esportsSearchInput" class="search-input" placeholder="Search tournaments by title, game, tier, or tags...">
+        <button type="button" id="clearSearchBtn" class="clear-search-btn" style="display: none;" aria-label="Clear Search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sort-wrapper">
+        <select id="esportsSortSelect" class="sort-select">
+          <option value="title:asc">Tournament Title (A - Z)</option>
+          <option value="title:desc">Tournament Title (Z - A)</option>
+          <option value="prizePool:desc">Prize Pool (Highest First)</option>
+          <option value="prizePool:asc">Prize Pool (Lowest First)</option>
+          <option value="viewers:desc">Peak Viewership</option>
+          <option value="rating:desc">Hype Rating</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="tag-chips-section">
+      <span class="tags-label">Esports Tags & Genres:</span>
+      <div id="esportsTagChips" class="tag-chips-container"></div>
+    </div>
+
+    <div id="esportsMatchCards" class="match-cards-grid"></div>
+
+    <div id="esportsEmptyState" class="empty-state-card" style="display: none;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <line x1="8" y1="11" x2="14" y2="11"></line>
+      </svg>
+      <h3>No matching tournaments found</h3>
+      <p>Try refining your search keyword or clearing selected genre tags.</p>
+    </div>
+  </div>
+
+  <script type="module" src="filter-engine.js"></script>
+</body>
+</html>
