@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Museum 3D - Curatorial Preset Snippet Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+</head>
+<body>
+  <div class="vault-wrapper">
+    <header class="vault-header">
+      <div>
+        <h1 class="vault-title">Virtual Museum 3D Preset Snippet Vault</h1>
+        <p class="vault-subtitle">Search and inspect verified OrbitControls damping rigs, PBR marble shaders, photogrammetry LOD decimation, and exhibition spotlights.</p>
+      </div>
+      <button id="openAddModalBtn" class="btn-primary">+ Add 3D Preset</button>
+    </header>
+
+    <div class="controls-bar">
+      <input type="text" id="searchSnippetInput" class="search-input" placeholder="Search presets by keyword, Three.js class, shader uniform, or tag...">
+      <div id="tagFilterBar" class="tag-bar">
+        <button class="filter-pill active" data-tag="all">All Presets</button>
+        <button class="filter-pill" data-tag="camera">Camera Rig</button>
+        <button class="filter-pill" data-tag="material">PBR Shader</button>
+        <button class="filter-pill" data-tag="geometry">Photogrammetry LOD</button>
+        <button class="filter-pill" data-tag="lighting">Gallery Lighting</button>
+      </div>
+    </div>
+
+    <div id="snippetList" class="snippets-grid"></div>
+  </div>
+
+  <div id="addSnippetModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Save 3D Exhibit Preset Snippet</h3>
+        <button id="closeModalBtn" class="close-btn">&times;</button>
+      </div>
+      <form id="newSnippetForm">
+        <div class="form-group">
+          <label for="inputSnippetTitle">Preset Title</label>
+          <input type="text" id="inputSnippetTitle" placeholder="e.g. Bronze Patina Procedural Normal Generator" required>
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetCategory">Category</label>
+          <select id="inputSnippetCategory">
+            <option value="camera">Camera Rig</option>
+            <option value="material">PBR Shader</option>
+            <option value="geometry">Photogrammetry LOD</option>
+            <option value="lighting">Gallery Lighting</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetTags">Tags (comma-separated)</label>
+          <input type="text" id="inputSnippetTags" placeholder="threejs, pbr, material">
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetDesc">Description</label>
+          <input type="text" id="inputSnippetDesc" placeholder="Brief technical summary...">
+        </div>
+        <div class="form-group">
+          <label for="inputSnippetCode">Code / Config Definition</label>
+          <textarea id="inputSnippetCode" rows="6" placeholder="// Enter JavaScript / Three.js code..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">Save to Vault</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="snippet-vault.js"></script>
+</body>
+</html>
