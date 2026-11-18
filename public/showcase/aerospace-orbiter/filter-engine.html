@@ -1,0 +1,56 @@
+<div class="aero-filter-container" id="aero-filter-engine-widget">
+  <div class="aero-filter-toolbar">
+    <div class="aero-search-box">
+      <svg class="aero-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="text"
+        id="aero-search-input"
+        class="aero-search-input"
+        placeholder="Search orbital craft by name, NORAD ID, or regime (e.g. ISS, JWST, LEO)..."
+        aria-label="Search orbital craft"
+      >
+      <button type="button" id="aero-search-clear" class="aero-clear-btn" aria-label="Clear search" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="aero-sort-box">
+      <label for="aero-sort-select" class="aero-sort-label">Sort:</label>
+      <select id="aero-sort-select" class="aero-sort-select" aria-label="Sort spacecraft">
+        <option value="altitudeKm:desc">Altitude (Highest Ephemeris)</option>
+        <option value="altitudeKm:asc">Altitude (Lowest Perigee)</option>
+        <option value="velocityKmS:desc">Velocity (Fastest Orbital)</option>
+        <option value="velocityKmS:asc">Velocity (Slowest Orbital)</option>
+        <option value="massKg:desc">Dry Mass (Heaviest)</option>
+        <option value="name:asc">Spacecraft Name (A-Z)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="aero-tag-strip" id="aero-tag-chips" role="group" aria-label="Filter by orbital tags">
+    <button type="button" class="aero-tag-chip" data-tag="leo">LEO</button>
+    <button type="button" class="aero-tag-chip" data-tag="geo">GEO</button>
+    <button type="button" class="aero-tag-chip" data-tag="deep-space">Deep Space</button>
+    <button type="button" class="aero-tag-chip" data-tag="space-station">Space Station</button>
+    <button type="button" class="aero-tag-chip" data-tag="crewed">Crewed Mission</button>
+    <button type="button" class="aero-tag-chip" data-tag="scientific">Scientific</button>
+    <button type="button" class="aero-tag-chip" data-tag="lunar">Lunar</button>
+  </div>
+
+  <div class="aero-filter-status">
+    <span id="aero-results-count" class="aero-count-pill">Tracking 8 active spacecraft</span>
+    <button type="button" id="aero-reset-filters-btn" class="aero-reset-link" style="display:none;">Reset ephemeris filters</button>
+  </div>
+
+  <div id="aero-empty-state" class="aero-empty-card" style="display:none;">
+    <div class="aero-empty-icon">⏣</div>
+    <h4>No Orbital Craft Found</h4>
+    <p>No orbital trajectories match your current query or tags. Try adjusting your parameters.</p>
+  </div>
+</div>
