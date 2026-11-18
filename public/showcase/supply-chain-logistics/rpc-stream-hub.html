@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Logistics - WebSocket & RPC Streaming Hub</title>
+  <link rel="stylesheet" href="rpc-stream-hub.css">
+</head>
+<body>
+  <div class="rpc-container">
+    <header class="rpc-header">
+      <div class="header-titles">
+        <h2>⚡ Supply Chain Real-Time RPC & Telemetry Hub</h2>
+        <p>Bi-directional multiplexed RPC execution, PubSub message dispatching & fleet stream monitor</p>
+      </div>
+      <span id="connectionStatusBadge" class="status-badge badge-disconnected">DISCONNECTED</span>
+    </header>
+
+    <div class="endpoint-toolbar">
+      <input type="text" id="wsEndpointInput" value="wss://telemetry.supplychain.carrierforge.io/v1/rpc" class="input-endpoint">
+      <button id="btnConnect" class="btn btn-connect">Connect</button>
+      <button id="btnDisconnect" class="btn btn-disconnect">Disconnect</button>
+    </div>
+
+    <div class="actions-panel">
+      <h3>Dispatch Logistics RPC & Broadcast PubSub</h3>
+      <div class="btn-group">
+        <button id="btnSendPing" class="btn btn-action">Send ping() RPC</button>
+        <button id="btnGetFleetStatus" class="btn btn-action">Send getFleetStatus() RPC</button>
+        <button id="btnBroadcastTelemetry" class="btn btn-action">Broadcast fleet:telemetry</button>
+        <button id="btnClearLogs" class="btn btn-clear">Clear Stream</button>
+      </div>
+    </div>
+
+    <div class="stream-panel">
+      <div class="stream-header">
+        <h3>Live Duplex Telemetry Stream</h3>
+        <span class="stream-mode">JSON-RPC 2.0 / WebSockets</span>
+      </div>
+      <div id="rpcLogContainer" class="rpc-log-container">
+        <!-- RPC logs render here -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="rpc-stream-hub.js"></script>
+</body>
+</html>
