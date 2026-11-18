@@ -1,0 +1,138 @@
+<div id="quantum-forge-preferences-modal" class="quantum-modal-backdrop" aria-hidden="true" role="dialog" aria-labelledby="quantum-pref-title">
+  <div class="quantum-modal-drawer">
+    <div class="quantum-drawer-header">
+      <div class="quantum-header-brand">
+        <span class="quantum-psi-icon">Ψ</span>
+        <h2 id="quantum-pref-title">Quantum Workbench Settings</h2>
+      </div>
+      <button type="button" class="quantum-close-btn" id="quantum-pref-close" aria-label="Close preferences drawer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="quantum-drawer-body">
+      <section class="quantum-pref-group">
+        <h3 class="quantum-group-title">State Visualization & Architecture</h3>
+
+        <div class="quantum-field-row">
+          <div class="quantum-label-col">
+            <label for="quantum-theme-select">Workbench Theme</label>
+            <span class="quantum-field-desc">Cryogenic dark palette for laser and pulse alignment</span>
+          </div>
+          <div class="quantum-control-col">
+            <select id="quantum-theme-select" class="quantum-select">
+              <option value="superconducting-dark">Superconducting Niobium</option>
+              <option value="trapped-ion-violet">Trapped Ion Ultraviolet</option>
+              <option value="topological-emerald">Topological Emerald</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="quantum-field-row">
+          <div class="quantum-label-col">
+            <label for="quantum-layout-select">Circuit Topology Visualizer</label>
+            <span class="quantum-field-desc">Qubit state vector coordinate projection</span>
+          </div>
+          <div class="quantum-control-col">
+            <select id="quantum-layout-select" class="quantum-select">
+              <option value="bloch-sphere">3D Bloch Sphere Multi-Qubit</option>
+              <option value="q-sphere">Q-Sphere Phase Diagram</option>
+              <option value="circuit-timeline">2D Gate Schedule Ribbon</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="quantum-field-row">
+          <div class="quantum-label-col">
+            <label for="quantum-basis-select">Native Basis Gate Set</label>
+            <span class="quantum-field-desc">Hardware target for quantum circuit transpilation</span>
+          </div>
+          <div class="quantum-control-col">
+            <select id="quantum-basis-select" class="quantum-select">
+              <option value="ibm-falcon">IBM Falcon (CX, ID, RZ, SX, X)</option>
+              <option value="rigetti-aspen">Rigetti Aspen (CZ, XY, RZ, RX)</option>
+              <option value="ionq-aria">IonQ Aria (GPI, GPI2, MS)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="quantum-field-row">
+          <div class="quantum-label-col">
+            <label for="quantum-shots-select">Default Sampling Shots</label>
+            <span class="quantum-field-desc">Monte Carlo measurement iterations per circuit</span>
+          </div>
+          <div class="quantum-control-col">
+            <select id="quantum-shots-select" class="quantum-select">
+              <option value="256">256 Shots (Draft)</option>
+              <option value="1024" selected>1,024 Shots (Standard)</option>
+              <option value="4096">4,096 Shots (High Precision)</option>
+              <option value="8192">8,192 Shots (Fault-Tolerant)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="quantum-pref-group">
+        <h3 class="quantum-group-title">Decoherence Audio & Safety</h3>
+
+        <div class="quantum-field-row">
+          <div class="quantum-label-col">
+            <span class="quantum-field-name">Decoherence Alert Audio</span>
+            <span class="quantum-field-desc">Acoustic alert when T1/T2 relaxation crosses threshold</span>
+          </div>
+          <div class="quantum-control-col">
+            <label class="quantum-switch">
+              <input type="checkbox" id="quantum-decoherence-audio" checked>
+              <span class="quantum-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quantum-field-row">
+          <div class="quantum-label-col">
+            <span class="quantum-field-name">Gate Execution Tone</span>
+            <span class="quantum-field-desc">Frequency micro-tones synthesized on Hadamard &amp; CNOT gates</span>
+          </div>
+          <div class="quantum-control-col">
+            <label class="quantum-switch">
+              <input type="checkbox" id="quantum-gate-tone" checked>
+              <span class="quantum-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quantum-field-row">
+          <div class="quantum-label-col">
+            <span class="quantum-field-name">High-Contrast Qubit Matrix</span>
+            <span class="quantum-field-desc">Maximum contrast qubit register grid for visual acuity</span>
+          </div>
+          <div class="quantum-control-col">
+            <label class="quantum-switch">
+              <input type="checkbox" id="quantum-contrast-qubits">
+              <span class="quantum-slider"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="quantum-drawer-footer">
+      <div class="quantum-footer-left">
+        <button type="button" class="quantum-btn-secondary" id="quantum-reset-defaults">
+          Reset Defaults
+        </button>
+      </div>
+      <div class="quantum-footer-right">
+        <button type="button" class="quantum-btn-violet" id="quantum-export-config">
+          Export Quantum Config
+        </button>
+        <button type="button" class="quantum-btn-primary" id="quantum-save-pref">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
