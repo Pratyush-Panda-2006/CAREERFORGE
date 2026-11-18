@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub — Monte Carlo Simulation Sandbox</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+</head>
+<body class="festival-sim-body">
+  <div class="sim-container">
+    <header class="sim-header">
+      <span class="badge">NUMERICAL SIMULATOR</span>
+      <h1>🎪 Festival Hub Monte Carlo Crowd Attendance Simulator</h1>
+      <p>Autonomous numerical simulation engine executing 1,000 iterative Monte Carlo runs to forecast attendance distributions and risk bounds.</p>
+    </header>
+
+    <div class="sim-card">
+      <div class="params-row">
+        <div class="param-group">
+          <label for="sim-trials">Trials</label>
+          <input type="number" id="sim-trials" value="1000" min="100" max="10000" step="100">
+        </div>
+        <div class="param-group">
+          <label for="sim-volatility">Volatility (σ)</label>
+          <input type="number" id="sim-volatility" value="0.15" min="0.01" max="0.5" step="0.01">
+        </div>
+        <div class="param-group">
+          <label for="sim-base">Base Crowd</label>
+          <input type="number" id="sim-base" value="25000" min="1000" max="100000" step="1000">
+        </div>
+        <button type="button" id="btn-run-sim" class="btn btn-primary">Run Monte Carlo</button>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card primary">
+          <span class="label">Expected Mean</span>
+          <span id="metric-mean" class="val">25,000</span>
+          <span class="unit">attendees</span>
+        </div>
+        <div class="metric-card">
+          <span class="label">Standard Deviation</span>
+          <span id="metric-stddev" class="val">±3,750</span>
+          <span class="unit">1-sigma spread</span>
+        </div>
+        <div class="metric-card">
+          <span class="label">P50 Median</span>
+          <span id="metric-p50" class="val">24,900</span>
+          <span class="unit">50th percentile</span>
+        </div>
+        <div class="metric-card">
+          <span class="label">P95 Worst-Case Spike</span>
+          <span id="metric-p95" class="val">31,500</span>
+          <span class="unit">95th percentile</span>
+        </div>
+      </div>
+    </div>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Festival Hub Showcase</a>
+    </nav>
+  </div>
+
+  <script type="module" src="simulation-sandbox.js"></script>
+</body>
+</html>
