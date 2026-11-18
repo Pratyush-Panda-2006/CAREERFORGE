@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter — Offline Data Persistence & Queue Engine</title>
+  <link rel="stylesheet" href="offline-sync.css">
+</head>
+<body class="aerospace-sync-body">
+  <div class="sync-container">
+    <header class="sync-header">
+      <span class="badge">OFFLINE QUEUE & VECTOR CLOCKS</span>
+      <h1>🛰️ Aerospace Orbiter Resilient Offline Data Persistence</h1>
+      <p>Deterministic client-side queue engine buffering space telemetry and thruster commands during deep-space signal occlusion.</p>
+    </header>
+
+    <div class="sync-card">
+      <div class="status-row">
+        <div class="status-group">
+          <span class="label">Telemetry Link Status</span>
+          <span id="connection-status-badge" class="status-badge online">Online (Telemetry Linked)</span>
+        </div>
+        <div class="status-group">
+          <span class="label">Buffered Mutations</span>
+          <span class="queue-num"><span id="queue-count">0</span> items</span>
+        </div>
+        <button type="button" id="sync-now-btn" class="btn btn-primary">Sync Now</button>
+      </div>
+
+      <div class="info-section">
+        <h3>Queue Synchronization Characteristics</h3>
+        <ul class="feature-list">
+          <li><strong>Vector Clock Reconciliation:</strong> Causally deterministic resolution prevents state overwrites across orbiter ground stations.</li>
+          <li><strong>Exponential Retry Backoff:</strong> Protects satellite radio downlink channels with formula: <code>baseBackoff * 2^retries</code>.</li>
+          <li><strong>FIFO Persistence:</strong> Guaranteed chronological command sequencing across telemetry reboots.</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Aerospace Orbiter Showcase</a>
+    </nav>
+  </div>
+
+  <script type="module" src="offline-sync.js"></script>
+</body>
+</html>
