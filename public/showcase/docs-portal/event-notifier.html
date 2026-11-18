@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Reactive Toast Notification & Audio Dispatcher</title>
+  <link rel="stylesheet" href="event-notifier.css">
+</head>
+<body class="notifier-body">
+  <div class="notifier-container">
+    <header class="notifier-header">
+      <div class="header-info">
+        <h1 class="notifier-title">Docs Portal Notification Dispatcher</h1>
+        <p class="notifier-subtitle">Prioritized Docs Portal event stream with synthesized Web Audio chimes & automated eviction</p>
+      </div>
+      <div class="header-controls">
+        <label class="volume-switch">
+          <input type="checkbox" id="audio-toggle" checked>
+          <span class="slider"></span>
+          <span class="label-text">Audio Chimes</span>
+        </label>
+        <button id="clear-all-btn" class="btn btn-secondary">Clear Alert Queue</button>
+      </div>
+    </header>
+
+    <section class="trigger-matrix">
+      <h2>Simulate Docs Portal Events</h2>
+      <div class="button-row">
+        <button class="btn btn-info" data-type="info">ℹ️ Info Notice</button>
+        <button class="btn btn-success" data-type="success">✅ Success Event</button>
+        <button class="btn btn-warning" data-type="warning">⚠️ Warning Alert</button>
+        <button class="btn btn-danger" data-type="danger">🚨 Urgent Alert</button>
+      </div>
+    </section>
+
+    <main class="notifier-layout">
+      <section class="queue-panel">
+        <div class="panel-head">
+          <h3>Active Notification Stack</h3>
+          <span class="status-pill" id="stack-count">0 active</span>
+        </div>
+        <div class="stack-list" id="active-stack"></div>
+      </section>
+
+      <section class="history-panel">
+        <div class="panel-head">
+          <h3>Archived Event Stream</h3>
+          <span class="status-pill neutral" id="history-count">0 logs</span>
+        </div>
+        <div class="history-list" id="history-stream"></div>
+      </section>
+    </main>
+
+    <div class="toast-stack-viewport" id="toast-viewport"></div>
+  </div>
+
+  <script type="module">
+    import { DocsPortalNotificationManager } from './event-notifier.js';
+
+    const notifier = new DocsPortalNotificationManager({ maxQueueSize: 5 });
+
+    const presets = {
+      info: { title: 'Doc Index Rebuilt', msg: 'Search vector indexing updated across 450 Markdown guides.' },
+      success: { title: 'SDK v3.2 Released', msg: 'Client library bindings published to npm and PyPI registries.' },
+      warning: { title: 'API Deprecation', msg: 'v1 endpoint sunset scheduled in 14 days.' },
+      danger: { title: 'Rate Limit Exceeded', msg: '429 Too Many Requests detected on public gateway.' }
+    };
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function render() {
+      const active = notifier.getActiveQueue();
+      const history = notifier.getHistory();
+
+      document.getElementById('stack-count').textContent = `${active.length} / 5 active`;
+      document.getElementById('history-count').textContent = `${history.length} logged`;
+
+      const stackContainer = document.getElementById('active-stack');
+      stackContainer.innerHTML = '';
+      if (active.length === 0) {
+        stackContainer.innerHTML = '<div class="empty-state">No active notifications in queue.</div>';
+      } else {
+        active.forEach(item => {
+          const el = document.createElement('div');
+          el.className = `stack-item item-${item.type}`;
+          el.innerHTML = `
+            <div class="item-badge">${item.type.toUpperCase()}</div>
+            <div class="item-content">
+              <strong>${escapeHtml(item.title)}</strong>
+              <p>${escapeHtml(item.message)}</p>
+            </div>
+            <button class="btn-dismiss" data-id="${item.id}">&times;</button>
+          `;
+          el.querySelector('.btn-dismiss').onclick = () => notifier.dismiss(item.id, 'manual');
+          stackContainer.appendChild(el);
+        });
+      }
+
+      const viewport = document.getElementById('toast-viewport');
+      viewport.innerHTML = '';
+      active.forEach(item => {
+        const toast = document.createElement('div');
+        toast.className = `toast-toast toast-${item.type}`;
+        toast.innerHTML = `
+          <div class="toast-title-bar">
+            <span class="toast-tag">${item.type.toUpperCase()}</span>
+            <span class="toast-close-x" data-id="${item.id}">&times;</span>
+          </div>
+          <div class="toast-headline">${escapeHtml(item.title)}</div>
+          <div class="toast-bodytext">${escapeHtml(item.message)}</div>
+        `;
+        toast.querySelector('.toast-close-x').onclick = () => notifier.dismiss(item.id, 'manual');
+        viewport.appendChild(toast);
+      });
+
+      const histContainer = document.getElementById('history-stream');
+      histContainer.innerHTML = '';
+      if (history.length === 0) {
+        histContainer.innerHTML = '<div class="empty-state">No archived notification events.</div>';
+      } else {
+        history.slice().reverse().forEach(h => {
+          const row = document.createElement('div');
+          row.className = 'history-row';
+          row.innerHTML = `
+            <span class="history-dot dot-${h.type}"></span>
+            <span class="history-time">${new Date(h.timestamp).toLocaleTimeString()}</span>
+            <span class="history-title">${escapeHtml(h.title)}</span>
+            <span class="history-reason">${h.reason}</span>
+          `;
+          histContainer.appendChild(row);
+        });
+      }
+    }
+
+    notifier.subscribe(() => render());
+
+    document.querySelectorAll('.trigger-matrix .btn').forEach(btn => {
+      btn.onclick = () => {
+        const type = btn.dataset.type;
+        const preset = presets[type];
+        notifier.dispatch(type, preset.title, preset.msg, { duration: 4000 });
+      };
+    });
+
+    document.getElementById('audio-toggle').onchange = (e) => {
+      notifier.audioEnabled = e.target.checked;
+    };
+
+    document.getElementById('clear-all-btn').onclick = () => notifier.clear();
+
+    notifier.dispatch('info', 'Docs Portal Engine Online', 'Telemetry dispatcher initialized and monitoring queue.', { duration: 5000 });
+    notifier.dispatch('success', 'Operational Ready', 'All background handlers synchronized.', { duration: 6000 });
+  </script>
+</body>
+</html>
