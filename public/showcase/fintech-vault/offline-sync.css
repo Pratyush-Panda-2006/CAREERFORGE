@@ -1,0 +1,125 @@
+/* Fintech Vault - Offline Data Persistence Styles */
+:root {
+  --fv-primary: #10b981;
+  --fv-primary-glow: rgba(16, 185, 129, 0.3);
+  --fv-accent: #f59e0b;
+  --fv-bg: #090d16;
+  --fv-card-bg: rgba(15, 23, 42, 0.7);
+  --fv-border: #1e293b;
+  --fv-text: #f8fafc;
+  --fv-text-muted: #94a3b8;
+  --fv-warning: #f59e0b;
+  --fv-danger: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--fv-bg);
+  color: var(--fv-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+.sync-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--fv-border);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px var(--fv-primary-glow);
+}
+
+.sync-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--fv-border);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sync-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  color: #fff;
+}
+
+.status-pill {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.status-pill.online {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid var(--fv-primary);
+  color: #a7f3d0;
+}
+
+.status-pill.offline {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid var(--fv-warning);
+  color: #fde68a;
+}
+
+.actions-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn-action {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--fv-border);
+  background: var(--fv-card-bg);
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.btn-action.primary {
+  background: linear-gradient(135deg, var(--fv-primary), #059669);
+  color: #fff;
+  border: none;
+}
+
+.btn-action:hover {
+  filter: brightness(1.15);
+}
+
+.queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--fv-card-bg);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.queue-table th, .queue-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--fv-border);
+}
+
+.queue-table th {
+  background: rgba(9, 13, 22, 0.8);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--fv-text-muted);
+}
+
+.badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.badge.pending { background: rgba(245, 158, 11, 0.2); color: var(--fv-warning); }
+.badge.retrying { background: rgba(16, 185, 129, 0.2); color: var(--fv-primary); }
+.badge.failed { background: rgba(239, 68, 68, 0.2); color: var(--fv-danger); }
