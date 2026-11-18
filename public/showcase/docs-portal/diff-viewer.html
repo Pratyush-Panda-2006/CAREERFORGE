@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Diff Inspector Showcase</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 32px 16px;
+      background: #020617;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .wrapper {
+      width: 100%;
+      max-width: 950px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div id="diff-root"></div>
+  </div>
+
+  <script type="module">
+    import { DocsPortalDiffInspector } from './diff-viewer.js';
+
+    const inspector = new DocsPortalDiffInspector();
+    const root = document.getElementById('diff-root');
+    inspector.renderToDOM(root);
+  </script>
+</body>
+</html>
