@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Esports Hub - Operations Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+  <style>
+    body {
+      background: #080811;
+      color: #f1f5f9;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h1>Esports Tournament & Server Operations Pipeline</h1>
+  <div id="pipeline-root"></div>
+
+  <script type="module">
+    import { GamingEsportsPipelineEngine } from './workflow-pipeline.js';
+
+    const pipeline = new GamingEsportsPipelineEngine();
+    const root = document.getElementById('pipeline-root');
+
+    pipeline.subscribe(() => {
+      pipeline.renderToDOM(root);
+    });
+
+    pipeline.renderToDOM(root);
+  </script>
+</body>
+</html>
