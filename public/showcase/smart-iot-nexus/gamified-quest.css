@@ -1,0 +1,471 @@
+/* Smart IoT Nexus - Gamified Milestone & Badge Engine Styles */
+
+:root {
+  --bg-primary: #0b1120;
+  --bg-secondary: #131c31;
+  --bg-card: #18233c;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --accent-cyan: #06b6d4;
+  --accent-cyan-glow: rgba(6, 182, 212, 0.45);
+  --border-subtle: #243254;
+
+  /* Tier colors */
+  --tier-bronze: #cd7f32;
+  --tier-bronze-glow: rgba(205, 127, 50, 0.4);
+  --tier-silver: #c0c0c0;
+  --tier-silver-glow: rgba(192, 192, 192, 0.4);
+  --tier-gold: #fbbf24;
+  --tier-gold-glow: rgba(251, 191, 36, 0.45);
+  --tier-platinum: #38bdf8;
+  --tier-platinum-glow: rgba(56, 189, 248, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  padding: 2.5rem 1.5rem;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.quest-container {
+  width: 100%;
+  max-width: 1050px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Header */
+.quest-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.badge-pill {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--accent-cyan);
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid var(--accent-cyan-glow);
+}
+
+.quest-header h1 {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.quest-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  max-width: 750px;
+  line-height: 1.5;
+}
+
+/* XP Level Card */
+.level-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.level-badge {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 0.45rem 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.xp-stats {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.xp-values {
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.progress-bar-container {
+  height: 14px;
+  background: #0f172a;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+  border-radius: 9999px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px var(--accent-cyan-glow);
+}
+
+.level-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+/* Sections */
+.section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-block h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+/* Badges Grid & Glowing Rims */
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.badge-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.badge-card.is-unlocked {
+  transform: translateY(-2px);
+}
+
+.badge-card.tier-bronze.is-unlocked {
+  border-color: var(--tier-bronze);
+  box-shadow: 0 0 18px var(--tier-bronze-glow);
+}
+
+.badge-card.tier-silver.is-unlocked {
+  border-color: var(--tier-silver);
+  box-shadow: 0 0 20px var(--tier-silver-glow);
+}
+
+.badge-card.tier-gold.is-unlocked {
+  border-color: var(--tier-gold);
+  box-shadow: 0 0 24px var(--tier-gold-glow);
+}
+
+.badge-card.tier-platinum.is-unlocked {
+  border-color: var(--tier-platinum);
+  box-shadow: 0 0 28px var(--tier-platinum-glow);
+}
+
+.badge-card.is-locked {
+  opacity: 0.65;
+  filter: grayscale(0.4);
+}
+
+.badge-icon-wrapper {
+  font-size: 2.2rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-subtle);
+}
+
+.badge-tier-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.badge-card.tier-bronze .badge-tier-tag { color: var(--tier-bronze); }
+.badge-card.tier-silver .badge-tier-tag { color: var(--tier-silver); }
+.badge-card.tier-gold .badge-tier-tag { color: var(--tier-gold); }
+.badge-card.tier-platinum .badge-tier-tag { color: var(--tier-platinum); }
+
+.badge-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.badge-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  min-height: 40px;
+}
+
+.badge-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.badge-progress-track {
+  height: 6px;
+  background: #0f172a;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.badge-progress-bar {
+  height: 100%;
+  background: var(--accent-cyan);
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+/* Quests Grid */
+.quests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.quest-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.quest-card.is-completed {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.quest-status-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-bottom: 0.25rem;
+}
+
+.quest-card.is-completed .quest-status-tag {
+  color: #4ade80;
+}
+
+.quest-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.quest-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.quest-reward {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #facc15;
+}
+
+.quest-progress-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quest-counter {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: right;
+}
+
+.quest-track {
+  height: 8px;
+  background: #0f172a;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.quest-fill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.quest-card.is-completed .quest-fill {
+  background: #22c55e;
+}
+
+.quest-action-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.4rem;
+}
+
+.quest-action-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.quest-action-btn:disabled {
+  background: #334155;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* Glassmorphic Modal */
+.unlock-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+
+.unlock-modal-overlay.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.unlock-modal-content {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.unlock-modal-overlay.is-active .unlock-modal-content {
+  transform: scale(1);
+}
+
+.unlock-sparkle {
+  font-size: 1.5rem;
+}
+
+.unlock-icon {
+  font-size: 3.5rem;
+}
+
+.unlock-modal-content h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.unlock-modal-content p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+}
