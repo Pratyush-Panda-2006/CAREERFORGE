@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renewable Microgrid — Offline Sync & Conflict-Free Queue</title>
+  <link rel="stylesheet" href="offline-sync.css">
+</head>
+<body class="sync-body">
+  <div class="sync-container">
+    <header class="sync-header">
+      <span class="badge">CLEANTECH SMART GRID</span>
+      <h1>🔄 Renewable Microgrid Resilient Offline Data Persistence & Sync Engine</h1>
+      <p>Offline mutation buffering, vector clock concurrency tracking, and Last-Write-Wins conflict resolution.</p>
+    </header>
+
+    <div class="sync-card">
+      <div class="status-row">
+        <div class="status-group">
+          <span class="label">Network Status</span>
+          <span id="connection-status-badge" class="status-badge online">Online (Cloud Linked)</span>
+        </div>
+        <div class="status-group">
+          <span class="label">Buffered Mutations</span>
+          <span class="count-val"><span id="queue-count">0</span> items</span>
+        </div>
+        <div class="btn-group">
+          <button type="button" id="toggle-online-btn" class="btn btn-secondary">Toggle Network</button>
+          <button type="button" id="enqueue-btn" class="btn btn-secondary">Enqueue SOLAR_PV_INVERTER_SAMPLE</button>
+          <button type="button" id="sync-now-btn" class="btn btn-primary">Sync Now</button>
+        </div>
+      </div>
+
+      <div class="queue-section">
+        <h3>Pending Mutation Buffer</h3>
+        <div id="queue-list" class="queue-list"></div>
+      </div>
+    </div>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Renewable Microgrid Showcase</a>
+    </nav>
+  </div>
+
+  <script type="module" src="offline-sync.js"></script>
+</body>
+</html>
