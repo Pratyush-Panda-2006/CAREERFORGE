@@ -1,0 +1,219 @@
+/**
+ * Automotive Hypercar - Telemetry Visualizer Styles
+ * Carbon-fiber dark glassmorphic container with glowing crimson line strokes & floating tooltip
+ */
+
+:root {
+  --car-bg: #0b0c10;
+  --car-card-bg: rgba(23, 25, 33, 0.75);
+  --car-card-border: rgba(239, 68, 68, 0.25);
+  --car-red: #ef4444;
+  --car-red-glow: rgba(239, 68, 68, 0.4);
+  --car-red-hover: #dc2626;
+  --car-amber: #f59e0b;
+  --car-cyan: #06b6d4;
+  --car-text-main: #f8fafc;
+  --car-text-muted: #94a3b8;
+  --car-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --transition-speed: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--car-bg);
+  font-family: var(--car-font-family);
+  color: var(--car-text-main);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.hypercar-telemetry-container {
+  width: 100%;
+  max-width: 840px;
+  background: var(--car-card-bg);
+  border: 1px solid var(--car-card-border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 25px var(--car-red-glow);
+  backdrop-filter: blur(14px);
+  position: relative;
+}
+
+/* Header */
+.telemetry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.header-titles {
+  flex: 1;
+  min-width: 240px;
+}
+
+.telemetry-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--car-red);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+.telemetry-title {
+  margin: 0 0 6px 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.telemetry-subtitle {
+  margin: 0;
+  color: var(--car-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Time Window Buttons */
+.time-window-controls {
+  display: flex;
+  background: rgba(11, 12, 16, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.time-window-btn {
+  background: transparent;
+  border: none;
+  color: var(--car-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-speed);
+}
+
+.time-window-btn:hover {
+  color: #ffffff;
+}
+
+.time-window-btn.active {
+  background: var(--car-red);
+  color: #ffffff;
+  box-shadow: 0 2px 8px var(--car-red-glow);
+}
+
+/* Stats Bar */
+.telemetry-stats-bar {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  background: rgba(11, 12, 16, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 18px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--car-text-muted);
+  letter-spacing: 0.5px;
+}
+
+.stat-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 2px;
+}
+
+.stat-val.highlight {
+  color: var(--car-amber);
+}
+
+/* Canvas Wrapper */
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background: rgba(11, 12, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#automotive-hypercar-telemetry-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+/* Tooltip */
+.telemetry-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(23, 25, 33, 0.95);
+  border: 1px solid var(--car-red);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #ffffff;
+  transform: translate(-50%, -100%);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.telemetry-tooltip strong {
+  color: var(--car-amber);
+}
+
+.telemetry-tooltip span {
+  font-size: 10px;
+  color: var(--car-text-muted);
+}
+
+.telemetry-tooltip.visible {
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .telemetry-header {
+    flex-direction: column;
+  }
+  .time-window-controls {
+    align-self: flex-start;
+  }
+}
