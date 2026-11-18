@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Yield Matrix - Time-Travel State Debugger & Event Snapshot Replay</title>
+  <link rel="stylesheet" href="state-debugger.css">
+</head>
+<body>
+  <div class="debugger-container">
+    <header class="debugger-header">
+      <div class="badge-tag">State Replay Engine</div>
+      <h1>Time-Travel State Debugger & Replay Studio</h1>
+      <p>Autonomous state mutation recorder capturing immutable action snapshots, granular JSON diff comparisons, and deterministic history scrub replay.</p>
+    </header>
+
+    <section class="timeline-scrubber-card">
+      <div class="scrubber-header">
+        <h2>Interactive History Timeline Scrubber</h2>
+        <span class="step-badge" id="currentStepBadge">Step 1 / 1</span>
+      </div>
+      <input type="range" id="timelineSlider" class="scrubber-slider" min="0" max="0" value="0">
+    </section>
+
+    <div class="debugger-grid">
+      <section class="debugger-card actions-panel">
+        <h3>Dispatch Pool Actions</h3>
+        <div class="action-buttons">
+          <button id="actionStakeBtn" class="btn-action">+ Stake 500 USDC</button>
+          <button id="actionHarvestBtn" class="btn-action">Harvest Accrued Yield</button>
+          <button id="actionCompoundBtn" class="btn-action">Trigger Auto-Compound</button>
+          <button id="exportReplayBtn" class="btn-primary">Export Replay JSON</button>
+        </div>
+
+        <h3>Snapshot History Log</h3>
+        <div class="action-list" id="actionHistoryList">
+          <!-- Snapshots render here -->
+        </div>
+      </section>
+
+      <section class="debugger-card inspector-panel">
+        <div class="inspector-split">
+          <div>
+            <h3>Current State Snapshot (JSON)</h3>
+            <pre class="json-view" id="stateJsonView"></pre>
+          </div>
+          <div>
+            <h3>Step Mutation Diff</h3>
+            <div class="diff-container" id="diffViewContainer">
+              <!-- Diff rows render here -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="state-debugger.js"></script>
+</body>
+</html>
