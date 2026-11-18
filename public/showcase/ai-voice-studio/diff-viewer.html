@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - Diff Inspector</title>
+  <link rel="stylesheet" href="diff-viewer.css">
+  <style>
+    body {
+      background: #090d16;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .av-preset-selector {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .av-select {
+      padding: 8px 14px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid rgba(192, 132, 252, 0.4);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Voice Studio Script & DSP Diff Inspector</h1>
+  <div class="av-preset-selector">
+    <label for="preset-dropdown">Select Voice Tuning Preset:</label>
+    <select id="preset-dropdown" class="av-select">
+      <option value="ssmlRevision">SSML Script Narration Revision</option>
+      <option value="phonemeMapping">Phonetic Lexicon Tuning</option>
+      <option value="masteringFilter">DSP Equalizer & Compressor Preset</option>
+    </select>
+  </div>
+
+  <div id="diff-root"></div>
+
+  <script type="module">
+    import { AiVoiceStudioDiffInspector } from './diff-viewer.js';
+
+    const inspector = new AiVoiceStudioDiffInspector();
+    const root = document.getElementById('diff-root');
+    const select = document.getElementById('preset-dropdown');
+
+    const update = (key) => {
+      const preset = inspector.getPreset(key);
+      if (preset) {
+        const diff = inspector.computeDiff(preset.left, preset.right);
+        inspector.render(root, diff);
+      }
+    };
+
+    select.addEventListener('change', (e) => update(e.target.value));
+    update('ssmlRevision');
+  </script>
+</body>
+</html>
