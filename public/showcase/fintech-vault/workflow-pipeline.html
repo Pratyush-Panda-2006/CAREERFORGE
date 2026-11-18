@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fintech Vault - Settlements & AML Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f1f5f9;
+      padding: 32px;
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h1>Financial Operations & Settlement Pipeline</h1>
+  <div id="pipeline-root"></div>
+
+  <script type="module">
+    import { FintechVaultPipelineEngine } from './workflow-pipeline.js';
+
+    const pipeline = new FintechVaultPipelineEngine();
+    const root = document.getElementById('pipeline-root');
+
+    pipeline.subscribe(() => {
+      pipeline.renderToDOM(root);
+    });
+
+    pipeline.renderToDOM(root);
+  </script>
+</body>
+</html>
