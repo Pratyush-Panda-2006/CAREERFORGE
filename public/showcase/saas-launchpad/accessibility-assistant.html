@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Automated WCAG Contrast & Keyboard Accessibility Inspector</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+</head>
+<body>
+  <div class="a11y-container">
+    <header class="a11y-header">
+      <div class="badge-tag">SaaS UI Accessibility</div>
+      <h1>SaaS Launchpad WCAG 2.1 Contrast & Accessibility Inspector</h1>
+      <p>Automated real-time color contrast evaluation, typography readability verification, and keyboard accessibility inspection for SaaS landing pages and dashboards.</p>
+    </header>
+
+    <div class="a11y-grid">
+      <section class="a11y-card controls-card">
+        <h2>Component Color Pairing</h2>
+
+        <div class="picker-group">
+          <label>Foreground / Primary Text & CTA</label>
+          <div class="picker-row">
+            <input type="color" id="fgColorPicker" value="#38bdf8" aria-label="Foreground color picker">
+            <input type="text" id="fgColorInput" value="#38bdf8" maxlength="7" spellcheck="false" aria-label="Foreground hex code">
+          </div>
+        </div>
+
+        <div class="picker-group">
+          <label>Background / Canvas & Card Background</label>
+          <div class="picker-row">
+            <input type="color" id="bgColorPicker" value="#030712" aria-label="Background color picker">
+            <input type="text" id="bgColorInput" value="#030712" maxlength="7" spellcheck="false" aria-label="Background hex code">
+          </div>
+        </div>
+
+        <div class="preset-group">
+          <label>SaaS Design System Presets</label>
+          <div class="preset-buttons">
+            <button type="button" class="preset-btn" data-fg="#34d399" data-bg="#022c22">Emerald Success</button>
+            <button type="button" class="preset-btn" data-fg="#fbbf24" data-bg="#451a03">Amber Attention</button>
+            <button type="button" class="preset-btn" data-fg="#f87171" data-bg="#450a0a">Crimson Alert</button>
+            <button type="button" class="preset-btn" data-fg="#38bdf8" data-bg="#030712">Brand Sky Blue</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="a11y-card results-card">
+        <h2>Live Contrast Verification</h2>
+
+        <div class="preview-box" id="contrastPreviewBox">
+          <p id="previewText" class="preview-heading">LAUNCH YOUR SAAS IN DAYS, NOT MONTHS</p>
+          <p class="preview-sub">Production-ready authentication, multi-tenant billing, and telemetry analytics pre-integrated.</p>
+        </div>
+
+        <div class="ratio-display">
+          <span class="ratio-label">Calculated Contrast Ratio</span>
+          <span class="ratio-value" id="contrastRatioVal">-- : 1</span>
+        </div>
+
+        <div class="wcag-table">
+          <div class="wcag-row">
+            <span class="criterion">WCAG AA Normal Text (&ge; 4.5:1)</span>
+            <span class="status-pill" id="aaNormalPill">--</span>
+          </div>
+          <div class="wcag-row">
+            <span class="criterion">WCAG AA Large Text / UI Components (&ge; 3.0:1)</span>
+            <span class="status-pill" id="aaLargePill">--</span>
+          </div>
+          <div class="wcag-row">
+            <span class="criterion">WCAG AAA Normal Text (&ge; 7.0:1)</span>
+            <span class="status-pill" id="aaaNormalPill">--</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="accessibility-assistant.js"></script>
+</body>
+</html>
