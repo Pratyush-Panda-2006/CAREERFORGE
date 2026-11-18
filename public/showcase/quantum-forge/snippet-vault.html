@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge - Snippet Vault</title>
+  <link rel="stylesheet" href="snippet-vault.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="qf-vault-wrapper">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Quantum Algorithm & Circuit Snippet Vault</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Reusable OpenQASM circuit templates, oracle definitions, and mathematical primitives.</p>
+    </header>
+
+    <section class="qf-vault-searchbar" aria-label="Search and filter snippets">
+      <input type="search" id="vault-search" class="qf-search-input" placeholder="Search algorithms, gates, QASM circuits, or tags...">
+      <div id="filter-chips" class="qf-filter-chips">
+        <button class="qf-chip active" data-tag="all">All Presets</button>
+      </div>
+    </section>
+
+    <section id="snippet-grid" class="qf-vault-grid" aria-live="polite">
+      <!-- Snippet cards dynamically populated -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { QuantumForgeSnippetVault } from './snippet-vault.js';
+
+    const vault = new QuantumForgeSnippetVault();
+    const grid = document.getElementById('snippet-grid');
+    const searchInput = document.getElementById('vault-search');
+    const filterChips = document.getElementById('filter-chips');
+
+    let activeTag = 'all';
+
+    function renderChips() {
+      const tags = vault.getAllTags();
+      filterChips.replaceChildren();
+
+      const allBtn = document.createElement('button');
+      allBtn.className = `qf-chip ${activeTag === 'all' ? 'active' : ''}`;
+      allBtn.textContent = 'All Presets';
+      allBtn.dataset.tag = 'all';
+      allBtn.addEventListener('click', () => setTag('all'));
+      filterChips.append(allBtn);
+
+      for (const tag of tags) {
+        const chip = document.createElement('button');
+        chip.className = `qf-chip ${activeTag === tag ? 'active' : ''}`;
+        chip.textContent = `#${tag}`;
+        chip.dataset.tag = tag;
+        chip.addEventListener('click', () => setTag(tag));
+        filterChips.append(chip);
+      }
+    }
+
+    function setTag(tag) {
+      activeTag = tag;
+      renderChips();
+      updateView();
+    }
+
+    function updateView() {
+      let filtered = vault.filterByTag(activeTag);
+      const query = searchInput.value;
+      if (query && query.trim()) {
+        const tokens = query.trim().toLowerCase().split(/\s+/);
+        filtered = filtered.filter(item => {
+          const text = `${item.title} ${item.description} ${item.tags.join(' ')} ${item.code}`.toLowerCase();
+          return tokens.every(t => text.includes(t));
+        });
+      }
+      vault.render(grid, { items: filtered });
+    }
+
+    searchInput.addEventListener('input', updateView);
+    renderChips();
+    updateView();
+  </script>
+</body>
+</html>
