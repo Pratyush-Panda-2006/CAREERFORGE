@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar - Telemetry Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #050811;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+    }
+    .ah-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ah-btn {
+      padding: 8px 16px;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      background: rgba(30, 41, 59, 0.8);
+      color: #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .ah-btn:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hypercar Telemetry Alert Queue</h1>
+  <div class="ah-controls">
+    <button class="ah-btn" id="btn-critical">Inverter Overheat (Critical)</button>
+    <button class="ah-btn" id="btn-warning">Tire Pressure Low (Warning)</button>
+    <button class="ah-btn" id="btn-success">DRS Active (Success)</button>
+    <button class="ah-btn" id="btn-info">Dyno Sync Nominal (Info)</button>
+    <button class="ah-btn" id="btn-clear">Clear All</button>
+  </div>
+
+  <div id="hub-root" class="ah-notification-hub-container"></div>
+
+  <script type="module">
+    import { AutomotiveHypercarNotificationHub } from './notification-hub.js';
+
+    const hub = new AutomotiveHypercarNotificationHub();
+    const container = document.getElementById('hub-root');
+
+    hub.subscribe(() => {
+      hub.render(container);
+    });
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Inverter MOSFET junction temp spiked to 138°C on rear axle motor!', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Front-left tire pressure dropped to 26.4 PSI under high aero load.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('DRS flap opened at 285 km/h. Downforce drag trimmed by 34%.', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('CAN-bus telemetry packet rate stable at 1000 Hz.', 'info', 'info');
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hub.clearQueue();
+    });
+
+    hub.render(container);
+  </script>
+</body>
+</html>
