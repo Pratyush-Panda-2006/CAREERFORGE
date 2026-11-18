@@ -1,0 +1,268 @@
+/**
+ * Supply Chain Logistics - Finite State Machine Visualizer Styles
+ */
+.fsm-workbench-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: radial-gradient(circle at 10% 20%, rgba(30, 41, 59, 0.95), rgba(9, 13, 22, 0.98));
+  border-radius: 12px;
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.fsm-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f59e0b;
+  letter-spacing: -0.02em;
+}
+
+.fsm-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.fsm-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+}
+
+.fsm-status-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fsm-status-badge {
+  padding: 0.35rem 0.85rem;
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: #ffffff;
+  border-radius: 6px;
+  font-weight: 700;
+  font-family: monospace;
+  font-size: 1rem;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+  transition: all 0.3s ease;
+}
+
+.fsm-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .fsm-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fsm-panel {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fsm-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #f59e0b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.fsm-nodes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.fsm-state-node {
+  padding: 0.75rem;
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: all 0.25s ease;
+}
+
+.fsm-state-node.fsm-state-active {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+  transform: scale(1.02);
+}
+
+.fsm-node-title {
+  font-weight: 700;
+  font-family: monospace;
+  font-size: 0.95rem;
+  color: #f1f5f9;
+}
+
+.fsm-state-active .fsm-node-title {
+  color: #f59e0b;
+}
+
+.fsm-node-outgoing {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+.fsm-event-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fsm-btn {
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.fsm-event-btn {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.4);
+  text-align: left;
+}
+
+.fsm-event-btn:hover {
+  background: rgba(245, 158, 11, 0.35);
+  border-color: #f59e0b;
+  transform: translateX(4px);
+}
+
+.fsm-btn-primary {
+  background: #d97706;
+  color: #ffffff;
+}
+
+.fsm-btn-primary:hover {
+  background: #b45309;
+}
+
+.fsm-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.fsm-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.fsm-btn-warning {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+  margin-top: 0.5rem;
+}
+
+.fsm-btn-warning:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.fsm-custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.fsm-custom-form h4 {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.fsm-custom-form input {
+  padding: 0.5rem;
+  background: rgba(2, 6, 23, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #f8fafc;
+  font-size: 0.8rem;
+}
+
+.fsm-custom-form input:focus {
+  outline: none;
+  border-color: #f59e0b;
+}
+
+.fsm-mermaid-box {
+  background: #020617;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #f59e0b;
+  font-family: monospace;
+  font-size: 0.75rem;
+  padding: 0.75rem;
+  height: 120px;
+  resize: vertical;
+}
+
+.fsm-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fsm-history-item {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  background: rgba(2, 6, 23, 0.4);
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+}
+
+.fsm-hist-time {
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.fsm-hist-desc {
+  color: #e2e8f0;
+  font-family: monospace;
+}
+
+.fsm-muted {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-style: italic;
+}
