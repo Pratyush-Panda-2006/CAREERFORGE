@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge - Prioritized Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="qf-notification-container">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Quantum Forge Notification Hub</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Real-time QPU telemetry alert dispatch & prioritized event stream.</p>
+    </header>
+
+    <section class="qf-controls" aria-label="Alert simulation triggers">
+      <button id="btn-critical" class="qf-btn qf-btn-critical">Trigger Cryogenic Trip (Critical)</button>
+      <button id="btn-warning" class="qf-btn qf-btn-warning">Trigger Qubit Decoherence (Warning)</button>
+      <button id="btn-success" class="qf-btn qf-btn-success">Transpilation Complete (Success)</button>
+      <button id="btn-info" class="qf-btn qf-btn-info">Bloch Sphere Pulse (Info)</button>
+      <button id="btn-clear" class="qf-btn qf-btn-clear">Clear Active Alerts</button>
+    </section>
+
+    <section id="toast-viewport" class="qf-toast-viewport" aria-live="polite">
+      <!-- Toasts dynamically appended via QuantumForgeNotificationHub -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { QuantumForgeNotificationHub } from './notification-hub.js';
+
+    const hub = new QuantumForgeNotificationHub();
+    const viewport = document.getElementById('toast-viewport');
+
+    hub.subscribe(() => {
+      hub.render(viewport);
+    });
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('QPU Cryogenic Trip: Temperature exceeded 15mK threshold! Thermal stabilization halted.', 'critical', 'critical', 6000);
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Qubit Fidelity Degradation: T2 dephasing time dropped below 85 microseconds.', 'warning', 'warning', 5000);
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Transpilation Succeeded: 64-qubit Bernstein-Vazirani circuit optimized to depth 12.', 'success', 'success', 4000);
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Bloch Sphere Calibration: Microwave pulse resonance sync complete.', 'info', 'info', 3000);
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hub.clearQueue();
+    });
+
+    hub.render(viewport);
+  </script>
+</body>
+</html>
