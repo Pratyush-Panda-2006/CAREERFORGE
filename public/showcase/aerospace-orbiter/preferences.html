@@ -1,0 +1,136 @@
+<div id="aerospace-orbiter-preferences-modal" class="aero-modal-backdrop" aria-hidden="true" role="dialog" aria-labelledby="aero-pref-title">
+  <div class="aero-modal-drawer">
+    <div class="aero-drawer-header">
+      <div class="aero-header-brand">
+        <span class="aero-hud-icon">⌬</span>
+        <h2 id="aero-pref-title">Mission Avionics Settings</h2>
+      </div>
+      <button type="button" class="aero-close-btn" id="aero-pref-close" aria-label="Close preferences drawer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="aero-drawer-body">
+      <section class="aero-pref-group">
+        <h3 class="aero-group-title">Orbital Visualization & Coordinates</h3>
+
+        <div class="aero-field-row">
+          <div class="aero-label-col">
+            <label for="aero-theme-select">HUD Theme Palette</label>
+            <span class="aero-field-desc">High-contrast cockpit display lighting</span>
+          </div>
+          <div class="aero-control-col">
+            <select id="aero-theme-select" class="aero-select">
+              <option value="deep-space">Deep Space Obsidian</option>
+              <option value="lunar-tactical">Lunar Tactical Monochrome</option>
+              <option value="solar-amber">Solar Flare Amber</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="aero-field-row">
+          <div class="aero-label-col">
+            <label for="aero-projection-select">Orbital Trajectory Projection</label>
+            <span class="aero-field-desc">Ephemeris rendering model for satellite vectors</span>
+          </div>
+          <div class="aero-control-col">
+            <select id="aero-projection-select" class="aero-select">
+              <option value="3d-elliptical">3D Keplerian Ellipse</option>
+              <option value="ground-track">2D Mercator Ground Track</option>
+              <option value="polar-azimuth">Polar Azimuthal Equidistant</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="aero-field-row">
+          <div class="aero-label-col">
+            <label for="aero-units-select">Avionics Unit System</label>
+            <span class="aero-field-desc">Standard for delta-V, apogee, and altitude</span>
+          </div>
+          <div class="aero-control-col">
+            <select id="aero-units-select" class="aero-select">
+              <option value="metric">Metric (km, km/s, kg)</option>
+              <option value="nautical">Nautical (NM, knots, lbs)</option>
+              <option value="astronomical">Astronomical (AU, c, Solar M)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="aero-pref-group">
+        <h3 class="aero-group-title">Guidance Acoustics & Safety Interlocks</h3>
+
+        <div class="aero-field-row">
+          <div class="aero-label-col">
+            <span class="aero-field-name">Acoustic Guidance Cues</span>
+            <span class="aero-field-desc">Auditory frequency pulses for burn duration countdown</span>
+          </div>
+          <div class="aero-control-col">
+            <label class="aero-switch">
+              <input type="checkbox" id="aero-audio-cues" checked>
+              <span class="aero-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="aero-field-row">
+          <div class="aero-label-col">
+            <span class="aero-field-name">Debris Proximity Warnings</span>
+            <span class="aero-field-desc">Real-time alerts for orbital conjunctions &lt; 5km</span>
+          </div>
+          <div class="aero-control-col">
+            <label class="aero-switch">
+              <input type="checkbox" id="aero-proximity-alerts" checked>
+              <span class="aero-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="aero-field-row">
+          <div class="aero-label-col">
+            <span class="aero-field-name">Haptic RCS Thruster Feedback</span>
+            <span class="aero-field-desc">Tactile vibration on reaction control system firing</span>
+          </div>
+          <div class="aero-control-col">
+            <label class="aero-switch">
+              <input type="checkbox" id="aero-haptic-thrusters" checked>
+              <span class="aero-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="aero-field-row">
+          <div class="aero-label-col">
+            <span class="aero-field-name">High-Contrast HUD Filter</span>
+            <span class="aero-field-desc">Enhanced luminance filter for direct solar exposure</span>
+          </div>
+          <div class="aero-control-col">
+            <label class="aero-switch">
+              <input type="checkbox" id="aero-contrast-hud">
+              <span class="aero-slider"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="aero-drawer-footer">
+      <div class="aero-footer-left">
+        <button type="button" class="aero-btn-secondary" id="aero-reset-defaults">
+          Reset Defaults
+        </button>
+      </div>
+      <div class="aero-footer-right">
+        <button type="button" class="aero-btn-cyan" id="aero-export-config">
+          Export Avionics JSON
+        </button>
+        <button type="button" class="aero-btn-primary" id="aero-save-pref">
+          Save Avionics
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
