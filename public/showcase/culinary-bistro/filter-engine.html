@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Culinary Bistro - Dynamic Search, Tag Filtering & Multi-Column Sorting</title>
+  <link rel="stylesheet" href="filter-engine.css">
+</head>
+<body class="filter-engine-view">
+  <main class="filter-container">
+    <!-- Header Section -->
+    <header class="bistro-header">
+      <div class="brand">
+        <span class="badge-pill">Bistro Gastronomy</span>
+        <h1>Seasonal Menu & Sommelier Cellar Index</h1>
+        <p>In-memory search engine with dietary tag filtering and instant multi-column sorting across bistro courses.</p>
+      </div>
+
+      <div class="header-stat">
+        <span class="stat-num" id="menuResultCount">6 dishes</span>
+        <span class="stat-label">Active Items</span>
+      </div>
+    </header>
+
+    <!-- Filter & Search Controls Bar -->
+    <section class="controls-bar">
+      <!-- Search Box with Clear Button -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchMenuInput" class="search-input" placeholder="Search dishes, cellar vintages, courses, or ingredients..." autocomplete="off">
+        <button type="button" id="btnClearSearch" class="btn-clear" aria-label="Clear search" style="display: none;">&times;</button>
+      </div>
+
+      <!-- Sorting Select Dropdown -->
+      <div class="sort-box">
+        <label for="menuSortSelect" class="sort-label">Sort By:</label>
+        <select id="menuSortSelect" class="sort-select">
+          <option value="title-asc">Dish Name (A - Z)</option>
+          <option value="title-desc">Dish Name (Z - A)</option>
+          <option value="price-asc">Price (Lowest First)</option>
+          <option value="price-desc">Price (Highest First)</option>
+          <option value="rating-desc">Rating (Highest First)</option>
+        </select>
+      </div>
+
+      <!-- Reset Button -->
+      <button type="button" id="btnResetFilters" class="btn btn-reset">
+        <span>Reset Filters</span>
+      </button>
+    </section>
+
+    <!-- Tag Filter Chips Bar -->
+    <section class="chips-section">
+      <span class="chips-label">Filter by Dietary & Ingredients:</span>
+      <div id="filterChipsContainer" class="chips-container">
+        <!-- Injected dynamically by filter-engine.js -->
+      </div>
+    </section>
+
+    <!-- Menu Grid -->
+    <section id="bistroMenuList" class="menu-grid">
+      <!-- Dish cards injected dynamically -->
+    </section>
+
+    <!-- Empty State Alert Card -->
+    <div id="menuEmptyState" class="empty-state-card" style="display: none;">
+      <div class="empty-icon">🍽️</div>
+      <h3>No culinary creations match your selection</h3>
+      <p>Try refining your search keyword or clearing active ingredient filter chips.</p>
+    </div>
+  </main>
+
+  <script type="module" src="filter-engine.js"></script>
+</body>
+</html>
