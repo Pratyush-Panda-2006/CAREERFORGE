@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edtech Academy - Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+    }
+    .ed-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ed-btn {
+      padding: 8px 16px;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      background: rgba(30, 41, 59, 0.8);
+      color: #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .ed-btn:hover {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <h1>Edtech Academy Notification Queue</h1>
+  <div class="ed-controls">
+    <button class="ed-btn" id="btn-critical">Proctoring Disconnect (Critical)</button>
+    <button class="ed-btn" id="btn-warning">Quiz Deadline Imminent (Warning)</button>
+    <button class="ed-btn" id="btn-success">Certificate Issued (Success)</button>
+    <button class="ed-btn" id="btn-info">Instructor Feedback (Info)</button>
+    <button class="ed-btn" id="btn-clear">Clear All</button>
+  </div>
+
+  <div id="hub-root" class="ed-notification-hub-container"></div>
+
+  <script type="module">
+    import { EdtechAcademyNotificationHub } from './notification-hub.js';
+
+    const hub = new EdtechAcademyNotificationHub();
+    const container = document.getElementById('hub-root');
+
+    hub.subscribe(() => {
+      hub.render(container);
+    });
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('AI Webcam Proctoring Session disconnected! Reconnect within 60s to avoid quiz lock.', 'critical', 'critical');
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Module 4 Midterm closes in 15 minutes. Ensure all answers are submitted.', 'warning', 'warning');
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Congratulations! Passed "Distributed Cloud Systems" with 94% distinction.', 'success', 'success');
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('Prof. Davis posted inline code feedback on Assignment 3 repository.', 'info', 'info');
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hub.clearQueue();
+    });
+
+    hub.render(container);
+  </script>
+</body>
+</html>
