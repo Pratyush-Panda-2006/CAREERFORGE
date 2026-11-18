@@ -1,0 +1,201 @@
+/**
+ * Streaming Cinema Hub - State Machine & Workflow Visualizer Styles
+ */
+
+:root {
+  --cinema-red: #e50914;
+  --cinema-dark: #121212;
+  --cinema-card: #1c1c1c;
+  --cinema-border: #2e2e2e;
+  --cinema-gold: #f5c518;
+  --cinema-active-glow: #e50914;
+  --cinema-text: #ffffff;
+  --cinema-dim: #999999;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--cinema-dark);
+  color: var(--cinema-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.fsm-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fsm-header {
+  border-bottom: 2px solid var(--cinema-border);
+  padding-bottom: 16px;
+}
+
+.fsm-header h1 {
+  margin: 0 0 6px 0;
+  color: var(--cinema-red);
+  font-size: 1.8rem;
+}
+
+.fsm-header p {
+  margin: 0;
+  color: var(--cinema-dim);
+  font-size: 0.95rem;
+}
+
+.current-state-panel {
+  background: var(--cinema-card);
+  border: 1px solid var(--cinema-border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.state-badge {
+  background: var(--cinema-red);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.4);
+}
+
+.fsm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .fsm-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fsm-card {
+  background: var(--cinema-card);
+  border: 1px solid var(--cinema-border);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fsm-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--cinema-gold);
+}
+
+.nodes-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.state-node-card {
+  background: #262626;
+  border: 1px solid var(--cinema-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cinema-dim);
+  transition: all 0.25s ease;
+}
+
+.state-node-card.active {
+  background: #381216;
+  border-color: var(--cinema-red);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+}
+
+.state-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #555;
+}
+
+.state-node-card.active .state-dot {
+  background: var(--cinema-red);
+  box-shadow: 0 0 8px var(--cinema-red);
+}
+
+.event-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cinema-trigger-btn {
+  background: #292929;
+  border: 1px solid var(--cinema-border);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.cinema-trigger-btn:hover {
+  background: var(--cinema-red);
+  border-color: var(--cinema-red);
+  transform: translateY(-1px);
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 140px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--cinema-dim);
+}
+
+.history-list li {
+  padding: 4px 0;
+  border-bottom: 1px solid #282828;
+}
+
+.mermaid-box {
+  background: #0d0d0d;
+  border: 1px solid var(--cinema-border);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #58a6ff;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.reset-btn {
+  background: #2a2a2a;
+  border: 1px solid var(--cinema-border);
+  color: var(--cinema-dim);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reset-btn:hover {
+  color: #fff;
+  background: #3a3a3a;
+}
