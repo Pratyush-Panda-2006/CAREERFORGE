@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Client-Side Export Engine & Summary Report Generator</title>
+  <link rel="stylesheet" href="export-engine.css">
+</head>
+<body class="export-engine-body">
+  <main class="export-container">
+    <!-- Header Section -->
+    <header class="export-header">
+      <div class="header-brand">
+        <span class="badge-pill">Knowledge Export Engine</span>
+        <h1>Documentation Catalog & Content Export</h1>
+        <p>Export technical guides, API references, and documentation metadata in JSON, CSV, and Markdown audit format.</p>
+      </div>
+
+      <!-- Action Toolbar with Dropdown Popover (Issue #594) -->
+      <div class="export-actions">
+        <div class="dropdown-wrapper">
+          <button type="button" id="exportDropdownToggle" class="btn btn-primary" aria-haspopup="true" aria-expanded="false">
+            <span class="icon">⤓</span>
+            <span>Export Documentation</span>
+            <span class="caret">▼</span>
+          </button>
+
+          <!-- Dropdown Popover Menu -->
+          <div id="exportDropdownMenu" class="dropdown-popover">
+            <div class="popover-heading">Export Channels</div>
+            <button type="button" id="btnExportJSON" class="dropdown-item">
+              <span class="item-icon">{ }</span>
+              <div class="item-info">
+                <strong>Download JSON Data</strong>
+                <small>Full documentation node schema (.json)</small>
+              </div>
+            </button>
+            <button type="button" id="btnExportCSV" class="dropdown-item">
+              <span class="item-icon">▦</span>
+              <div class="item-info">
+                <strong>Export CSV Table</strong>
+                <small>RFC 4180 escaped spreadsheet (.csv)</small>
+              </div>
+            </button>
+            <div class="dropdown-divider"></div>
+            <button type="button" id="btnExportMarkdown" class="dropdown-item">
+              <span class="item-icon">📋</span>
+              <div class="item-info">
+                <strong>Copy Markdown Audit</strong>
+                <small>Formatted README summary report</small>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Metrics Summary Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Documented Guides</span>
+        <span class="kpi-val">6</span>
+        <span class="kpi-sub">Technical Articles</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Cumulative Word Count</span>
+        <span class="kpi-val">17,050</span>
+        <span class="kpi-sub">Comprehensive Content</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Est. Reading Time</span>
+        <span class="kpi-val">~66 mins</span>
+        <span class="kpi-sub">Total Curriculum Duration</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Publication Health</span>
+        <span class="kpi-val">83.3%</span>
+        <span class="kpi-sub">Active Production Guides</span>
+      </div>
+    </section>
+
+    <!-- Workspace Preview Panel -->
+    <section class="preview-panel">
+      <div class="preview-header">
+        <div class="preview-tabs">
+          <button type="button" class="preview-tab active" data-mode="json">JSON Schema</button>
+          <button type="button" class="preview-tab" data-mode="csv">CSV Stream</button>
+          <button type="button" class="preview-tab" data-mode="markdown">Markdown Audit</button>
+        </div>
+        <span class="engine-badge">Export Engine: Operational</span>
+      </div>
+
+      <pre id="exportPreviewArea" class="preview-code-box"></pre>
+    </section>
+
+    <!-- Notification Toast -->
+    <div id="exportToast" class="toast-notice"></div>
+  </main>
+
+  <script type="module" src="export-engine.js"></script>
+</body>
+</html>
