@@ -1,0 +1,177 @@
+/**
+ * Supply Chain Logistics - SVG Radar Chart Styles
+ * Issue #1138
+ */
+
+:root {
+  --sc-radar-bg: #0b1320;
+  --sc-radar-card: rgba(15, 23, 42, 0.85);
+  --sc-radar-border: #1e293b;
+  --sc-radar-amber: #f59e0b;
+  --sc-radar-cyan: #38bdf8;
+  --sc-radar-text: #f8fafc;
+  --sc-radar-muted: #94a3b8;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--sc-radar-bg);
+  color: var(--sc-radar-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.radar-container {
+  max-width: 980px;
+  margin: 30px auto;
+  padding: 24px;
+  background: var(--sc-radar-card);
+  border: 1px solid var(--sc-radar-border);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.radar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--sc-radar-border);
+  padding-bottom: 18px;
+  margin-bottom: 24px;
+}
+
+.header-titles h2 {
+  margin: 0 0 6px 0;
+  font-size: 1.45rem;
+  color: var(--sc-radar-amber);
+}
+
+.header-titles p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--sc-radar-muted);
+}
+
+.btn {
+  padding: 9px 18px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-random {
+  background: #d97706;
+  color: #ffffff;
+}
+
+.btn-random:hover {
+  background: #b45309;
+}
+
+.radar-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.chart-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--sc-radar-border);
+  border-radius: 10px;
+}
+
+.svg-container {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1;
+}
+
+.sc-radar-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.radar-grid-polygon {
+  fill: rgba(245, 158, 11, 0.03);
+  stroke: rgba(148, 163, 184, 0.2);
+  stroke-dasharray: 2 2;
+  stroke-width: 1;
+}
+
+.radar-axis-line {
+  stroke: rgba(148, 163, 184, 0.25);
+  stroke-width: 1;
+}
+
+.radar-axis-label {
+  fill: #cbd5e1;
+  font-size: 9px;
+  font-weight: 500;
+  font-family: -apple-system, sans-serif;
+}
+
+.radar-data-polygon {
+  fill: rgba(245, 158, 11, 0.26);
+  stroke: #f59e0b;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.45));
+}
+
+.radar-vertex-dot {
+  fill: #38bdf8;
+  stroke: #ffffff;
+  stroke-width: 1.5;
+}
+
+.sliders-panel {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--sc-radar-border);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.sliders-panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.05rem;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 8px;
+}
+
+.sliders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.metric-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.slider-val {
+  font-weight: 700;
+  color: var(--sc-radar-amber);
+  font-family: monospace;
+}
+
+.slider-input {
+  accent-color: var(--sc-radar-amber);
+  cursor: pointer;
+}
