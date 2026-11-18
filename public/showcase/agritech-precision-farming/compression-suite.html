@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Payload compression lab · TERRA-AGRI</title>
+    <link rel="stylesheet" href="compression-suite.css" />
+    <script type="module" src="compression-suite.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html">TERRA-AGRI / Field tools</a
+      ><span>PAYLOAD COMPRESSION LAB</span>
+    </header>
+    <main>
+      <p class="eyebrow">Telemetry / lossless LZW</p>
+      <h1>Measure the bytes<br />before transmission.</h1>
+      <p class="intro">
+        Encode a sensor payload, verify its round trip and compare the actual
+        binary size. Your text stays in this browser.
+      </p>
+      <div class="workspace">
+        <section>
+          <h2>01 / Source payload</h2>
+          <form id="compression-form">
+            <label for="raw-text">UTF-8 text · up to 256 KiB</label
+            ><textarea
+              id="raw-text"
+              name="text"
+              rows="12"
+              spellcheck="false"
+              maxlength="262144"
+            >
+{"sensor":"north-field","temperature":24,"moisture":38}
+{"sensor":"north-field","temperature":24,"moisture":39}
+{"sensor":"north-field","temperature":25,"moisture":39}
+{"sensor":"north-field","temperature":25,"moisture":38}</textarea
+            ><button type="submit">Analyze payload</button>
+          </form>
+          <p id="compression-status" role="status" aria-live="polite">
+            Ready to analyze. Small payloads may grow.
+          </p>
+        </section>
+        <section>
+          <h2>02 / Encoded result</h2>
+          <dl>
+            <div>
+              <dt>Original UTF-8</dt>
+              <dd id="raw-bytes">—</dd>
+            </div>
+            <div>
+              <dt>Serialized LZW</dt>
+              <dd id="packed-bytes">—</dd>
+            </div>
+          </dl>
+          <strong id="savings">No result yet</strong
+          ><label for="savings-meter" class="sr-only"
+            >Percentage saved, excluding expansion</label
+          ><meter id="savings-meter" min="0" max="100" value="0">0</meter>
+          <p class="note">
+            Includes an 8-byte LZW1 header and fixed 16-bit codes. The
+            dictionary freezes at 65,536 entries. This is a local container
+            format, not ZIP or gzip.
+          </p>
+          <label for="codes">Code preview · hexadecimal</label
+          ><textarea id="codes" rows="5" readonly spellcheck="false"></textarea>
+          <p id="code-count" class="note">No codes yet</p>
+          <button id="download-binary" type="button" disabled>
+            Download binary
+          </button>
+        </section>
+      </div>
+      <section class="transfer">
+        <div>
+          <h2>03 / Transfer model</h2>
+          <label for="bandwidth">Link speed (Mbps)</label
+          ><input
+            id="bandwidth"
+            type="number"
+            min="0.001"
+            max="1000000"
+            step="any"
+            value="1"
+          />
+          <p class="note">
+            Serialization time only: bytes × 8 ÷ link speed. Excludes request
+            overhead, latency and compression time. No network benchmark is
+            performed.
+          </p>
+        </div>
+        <dl>
+          <div>
+            <dt>Raw payload</dt>
+            <dd id="raw-time">—</dd>
+          </div>
+          <div>
+            <dt>Compressed payload</dt>
+            <dd id="packed-time">—</dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+  </body>
+</html>
