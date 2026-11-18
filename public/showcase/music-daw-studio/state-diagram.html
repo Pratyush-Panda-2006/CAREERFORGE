@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Transport state lab · BEAT-FORGE</title>
+    <link rel="stylesheet" href="state-diagram.css" />
+    <script type="module" src="state-diagram.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html">BEAT-FORGE / Workbench</a
+      ><span>TRANSPORT STATE LAB</span>
+    </header>
+    <main>
+      <div class="heading">
+        <div>
+          <p class="eyebrow">Finite state machine</p>
+          <h1>Make every transition explicit.</h1>
+          <p>
+            Explore a DAW transport lifecycle, dispatch events and export the
+            resulting state diagram.
+          </p>
+        </div>
+        <div class="state-readout">
+          <span>Current state</span><strong id="current-state">Stopped</strong>
+        </div>
+      </div>
+      <div class="workspace">
+        <section class="diagram" aria-labelledby="graph-title">
+          <h2 id="graph-title">Lifecycle graph</h2>
+          <div
+            class="graph-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="Scrollable state graph"
+          >
+            <svg
+              id="graph"
+              viewBox="0 0 600 360"
+              role="img"
+              aria-label="Transition graph"
+            >
+              <defs>
+                <marker
+                  id="arrow"
+                  viewBox="0 0 10 10"
+                  refX="9"
+                  refY="5"
+                  markerWidth="5"
+                  markerHeight="5"
+                  orient="auto-start-reverse"
+                >
+                  <path d="M 0 0 L 10 5 L 0 10 z"></path>
+                </marker>
+              </defs>
+              <g id="graph-content"></g>
+            </svg>
+          </div>
+          <p class="note">
+            Highlighted paths start from the active state. The full transition
+            table below describes every path.
+          </p>
+        </section>
+        <aside>
+          <h2>Dispatch an event</h2>
+          <div id="events" class="events"></div>
+          <button type="button" id="reset" class="secondary">
+            Reset state
+          </button>
+          <p id="status" role="status" aria-live="polite">
+            Choose PLAY or RECORD to start.
+          </p>
+          <h2>Event history</h2>
+          <ol id="history"></ol>
+          <p class="note">
+            Latest first, up to 100 transitions. This is a local workflow model;
+            it does not record or play audio.
+          </p>
+        </aside>
+      </div>
+      <section class="definitions" aria-labelledby="rules-title">
+        <div>
+          <h2 id="rules-title">Define a transition</h2>
+          <p>A state and event can have only one destination.</p>
+          <form id="transition-form">
+            <label
+              >From state<input
+                name="from"
+                value="Stopped"
+                maxlength="60"
+                required /></label
+            ><label
+              >Event<input
+                name="event"
+                value="ARM"
+                maxlength="60"
+                required /></label
+            ><label
+              >To state<input
+                name="to"
+                value="Armed"
+                maxlength="60"
+                required /></label
+            ><button type="submit">Add transition</button>
+          </form>
+          <p class="note">
+            Names begin with a letter and use letters, digits, spaces,
+            underscores or hyphens. Up to 32 states and 128 transitions.
+          </p>
+          <div class="table-scroll">
+            <table>
+              <caption>
+                Transition rules
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">From</th>
+                  <th scope="col">Event</th>
+                  <th scope="col">To</th>
+                </tr>
+              </thead>
+              <tbody id="transition-table"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h2>Mermaid definition</h2>
+          <label for="mermaid" class="note"
+            >Select and copy this definition, or download the .mmd file.</label
+          ><textarea
+            id="mermaid"
+            readonly
+            spellcheck="false"
+            rows="14"
+          ></textarea
+          ><button id="download" type="button">Download Mermaid</button>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

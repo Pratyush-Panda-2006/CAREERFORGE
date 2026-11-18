@@ -1,0 +1,278 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f1e8;
+  --paper: #fffdf7;
+  --ink: #242720;
+  --muted: #5f6558;
+  --line: #c5c7b9;
+  --accent: #d8e879;
+  --active: #334629;
+  --graph-line: #868c7e;
+  --font: system-ui, sans-serif;
+  --mono: ui-monospace, monospace;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  overflow-x: clip;
+}
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 24px 4vw;
+  border-bottom: 1px solid var(--line);
+  font: 12px var(--mono);
+}
+a {
+  color: var(--ink);
+  text-decoration: none;
+}
+main {
+  max-width: 1500px;
+  margin: auto;
+  padding: 35px 4vw;
+}
+h1 {
+  font-size: clamp(34px, 4vw, 58px);
+  font-weight: 550;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+  margin: 14px 0;
+  overflow-wrap: anywhere;
+}
+h2 {
+  font-size: 17px;
+  margin: 0 0 20px;
+}
+p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.eyebrow {
+  font: 12px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 35px;
+}
+.heading > div:first-child {
+  max-width: 720px;
+}
+.state-readout {
+  border-left: 4px solid var(--active);
+  padding: 12px 20px;
+  min-width: 180px;
+}
+.state-readout span {
+  display: block;
+  color: var(--muted);
+  font: 12px var(--mono);
+}
+.state-readout strong {
+  display: block;
+  font-size: 24px;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(230px, 1fr);
+  border-block: 1px solid var(--line);
+  background: var(--paper);
+}
+.diagram,
+aside {
+  padding: 28px;
+  min-width: 0;
+}
+aside {
+  border-left: 1px solid var(--line);
+}
+.graph-scroll {
+  overflow: auto;
+  max-height: 500px;
+}
+svg {
+  width: 100%;
+  min-width: 500px;
+  display: block;
+}
+marker path {
+  fill: var(--graph-line);
+}
+.edge {
+  fill: none;
+  stroke: var(--graph-line);
+  stroke-width: 2;
+}
+.active-edge {
+  stroke: var(--active);
+  stroke-width: 3;
+}
+.state {
+  fill: var(--paper);
+  stroke: var(--line);
+  stroke-width: 2;
+}
+.active-state {
+  fill: var(--accent);
+  stroke: var(--active);
+  stroke-width: 3;
+}
+.state-label {
+  fill: var(--ink);
+  font: 14px var(--mono);
+}
+button {
+  font: 600 13px var(--font);
+  padding: 12px 16px;
+  white-space: nowrap;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+}
+.secondary {
+  background: transparent;
+  color: var(--ink);
+  margin-top: 12px;
+}
+.events {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.events button {
+  background: var(--accent);
+  color: var(--ink);
+}
+:focus-visible {
+  outline: 3px solid var(--active);
+  outline-offset: 4px;
+}
+#status {
+  min-height: 4em;
+  font-size: 14px;
+}
+#history {
+  font: 12px/1.7 var(--mono);
+  padding-left: 24px;
+  max-height: 180px;
+  overflow: auto;
+}
+#history li {
+  padding: 5px 0;
+  overflow-wrap: anywhere;
+}
+.note {
+  font-size: 12px;
+  color: var(--muted);
+}
+.definitions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 45px;
+  padding-top: 35px;
+}
+form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+label {
+  display: block;
+  font-size: 12px;
+  flex: 1;
+  min-width: 120px;
+}
+input,
+textarea {
+  font: 14px var(--mono);
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  margin: 8px 0 0;
+  border-radius: 0;
+}
+textarea {
+  resize: vertical;
+  margin-bottom: 12px;
+}
+.table-scroll {
+  overflow: auto;
+  margin-top: 25px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font: 12px var(--mono);
+}
+caption {
+  text-align: left;
+  margin-bottom: 12px;
+  font: 600 14px var(--font);
+}
+td,
+th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+  max-width: 160px;
+}
+@media (max-width: 800px) {
+  .workspace,
+  .definitions {
+    display: block;
+  }
+  .definitions > div {
+    margin-bottom: 35px;
+  }
+  aside {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .heading {
+    display: block;
+  }
+  .state-readout {
+    margin-top: 25px;
+  }
+  .diagram,
+  aside {
+    padding: 20px 14px;
+  }
+  form {
+    display: block;
+  }
+  form label {
+    margin-bottom: 12px;
+  }
+  .graph-scroll {
+    max-height: 360px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
+}
