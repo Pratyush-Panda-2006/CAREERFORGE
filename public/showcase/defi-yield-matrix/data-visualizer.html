@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Yield Matrix - Multi-Dimensional SVG Radar Chart</title>
+  <link rel="stylesheet" href="data-visualizer.css">
+</head>
+<body>
+  <div class="radar-container">
+    <header class="radar-header">
+      <div class="badge-tag">Polar Performance Metrics</div>
+      <h1>Multi-Dimensional SVG Radar Visualizer</h1>
+      <p>Interactive vector polar coordinates engine plotting multi-axis liquidity depth, contract security, and enclosed polygon risk envelopes.</p>
+    </header>
+
+    <div class="radar-grid">
+      <section class="radar-card controls-card">
+        <h2>Metrics Configuration</h2>
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Yield APY</span>
+            <span class="slider-val" id="metricYieldVal">85%</span>
+          </div>
+          <input type="range" id="metricYield" min="10" max="100" value="85">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Liquidity Depth</span>
+            <span class="slider-val" id="metricLiquidityVal">92%</span>
+          </div>
+          <input type="range" id="metricLiquidity" min="10" max="100" value="92">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Smart Contract Safety</span>
+            <span class="slider-val" id="metricSafetyVal">95%</span>
+          </div>
+          <input type="range" id="metricSafety" min="10" max="100" value="95">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>IL Resilience</span>
+            <span class="slider-val" id="metricIlRiskVal">78%</span>
+          </div>
+          <input type="range" id="metricIlRisk" min="10" max="100" value="78">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Capital Efficiency</span>
+            <span class="slider-val" id="metricCapEffVal">88%</span>
+          </div>
+          <input type="range" id="metricCapEff" min="10" max="100" value="88">
+        </div>
+
+        <div class="stats-summary">
+          <div class="stat-box">
+            <span class="stat-label">Enclosed Area</span>
+            <span class="stat-val" id="radarAreaVal">--</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Efficiency Ratio</span>
+            <span class="stat-val" id="radarEfficiencyVal">--</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="radar-card chart-card">
+        <h2>Interactive Polar Radar Web</h2>
+        <div class="svg-canvas-wrapper">
+          <svg class="radar-svg" viewBox="0 0 400 400" width="380" height="380">
+            <!-- Concentric Grid Webs (20%, 40%, 60%, 80%, 100%) -->
+            <polygon class="radar-web" points="200,172 226.63,191.35 216.46,222.65 183.54,222.65 173.37,191.35"></polygon>
+            <polygon class="radar-web" points="200,144 253.26,182.69 232.92,245.31 167.08,245.31 146.74,182.69"></polygon>
+            <polygon class="radar-web" points="200,116 279.89,174.04 249.37,267.96 150.63,267.96 120.11,174.04"></polygon>
+            <polygon class="radar-web" points="200,88 306.52,165.38 265.83,290.62 134.17,290.62 93.48,165.38"></polygon>
+            <polygon class="radar-web" points="200,60 333.15,156.73 282.29,313.27 117.71,313.27 66.85,156.73"></polygon>
+
+            <!-- Axis Rays -->
+            <line class="radar-axis" x1="200" y1="200" x2="200" y2="60"></line>
+            <line class="radar-axis" x1="200" y1="200" x2="333.15" y2="156.73"></line>
+            <line class="radar-axis" x1="200" y1="200" x2="282.29" y2="313.27"></line>
+            <line class="radar-axis" x1="200" y1="200" x2="117.71" y2="313.27"></line>
+            <line class="radar-axis" x1="200" y1="200" x2="66.85" y2="156.73"></line>
+
+            <!-- Dynamic Polygon Fill -->
+            <polygon id="radarPolygon" class="radar-data-polygon" points=""></polygon>
+
+            <!-- Axis Labels -->
+            <text class="radar-label" x="200" y="45">Yield APY</text>
+            <text class="radar-label" x="350" y="155">Liquidity</text>
+            <text class="radar-label" x="295" y="330">Safety</text>
+            <text class="radar-label" x="105" y="330">IL Resilience</text>
+            <text class="radar-label" x="48" y="155">Efficiency</text>
+          </svg>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="data-visualizer.js"></script>
+</body>
+</html>
