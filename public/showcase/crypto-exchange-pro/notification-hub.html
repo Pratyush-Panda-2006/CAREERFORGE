@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Exchange Pro - Prioritized Notification Hub</title>
+  <link rel="stylesheet" href="notification-hub.css">
+</head>
+<body style="background: #020617; min-height: 100vh; padding: 2rem;">
+  <main class="cep-notification-container">
+    <header>
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Exchange Orderbook & Telemetry Hub</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Real-time margin liquidation risk, slippage alerts, and order fill confirmations.</p>
+    </header>
+
+    <section class="cep-controls" aria-label="Orderbook alert triggers">
+      <button id="btn-critical" class="cep-btn cep-btn-critical">Liquidation Call (Critical)</button>
+      <button id="btn-warning" class="cep-btn cep-btn-warning">High Slippage Alert (Warning)</button>
+      <button id="btn-success" class="cep-btn cep-btn-success">Limit Fill Complete (Success)</button>
+      <button id="btn-info" class="cep-btn cep-btn-info">WebSocket Sync (Info)</button>
+      <button id="btn-clear" class="cep-btn cep-btn-clear">Clear Active Alerts</button>
+    </section>
+
+    <section id="toast-viewport" class="cep-toast-viewport" aria-live="polite">
+      <!-- Toasts dynamically appended via CryptoExchangeProNotificationHub -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { CryptoExchangeProNotificationHub } from './notification-hub.js';
+
+    const hub = new CryptoExchangeProNotificationHub();
+    const viewport = document.getElementById('toast-viewport');
+
+    hub.subscribe(() => {
+      hub.render(viewport);
+    });
+
+    document.getElementById('btn-critical').addEventListener('click', () => {
+      hub.enqueue('Margin Warning: Account leverage exceeded maintenance margin (102.4%). Auto-deleveraging initiated!', 'critical', 'critical', 6000);
+    });
+
+    document.getElementById('btn-warning').addEventListener('click', () => {
+      hub.enqueue('Adverse Slippage Detected: ETH/USDT market depth deficit caused 2.85% execution drift.', 'warning', 'warning', 5000);
+    });
+
+    document.getElementById('btn-success').addEventListener('click', () => {
+      hub.enqueue('Order Filled: Bought 1.25 BTC @ $94,500.00 Limit Maker (Fee: $0.00 VIP 5).', 'success', 'success', 4000);
+    });
+
+    document.getElementById('btn-info').addEventListener('click', () => {
+      hub.enqueue('WebSocket Reconnected: Binance / Deribit low-latency quote stream acquired (11ms).', 'info', 'info', 3000);
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hub.clearQueue();
+    });
+
+    hub.render(viewport);
+  </script>
+</body>
+</html>
