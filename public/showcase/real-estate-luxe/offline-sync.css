@@ -1,0 +1,125 @@
+/* Real Estate Luxe - Offline Data Persistence Styles */
+:root {
+  --luxe-primary: #d4af37;
+  --luxe-primary-glow: rgba(212, 175, 55, 0.3);
+  --luxe-accent: #f59e0b;
+  --luxe-bg: #0c0a09;
+  --luxe-card-bg: rgba(28, 25, 23, 0.85);
+  --luxe-border: #44403c;
+  --luxe-text: #fafaf9;
+  --luxe-text-muted: #d6d3d1;
+  --luxe-warning: #f59e0b;
+  --luxe-danger: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--luxe-bg);
+  color: var(--luxe-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+.sync-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(28, 25, 23, 0.6);
+  border: 1px solid var(--luxe-border);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px var(--luxe-primary-glow);
+}
+
+.sync-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--luxe-border);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sync-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  color: #fff;
+}
+
+.status-pill {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.status-pill.online {
+  background: rgba(212, 175, 55, 0.2);
+  border: 1px solid var(--luxe-primary);
+  color: #fef08a;
+}
+
+.status-pill.offline {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid var(--luxe-warning);
+  color: #fde68a;
+}
+
+.actions-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn-action {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--luxe-border);
+  background: var(--luxe-card-bg);
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.btn-action.primary {
+  background: linear-gradient(135deg, var(--luxe-primary), var(--luxe-accent));
+  color: #0c0a09;
+  border: none;
+}
+
+.btn-action:hover {
+  filter: brightness(1.15);
+}
+
+.queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--luxe-card-bg);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.queue-table th, .queue-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--luxe-border);
+}
+
+.queue-table th {
+  background: rgba(12, 10, 9, 0.8);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--luxe-text-muted);
+}
+
+.badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.badge.pending { background: rgba(245, 158, 11, 0.2); color: var(--luxe-warning); }
+.badge.retrying { background: rgba(212, 175, 55, 0.2); color: var(--luxe-primary); }
+.badge.failed { background: rgba(239, 68, 68, 0.2); color: var(--luxe-danger); }
