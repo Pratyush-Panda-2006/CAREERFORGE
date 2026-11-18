@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Odyssey - Expedition Workflow Pipeline</title>
+  <link rel="stylesheet" href="workflow-pipeline.css">
+  <style>
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .to-pipeline-controls {
+      display: flex;
+      gap: 12px;
+    }
+    .to-btn {
+      padding: 8px 16px;
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>Travel Odyssey Expeditions Pipeline</h1>
+  <div class="to-pipeline-controls">
+    <button class="to-btn" id="btn-add-task">+ Schedule Expedition Stage</button>
+  </div>
+  <div id="pipeline-root"></div>
+
+  <script type="module">
+    import { TravelOdysseyPipelineEngine } from './workflow-pipeline.js';
+
+    const engine = new TravelOdysseyPipelineEngine();
+    const root = document.getElementById('pipeline-root');
+
+    document.getElementById('btn-add-task').addEventListener('click', () => {
+      engine.addTask({
+        title: `Safari Ground Transport Milestone #${Math.floor(Math.random() * 1000)}`,
+        description: 'Scheduled trip operational task.',
+        columnId: 'itinerary-planning',
+        priority: 'high',
+        assignee: 'Expedition Guide',
+        durationEst: '2d'
+      });
+      engine.render(root);
+    });
+
+    engine.render(root);
+  </script>
+</body>
+</html>
