@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neurotech Interface - User Preferences</title>
+  <link rel="stylesheet" href="preferences.css">
+</head>
+<body>
+  <div class="pref-page-container">
+    <div class="pref-header">
+      <h1>
+        Neurotech Interface Setup
+        <span class="pref-badge">Issue #691</span>
+      </h1>
+      <p>Adaptive BCI signal preferences, EEG frequency band filtering, and local hardware configuration.</p>
+    </div>
+
+    <button id="open-preferences-btn" class="pref-trigger-btn">
+      ⚙️ Open BCI Settings Drawer
+    </button>
+  </div>
+
+  <!-- Preferences Modal / Drawer -->
+  <div id="neurotech-interface-preferences-modal" class="neurotech-modal-overlay">
+    <div class="neurotech-modal-card">
+      <div class="modal-header-row">
+        <h2>BCI Signal Settings</h2>
+        <button id="close-preferences-btn" class="close-x-btn">&times;</button>
+      </div>
+
+      <div class="pref-field-group">
+        <label for="pref-eeg-band">Frequency Band Filter</label>
+        <select id="pref-eeg-band" class="pref-select">
+          <option value="all-bands">Full Spectrum (0.5 - 100 Hz)</option>
+          <option value="alpha">Alpha Waves (8 - 12 Hz, Relaxation)</option>
+          <option value="beta">Beta Waves (13 - 30 Hz, Focus)</option>
+          <option value="gamma">Gamma Waves (30 - 100 Hz, Cognition)</option>
+          <option value="theta">Theta Waves (4 - 7 Hz, Meditation)</option>
+        </select>
+      </div>
+
+      <div class="pref-field-group">
+        <label for="pref-sample-rate">Electrode Sample Rate</label>
+        <select id="pref-sample-rate" class="pref-select">
+          <option value="250">250 Hz (Clinical Standard)</option>
+          <option value="500">500 Hz (High Resolution)</option>
+          <option value="1000">1000 Hz (Micro-Spike Capture)</option>
+        </select>
+      </div>
+
+      <div class="pref-toggle-row">
+        <span>Ocular Artifact Rejection</span>
+        <label class="switch">
+          <input type="checkbox" id="pref-artifact-rejection">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="pref-toggle-row">
+        <span>60Hz Powerline Notch Filter</span>
+        <label class="switch">
+          <input type="checkbox" id="pref-notch-filter">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button id="reset-preferences-btn" class="btn-secondary">Reset Defaults</button>
+        <button id="export-preferences-btn" class="btn-primary">Export Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="preferences.js"></script>
+</body>
+</html>
