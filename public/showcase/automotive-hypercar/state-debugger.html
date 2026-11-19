@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>State recorder | Automotive Hypercar</title>
+  <link rel="stylesheet" href="./state-debugger.css">
+  <script type="module" src="./state-debugger.js"></script>
+</head>
+<body>
+<main data-state-recorder>
+  <header><a href="./index.html">Automotive Hypercar</a><span>ENGINEERING / LOCAL WORKBENCH 04</span></header>
+  <section class="intro">
+    <p class="eyebrow">Setup history</p><h1>Inspect every change.</h1>
+    <p>Capture a tune as an immutable snapshot. Move through its history, compare changes and carry the replay to another session.</p>
+    <p class="local-note">Standalone demo. Snapshots stay in memory until you export; nothing is sent to a server. Reloading clears this session.</p>
+  </section>
+  <div class="strip"><strong id="count">0 / 200 snapshots</strong><span>JSON ONLY · MAX 1 MB · NO LIVE VEHICLE CONNECTION</span></div>
+  <div class="workspace">
+    <section aria-labelledby="capture-title">
+      <h2 id="capture-title">01 / Capture a state</h2>
+      <form id="capture">
+        <label for="action">Action label</label><input id="action" value="BASELINE_SETUP" required maxlength="120" autocomplete="off">
+        <label for="state-input">State JSON</label>
+        <textarea id="state-input" rows="13" spellcheck="false">{
+  "driveMode": "track",
+  "battery": { "chargePercent": 82, "cooling": "normal" },
+  "aero": { "rearWingDegrees": 12 },
+  "torqueSplit": [40, 60]
+}</textarea>
+        <button type="submit" class="primary">Record snapshot</button>
+      </form>
+      <p id="branch-note" class="help"></p>
+    </section>
+    <section aria-labelledby="state-title">
+      <h2 id="state-title">02 / Selected snapshot</h2>
+      <p id="position" tabindex="-1" aria-live="polite">No snapshot selected</p>
+      <pre id="selected-state" tabindex="0" aria-label="Selected state JSON"></pre>
+    </section>
+  </div>
+  <section class="timeline" aria-labelledby="timeline-title">
+    <div class="section-heading"><h2 id="timeline-title">03 / Move through history</h2><div><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button></div></div>
+    <label for="playhead">Snapshot playhead</label><input id="playhead" type="range" min="0" max="0" step="1" value="0" disabled>
+    <div class="table-scroll" tabindex="0" aria-label="Action history"><table><caption>Recorded actions. Select a step to inspect it.</caption><thead><tr><th scope="col">Step</th><th scope="col">Action</th><th scope="col">Captured at</th></tr></thead><tbody id="history"></tbody></table></div>
+  </section>
+  <section class="diff-section" aria-labelledby="diff-heading"><h2 id="diff-heading">04 / Structural changes</h2><p id="diff-title" class="help"></p><div id="diff" aria-live="polite"></div><p class="help">Paths use JSON Pointer escaping: ~0 for ~ and ~1 for /. Additions and removals are labeled as well as colored.</p></section>
+  <section class="replay" aria-labelledby="replay-title"><h2 id="replay-title">05 / Keep or restore a replay</h2><p class="help">Export includes all retained snapshots and the current playhead. Import replaces this session only after the complete replay is validated. Limit: 200 snapshots, 48 nested levels, 10,000 values per state and 1 MB of JSON.</p><div class="buttons"><button id="export" type="button">Export replay</button><button id="import" type="button">Import replay JSON</button></div><label for="replay-input">Replay JSON</label><textarea id="replay-input" rows="6" spellcheck="false" placeholder="Paste an exported version 1 replay here"></textarea></section>
+  <p id="notice" role="status" aria-live="polite"></p>
+  <footer><span>Snapshot recorder / v1</span><span>Backtracking is inspection. Recording from an earlier step creates a new branch.</span></footer>
+</main>
+</body>
+</html>
