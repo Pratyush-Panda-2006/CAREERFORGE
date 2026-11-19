@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Micro-Impact accessibility review</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+  <script type="module" src="accessibility-assistant.js"></script>
+</head>
+<body>
+  <a class="skip" href="#review">Skip to review</a>
+  <header><a href="index.html">Micro-Impact</a><span>Accessibility workbench</span></header>
+  <main id="review" tabindex="-1">
+    <h1>A loan application everyone can use.</h1>
+    <p class="intro">Inspect this sample application, compare a repair preview, then try the keyboard route yourself. Your entries stay on this page.</p>
+    <div class="toolbar">
+      <button id="scan" type="button">Run checks</button>
+      <button id="preview" type="button" aria-pressed="false">Preview repairs</button>
+      <button id="keyboard" type="button">Start keyboard review</button>
+      <label>Sample text <input id="text-color" type="color" value="#899a91"></label>
+      <label>Sample background <input id="background-color" type="color" value="#ffffff"></label>
+    </div>
+    <p id="scan-status" role="status">Loading the sample review…</p>
+    <div class="workspace">
+      <section class="sample-column" aria-labelledby="sample-title">
+        <div class="section-heading"><h2 id="sample-title">Sample application</h2><span id="sample-state">Original</span></div>
+        <section id="loan-sample" aria-label="Sample microloan application">
+          <span class="sample-mark" aria-hidden="true">m</span>
+          <h3 data-contrast="Application heading">Back a small beginning.</h3>
+          <p class="sample-copy" data-contrast="Application introduction">Help a local maker buy tools for their next order. This is a demonstration; no money moves.</p>
+          <label for="lender-name">Your name</label>
+          <input id="lender-name" autocomplete="off" maxlength="60" placeholder="Try a sample name">
+          <div class="field-row">
+            <div><label for="loan-amount">Contribution</label><select id="loan-amount"><option>₹500</option><option>₹1,000</option><option>₹2,000</option></select></div>
+            <div><label for="loan-term">Repayment period</label><select id="loan-term"><option>6 months</option><option>12 months</option></select></div>
+          </div>
+          <button id="loan-details" type="button" aria-expanded="maybe" aria-controls="missing-terms">Review the terms</button>
+          <p id="loan-terms" hidden data-contrast="Repayment terms">Illustrative terms only. Repayment is uncertain; review a real lender’s disclosures before making a financial decision.</p>
+          <p class="sample-copy" data-contrast="Sample notice">No account, payment, or credit check is connected to this preview.</p>
+          <button id="loan-apply" type="button" tabindex="2">Preview contribution</button>
+          <p id="loan-message" role="status"></p>
+        </section>
+        <p class="scope-note">Scope: only the sample above. Its faint text, broken ARIA reference, and positive tab index are deliberate review fixtures.</p>
+      </section>
+      <section class="report" aria-labelledby="report-title">
+        <div class="section-heading"><h2 id="report-title">Scoped check results</h2><span id="score"></span></div>
+        <p id="score-detail"></p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Contrast results"><table><caption>Visible sample text contrast</caption><thead><tr><th scope="col">Text</th><th scope="col">Ratio</th><th scope="col">AA / AAA</th></tr></thead><tbody id="contrast-results"></tbody></table></div>
+        <ul id="structure-results" class="checks"></ul>
+        <section class="keyboard-review" aria-labelledby="keyboard-title">
+          <h3 id="keyboard-title">Keyboard review</h3>
+          <p>Predicted sample tab sequence, excluding disabled, hidden, and negative-tab-index controls. Page review controls remain in the full tab order.</p>
+          <ol id="tab-route"></ol>
+          <p id="focus-status" role="status">Start the review, then use Tab and Shift+Tab. A visible ring should follow each control.</p>
+          <p class="manual">Manual review required: meaningful order, keyboard operation, focus visibility, screen-reader announcements, and all other WCAG criteria. A scoped score is not a compliance certification.</p>
+        </section>
+      </section>
+    </div>
+    <footer>Reference: <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">WCAG 2.2 text contrast</a> and <a href="https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html">focus order</a>. Complex backgrounds and effects require manual inspection.</footer>
+  </main>
+</body>
+</html>
