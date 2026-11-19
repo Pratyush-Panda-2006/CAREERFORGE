@@ -23,33 +23,43 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             const prNumber = pr.number;
-            const prBody = pr.body || '';
-            const prTitle = pr.title || '';
-            const branchName = pr.head ? pr.head.ref : '';
             const author = pr.user ? pr.user.login : 'contributor';
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
+            const textToScan = [
+              pr.body || '',
+              pr.title || '',
+              pr.head?.ref || ''
+            ].join('\n');
+
             const issueNumbers = new Set();
 
-            // Match closing keywords in PR body
-            const keywordRegex = /\b(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+#(\d+)\b/gi;
-            for (const match of prBody.matchAll(keywordRegex)) {
-              issueNumbers.add(parseInt(match[2], 10));
-            }
-
-            // Match #<issueNum> in PR title (excluding the PR number itself)
-            for (const match of prTitle.matchAll(/#(\d+)/g)) {
+            // 1. Closing keywords
+            const kwRegex = /\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved|issue|task)\b\s*:?\s*#?(\d+)/gi;
+            for (const match of textToScan.matchAll(kwRegex)) {
               const num = parseInt(match[1], 10);
-              if (num !== prNumber) {
-                issueNumbers.add(num);
-              }
+              if (num !== prNumber) issueNumbers.add(num);
             }
 
-            // Match branch ending with -<issueNum>
-            const branchMatch = branchName.match(/-(\d+)$/);
+            // 2. Issue URLs
+            const urlRegex = /https:\/\/github\.com\/[^/]+\/[^/]+\/issues\/(\d+)/gi;
+            for (const match of textToScan.matchAll(urlRegex)) {
+              const num = parseInt(match[1], 10);
+              if (num !== prNumber) issueNumbers.add(num);
+            }
+
+            // 3. Branch name numbers
+            const branchMatch = (pr.head?.ref || '').match(/(\d+)$/);
             if (branchMatch) {
-              issueNumbers.add(parseInt(branchMatch[1], 10));
+              const num = parseInt(branchMatch[1], 10);
+              if (num !== prNumber) issueNumbers.add(num);
+            }
+
+            // 4. PR title #number
+            for (const match of (pr.title || '').matchAll(/#(\d+)/g)) {
+              const num = parseInt(match[1], 10);
+              if (num !== prNumber) issueNumbers.add(num);
             }
 
             console.log(`Identified ${issueNumbers.size} potential linked issues for merged PR #${prNumber}:`, Array.from(issueNumbers));
@@ -62,7 +72,7 @@ jobs:
                   issue_number: issueNum
                 });
 
-                if (issue && issue.state === 'open') {
+                if (issue && !issue.pull_request && issue.state === 'open') {
                   await github.rest.issues.createComment({
                     owner,
                     repo,
@@ -79,8 +89,10 @@ jobs:
                   });
 
                   console.log(`✅ Successfully closed issue #${issueNum} via merged PR #${prNumber}`);
+                } else if (issue && issue.pull_request) {
+                  console.log(`#${issueNum} is a Pull Request, skipping.`);
                 } else {
-                  console.log(`Issue #${issueNum} is already closed.`);
+                  console.log(`Issue #${issueNum} is already closed or not found.`);
                 }
               } catch (err) {
                 console.warn(`Could not close issue #${issueNum}: ${err.message}`);

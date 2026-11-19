@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import { execSync } from "child_process";
 
 const isDryRun = process.argv.includes("--dry-run");
@@ -13,18 +11,29 @@ if (!token && !isDryRun) {
   }
 }
 
-let octokit = null;
-if (token && !isDryRun) {
-  try {
-    const { Octokit } = await import("@octokit/rest");
-    octokit = new Octokit({ auth: token });
-  } catch {
-    console.warn("⚠️ @octokit/rest not found. Ensure dependencies are installed.");
-  }
-}
-
 const repoEnv = process.env.GITHUB_REPOSITORY || "Pratyush-Panda-2006/CAREERFORGE";
 const [owner, repo] = repoEnv.split("/");
+
+/**
+ * Native GitHub API helper with rate limit handling and pagination
+ */
+async function ghRequest(endpoint, options = {}) {
+  const url = endpoint.startsWith("http") ? endpoint : `https://api.github.com${endpoint}`;
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "CAREERFORGE-Issue-Closer",
+    "X-GitHub-Api-Version": "2022-11-28",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {})
+  };
+
+  const res = await fetch(url, { ...options, headers });
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`GitHub API error ${res.status} on ${url}: ${errorText}`);
+  }
+  return res.json();
+}
 
 /**
  * Scan git history for all resolved issue references
@@ -43,14 +52,14 @@ function scanGitResolvedIssues() {
       const lines = c.trim().split("\n");
       const [hash, author, email, subj, ...bodyParts] = lines;
       const body = bodyParts.slice(0, -1).join("\n");
-      const fullText = subj + "\n" + body;
+      const fullText = (subj || "") + "\n" + (body || "");
 
       // 1. Squash commits with double parens: ... (#<issueNum>) (#<prNum>)
       const doubleParenMatch = subj.match(/\(#(\d+)\)\s+\(#(\d+)\)$/);
       if (doubleParenMatch) {
         const issueNum = parseInt(doubleParenMatch[1], 10);
         const prNum = parseInt(doubleParenMatch[2], 10);
-        if (!issueToMeta.has(issueNum)) {
+        if (issueNum < 2200 && !issueToMeta.has(issueNum)) {
           issueToMeta.set(issueNum, { issueNum, prNum, hash, author });
         }
       }
@@ -60,10 +69,10 @@ function scanGitResolvedIssues() {
       if (mergePrMatch) {
         const prNum = parseInt(mergePrMatch[1], 10);
         const branch = mergePrMatch[2] || "";
-        const branchIssueMatch = branch.match(/-(\d+)$/);
+        const branchIssueMatch = branch.match(/(\d+)$/);
         if (branchIssueMatch) {
           const issueNum = parseInt(branchIssueMatch[1], 10);
-          if (!issueToMeta.has(issueNum)) {
+          if (issueNum < 2200 && !issueToMeta.has(issueNum)) {
             issueToMeta.set(issueNum, { issueNum, prNum, hash, author });
           }
         }
@@ -71,23 +80,36 @@ function scanGitResolvedIssues() {
 
       // 3. Keywords: Closes #<issue>, Fixes #<issue>, Resolves #<issue>
       const keywordMatches = [
-        ...fullText.matchAll(/(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+#(\d+)/gi)
+        ...fullText.matchAll(/\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved|issue|task)\b\s*:?\s*#?(\d+)/gi)
       ];
       for (const km of keywordMatches) {
         const issueNum = parseInt(km[1], 10);
         const prMatch = subj.match(/#(\d+)/);
         const prNum = prMatch ? parseInt(prMatch[1], 10) : null;
-        if (!issueToMeta.has(issueNum)) {
+        if (issueNum < 2200 && issueNum !== prNum && !issueToMeta.has(issueNum)) {
           issueToMeta.set(issueNum, { issueNum, prNum, hash, author });
         }
       }
 
-      // 4. Direct issue reference (#<num>) in commit subject
+      // 4. Issue URL references in commit body
+      const urlMatches = [
+        ...fullText.matchAll(/https:\/\/github\.com\/[^/]+\/[^/]+\/issues\/(\d+)/gi)
+      ];
+      for (const um of urlMatches) {
+        const issueNum = parseInt(um[1], 10);
+        const prMatch = subj.match(/#(\d+)/);
+        const prNum = prMatch ? parseInt(prMatch[1], 10) : null;
+        if (issueNum < 2200 && !issueToMeta.has(issueNum)) {
+          issueToMeta.set(issueNum, { issueNum, prNum, hash, author });
+        }
+      }
+
+      // 5. Direct issue reference (#<num>) in commit subject
       const singleParenMatch = subj.match(/\(#(\d+)\)$/);
       if (singleParenMatch) {
         const num = parseInt(singleParenMatch[1], 10);
-        // Only if within known issue ranges (< 1000)
-        if (num <= 900 && !issueToMeta.has(num)) {
+        // Only if within known issue ranges (< 2000)
+        if (num <= 1500 && !issueToMeta.has(num)) {
           issueToMeta.set(num, { issueNum: num, prNum: num, hash, author });
         }
       }
@@ -103,91 +125,108 @@ async function run() {
   console.log("======================================================");
   console.log("🧹 CAREERFORGE Automated Merged Issue Closer");
   console.log(`   Repository: ${owner}/${repo}`);
-  console.log(`   Mode: ${isDryRun || !octokit ? "DRY-RUN (Preview Only)" : "LIVE CLOSE"}`);
+  console.log(`   Mode: ${isDryRun || !token ? "DRY-RUN (Preview Only)" : "LIVE CLOSE"}`);
   console.log("======================================================\n");
 
   const resolvedIssues = scanGitResolvedIssues();
   console.log(`Found ${resolvedIssues.size} resolved issue references from Git history.`);
 
-  // If Octokit is available, also inspect closed PRs from GitHub API
-  if (octokit) {
-    try {
-      console.log("Fetching closed PRs from GitHub API to discover additional linked issues...");
-      const iterator = octokit.paginate.iterator(octokit.rest.pulls.list, {
-        owner,
-        repo,
-        state: "closed",
-        per_page: 100
-      });
+  // If token is available or public API can be read, fetch closed PRs to discover linked issues
+  try {
+    console.log("Fetching recent closed PRs from GitHub API to discover additional linked issues...");
+    let page = 1;
+    let keepFetching = true;
 
-      for await (const response of iterator) {
-        const pulls = response.data;
-        if (!pulls || pulls.length === 0) break;
+    while (keepFetching && page <= 5) {
+      const pulls = await ghRequest(`/repos/${owner}/${repo}/pulls?state=closed&per_page=100&page=${page}`);
+      if (!pulls || pulls.length === 0) break;
 
-        for (const pr of pulls) {
-          if (!pr.merged_at) continue;
+      for (const pr of pulls) {
+        if (!pr.merged_at) continue;
 
-          const prNum = pr.number;
-          const body = pr.body || "";
-          const title = pr.title || "";
-          const branch = pr.head?.ref || "";
+        const prNum = pr.number;
+        const textToScan = [
+          pr.body || "",
+          pr.title || "",
+          pr.head?.ref || ""
+        ].join("\n");
 
-          // Keywords in body
-          const kwMatches = [
-            ...body.matchAll(/(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+#(\d+)/gi)
-          ];
-          for (const km of kwMatches) {
-            const issueNum = parseInt(km[1], 10);
-            if (!resolvedIssues.has(issueNum)) {
-              resolvedIssues.set(issueNum, { issueNum, prNum, hash: pr.merge_commit_sha || `PR #${prNum}`, author: pr.user?.login });
-            }
+        // Keywords in body/title
+        const kwMatches = [
+          ...textToScan.matchAll(/\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved|issue|task)\b\s*:?\s*#?(\d+)/gi)
+        ];
+        for (const km of kwMatches) {
+          const issueNum = parseInt(km[1], 10);
+          if (issueNum < 2200 && issueNum !== prNum && !resolvedIssues.has(issueNum)) {
+            resolvedIssues.set(issueNum, {
+              issueNum,
+              prNum,
+              hash: pr.merge_commit_sha || `PR #${prNum}`,
+              author: pr.user?.login
+            });
           }
+        }
 
-          // Branch name ending with -<id>
-          const bMatch = branch.match(/-(\d+)$/);
-          if (bMatch) {
-            const issueNum = parseInt(bMatch[1], 10);
-            if (!resolvedIssues.has(issueNum)) {
-              resolvedIssues.set(issueNum, { issueNum, prNum, hash: pr.merge_commit_sha || `PR #${prNum}`, author: pr.user?.login });
-            }
+        // Branch name ending with digits
+        const bMatch = (pr.head?.ref || "").match(/(\d+)$/);
+        if (bMatch) {
+          const issueNum = parseInt(bMatch[1], 10);
+          if (issueNum < 2200 && issueNum !== prNum && !resolvedIssues.has(issueNum)) {
+            resolvedIssues.set(issueNum, {
+              issueNum,
+              prNum,
+              hash: pr.merge_commit_sha || `PR #${prNum}`,
+              author: pr.user?.login
+            });
           }
+        }
 
-          // Title containing (#<id>)
-          const titleMatches = [...title.matchAll(/#(\d+)/g)];
-          for (const tm of titleMatches) {
-            const num = parseInt(tm[1], 10);
-            if (num !== prNum && !resolvedIssues.has(num)) {
-              resolvedIssues.set(num, { issueNum: num, prNum, hash: pr.merge_commit_sha || `PR #${prNum}`, author: pr.user?.login });
-            }
+        // Title containing (#<id>)
+        const titleMatches = [...(pr.title || "").matchAll(/#(\d+)/g)];
+        for (const tm of titleMatches) {
+          const num = parseInt(tm[1], 10);
+          if (num < 2200 && num !== prNum && !resolvedIssues.has(num)) {
+            resolvedIssues.set(num, {
+              issueNum: num,
+              prNum,
+              hash: pr.merge_commit_sha || `PR #${prNum}`,
+              author: pr.user?.login
+            });
           }
         }
       }
-      console.log(`Total resolved issue pool after GitHub API scan: ${resolvedIssues.size}`);
-    } catch (err) {
-      console.warn("⚠️ GitHub API pulls scan warning:", err.message);
+
+      page++;
     }
+    console.log(`Total resolved issue pool after GitHub API scan: ${resolvedIssues.size}`);
+  } catch (err) {
+    console.warn("⚠️ GitHub API pulls scan warning:", err.message);
   }
 
   // Fetch all open issues in the repository
   let openIssues = [];
-  if (octokit) {
+  if (token && !isDryRun) {
     try {
       console.log("Fetching currently open issues from GitHub...");
-      const allOpen = await octokit.paginate(octokit.rest.issues.listForRepo, {
-        owner,
-        repo,
-        state: "open",
-        per_page: 100
-      });
-      // Filter out Pull Requests (which GitHub API returns under issues)
-      openIssues = allOpen.filter((item) => !item.pull_request);
+      let page = 1;
+      while (true) {
+        const issuesPage = await ghRequest(`/repos/${owner}/${repo}/issues?state=open&per_page=100&page=${page}`);
+        if (!issuesPage || issuesPage.length === 0) break;
+
+        // Filter out Pull Requests (GitHub issues API includes PRs with a `pull_request` property)
+        const pureIssues = issuesPage.filter((item) => !item.pull_request);
+        openIssues.push(...pureIssues);
+
+        if (issuesPage.length < 100) break;
+        page++;
+      }
       console.log(`Found ${openIssues.length} currently open issues in ${owner}/${repo}.`);
     } catch (err) {
       console.error("⚠️ Failed to list open issues:", err.message);
       return;
     }
   } else {
-    // In dry-run mode without token, simulate with all known resolved issues
+    // In dry-run mode without token, simulate
     console.log("[DRY-RUN] Simulating issue closing based on local git resolution mapping...");
     openIssues = [...resolvedIssues.values()].map((r) => ({
       number: r.issueNum,
@@ -212,7 +251,7 @@ async function run() {
   for (let i = 0; i < issuesToClose.length; i++) {
     const { issue, meta } = issuesToClose[i];
 
-    if (isDryRun || !octokit) {
+    if (isDryRun || !token) {
       console.log(`[DRY-RUN] [${i + 1}/${issuesToClose.length}] Would close Issue #${issue.number}: "${issue.title}" (Merged via PR #${meta.prNum || meta.hash})`);
       closedCount++;
     } else {
@@ -222,20 +261,20 @@ async function run() {
       while (!success && retries < 3) {
         try {
           // 1. Post congratulatory closing comment
-          await octokit.rest.issues.createComment({
-            owner,
-            repo,
-            issue_number: issue.number,
-            body: `### 🎉 Issue Resolved & Closed\n\nThis issue has been completed and merged via Pull Request #${meta.prNum || meta.hash}.\n\nThank you for contributing to **CAREERFORGE**! 🚀`
+          await ghRequest(`/repos/${owner}/${repo}/issues/${issue.number}/comments`, {
+            method: "POST",
+            body: JSON.stringify({
+              body: `### 🎉 Issue Resolved & Closed\n\nThis issue has been completed and merged via Pull Request #${meta.prNum || meta.hash}.\n\nThank you for contributing to **CAREERFORGE**! 🚀`
+            })
           });
 
           // 2. Close the issue
-          await octokit.rest.issues.update({
-            owner,
-            repo,
-            issue_number: issue.number,
-            state: "closed",
-            state_reason: "completed"
+          await ghRequest(`/repos/${owner}/${repo}/issues/${issue.number}`, {
+            method: "PATCH",
+            body: JSON.stringify({
+              state: "closed",
+              state_reason: "completed"
+            })
           });
 
           console.log(`✅ [${i + 1}/${issuesToClose.length}] Closed Issue #${issue.number} (Merged via PR #${meta.prNum || meta.hash})`);
@@ -247,7 +286,7 @@ async function run() {
         } catch (err) {
           retries++;
           console.error(`⚠️ Attempt ${retries} failed for Issue #${issue.number}: ${err.message}`);
-          if (err.status === 403 || err.status === 429) {
+          if (err.message.includes("403") || err.message.includes("429")) {
             console.log("⏳ Secondary rate limit detected, sleeping for 30 seconds before retry...");
             await new Promise((r) => setTimeout(r, 30000));
           } else {
