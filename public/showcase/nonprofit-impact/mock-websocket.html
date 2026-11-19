@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Common Ground / Local Stream Lab</title>
+  <link rel="stylesheet" href="mock-websocket.css"><script type="module" src="mock-websocket.js"></script>
+</head>
+<body>
+  <main>
+    <header><a href="./index.html">COMMON GROUND / SHOWCASE</a><span>LOCAL STREAM LAB</span></header>
+    <section class="intro"><p class="eyebrow">SMALL PACKETS. SHARED IMPACT.</p><h1>Follow the signal.</h1><p>A hands-on pub/sub simulation. Connect, subscribe, publish a packet, then interrupt the link to watch heartbeat detection and reconnect backoff.</p><p class="demo"><strong>Everything here is simulated in this tab.</strong> Samples describe fictional community activity. No network, donor, payment or equipment connection is made. Refresh resets the session.</p></section>
+    <div class="connection-bar"><span id="connection-status" role="status" data-state="disconnected">disconnected</span><div class="connection-actions"><button id="connect" type="button">Connect</button><button id="disconnect" type="button" disabled>Disconnect</button><button id="dropout" type="button" disabled>Drop link for 3s</button><button id="ping" type="button" disabled>Send heartbeat</button></div></div>
+    <div class="workspace">
+      <aside>
+        <fieldset><legend>01 / Subscribe to topics</legend><label><input type="checkbox" name="topic" value="impact" checked>impact <small>Activity summaries</small></label><label><input type="checkbox" name="topic" value="supplies" checked>supplies <small>Fictional kit counts</small></label><label><input type="checkbox" name="topic" value="volunteers" checked>volunteers <small>Demo shift updates</small></label></fieldset>
+        <label class="auto"><input id="auto" type="checkbox" checked>Generate local telemetry<br><small>One packet per second while connected and visible.</small></label>
+        <fieldset class="conditions"><legend>02 / Transport conditions</legend><label for="loss">Data packet loss <output id="loss-value" for="loss">0%</output></label><input id="loss" type="range" min="0" max="100" step="5" value="0"><label for="latency">Packet / heartbeat latency</label><select id="latency"><option value="60">60 ms</option><option value="150">150 ms</option><option value="500">500 ms</option></select><p>Data loss leaves heartbeats intact. A link dropout interrupts both. Heartbeats run every 500 ms; 1.5 s without an acknowledgement starts retries at 250 ms, doubling to a 2 s cap.</p></fieldset>
+        <form id="publish-form"><h2>03 / Publish a packet</h2><label for="publish-topic">Topic</label><select id="publish-topic"><option>impact</option><option>supplies</option><option>volunteers</option></select><label for="payload">JSON payload</label><textarea id="payload" rows="5" spellcheck="false">{"demo": true, "kits": 24}</textarea><button id="publish" type="submit" disabled>Publish locally</button><p id="publish-error" role="alert"></p><p class="bounds">Max 4 KB JSON, 256 values, 12 nesting levels; at most 64 in-flight packets. Offline packets are dropped, not replayed later.</p></form>
+      </aside>
+      <section class="monitor" aria-labelledby="monitor-title">
+        <div class="monitor-heading"><h2 id="monitor-title">Live transport</h2><span>SIMULATION / MEMORY ONLY</span></div>
+        <dl class="stats"><div><dt>Sent</dt><dd id="sent-count">0</dd></div><div><dt>Delivered</dt><dd id="delivered-count">0</dd></div><div><dt>Dropped / sent</dt><dd><span id="loss-percent">0%</span><small id="dropped-count">0 dropped</small></dd></div><div><dt>In flight</dt><dd id="pending-count">0</dd></div><div><dt>Last packet latency</dt><dd id="latency-value">—</dd></div><div><dt>Reconnect attempts</dt><dd id="retry-count">0</dd></div><div><dt>Heartbeat ACKs / pings</dt><dd id="heartbeat-count">0 / 0</dd></div><div><dt>Subscriptions</dt><dd id="subscription-count">3</dd></div></dl>
+        <div class="log-toolbar"><h3>Packet journal</h3><label><input type="checkbox" id="show-heartbeats">Show heartbeats</label><button id="clear-log" type="button">Clear log</button></div>
+        <p id="journal-note">Latest 80 entries. Sent and received packets are separate events. Transport totals include packets without a subscriber.</p>
+        <ol id="stream" role="log" aria-live="off" aria-label="Packet journal" tabindex="0"></ol>
+        <p id="lifecycle-note" role="status">Connect to begin. Unsubscribing stops that topic's inbox deliveries.</p>
+      </section>
+    </div>
+    <footer><span>COMMON GROUND / SIGNAL STUDIES</span><span>FICTIONAL DATA · NO PERSISTENCE</span></footer>
+  </main>
+</body>
+</html>
