@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apex / Metric Geometry Lab</title>
+  <link rel="stylesheet" href="data-visualizer.css">
+  <script type="module" src="data-visualizer.js"></script>
+</head>
+<body>
+  <main>
+    <header><a href="./index.html">APEX / SHOWCASE</a><span>ENGINEERING STUDY 06</span></header>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">PERFORMANCE SHAPES</p><h1 id="page-title">Every setup<br>has a signature.</h1>
+      <p>Compare six normalized metrics on the same polar grid. Tune the custom setup and watch its geometry change.</p>
+      <p class="demo-note"><strong>Synthetic scores, not vehicle measurements.</strong> Each axis runs from 0 to 100. Higher means more of that illustrative attribute.</p>
+    </section>
+    <div class="workspace">
+      <aside aria-labelledby="tuning-title">
+        <div class="section-heading"><h2 id="tuning-title">01 / Tune custom</h2><button id="reset" type="button">Reset</button></div>
+        <div id="metric-controls"></div>
+        <fieldset><legend>02 / Overlay datasets</legend>
+          <label class="toggle"><input type="checkbox" name="dataset" value="custom" checked><span class="swatch custom"></span>Custom setup</label>
+          <label class="toggle"><input type="checkbox" name="dataset" value="circuit" checked><span class="swatch circuit"></span>Circuit study</label>
+          <label class="toggle"><input type="checkbox" name="dataset" value="touring"><span class="swatch touring"></span>Touring study</label>
+        </fieldset>
+        <p id="input-error" role="alert"></p>
+      </aside>
+      <section class="plot-panel" aria-labelledby="plot-heading">
+        <div class="plot-heading"><h2 id="plot-heading">Polar comparison</h2><span>0 — 100 / 6 AXES</span></div>
+        <svg id="radar" viewBox="0 0 440 440" role="group" aria-labelledby="chart-title chart-description">
+          <title id="chart-title">Normalized metric radar</title>
+          <desc id="chart-description">Clockwise from the top: pace, launch, grip, braking, efficiency and range. Focus a plotted vertex to read its value. The same values are available below.</desc>
+          <g id="grid" aria-hidden="true"></g><g id="overlays"></g><g id="axis-labels" aria-hidden="true"></g>
+        </svg>
+        <p id="vertex-detail" class="vertex-detail" role="status">Hover or focus a vertex to inspect its score.</p>
+        <p id="empty-state" hidden>No datasets selected. Enable an overlay to compare its shape.</p>
+      </section>
+    </div>
+    <section class="readout" aria-labelledby="readout-title">
+      <h2 id="readout-title">03 / Read the geometry</h2>
+      <div class="table-scroll" role="region" aria-label="Dataset values; scroll horizontally on small screens" tabindex="0"><table><caption>Visible datasets: scores out of 100 and polygon coverage</caption><thead><tr><th scope="col">Dataset</th><th scope="col">Pace</th><th scope="col">Launch</th><th scope="col">Grip</th><th scope="col">Braking</th><th scope="col">Efficiency</th><th scope="col">Range</th><th scope="col">Coverage</th></tr></thead><tbody id="score-rows"></tbody></table></div>
+      <p id="area-summary" aria-live="polite"></p>
+      <details><summary>How the area is calculated</summary><p>Scores scale each axis radius linearly. Vertices start at the top and proceed clockwise at equal angles. The shoelace formula measures the enclosed polygon in SVG square units. Coverage compares it with the all-100 polygon on this exact grid. Axis order affects area; this geometric measure is not an overall performance rating or a safety recommendation. No data is sent or saved; refresh resets the studies.</p></details>
+    </section>
+    <footer><span>APEX / LOCAL GEOMETRY LAB</span><span>DEMO DATA · NO TELEMETRY CONNECTION</span></footer>
+  </main>
+</body>
+</html>
