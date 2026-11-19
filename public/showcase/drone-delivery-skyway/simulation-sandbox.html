@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Explore seeded drone delivery-time scenarios, percentile bands and late-delivery sampling intervals.">
+  <title>Delivery scenario desk · Drone Delivery Skyway</title>
+  <link rel="stylesheet" href="./simulation-sandbox.css">
+</head>
+<body>
+  <main id="drone-simulation">
+    <header class="masthead">
+      <a href="./index.html">Drone Delivery Skyway</a>
+      <span class="desk-label">Scenario desk</span>
+    </header>
+    <section class="introduction" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title">How much room<br>does a delivery need?</h1>
+        <p>Explore a range of flight times before choosing a delivery window. The same seed reproduces the same scenarios.</p>
+      </div>
+      <svg class="route" viewBox="0 0 240 110" role="img" aria-label="An illustrative delivery route between a depot and its destination">
+        <path d="M16 84H70V35H170V84H224" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="5 5"/>
+        <circle cx="16" cy="84" r="7"/><circle cx="224" cy="84" r="7"/>
+        <path d="m108 34 12-7 12 7-12 7Z M120 27V16 M120 41v11 M108 34H96 M132 34h12" fill="none" stroke="currentColor" stroke-width="2"/>
+        <text x="4" y="108">Depot</text><text x="177" y="108">Delivery</text>
+      </svg>
+    </section>
+
+    <div class="workspace">
+      <form aria-labelledby="conditions-title">
+        <h2 id="conditions-title">Flight conditions</h2>
+        <fieldset>
+          <legend class="sr-only">Simulation inputs</legend>
+          <label for="trials">Scenarios <output for="trials">1,000</output></label>
+          <input id="trials" name="trials" type="range" min="100" max="50000" step="100" value="1000">
+          <small>100–50,000 independent draws</small>
+
+          <label for="baseline">Baseline flight time <output for="baseline">30 min</output></label>
+          <input id="baseline" name="baseline" type="range" min="5" max="180" step="1" value="30">
+
+          <label for="volatility">Time variation <output for="volatility">20%</output></label>
+          <input id="volatility" name="volatility" type="range" min="0" max=".6" step=".01" value=".2">
+          <small>Standard deviation as a share of baseline time</small>
+
+          <label for="deadline">Delivery window <output for="deadline">40 min</output></label>
+          <input id="deadline" name="deadline" type="range" min="5" max="240" step="1" value="40">
+
+          <label for="seed">Scenario seed</label>
+          <input id="seed" name="seed" type="number" min="0" max="4294967295" step="1" value="17" required>
+          <small>Use an integer to reproduce a run.</small>
+        </fieldset>
+        <div class="actions">
+          <button type="submit" data-run>Run scenarios</button>
+          <button type="button" data-cancel hidden>Cancel run</button>
+        </div>
+        <label class="progress-label" for="simulation-progress">Simulation progress <span data-progress>Ready</span></label>
+        <progress id="simulation-progress" value="0" max="1000"></progress>
+        <p class="status" role="status" aria-live="polite">Choose conditions and run a scenario.</p>
+      </form>
+
+      <section class="results" aria-labelledby="results-title">
+        <div class="results-heading">
+          <h2 id="results-title">Delivery-time distribution</h2>
+          <p data-run-caption>No completed run</p>
+        </div>
+        <div class="empty" data-empty>
+          <span class="flight-line" aria-hidden="true"></span>
+          <p>Your generated delivery times will appear here.</p>
+        </div>
+        <div data-plot hidden>
+          <svg class="histogram" viewBox="0 0 720 240" role="img" aria-label="Generated delivery-time histogram"></svg>
+          <div class="scale"><span data-scale-low></span><span>Delivery time</span><span data-scale-high></span></div>
+          <p class="chart-key"><span class="band-key"></span>Middle 80% of outcomes <span class="median-key"></span>Median</p>
+        </div>
+        <dl class="statistics">
+          <div><dt>Mean flight time</dt><dd data-mean>—</dd></div>
+          <div><dt>Outcome standard deviation</dt><dd data-deviation>—</dd></div>
+          <div><dt>10th–90th percentile band</dt><dd data-band>—</dd></div>
+          <div><dt>Late outcomes</dt><dd data-late>—</dd></div>
+          <div><dt>95% sampling interval for late share</dt><dd data-interval>—</dd></div>
+        </dl>
+        <details class="count-table">
+          <summary>Inspect distribution counts</summary>
+          <table><caption>Generated outcomes by delivery-time range</caption><thead><tr><th scope="col">Flight-time range</th><th scope="col">Outcomes</th></tr></thead><tbody></tbody></table>
+        </details>
+      </section>
+    </div>
+    <aside class="assumptions" aria-labelledby="model-title">
+      <h2 id="model-title">What this model assumes</h2>
+      <p>Each flight time is baseline × (1 + variation × a standard normal draw), with a one-minute minimum. Flights are independent. Inputs are hypothetical; calibrating them requires observed delivery data.</p>
+      <p>The shaded band describes individual simulated outcomes. The Wilson interval describes sampling uncertainty in the late-outcome share. It does not include uncertainty in the model or its inputs.</p>
+    </aside>
+    <footer>Runs stay in this tab. No flight data or credentials are requested.</footer>
+  </main>
+  <script type="module" src="./simulation-sandbox.js"></script>
+</body>
+</html>
