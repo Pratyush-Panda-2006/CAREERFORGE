@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Campaign state mapper | Nonprofit Impact</title><link rel="stylesheet" href="./state-diagram.css"><script type="module" src="./state-diagram.js"></script></head>
+<body>
+<main data-fsm-workbench>
+  <header><a href="./index.html">Nonprofit Impact</a><span>Campaign workflow laboratory</span></header>
+  <section class="intro"><h1>Trace a campaign lifecycle.</h1><p>Dispatch an event, follow its transition and inspect the next state. Add your own paths, explore review cycles and export the graph as Mermaid.</p><p class="help">This is a local simulation with illustrative campaign states. Changes stay in memory until exported; reloading restores the demo.</p></section>
+  <div class="workspace">
+    <section class="diagram" aria-labelledby="graph-title"><div class="heading-row"><h2 id="graph-title">State transition graph</h2><span id="graph-count"></span></div><p class="help">Select a node to inspect it. Events move the current state. Scroll the diagram horizontally on narrow screens, or use the transition table below.</p>
+      <div class="graph-scroll" tabindex="0" aria-label="Scrollable campaign state diagram"><svg viewBox="0 0 760 480" role="group" aria-labelledby="svg-title svg-description"><title id="svg-title">Campaign state transitions</title><desc id="svg-description">Directional arrows are labeled with events. The current state glows green; select a node with a pointer or keyboard to inspect outgoing transitions.</desc><defs><marker id="transition-arrow" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#b8c7ce"></path></marker></defs><g id="edges" aria-hidden="true"></g><g id="nodes"></g></svg></div>
+    </section>
+    <aside class="inspector" aria-labelledby="inspector-title"><h2 id="inspector-title">Run inspector</h2><p class="help">Current state</p><p id="current-state" tabindex="-1" aria-live="polite" aria-atomic="true"></p><h3>Available events</h3><div id="event-buttons" class="buttons"></div>
+      <form id="dispatch-form"><label for="dispatch-event">Event to dispatch</label><div class="dispatch-row"><input id="dispatch-event" value="SUBMIT" maxlength="40" required autocomplete="off"><button type="submit">Dispatch</button></div></form>
+      <h3>Inspecting <span id="inspected-state"></span></h3><ul id="outgoing"></ul><div class="buttons"><button id="reset-run" type="button">Reset run</button><button id="restore-demo" type="button">Restore demo graph</button></div><p class="help">Reset run keeps your graph. Restore demo graph replaces custom transitions. The most recent 200 accepted events are retained.</p>
+    </aside>
+  </div>
+  <section class="editor" aria-labelledby="edit-title"><h2 id="edit-title">Define a transition</h2><p class="help">Each state/event pair has one target. Names are case-sensitive and limited to 40 letters, numbers, spaces, underscores or hyphens, starting with a letter. Maximum: 12 states and 64 transitions.</p>
+    <form id="transition-form"><datalist id="state-names"></datalist><div class="transition-inputs"><label>From state<input id="from" list="state-names" value="Review" maxlength="40" required autocomplete="off"></label><label>Event name<input id="transition-event" value="RECHECK" maxlength="40" required autocomplete="off"></label><label>To state<input id="to" list="state-names" value="Review" maxlength="40" required autocomplete="off"></label></div><button type="submit" class="primary">Add transition</button></form>
+    <div class="table-scroll" tabindex="0" aria-label="All state transitions"><table><caption>Directed event transitions</caption><thead><tr><th scope="col">From</th><th scope="col">Event</th><th scope="col">To</th></tr></thead><tbody id="transition-rows"></tbody></table></div>
+  </section>
+  <section class="export" aria-labelledby="export-title"><div class="heading-row"><h2 id="export-title">Mermaid definition</h2><div class="buttons"><button id="copy" type="button">Copy definition</button><button id="download" type="button">Download Mermaid</button></div></div><p class="help">Generated aliases preserve labels safely. The definition includes the initial state, all directed transitions and a comment identifying the current state.</p><label for="definition">Mermaid state diagram source</label><textarea id="definition" rows="11" readonly spellcheck="false"></textarea></section>
+  <details class="history"><summary id="history-summary">Event history</summary><ol id="history-list"></ol></details>
+  <p id="notice" role="status" aria-live="polite"></p><footer>Campaign state mapper · deterministic local event transitions</footer>
+</main>
+</body>
+</html>
