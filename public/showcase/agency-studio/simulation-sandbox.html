@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency Studio - Monte Carlo Retainer Risk Forecaster</title>
+  <link rel="stylesheet" href="./simulation-sandbox.css">
+</head>
+<body class="agency-simulation-theme">
+  <div class="simulation-sandbox-container">
+    <header class="simulation-header">
+      <div class="branding-group">
+        <span class="simulation-orb"></span>
+        <h2>Agency Studio Client Retainer & Revenue Variance Forecaster</h2>
+      </div>
+      <button id="btnRunSimulation" class="sim-run-btn">Execute Simulation</button>
+    </header>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label for="trialsRange">Monte Carlo Trials: <span id="trialsValue" class="value-badge">1000</span></label>
+        <input type="range" id="trialsRange" min="100" max="5000" step="100" value="1000">
+      </div>
+      <div class="control-group">
+        <label for="volatilityRange">Retainer Volatility: <span id="volatilityValue" class="value-badge">15%</span></label>
+        <input type="range" id="volatilityRange" min="0.05" max="0.50" step="0.01" value="0.15">
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-title">Mean Retainer Forecast</span>
+        <span id="metricMean" class="metric-number">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Standard Deviation</span>
+        <span id="metricStdDev" class="metric-number">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">10th Percentile (Conservative)</span>
+        <span id="metricP10" class="metric-number">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Median (50th Percentile)</span>
+        <span id="metricP50" class="metric-number">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">90th Percentile (Optimistic)</span>
+        <span id="metricP90" class="metric-number">--</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./simulation-sandbox.js"></script>
+</body>
+</html>
