@@ -7,6 +7,7 @@ on:
 permissions:
   pull-requests: write
   contents: write
+  issues: write
 
 jobs:
   enable-auto-merge:
@@ -52,3 +53,122 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for Merge and Close Linked Issue(s)
+        if: steps.check-scope.outputs.can_merge == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const author = pr.user ? pr.user.login : 'contributor';
+
+            console.log(`Watching PR #${prNumber} for auto-merge completion...`);
+
+            let merged = false;
+            let mergedPr = pr;
+
+            // Wait up to 3 minutes (36 checks * 5s) for auto-merge to execute
+            for (let i = 0; i < 36; i++) {
+              await new Promise(r => setTimeout(r, 5000));
+              try {
+                const { data: updatedPr } = await github.rest.pulls.get({
+                  owner,
+                  repo,
+                  pull_number: prNumber
+                });
+                if (updatedPr.merged) {
+                  merged = true;
+                  mergedPr = updatedPr;
+                  console.log(`PR #${prNumber} merged successfully!`);
+                  break;
+                }
+                if (updatedPr.state === 'closed') {
+                  console.log(`PR #${prNumber} closed without merging.`);
+                  break;
+                }
+              } catch (err) {
+                console.log(`Poll error: ${err.message}`);
+              }
+            }
+
+            if (!merged) {
+              console.log(`Auto-merge not finalized within window. Background issue closer will handle closing.`);
+              return;
+            }
+
+            // Extract all linked issues
+            const textToScan = [
+              mergedPr.body || '',
+              mergedPr.title || '',
+              mergedPr.head?.ref || ''
+            ].join('\n');
+
+            const issueNumbers = new Set();
+
+            // 1. Closing keywords
+            const kwRegex = /\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved|issue|task)\b\s*:?\s*#?(\d+)/gi;
+            for (const m of textToScan.matchAll(kwRegex)) {
+              const num = parseInt(m[1], 10);
+              if (num !== prNumber) issueNumbers.add(num);
+            }
+
+            // 2. Issue URLs
+            const urlRegex = /https:\/\/github\.com\/[^/]+\/[^/]+\/issues\/(\d+)/gi;
+            for (const m of textToScan.matchAll(urlRegex)) {
+              const num = parseInt(m[1], 10);
+              if (num !== prNumber) issueNumbers.add(num);
+            }
+
+            // 3. Branch name numbers
+            const branchMatch = (mergedPr.head?.ref || '').match(/(\d+)$/);
+            if (branchMatch) {
+              const num = parseInt(branchMatch[1], 10);
+              if (num !== prNumber) issueNumbers.add(num);
+            }
+
+            // 4. PR title #number
+            for (const m of (mergedPr.title || '').matchAll(/#(\d+)/g)) {
+              const num = parseInt(m[1], 10);
+              if (num !== prNumber) issueNumbers.add(num);
+            }
+
+            console.log(`Detected linked issue candidates for PR #${prNumber}:`, Array.from(issueNumbers));
+
+            for (const issueNum of issueNumbers) {
+              try {
+                const { data: issue } = await github.rest.issues.get({
+                  owner,
+                  repo,
+                  issue_number: issueNum
+                });
+
+                if (issue && !issue.pull_request && issue.state === 'open') {
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: issueNum,
+                    body: `### 🎉 Issue Resolved & Closed\n\nThis issue has been completed and merged via Pull Request #${prNumber}.\n\nThank you @${author} for your contribution to **CAREERFORGE**! 🚀`
+                  });
+
+                  await github.rest.issues.update({
+                    owner,
+                    repo,
+                    issue_number: issueNum,
+                    state: 'closed',
+                    state_reason: 'completed'
+                  });
+
+                  console.log(`✅ Successfully closed issue #${issueNum} via merged PR #${prNumber}`);
+                } else if (issue && issue.pull_request) {
+                  console.log(`#${issueNum} is a Pull Request, skipping.`);
+                } else {
+                  console.log(`Issue #${issueNum} is already closed or not found.`);
+                }
+              } catch (err) {
+                console.warn(`Could not close issue #${issueNum}: ${err.message}`);
+              }
+            }

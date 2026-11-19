@@ -1,11 +1,12 @@
 name: Close Merged Issues
 
 on:
+  schedule:
+    # Run every 15 minutes to guarantee all merged PR issues are promptly closed
+    - cron: '*/15 * * * *'
   push:
     branches:
       - main
-    paths:
-      - '.github/workflows/close-merged-issues.yml'
   workflow_dispatch:
 
 permissions:
@@ -28,10 +29,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci || npm install
 
       - name: Close All Merged Issues
         env:
