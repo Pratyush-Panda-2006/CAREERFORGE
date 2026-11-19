@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Conservation profile comparison | TerraInitia</title><link rel="stylesheet" href="./data-visualizer.css"><script type="module" src="./data-visualizer.js"></script></head>
+<body>
+<main data-conservation-radar>
+  <header><a href="./index.html">TerraInitia / Nonprofit Impact</a><span>Conservation planning</span></header>
+  <section class="intro"><h1>Compare conservation profiles.</h1><p>Explore the balance between six program measures. Change a profile, overlay it with another and inspect the shape of the difference.</p><p class="note">Illustrative profiles only. All six measures use a 0–100% scale; polygon coverage is relative to the all-100% shape. No data is sent anywhere.</p></section>
+  <div class="workspace">
+    <aside aria-labelledby="edit-title"><h2 id="edit-title">Edit a profile</h2><label for="editing-profile" class="small">Profile to edit</label><select id="editing-profile"><option value="0">Current program</option><option value="1">Proposed program</option></select><div id="metric-controls"></div><button id="reset" type="button">Reset illustrative profiles</button><p id="status" role="status"></p></aside>
+    <section class="plot" aria-labelledby="plot-heading"><div class="plot-heading"><h2 id="plot-heading">Program balance</h2><span>Shared scale / six axes</span></div>
+      <fieldset><legend>Visible profiles</legend><label><input id="show-0" type="checkbox" checked><span class="swatch current"></span>Current program</label><label><input id="show-1" type="checkbox" checked><span class="swatch proposed"></span>Proposed program</label></fieldset>
+      <svg viewBox="0 0 480 480" role="group" aria-labelledby="plot-title plot-desc" class="radar"><title id="plot-title">Conservation profile radar chart</title><desc id="plot-desc">The six axes S1 to S6 match the labeled controls. Concentric webs mark 25%, 50%, 75% and 100%. Focus a vertex to hear its measure and value.</desc><g id="grid" aria-hidden="true"></g><g id="profiles"></g></svg>
+      <p id="empty-state" hidden>No profiles visible. Enable a profile above to compare its shape.</p><p id="vertex-tooltip" role="status">Focus or point to a vertex to inspect its metric.</p>
+      <div class="table-wrap"><table><caption>Geometric comparison</caption><thead><tr><th scope="col">Profile</th><th scope="col">Polygon area <span>(SVG units²)</span></th><th scope="col">Full-scale coverage</th></tr></thead><tbody><tr><th scope="row">Current program <span id="visibility-0">Visible</span></th><td id="area-0"></td><td id="coverage-0"></td></tr><tr><th scope="row">Proposed program <span id="visibility-1">Visible</span></th><td id="area-1"></td><td id="coverage-1"></td></tr></tbody></table></div>
+      <p class="note">Area uses unrounded coordinates. The displayed vertices are rounded to four decimal places. Hidden profiles retain their values.</p>
+    </section>
+  </div>
+  <footer><span>TerraInitia field tools</span><span>Sliders and profile toggles work with a keyboard. Vertex values are also available by focus.</span></footer>
+</main>
+</body>
+</html>
