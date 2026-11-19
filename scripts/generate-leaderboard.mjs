@@ -4,6 +4,19 @@ import { execSync } from "child_process";
 
 const OUTPUT_PATH = path.resolve("public", "leaderboard.json");
 
+// Non-NSoC contributors (collaborators, project owners, bots) excluded from the contributor leaderboard
+const EXCLUDED_USERS = new Set([
+  "harshbok69-bit",
+  "Pratyush-Panda-2006",
+  "Pratyush-Panda"
+]);
+
+function isExcludedUser(username) {
+  if (!username) return true;
+  if (username.includes("[bot]")) return true;
+  return EXCLUDED_USERS.has(username);
+}
+
 // Map known author emails and names to their canonical GitHub usernames
 const authorToUser = {
   "souravranjanmirdha@gmail.com": "souravranjanmirdha-sudo",
@@ -15,7 +28,6 @@ const authorToUser = {
   "85987665+divyanshagarwal123@users.noreply.github.com": "divyanshAgarwal123",
   "73594751+sarbajit-sengupta@users.noreply.github.com": "Sarbajit-Sengupta",
   "sarbajitsengupta1712@gmail.com": "Sarbajit-Sengupta",
-  "harsh.bok69@gmail.com": "harshbok69-bit",
   "aush5895@gmail.com": "aush5895",
   "190047591+chanchall26@users.noreply.github.com": "chanchall26",
   "kunalyelgatew@gmail.com": "kunal-yelgate",
@@ -125,7 +137,7 @@ function scanGitCommits(processedPrNumbers, contributorStats) {
         }
       }
 
-      if (username && !username.includes("[bot]") && !username.includes("Pratyush-Panda")) {
+      if (username && !isExcludedUser(username)) {
         processedPrNumbers.add(prNumber);
         if (!contributorStats[username]) {
           contributorStats[username] = {
@@ -161,7 +173,7 @@ async function run() {
   // Hydrate contributor stats from existing baseline
   if (existingData && Array.isArray(existingData.contributors)) {
     for (const c of existingData.contributors) {
-      if (c.username) {
+      if (c.username && !isExcludedUser(c.username)) {
         contributorStats[c.username] = {
           username: c.username,
           avatar_url: c.avatar_url || `https://github.com/${c.username}.png`,
@@ -171,6 +183,7 @@ async function run() {
       }
     }
   }
+  delete contributorStats["harshbok69-bit"];
 
   // 1. Fetch live from GitHub API if token is provided
   if (token) {
@@ -195,7 +208,7 @@ async function run() {
         if (!pagePulls || pagePulls.length === 0) break;
 
         for (const pr of pagePulls) {
-          if (pr.merged_at && pr.user && !pr.user.login.includes("[bot]") && !pr.user.login.includes("Pratyush-Panda")) {
+          if (pr.merged_at && pr.user && !isExcludedUser(pr.user.login)) {
             const prNum = pr.number;
             if (!processedPrNumbers.has(prNum)) {
               processedPrNumbers.add(prNum);
@@ -226,7 +239,7 @@ async function run() {
 
   // 3. Sort descending by merged PR count
   const sorted = Object.values(contributorStats)
-    .filter((item) => item.merged_prs > 0)
+    .filter((item) => item.merged_prs > 0 && !isExcludedUser(item.username))
     .sort((a, b) => b.merged_prs - a.merged_prs);
 
   // Guard: NEVER overwrite with empty contributors

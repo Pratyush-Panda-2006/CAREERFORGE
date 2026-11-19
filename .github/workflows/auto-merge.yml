@@ -20,6 +20,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request;
+
+            // Collaborators are allowed to contribute inside or outside public/showcase/
+            const isCollaborator = ['harshbok69-bit', 'Pratyush-Panda-2006', 'Pratyush-Panda'].includes(pr.user?.login);
+            if (isCollaborator) {
+              console.log(`Collaborator PR #${pr.number} by @${pr.user?.login}: allowed to contribute outside or inside public/showcase/.`);
+              core.setOutput('can_merge', 'true');
+              return;
+            }
+
             const { data: files } = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
               repo: context.repo.repo,

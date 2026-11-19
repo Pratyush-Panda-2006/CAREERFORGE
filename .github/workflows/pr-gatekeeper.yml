@@ -27,6 +27,13 @@ jobs:
             const repo = context.repo.repo;
             const prBody = pr.body || '';
 
+            // Check if PR author is a designated collaborator (exempt from showcase-only restriction and issue-linking)
+            const isCollaborator = ['harshbok69-bit', 'Pratyush-Panda-2006', 'Pratyush-Panda'].includes(pr.user?.login);
+            if (isCollaborator) {
+              console.log(`✅ Collaborator PR #${prNumber} by @${pr.user.login}: Exempt from showcase scope and issue linking requirements. Allowed to contribute outside or inside public/showcase/.`);
+              return;
+            }
+
             // 0. Automatically tag PR with 'nsoc26'
             try {
               await github.rest.issues.addLabels({
