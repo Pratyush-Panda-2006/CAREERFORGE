@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming Cinema Hub - Automated WCAG Contrast & Keyboard Accessibility Inspector</title>
+  <link rel="stylesheet" href="accessibility-assistant.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="a11y-container">
+    <header class="a11y-header">
+      <div class="badge-tag">STREAMING CINEMA ACCESSIBILITY</div>
+      <h1>Automated WCAG 2.1 Contrast & Keyboard Inspector</h1>
+      <p>Automated real-time color contrast evaluation, subtitle readability validation, and keyboard accessibility inspection for indie film streaming lounges and watch party interfaces.</p>
+    </header>
+
+    <div class="a11y-grid">
+      <section class="a11y-card controls-card">
+        <h2>Cinema UI & Subtitle Palette Pairing</h2>
+
+        <div class="picker-group">
+          <label>Foreground / Subtitle Text Color</label>
+          <div class="picker-row">
+            <input type="color" id="fgColorPicker" value="#f43f5e" aria-label="Foreground color picker">
+            <input type="text" id="fgColorInput" value="#f43f5e" maxlength="7" spellcheck="false" aria-label="Foreground hex code">
+          </div>
+        </div>
+
+        <div class="picker-group">
+          <label>Background Canvas Color</label>
+          <div class="picker-row">
+            <input type="color" id="bgColorPicker" value="#090a0f" aria-label="Background color picker">
+            <input type="text" id="bgColorInput" value="#090a0f" maxlength="7" spellcheck="false" aria-label="Background hex code">
+          </div>
+        </div>
+
+        <div class="preset-group">
+          <label>Curated Cinematic High-Contrast Presets</label>
+          <div class="preset-buttons">
+            <button type="button" class="preset-btn" data-fg="#ffffff" data-bg="#090a0f">Cinema Pure White</button>
+            <button type="button" class="preset-btn" data-fg="#38bdf8" data-bg="#0c192c">Neon Cyan Ambient</button>
+            <button type="button" class="preset-btn" data-fg="#fde047" data-bg="#1c1917">Subtitle Yellow Warning</button>
+            <button type="button" class="preset-btn" data-fg="#f43f5e" data-bg="#090a0f">Signature Rose Red</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="a11y-card results-card">
+        <h2>Live Contrast Verification</h2>
+
+        <div class="preview-box" id="contrastPreviewBox">
+          <p id="previewText" class="preview-heading">STREAMING CINEMA SUBTITLE PREVIEW</p>
+          <p class="preview-sub">Readability verification • High-contrast compliance • Subtitle readability standard</p>
+        </div>
+
+        <div class="ratio-display">
+          <span class="ratio-label">Calculated Contrast Ratio</span>
+          <span class="ratio-value" id="contrastRatioVal">-- : 1</span>
+        </div>
+
+        <div class="wcag-table">
+          <div class="wcag-row">
+            <span class="criterion">WCAG AA Normal Text (&ge; 4.5:1)</span>
+            <span class="status-pill" id="aaNormalPill">--</span>
+          </div>
+          <div class="wcag-row">
+            <span class="criterion">WCAG AA Large Text / UI Components (&ge; 3.0:1)</span>
+            <span class="status-pill" id="aaLargePill">--</span>
+          </div>
+          <div class="wcag-row">
+            <span class="criterion">WCAG AAA Normal Text (&ge; 7.0:1)</span>
+            <span class="status-pill" id="aaaNormalPill">--</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="accessibility-assistant.js"></script>
+</body>
+</html>
