@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music DAW Studio - Monte Carlo Multi-Scenario Simulator & Risk Variance Forecaster</title>
+  <link rel="stylesheet" href="simulation-sandbox.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="sim-container">
+    <header class="sim-header">
+      <div class="badge-tag">AUDIO DSP SIMULATOR</div>
+      <h1>Monte Carlo Multi-Scenario Risk & Audio DSP Simulator</h1>
+      <p>Autonomous numerical simulation engine executing 1,000 iterative Monte Carlo runs to forecast DSP thread latency variance, buffer underrun risks, and multi-track audio rendering confidence bounds.</p>
+    </header>
+
+    <div class="sim-grid">
+      <section class="sim-controls-panel">
+        <h2>Audio Engine Parameters</h2>
+        <div class="control-group">
+          <label for="trialSlider">Trial Iterations: <span id="trialVal">1000</span> runs</label>
+          <input type="range" id="trialSlider" min="100" max="5000" step="100" value="1000">
+        </div>
+
+        <div class="control-group">
+          <label for="volatilitySlider">DSP Processing Jitter (&sigma;): <span id="volatilityVal">0.12</span></label>
+          <input type="range" id="volatilitySlider" min="0.02" max="0.40" step="0.01" value="0.12">
+        </div>
+
+        <div class="control-group">
+          <label for="baseSlider">Baseline Buffer Latency: <span id="baseVal">5.8</span> ms</label>
+          <input type="range" id="baseSlider" min="1" max="25" step="0.5" value="5.8">
+        </div>
+
+        <div class="control-actions">
+          <button id="runSimBtn" class="btn-primary">Execute Monte Carlo Runs</button>
+        </div>
+      </section>
+
+      <section class="sim-summary-panel">
+        <h2>Forecasting Confidence Bounds</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Expected Latency (Mean)</span>
+            <span class="metric-value" id="meanMetric">--</span>
+            <span class="metric-unit">ms</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Standard Deviation (&sigma;)</span>
+            <span class="metric-value" id="stdDevMetric">--</span>
+            <span class="metric-unit">ms</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Median (P50)</span>
+            <span class="metric-value" id="p50Metric">--</span>
+            <span class="metric-unit">ms</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Buffer Stress (P95)</span>
+            <span class="metric-value" id="p95Metric">--</span>
+            <span class="metric-unit">ms</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Underrun Spike (P99)</span>
+            <span class="metric-value" id="p99Metric">--</span>
+            <span class="metric-unit">ms</span>
+          </div>
+        </div>
+
+        <div class="distribution-section">
+          <h3>DSP Latency Probability Distribution</h3>
+          <div class="distribution-bars" id="distributionBarContainer"></div>
+          <div class="dist-axis">
+            <span>Optimal Buffer (P10)</span>
+            <span>Target Baseline (P50)</span>
+            <span>Underrun Threshold (P99)</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="simulation-sandbox.js"></script>
+</body>
+</html>
