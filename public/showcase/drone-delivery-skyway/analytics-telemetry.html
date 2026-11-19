@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="An opt-in, memory-only workbench for coarse drone showcase interaction measurements.">
+  <title>Local interaction observatory · Drone Delivery Skyway</title>
+  <link rel="stylesheet" href="./analytics-telemetry.css">
+</head>
+<body>
+<main id="drone-analytics">
+  <header>
+    <a href="./index.html">Drone Delivery Skyway</a>
+    <span>Local interaction observatory</span>
+  </header>
+  <section class="intro" aria-labelledby="page-title">
+    <h1 id="page-title">See the interaction.<br>Leave the person out.</h1>
+    <p>Measure this page’s test area with fixed target names and coarse cells. Collection starts only when you choose it. Measurements stay in memory until cleared or this page reloads.</p>
+  </section>
+  <div class="collection-bar">
+    <strong class="state" data-state>Paused</strong>
+    <div class="buttons">
+      <button type="button" data-toggle aria-pressed="false">Start collection</button>
+      <button type="button" class="secondary" data-clear>Clear measurements</button>
+      <button type="button" class="secondary" data-export>Download JSON report</button>
+    </div>
+  </div>
+  <p id="collection-status" role="status" aria-live="polite">Collection is paused. Nothing is measured until you start it.</p>
+  <div class="workspace">
+    <section class="panel" aria-labelledby="area-title">
+      <h2 id="area-title">Interaction test area</h2>
+      <p class="muted">Try the controls or empty space. Keyboard clicks count by target without an invented pointer position.</p>
+      <div class="interaction-area" data-interaction-area data-analytics-target="surface" role="group" aria-label="Interaction test area">
+        <svg viewBox="0 0 400 200" class="map" aria-hidden="true"><path d="M32 140H115V50H300V140H365" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="7 7"/><circle cx="32" cy="140" r="8"/><circle cx="365" cy="140" r="8"/></svg>
+        <button type="button" data-analytics-target="route">Plan route</button>
+        <button type="button" data-analytics-target="weather">Check conditions</button>
+        <button type="button" data-analytics-target="dispatch">Preview dispatch</button>
+      </div>
+      <p class="stage-message" data-stage-message>This area demonstrates interaction measurement; it dispatches no flights.</p>
+      <div class="note-demo">
+        <label for="private-note">Try a private note</label>
+        <input id="private-note" type="text" maxlength="200" autocomplete="off" placeholder="Form values are excluded">
+        <p class="muted">This field is outside the measured area. Its value is never read by the analytics module.</p>
+      </div>
+    </section>
+    <section class="panel readings" aria-labelledby="readings-title">
+      <h2 id="readings-title">Session readings</h2>
+      <dl class="metrics">
+        <div><dt>Visible collection time</dt><dd data-duration>0.0 s</dd></div>
+        <div><dt>Counted clicks</dt><dd data-clicks>0</dd></div>
+        <div><dt>Maximum page scroll</dt><dd data-depth>0%</dd></div>
+        <div><dt>Accepted events</dt><dd data-events>0</dd></div>
+      </dl>
+      <h3>Pointer heatmap</h3>
+      <div class="heatmap" data-heatmap role="img" aria-label="No pointer interactions measured"></div>
+      <p class="muted">8 × 6 coarse cells across the test area. Brighter cells received more clicks.</p>
+      <ul class="target-counts" aria-label="Click totals by target">
+        <li>Plan route <strong data-target-count="route">0</strong></li>
+        <li>Check conditions <strong data-target-count="weather">0</strong></li>
+        <li>Preview dispatch <strong data-target-count="dispatch">0</strong></li>
+        <li>Empty test area <strong data-target-count="surface">0</strong></li>
+      </ul>
+    </section>
+  </div>
+  <section class="panel trace" aria-labelledby="trace-title">
+    <div class="trace-heading"><h2 id="trace-title">Measurement stream</h2><span>Latest 100 events · newest first</span></div>
+    <ol data-event-log aria-live="off" tabindex="0" aria-label="Latest collected measurements"><li class="empty">No measurements yet.</li></ol>
+  </section>
+  <section class="privacy" aria-labelledby="privacy-title">
+    <h2 id="privacy-title">What the report contains</h2>
+    <p>Fixed target names, coarse pointer cells, scroll depth in five-percent steps and relative active time. Form values, page URLs, credentials, browser fingerprints and persistent identifiers are excluded.</p>
+    <p>Pausing collection or hiding the tab pauses its clock. A report is created only when you request a download. No measurements are sent over the network or written to browser storage.</p>
+    <p>History retains the latest 100 events; aggregate counters retain the session totals up to one million clicks. Active time is capped at 24 hours.</p>
+  </section>
+  <footer>Memory only. Clear measurements or reload this page to discard the session.</footer>
+</main>
+<script type="module" src="./analytics-telemetry.js"></script>
+</body>
+</html>
