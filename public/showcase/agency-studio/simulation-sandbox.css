@@ -1,0 +1,147 @@
+/* Agency Studio - Monte Carlo Simulator & Risk Variance Forecaster Styles */
+
+:root {
+  --agency-sim-bg: #090d16;
+  --agency-sim-panel: rgba(19, 24, 38, 0.9);
+  --agency-sim-border: rgba(236, 72, 153, 0.22);
+  --agency-sim-accent: #ec4899;
+  --agency-sim-glow: rgba(236, 72, 153, 0.35);
+  --agency-sim-text: #f8fafc;
+  --agency-sim-muted: #94a3b8;
+}
+
+body.agency-simulation-theme {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--agency-sim-bg);
+  color: var(--agency-sim-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.simulation-sandbox-container {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.simulation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background: var(--agency-sim-panel);
+  border: 1px solid var(--agency-sim-border);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.branding-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.branding-group h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.simulation-orb {
+  width: 14px;
+  height: 14px;
+  background-color: var(--agency-sim-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 14px var(--agency-sim-accent);
+  animation: agency-orb-pulse 2s infinite ease-in-out;
+}
+
+@keyframes agency-orb-pulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.sim-run-btn {
+  padding: 10px 22px;
+  background: var(--agency-sim-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sim-run-btn:hover {
+  background: #db2777;
+  box-shadow: 0 0 12px var(--agency-sim-glow);
+}
+
+.controls-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  background: var(--agency-sim-panel);
+  border: 1px solid var(--agency-sim-border);
+  padding: 18px 20px;
+  border-radius: 10px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--agency-sim-text);
+  display: flex;
+  justify-content: space-between;
+}
+
+.value-badge {
+  color: var(--agency-sim-accent);
+  font-weight: bold;
+}
+
+.control-group input[type="range"] {
+  width: 100%;
+  accent-color: var(--agency-sim-accent);
+  cursor: pointer;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.metric-card {
+  background: var(--agency-sim-panel);
+  border: 1px solid var(--agency-sim-border);
+  padding: 16px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metric-title {
+  font-size: 0.78rem;
+  color: var(--agency-sim-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-number {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--agency-sim-text);
+  font-family: monospace;
+}
