@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Impact Studio · Certificate maker</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="export-receipt.css">
+  <script type="module" src="export-receipt.js"></script>
+</head>
+<body>
+  <main id="receipt-studio">
+    <header><a href="index.html">Nonprofit Impact</a><p class="eyebrow">THE COMMUNITY RECORD / 01</p><h1>Give good work<br>a lasting record.</h1><p>Create a personal impact certificate. Edit the sample, inspect the preview, and keep a high-resolution PNG. Everything stays in this tab.</p></header>
+    <div class="workspace">
+      <form id="receipt-form" novalidate>
+        <h2>Your certificate</h2>
+        <p class="hint">Fictional sample details. This is a personal acknowledgement, not a tax receipt or verified credential.</p>
+        <label>Certificate title<input name="title" maxlength="60" value="A small act. A lasting impact." required></label>
+        <label>Presented to<input name="recipient" maxlength="80" value="Asha Rao" required autocomplete="off"></label>
+        <label>Contribution<input name="contribution" maxlength="80" value="12 volunteer hours · Community garden" required></label>
+        <div class="fields"><label>Date<input name="date" type="date" value="2026-11-19" required></label><label>Reference<input name="reference" maxlength="24" value="IMPACT-2026-014" required aria-describedby="reference-note" autocomplete="off"></label></div>
+        <p id="reference-note" class="hint">1–24 letters, numbers or hyphens. The decorative reference pattern uses odd parity; it is not a standard retail barcode.</p>
+        <label>A personal note<textarea name="message" rows="3" maxlength="180" required>Thank you for showing up, sharing your time, and helping our neighbourhood grow.</textarea></label>
+        <button type="submit" class="secondary">Update preview</button>
+        <p id="receipt-error" role="alert" hidden></p>
+      </form>
+      <section class="preview-panel" aria-labelledby="preview-heading">
+        <div class="toolbar"><div><p class="eyebrow">YOUR IMPACT, IN PRINT</p><h2 id="preview-heading">The final piece.</h2></div><div role="group" aria-label="Preview magnification"><button type="button" data-zoom="fit" aria-pressed="true">Fit</button><button type="button" data-zoom="detail" aria-pressed="false">Detail</button></div></div>
+        <div class="canvas-frame" id="canvas-frame" data-zoom="fit" tabindex="0" role="region" aria-label="Certificate preview, scroll to inspect detail">
+          <canvas id="receipt-canvas" width="2000" height="1400" role="img" aria-label="Certificate preview">Your browser needs Canvas support to preview the certificate.</canvas>
+        </div>
+        <p id="receipt-summary" class="hint"></p>
+        <div class="download-row"><div><p id="receipt-status" role="status">Preparing preview…</p><p class="hint">2000 × 1400 px · PNG · no account or upload</p></div><button type="button" id="download-receipt" disabled>Download PNG Receipt</button></div>
+      </section>
+    </div>
+    <footer><span>Made for the people who make a difference.</span><span>LOCAL CANVAS STUDIO</span></footer>
+  </main>
+</body>
+</html>
