@@ -1084,6 +1084,85 @@
   </section>
   <!-- ===== END Issue #350 ===== -->
 
+  <section class="clearance-section" id="helipad-clearance" aria-labelledby="clearance-title">
+    <div class="clearance-container">
+      <header class="clearance-header">
+        <span class="clearance-kicker">AURA MARITIME · FLIGHT OPERATIONS</span>
+        <h2 id="clearance-title">Helipad Flight Clearance &amp; Marine Weather Station</h2>
+        <p>Monitor wind, sea conditions, and superyacht deck attitude for a live landing-readiness advisory.</p>
+      </header>
+
+      <div class="clearance-console">
+        <div class="clearance-controls" aria-label="Weather and deck conditions">
+          <label class="clearance-control" for="clearance-wind">
+            <span>Wind speed <output id="clearance-wind-value" for="clearance-wind">12 kt</output></span>
+            <input id="clearance-wind" type="range" min="0" max="60" step="1" value="12">
+          </label>
+          <label class="clearance-control" for="clearance-swell">
+            <span>Swell height <output id="clearance-swell-value" for="clearance-swell">0.8 m</output></span>
+            <input id="clearance-swell" type="range" min="0" max="20" step="0.1" value="0.8">
+          </label>
+          <label class="clearance-control" for="clearance-pitch">
+            <span>Deck pitch <output id="clearance-pitch-value" for="clearance-pitch">1.2°</output></span>
+            <input id="clearance-pitch" type="range" min="-10" max="10" step="0.1" value="1.2">
+          </label>
+          <label class="clearance-control" for="clearance-roll">
+            <span>Deck roll <output id="clearance-roll-value" for="clearance-roll">2.0°</output></span>
+            <input id="clearance-roll" type="range" min="-10" max="10" step="0.1" value="2">
+          </label>
+          <label class="clearance-control" for="clearance-direction">
+            <span>Wind direction <output id="clearance-direction-value" for="clearance-direction">045°</output></span>
+            <input id="clearance-direction" type="range" min="0" max="359" step="1" value="45">
+          </label>
+        </div>
+
+        <div class="clearance-instruments">
+          <div class="clearance-instrument">
+            <h3>Wind &amp; sea state</h3>
+            <div class="wind-compass" aria-hidden="true">
+              <span class="compass-north">N</span>
+              <span class="compass-east">E</span>
+              <span class="compass-south">S</span>
+              <span class="compass-west">W</span>
+              <span class="compass-needle" id="clearance-compass-needle"></span>
+            </div>
+            <dl class="clearance-readouts">
+              <div><dt>Beaufort</dt><dd id="clearance-beaufort">4 · Moderate breeze</dd></div>
+              <div><dt>Douglas sea state</dt><dd id="clearance-sea-state">3 · Slight</dd></div>
+              <div><dt>Significant swell</dt><dd id="clearance-swell-readout">0.8 m</dd></div>
+            </dl>
+          </div>
+
+          <div class="clearance-instrument">
+            <h3>Deck attitude</h3>
+            <div class="attitude-gimbal" aria-label="Deck attitude indicator">
+              <div class="attitude-disc" id="clearance-attitude">
+                <span class="attitude-sky"></span>
+                <span class="attitude-ground"></span>
+                <span class="attitude-horizon"></span>
+                <span class="attitude-aircraft" aria-hidden="true">✦</span>
+              </div>
+              <span class="attitude-crosshair" aria-hidden="true"></span>
+            </div>
+            <dl class="clearance-readouts">
+              <div><dt>Pitch</dt><dd id="clearance-pitch-readout">1.2°</dd></div>
+              <div><dt>Roll</dt><dd id="clearance-roll-readout">2.0°</dd></div>
+            </dl>
+          </div>
+
+          <div class="clearance-status-panel" id="clearance-status-panel" data-status="green" role="status" aria-live="polite">
+            <span class="clearance-beacon" aria-hidden="true"></span>
+            <span class="clearance-status-label">LANDING ADVISORY</span>
+            <strong id="clearance-status">GREEN · WITHIN GUIDANCE</strong>
+            <p id="clearance-message">Conditions are within this station’s illustrative green thresholds.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="clearance-disclaimer">Illustrative planning aid only. Thresholds are sample values and are not certified or a substitute for the aircraft flight manual, helideck limits, current observations, or the pilot-in-command’s assessment.</p>
+    </div>
+  </section>
+
   <!-- ===== Issue #295: Bespoke Onboard Catering Menu Customizer ===== -->
   <section class="catering-section" id="cateringMenuSection" aria-labelledby="cateringTitle">
     <div class="catering-container">

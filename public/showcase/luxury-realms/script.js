@@ -2582,6 +2582,101 @@
 })();
 /* ===== END Issue #413 ===== */
 
+(function initHelipadClearanceStation() {
+  if (typeof document === 'undefined') return;
+
+  function setup() {
+    var section = document.getElementById('helipad-clearance');
+    if (!section) return;
+
+    var controls = {
+      wind: document.getElementById('clearance-wind'),
+      swell: document.getElementById('clearance-swell'),
+      pitch: document.getElementById('clearance-pitch'),
+      roll: document.getElementById('clearance-roll'),
+      direction: document.getElementById('clearance-direction')
+    };
+    var beaufortLimits = [1, 4, 7, 11, 17, 22, 28, 34, 41, 48, 56, 64];
+    var beaufortNames = [
+      'Calm', 'Light air', 'Light breeze', 'Gentle breeze', 'Moderate breeze',
+      'Fresh breeze', 'Strong breeze', 'Near gale', 'Gale', 'Strong gale',
+      'Storm', 'Violent storm', 'Hurricane force'
+    ];
+    var seaStateLimits = [0, 0.1, 0.5, 1.25, 2.5, 4, 6, 9, 14];
+    var seaStateNames = [
+      'Calm (glassy)', 'Calm (rippled)', 'Smooth', 'Slight', 'Moderate',
+      'Rough', 'Very rough', 'High', 'Very high', 'Phenomenal'
+    ];
+
+    function render() {
+      var wind = Number(controls.wind.value);
+      var swell = Number(controls.swell.value);
+      var pitch = Number(controls.pitch.value);
+      var roll = Number(controls.roll.value);
+      var direction = Number(controls.direction.value);
+      var beaufort = beaufortLimits.findIndex(function (limit) { return wind < limit; });
+      if (beaufort === -1) beaufort = 12;
+      var seaState = seaStateLimits.findIndex(function (limit) { return swell <= limit; });
+      if (seaState === -1) seaState = 9;
+
+      document.getElementById('clearance-wind-value').textContent = wind + ' kt';
+      document.getElementById('clearance-swell-value').textContent = swell.toFixed(1) + ' m';
+      document.getElementById('clearance-pitch-value').textContent = pitch.toFixed(1) + '°';
+      document.getElementById('clearance-roll-value').textContent = roll.toFixed(1) + '°';
+      document.getElementById('clearance-direction-value').textContent = String(direction).padStart(3, '0') + '°';
+      document.getElementById('clearance-beaufort').textContent = beaufort + ' · ' + beaufortNames[beaufort];
+      document.getElementById('clearance-sea-state').textContent = seaState + ' · ' + seaStateNames[seaState];
+      document.getElementById('clearance-swell-readout').textContent = swell.toFixed(1) + ' m';
+      document.getElementById('clearance-pitch-readout').textContent = pitch.toFixed(1) + '°';
+      document.getElementById('clearance-roll-readout').textContent = roll.toFixed(1) + '°';
+      document.getElementById('clearance-compass-needle').style.transform = 'rotate(' + direction + 'deg)';
+
+      var attitude = document.getElementById('clearance-attitude');
+      attitude.style.setProperty('--deck-roll', (-roll) + 'deg');
+      attitude.style.setProperty('--deck-pitch', Math.max(-18, Math.min(18, pitch * 1.5)) + 'px');
+
+      var violations = [];
+      var cautions = [];
+      if (wind > 30) violations.push('wind exceeds 30 kt');
+      else if (wind > 20) cautions.push('wind above 20 kt');
+      if (swell > 2.5) violations.push('swell exceeds 2.5 m');
+      else if (swell > 1.5) cautions.push('swell above 1.5 m');
+      if (Math.abs(pitch) > 4) violations.push('pitch exceeds 4°');
+      else if (Math.abs(pitch) > 2) cautions.push('pitch above 2°');
+      if (Math.abs(roll) > 5) violations.push('roll exceeds 5°');
+      else if (Math.abs(roll) > 3) cautions.push('roll above 3°');
+
+      var statusPanel = document.getElementById('clearance-status-panel');
+      var status = document.getElementById('clearance-status');
+      var message = document.getElementById('clearance-message');
+      if (violations.length) {
+        statusPanel.dataset.status = 'red';
+        status.textContent = 'RED · OUTSIDE GUIDANCE';
+        message.textContent = 'Review required: ' + violations.join('; ') + '.';
+      } else if (cautions.length) {
+        statusPanel.dataset.status = 'amber';
+        status.textContent = 'AMBER · CAUTION';
+        message.textContent = 'Caution: ' + cautions.join('; ') + '.';
+      } else {
+        statusPanel.dataset.status = 'green';
+        status.textContent = 'GREEN · WITHIN GUIDANCE';
+        message.textContent = 'Conditions are within this station’s illustrative green thresholds.';
+      }
+    }
+
+    Object.keys(controls).forEach(function (key) {
+      controls[key].addEventListener('input', render);
+    });
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
+
 // ==========================================================================
 // Issue #350: Interactive Superyacht Charter Route Customizer & Fuel Surcharge Estimator
 // ==========================================================================
