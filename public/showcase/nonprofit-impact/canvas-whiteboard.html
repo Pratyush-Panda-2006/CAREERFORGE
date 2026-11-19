@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102923"><title>Field Sketchbook · Nonprofit Impact</title><link rel="stylesheet" href="./canvas-whiteboard.css"><script type="module" src="./canvas-whiteboard.js"></script></head>
+<body><main>
+  <header><a href="./index.html">← Nonprofit Impact</a><span class="edition">FIELD TOOLS / 06</span><p class="eyebrow">A place to think together</p><h1>Sketch the next field day.</h1><p class="intro">Mark a route, outline planting zones, or work through an idea. Share the finished drawing as an editable SVG. This board stays in your tab.</p></header>
+  <section class="editor" aria-label="Field sketch editor">
+    <div class="toolbar" role="group" aria-label="Drawing controls">
+      <div class="tools" role="group" aria-label="Drawing tools"><button type="button" data-tool="pen" aria-pressed="true">Pen</button><button type="button" data-tool="eraser" aria-pressed="false">Eraser</button><button type="button" data-tool="line" aria-pressed="false">Line</button><button type="button" data-tool="rectangle" aria-pressed="false">Rectangle</button></div>
+      <div class="colors" role="group" aria-label="Ink palette"><button type="button" data-color="#224e3f" aria-label="Fern ink" aria-pressed="true" style="--ink:#224e3f"></button><button type="button" data-color="#bb6949" aria-label="Clay ink" aria-pressed="false" style="--ink:#bb6949"></button><button type="button" data-color="#2a6986" aria-label="Ocean ink" aria-pressed="false" style="--ink:#2a6986"></button><label class="sr-only" for="color">Brush color</label><input id="color" type="color" value="#224e3f"></div>
+      <label class="brush" for="brush">Width <input id="brush" type="range" min="1" max="24" step="1" value="4"><output id="brush-value" for="brush">4 px</output></label>
+      <div class="history"><button id="undo" type="button" disabled>Undo</button><button id="redo" type="button" disabled>Redo</button></div>
+    </div>
+    <div class="paper"><canvas id="board" width="1000" height="625" tabindex="0" role="img" aria-label="Field drawing canvas" aria-describedby="keyboard-help">Your browser needs Canvas 2D to draw. SVG export keeps your completed vector marks.</canvas></div>
+    <div class="board-footer"><span id="count">0 / 80 marks</span><span>Cursor <output id="coordinates">500, 313</output></span><span>1000 × 625 · SVG</span></div>
+  </section>
+  <div class="below"><p id="keyboard-help">Keyboard: focus the canvas, press <kbd>Enter</kbd> to start or finish a mark, and move with arrow keys. <kbd>Shift</kbd> moves farther; <kbd>Esc</kbd> cancels. <kbd>Ctrl / ⌘ Z</kbd> undoes; add <kbd>Shift</kbd> to redo.</p><div class="actions"><button type="button" id="clear" disabled>Clear drawing</button><button type="button" id="export" class="primary" disabled>Export SVG ↓</button></div></div>
+  <p id="notice" role="status" aria-live="polite">Choose a tool and draw. Each completed mark can be undone.</p>
+  <footer><span>Local to this tab · export before leaving</span><span>Up to 80 marks. Undo or clear to make room; existing marks are never silently dropped.</span></footer>
+</main></body></html>
