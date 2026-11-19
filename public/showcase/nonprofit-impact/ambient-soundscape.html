@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0d211f">
+  <title>Canopy Radio · Nonprofit Impact</title>
+  <link rel="stylesheet" href="./ambient-soundscape.css"><script type="module" src="./ambient-soundscape.js"></script>
+</head>
+<body><main id="soundscape">
+  <header><a href="./index.html">← Nonprofit Impact</a><span class="edition">FIELD STUDIO / 05</span><p class="eyebrow">A small space for listening</p><h1>Canopy Radio.</h1><p class="intro">Shape a forest, a shoreline, or a quieter desk. Six sounds, generated here in your browser. Nothing plays until you press start.</p></header>
+  <div class="studio">
+    <section class="console" aria-labelledby="master-title">
+      <div class="section-head"><h2 id="master-title">Master level</h2><span class="tag">PROCEDURAL AUDIO</span></div>
+      <div id="dial" aria-hidden="true"><span class="needle"></span><div class="dial-center"><span>MASTER</span><strong id="master-value">40%</strong></div></div>
+      <label class="sr-only" for="master">Master level</label><input type="range" id="master" min="0" max="100" step="1" value="40">
+      <button type="button" id="play" class="play" aria-pressed="false">Start listening</button><p id="state" class="state">Paused · no audio running</p>
+      <div class="spectrum-box"><span class="eyebrow">Output spectrum</span><svg id="spectrum" viewBox="0 0 360 80" aria-hidden="true"></svg><p id="meter-note" class="hint"></p></div>
+    </section>
+    <section class="mixer" aria-labelledby="mixer-title">
+      <div class="section-head"><h2 id="mixer-title">The landscape</h2><span class="hint">Independent channel levels</span></div>
+      <div class="presets" aria-label="Soundscape presets"><button type="button" data-preset="canopy" aria-pressed="true">Canopy rain</button><button type="button" data-preset="coast" aria-pressed="false">Quiet coast</button><button type="button" data-preset="focus" aria-pressed="false">After hours</button></div>
+      <div class="channel"><div><label for="rain">Canopy rain</label><p>Soft, filtered pink noise</p></div><output id="rain-value" for="rain">75%</output><input type="range" id="rain" min="0" max="100" value="75"></div>
+      <div class="channel"><div><label for="wind">Low wind</label><p>Low frequencies through the trees</p></div><output id="wind-value" for="wind">35%</output><input type="range" id="wind" min="0" max="100" value="35"></div>
+      <div class="channel"><div><label for="noise">White noise</label><p>An even bed of texture</p></div><output id="noise-value" for="noise">0%</output><input type="range" id="noise" min="0" max="100" value="0"></div>
+      <div class="channel"><div><label for="waves">Gentle waves</label><p>A slow, rising and falling wash</p></div><output id="waves-value" for="waves">10%</output><input type="range" id="waves" min="0" max="100" value="10"></div>
+      <div class="channel"><div><label for="chimes">Woodland chimes</label><p>Two fading, bell-like tones</p></div><output id="chimes-value" for="chimes">25%</output><input type="range" id="chimes" min="0" max="100" value="25"></div>
+      <div class="channel"><div><label for="beats">Stereo tones</label><p>180 Hz left / 184 Hz right · use stereo to hear both</p></div><output id="beats-value" for="beats">0%</output><input type="range" id="beats" min="0" max="100" value="0"></div>
+      <div class="actions"><button type="button" id="silence">Silence all channels</button><button type="button" id="save">Save mix settings ↓</button></div>
+    </section>
+  </div>
+  <p id="notice" role="status" aria-live="polite">Choose a preset or adjust the levels, then start listening.</p>
+  <footer><p>Locally synthesized loops · no microphone, recordings or external audio files</p><p>Changing tabs stops and releases the audio. Saved mixes contain settings only.</p></footer>
+</main></body></html>
