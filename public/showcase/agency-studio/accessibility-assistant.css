@@ -1,0 +1,202 @@
+/* Agency Studio - Automated WCAG Contrast & Keyboard Accessibility Inspector Styles */
+
+:root {
+  --agency-a11y-bg: #090d16;
+  --agency-a11y-panel: rgba(19, 24, 38, 0.9);
+  --agency-a11y-border: rgba(236, 72, 153, 0.22);
+  --agency-a11y-accent: #ec4899;
+  --agency-a11y-glow: rgba(236, 72, 153, 0.35);
+  --agency-a11y-text: #f8fafc;
+  --agency-a11y-muted: #94a3b8;
+  --agency-a11y-pass: #10b981;
+  --agency-a11y-warn: #f59e0b;
+}
+
+body.agency-a11y-theme {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--agency-a11y-bg);
+  color: var(--agency-a11y-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+body.high-contrast-active {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast-active .a11y-header,
+body.high-contrast-active .results-panel,
+body.high-contrast-active .audit-result-item {
+  border-color: #ffffff !important;
+  background: #000000 !important;
+}
+
+.a11y-assistant-container {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.a11y-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background: var(--agency-a11y-panel);
+  border: 1px solid var(--agency-a11y-border);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.branding-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.branding-group h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.a11y-orb {
+  width: 14px;
+  height: 14px;
+  background-color: var(--agency-a11y-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 14px var(--agency-a11y-accent);
+  animation: agency-a11y-pulse 2s infinite ease-in-out;
+}
+
+@keyframes agency-a11y-pulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--agency-a11y-muted);
+  cursor: pointer;
+}
+
+.inspect-btn {
+  padding: 9px 20px;
+  background: var(--agency-a11y-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.inspect-btn:hover {
+  background: #db2777;
+  box-shadow: 0 0 12px var(--agency-a11y-glow);
+}
+
+.standards-banner {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.standard-pill {
+  padding: 8px 14px;
+  background: var(--agency-a11y-panel);
+  border: 1px solid var(--agency-a11y-border);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: var(--agency-a11y-text);
+}
+
+.results-panel {
+  background: var(--agency-a11y-panel);
+  border: 1px solid var(--agency-a11y-border);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.results-panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.audit-result-item {
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.audit-result-item.pass {
+  border-left: 4px solid var(--agency-a11y-pass);
+}
+.audit-result-item.warn {
+  border-left: 4px solid var(--agency-a11y-warn);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.element-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.compliance-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+.badge-aaa {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+.badge-aa {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+.badge-aa-large {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+.badge-fail {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.result-details {
+  display: flex;
+  gap: 20px;
+  font-size: 0.82rem;
+  color: var(--agency-a11y-muted);
+}
