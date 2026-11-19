@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neurotech Interface - LZW Data Compression Suite</title>
+  <link rel="stylesheet" href="compression-suite.css">
+</head>
+<body>
+  <div class="compression-suite-container">
+    <header class="suite-header">
+      <h1>Neurotech Interface - Neural Signal Compression</h1>
+      <p>Real-time dictionary LZW compression & multichannel EEG telemetry shrinkage analyzer</p>
+    </header>
+
+    <section class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Raw EEG Telemetry</div>
+        <div id="raw-bytes" class="metric-value">0 B</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Compressed Stream</div>
+        <div id="compressed-bytes" class="metric-value">0 B</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Savings Percent</div>
+        <div id="savings-percent" class="metric-value">0%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Compression Ratio</div>
+        <div id="compression-ratio" class="metric-value">1.0</div>
+      </div>
+    </section>
+
+    <main class="editor-grid">
+      <div class="panel-card">
+        <h3>Neural Signal Stream / Spike Train</h3>
+        <textarea id="neural-input" class="neuro-textarea">EEG_CH01_ALPHA_8.5HZ_CH02_BETA_14.2HZ_CH03_GAMMA_42.0HZ_SPIKE_BURST_EEG_CH01_ALPHA_8.5HZ_CH02_BETA_14.2HZ_CH03_GAMMA_42.0HZ_SPIKE_BURST</textarea>
+        <div class="action-buttons">
+          <button id="compress-btn" class="neuro-btn">Compress Signal</button>
+          <button id="decompress-btn" class="neuro-btn secondary">Decompress Bytecode</button>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3>LZW Bytecode Sequence</h3>
+        <div id="bytecode-display" class="code-output">(Awaiting compression...)</div>
+
+        <h3>Lossless Decoded Verification</h3>
+        <div id="decompressed-display" class="code-output">(Click 'Decompress Bytecode' to verify)</div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="compression-suite.js"></script>
+</body>
+</html>
