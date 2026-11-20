@@ -1,0 +1,200 @@
+/**
+ * Virtual Museum 3D - State Machine & Workflow Visualizer Styles
+ */
+
+:root {
+  --museum-gold: #d4af37;
+  --museum-marble: #f4f1ea;
+  --museum-dark: #0f1013;
+  --museum-card: #18191e;
+  --museum-border: #292b33;
+  --museum-dim: #9b9da6;
+  --museum-accent: #b8860b;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--museum-dark);
+  color: var(--museum-marble);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.fsm-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fsm-header {
+  border-bottom: 2px solid var(--museum-border);
+  padding-bottom: 16px;
+}
+
+.fsm-header h1 {
+  margin: 0 0 6px 0;
+  color: var(--museum-gold);
+  font-size: 1.8rem;
+}
+
+.fsm-header p {
+  margin: 0;
+  color: var(--museum-dim);
+  font-size: 0.95rem;
+}
+
+.current-state-panel {
+  background: var(--museum-card);
+  border: 1px solid var(--museum-border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.state-badge {
+  background: var(--museum-accent);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+}
+
+.fsm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .fsm-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fsm-card {
+  background: var(--museum-card);
+  border: 1px solid var(--museum-border);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fsm-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--museum-gold);
+}
+
+.nodes-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.state-node-card {
+  background: #101217;
+  border: 1px solid var(--museum-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--museum-dim);
+  transition: all 0.25s ease;
+}
+
+.state-node-card.active {
+  background: #2b220d;
+  border-color: var(--museum-gold);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.state-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3a3d47;
+}
+
+.state-node-card.active .state-dot {
+  background: var(--museum-gold);
+  box-shadow: 0 0 8px var(--museum-gold);
+}
+
+.event-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.museum-trigger-btn {
+  background: #20222a;
+  border: 1px solid var(--museum-border);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.museum-trigger-btn:hover {
+  background: var(--museum-gold);
+  color: #000;
+  transform: translateY(-1px);
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 140px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--museum-dim);
+}
+
+.history-list li {
+  padding: 4px 0;
+  border-bottom: 1px solid #20222a;
+}
+
+.mermaid-box {
+  background: #08090b;
+  border: 1px solid var(--museum-border);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #ffd54f;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.reset-btn {
+  background: #20222a;
+  border: 1px solid var(--museum-border);
+  color: var(--museum-dim);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reset-btn:hover {
+  color: #fff;
+  background: #2e303b;
+}
