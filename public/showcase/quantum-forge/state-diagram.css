@@ -1,0 +1,244 @@
+/**
+ * Quantum Forge - Finite State Machine & Workflow Visualizer Styling
+ */
+
+:root {
+  --quantum-purple: #c084fc;
+  --quantum-violet: #a855f7;
+  --quantum-cyan: #38bdf8;
+  --quantum-dark: #090912;
+  --quantum-card: #121224;
+  --quantum-border: #242445;
+  --quantum-dim: #9494bd;
+  --quantum-text: #f0f0ff;
+  --quantum-danger: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--quantum-dark);
+  color: var(--quantum-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.fsm-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fsm-header {
+  border-bottom: 2px solid var(--quantum-border);
+  padding-bottom: 16px;
+}
+
+.fsm-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--quantum-purple);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.fsm-header p {
+  margin: 0;
+  color: var(--quantum-dim);
+  font-size: 0.95rem;
+}
+
+.status-banner {
+  background: var(--quantum-card);
+  border: 1px solid var(--quantum-border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-label {
+  font-size: 0.9rem;
+  color: var(--quantum-dim);
+}
+
+.badge-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--quantum-cyan);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  background: rgba(192, 132, 252, 0.12);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+
+.fsm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.graph-panel,
+.controls-panel {
+  background: var(--quantum-card);
+  border: 1px solid var(--quantum-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--quantum-purple);
+}
+
+.panel-hint {
+  font-size: 0.8rem;
+  color: var(--quantum-dim);
+}
+
+.nodes-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.fsm-node {
+  background: #090916;
+  border: 1px solid var(--quantum-border);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.25s ease-in-out;
+}
+
+.fsm-node.active {
+  border-color: var(--quantum-purple);
+  background: rgba(192, 132, 252, 0.1);
+  box-shadow: 0 0 16px rgba(192, 132, 252, 0.35);
+  transform: translateY(-2px);
+}
+
+.fsm-node.danger.active {
+  border-color: var(--quantum-danger);
+  background: rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+}
+
+.node-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--quantum-text);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.fsm-node.active .node-title {
+  color: var(--quantum-cyan);
+}
+
+.fsm-node.danger.active .node-title {
+  color: var(--quantum-danger);
+}
+
+.node-desc {
+  font-size: 0.78rem;
+  color: var(--quantum-dim);
+}
+
+.event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-btn {
+  background: linear-gradient(135deg, var(--quantum-violet), var(--quantum-cyan));
+  color: #080816;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.event-btn:hover {
+  opacity: 0.9;
+}
+
+.event-btn.danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+}
+
+.history-container {
+  height: 120px;
+  overflow-y: auto;
+  background: #090916;
+  border: 1px solid var(--quantum-border);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.history-item {
+  color: var(--quantum-dim);
+}
+
+.history-item.recent {
+  color: var(--quantum-cyan);
+}
+
+.mermaid-preview {
+  height: 130px;
+  overflow-y: auto;
+  background: #090916;
+  border: 1px solid var(--quantum-border);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0;
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.8rem;
+  color: var(--quantum-purple);
+  white-space: pre;
+}
+
+.secondary-btn {
+  background: #191936;
+  border: 1px solid var(--quantum-border);
+  color: var(--quantum-dim);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+  border-color: var(--quantum-purple);
+  color: var(--quantum-text);
+}
