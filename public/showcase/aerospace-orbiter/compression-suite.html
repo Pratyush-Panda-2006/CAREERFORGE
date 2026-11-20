@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter - LZW Telemetry Compression & Payload Shrinkage Analyzer</title>
+  <link rel="stylesheet" href="compression-suite.css">
+</head>
+<body>
+  <div class="compression-container">
+    <header class="compression-header">
+      <div class="header-badge">AEROSPACE TELEMETRY DOWNLINK LAB</div>
+      <h1>Orbital Payload Compression & Latency Analyzer</h1>
+      <p>Autonomous in-browser LZW dictionary encoding, byte-level footprint reduction, and deep-space RF latency simulation</p>
+    </header>
+
+    <section class="metrics-dashboard" aria-label="Compression Metrics Dashboard">
+      <div class="metric-card">
+        <span class="metric-label">Original Telemetry</span>
+        <span id="raw-bytes" class="metric-value">0 B</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Compressed Footprint</span>
+        <span id="compressed-bytes" class="metric-value">0 B</span>
+      </div>
+      <div class="metric-card highlight">
+        <span class="metric-label">Bandwidth Savings</span>
+        <span id="savings-percent" class="metric-value">0.0%</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Compression Ratio</span>
+        <span id="compression-ratio" class="metric-value">1.000x</span>
+      </div>
+      <div class="metric-card latency">
+        <span class="metric-label">Downlink Latency</span>
+        <span id="downlink-latency" class="metric-value">0.0 ms</span>
+      </div>
+    </section>
+
+    <main class="workbench-grid">
+      <section class="workbench-panel">
+        <div class="panel-header">
+          <h3>Orbital Telemetry & Vector Input</h3>
+          <button id="load-sample-btn" type="button" class="secondary-btn">Load Sample Telemetry</button>
+        </div>
+        <textarea id="telemetry-input" class="telemetry-textarea" placeholder="Paste orbital Keplerian elements, statevectors, attitude quaternions, or mission JSON telemetry..."></textarea>
+        
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="baud-select">RF Link Bitrate:</label>
+            <select id="baud-select" class="select-input">
+              <option value="32000" selected>Deep Space Network (32 kbps)</option>
+              <option value="256000">S-Band Tracking (256 kbps)</option>
+              <option value="2000000">X-Band High-Rate (2 Mbps)</option>
+              <option value="10000000">Ka-Band Direct (10 Mbps)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button id="compress-btn" type="button" class="primary-btn">Compress Telemetry (LZW)</button>
+          <button id="clear-btn" type="button" class="secondary-btn">Clear</button>
+        </div>
+      </section>
+
+      <section class="workbench-panel">
+        <div class="panel-header">
+          <h3>Compressed 16-Bit Bytecode Stream</h3>
+          <button id="download-btn" type="button" class="secondary-btn">Export Binary (.bin)</button>
+        </div>
+        <div id="bytecode-display" class="bytecode-viewer">Waiting for orbital telemetry input...</div>
+        
+        <div class="button-group">
+          <button id="decompress-btn" type="button" class="primary-btn">Decompress & Verify</button>
+        </div>
+        <div id="decompressed-display" class="decompressed-viewer" style="display: none;"></div>
+      </section>
+    </main>
+
+    <footer class="compression-footer">
+      <div id="engine-status" class="status-indicator">Engine Status: Ready • Base Dictionary Loaded (256 symbols)</div>
+    </footer>
+  </div>
+
+  <script type="module" src="compression-suite.js"></script>
+</body>
+</html>
