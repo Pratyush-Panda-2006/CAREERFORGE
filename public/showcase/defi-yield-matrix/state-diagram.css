@@ -1,0 +1,200 @@
+/**
+ * DeFi Yield Matrix - State Machine & Workflow Visualizer Styles
+ */
+
+:root {
+  --defi-emerald: #00e676;
+  --defi-teal: #00b0ff;
+  --defi-dark: #0a0e14;
+  --defi-card: #121820;
+  --defi-border: #1e2632;
+  --defi-dim: #78909c;
+  --defi-text: #eceff1;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--defi-dark);
+  color: var(--defi-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.fsm-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fsm-header {
+  border-bottom: 2px solid var(--defi-border);
+  padding-bottom: 16px;
+}
+
+.fsm-header h1 {
+  margin: 0 0 6px 0;
+  color: var(--defi-emerald);
+  font-size: 1.8rem;
+}
+
+.fsm-header p {
+  margin: 0;
+  color: var(--defi-dim);
+  font-size: 0.95rem;
+}
+
+.current-state-panel {
+  background: var(--defi-card);
+  border: 1px solid var(--defi-border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.state-badge {
+  background: var(--defi-emerald);
+  color: #000;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+}
+
+.fsm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .fsm-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fsm-card {
+  background: var(--defi-card);
+  border: 1px solid var(--defi-border);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fsm-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--defi-emerald);
+}
+
+.nodes-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.state-node-card {
+  background: #090e15;
+  border: 1px solid var(--defi-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--defi-dim);
+  transition: all 0.25s ease;
+}
+
+.state-node-card.active {
+  background: #0d2818;
+  border-color: var(--defi-emerald);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+}
+
+.state-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #263238;
+}
+
+.state-node-card.active .state-dot {
+  background: var(--defi-emerald);
+  box-shadow: 0 0 8px var(--defi-emerald);
+}
+
+.event-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.defi-trigger-btn {
+  background: #17202c;
+  border: 1px solid var(--defi-border);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.defi-trigger-btn:hover {
+  background: var(--defi-emerald);
+  color: #000;
+  transform: translateY(-1px);
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 140px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--defi-dim);
+}
+
+.history-list li {
+  padding: 4px 0;
+  border-bottom: 1px solid #17202c;
+}
+
+.mermaid-box {
+  background: #05070a;
+  border: 1px solid var(--defi-border);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #69f0ae;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.reset-btn {
+  background: #17202c;
+  border: 1px solid var(--defi-border);
+  color: var(--defi-dim);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reset-btn:hover {
+  color: #fff;
+  background: #202c3c;
+}
