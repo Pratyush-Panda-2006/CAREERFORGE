@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biotech Genomics - Finite State Machine & Workflow Visualizer</title>
+  <link rel="stylesheet" href="state-diagram.css">
+</head>
+<body>
+  <div class="fsm-container">
+    <header class="fsm-header">
+      <h1>Biotech Genomics - Workflow State Machine Visualizer</h1>
+      <p>Node-based genomics pipeline lifecycle engine with dynamic transition dispatch and Mermaid.js export</p>
+    </header>
+
+    <div class="status-banner">
+      <div class="status-badge">
+        <span class="badge-label">Active State:</span>
+        <span id="current-state-badge" class="badge-val">LAB_IDLE</span>
+      </div>
+      <button id="reset-fsm-btn" class="secondary-btn">Reset Pipeline</button>
+    </div>
+
+    <main class="fsm-grid">
+      <div class="graph-panel">
+        <div class="panel-header">
+          <h3>Genomic Pipeline State Graph</h3>
+          <span class="panel-hint">Live Node Highlights</span>
+        </div>
+        <div id="nodes-canvas" class="nodes-container">
+          <div class="fsm-node active" data-state="LAB_IDLE">
+            <div class="node-title">LAB_IDLE</div>
+            <div class="node-desc">Ready for extraction</div>
+          </div>
+          <div class="fsm-node" data-state="SAMPLE_EXTRACTION">
+            <div class="node-title">SAMPLE_EXTRACTION</div>
+            <div class="node-desc">Isolating cellular DNA</div>
+          </div>
+          <div class="fsm-node" data-state="DNA_SEQUENCING">
+            <div class="node-title">DNA_SEQUENCING</div>
+            <div class="node-desc">High-throughput reads</div>
+          </div>
+          <div class="fsm-node" data-state="CRISPR_ALIGNMENT">
+            <div class="node-title">CRISPR_ALIGNMENT</div>
+            <div class="node-desc">Target loci homology matching</div>
+          </div>
+          <div class="fsm-node" data-state="VARIANT_ANALYSIS">
+            <div class="node-title">VARIANT_ANALYSIS</div>
+            <div class="node-desc">SNP & indel calling</div>
+          </div>
+          <div class="fsm-node danger" data-state="CONTAMINATION_ALERT">
+            <div class="node-title">CONTAMINATION_ALERT</div>
+            <div class="node-desc">Sample quarantine required</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-panel">
+        <div class="panel-header">
+          <h3>Dispatch Pipeline Transition</h3>
+        </div>
+        <div id="event-buttons" class="event-actions">
+          <!-- Populated dynamically based on available events -->
+        </div>
+
+        <div class="panel-header" style="margin-top: 14px;">
+          <h3>Transition History Log</h3>
+        </div>
+        <div id="history-log" class="history-container">
+          <div class="history-item placeholder">Pipeline initialized in LAB_IDLE</div>
+        </div>
+
+        <div class="panel-header" style="margin-top: 14px;">
+          <h3>Export Schema (Mermaid.js)</h3>
+          <button id="copy-mermaid-btn" class="secondary-btn">Copy Mermaid</button>
+        </div>
+        <pre id="mermaid-code" class="mermaid-preview"></pre>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="state-diagram.js"></script>
+</body>
+</html>
