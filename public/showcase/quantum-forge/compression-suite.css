@@ -1,0 +1,212 @@
+/**
+ * Quantum Forge - QASM Circuit Compression & Payload Shrinkage Analyzer Styling
+ */
+
+:root {
+  --quantum-purple: #c084fc;
+  --quantum-violet: #a855f7;
+  --quantum-cyan: #38bdf8;
+  --quantum-dark: #090912;
+  --quantum-card: #121224;
+  --quantum-border: #242445;
+  --quantum-dim: #9494bd;
+  --quantum-text: #f0f0ff;
+  --quantum-success: #34d399;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--quantum-dark);
+  color: var(--quantum-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.compression-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.compression-header {
+  border-bottom: 2px solid var(--quantum-border);
+  padding-bottom: 16px;
+}
+
+.compression-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--quantum-purple);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.compression-header p {
+  margin: 0;
+  color: var(--quantum-dim);
+  font-size: 0.95rem;
+}
+
+.metrics-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  background: var(--quantum-card);
+  border: 1px solid var(--quantum-border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--quantum-cyan);
+}
+
+.metric-card.highlight {
+  border-color: var(--quantum-purple);
+  background: linear-gradient(135deg, rgba(192, 132, 252, 0.08), rgba(56, 189, 248, 0.08));
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: var(--quantum-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--quantum-cyan);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.metric-card.highlight .metric-value {
+  color: var(--quantum-purple);
+}
+
+.workbench-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.workbench-panel {
+  background: var(--quantum-card);
+  border: 1px solid var(--quantum-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--quantum-purple);
+}
+
+.circuit-textarea {
+  width: 100%;
+  height: 220px;
+  background: #090916;
+  border: 1px solid var(--quantum-border);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--quantum-text);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.circuit-textarea:focus {
+  outline: none;
+  border-color: var(--quantum-purple);
+}
+
+.bytecode-viewer,
+.decompressed-viewer {
+  min-height: 140px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #090916;
+  border: 1px solid var(--quantum-border);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--quantum-success);
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.decompressed-viewer {
+  color: var(--quantum-cyan);
+  border-color: var(--quantum-violet);
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.primary-btn {
+  flex: 1;
+  background: linear-gradient(135deg, var(--quantum-violet), var(--quantum-cyan));
+  color: #080816;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+.secondary-btn {
+  background: #191936;
+  border: 1px solid var(--quantum-border);
+  color: var(--quantum-dim);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+  border-color: var(--quantum-purple);
+  color: var(--quantum-text);
+}
+
+.compression-footer {
+  text-align: center;
+  padding: 8px;
+}
+
+.status-indicator {
+  font-size: 0.85rem;
+  color: var(--quantum-dim);
+}
