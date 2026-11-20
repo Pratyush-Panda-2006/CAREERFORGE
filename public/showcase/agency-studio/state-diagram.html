@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workflow mapper | Aetheria Studio</title>
+  <link rel="stylesheet" href="state-diagram.css">
+  <script type="module" src="state-diagram.js"></script>
+</head>
+<body>
+  <main data-agency-fsm>
+    <header>
+      <a href="index.html">Aetheria Studio</a>
+      <h1>Map the next move.</h1>
+      <p>Try the studio lifecycle, add a transition, then take the diagram into your project.</p>
+    </header>
+    <div class="workspace">
+      <section class="diagram" aria-label="Workflow diagram">
+        <div class="diagram-heading"><h2>Project lifecycle</h2><button id="reset" type="button">Reset workflow</button></div>
+        <svg id="graph" viewBox="0 0 800 470" role="img" aria-labelledby="graph-title"></svg>
+        <details><summary>Read all transitions</summary><ol id="transition-list"></ol></details>
+      </section>
+      <aside class="inspector" aria-label="State inspector">
+        <p class="state-label">Current state</p><strong id="current">Brief</strong>
+        <label class="approval"><input id="approved" type="checkbox"> Client approved delivery</label>
+        <p class="hint">“Deliver” requires approval while in Review. Try an event from another state to see its guard.</p>
+        <h2>Dispatch an event</h2><div id="events"></div>
+        <p id="status" role="status" aria-live="polite">Start with “Start design”.</p>
+      </aside>
+    </div>
+    <div class="lower">
+      <section aria-labelledby="add-title">
+        <h2 id="add-title">Extend the workflow</h2>
+        <p>Use a new state name or reuse an existing one. Each state accepts an event once.</p>
+        <form id="add-transition">
+          <label>From state<input id="from" required maxlength="64" value="Delivered"></label>
+          <label>Event<input id="event" required maxlength="64" value="Reopen"></label>
+          <label>To state<input id="to" required maxlength="64" value="Review"></label>
+          <button type="submit">Add transition</button>
+        </form>
+        <p class="hint">Up to 8 states and 32 transitions. Custom transitions have no approval guard.</p>
+      </section>
+      <section aria-labelledby="history-title">
+        <h2 id="history-title">Event history</h2>
+        <p id="empty-history">Your dispatched events appear here.</p>
+        <ol id="history" aria-label="Most recent 20 events, newest first"></ol>
+      </section>
+    </div>
+    <section class="export" aria-labelledby="export-title">
+      <div><h2 id="export-title">Mermaid definition</h2><button id="download" type="button">Download Mermaid</button></div>
+      <pre><code id="mermaid"></code></pre>
+      <p class="hint">Diagram definition only; the current state and event history are not saved. Reloading starts a fresh workflow.</p>
+    </section>
+  </main>
+</body>
+</html>
