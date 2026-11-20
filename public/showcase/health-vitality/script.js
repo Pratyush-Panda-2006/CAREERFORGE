@@ -1995,3 +1995,160 @@ document.addEventListener('DOMContentLoaded', function initHabitStack() {
 });
 /* ===== END Issue #411 ===== */
 
+document.addEventListener('DOMContentLoaded', () => {
+  const foods = {
+    oats: { name: 'Oats', serving: '40 g dry', carbs: 27, fiber: 4, gi: 55, protein: 5 },
+    berries: { name: 'Berries', serving: '1 cup', carbs: 15, fiber: 8, gi: 40, protein: 1 },
+    honey: { name: 'Honey', serving: '1 tbsp', carbs: 17, fiber: 0, gi: 58, protein: 0 },
+    rice: { name: 'Rice', serving: '1 cup cooked', carbs: 45, fiber: 0, gi: 73, protein: 4 },
+    chicken: { name: 'Chicken', serving: '100 g cooked', carbs: 0, fiber: 0, gi: 0, protein: 31 }
+  };
+  const foodSelect = document.getElementById('glycemic-food');
+  const servingsInput = document.getElementById('glycemic-servings');
+  const addButton = document.getElementById('glycemic-add');
+  const mealList = document.getElementById('glycemic-meal-list');
+  const emptyMessage = document.getElementById('glycemic-empty');
+  const netCarbsOutput = document.getElementById('glycemic-net-carbs');
+  const glycemicLoadOutput = document.getElementById('glycemic-load');
+  const baselineInput = document.getElementById('glycemic-baseline-input');
+  const curvePath = document.getElementById('glycemic-curve');
+  const areaPath = document.getElementById('glycemic-area');
+  const insight = document.getElementById('glycemic-insight');
+
+  if (!foodSelect || !servingsInput || !addButton || !mealList || !emptyMessage ||
+      !netCarbsOutput || !glycemicLoadOutput || !baselineInput || !curvePath || !areaPath || !insight) return;
+
+  const meal = [];
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const plotX = minute => 56 + (minute / 180) * 684;
+  const plotY = glucose => 24 + ((200 - clamp(glucose, 50, 200)) / 150) * 246;
+
+  function renderMeal() {
+    mealList.replaceChildren();
+    emptyMessage.hidden = meal.length > 0;
+
+    meal.forEach((item, index) => {
+      const food = foods[item.id];
+      const netCarbs = Math.max(0, food.carbs - food.fiber) * item.servings;
+      const load = netCarbs * food.gi / 100;
+      const row = document.createElement('li');
+      row.className = 'glycemic-meal-item';
+
+      const description = document.createElement('div');
+      description.className = 'glycemic-food-description';
+      const name = document.createElement('strong');
+      name.textContent = food.name;
+      const detail = document.createElement('span');
+      detail.textContent = `${food.serving} · ${netCarbs.toFixed(1)} g net carbs · GL ${load.toFixed(1)}`;
+      description.append(name, detail);
+
+      const controls = document.createElement('div');
+      controls.className = 'glycemic-row-controls';
+      const quantity = document.createElement('input');
+      quantity.type = 'number';
+      quantity.min = '0.5';
+      quantity.max = '5';
+      quantity.step = '0.5';
+      quantity.value = String(item.servings);
+      quantity.setAttribute('aria-label', `Servings of ${food.name}`);
+      quantity.addEventListener('change', () => {
+        const servings = Number(quantity.value);
+        if (!quantity.validity.valid || !Number.isFinite(servings)) {
+          quantity.value = String(item.servings);
+          return;
+        }
+        item.servings = servings;
+        renderMeal();
+      });
+
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'glycemic-remove-button';
+      removeButton.textContent = 'Remove';
+      removeButton.setAttribute('aria-label', `Remove ${food.name} from meal`);
+      removeButton.addEventListener('click', () => {
+        meal.splice(index, 1);
+        renderMeal();
+      });
+
+      controls.append(quantity, removeButton);
+      row.append(description, controls);
+      mealList.appendChild(row);
+    });
+
+    updateProjection();
+  }
+
+  function updateProjection() {
+    const netCarbs = meal.reduce((sum, item) => {
+      const food = foods[item.id];
+      return sum + Math.max(0, food.carbs - food.fiber) * item.servings;
+    }, 0);
+    const glycemicLoad = meal.reduce((sum, item) => {
+      const food = foods[item.id];
+      return sum + Math.max(0, food.carbs - food.fiber) * item.servings * food.gi / 100;
+    }, 0);
+    const fiber = meal.reduce((sum, item) => sum + foods[item.id].fiber * item.servings, 0);
+    const protein = meal.reduce((sum, item) => sum + foods[item.id].protein * item.servings, 0);
+    const baseline = Number(baselineInput.value);
+    netCarbsOutput.textContent = netCarbs.toFixed(1);
+    glycemicLoadOutput.textContent = glycemicLoad.toFixed(1);
+
+    const peakTime = clamp(45 + fiber * 0.45 + protein * 0.25, 35, 75);
+    const peakRise = glycemicLoad * 0.75;
+    const lateDip = Math.min(18, glycemicLoad * 0.45);
+    const points = [];
+    for (let minute = 0; minute <= 180; minute += 5) {
+      const rise = minute === 0 ? 0 : peakRise * (minute / peakTime) * Math.exp(1 - minute / peakTime);
+      const dip = lateDip * Math.exp(-0.5 * ((minute - 145) / 30) ** 2);
+      points.push({ minute, glucose: baseline + rise - dip });
+    }
+
+    const line = points.map((point, index) =>
+      `${index === 0 ? 'M' : 'L'}${plotX(point.minute).toFixed(1)},${plotY(point.glucose).toFixed(1)}`
+    ).join(' ');
+    curvePath.setAttribute('d', line);
+    areaPath.setAttribute('d', `${line} L${plotX(180)},${plotY(50)} L${plotX(0)},${plotY(50)} Z`);
+
+    const peak = points.reduce((highest, point) => point.glucose > highest.glucose ? point : highest, points[0]);
+    const lowest = points.reduce((minimum, point) => point.glucose < minimum.glucose ? point : minimum, points[0]);
+    const hasMeal = meal.length > 0;
+    const hasSpike = peak.glucose > 140;
+    const hasLow = lowest.glucose < 70;
+    curvePath.classList.toggle('glycemic-curve-warning', hasSpike);
+    areaPath.classList.toggle('glycemic-area-warning', hasSpike);
+    insight.classList.toggle('glycemic-insight-warning', hasSpike || hasLow);
+
+    if (!hasMeal) {
+      insight.textContent = 'Add foods to see an estimated response.';
+    } else {
+      const warnings = [];
+      if (hasSpike) warnings.push('projected peak above 140 mg/dL');
+      if (hasLow) warnings.push('possible low below 70 mg/dL');
+      insight.textContent = `Estimated peak ${peak.glucose.toFixed(0)} mg/dL at ${peak.minute} min · ${
+        warnings.length ? warnings.join(' · ') : 'no threshold alerts in this estimate'
+      }.`;
+    }
+  }
+
+  addButton.addEventListener('click', () => {
+    const servings = Number(servingsInput.value);
+    if (!servingsInput.validity.valid || !Number.isFinite(servings)) {
+      servingsInput.reportValidity();
+      return;
+    }
+    meal.push({ id: foodSelect.value, servings });
+    renderMeal();
+  });
+
+  baselineInput.addEventListener('input', () => {
+    const baseline = Number(baselineInput.value);
+    if (baselineInput.validity.valid && Number.isFinite(baseline)) updateProjection();
+  });
+  baselineInput.addEventListener('change', () => {
+    if (!baselineInput.validity.valid) baselineInput.reportValidity();
+  });
+
+  renderMeal();
+});
+

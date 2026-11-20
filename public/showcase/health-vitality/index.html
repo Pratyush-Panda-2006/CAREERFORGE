@@ -815,6 +815,102 @@
   </section>
   <!-- ===== Interactive Meal Planner & Macronutrient Distribution Chart (Issue #199) END ===== -->
 
+  <section class="glycemic-section" id="glycemic-section" aria-labelledby="glycemic-title">
+    <div class="glycemic-card">
+      <div class="glycemic-header">
+        <div>
+          <span class="glycemic-eyebrow">MEAL RESPONSE SIMULATOR</span>
+          <h2 id="glycemic-title">Glycemic Response Predictor</h2>
+          <p>Build a meal and explore an estimated blood glucose response over three hours.</p>
+        </div>
+        <div class="glycemic-icon" aria-hidden="true">📈</div>
+      </div>
+
+      <div class="glycemic-builder">
+        <div class="glycemic-add-controls">
+          <label for="glycemic-food">Food</label>
+          <select id="glycemic-food">
+            <option value="oats">Oats — 40 g dry</option>
+            <option value="berries">Berries — 1 cup</option>
+            <option value="honey">Honey — 1 tbsp</option>
+            <option value="rice">Rice — 1 cup cooked</option>
+            <option value="chicken">Chicken — 100 g cooked</option>
+          </select>
+          <label for="glycemic-servings">Servings</label>
+          <input id="glycemic-servings" type="number" min="0.5" max="5" step="0.5" value="1" />
+          <button type="button" class="glycemic-add-button" id="glycemic-add">Add food</button>
+        </div>
+
+        <div class="glycemic-meal-layout">
+          <div class="glycemic-meal-panel">
+            <div class="glycemic-subhead">
+              <h3>Your meal</h3>
+              <span>Estimated serving values</span>
+            </div>
+            <ul class="glycemic-meal-list" id="glycemic-meal-list" aria-label="Foods in your meal"></ul>
+            <p class="glycemic-empty" id="glycemic-empty">Add a food above to build your meal.</p>
+            <div class="glycemic-totals" aria-live="polite">
+              <div><span>Net carbs</span><strong><span id="glycemic-net-carbs">0</span> g</strong></div>
+              <div><span>Glycemic load</span><strong id="glycemic-load">0</strong></div>
+            </div>
+          </div>
+
+          <div class="glycemic-baseline">
+            <label for="glycemic-baseline-input">Starting glucose</label>
+            <div><input id="glycemic-baseline-input" type="number" min="70" max="130" step="1" value="90" /><span>mg/dL</span></div>
+            <p>Adjust the starting value to explore how the projection changes.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glycemic-chart-card">
+        <div class="glycemic-chart-heading">
+          <div>
+            <h3>Estimated blood glucose</h3>
+            <p>mg/dL · minutes after eating</p>
+          </div>
+          <span class="glycemic-chart-legend"><i aria-hidden="true"></i> Typical range 70–140</span>
+        </div>
+        <div class="glycemic-chart-scroll">
+          <svg class="glycemic-chart" id="glycemic-chart" viewBox="0 0 760 320" role="img" aria-labelledby="glycemic-chart-title glycemic-chart-description">
+            <title id="glycemic-chart-title">Estimated blood glucose over 180 minutes</title>
+            <desc id="glycemic-chart-description">An illustrative curve over a shaded typical range from 70 to 140 milligrams per deciliter.</desc>
+            <rect class="glycemic-safe-band" x="56" y="122.4" width="684" height="114.7" rx="4"></rect>
+            <g class="glycemic-grid" aria-hidden="true">
+              <line x1="56" y1="24" x2="740" y2="24"></line>
+              <line x1="56" y1="122.4" x2="740" y2="122.4"></line>
+              <line x1="56" y1="188" x2="740" y2="188"></line>
+              <line x1="56" y1="237.1" x2="740" y2="237.1"></line>
+              <line x1="56" y1="270" x2="740" y2="270"></line>
+              <line x1="56" y1="24" x2="56" y2="270"></line>
+              <line x1="170" y1="24" x2="170" y2="270"></line>
+              <line x1="284" y1="24" x2="284" y2="270"></line>
+              <line x1="398" y1="24" x2="398" y2="270"></line>
+              <line x1="512" y1="24" x2="512" y2="270"></line>
+              <line x1="626" y1="24" x2="626" y2="270"></line>
+              <line x1="740" y1="24" x2="740" y2="270"></line>
+            </g>
+            <g class="glycemic-axis-labels" aria-hidden="true">
+              <text x="46" y="28">200</text><text x="46" y="126">140</text>
+              <text x="46" y="192">100</text><text x="46" y="241">70</text>
+              <text x="46" y="274">50</text>
+              <text x="56" y="294">0</text><text x="170" y="294">30</text>
+              <text x="284" y="294">60</text><text x="398" y="294">90</text>
+              <text x="512" y="294">120</text><text x="626" y="294">150</text>
+              <text x="740" y="294">180</text>
+            </g>
+            <path class="glycemic-area" id="glycemic-area"></path>
+            <path class="glycemic-curve" id="glycemic-curve"></path>
+          </svg>
+        </div>
+        <div class="glycemic-chart-footer">
+          <p id="glycemic-insight" role="status" aria-live="polite">Add foods to see an estimated response.</p>
+          <p class="glycemic-disclaimer">Illustrative estimate only—not a CGM prediction or medical advice. Food values and responses vary by person.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="hydration-section" id="hydration-section">
     <div class="hydration-card">
       <div class="hydration-header">
