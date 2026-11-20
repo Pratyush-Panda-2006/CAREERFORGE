@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field sketch board | Terra-Agri</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <script type="module" src="canvas-whiteboard.js"></script>
+</head>
+<body>
+  <main data-field-board>
+    <header><a href="index.html">Terra-Agri</a><h1>A plan starts with a line.</h1>
+      <p>Sketch field boundaries, irrigation routes and planting ideas. Everything stays in this tab until you download it.</p></header>
+    <div class="workbench">
+      <aside aria-label="Drawing tools">
+        <h2>Mark the field</h2>
+        <div class="tools" role="group" aria-label="Tool">
+          <button type="button" data-tool="pen" aria-pressed="true">Pen</button>
+          <button type="button" data-tool="line" aria-pressed="false">Line</button>
+          <button type="button" data-tool="rectangle" aria-pressed="false">Rectangle</button>
+          <button type="button" data-tool="eraser" aria-pressed="false">Erase stroke</button>
+        </div>
+        <fieldset><legend>Brush color</legend><div class="colors">
+          <button type="button" data-color="#22533b" aria-label="Forest green" aria-pressed="true" style="--swatch:#22533b"></button>
+          <button type="button" data-color="#3265a8" aria-label="Water blue" aria-pressed="false" style="--swatch:#3265a8"></button>
+          <button type="button" data-color="#a64238" aria-label="Soil red" aria-pressed="false" style="--swatch:#a64238"></button>
+          <button type="button" data-color="#986c17" aria-label="Harvest gold" aria-pressed="false" style="--swatch:#986c17"></button>
+          <button type="button" data-color="#303945" aria-label="Graphite" aria-pressed="false" style="--swatch:#303945"></button>
+        </div></fieldset>
+        <label class="width" for="width">Brush width <output id="width-value" for="width">5</output></label>
+        <input id="width" type="range" min="1" max="24" value="5">
+        <p class="hint">Erase stroke removes whole marks. Its radius follows the brush width.</p>
+        <div class="history-tools"><button id="undo" type="button" disabled>Undo</button><button id="redo" type="button" disabled>Redo</button></div>
+        <button id="clear" type="button">Clear board</button>
+        <button id="export" type="button" class="primary">Download SVG</button>
+      </aside>
+      <section class="sheet" aria-label="Field drawing">
+        <div class="sheet-heading"><h2>Field planning sketch</h2><span id="stroke-count">0 / 500 strokes</span></div>
+        <canvas id="board" width="1000" height="650" tabindex="0" aria-label="Field sketch canvas" aria-describedby="keyboard-help cursor-position">Use a browser with Canvas support to draw a field sketch.</canvas>
+        <p id="status" role="status" aria-live="polite">Choose a tool and draw on the sheet.</p>
+      </section>
+    </div>
+    <footer>
+      <p id="keyboard-help"><strong>Keyboard drawing:</strong> Tab to the canvas. Arrow keys move the cursor; Shift moves faster. Space or Enter starts and finishes a stroke. Escape cancels.</p>
+      <p id="cursor-position">Keyboard cursor: 500, 325</p>
+      <p>Local sketch only, without live collaboration or autosave. Reloading clears it. The last 50 changes can be undone; downloads contain completed strokes on a white 1000 × 650 sheet.</p>
+    </footer>
+  </main>
+</body>
+</html>
