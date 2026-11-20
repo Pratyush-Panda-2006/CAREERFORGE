@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Museum 3D - LZW Data Compression Suite</title>
+  <link rel="stylesheet" href="compression-suite.css">
+</head>
+<body>
+  <div class="compression-suite-container">
+    <header class="suite-header">
+      <h1>Virtual Museum 3D - 3D Asset Compression Suite</h1>
+      <p>Real-time dictionary LZW compression & 3D mesh manifest payload shrinkage analyzer</p>
+    </header>
+
+    <section class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Raw 3D Manifest</div>
+        <div id="raw-bytes" class="metric-value">0 B</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Compressed Stream</div>
+        <div id="compressed-bytes" class="metric-value">0 B</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Savings Percent</div>
+        <div id="savings-percent" class="metric-value">0%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Compression Ratio</div>
+        <div id="compression-ratio" class="metric-value">1.0</div>
+      </div>
+    </section>
+
+    <main class="editor-grid">
+      <div class="panel-card">
+        <h3>3D Geometry / Artifact Catalog Input</h3>
+        <textarea id="museum-input" class="museum-textarea">MESH_VERTEX_V01_X1.23_Y4.56_Z7.89_NORM_0.0_1.0_0.0_UV_0.5_0.5_MESH_VERTEX_V01_X1.23_Y4.56_Z7.89_NORM_0.0_1.0_0.0_UV_0.5_0.5</textarea>
+        <div class="action-buttons">
+          <button id="compress-btn" class="museum-btn">Compress Manifest</button>
+          <button id="decompress-btn" class="museum-btn secondary">Decompress Bytecode</button>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3>LZW Bytecode Sequence</h3>
+        <div id="bytecode-display" class="code-output">(Awaiting compression...)</div>
+
+        <h3>Lossless Decoded Verification</h3>
+        <div id="decompressed-display" class="code-output">(Click 'Decompress Bytecode' to verify)</div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="compression-suite.js"></script>
+</body>
+</html>
