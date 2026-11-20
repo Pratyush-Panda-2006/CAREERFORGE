@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge - Finite State Machine & Workflow Visualizer</title>
+  <link rel="stylesheet" href="state-diagram.css">
+</head>
+<body>
+  <div class="fsm-container">
+    <header class="fsm-header">
+      <h1>Quantum Forge - Quantum Processor State Visualizer</h1>
+      <p>Node-based QPU lifecycle engine with dynamic event transition dispatch and Mermaid.js export</p>
+    </header>
+
+    <div class="status-banner">
+      <div class="status-badge">
+        <span class="badge-label">Active State:</span>
+        <span id="current-state-badge" class="badge-val">QPU_IDLE</span>
+      </div>
+      <button id="reset-fsm-btn" class="secondary-btn">Reset Processor</button>
+    </div>
+
+    <main class="fsm-grid">
+      <div class="graph-panel">
+        <div class="panel-header">
+          <h3>Quantum Lifecycle State Graph</h3>
+          <span class="panel-hint">Live Node Highlights</span>
+        </div>
+        <div id="nodes-canvas" class="nodes-container">
+          <div class="fsm-node active" data-state="QPU_IDLE">
+            <div class="node-title">QPU_IDLE</div>
+            <div class="node-desc">Ready for cooling cycle</div>
+          </div>
+          <div class="fsm-node" data-state="CRYOGENIC_COOLING">
+            <div class="node-title">CRYOGENIC_COOLING</div>
+            <div class="node-desc">Dilution fridge reaching 15mK</div>
+          </div>
+          <div class="fsm-node" data-state="QUBIT_INITIALIZATION">
+            <div class="node-title">QUBIT_INITIALIZATION</div>
+            <div class="node-desc">Ground state |00...0⟩ preparation</div>
+          </div>
+          <div class="fsm-node" data-state="QUANTUM_GATE_EXECUTION">
+            <div class="node-title">QUANTUM_GATE_EXECUTION</div>
+            <div class="node-desc">Microwave pulse unitary gates</div>
+          </div>
+          <div class="fsm-node" data-state="MEASUREMENT_COLLAPSE">
+            <div class="node-title">MEASUREMENT_COLLAPSE</div>
+            <div class="node-desc">Wavefunction projective readout</div>
+          </div>
+          <div class="fsm-node danger" data-state="DECOHERENCE_FAULT">
+            <div class="node-title">DECOHERENCE_FAULT</div>
+            <div class="node-desc">Phase damping or thermal error</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-panel">
+        <div class="panel-header">
+          <h3>Dispatch Quantum Event</h3>
+        </div>
+        <div id="event-buttons" class="event-actions">
+          <!-- Populated dynamically based on available events -->
+        </div>
+
+        <div class="panel-header" style="margin-top: 14px;">
+          <h3>Transition History Log</h3>
+        </div>
+        <div id="history-log" class="history-container">
+          <div class="history-item placeholder">QPU initialized in QPU_IDLE</div>
+        </div>
+
+        <div class="panel-header" style="margin-top: 14px;">
+          <h3>Export Schema (Mermaid.js)</h3>
+          <button id="copy-mermaid-btn" class="secondary-btn">Copy Mermaid</button>
+        </div>
+        <pre id="mermaid-code" class="mermaid-preview"></pre>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="state-diagram.js"></script>
+</body>
+</html>
