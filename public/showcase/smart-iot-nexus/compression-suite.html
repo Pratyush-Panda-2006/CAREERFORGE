@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart IoT Nexus - LZW Data Compression Suite</title>
+  <link rel="stylesheet" href="compression-suite.css">
+</head>
+<body>
+  <div class="compression-suite-container">
+    <header class="suite-header">
+      <h1>Smart IoT Nexus - Telemetry Compression Suite</h1>
+      <p>Real-time dictionary LZW compression & edge sensor telemetry payload shrinkage analyzer</p>
+    </header>
+
+    <section class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Raw Telemetry</div>
+        <div id="raw-bytes" class="metric-value">0 B</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Compressed Stream</div>
+        <div id="compressed-bytes" class="metric-value">0 B</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Savings Percent</div>
+        <div id="savings-percent" class="metric-value">0%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Compression Ratio</div>
+        <div id="compression-ratio" class="metric-value">1.0</div>
+      </div>
+    </section>
+
+    <main class="editor-grid">
+      <div class="panel-card">
+        <h3>MQTT / Sensor Telemetry Input</h3>
+        <textarea id="iot-input" class="iot-textarea">SENSOR_NODE_01_TEMP_23.4C_HUM_58%_VOLT_3.3V_SENSOR_NODE_01_TEMP_23.4C_HUM_58%_VOLT_3.3V_SENSOR_NODE_01_TEMP_23.4C_HUM_58%_VOLT_3.3V</textarea>
+        <div class="action-buttons">
+          <button id="compress-btn" class="iot-btn">Compress Telemetry</button>
+          <button id="decompress-btn" class="iot-btn secondary">Decompress Bytecode</button>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3>LZW Bytecode Sequence</h3>
+        <div id="bytecode-display" class="code-output">(Awaiting compression...)</div>
+
+        <h3>Lossless Decoded Verification</h3>
+        <div id="decompressed-display" class="code-output">(Click 'Decompress Bytecode' to verify)</div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="compression-suite.js"></script>
+</body>
+</html>
