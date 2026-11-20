@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart IoT Nexus - Edge Gateway Location Radar</title>
+  <link rel="stylesheet" href="geo-tracker.css">
+</head>
+<body>
+  <div class="radar-dashboard">
+    <header class="radar-header">
+      <h1>Smart IoT Nexus - Gateway Proximity Radar</h1>
+      <p>Autonomous geospatial coordinate proximity calculator & LoRaWAN gateway locator</p>
+    </header>
+
+    <section class="radar-controls-card">
+      <div class="control-group">
+        <label for="user-lat">User Latitude</label>
+        <input type="number" id="user-lat" step="0.0001" value="37.7749">
+      </div>
+      <div class="control-group">
+        <label for="user-lon">User Longitude</label>
+        <input type="number" id="user-lon" step="0.0001" value="-122.4194">
+      </div>
+      <button id="scan-radar-btn" class="scan-btn">Scan Edge Gateways</button>
+      <div id="radar-status" class="radar-status">Ready to scan edge nodes.</div>
+    </section>
+
+    <main class="radar-main-content">
+      <div class="radar-display-wrapper">
+        <div class="radar-viewport">
+          <div class="radar-grid-ring ring-outer"></div>
+          <div class="radar-grid-ring ring-mid"></div>
+          <div class="radar-grid-ring ring-inner"></div>
+          <div class="radar-beam"></div>
+          <div id="radar-sweep-canvas"></div>
+        </div>
+      </div>
+
+      <div class="radar-results-wrapper">
+        <h3 style="margin-top: 0; color: var(--iot-cyan);">Nearby IoT Concentrators</h3>
+        <div id="nodes-list"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="geo-tracker.js"></script>
+</body>
+</html>

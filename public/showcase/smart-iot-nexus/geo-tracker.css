@@ -1,0 +1,215 @@
+/**
+ * Smart IoT Nexus - Geo Radar & Location Tracker Styling
+ */
+
+:root {
+  --iot-cyan: #00e5ff;
+  --iot-teal: #00b4d8;
+  --iot-dark: #070d14;
+  --iot-card: #0d1926;
+  --iot-border: #182e44;
+  --iot-dim: #7da0c2;
+  --iot-text: #e0f2fe;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--iot-dark);
+  color: var(--iot-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.radar-dashboard {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.radar-header {
+  border-bottom: 2px solid var(--iot-border);
+  padding-bottom: 16px;
+}
+
+.radar-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--iot-cyan);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.radar-header p {
+  margin: 0;
+  color: var(--iot-dim);
+  font-size: 0.95rem;
+}
+
+.radar-controls-card {
+  background: var(--iot-card);
+  border: 1px solid var(--iot-border);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-group label {
+  font-size: 0.85rem;
+  color: var(--iot-dim);
+  text-transform: uppercase;
+}
+
+.control-group input {
+  background: #04080e;
+  border: 1px solid var(--iot-border);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  width: 140px;
+}
+
+.scan-btn {
+  background: var(--iot-cyan);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.scan-btn:hover {
+  background: #6fffd9;
+  transform: translateY(-1px);
+}
+
+.radar-main-content {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 720px) {
+  .radar-main-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.radar-display-wrapper {
+  background: var(--iot-card);
+  border: 1px solid var(--iot-border);
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.radar-viewport {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  border: 2px solid var(--iot-cyan);
+  position: relative;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.1) 0%, rgba(4, 10, 16, 0.95) 100%);
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+}
+
+.radar-grid-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 229, 255, 0.25);
+}
+
+.ring-outer {
+  width: 190px;
+  height: 190px;
+}
+
+.ring-mid {
+  width: 120px;
+  height: 120px;
+}
+
+.ring-inner {
+  width: 50px;
+  height: 50px;
+}
+
+.radar-beam {
+  position: absolute;
+  width: 125px;
+  height: 125px;
+  top: 0;
+  left: 0;
+  transform-origin: 100% 100%;
+  background: conic-gradient(from 0deg, rgba(0, 229, 255, 0.45) 0deg, transparent 60deg);
+  animation: radar-sweep-anim 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes radar-sweep-anim {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-blip {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--iot-cyan);
+  box-shadow: 0 0 8px var(--iot-cyan);
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+
+.radar-node-card {
+  background: var(--iot-card);
+  border-left: 4px solid var(--iot-cyan);
+  border-top: 1px solid var(--iot-border);
+  border-right: 1px solid var(--iot-border);
+  border-bottom: 1px solid var(--iot-border);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.radar-node-card h4 {
+  margin: 0 0 6px 0;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.radar-node-card p {
+  margin: 0;
+  color: var(--iot-dim);
+  font-size: 0.85rem;
+}
+
+.radar-status {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--iot-dim);
+}
