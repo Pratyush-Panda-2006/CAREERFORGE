@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Yield Matrix - Finite State Machine Visualizer</title>
+  <link rel="stylesheet" href="state-diagram.css">
+</head>
+<body>
+  <div class="fsm-container">
+    <header class="fsm-header">
+      <h1>DeFi Yield Matrix - Strategy FSM Visualizer</h1>
+      <p>Finite state machine modeling AMM routing, flash loans, and collateral rebalancing</p>
+    </header>
+
+    <div class="current-state-panel">
+      <div>
+        <span style="color: var(--defi-dim); font-size: 0.9rem; text-transform: uppercase;">Vault State: </span>
+        <span id="current-state-badge" class="state-badge">WALLET_IDLE</span>
+      </div>
+      <button id="reset-fsm-btn" class="reset-btn">Reset FSM</button>
+    </div>
+
+    <div class="fsm-grid">
+      <div class="fsm-card">
+        <h3>DeFi Protocol States</h3>
+        <div id="nodes-container" class="nodes-container"></div>
+
+        <h3>Dispatch Strategy Event</h3>
+        <div id="event-triggers" class="event-triggers"></div>
+      </div>
+
+      <div class="fsm-card">
+        <h3>Mermaid.js State Diagram</h3>
+        <div id="mermaid-output" class="mermaid-box"></div>
+
+        <h3>Execution Event Log</h3>
+        <ul id="history-log" class="history-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="state-diagram.js"></script>
+</body>
+</html>
