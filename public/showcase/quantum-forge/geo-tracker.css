@@ -1,0 +1,245 @@
+/**
+ * Quantum Forge - Geospatial Proximity Calculator & Location Radar Styling
+ */
+
+:root {
+  --quantum-purple: #c084fc;
+  --quantum-violet: #a855f7;
+  --quantum-cyan: #38bdf8;
+  --quantum-dark: #090912;
+  --quantum-card: #121224;
+  --quantum-border: #242445;
+  --quantum-dim: #9494bd;
+  --quantum-text: #f0f0ff;
+  --quantum-blip: #34d399;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--quantum-dark);
+  color: var(--quantum-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.radar-dashboard {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.radar-header {
+  border-bottom: 2px solid var(--quantum-border);
+  padding-bottom: 16px;
+}
+
+.radar-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--quantum-purple);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.radar-header p {
+  margin: 0;
+  color: var(--quantum-dim);
+  font-size: 0.95rem;
+}
+
+.radar-controls-card {
+  background: var(--quantum-card);
+  border: 1px solid var(--quantum-border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-group label {
+  font-size: 0.82rem;
+  color: var(--quantum-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.control-group input {
+  background: #090916;
+  border: 1px solid var(--quantum-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--quantum-text);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.9rem;
+}
+
+.control-group input:focus {
+  outline: none;
+  border-color: var(--quantum-purple);
+}
+
+.scan-btn {
+  background: linear-gradient(135deg, var(--quantum-violet), var(--quantum-cyan));
+  color: #080816;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.scan-btn:hover {
+  opacity: 0.9;
+}
+
+.radar-status {
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--quantum-dim);
+  margin-top: 4px;
+}
+
+.radar-main-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.radar-display-wrapper {
+  background: var(--quantum-card);
+  border: 1px solid var(--quantum-border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.radar-viewport {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a1436 0%, #06060f 100%);
+  border: 2px solid var(--quantum-purple);
+  box-shadow: 0 0 24px rgba(192, 132, 252, 0.25);
+  overflow: hidden;
+}
+
+.radar-grid-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(192, 132, 252, 0.3);
+  pointer-events: none;
+}
+
+.ring-outer { width: 85%; height: 85%; }
+.ring-mid { width: 55%; height: 55%; }
+.ring-inner { width: 25%; height: 25%; }
+
+.radar-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(from 0deg, rgba(192, 132, 252, 0.4) 0deg, transparent 60deg, transparent 360deg);
+  border-radius: 50%;
+  animation: quantumRadarScan 3s linear infinite;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+@keyframes quantumRadarScan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-blip {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--quantum-blip);
+  box-shadow: 0 0 10px var(--quantum-blip);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.radar-blip:hover {
+  transform: translate(-50%, -50%) scale(1.6);
+  background: #ffffff;
+}
+
+.radar-results-wrapper {
+  background: var(--quantum-card);
+  border: 1px solid var(--quantum-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.results-heading {
+  margin: 0;
+  color: var(--quantum-purple);
+  font-size: 1.15rem;
+}
+
+.nodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.node-card {
+  background: #090916;
+  border: 1px solid var(--quantum-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.node-card-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--quantum-text);
+}
+
+.node-dist {
+  color: var(--quantum-cyan);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.node-category {
+  font-size: 0.75rem;
+  color: var(--quantum-dim);
+}
+
+.node-bearing {
+  font-size: 0.78rem;
+  color: var(--quantum-purple);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
