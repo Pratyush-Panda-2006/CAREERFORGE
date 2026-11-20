@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Yield Matrix - LZW Data Compression Suite</title>
+  <link rel="stylesheet" href="compression-suite.css">
+</head>
+<body>
+  <div class="compression-suite-container">
+    <header class="suite-header">
+      <h1>DeFi Yield Matrix - Calldata Compression Suite</h1>
+      <p>Real-time dictionary LZW compression & smart contract transaction payload shrinkage analyzer</p>
+    </header>
+
+    <section class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Raw Calldata</div>
+        <div id="raw-bytes" class="metric-value">0 B</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Compressed Stream</div>
+        <div id="compressed-bytes" class="metric-value">0 B</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Savings Percent</div>
+        <div id="savings-percent" class="metric-value">0%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Compression Ratio</div>
+        <div id="compression-ratio" class="metric-value">1.0</div>
+      </div>
+    </section>
+
+    <main class="editor-grid">
+      <div class="panel-card">
+        <h3>AMM Swap Route / Flash Loan Calldata Input</h3>
+        <textarea id="defi-input" class="defi-textarea">0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000de0b6b3a76400000xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000de0b6b3a7640000</textarea>
+        <div class="action-buttons">
+          <button id="compress-btn" class="defi-btn">Compress Calldata</button>
+          <button id="decompress-btn" class="defi-btn secondary">Decompress Bytecode</button>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3>LZW Bytecode Sequence</h3>
+        <div id="bytecode-display" class="code-output">(Awaiting compression...)</div>
+
+        <h3>Lossless Decoded Verification</h3>
+        <div id="decompressed-display" class="code-output">(Click 'Decompress Bytecode' to verify)</div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="compression-suite.js"></script>
+</body>
+</html>
