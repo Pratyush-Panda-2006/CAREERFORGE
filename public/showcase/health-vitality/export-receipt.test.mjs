@@ -1,0 +1,95 @@
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { HealthVitalityReceiptGenerator } from './export-receipt.js';
+
+describe('HealthVitalityReceiptGenerator (Issue #1067)', () => {
+  it('initializes with default canvas dimensions and brand configuration', () => {
+    const generator = new HealthVitalityReceiptGenerator();
+    assert.equal(generator.width, 640);
+    assert.equal(generator.height, 840);
+    assert.equal(generator.brandName, 'HEALTH VITALITY CLINICAL LABS & WELLNESS');
+    const bounds = generator.getBounds();
+    assert.equal(bounds.width, 640);
+    assert.equal(bounds.height, 840);
+    assert.ok(bounds.aspectRatio < 1);
+  });
+
+  it('calculates deterministic modulo-10 parity checksums for verification codes', () => {
+    const generator = new HealthVitalityReceiptGenerator();
+    const parity1 = generator.calculateBarcodeParity('HEALTH-VITALITY-2026-TX1067');
+    const parity2 = generator.calculateBarcodeParity('HEALTH-VITALITY-2026-TX1067');
+    assert.equal(parity1, parity2);
+    assert.ok(parity1 >= 0 && parity1 <= 9);
+
+    // Empty and invalid input handling
+    assert.equal(generator.calculateBarcodeParity(''), 0);
+    assert.equal(generator.calculateBarcodeParity(null), 0);
+  });
+
+  it('generates valid barcode bit patterns with sentinel start/stop markers', () => {
+    const generator = new HealthVitalityReceiptGenerator();
+    const result = generator.generateBarcodePattern('HEALTH-VITALITY-1067');
+
+    assert.ok(Array.isArray(result.pattern));
+    assert.ok(result.pattern.length > 20);
+
+    // Verify start sentinel: 101001
+    assert.deepEqual(result.pattern.slice(0, 6), [1, 0, 1, 0, 0, 1]);
+
+    // Verify stop sentinel: 110101
+    assert.deepEqual(result.pattern.slice(-6), [1, 1, 0, 1, 0, 1]);
+
+    // Verify all pattern elements are strictly 0 or 1
+    result.pattern.forEach((bit) => {
+      assert.ok(bit === 0 || bit === 1);
+    });
+  });
+
+  it('draws barcode vectors accurately onto mock canvas context', () => {
+    const generator = new HealthVitalityReceiptGenerator();
+    const rectCalls = [];
+
+    const mockCtx = {
+      fillStyle: '',
+      font: '',
+      textAlign: '',
+      fillRect: (x, y, w, h) => {
+        rectCalls.push({ x, y, w, h });
+      },
+      fillText: () => {}
+    };
+
+    const out = generator.drawBarcode(mockCtx, 'HEALTH-VITALITY-1067', 50, 700);
+    assert.ok(out);
+    assert.ok(rectCalls.length > 10);
+    assert.ok(out.totalWidth > 100);
+  });
+
+  it('renders complete certificate canvas layout without runtime exceptions', () => {
+    const generator = new HealthVitalityReceiptGenerator();
+    const mockCtx = {
+      fillStyle: '',
+      strokeStyle: '',
+      lineWidth: 0,
+      font: '',
+      textAlign: '',
+      fillRect: () => {},
+      strokeRect: () => {},
+      beginPath: () => {},
+      moveTo: () => {},
+      lineTo: () => {},
+      stroke: () => {},
+      fill: () => {},
+      fillText: () => {}
+    };
+
+    const rendered = generator.renderCanvas(mockCtx, {
+      name: 'Dr. Sarah Lin (Elite Performance)',
+      vault: 'HV-CLINIC-2026-BIO884',
+      certId: 'HEALTH-VITALITY-2026-TX1067',
+      amount: 985
+    });
+
+    assert.equal(rendered, true);
+  });
+});
