@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxury Realms - Polar Metrics Radar Chart</title>
+  <link rel="stylesheet" href="data-visualizer.css">
+</head>
+<body class="radar-body">
+  <main class="radar-container">
+    <header class="radar-header">
+      <div class="header-left">
+        <h1 class="header-title">Luxury Realms Polar Metrics Radar</h1>
+        <p class="header-desc">Polar coordinate visualizer for multi-dimensional performance telemetry</p>
+      </div>
+      <div class="metrics-badge">
+        <span class="badge-label">Metric Area:</span>
+        <span class="badge-val" id="areaDisplay">0 sq px</span>
+      </div>
+    </header>
+
+    <div class="radar-workspace">
+      <section class="chart-canvas-panel">
+        <div class="svg-wrapper">
+          <svg id="radarSvg" width="460" height="460" viewBox="0 0 460 460">
+            <!-- Web grid, spokes, polygon fill, and vertices rendered dynamically -->
+          </svg>
+        </div>
+      </section>
+
+      <section class="metrics-controls-panel">
+        <div class="panel-header">
+          <h3>Telemetry Factor Sliders</h3>
+          <button class="btn btn-sm" id="resetSlidersBtn">Reset</button>
+        </div>
+        <div class="sliders-list" id="slidersContainer">
+          <!-- Range sliders injected by script -->
+        </div>
+        <div class="summary-card">
+          <h4>Performance Quality Grade</h4>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="stabilityFill" style="width: 92%;"></div>
+          </div>
+          <span class="summary-text" id="stabilityScoreText">92% Optimal Score</span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { LuxuryRealmsRadarChart } from './data-visualizer.js';
+
+    const chart = new LuxuryRealmsRadarChart();
+    const svgElem = document.getElementById('radarSvg');
+    const areaDisplay = document.getElementById('areaDisplay');
+    const slidersContainer = document.getElementById('slidersContainer');
+    const stabilityFill = document.getElementById('stabilityFill');
+    const stabilityScoreText = document.getElementById('stabilityScoreText');
+
+    function renderSvg() {
+      svgElem.innerHTML = '';
+
+      // Render concentric web rings
+      const rings = chart.generateWebGrid(5);
+      rings.forEach((ring) => {
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        poly.setAttribute('points', ring);
+        poly.setAttribute('class', 'grid-ring');
+        svgElem.appendChild(poly);
+      });
+
+      // Render radial spoke lines
+      const spokes = chart.getSpokeCoordinates();
+      spokes.forEach((sp) => {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', sp.x1);
+        line.setAttribute('y1', sp.y1);
+        line.setAttribute('x2', sp.x2);
+        line.setAttribute('y2', sp.y2);
+        line.setAttribute('class', 'spoke-line');
+        svgElem.appendChild(line);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', sp.labelX);
+        text.setAttribute('y', sp.labelY);
+        text.setAttribute('class', 'spoke-label');
+        text.setAttribute('text-anchor', 'middle');
+        text.textContent = sp.name;
+        svgElem.appendChild(text);
+      });
+
+      // Render metric polygon fill
+      const polyPts = chart.generatePolygonPoints();
+      const areaPolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      areaPolygon.setAttribute('points', polyPts);
+      areaPolygon.setAttribute('class', 'radar-fill-polygon');
+      svgElem.appendChild(areaPolygon);
+
+      // Render vertex dots
+      const vertices = chart.getVertexCoordinates();
+      vertices.forEach((v) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', v.x);
+        circle.setAttribute('cy', v.y);
+        circle.setAttribute('r', '5');
+        circle.setAttribute('class', 'vertex-dot');
+        svgElem.appendChild(circle);
+      });
+
+      const summary = chart.getMetricsSummary();
+      areaDisplay.textContent = `${summary.enclosedArea} sq px`;
+      const pct = Math.round(summary.averageScore * 100);
+      stabilityFill.style.width = `${pct}%`;
+      stabilityScoreText.textContent = `${pct}% Grade Profile`;
+    }
+
+    function buildSliders() {
+      slidersContainer.innerHTML = '';
+      chart.metrics.forEach((m) => {
+        const row = document.createElement('div');
+        row.className = 'slider-row';
+        row.innerHTML = `
+          <div class="slider-info">
+            <span class="metric-label">${m.name}</span>
+            <span class="metric-val" id="val_${m.key}">${Math.round(m.value * 100)}%</span>
+          </div>
+          <input type="range" min="0" max="100" value="${Math.round(m.value * 100)}" class="metric-slider" data-key="${m.key}">
+        `;
+        row.querySelector('input').addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10) / 100;
+          chart.updateMetric(m.key, val);
+          row.querySelector(`#val_${m.key}`).textContent = `${e.target.value}%`;
+          renderSvg();
+        });
+        slidersContainer.appendChild(row);
+      });
+    }
+
+    document.getElementById('resetSlidersBtn').addEventListener('click', () => {
+      chart.resetMetrics();
+      buildSliders();
+      renderSvg();
+    });
+
+    buildSliders();
+    renderSvg();
+  </script>
+</body>
+</html>
