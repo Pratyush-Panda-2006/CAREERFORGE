@@ -1,0 +1,230 @@
+/**
+ * Travel Odyssey - Expedition Ambient Soundscape Synthesizer Styling
+ */
+
+:root {
+  --sound-bg: #071526;
+  --sound-card: #0d2137;
+  --sound-card-light: #163252;
+  --sound-border: #1e446d;
+  --sound-cyan: #06b6d4;
+  --sound-blue: #0ea5e9;
+  --sound-accent: #38bdf8;
+  --sound-text: #f0f9ff;
+  --sound-dim: #94a3b8;
+  --sound-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--sound-bg);
+  color: var(--sound-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.soundscape-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.soundscape-header {
+  border-bottom: 2px solid var(--sound-border);
+  padding-bottom: 16px;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid var(--sound-blue);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--sound-font);
+  color: var(--sound-accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.soundscape-header h1 {
+  margin: 0 0 6px 0;
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.soundscape-header p {
+  margin: 0;
+  color: var(--sound-dim);
+  font-size: 0.95rem;
+}
+
+.visualizer-card {
+  background: var(--sound-card);
+  border: 1px solid var(--sound-border);
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.eq-meter {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 60px;
+  padding: 10px 20px;
+  background: #050e1a;
+  border-radius: 8px;
+  border: 1px solid var(--sound-border);
+}
+
+.eq-bar {
+  width: 12px;
+  height: 12px;
+  background: var(--sound-blue);
+  border-radius: 2px;
+  transition: height 0.15s ease, background-color 0.2s ease;
+}
+
+.visualizer-card.playing .eq-bar:nth-child(1) { animation: soundBar 0.6s infinite alternate ease-in-out; }
+.visualizer-card.playing .eq-bar:nth-child(2) { animation: soundBar 0.8s infinite alternate ease-in-out 0.1s; }
+.visualizer-card.playing .eq-bar:nth-child(3) { animation: soundBar 0.5s infinite alternate ease-in-out 0.2s; }
+.visualizer-card.playing .eq-bar:nth-child(4) { animation: soundBar 0.9s infinite alternate ease-in-out 0.15s; }
+.visualizer-card.playing .eq-bar:nth-child(5) { animation: soundBar 0.7s infinite alternate ease-in-out 0.25s; }
+.visualizer-card.playing .eq-bar:nth-child(6) { animation: soundBar 0.4s infinite alternate ease-in-out 0.3s; }
+.visualizer-card.playing .eq-bar:nth-child(7) { animation: soundBar 0.85s infinite alternate ease-in-out 0.05s; }
+.visualizer-card.playing .eq-bar:nth-child(8) { animation: soundBar 0.65s infinite alternate ease-in-out 0.18s; }
+
+@keyframes soundBar {
+  0% { height: 8px; background: var(--sound-blue); }
+  50% { height: 46px; background: var(--sound-cyan); }
+  100% { height: 20px; background: var(--sound-accent); }
+}
+
+.sound-btn {
+  background: #0284c7;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(14, 165, 233, 0.3);
+}
+
+.sound-btn:hover {
+  background: var(--sound-blue);
+  box-shadow: 0 0 18px rgba(14, 165, 233, 0.5);
+}
+
+.sound-btn.playing {
+  background: #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+.mixer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 768px) {
+  .mixer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.control-panel {
+  background: var(--sound-card);
+  border: 1px solid var(--sound-border);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.control-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #fff;
+  border-bottom: 1px solid var(--sound-border);
+  padding-bottom: 8px;
+}
+
+.panel-label {
+  font-size: 0.85rem;
+  color: var(--sound-dim);
+}
+
+.preset-dropdown {
+  background: #050e1a;
+  border: 1px solid var(--sound-border);
+  color: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.preset-dropdown:focus {
+  border-color: var(--sound-blue);
+}
+
+.channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.channel-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.channel-row.master-row {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--sound-border);
+}
+
+.channel-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.channel-name {
+  color: var(--sound-text);
+}
+
+.channel-val {
+  font-family: var(--sound-font);
+  color: var(--sound-accent);
+}
+
+.channel-slider {
+  width: 100%;
+  accent-color: var(--sound-blue);
+  cursor: pointer;
+}
+
+.soundscape-footer {
+  border-top: 1px solid var(--sound-border);
+  padding-top: 14px;
+}
+
+.status-indicator {
+  font-size: 0.85rem;
+  font-family: var(--sound-font);
+  color: var(--sound-dim);
+}
