@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Logistics - Voice Commander & Speech Dispatcher</title>
+  <link rel="stylesheet" href="./voice-commander.css">
+</head>
+<body class="voice-theme">
+  <div class="voice-commander-container">
+    <header class="commander-header">
+      <div class="brand-group">
+        <span class="pulse-mic-icon">ðŸŽ™ï¸ </span>
+        <h2>Supply Chain Logistics Voice Commander</h2>
+      </div>
+      <div id="voiceStatusBadge" class="status-badge ready">READY</div>
+    </header>
+
+    <div class="mic-control-card">
+      <button id="micToggleBtn" class="mic-action-btn">
+        <span class="mic-inner-icon">ðŸŽ¤</span>
+        <span class="mic-btn-label">Activate Microphone</span>
+      </button>
+      <div class="simulated-commands-bar">
+        <span>Simulate Quick Voice Inputs:</span>
+        <button class="voice-chip" data-voice-command="track shipment">"Cargo container SC-9042 located en route; estimated delivery in 4 hours"</button>
+        <button class="voice-chip" data-voice-command="inventory status">"Warehouse inventory at 92% capacity across all automated distribution bays"</button>
+        <button class="voice-chip" data-voice-command="reroute fleet">"AI dynamic routing engaged"</button>
+        <button class="voice-chip" data-voice-command="dispatch drone">"Autonomous express delivery drone dispatched to depot zone 3"</button>
+        <button class="voice-chip" data-voice-command="unknown action test">"Unknown Action"</button>
+      </div>
+    </div>
+
+    <section class="command-history-panel">
+      <div class="panel-header">
+        <h3>Recognized Command History</h3>
+        <span id="historyCount">0 entries</span>
+      </div>
+      <div id="commandHistoryList" class="history-list">
+        <div class="empty-state">No spoken voice commands recorded yet.</div>
+      </div>
+    </section>
+
+    <div id="speechFeedbackToast" class="speech-toast hidden">
+      <span class="toast-indicator"></span>
+      <span id="toastMessage">Spoken confirmation message</span>
+    </div>
+  </div>
+
+  <script type="module" src="./voice-commander.js"></script>
+</body>
+</html>
