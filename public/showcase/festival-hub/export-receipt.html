@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - VIP Certificate & PNG Receipt Exporter</title>
+  <link rel="stylesheet" href="export-receipt.css">
+</head>
+<body class="receipt-body">
+  <div class="receipt-page-container" id="festival-hub-receipt-container">
+    <header class="receipt-header">
+      <div class="receipt-tag">CANVAS 2D VECTOR GENERATOR</div>
+      <h2>Festival VIP Access Pass & PNG Exporter</h2>
+      <p>Instant client-side high-DPI pass and receipt generation with verifiable barcode parity checksums.</p>
+    </header>
+
+    <div class="receipt-grid">
+      <!-- Input Controls Section -->
+      <div class="receipt-controls-panel">
+        <h3>Pass Customization</h3>
+        <div class="form-group">
+          <label for="inp-attendee">Attendee Name</label>
+          <input type="text" id="inp-attendee" value="Alex Vance" class="receipt-input">
+        </div>
+
+        <div class="form-group">
+          <label for="inp-ticket-id">Pass / Ticket Reference</label>
+          <input type="text" id="inp-ticket-id" value="FEST-2026-VIP-8891" class="receipt-input">
+        </div>
+
+        <div class="form-group">
+          <label for="inp-stage">Authorized Stage / Zone</label>
+          <input type="text" id="inp-stage" value="Solaris Main Stage & Backstage" class="receipt-input">
+        </div>
+
+        <div class="form-group">
+          <label for="inp-tier">Access Tier Badge</label>
+          <select id="inp-tier" class="receipt-select">
+            <option value="VIP BACKSTAGE ACCESS PASS">VIP Backstage Access Pass</option>
+            <option value="ALL-ACCESS ARTIST CREDENTIAL">All-Access Artist Credential</option>
+            <option value="GENERAL ADMISSION WEEKEND PASS">General Admission Weekend Pass</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="inp-amount">Verified Total</label>
+          <input type="text" id="inp-amount" value="$349.00 USD" class="receipt-input">
+        </div>
+
+        <div class="receipt-actions">
+          <button id="btn-refresh-canvas" class="receipt-btn receipt-btn-secondary">Update Pass Preview</button>
+          <button id="btn-download-png" class="receipt-btn receipt-btn-primary">Download PNG Receipt</button>
+        </div>
+      </div>
+
+      <!-- Live Canvas Preview Viewport -->
+      <div class="receipt-preview-viewport">
+        <div class="viewport-toolbar">
+          <span class="preview-resolution-tag">640 × 840 HIGH-DPI CANVAS</span>
+          <button id="btn-zoom-toggle" class="zoom-btn" title="Toggle Scale">Zoom 100%</button>
+        </div>
+        <div class="canvas-frame">
+          <canvas id="festival-receipt-canvas" width="640" height="840"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { FestivalHubReceiptGenerator } from './export-receipt.js';
+    const generator = new FestivalHubReceiptGenerator();
+
+    const canvas = document.getElementById('festival-receipt-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const inpAttendee = document.getElementById('inp-attendee');
+    const inpTicketId = document.getElementById('inp-ticket-id');
+    const inpStage = document.getElementById('inp-stage');
+    const inpTier = document.getElementById('inp-tier');
+    const inpAmount = document.getElementById('inp-amount');
+
+    const btnRefresh = document.getElementById('btn-refresh-canvas');
+    const btnDownload = document.getElementById('btn-download-png');
+    const btnZoom = document.getElementById('btn-zoom-toggle');
+    const canvasFrame = document.querySelector('.canvas-frame');
+
+    function redrawPass() {
+      generator.renderCanvas(ctx, {
+        attendee: inpAttendee.value,
+        ticketId: inpTicketId.value,
+        stage: inpStage.value,
+        tier: inpTier.value,
+        totalAmount: inpAmount.value
+      });
+    }
+
+    btnRefresh?.addEventListener('click', redrawPass);
+    [inpAttendee, inpTicketId, inpStage, inpTier, inpAmount].forEach(elem => {
+      elem?.addEventListener('input', redrawPass);
+    });
+
+    btnDownload?.addEventListener('click', () => {
+      const code = inpTicketId.value || 'pass';
+      generator.downloadBlob(canvas, `${code}-receipt.png`);
+    });
+
+    btnZoom?.addEventListener('click', () => {
+      canvasFrame.classList.toggle('zoomed');
+      btnZoom.textContent = canvasFrame.classList.contains('zoomed') ? 'Zoom 50%' : 'Zoom 100%';
+    });
+
+    redrawPass();
+  </script>
+</body>
+</html>
