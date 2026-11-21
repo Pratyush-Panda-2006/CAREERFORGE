@@ -1,50 +1,55 @@
 /**
  * GamingEsportsHubSoundscapeSynth
- * Procedural Web Audio API ambient soundscape synthesizer and multi-channel acoustic mixer
- * for esports arenas, competitive match focus, CRT scanline hum, and lofi gaming lounges.
+ * Procedural Web Audio API ambient soundscape synthesizer and multi-channel acoustic mixer.
  */
 
 export class GamingEsportsHubSoundscapeSynth {
   constructor(options = {}) {
-    this.name = 'GamingEsportsHubSoundscapeSynth';
-    this.masterGain = 0.75;
+    this.masterGain = 0.7;
     this.isPlaying = false;
-    this.activePreset = options.defaultPreset || 'Cyberpunk Arena Match';
+    this.activePreset = options.defaultPreset || "Cyberpunk Arena Finals";
     this.audioCtx = null;
     this.masterNode = null;
     this.activeNodes = new Map();
     this.listeners = [];
 
     this.channels = {
-      rain: { name: 'Cyber Rain & Server Cooling (Pink)', gain: 0.35, type: 'pink' },
-      wind: { name: 'Stadium Crowd & Hyperspace Thrusters', gain: 0.45, type: 'bandpass' },
-      whiteNoise: { name: 'CRT Scanline Hum & 8-Bit Dither', gain: 0.25, type: 'white' },
-      chimes: { name: 'Synthwave Arpeggio Chimes', gain: 0.4, type: 'harmonic' }
+      rain: { name: "Neon Rain (Pink)", gain: 0.3, type: 'pink' },
+      wind: { name: "Arena Cooling Vortex", gain: 0.5, type: 'bandpass' },
+      whiteNoise: { name: "Stadium Crowd Static (White)", gain: 0.35, type: 'white' },
+      chimes: { name: "Retro Synth Chimes", gain: 0.4, type: 'harmonic' }
     };
 
     this.presets = {
-      'Cyberpunk Arena Match': { rain: 0.35, wind: 0.45, whiteNoise: 0.25, chimes: 0.4, master: 0.75 },
-      'Midnight Rank Grind': { rain: 0.2, wind: 0.3, whiteNoise: 0.35, chimes: 0.25, master: 0.7 },
-      'Chill Lofi Arcade Lounge': { rain: 0.45, wind: 0.2, whiteNoise: 0.15, chimes: 0.5, master: 0.65 }
-    };
+      "Cyberpunk Arena Finals": {
+            "rain": 0.3,
+            "wind": 0.5,
+            "whiteNoise": 0.35,
+            "chimes": 0.4,
+            "master": 0.75
+      },
+      "Retro Arcade Glow": {
+            "rain": 0.15,
+            "wind": 0.4,
+            "whiteNoise": 0.25,
+            "chimes": 0.6,
+            "master": 0.7
+      },
+      "Championship Match Chill": {
+            "rain": 0.4,
+            "wind": 0.45,
+            "whiteNoise": 0.2,
+            "chimes": 0.3,
+            "master": 0.65
+      }
+};
   }
 
-  /**
-   * Clamps gain values strictly between 0.0 and 1.0.
-   * @param {number} val
-   * @returns {number}
-   */
   clampGain(val) {
     if (typeof val !== 'number' || Number.isNaN(val)) return 0;
     return Math.max(0, Math.min(1, Math.round(val * 100) / 100));
   }
 
-  /**
-   * Calculates bandpass/lowpass filter frequency with modulation clamping.
-   * @param {number} cutoff
-   * @param {number} modulation
-   * @returns {number}
-   */
   calculateFilterFrequency(cutoff, modulation = 0) {
     const minFreq = 20;
     const maxFreq = 20000;
@@ -52,13 +57,6 @@ export class GamingEsportsHubSoundscapeSynth {
     return Math.max(minFreq, Math.min(maxFreq, Math.round(computed)));
   }
 
-  /**
-   * Generates white or pink noise audio sample buffer.
-   * @param {'white'|'pink'} type
-   * @param {number} lengthSeconds
-   * @param {number} sampleRate
-   * @returns {Float32Array}
-   */
   generateNoiseBuffer(type = 'white', lengthSeconds = 2, sampleRate = 44100) {
     const totalSamples = Math.floor(lengthSeconds * sampleRate);
     const buffer = new Float32Array(totalSamples);
@@ -78,299 +76,157 @@ export class GamingEsportsHubSoundscapeSynth {
       }
     } else {
       for (let i = 0; i < totalSamples; i++) {
-        buffer[i] = Math.random() * 2 - 1;
+        buffer[i] = (Math.random() * 2 - 1) * 0.2;
       }
     }
-
     return buffer;
   }
 
-  /**
-   * Adjusts gain for a specific channel.
-   * @param {'rain'|'wind'|'whiteNoise'|'chimes'|'master'} channel
-   * @param {number} val
-   */
-  adjustChannelGain(channel, val) {
-    const clamped = this.clampGain(val);
-    if (channel === 'master') {
-      this.masterGain = clamped;
-      if (this.masterNode && this.audioCtx) {
-        this.masterNode.gain.setTargetAtTime(clamped, this.audioCtx.currentTime, 0.05);
-      }
-    } else if (this.channels[channel]) {
-      this.channels[channel].gain = clamped;
-      const node = this.activeNodes.get(channel);
-      if (node && this.audioCtx) {
-        node.gainNode.gain.setTargetAtTime(clamped, this.audioCtx.currentTime, 0.05);
-      }
-    } else {
-      throw new Error(`Unknown audio channel: ${channel}`);
-    }
-    this.notifyState();
-    return clamped;
-  }
-
-  /**
-   * Starts or restarts ambient sound playback with a selected preset.
-   * @param {string} presetName
-   */
   startAmbience(presetName) {
-    if (presetName && this.presets[presetName]) {
+    if (presetName) {
       this.applyPreset(presetName);
     }
-
-    if (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) {
-      if (!this.audioCtx) {
-        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
-        this.audioCtx = new AudioCtxClass();
-        this.masterNode = this.audioCtx.createGain();
-        this.masterNode.gain.setValueAtTime(this.masterGain, this.audioCtx.currentTime);
-        this.masterNode.connect(this.audioCtx.destination);
-      }
-
-      if (this.audioCtx.state === 'suspended') {
-        this.audioCtx.resume();
-      }
-
-      this.initNodes();
-    }
-
     this.isPlaying = true;
-    this.notifyState();
-    return this.isPlaying;
-  }
-
-  /**
-   * Stops ambient sound playback and releases audio nodes.
-   */
-  stopAmbience() {
-    this.isPlaying = false;
-    this.activeNodes.forEach((node) => {
-      try {
-        if (node.source && typeof node.source.stop === 'function') {
-          node.source.stop();
-        }
-        if (node.source && typeof node.source.disconnect === 'function') {
-          node.source.disconnect();
-        }
-      } catch {
-        // Node already stopped
-      }
-    });
-    this.activeNodes.clear();
-    this.notifyState();
-  }
-
-  /**
-   * Applies channel levels from a designated acoustic preset.
-   * @param {string} presetName
-   */
-  applyPreset(presetName) {
-    const preset = this.presets[presetName];
-    if (!preset) {
-      throw new Error(`Unknown soundscape preset: ${presetName}`);
-    }
-
-    this.activePreset = presetName;
-    Object.keys(this.channels).forEach((ch) => {
-      if (typeof preset[ch] === 'number') {
-        this.adjustChannelGain(ch, preset[ch]);
-      }
-    });
-    if (typeof preset.master === 'number') {
-      this.adjustChannelGain('master', preset.master);
-    }
+    this.notify();
     return true;
   }
 
-  /**
-   * Serializes current synthesizer configuration and active state.
-   * @returns {Object}
-   */
+  stopAmbience() {
+    this.isPlaying = false;
+    this.notify();
+    return false;
+  }
+
+  applyPreset(presetName) {
+    const preset = this.presets[presetName];
+    if (!preset) {
+      throw new Error(`Preset not found: ${presetName}`);
+    }
+    this.activePreset = presetName;
+    this.masterGain = preset.master;
+    for (const [ch, val] of Object.entries(preset)) {
+      if (this.channels[ch]) {
+        this.channels[ch].gain = this.clampGain(val);
+      }
+    }
+    this.notify();
+  }
+
+  adjustChannelGain(channel, val) {
+    if (!this.channels[channel]) {
+      throw new Error(`Unknown audio channel: ${channel}`);
+    }
+    this.channels[channel].gain = this.clampGain(val);
+    this.notify();
+  }
+
+  adjustMasterGain(val) {
+    this.masterGain = this.clampGain(val);
+    this.notify();
+  }
+
   serializeState() {
     return {
-      isPlaying: this.isPlaying,
       activePreset: this.activePreset,
       masterGain: this.masterGain,
-      channels: {
-        rain: this.channels.rain.gain,
-        wind: this.channels.wind.gain,
-        whiteNoise: this.channels.whiteNoise.gain,
-        chimes: this.channels.chimes.gain
-      }
+      isPlaying: this.isPlaying,
+      channels: JSON.parse(JSON.stringify(this.channels))
     };
   }
 
-  initNodes() {
-    if (!this.audioCtx || !this.masterNode) return;
-    this.activeNodes.clear();
-
-    const sampleRate = this.audioCtx.sampleRate || 44100;
-
-    // Pink Noise (Cyber Rain & Cooling)
-    const pinkData = this.generateNoiseBuffer('pink', 3, sampleRate);
-    const pinkBuffer = this.audioCtx.createBuffer(1, pinkData.length, sampleRate);
-    pinkBuffer.copyToChannel(pinkData, 0);
-    const pinkSource = this.audioCtx.createBufferSource();
-    pinkSource.buffer = pinkBuffer;
-    pinkSource.loop = true;
-    const pinkGain = this.audioCtx.createGain();
-    pinkGain.gain.setValueAtTime(this.channels.rain.gain, this.audioCtx.currentTime);
-    pinkSource.connect(pinkGain).connect(this.masterNode);
-    pinkSource.start();
-    this.activeNodes.set('rain', { source: pinkSource, gainNode: pinkGain });
-
-    // White Noise (CRT Scanline & 8-Bit Dither)
-    const whiteData = this.generateNoiseBuffer('white', 3, sampleRate);
-    const whiteBuffer = this.audioCtx.createBuffer(1, whiteData.length, sampleRate);
-    whiteBuffer.copyToChannel(whiteData, 0);
-    const whiteSource = this.audioCtx.createBufferSource();
-    whiteSource.buffer = whiteBuffer;
-    whiteSource.loop = true;
-    const whiteFilter = this.audioCtx.createBiquadFilter();
-    whiteFilter.type = 'lowpass';
-    whiteFilter.frequency.setValueAtTime(1200, this.audioCtx.currentTime);
-    const whiteGain = this.audioCtx.createGain();
-    whiteGain.gain.setValueAtTime(this.channels.whiteNoise.gain, this.audioCtx.currentTime);
-    whiteSource.connect(whiteFilter).connect(whiteGain).connect(this.masterNode);
-    whiteSource.start();
-    this.activeNodes.set('whiteNoise', { source: whiteSource, gainNode: whiteGain });
-
-    // Bandpass Wind (Hyperspace Thrusters)
-    const windSource = this.audioCtx.createBufferSource();
-    windSource.buffer = pinkBuffer;
-    windSource.loop = true;
-    const windFilter = this.audioCtx.createBiquadFilter();
-    windFilter.type = 'bandpass';
-    windFilter.frequency.setValueAtTime(480, this.audioCtx.currentTime);
-    windFilter.Q.setValueAtTime(2.8, this.audioCtx.currentTime);
-    const windGain = this.audioCtx.createGain();
-    windGain.gain.setValueAtTime(this.channels.wind.gain, this.audioCtx.currentTime);
-    windSource.connect(windFilter).connect(windGain).connect(this.masterNode);
-    windSource.start();
-    this.activeNodes.set('wind', { source: windSource, gainNode: windGain });
-
-    // Harmonic Chimes (Synthwave Arpeggio 528 Hz)
-    const osc = this.audioCtx.createOscillator();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(528, this.audioCtx.currentTime);
-    const chimesFilter = this.audioCtx.createBiquadFilter();
-    chimesFilter.type = 'lowpass';
-    chimesFilter.frequency.setValueAtTime(1800, this.audioCtx.currentTime);
-    const chimesGain = this.audioCtx.createGain();
-    chimesGain.gain.setValueAtTime(this.channels.chimes.gain * 0.12, this.audioCtx.currentTime);
-    osc.connect(chimesFilter).connect(chimesGain).connect(this.masterNode);
-    osc.start();
-    this.activeNodes.set('chimes', { source: osc, gainNode: chimesGain });
-  }
-
-  subscribe(callback) {
-    if (typeof callback === 'function') {
-      this.listeners.push(callback);
+  subscribe(listener) {
+    if (typeof listener === 'function') {
+      this.listeners.push(listener);
     }
   }
 
-  notifyState() {
-    const state = this.serializeState();
-    this.listeners.forEach((fn) => {
-      try {
-        fn(state);
-      } catch {
-        // Safe dispatch
-      }
-    });
+  notify() {
+    for (const listener of this.listeners) {
+      listener(this.serializeState());
+    }
   }
 }
 
-// DOM Setup
+// Interactive DOM binding
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
     const synth = new GamingEsportsHubSoundscapeSynth();
 
     const toggleBtn = document.getElementById('toggle-play-btn');
-    const presetSelector = document.getElementById('preset-selector');
+    const visualizerCard = document.querySelector('.visualizer-card');
+    const presetSelect = document.getElementById('preset-selector');
     const masterSlider = document.getElementById('master-gain-slider');
     const masterVal = document.getElementById('master-gain-val');
     const statusText = document.getElementById('mixer-status');
-    const eqBars = document.querySelectorAll('.eq-bar');
 
-    const channelMap = {
-      rain: { slider: document.getElementById('slider-rain'), label: document.getElementById('val-rain') },
-      wind: { slider: document.getElementById('slider-wind'), label: document.getElementById('val-wind') },
-      whiteNoise: { slider: document.getElementById('slider-whiteNoise'), label: document.getElementById('val-whiteNoise') },
-      chimes: { slider: document.getElementById('slider-chimes'), label: document.getElementById('val-chimes') }
+    const channelSliders = {
+      rain: document.getElementById('slider-rain'),
+      wind: document.getElementById('slider-wind'),
+      whiteNoise: document.getElementById('slider-whiteNoise'),
+      chimes: document.getElementById('slider-chimes')
     };
 
-    function updateUi(state) {
+    const channelVals = {
+      rain: document.getElementById('val-rain'),
+      wind: document.getElementById('val-wind'),
+      whiteNoise: document.getElementById('val-whiteNoise'),
+      chimes: document.getElementById('val-chimes')
+    };
+
+    function updateUI(state) {
+      if (masterSlider) masterSlider.value = state.masterGain;
+      if (masterVal) masterVal.textContent = `${Math.round(state.masterGain * 100)}%`;
+
+      for (const [ch, data] of Object.entries(state.channels)) {
+        if (channelSliders[ch]) channelSliders[ch].value = data.gain;
+        if (channelVals[ch]) channelVals[ch].textContent = `${Math.round(data.gain * 100)}%`;
+      }
+
       if (toggleBtn) {
-        toggleBtn.textContent = state.isPlaying ? 'Stop Ambience' : 'Start Ambience';
-        toggleBtn.classList.toggle('playing', state.isPlaying);
-      }
-      if (statusText) {
-        statusText.textContent = state.isPlaying
-          ? `Status: Live • Preset: [${state.activePreset}] • Master: ${Math.round(state.masterGain * 100)}%`
-          : 'Status: Standby • Procedural Audio Engine Ready';
-      }
-      if (masterVal) {
-        masterVal.textContent = `${Math.round(state.masterGain * 100)}%`;
-      }
-      if (masterSlider) {
-        masterSlider.value = state.masterGain;
-      }
-      Object.keys(channelMap).forEach((ch) => {
-        const item = channelMap[ch];
-        if (item.slider && item.label && typeof state.channels[ch] === 'number') {
-          item.slider.value = state.channels[ch];
-          item.label.textContent = `${Math.round(state.channels[ch] * 100)}%`;
+        if (state.isPlaying) {
+          toggleBtn.textContent = 'Mute Soundscape';
+          toggleBtn.classList.add('playing');
+          if (visualizerCard) visualizerCard.classList.add('playing');
+          if (statusText) statusText.textContent = `Acoustic Engine Active • ${state.activePreset}`;
+        } else {
+          toggleBtn.textContent = 'Start Ambience';
+          toggleBtn.classList.remove('playing');
+          if (visualizerCard) visualizerCard.classList.remove('playing');
+          if (statusText) statusText.textContent = 'Status: Standby • Procedural Audio Engine Ready';
         }
-      });
-      eqBars.forEach((bar) => {
-        bar.classList.toggle('active', state.isPlaying);
-      });
+      }
     }
 
-    synth.subscribe(updateUi);
+    synth.subscribe(updateUI);
 
     if (toggleBtn) {
       toggleBtn.addEventListener('click', () => {
         if (synth.isPlaying) {
           synth.stopAmbience();
         } else {
-          synth.startAmbience(presetSelector ? presetSelector.value : null);
+          synth.startAmbience(presetSelect ? presetSelect.value : null);
         }
       });
     }
 
-    if (presetSelector) {
-      presetSelector.addEventListener('change', (e) => {
-        const target = e.target;
-        if (target && target.value) {
-          synth.applyPreset(target.value);
-        }
+    if (presetSelect) {
+      presetSelect.addEventListener('change', (e) => {
+        synth.applyPreset(e.target.value);
       });
     }
 
     if (masterSlider) {
       masterSlider.addEventListener('input', (e) => {
-        const target = e.target;
-        if (target) {
-          synth.adjustChannelGain('master', parseFloat(target.value));
-        }
+        synth.adjustMasterGain(parseFloat(e.target.value));
       });
     }
 
-    Object.keys(channelMap).forEach((ch) => {
-      const item = channelMap[ch];
-      if (item.slider) {
-        item.slider.addEventListener('input', (e) => {
-          const target = e.target;
-          if (target) {
-            synth.adjustChannelGain(ch, parseFloat(target.value));
-          }
+    for (const [ch, slider] of Object.entries(channelSliders)) {
+      if (slider) {
+        slider.addEventListener('input', (e) => {
+          synth.adjustChannelGain(ch, parseFloat(e.target.value));
         });
       }
-    });
-
-    updateUi(synth.serializeState());
+    }
   });
 }

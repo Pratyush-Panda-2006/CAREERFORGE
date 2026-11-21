@@ -1,68 +1,75 @@
-import test from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { GamingEsportsHubSoundscapeSynth } from './ambient-soundscape.js';
 
-test('GamingEsportsHubSoundscapeSynth - initializes with default channels and presets', () => {
-  const synth = new GamingEsportsHubSoundscapeSynth();
-  assert.equal(synth.name, 'GamingEsportsHubSoundscapeSynth');
-  assert.equal(synth.masterGain, 0.75);
-  assert.equal(synth.isPlaying, false);
-  assert.ok(synth.channels.rain);
-  assert.ok(synth.channels.wind);
-  assert.ok(synth.channels.whiteNoise);
-  assert.ok(synth.channels.chimes);
-  assert.ok(synth.presets['Cyberpunk Arena Match']);
-});
+describe('GamingEsportsHubSoundscapeSynth', () => {
+  it('initializes with default audio channels, presets, and master volume', () => {
+    const synth = new GamingEsportsHubSoundscapeSynth();
+    assert.equal(synth.masterGain, 0.7);
+    assert.equal(synth.isPlaying, false);
+    assert.ok(synth.channels.rain);
+    assert.ok(synth.channels.wind);
+    assert.ok(synth.channels.whiteNoise);
+    assert.ok(synth.channels.chimes);
+    assert.ok(synth.presets["Cyberpunk Arena Finals"]);
+  });
 
-test('GamingEsportsHubSoundscapeSynth - clamps gain values between 0.0 and 1.0', () => {
-  const synth = new GamingEsportsHubSoundscapeSynth();
-  assert.equal(synth.clampGain(0.55), 0.55);
-  assert.equal(synth.clampGain(1.8), 1.0);
-  assert.equal(synth.clampGain(-0.5), 0.0);
-  assert.equal(synth.clampGain('invalid'), 0.0);
-  assert.equal(synth.clampGain(NaN), 0.0);
-});
+  it('clamps gain values strictly between 0.0 and 1.0', () => {
+    const synth = new GamingEsportsHubSoundscapeSynth();
+    assert.equal(synth.clampGain(-0.5), 0);
+    assert.equal(synth.clampGain(1.75), 1);
+    assert.equal(synth.clampGain(0.456), 0.46);
+    assert.equal(synth.clampGain(NaN), 0);
+  });
 
-test('GamingEsportsHubSoundscapeSynth - calculates filter frequency bounds accurately', () => {
-  const synth = new GamingEsportsHubSoundscapeSynth();
-  assert.equal(synth.calculateFilterFrequency(800, 300), 1100);
-  assert.equal(synth.calculateFilterFrequency(22000, 500), 20000);
-  assert.equal(synth.calculateFilterFrequency(10, -50), 20);
-});
+  it('calculates acoustic filter frequency bounds correctly', () => {
+    const synth = new GamingEsportsHubSoundscapeSynth();
+    assert.equal(synth.calculateFilterFrequency(800, 200), 1000);
+    assert.equal(synth.calculateFilterFrequency(10, -50), 20);
+    assert.equal(synth.calculateFilterFrequency(22000, 500), 20000);
+  });
 
-test('GamingEsportsHubSoundscapeSynth - generates synthetic noise buffers', () => {
-  const synth = new GamingEsportsHubSoundscapeSynth();
-  const whiteBuffer = synth.generateNoiseBuffer('white', 0.5, 44100);
-  assert.equal(whiteBuffer.length, 22050);
-  assert.ok(whiteBuffer.some((sample) => sample !== 0));
+  it('generates synthetic noise buffer accurately', () => {
+    const synth = new GamingEsportsHubSoundscapeSynth();
+    const buffer = synth.generateNoiseBuffer('white', 0.1, 1000);
+    assert.equal(buffer.length, 100);
+    assert.ok(buffer.some((v) => v !== 0));
 
-  const pinkBuffer = synth.generateNoiseBuffer('pink', 0.5, 44100);
-  assert.equal(pinkBuffer.length, 22050);
-  assert.ok(pinkBuffer.some((sample) => sample !== 0));
-});
+    const pinkBuffer = synth.generateNoiseBuffer('pink', 0.1, 1000);
+    assert.equal(pinkBuffer.length, 100);
+  });
 
-test('GamingEsportsHubSoundscapeSynth - applies presets and serializes state', () => {
-  const synth = new GamingEsportsHubSoundscapeSynth();
-  synth.applyPreset('Chill Lofi Arcade Lounge');
-  assert.equal(synth.activePreset, 'Chill Lofi Arcade Lounge');
-  assert.equal(synth.masterGain, 0.65);
-  assert.equal(synth.channels.chimes.gain, 0.5);
+  it('applies presets and serializes acoustic mixer state', () => {
+    const synth = new GamingEsportsHubSoundscapeSynth();
+    const testPreset = "Retro Arcade Glow";
+    synth.applyPreset(testPreset);
+    assert.equal(synth.activePreset, testPreset);
+    assert.equal(synth.channels.rain.gain, 0.15);
+    assert.equal(synth.channels.wind.gain, 0.4);
 
-  const state = synth.serializeState();
-  assert.equal(state.activePreset, 'Chill Lofi Arcade Lounge');
-  assert.equal(state.masterGain, 0.65);
-  assert.equal(state.channels.chimes, 0.5);
-});
+    const serialized = synth.serializeState();
+    assert.equal(serialized.activePreset, testPreset);
+    assert.equal(serialized.isPlaying, false);
+    assert.equal(serialized.channels.chimes.gain, 0.6);
+  });
 
-test('GamingEsportsHubSoundscapeSynth - handles channel gain adjustments and errors', () => {
-  const synth = new GamingEsportsHubSoundscapeSynth();
-  const clamped = synth.adjustChannelGain('chimes', 0.9);
-  assert.equal(clamped, 0.9);
-  assert.equal(synth.channels.chimes.gain, 0.9);
+  it('handles startAmbience and stopAmbience state transitions', () => {
+    const synth = new GamingEsportsHubSoundscapeSynth();
+    const testPreset = "Championship Match Chill";
+    synth.startAmbience(testPreset);
+    assert.equal(synth.isPlaying, true);
+    assert.equal(synth.activePreset, testPreset);
+    synth.stopAmbience();
+    assert.equal(synth.isPlaying, false);
+  });
 
-  synth.adjustChannelGain('master', 0.8);
-  assert.equal(synth.masterGain, 0.8);
-
-  assert.throws(() => synth.adjustChannelGain('nonExistentChannel', 0.5), /Unknown audio channel/);
-  assert.throws(() => synth.applyPreset('UnknownPreset'), /Unknown soundscape preset/);
+  it('throws on invalid channel manipulation and unknown presets', () => {
+    const synth = new GamingEsportsHubSoundscapeSynth();
+    assert.throws(() => {
+      synth.adjustChannelGain('nonexistent', 0.5);
+    }, /Unknown audio channel/);
+    assert.throws(() => {
+      synth.applyPreset('Invalid Preset');
+    }, /Preset not found/);
+  });
 });

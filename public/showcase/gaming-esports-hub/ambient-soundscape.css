@@ -1,30 +1,28 @@
-/**
- * Gaming Esports Hub - Arena Acoustic Synthesizer Styling
- */
-
 :root {
-  --game-bg: #0b0914;
-  --game-card: #151124;
-  --game-card-light: #201a38;
-  --game-border: #352b5c;
-  --game-purple: #a855f7;
-  --game-cyan: #06b6d4;
-  --game-neon: #ec4899;
-  --game-text: #fdf4ff;
-  --game-dim: #c084fc;
-  --game-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+  --sound-bg: #0a0d14;
+  --sound-card: #121824;
+  --sound-border: #1f293d;
+  --sound-accent: #00f2fe;
+  --sound-glow: #00f2fe;
+  --sound-text: #e6edf3;
+  --sound-dim: rgba(255, 255, 255, 0.65);
+  --sound-font: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
   padding: 24px;
-  background-color: var(--game-bg);
-  color: var(--game-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--sound-bg);
+  color: var(--sound-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .soundscape-container {
-  max-width: 980px;
+  max-width: 960px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -32,104 +30,97 @@ body {
 }
 
 .soundscape-header {
-  border-bottom: 2px solid var(--game-border);
+  border-bottom: 2px solid var(--sound-border);
   padding-bottom: 16px;
 }
 
 .header-badge {
   display: inline-block;
   padding: 4px 10px;
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid var(--game-purple);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--sound-border);
   border-radius: 4px;
   font-size: 0.75rem;
-  font-family: var(--game-font);
-  color: var(--game-purple);
+  font-family: var(--sound-font);
+  color: var(--sound-accent);
   margin-bottom: 8px;
-  letter-spacing: 0.5px;
 }
 
 .soundscape-header h1 {
-  margin: 0 0 8px 0;
-  color: var(--game-purple);
-  font-size: 1.8rem;
-  letter-spacing: 0.5px;
-  font-weight: 700;
+  margin: 0 0 6px 0;
+  font-size: 1.5rem;
+  color: var(--sound-text);
 }
 
 .soundscape-header p {
   margin: 0;
-  color: #d8b4fe;
+  color: var(--sound-dim);
   font-size: 0.95rem;
 }
 
 .visualizer-card {
-  background: var(--game-card);
-  border: 1px solid var(--game-border);
-  border-radius: 8px;
-  padding: 20px;
+  background: var(--sound-card);
+  border: 1px solid var(--sound-border);
+  border-radius: 10px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(168, 85, 247, 0.15);
 }
 
 .eq-meter {
   display: flex;
-  align-items: flex-end;
   gap: 8px;
   height: 60px;
-  padding: 8px;
+  align-items: flex-end;
 }
 
 .eq-bar {
-  width: 10px;
+  width: 12px;
+  background: var(--sound-border);
+  border-radius: 4px;
   height: 8px;
-  background: var(--game-card-light);
-  border-radius: 3px;
-  transition: height 0.15s ease, background-color 0.2s;
+  transition: height 0.2s ease, background-color 0.2s ease;
 }
 
-.eq-bar.active {
-  background: linear-gradient(180deg, var(--game-cyan) 0%, var(--game-purple) 50%, var(--game-neon) 100%);
-  animation: eqPulse 1.1s ease-in-out infinite alternate;
+.visualizer-card.playing .eq-bar {
+  background: var(--sound-accent);
+  box-shadow: 0 0 8px var(--sound-glow);
+  animation: eqPulse 1.2s infinite ease-in-out alternate;
 }
 
-.eq-bar.active:nth-child(2) { animation-delay: 0.12s; }
-.eq-bar.active:nth-child(3) { animation-delay: 0.24s; }
-.eq-bar.active:nth-child(4) { animation-delay: 0.36s; }
-.eq-bar.active:nth-child(5) { animation-delay: 0.18s; }
-.eq-bar.active:nth-child(6) { animation-delay: 0.30s; }
-.eq-bar.active:nth-child(7) { animation-delay: 0.42s; }
-.eq-bar.active:nth-child(8) { animation-delay: 0.20s; }
+.visualizer-card.playing .eq-bar:nth-child(1) { animation-delay: 0.1s; height: 35px; }
+.visualizer-card.playing .eq-bar:nth-child(2) { animation-delay: 0.3s; height: 50px; }
+.visualizer-card.playing .eq-bar:nth-child(3) { animation-delay: 0.2s; height: 28px; }
+.visualizer-card.playing .eq-bar:nth-child(4) { animation-delay: 0.5s; height: 58px; }
+.visualizer-card.playing .eq-bar:nth-child(5) { animation-delay: 0.15s; height: 42px; }
+.visualizer-card.playing .eq-bar:nth-child(6) { animation-delay: 0.4s; height: 30px; }
+.visualizer-card.playing .eq-bar:nth-child(7) { animation-delay: 0.25s; height: 48px; }
+.visualizer-card.playing .eq-bar:nth-child(8) { animation-delay: 0.35s; height: 20px; }
 
 @keyframes eqPulse {
-  0% { height: 10px; }
-  50% { height: 50px; }
-  100% { height: 28px; }
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1.0); }
 }
 
 .sound-btn {
   padding: 10px 24px;
-  background: linear-gradient(135deg, var(--game-purple) 0%, var(--game-cyan) 100%);
-  color: #fff;
+  background: var(--sound-accent);
+  color: #000;
+  font-weight: 600;
   border: none;
   border-radius: 6px;
-  font-weight: 700;
-  font-size: 0.95rem;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.3);
+  transition: opacity 0.2s;
 }
 
 .sound-btn:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
+  opacity: 0.9;
 }
 
 .sound-btn.playing {
-  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  background: #ef4444;
   color: #fff;
 }
 
@@ -146,10 +137,10 @@ body {
 }
 
 .control-panel {
-  background: var(--game-card);
-  border: 1px solid var(--game-border);
-  border-radius: 8px;
-  padding: 18px;
+  background: var(--sound-card);
+  border: 1px solid var(--sound-border);
+  border-radius: 10px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -158,30 +149,23 @@ body {
 .control-panel h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: var(--game-cyan);
-  border-bottom: 1px solid var(--game-border);
+  color: var(--sound-text);
+  border-bottom: 1px solid var(--sound-border);
   padding-bottom: 8px;
 }
 
 .panel-label {
   font-size: 0.85rem;
-  color: #d8b4fe;
-  font-family: var(--game-font);
+  color: var(--sound-dim);
 }
 
 .preset-dropdown {
-  background: var(--game-card-light);
-  border: 1px solid var(--game-border);
-  color: #fff;
+  background: var(--sound-bg);
+  color: var(--sound-text);
+  border: 1px solid var(--sound-border);
   padding: 8px 12px;
-  border-radius: 4px;
-  font-family: var(--game-font);
+  border-radius: 6px;
   font-size: 0.9rem;
-}
-
-.preset-dropdown:focus {
-  outline: none;
-  border-color: var(--game-cyan);
 }
 
 .channel-list {
@@ -196,37 +180,39 @@ body {
   gap: 4px;
 }
 
-.channel-row.master-row {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--game-border);
-}
-
 .channel-info {
   display: flex;
   justify-content: space-between;
-  font-size: 0.82rem;
-  color: #d8b4fe;
-  font-family: var(--game-font);
+  font-size: 0.85rem;
+}
+
+.channel-name {
+  color: var(--sound-text);
 }
 
 .channel-val {
-  font-weight: 700;
-  color: var(--game-cyan);
+  color: var(--sound-accent);
+  font-family: var(--sound-font);
 }
 
 .channel-slider {
-  accent-color: var(--game-purple);
-  cursor: pointer;
+  width: 100%;
+  accent-color: var(--sound-accent);
+}
+
+.master-row {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--sound-border);
 }
 
 .soundscape-footer {
-  border-top: 1px solid var(--game-border);
-  padding-top: 12px;
-}
-
-.status-indicator {
-  font-size: 0.8rem;
-  font-family: var(--game-font);
-  color: #c084fc;
+  text-align: center;
+  padding: 12px;
+  background: var(--sound-card);
+  border: 1px solid var(--sound-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: var(--sound-font);
+  color: var(--sound-dim);
 }
