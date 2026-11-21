@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar - Real-Time Socket Stream Hub</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+</head>
+<body class="socket-hub-body">
+  <main class="socket-container">
+    <header class="socket-header">
+      <div class="header-left">
+        <h1 class="hub-title">Automotive Hypercar Stream Hub</h1>
+        <p class="hub-subtitle">Bi-directional WebSub streaming for real-time telemetry and pub/sub events</p>
+      </div>
+      <div class="connection-status-badge" id="connectionStatus">
+        <span class="status-pulse-dot" id="statusDot"></span>
+        <span class="status-text" id="statusLabel">DISCONNECTED</span>
+      </div>
+    </header>
+
+    <section class="socket-controls-grid">
+      <div class="control-card">
+        <h3>Stream Management</h3>
+        <div class="button-group">
+          <button class="btn btn-connect" id="connectBtn">Connect Stream</button>
+          <button class="btn btn-disconnect" id="disconnectBtn" disabled>Disconnect</button>
+          <button class="btn btn-dropout" id="dropoutBtn" disabled>Simulate Dropout</button>
+        </div>
+      </div>
+
+      <div class="control-card">
+        <h3>Active Channels</h3>
+        <div class="topics-pills" id="topicPills">
+          <span class="topic-pill active" data-channel="ecu/telemetry">ecu/telemetry</span>
+          <span class="topic-pill active" data-channel="chassis/aero-sensors">chassis/aero-sensors</span>
+          <span class="topic-pill active" data-channel="track/lap-timing">track/lap-timing</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="metrics-gauges-row">
+      <div class="gauge-card">
+        <span class="gauge-label">Packets In</span>
+        <span class="gauge-val" id="metricPacketsIn">0</span>
+      </div>
+      <div class="gauge-card">
+        <span class="gauge-label">Packets Out</span>
+        <span class="gauge-val" id="metricPacketsOut">0</span>
+      </div>
+      <div class="gauge-card">
+        <span class="gauge-label">Dropped</span>
+        <span class="gauge-val text-alert" id="metricDropped">0</span>
+      </div>
+      <div class="gauge-card">
+        <span class="gauge-label">Latency</span>
+        <span class="gauge-val text-success" id="metricLatency">-- ms</span>
+      </div>
+    </section>
+
+    <section class="terminal-panel">
+      <div class="terminal-header">
+        <span class="terminal-title">Live Message Stream</span>
+        <button class="btn btn-sm" id="clearLogBtn">Clear Log</button>
+      </div>
+      <div class="terminal-log" id="terminalLog">
+        <!-- Live socket events stream here -->
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { AutomotiveHypercarSocketEmulator } from './mock-websocket.js';
+
+    const socket = new AutomotiveHypercarSocketEmulator();
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const dropoutBtn = document.getElementById('dropoutBtn');
+    const statusLabel = document.getElementById('statusLabel');
+    const statusDot = document.getElementById('statusDot');
+    const terminalLog = document.getElementById('terminalLog');
+
+    const metricIn = document.getElementById('metricPacketsIn');
+    const metricOut = document.getElementById('metricPacketsOut');
+    const metricDropped = document.getElementById('metricDropped');
+    const metricLatency = document.getElementById('metricLatency');
+
+    function syncUi() {
+      const m = socket.getMetrics();
+      metricIn.textContent = m.packetsReceived;
+      metricOut.textContent = m.packetsSent;
+      metricDropped.textContent = m.packetsDropped;
+      metricLatency.textContent = socket.state === 'CONNECTED' ? `${m.lastLatencyMs} ms` : '-- ms';
+
+      statusLabel.textContent = socket.state;
+      statusDot.className = 'status-pulse-dot ' + socket.state.toLowerCase();
+
+      connectBtn.disabled = socket.state === 'CONNECTED';
+      disconnectBtn.disabled = socket.state !== 'CONNECTED';
+      dropoutBtn.disabled = socket.state !== 'CONNECTED';
+    }
+
+    function logMsg(dir, ch, data) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry ' + dir.toLowerCase();
+      entry.innerHTML = `
+        <span class="log-time">${new Date().toLocaleTimeString()}</span>
+        <span class="log-badge ${dir.toLowerCase()}">${dir}</span>
+        <span class="log-channel">${ch}</span>
+        <span class="log-payload">${JSON.stringify(data)}</span>
+      `;
+      terminalLog.prepend(entry);
+    }
+
+    // Subscribe to default channels
+    ["ecu/telemetry","chassis/aero-sensors","track/lap-timing"].forEach((ch) => {
+      socket.subscribe(ch, (pkt) => {
+        logMsg('IN', pkt.channel, pkt.payload);
+        syncUi();
+      });
+    });
+
+    connectBtn.addEventListener('click', () => {
+      socket.connect();
+      logMsg('SYS', 'hub', { event: 'CONNECTED', endpoint: socket.endpoint });
+      syncUi();
+    });
+
+    disconnectBtn.addEventListener('click', () => {
+      socket.disconnect();
+      logMsg('SYS', 'hub', { event: 'DISCONNECTED' });
+      syncUi();
+    });
+
+    dropoutBtn.addEventListener('click', () => {
+      socket.simulateDropout();
+      logMsg('SYS', 'hub', { event: 'NETWORK_DROPOUT_SIMULATION' });
+      syncUi();
+    });
+
+    document.getElementById('clearLogBtn').addEventListener('click', () => {
+      terminalLog.innerHTML = '';
+    });
+
+    syncUi();
+  </script>
+</body>
+</html>
