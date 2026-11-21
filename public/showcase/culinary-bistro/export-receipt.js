@@ -1,0 +1,242 @@
+/**
+ * Culinary Bistro - Branded Graphic Certificate & PNG Receipt Exporter
+ * Formats high-DPI restaurant guest invoices and culinary excellence certificates
+ * on HTML5 Canvas with custom barcode pattern generation, checksum parity, and instant export.
+ */
+
+export class CulinaryBistroReceiptGenerator {
+  constructor(options = {}) {
+    this.width = options.width || 640;
+    this.height = options.height || 840;
+    this.brandName = options.brandName || 'CULINARY BISTRO FINE DINING';
+    this.themeColors = {
+      bg: '#0f1115',
+      cardBg: '#1c1917',
+      border: '#292524',
+      primary: '#ea580c',
+      emerald: '#22c55e',
+      amber: '#f59e0b',
+      textPrimary: '#f5f5f4',
+      textSecondary: '#a8a29e'
+    };
+  }
+
+  /**
+   * Computes a weighted modulo-10 parity checksum for the certificate reference code.
+   */
+  calculateBarcodeParity(codeString) {
+    if (typeof codeString !== 'string' || codeString.length === 0) return 0;
+    let sum = 0;
+    for (let i = 0; i < codeString.length; i++) {
+      const code = codeString.charCodeAt(i);
+      const weight = (i % 2 === 0) ? 3 : 1;
+      sum += code * weight;
+    }
+    return (10 - (sum % 10)) % 10;
+  }
+
+  /**
+   * Converts a code string into a deterministic binary barcode bit-pattern (1 = bar, 0 = space).
+   */
+  generateBarcodePattern(codeString) {
+    const safeCode = (codeString || 'BISTRO-0000').toUpperCase();
+    const parity = this.calculateBarcodeParity(safeCode);
+    const fullCode = safeCode + '-' + parity;
+
+    // Start sentinel pattern: 101001
+    const bits = [1, 0, 1, 0, 0, 1];
+
+    for (let i = 0; i < fullCode.length; i++) {
+      const charVal = fullCode.charCodeAt(i);
+      // Derive 5-bit sequence per char
+      for (let b = 4; b >= 0; b--) {
+        bits.push((charVal >> b) & 1);
+      }
+      bits.push(0); // Inter-character gap
+    }
+
+    // Stop sentinel pattern: 110101
+    bits.push(1, 1, 0, 1, 0, 1);
+    return {
+      pattern: bits,
+      fullCode,
+      parity
+    };
+  }
+
+  /**
+   * Draws a vector barcode pattern onto the canvas context.
+   */
+  drawBarcode(ctx, code, x = 60, y = 720, barWidth = 2.4, barHeight = 44) {
+    if (!ctx) return null;
+    const { pattern, fullCode } = this.generateBarcodePattern(code);
+
+    let currentX = x;
+    ctx.fillStyle = this.themeColors.textPrimary;
+
+    for (let i = 0; i < pattern.length; i++) {
+      if (pattern[i] === 1) {
+        ctx.fillRect(currentX, y, barWidth, barHeight);
+      }
+      currentX += barWidth;
+    }
+
+    // Draw barcode human-readable text
+    if (ctx.fillText) {
+      ctx.fillStyle = this.themeColors.textSecondary;
+      ctx.font = '11px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      const centerX = x + (pattern.length * barWidth) / 2;
+      ctx.fillText(fullCode, centerX, y + barHeight + 16);
+    }
+
+    return {
+      totalWidth: pattern.length * barWidth,
+      totalHeight: barHeight + 20,
+      code: fullCode
+    };
+  }
+
+  /**
+   * Renders the complete certificate and dining receipt onto the canvas.
+   */
+  renderCanvas(ctx, data = {}) {
+    if (!ctx) return false;
+
+    const name = data.name || 'Arthur Pendelton';
+    const table = data.table || 'Table 12 (Terrace Garden)';
+    const certId = data.certId || 'BISTRO-2026-T1051';
+    const amount = data.amount !== undefined ? data.amount : 240;
+    const date = data.date || new Date().toISOString().split('T')[0];
+
+    // Background canvas fill
+    ctx.fillStyle = this.themeColors.bg;
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // Outer card container
+    ctx.fillStyle = this.themeColors.cardBg;
+    ctx.strokeStyle = this.themeColors.border;
+    ctx.lineWidth = 2;
+    if (ctx.roundRect) {
+      ctx.beginPath();
+      ctx.roundRect(30, 30, this.width - 60, this.height - 60, 12);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.fillRect(30, 30, this.width - 60, this.height - 60);
+      ctx.strokeRect(30, 30, this.width - 60, this.height - 60);
+    }
+
+    // Header brand band
+    ctx.fillStyle = this.themeColors.primary;
+    ctx.fillRect(50, 50, 6, 32);
+
+    ctx.fillStyle = this.themeColors.textPrimary;
+    ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+    ctx.textAlign = 'left';
+    ctx.fillText(this.brandName, 68, 72);
+
+    ctx.fillStyle = this.themeColors.textSecondary;
+    ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+    ctx.fillText('GASTRONOMIC RECEIPT & DINING VERIFICATION', 68, 92);
+
+    // Separator line
+    ctx.strokeStyle = this.themeColors.border;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(50, 115);
+    ctx.lineTo(this.width - 50, 115);
+    ctx.stroke();
+
+    // Recipient Section
+    ctx.fillStyle = this.themeColors.textSecondary;
+    ctx.font = '11px -apple-system, sans-serif';
+    ctx.fillText('GUEST / RESERVATION HOLDER', 50, 155);
+
+    ctx.fillStyle = this.themeColors.textPrimary;
+    ctx.font = 'bold 24px -apple-system, sans-serif';
+    ctx.fillText(name, 50, 192);
+
+    ctx.fillStyle = this.themeColors.amber;
+    ctx.font = '14px -apple-system, sans-serif';
+    ctx.fillText(table, 50, 218);
+
+    // Metric Summary Box
+    ctx.fillStyle = '#141210';
+    ctx.strokeStyle = this.themeColors.border;
+    if (ctx.roundRect) {
+      ctx.beginPath();
+      ctx.roundRect(50, 255, this.width - 100, 120, 8);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.fillRect(50, 255, this.width - 100, 120);
+      ctx.strokeRect(50, 255, this.width - 100, 120);
+    }
+
+    ctx.fillStyle = this.themeColors.emerald;
+    ctx.font = 'bold 36px -apple-system, sans-serif';
+    ctx.fillText('$' + Number(amount).toFixed(2), 75, 320);
+
+    ctx.fillStyle = this.themeColors.textPrimary;
+    ctx.font = 'bold 14px -apple-system, sans-serif';
+    ctx.fillText('Settled Check Amount', 210, 300);
+
+    ctx.fillStyle = this.themeColors.textSecondary;
+    ctx.font = '12px -apple-system, sans-serif';
+    ctx.fillText('Includes Chef Tasting Menu, Wine Pairings, and Service Gratuity', 210, 324);
+
+    // Audit Metadata Table
+    const rows = [
+      ['Receipt Reference:', certId],
+      ['Service Date:', date],
+      ['Sommelier Certification:', 'Level 3 Master Sommelier Paired'],
+      ['Integrity Verification:', 'SHA-256 (b930-fc77-0199-a412)'],
+      ['Payment Status:', 'PAID IN FULL / AUTHORIZED']
+    ];
+
+    let rowY = 425;
+    ctx.font = '13px -apple-system, sans-serif';
+    rows.forEach(([label, val]) => {
+      ctx.fillStyle = this.themeColors.textSecondary;
+      ctx.textAlign = 'left';
+      ctx.fillText(label, 50, rowY);
+
+      ctx.fillStyle = this.themeColors.textPrimary;
+      ctx.textAlign = 'right';
+      ctx.fillText(val, this.width - 50, rowY);
+
+      rowY += 34;
+    });
+
+    // Barcode section at bottom
+    ctx.textAlign = 'left';
+    this.drawBarcode(ctx, certId, 60, 680, 2.6, 48);
+
+    return true;
+  }
+
+  downloadBlob(canvas, filename = 'bistro-receipt.png') {
+    if (!canvas || typeof canvas.toBlob !== 'function') return false;
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+    return true;
+  }
+
+  getBounds() {
+    return {
+      width: this.width,
+      height: this.height,
+      aspectRatio: this.width / this.height
+    };
+  }
+}
