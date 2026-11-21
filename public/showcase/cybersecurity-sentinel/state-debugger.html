@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Sentinel - Time-Travel State Debugger</title>
+  <link rel="stylesheet" href="state-debugger.css">
+</head>
+<body class="debugger-body">
+  <main class="debugger-container">
+    <header class="debugger-header">
+      <div class="header-left">
+        <h1 class="header-title">Cybersecurity Sentinel State Debugger</h1>
+        <p class="header-desc">Time-travel action replay, state snapshot diffs, and state export engine</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="exportBtn">Export JSON</button>
+        <button class="btn btn-secondary" id="importBtn">Import JSON</button>
+        <input type="file" id="importFileInput" accept=".json" style="display: none;">
+      </div>
+    </header>
+
+    <section class="timeline-controls-bar">
+      <div class="scrubber-row">
+        <span class="scrub-label">Snapshot: <span id="currentStepText">0 / 0</span></span>
+        <input type="range" id="timelineScrubber" min="0" max="0" value="0" class="timeline-slider">
+      </div>
+      <div class="transport-buttons">
+        <button class="btn btn-sm" id="btnFirst">⏮ First</button>
+        <button class="btn btn-sm" id="btnPrev">◀ Prev</button>
+        <button class="btn btn-sm" id="btnNext">Next ▶</button>
+        <button class="btn btn-sm" id="btnLast">Last ⏭</button>
+        <button class="btn btn-sm btn-danger" id="btnClear">Clear History</button>
+      </div>
+    </section>
+
+    <div class="debugger-workspace">
+      <section class="action-history-panel">
+        <div class="panel-header">
+          <h3>Action History</h3>
+          <span class="badge" id="historyCountBadge">0 snapshots</span>
+        </div>
+        <div class="history-list" id="actionHistoryList">
+          <!-- Action snapshot items rendered here -->
+        </div>
+      </section>
+
+      <section class="diff-inspector-panel">
+        <div class="panel-header">
+          <h3>State Diff Inspector</h3>
+          <span class="diff-summary-tag" id="diffSummaryTag">No changes</span>
+        </div>
+        <div class="diff-display" id="diffDisplay">
+          <pre class="json-code">// Select or step through snapshots to inspect state mutations</pre>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { CybersecuritySentinelStateDebugger } from './state-debugger.js';
+
+    const debuggerInstance = new CybersecuritySentinelStateDebugger();
+    const scrubber = document.getElementById('timelineScrubber');
+    const currentStepText = document.getElementById('currentStepText');
+    const historyList = document.getElementById('actionHistoryList');
+    const diffDisplay = document.getElementById('diffDisplay');
+    const diffSummaryTag = document.getElementById('diffSummaryTag');
+    const historyCountBadge = document.getElementById('historyCountBadge');
+
+    function updateUi() {
+      const history = debuggerInstance.getHistory();
+      const currIdx = debuggerInstance.currentIndex;
+
+      scrubber.max = Math.max(0, history.length - 1);
+      scrubber.value = currIdx >= 0 ? currIdx : 0;
+      currentStepText.textContent = `${currIdx >= 0 ? currIdx + 1 : 0} / ${history.length}`;
+      historyCountBadge.textContent = `${history.length} snapshots`;
+
+      historyList.innerHTML = '';
+      history.forEach((snap, idx) => {
+        const item = document.createElement('div');
+        item.className = 'history-item' + (idx === currIdx ? ' active' : '');
+        item.innerHTML = `
+          <div class="item-title">
+            <span class="step-num">#${idx + 1}</span>
+            <span class="action-name">${snap.action.type}</span>
+          </div>
+          <span class="item-time">${new Date(snap.timestamp).toLocaleTimeString()}</span>
+        `;
+        item.addEventListener('click', () => {
+          debuggerInstance.jumpToStep(idx);
+          updateUi();
+        });
+        historyList.appendChild(item);
+      });
+
+      if (currIdx > 0) {
+        const prev = history[currIdx - 1].state;
+        const current = history[currIdx].state;
+        const diff = debuggerInstance.computeDiff(prev, current);
+        diffSummaryTag.textContent = `${diff.changes.length} change(s)`;
+        diffDisplay.innerHTML = `<pre class="json-code">${JSON.stringify(diff, null, 2)}</pre>`;
+      } else if (currIdx === 0) {
+        diffSummaryTag.textContent = 'Initial State';
+        diffDisplay.innerHTML = `<pre class="json-code">${JSON.stringify(history[0].state, null, 2)}</pre>`;
+      } else {
+        diffSummaryTag.textContent = 'No snapshots';
+        diffDisplay.innerHTML = '<pre class="json-code">// Empty state</pre>';
+      }
+    }
+
+    // Seed sample snapshots
+    debuggerInstance.recordSnapshot({ type: '@@INIT' }, {"clusterId":"sec_sentinel_us_east","activeRules":4500,"blockedIps":182,"alertsOpen":0,"quarantineState":"NOMINAL"});
+    debuggerInstance.recordSnapshot({"type":"DETECT_PORT_SCAN","sourceIp":"198.51.100.44"}, {"clusterId":"sec_sentinel_us_east","activeRules":4500,"blockedIps":183,"alertsOpen":1,"quarantineState":"ELEVATED"});
+    debuggerInstance.recordSnapshot({"type":"AUTO_ISOLATE_SUBNET","subnet":"10.0.4.0/24"}, {"clusterId":"sec_sentinel_us_east","activeRules":4501,"blockedIps":183,"alertsOpen":0,"quarantineState":"CONTAINED"});
+
+    scrubber.addEventListener('input', (e) => {
+      debuggerInstance.jumpToStep(parseInt(e.target.value, 10));
+      updateUi();
+    });
+
+    document.getElementById('btnFirst').addEventListener('click', () => {
+      debuggerInstance.jumpToStep(0);
+      updateUi();
+    });
+    document.getElementById('btnPrev').addEventListener('click', () => {
+      debuggerInstance.stepBackward();
+      updateUi();
+    });
+    document.getElementById('btnNext').addEventListener('click', () => {
+      debuggerInstance.stepForward();
+      updateUi();
+    });
+    document.getElementById('btnLast').addEventListener('click', () => {
+      debuggerInstance.jumpToStep(debuggerInstance.getHistory().length - 1);
+      updateUi();
+    });
+    document.getElementById('btnClear').addEventListener('click', () => {
+      debuggerInstance.clear();
+      updateUi();
+    });
+
+    updateUi();
+  </script>
+</body>
+</html>
