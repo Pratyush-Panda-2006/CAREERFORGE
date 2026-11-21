@@ -1,0 +1,234 @@
+/* Travel Odyssey - Polar Metrics Radar Chart Styles */
+:root {
+  --bg-color: #081b29;
+  --card-bg: #0f2b3f;
+  --border-color: #1a4360;
+  --primary-accent: #0ea5e9;
+  --secondary-accent: #f59e0b;
+  --success-color: #10b981;
+  --text-primary: #f0f9ff;
+  --text-muted: #93c5fd;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.radar-body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.radar-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.radar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.header-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.metrics-badge {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.badge-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--secondary-accent);
+}
+
+.radar-workspace {
+  display: grid;
+  grid-template-columns: 500px 1fr;
+  gap: 24px;
+}
+
+.chart-canvas-panel,
+.metrics-controls-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.svg-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.grid-ring {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 1.2;
+  opacity: 0.7;
+}
+
+.spoke-line {
+  stroke: var(--border-color);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+}
+
+.spoke-label {
+  fill: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.radar-fill-polygon {
+  fill: rgba(139, 92, 246, 0.25);
+  stroke: var(--primary-accent);
+  stroke-width: 2.4;
+  transition: all 0.2s ease;
+}
+
+.vertex-dot {
+  fill: var(--secondary-accent);
+  stroke: #ffffff;
+  stroke-width: 1.5;
+  transition: all 0.2s ease;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.panel-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: var(--primary-accent);
+}
+
+.sliders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slider-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.metric-label {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.metric-val {
+  color: var(--secondary-accent);
+  font-weight: 600;
+}
+
+.metric-slider {
+  width: 100%;
+  accent-color: var(--primary-accent);
+  cursor: pointer;
+}
+
+.summary-card {
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-card h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.progress-bar-bg {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-accent), var(--secondary-accent));
+  transition: width 0.3s ease;
+}
+
+.summary-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--success-color);
+}
+
+@media (max-width: 900px) {
+  .radar-workspace {
+    grid-template-columns: 1fr;
+  }
+}
