@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxury Realms - Estate Acquisition State Machine Visualizer</title>
+  <link rel="stylesheet" href="state-diagram.css">
+</head>
+<body>
+  <div class="fsm-container">
+    <header class="fsm-header">
+      <h1>Luxury Realms - Estate Transaction State Machine</h1>
+      <p>Node-based ultra-prime real estate acquisition lifecycle engine with dynamic event dispatch and Mermaid.js export</p>
+    </header>
+
+    <div class="status-banner">
+      <div class="status-badge">
+        <span class="badge-label">Active State:</span>
+        <span id="current-state-badge" class="badge-val">ESTATE_LISTED</span>
+      </div>
+      <button id="reset-fsm-btn" class="secondary-btn">Reset Acquisition Cycle</button>
+    </div>
+
+    <main class="fsm-grid">
+      <div class="graph-panel">
+        <div class="panel-header">
+          <h3>Estate Acquisition State Graph</h3>
+          <span class="panel-hint">Live Node Highlights</span>
+        </div>
+        <div id="nodes-canvas" class="nodes-container">
+          <div class="fsm-node active" data-state="ESTATE_LISTED">
+            <div class="node-title">ESTATE_LISTED</div>
+            <div class="node-desc">Off-market sovereign portfolio listing</div>
+          </div>
+          <div class="fsm-node" data-state="PRIVATE_SHOWING">
+            <div class="node-title">PRIVATE_SHOWING</div>
+            <div class="node-desc">Helicopter / yacht VIP on-site tour</div>
+          </div>
+          <div class="fsm-node" data-state="OFFER_NEGOTIATION">
+            <div class="node-title">OFFER_NEGOTIATION</div>
+            <div class="node-desc">Formal letter of intent & covenants</div>
+          </div>
+          <div class="fsm-node" data-state="ESCROW_DEPOSIT">
+            <div class="node-title">ESCROW_DEPOSIT</div>
+            <div class="node-desc">10% earnest escrow deposit wire</div>
+          </div>
+          <div class="fsm-node" data-state="DEED_CONVEYANCE">
+            <div class="node-title">DEED_CONVEYANCE</div>
+            <div class="node-desc">Sovereign title & deed execution</div>
+          </div>
+          <div class="fsm-node danger" data-state="DUE_DILIGENCE_DISPUTE">
+            <div class="node-title">DUE_DILIGENCE_DISPUTE</div>
+            <div class="node-desc">Title encumbrance or easement audit</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-panel">
+        <div class="panel-header">
+          <h3>Dispatch Acquisition Event</h3>
+        </div>
+        <div id="event-buttons" class="event-actions">
+          <!-- Populated dynamically based on available events -->
+        </div>
+
+        <div class="panel-header" style="margin-top: 14px;">
+          <h3>Transition History Log</h3>
+        </div>
+        <div id="history-log" class="history-container">
+          <div class="history-item placeholder">Acquisition engine initialized in ESTATE_LISTED</div>
+        </div>
+
+        <div class="panel-header" style="margin-top: 14px;">
+          <h3>Export Schema (Mermaid.js)</h3>
+          <button id="copy-mermaid-btn" class="secondary-btn">Copy Mermaid</button>
+        </div>
+        <pre id="mermaid-code" class="mermaid-preview"></pre>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="state-diagram.js"></script>
+</body>
+</html>

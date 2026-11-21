@@ -1,0 +1,244 @@
+/**
+ * Luxury Realms - Estate Acquisition State Machine Visualizer Styling
+ */
+
+:root {
+  --lux-gold: #d4af37;
+  --lux-gold-light: #f59e0b;
+  --lux-bronze: #b45309;
+  --lux-dark: #0c0a09;
+  --lux-card: #1c1917;
+  --lux-border: #292524;
+  --lux-dim: #a8a29e;
+  --lux-text: #f5f5f4;
+  --lux-danger: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--lux-dark);
+  color: var(--lux-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.fsm-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fsm-header {
+  border-bottom: 2px solid var(--lux-border);
+  padding-bottom: 16px;
+}
+
+.fsm-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--lux-gold);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.fsm-header p {
+  margin: 0;
+  color: var(--lux-dim);
+  font-size: 0.95rem;
+}
+
+.status-banner {
+  background: var(--lux-card);
+  border: 1px solid var(--lux-border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-label {
+  font-size: 0.9rem;
+  color: var(--lux-dim);
+}
+
+.badge-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--lux-gold-light);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  background: rgba(212, 175, 55, 0.12);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.fsm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.graph-panel,
+.controls-panel {
+  background: var(--lux-card);
+  border: 1px solid var(--lux-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--lux-gold);
+}
+
+.panel-hint {
+  font-size: 0.8rem;
+  color: var(--lux-dim);
+}
+
+.nodes-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.fsm-node {
+  background: #0c0a09;
+  border: 1px solid var(--lux-border);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.25s ease-in-out;
+}
+
+.fsm-node.active {
+  border-color: var(--lux-gold);
+  background: rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.35);
+  transform: translateY(-2px);
+}
+
+.fsm-node.danger.active {
+  border-color: var(--lux-danger);
+  background: rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+}
+
+.node-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--lux-text);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.fsm-node.active .node-title {
+  color: var(--lux-gold-light);
+}
+
+.fsm-node.danger.active .node-title {
+  color: var(--lux-danger);
+}
+
+.node-desc {
+  font-size: 0.78rem;
+  color: var(--lux-dim);
+}
+
+.event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-btn {
+  background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-light));
+  color: #0c0a09;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.event-btn:hover {
+  opacity: 0.9;
+}
+
+.event-btn.danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+}
+
+.history-container {
+  height: 120px;
+  overflow-y: auto;
+  background: #0c0a09;
+  border: 1px solid var(--lux-border);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.history-item {
+  color: var(--lux-dim);
+}
+
+.history-item.recent {
+  color: var(--lux-gold-light);
+}
+
+.mermaid-preview {
+  height: 130px;
+  overflow-y: auto;
+  background: #0c0a09;
+  border: 1px solid var(--lux-border);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0;
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.8rem;
+  color: var(--lux-gold);
+  white-space: pre;
+}
+
+.secondary-btn {
+  background: #292524;
+  border: 1px solid var(--lux-border);
+  color: var(--lux-dim);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+  border-color: var(--lux-gold);
+  color: var(--lux-text);
+}
