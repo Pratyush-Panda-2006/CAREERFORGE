@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Audio Stream - Broadcast Studio Radar & Proximity Calculator</title>
+  <link rel="stylesheet" href="geo-tracker.css">
+</head>
+<body>
+  <div class="geo-container">
+    <header class="geo-header">
+      <div class="header-badge">STUDIO-RADAR v3.5</div>
+      <h1>Podcast Audio Stream - Studio Radar & Proximity Calculator</h1>
+      <p>Autonomous geospatial coordinate proximity engine, Haversine locator, and global broadcast studio reachability visualizer</p>
+    </header>
+
+    <div class="geo-layout">
+      <!-- Radar Sweep Canvas & Controls -->
+      <section class="radar-panel">
+        <div class="panel-header">
+          <h3>Active Recording Studio Radar Sweep</h3>
+          <span class="sweep-live-indicator">● LIVE ON-AIR SCAN</span>
+        </div>
+
+        <div class="radar-display">
+          <div class="radar-sweep-beam"></div>
+          <div class="radar-ring ring-1"></div>
+          <div class="radar-ring ring-2"></div>
+          <div class="radar-ring ring-3"></div>
+          <div class="crosshair-v"></div>
+          <div class="crosshair-h"></div>
+          <div id="radar-sweep-canvas" class="radar-blips-layer"></div>
+        </div>
+
+        <div class="coords-form">
+          <div class="input-group">
+            <label for="user-lat">Podcaster Latitude:</label>
+            <input type="number" id="user-lat" step="0.0001" value="51.5186">
+          </div>
+          <div class="input-group">
+            <label for="user-lon">Podcaster Longitude:</label>
+            <input type="number" id="user-lon" step="0.0001" value="-0.1438">
+          </div>
+          <button id="scan-radar-btn" class="primary-btn">Calculate Studio Proximity</button>
+        </div>
+
+        <div id="radar-status" class="radar-status">Ready. Initialized at London BBC Broadcasting House.</div>
+      </section>
+
+      <!-- Sorted Nodes List -->
+      <section class="nodes-panel">
+        <div class="panel-header">
+          <h3>Nearest Podcast Production Studios & Broadcast Hubs</h3>
+        </div>
+        <div id="nodes-list" class="nodes-list"></div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="geo-tracker.js"></script>
+</body>
+</html>
