@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Portfolio - Time-Travel State Debugger</title>
+  <link rel="stylesheet" href="state-debugger.css">
+</head>
+<body class="debugger-body">
+  <div class="debugger-container" id="portfolio-debugger-container">
+    <header class="debugger-header">
+      <div class="debugger-tag">GIT-STYLE STATE REPLAY & DIFF</div>
+      <h2>Portfolio State Time-Travel Debugger</h2>
+      <p>Audit reactive UI state mutations, timeline step scrubbers, and property-level JSON delta trees in terminal mode.</p>
+    </header>
+
+    <!-- Timeline Scrubber Toolbar -->
+    <div class="timeline-toolbar">
+      <div class="scrubber-controls">
+        <button id="btn-step-prev" class="tool-btn" title="Step Backward">⏮ Prev Commit</button>
+        <button id="btn-step-next" class="tool-btn" title="Step Forward">Next Commit ⏭</button>
+        <span class="step-indicator" id="step-indicator">Step 0 of 0</span>
+      </div>
+
+      <div class="timeline-slider-wrap">
+        <input type="range" id="timeline-slider" min="0" max="0" value="0" class="timeline-slider">
+      </div>
+
+      <div class="replay-actions">
+        <button id="btn-export-replay" class="tool-btn tool-btn-secondary">Export JSON Log</button>
+        <button id="btn-simulate-action" class="tool-btn tool-btn-primary">+ Commit State Change</button>
+      </div>
+    </div>
+
+    <!-- Main Inspection Split View -->
+    <div class="debugger-split-view">
+      <!-- Left: Action History Log -->
+      <div class="action-history-panel">
+        <h3>Commit History</h3>
+        <div class="action-list" id="action-list" role="list">
+          <!-- Dynamically populated action items -->
+        </div>
+      </div>
+
+      <!-- Right: State Inspector & Diff View -->
+      <div class="diff-inspector-panel">
+        <div class="diff-header">
+          <h3>Commit Delta Inspector</h3>
+          <span class="active-action-pill" id="active-action-name">@@INIT_PORTFOLIO_STATE</span>
+        </div>
+
+        <div class="diff-view-content" id="diff-content">
+          <!-- Dynamically populated diff elements -->
+        </div>
+
+        <div class="raw-state-preview">
+          <h4>Working Tree Snapshot</h4>
+          <pre id="raw-state-json">{}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { DeveloperPortfolioStateDebugger } from './state-debugger.js';
+
+    const initialPortfolioState = {
+      developer: { name: 'Jordan Hayes', title: 'Principal Distributed Systems Engineer', handle: '@jordan_dev' },
+      theme: 'cyber-dark',
+      skillsFilter: ['Rust', 'TypeScript', 'WebAssembly', 'Kubernetes'],
+      featuredProjects: [
+        { id: 'proj-01', name: 'Hyperscale RPC Gateway', stars: 1420, openIssues: 12 },
+        { id: 'proj-02', name: 'Zero-Copy RingBuffer DB', stars: 890, openIssues: 4 }
+      ],
+      socialMetrics: { followers: 5820, publicRepos: 48, contributionsThisYear: 2840 }
+    };
+
+    const debuggerEngine = new DeveloperPortfolioStateDebugger(initialPortfolioState);
+
+    const slider = document.getElementById('timeline-slider');
+    const stepIndicator = document.getElementById('step-indicator');
+    const actionList = document.getElementById('action-list');
+    const diffContent = document.getElementById('diff-content');
+    const rawJson = document.getElementById('raw-state-json');
+    const activePill = document.getElementById('active-action-name');
+
+    function refreshUI() {
+      const idx = debuggerEngine.currentIndex;
+      const history = debuggerEngine.history;
+      const total = history.length;
+
+      slider.max = total - 1;
+      slider.value = idx;
+      stepIndicator.textContent = `Snapshot ${idx + 1} of ${total}`;
+
+      const currentSnap = debuggerEngine.getCurrentSnapshot();
+      if (currentSnap) {
+        activePill.textContent = currentSnap.action;
+        rawJson.textContent = JSON.stringify(currentSnap.state, null, 2);
+
+        // Compute diff with previous step
+        const prevSnap = idx > 0 ? history[idx - 1] : null;
+        const diffs = debuggerEngine.computeDiff(prevSnap ? prevSnap.state : {}, currentSnap.state);
+
+        diffContent.innerHTML = diffs.map(d => {
+          let badge = '';
+          if (d.type === 'added') badge = '<span class="diff-badge added">+ ADD</span>';
+          else if (d.type === 'deleted') badge = '<span class="diff-badge deleted">- DEL</span>';
+          else if (d.type === 'modified') badge = '<span class="diff-badge modified">~ MOD</span>';
+          else badge = '<span class="diff-badge same">SAME</span>';
+
+          return `
+            <div class="diff-item ${d.type}">
+              <div class="diff-meta">
+                ${badge}
+                <strong class="diff-key">${d.key}</strong>
+              </div>
+              <div class="diff-vals">
+                ${d.oldVal !== null && d.oldVal !== undefined ? `<div class="val old">Old: ${JSON.stringify(d.oldVal)}</div>` : ''}
+                ${d.newVal !== null && d.newVal !== undefined ? `<div class="val new">New: ${JSON.stringify(d.newVal)}</div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Action History Items
+      actionList.innerHTML = history.map((h, i) => `
+        <div class="action-item ${i === idx ? 'active' : ''}" data-index="${i}">
+          <span class="action-index">#${i + 1}</span>
+          <div class="action-details">
+            <strong class="action-title">${h.action}</strong>
+            <small class="action-time">${new Date(h.timestamp).toLocaleTimeString()}</small>
+          </div>
+        </div>
+      `).join('');
+
+      actionList.querySelectorAll('.action-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const targetIndex = Number(el.getAttribute('data-index'));
+          debuggerEngine.jumpToStep(targetIndex);
+          refreshUI();
+        });
+      });
+    }
+
+    document.getElementById('btn-step-prev')?.addEventListener('click', () => {
+      debuggerEngine.stepBackward();
+      refreshUI();
+    });
+
+    document.getElementById('btn-step-next')?.addEventListener('click', () => {
+      debuggerEngine.stepForward();
+      refreshUI();
+    });
+
+    slider?.addEventListener('input', (e) => {
+      debuggerEngine.jumpToStep(Number(e.target.value));
+      refreshUI();
+    });
+
+    const sampleActions = [
+      {
+        name: 'ADD_FEATURED_PROJECT_NEO_CORE',
+        mutator: (s) => ({
+          ...s,
+          featuredProjects: [...s.featuredProjects, { id: 'proj-03', name: 'Neo-Core Linux Kernel Module', stars: 2150, openIssues: 1 }]
+        })
+      },
+      {
+        name: 'UPDATE_SKILLS_FILTER_LIST',
+        mutator: (s) => ({ ...s, skillsFilter: [...s.skillsFilter, 'eBPF', 'Zig', 'LLVM'] })
+      },
+      {
+        name: 'INCREMENT_CONTRIBUTION_GRAPH',
+        mutator: (s) => ({ ...s, socialMetrics: { ...s.socialMetrics, contributionsThisYear: s.socialMetrics.contributionsThisYear + 120 } })
+      }
+    ];
+
+    let actionCounter = 0;
+    document.getElementById('btn-simulate-action')?.addEventListener('click', () => {
+      const act = sampleActions[actionCounter % sampleActions.length];
+      actionCounter++;
+      const cur = debuggerEngine.getCurrentState();
+      const updated = act.mutator(cur);
+      debuggerEngine.recordSnapshot(act.name, updated);
+      refreshUI();
+    });
+
+    document.getElementById('btn-export-replay')?.addEventListener('click', () => {
+      const replay = debuggerEngine.exportReplay();
+      const blob = new Blob([replay], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'developer-portfolio-replay.json';
+      a.click();
+    });
+
+    refreshUI();
+  </script>
+</body>
+</html>
