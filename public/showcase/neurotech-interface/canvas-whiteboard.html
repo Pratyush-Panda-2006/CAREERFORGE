@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neurotech Interface - Collaborative Freehand Vector Sketchpad</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+</head>
+<body>
+  <div class="canvas-container">
+    <header class="canvas-header">
+      <div class="badge-tag">Neurotech Interface Whiteboard</div>
+      <h1>Collaborative Freehand Vector Sketchpad</h1>
+      <p id="canvasStatus">Ready &bull; Select a tool and start drawing</p>
+    </header>
+
+    <section class="canvas-grid">
+      <section class="canvas-card toolbar-card">
+        <h2>Drawing Tools</h2>
+
+        <div class="tool-group">
+          <button type="button" class="tool-btn active" data-tool="pen" aria-label="Pen tool">Pen</button>
+          <button type="button" class="tool-btn" data-tool="eraser" aria-label="Eraser tool">Eraser</button>
+          <button type="button" class="tool-btn" data-tool="line" aria-label="Line tool">Line</button>
+          <button type="button" class="tool-btn" data-tool="rectangle" aria-label="Rectangle tool">Rectangle</button>
+        </div>
+
+        <div class="color-group">
+          <label class="color-label">Brush Color</label>
+          <div class="color-chips" id="colorChips"></div>
+          <input type="color" id="colorPicker" value="#38bdf8" aria-label="Custom brush color">
+        </div>
+
+        <div class="width-group">
+          <label class="width-label">Brush Width</label>
+          <input type="range" id="widthSlider" min="1" max="20" value="4" aria-label="Brush width">
+          <span id="widthVal">4px</span>
+        </div>
+
+        <div class="action-group">
+          <button type="button" id="undoBtn" class="action-btn">Undo</button>
+          <button type="button" id="redoBtn" class="action-btn">Redo</button>
+          <button type="button" id="clearBtn" class="action-btn danger">Clear Canvas</button>
+          <button type="button" id="exportBtn" class="action-btn export">Export SVG</button>
+        </div>
+      </section>
+
+      <section class="canvas-card drawing-card">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="whiteboardCanvas" width="800" height="500"></canvas>
+        </div>
+        <p class="canvas-hint">Freehand draw • Smooth stroke interpolation • Undo/redo stack • Vector SVG export</p>
+      </section>
+    </section>
+  </div>
+
+  <script type="module" src="canvas-whiteboard.js"></script>
+</body>
+</html>
