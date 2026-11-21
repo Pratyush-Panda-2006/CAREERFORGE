@@ -1,0 +1,223 @@
+/**
+ * Crypto Exchange Pro - Client-Side LZW Data Compression & Orderbook Shrinkage Engine
+ * Compresses WebSocket market depth ticks, orderbook JSON snapshots, and trade messages
+ * using LZW algorithm with UTF-8 byte stream fidelity and Unicode resilience.
+ */
+
+export class CryptoExchangeProCompressionEngine {
+  constructor() {
+    this.name = 'CryptoExchangeProCompressionEngine';
+  }
+
+  /**
+   * Compresses input string into an array of LZW integer codes via UTF-8 byte stream.
+   */
+  compressLZW(input) {
+    if (input === null || input === undefined) {
+      return [];
+    }
+    const text = String(input);
+    if (text.length === 0) {
+      return [];
+    }
+
+    const bytes = new TextEncoder().encode(text);
+    const dict = new Map();
+    for (let i = 0; i < 256; i++) {
+      dict.set(String.fromCharCode(i), i);
+    }
+
+    let phrase = '';
+    const output = [];
+    let codeIndex = 256;
+
+    for (let i = 0; i < bytes.length; i++) {
+      const char = String.fromCharCode(bytes[i]);
+      const combined = phrase + char;
+      if (dict.has(combined)) {
+        phrase = combined;
+      } else {
+        output.push(dict.get(phrase));
+        dict.set(combined, codeIndex++);
+        phrase = char;
+      }
+    }
+
+    if (phrase !== '') {
+      output.push(dict.get(phrase));
+    }
+
+    return output;
+  }
+
+  /**
+   * Decompresses an array of LZW integer codes back into the original string.
+   */
+  decompressLZW(codes) {
+    if (!Array.isArray(codes) || codes.length === 0) {
+      return '';
+    }
+
+    const dict = new Map();
+    for (let i = 0; i < 256; i++) {
+      dict.set(i, String.fromCharCode(i));
+    }
+
+    let phrase = dict.get(codes[0]);
+    let outputChars = phrase;
+    let codeIndex = 256;
+
+    for (let i = 1; i < codes.length; i++) {
+      const code = codes[i];
+      let entry = '';
+
+      if (dict.has(code)) {
+        entry = dict.get(code);
+      } else if (code === codeIndex) {
+        entry = phrase + phrase.charAt(0);
+      } else {
+        throw new Error(`Corrupted LZW code stream at index ${i}: code ${code}`);
+      }
+
+      outputChars += entry;
+      dict.set(codeIndex++, phrase + entry.charAt(0));
+      phrase = entry;
+    }
+
+    const byteArr = new Uint8Array(outputChars.length);
+    for (let i = 0; i < outputChars.length; i++) {
+      byteArr[i] = outputChars.charCodeAt(i);
+    }
+    return new TextDecoder().decode(byteArr);
+  }
+
+  /**
+   * Computes payload compression ratio, bandwidth savings percentage, and footprint.
+   */
+  computeSavingsRatio(originalText, compressedCodes) {
+    const rawByteLength = typeof originalText === 'string' ? new TextEncoder().encode(originalText).length : 0;
+    // Each LZW code is stored as 16-bit (2 bytes) integer
+    const compressedByteLength = Array.isArray(compressedCodes) ? compressedCodes.length * 2 : 0;
+
+    const ratio = rawByteLength > 0 ? (compressedByteLength / rawByteLength) : 1;
+    const savingsPercent = rawByteLength > 0 ? Math.max(0, ((1 - ratio) * 100)) : 0;
+
+    return {
+      rawByteLength,
+      compressedByteLength,
+      ratio: parseFloat(ratio.toFixed(3)),
+      savingsPercent: parseFloat(savingsPercent.toFixed(1))
+    };
+  }
+}
+
+// Browser DOM initializer for interactive Crypto compression workbench
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const engine = new CryptoExchangeProCompressionEngine();
+
+    const inputArea = document.getElementById('crypto-input');
+    const compressBtn = document.getElementById('compress-btn');
+    const decompressBtn = document.getElementById('decompress-btn');
+    const loadSampleBtn = document.getElementById('load-sample-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const rawBytesElem = document.getElementById('raw-bytes');
+    const compBytesElem = document.getElementById('compressed-bytes');
+    const savingsElem = document.getElementById('savings-percent');
+    const ratioElem = document.getElementById('compression-ratio');
+    const bytecodeView = document.getElementById('bytecode-display');
+    const decompressedView = document.getElementById('decompressed-display');
+    const statusElem = document.getElementById('engine-status');
+
+    let currentCodes = [];
+
+    const SAMPLE_ORDERBOOK = JSON.stringify({
+      symbol: "BTC-USDT",
+      timestamp: 1795252000000,
+      bids: [
+        ["98250.00", "4.2150"],
+        ["98249.50", "1.8900"],
+        ["98249.00", "3.4500"],
+        ["98248.50", "8.1200"],
+        ["98248.00", "12.5000"]
+      ],
+      asks: [
+        ["98250.50", "2.1000"],
+        ["98251.00", "5.6000"],
+        ["98251.50", "7.3000"],
+        ["98252.00", "10.0500"],
+        ["98252.50", "14.8000"]
+      ],
+      sequence: 981240182
+    }, null, 2);
+
+    if (loadSampleBtn && inputArea) {
+      loadSampleBtn.addEventListener('click', () => {
+        inputArea.value = SAMPLE_ORDERBOOK;
+      });
+    }
+
+    if (clearBtn && inputArea) {
+      clearBtn.addEventListener('click', () => {
+        inputArea.value = '';
+        currentCodes = [];
+        if (bytecodeView) bytecodeView.textContent = 'Waiting for market data payload input...';
+        if (decompressedView) {
+          decompressedView.style.display = 'none';
+          decompressedView.textContent = '';
+        }
+        if (rawBytesElem) rawBytesElem.textContent = '0 B';
+        if (compBytesElem) compBytesElem.textContent = '0 B';
+        if (savingsElem) savingsElem.textContent = '0.0%';
+        if (ratioElem) ratioElem.textContent = '1.000x';
+        if (statusElem) statusElem.textContent = 'Engine Status: Cleared';
+      });
+    }
+
+    if (compressBtn && inputArea) {
+      compressBtn.addEventListener('click', () => {
+        const text = inputArea.value;
+        if (!text) return;
+
+        currentCodes = engine.compressLZW(text);
+        const stats = engine.computeSavingsRatio(text, currentCodes);
+
+        if (rawBytesElem) rawBytesElem.textContent = `${stats.rawByteLength} B`;
+        if (compBytesElem) compBytesElem.textContent = `${stats.compressedByteLength} B`;
+        if (savingsElem) savingsElem.textContent = `${stats.savingsPercent}%`;
+        if (ratioElem) ratioElem.textContent = `${stats.ratio}x`;
+
+        if (bytecodeView) {
+          bytecodeView.textContent = currentCodes.map((c) => '0x' + c.toString(16).padStart(4, '0')).join(' ');
+        }
+        if (statusElem) {
+          statusElem.textContent = `Encoded ${stats.rawByteLength} bytes into ${currentCodes.length} tokens (${stats.savingsPercent}% reduction)`;
+        }
+      });
+    }
+
+    if (decompressBtn && decompressedView) {
+      decompressBtn.addEventListener('click', () => {
+        if (!currentCodes.length) return;
+        const decoded = engine.decompressLZW(currentCodes);
+        decompressedView.style.display = 'block';
+        decompressedView.textContent = `[Verified Match: ${decoded === inputArea.value ? '100% Lossless' : 'Mismatch'}]\n\n` + decoded;
+      });
+    }
+
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', () => {
+        if (!currentCodes.length) return;
+        const u16 = new Uint16Array(currentCodes);
+        const blob = new Blob([u16.buffer], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'crypto_orderbook.lzw.bin';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+  });
+}
