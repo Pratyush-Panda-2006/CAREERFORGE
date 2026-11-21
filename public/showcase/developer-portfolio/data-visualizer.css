@@ -1,0 +1,205 @@
+/* Developer Portfolio - Multi-Dimensional Polar Radar Chart Styles */
+
+.radar-body {
+  margin: 0;
+  padding: 30px 20px;
+  background-color: #0d1117;
+  color: #c9d1d9;
+  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.radar-container {
+  max-width: 860px;
+  margin: 0 auto;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  padding: 32px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.radar-header {
+  margin-bottom: 28px;
+}
+
+.radar-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3fb950;
+  background: rgba(63, 185, 80, 0.15);
+  border: 1px solid rgba(63, 185, 80, 0.4);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.radar-header h2 {
+  font-size: 1.7rem;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.radar-header p {
+  color: #8b949e;
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.radar-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 28px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .radar-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.radar-canvas-panel {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.radar-svg {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  overflow: visible;
+}
+
+/* Web Lines & Spokes */
+.web-line {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+}
+
+.axis-spoke {
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.axis-label {
+  fill: #8b949e;
+  font-size: 10px;
+  font-family: inherit;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* Radar Polygon Fill & Stroke */
+.radar-poly {
+  fill: url(#devRadarGlowGrad);
+  stroke: #3fb950;
+  stroke-width: 2.5;
+  transition: all 0.25s ease-out;
+}
+
+.radar-vertex {
+  fill: #7ee787;
+  stroke: #0d1117;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.radar-vertex:hover {
+  transform: scale(1.5);
+  fill: #ffffff;
+}
+
+/* Tooltip */
+.radar-vertex-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: #161b22;
+  border: 1px solid #3fb950;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* Controls Panel */
+.radar-controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.radar-controls-panel h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+
+.radar-sliders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slider-row label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #c9d1d9;
+}
+
+.slider-row .val-display {
+  font-weight: 700;
+  color: #3fb950;
+}
+
+.slider-row input[type="range"] {
+  accent-color: #3fb950;
+  cursor: pointer;
+}
+
+/* KPI Summary */
+.radar-kpi-summary {
+  margin-top: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #30363d;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kpi-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.84rem;
+}
+
+.kpi-item span {
+  color: #8b949e;
+}
+
+.kpi-item strong {
+  color: #ffffff;
+}
