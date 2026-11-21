@@ -1,0 +1,246 @@
+/**
+ * Crypto Exchange Pro - Geospatial Proximity Calculator & Location Radar Styling
+ */
+
+:root {
+  --crypto-emerald: #10b981;
+  --crypto-green: #059669;
+  --crypto-amber: #f59e0b;
+  --crypto-blue: #3b82f6;
+  --crypto-dark: #0a0e17;
+  --crypto-card: #111827;
+  --crypto-border: #1f2937;
+  --crypto-dim: #9ca3af;
+  --crypto-text: #f3f4f6;
+  --crypto-blip: #10b981;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--crypto-dark);
+  color: var(--crypto-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.radar-dashboard {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.radar-header {
+  border-bottom: 2px solid var(--crypto-border);
+  padding-bottom: 16px;
+}
+
+.radar-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--crypto-emerald);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.radar-header p {
+  margin: 0;
+  color: var(--crypto-dim);
+  font-size: 0.95rem;
+}
+
+.radar-controls-card {
+  background: var(--crypto-card);
+  border: 1px solid var(--crypto-border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-group label {
+  font-size: 0.82rem;
+  color: var(--crypto-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.control-group input {
+  background: #0a0e17;
+  border: 1px solid var(--crypto-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--crypto-text);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.9rem;
+}
+
+.control-group input:focus {
+  outline: none;
+  border-color: var(--crypto-emerald);
+}
+
+.scan-btn {
+  background: linear-gradient(135deg, var(--crypto-emerald), var(--crypto-blue));
+  color: #07090e;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.scan-btn:hover {
+  opacity: 0.9;
+}
+
+.radar-status {
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--crypto-dim);
+  margin-top: 4px;
+}
+
+.radar-main-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.radar-display-wrapper {
+  background: var(--crypto-card);
+  border: 1px solid var(--crypto-border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.radar-viewport {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0e1e2d 0%, #070e17 100%);
+  border: 2px solid var(--crypto-emerald);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.25);
+  overflow: hidden;
+}
+
+.radar-grid-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(16, 185, 129, 0.3);
+  pointer-events: none;
+}
+
+.ring-outer { width: 85%; height: 85%; }
+.ring-mid { width: 55%; height: 55%; }
+.ring-inner { width: 25%; height: 25%; }
+
+.radar-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(from 0deg, rgba(16, 185, 129, 0.4) 0deg, transparent 60deg, transparent 360deg);
+  border-radius: 50%;
+  animation: cryptoRadarScan 3s linear infinite;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+@keyframes cryptoRadarScan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-blip {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--crypto-blip);
+  box-shadow: 0 0 10px var(--crypto-blip);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.radar-blip:hover {
+  transform: translate(-50%, -50%) scale(1.6);
+  background: #ffffff;
+}
+
+.radar-results-wrapper {
+  background: var(--crypto-card);
+  border: 1px solid var(--crypto-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.results-heading {
+  margin: 0;
+  color: var(--crypto-emerald);
+  font-size: 1.15rem;
+}
+
+.nodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.node-card {
+  background: #0a0e17;
+  border: 1px solid var(--crypto-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.node-card-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--crypto-text);
+}
+
+.node-dist {
+  color: var(--crypto-emerald);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.node-category {
+  font-size: 0.75rem;
+  color: var(--crypto-dim);
+}
+
+.node-bearing {
+  font-size: 0.78rem;
+  color: var(--crypto-blue);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
