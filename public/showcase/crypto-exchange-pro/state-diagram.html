@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Exchange Pro - Order Lifecycle State Machine Visualizer</title>
+  <link rel="stylesheet" href="state-diagram.css">
+</head>
+<body>
+  <div class="fsm-container">
+    <header class="fsm-header">
+      <h1>Crypto Exchange Pro - Order Execution State Machine</h1>
+      <p>Node-based trading lifecycle engine with dynamic event transition dispatch and Mermaid.js export</p>
+    </header>
+
+    <div class="status-banner">
+      <div class="status-badge">
+        <span class="badge-label">Active State:</span>
+        <span id="current-state-badge" class="badge-val">ORDER_CREATED</span>
+      </div>
+      <button id="reset-fsm-btn" class="secondary-btn">Reset Order Cycle</button>
+    </div>
+
+    <main class="fsm-grid">
+      <div class="graph-panel">
+        <div class="panel-header">
+          <h3>Trading Lifecycle State Graph</h3>
+          <span class="panel-hint">Live Node Highlights</span>
+        </div>
+        <div id="nodes-canvas" class="nodes-container">
+          <div class="fsm-node active" data-state="ORDER_CREATED">
+            <div class="node-title">ORDER_CREATED</div>
+            <div class="node-desc">Client signed order intent</div>
+          </div>
+          <div class="fsm-node" data-state="MARGIN_CHECK">
+            <div class="node-title">MARGIN_CHECK</div>
+            <div class="node-desc">Risk engine collateral audit</div>
+          </div>
+          <div class="fsm-node" data-state="ORDERBOOK_ROUTING">
+            <div class="node-title">ORDERBOOK_ROUTING</div>
+            <div class="node-desc">Smart router depth matching</div>
+          </div>
+          <div class="fsm-node" data-state="MATCHING_FILLED">
+            <div class="node-title">MATCHING_FILLED</div>
+            <div class="node-desc">Limit/Market crossing confirmed</div>
+          </div>
+          <div class="fsm-node" data-state="CLEARING_SETTLEMENT">
+            <div class="node-title">CLEARING_SETTLEMENT</div>
+            <div class="node-desc">Multi-sig ledger balance update</div>
+          </div>
+          <div class="fsm-node danger" data-state="LIQUIDATION_HALT">
+            <div class="node-title">LIQUIDATION_HALT</div>
+            <div class="node-desc">Margin breach protective freeze</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-panel">
+        <div class="panel-header">
+          <h3>Dispatch Trade Event</h3>
+        </div>
+        <div id="event-buttons" class="event-actions">
+          <!-- Populated dynamically based on available events -->
+        </div>
+
+        <div class="panel-header" style="margin-top: 14px;">
+          <h3>Transition History Log</h3>
+        </div>
+        <div id="history-log" class="history-container">
+          <div class="history-item placeholder">Order engine initialized in ORDER_CREATED</div>
+        </div>
+
+        <div class="panel-header" style="margin-top: 14px;">
+          <h3>Export Schema (Mermaid.js)</h3>
+          <button id="copy-mermaid-btn" class="secondary-btn">Copy Mermaid</button>
+        </div>
+        <pre id="mermaid-code" class="mermaid-preview"></pre>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="state-diagram.js"></script>
+</body>
+</html>
