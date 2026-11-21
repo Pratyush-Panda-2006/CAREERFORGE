@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fintech Vault - Dynamic KPI Formula Calculator</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+</head>
+<body>
+  <div class="evaluator-container">
+    <header class="evaluator-header">
+      <div class="header-badge">AUTOMATA-CALC v2.4</div>
+      <h1>Fintech Vault - KPI Formula Calculator</h1>
+      <p>Mathematical expression tokenizer, dynamic formula parser, and robotic actuator KPI engine</p>
+    </header>
+
+    <div class="syntax-pills-bar">
+      <span class="pill-title">Supported Syntax:</span>
+      <span class="syntax-pill">+ Addition</span>
+      <span class="syntax-pill">- Subtraction</span>
+      <span class="syntax-pill">* Multiply</span>
+      <span class="syntax-pill">/ Divide</span>
+      <span class="syntax-pill">% Modulo</span>
+      <span class="syntax-pill">^ Exponent</span>
+      <span class="syntax-pill">( ) Groups</span>
+    </div>
+
+    <main class="evaluator-grid">
+      <!-- Input and Variables Panel -->
+      <section class="config-panel">
+        <div class="panel-header">
+          <h3>Robotic KPI Equation Input</h3>
+          <button id="load-sample-btn" class="secondary-btn">Load Actuator Preset</button>
+        </div>
+
+        <div class="form-group">
+          <label for="formula-input">Formula Expression:</label>
+          <input type="text" id="formula-input" class="formula-text-input" value="(actuator_torque * angular_velocity) / (1 - thermal_loss)">
+        </div>
+
+        <div class="variables-section">
+          <div class="variables-header">
+            <h4>Live Variable Parameters</h4>
+          </div>
+          <div id="variables-list" class="variables-list">
+            <div class="var-item">
+              <label for="var-torque">actuator_torque (Nm):</label>
+              <input type="number" id="var-torque" class="var-input" data-var="actuator_torque" value="45" step="1">
+            </div>
+            <div class="var-item">
+              <label for="var-velocity">angular_velocity (rad/s):</label>
+              <input type="number" id="var-velocity" class="var-input" data-var="angular_velocity" value="12" step="0.5">
+            </div>
+            <div class="var-item">
+              <label for="var-loss">thermal_loss (ratio 0-1):</label>
+              <input type="number" id="var-loss" class="var-input" data-var="thermal_loss" value="0.1" step="0.05">
+            </div>
+          </div>
+        </div>
+
+        <div class="button-actions">
+          <button id="evaluate-btn" class="primary-btn">Calculate KPI Result</button>
+          <button id="clear-btn" class="secondary-btn">Reset</button>
+        </div>
+
+        <div id="warning-banner" class="warning-banner" style="display: none;"></div>
+      </section>
+
+      <!-- Results and Token Stream Panel -->
+      <section class="results-panel">
+        <div class="result-card">
+          <span class="result-label">Computed KPI Output</span>
+          <div id="result-display" class="result-value">600</div>
+          <span id="result-meta" class="result-sub">Normalized Robotic Actuator Power (Watts)</span>
+        </div>
+
+        <div class="token-stream-box">
+          <div class="panel-header">
+            <h4>Tokenized Parser Stream</h4>
+          </div>
+          <div id="token-stream" class="token-view"></div>
+        </div>
+
+        <div class="rpn-box">
+          <div class="panel-header">
+            <h4>Reverse Polish Notation (RPN)</h4>
+          </div>
+          <div id="rpn-stream" class="rpn-view"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
