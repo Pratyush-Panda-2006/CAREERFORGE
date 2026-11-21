@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070a13"><title>ApexVault · Ledger Payload Lab</title><link rel="stylesheet" href="./compression-suite.css"><script type="module" src="./compression-suite.js"></script></head>
+<body>
+  <main>
+    <header><a href="./index.html" class="back">← ApexVault</a><span class="edition">Fictional ledger payloads</span><p class="eyebrow">Smaller payloads, verified recovery</p><h1>A leaner ledger handoff.</h1><p class="intro">Compare a fictional ledger payload with the complete LZW1 download, then verify that every character is recovered. Everything stays in this tab.</p></header>
+    <form id="analyzer" novalidate>
+      <div class="workspace">
+        <section class="panel source-panel" aria-labelledby="source-title"><div class="panel-head"><h2 id="source-title">01 / Original ledger example</h2><span id="input-size"></span></div><label for="source">Text to compress · up to 256 KiB of UTF-8</label><textarea id="source" spellcheck="false" rows="12"></textarea><div class="actions"><button type="submit" class="primary">Analyze payload <span aria-hidden="true">↗</span></button><button type="button" id="example">Load example</button><button type="button" id="clear">Clear</button></div><p class="hint">⌘ / Ctrl + Enter to analyze. Text stays in this browser’s memory.</p></section>
+        <section class="panel output-panel" aria-labelledby="output-title"><div class="panel-head"><h2 id="output-title">02 / Packed payload</h2><span class="tag">LZW / 16 BIT</span></div><p id="verification" class="verification"></p><pre id="hex" tabindex="0" aria-label="Packed binary preview"></pre><p class="hint" id="preview-note"></p><button type="button" id="download" disabled>Download binary <span aria-hidden="true">↓</span></button><details><summary>Inspect decoded text</summary><p class="hint">Preview: first 4,000 Unicode characters. Verification checks the complete text.</p><pre id="decoded" tabindex="0"></pre></details></section>
+      </div>
+      <section id="result" class="result" aria-label="Compression comparison"><div><p class="eyebrow">Original UTF-8</p><p class="measure"><output id="raw-bytes">0</output><span>bytes</span></p><p id="raw-time" class="time"></p></div><div><p class="eyebrow">Complete LZW1 payload</p><p class="measure"><output id="packed-bytes">0</output><span>bytes</span></p><p id="code-count" class="hint"></p><p id="packed-time" class="time"></p></div><div class="saving"><p id="savings-label" class="eyebrow">Bytes saved</p><output id="savings">0%</output><div class="track" aria-hidden="true"><div id="saving-fill"></div></div></div></section>
+      <div class="model"><label for="bandwidth">Modeled link speed <span class="speed"><input id="bandwidth" type="number" value="1" min="0.01" max="10000" step="0.01"> Mbps</span></label><p>Transmission time = bytes × 8 ÷ link speed. This excludes network latency, protocol overhead and codec execution time; it is not a live benchmark.</p></div>
+    </form>
+    <p id="message" role="status" aria-live="polite"></p>
+    <footer><p>Small or varied text can grow. Negative savings show that expansion honestly.</p><details><summary>About the binary format</summary><p>LZW1 uses a 12-byte header: four magic bytes, the original UTF-8 byte count and the code count (32-bit big-endian). Codes are unsigned 16-bit big-endian. The byte dictionary starts at 256 entries and freezes at 65,536 entries. This standalone format is not ZIP. Invalid UTF-8 and malformed payloads are rejected; decoded output is capped at 256 KiB.</p></details></footer>
+  </main>
+</body>
+</html>
