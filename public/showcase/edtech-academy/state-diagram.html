@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edtech Academy - Learning Journey FSM & Workflow Visualizer</title>
+  <link rel="stylesheet" href="state-diagram.css">
+</head>
+<body>
+  <div class="fsm-app-container">
+    <header class="fsm-header">
+      <div class="header-badge">EDTECH-FSM v2.4</div>
+      <h1>Edtech Academy - Learning Journey FSM Visualizer</h1>
+      <p>Node-based curriculum transition mapper, student milestone orchestrator, and Mermaid.js diagram generator</p>
+    </header>
+
+    <div class="status-banner">
+      <div class="status-left">
+        <span class="status-label">Current Academic State:</span>
+        <span id="current-state-badge" class="state-badge">COURSE_ENROLLED</span>
+      </div>
+      <div class="status-actions">
+        <button id="reset-fsm-btn" class="secondary-btn">Reset Enrollment</button>
+      </div>
+    </div>
+
+    <main class="fsm-workspace">
+      <!-- Interactive Graph Canvas -->
+      <section class="graph-section">
+        <div class="section-title">Academic Curriculum Journey Lifecycle Nodes</div>
+        <div class="nodes-canvas">
+          <div class="fsm-node active" data-state="COURSE_ENROLLED">
+            <div class="node-icon">🎓</div>
+            <div class="node-title">COURSE_ENROLLED</div>
+            <div class="node-sub">Onboarding & Syllabus</div>
+          </div>
+          <div class="connector-arrow">➔</div>
+
+          <div class="fsm-node" data-state="LESSON_PROGRESS">
+            <div class="node-icon">📖</div>
+            <div class="node-title">LESSON_PROGRESS</div>
+            <div class="node-sub">Interactive Modules</div>
+          </div>
+          <div class="connector-arrow">➔</div>
+
+          <div class="fsm-node" data-state="QUIZ_ASSESSMENT">
+            <div class="node-icon">📝</div>
+            <div class="node-title">QUIZ_ASSESSMENT</div>
+            <div class="node-sub">Skill Mastery Check</div>
+          </div>
+
+          <div class="fsm-node" data-state="PROJECT_SUBMISSION">
+            <div class="node-icon">💻</div>
+            <div class="node-title">PROJECT_SUBMISSION</div>
+            <div class="node-sub">Capstone Build</div>
+          </div>
+          <div class="connector-arrow">➔</div>
+
+          <div class="fsm-node" data-state="PEER_REVIEW">
+            <div class="node-icon">👥</div>
+            <div class="node-title">PEER_REVIEW</div>
+            <div class="node-sub">Community Feedback</div>
+          </div>
+          <div class="connector-arrow">➔</div>
+
+          <div class="fsm-node" data-state="CERTIFICATE_ISSUED">
+            <div class="node-icon">🏆</div>
+            <div class="node-title">CERTIFICATE_ISSUED</div>
+            <div class="node-sub">Degree Credential</div>
+          </div>
+        </div>
+
+        <div class="controls-panel">
+          <h3>Trigger Learning Journey Event</h3>
+          <div id="event-buttons" class="event-actions"></div>
+        </div>
+      </section>
+
+      <!-- Inspector / Export Overlay Drawer -->
+      <aside class="sidebar-section">
+        <div class="panel-box">
+          <div class="panel-header">
+            <h3>Mermaid.js Diagram Definition</h3>
+            <button id="copy-mermaid-btn" class="secondary-btn">Copy Mermaid</button>
+          </div>
+          <pre id="mermaid-code" class="code-box"></pre>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-header">
+            <h3>Academic Journey Audit Log Drawer</h3>
+          </div>
+          <div id="history-log" class="history-list">
+            <div class="history-empty">No events dispatched yet. Student initialized at enrollment.</div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="state-diagram.js"></script>
+</body>
+</html>
