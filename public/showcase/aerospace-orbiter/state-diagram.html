@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080e21">
+  <title>Mission State Diagram | Orbiter-X</title>
+  <link rel="stylesheet" href="./state-diagram.css">
+  <script type="module" src="./state-diagram.js"></script>
+</head>
+<body>
+  <main id="fsm-workbench" class="shell">
+    <header>
+      <a href="./index.html">← Mission control</a>
+      <p class="eyebrow">Orbiter-X / Workflow lab</p>
+      <h1>Mission state diagram</h1>
+      <p>Dispatch events to trace the orbiter lifecycle. Add transitions and export a Mermaid diagram.</p>
+    </header>
+    <section class="panel" aria-labelledby="graph-heading">
+      <h2 id="graph-heading">State graph</h2>
+      <p>Active state: <strong id="current-state"></strong></p>
+      <div id="state-nodes" class="state-graph" aria-label="Mission lifecycle states"></div>
+      <h3>Available events</h3>
+      <div id="event-buttons" class="actions"></div>
+      <button id="reset-machine" type="button" class="secondary">Reset mission</button>
+      <p id="event-message" role="status" aria-live="polite"></p>
+    </section>
+    <section class="panel inspector" aria-labelledby="inspector-heading">
+      <h2 id="inspector-heading">Transition inspector</h2>
+      <form id="transition-form">
+        <label>From state <input name="from" required placeholder="Orbit"></label>
+        <label>Event <input name="event" required placeholder="dock"></label>
+        <label>To state <input name="to" required placeholder="Docked"></label>
+        <button type="submit">Add transition</button>
+      </form>
+      <h3>Event history</h3>
+      <ol id="event-history" aria-live="polite"></ol>
+    </section>
+    <section class="panel export" aria-labelledby="export-heading">
+      <h2 id="export-heading">Mermaid definition</h2>
+      <p>Copy this definition into any Mermaid renderer to view the directed graph.</p>
+      <textarea id="mermaid-source" rows="15" readonly spellcheck="false" aria-label="Mermaid diagram source"></textarea>
+    </section>
+  </main>
+</body>
+</html>
