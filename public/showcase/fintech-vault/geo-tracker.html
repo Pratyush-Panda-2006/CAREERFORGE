@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fintech Vault Global Reserve Radar</title>
+  <link rel="stylesheet" href="./geo-tracker.css"><script type="module" src="./geo-tracker.js"></script>
+</head>
+<body>
+<main data-geo-radar>
+  <header><a href="./index.html">Fintech Vault</a><span>Location Proximity Radar</span></header>
+  <section class="intro">
+    <h1>Fintech Vault Global Reserve Radar</h1>
+    <p>Autonomous geospatial coordinate proximity engine & circular radar locator for financial vaults</p>
+    <p class="muted">Spherical haversine coordinate radar. Calculations run in browser without tracking.</p>
+  </section>
+  <div class="workspace">
+    <section class="controls" aria-labelledby="origin-title">
+      <h2 id="origin-title">Sensor Origin</h2>
+      <form id="origin-form">
+        <div class="coordinate-inputs">
+          <label>Latitude (degrees)<input id="latitude" type="number" min="-90" max="90" step="any" value="40.706" required></label>
+          <label>Longitude (degrees)<input id="longitude" type="number" min="-180" max="180" step="any" value="-74.009" required></label>
+        </div>
+        <button type="submit" class="primary">Apply Origin</button>
+      </form>
+      <div class="range-control">
+        <label for="range">Radar Range (km)</label>
+        <output id="range-value" for="range">500 km</output>
+        <input id="range" type="range" min="10" max="21000" step="10" value="500">
+      </div>
+      <div class="buttons">
+        <button id="pause" type="button" aria-pressed="false">Pause Sweep</button>
+        <button id="dateline" type="button">Dateline Test</button>
+        <button id="reset" type="button">Reset</button>
+      </div>
+      <section class="details" aria-labelledby="site-name" aria-live="polite">
+        <h2 id="site-name">Selected Target</h2>
+        <dl>
+          <div><dt>Distance</dt><dd id="site-distance">-</dd></div>
+          <div><dt>Bearing</dt><dd id="site-bearing">-</dd></div>
+          <div><dt>Coordinates</dt><dd id="site-coordinate">-</dd></div>
+          <div><dt>Range Status</dt><dd id="site-range">-</dd></div>
+        </dl>
+      </section>
+    </section>
+    <section class="radar-panel" aria-labelledby="radar-heading">
+      <div class="radar-heading"><h2 id="radar-heading">Proximity Radar</h2><span id="site-count"></span></div>
+      <svg viewBox="0 0 400 400" role="group" aria-labelledby="radar-title radar-description">
+        <title id="radar-title">Fintech Vault Sites</title>
+        <desc id="radar-description">Haversine distance circular radar scope.</desc>
+        <defs>
+          <linearGradient id="sweep-color">
+            <stop stop-color="#00f2fe" stop-opacity="0"></stop>
+            <stop offset="1" stop-color="#00f2fe" stop-opacity=".3"></stop>
+          </linearGradient>
+        </defs>
+        <circle cx="200" cy="200" r="152" class="radar-disc"></circle>
+        <g id="rings" aria-hidden="true"></g>
+        <path d="M48 200H352M200 48V352" class="crosshair" aria-hidden="true"></path>
+        <g class="sweep" aria-hidden="true">
+          <path d="M200 200L160.66 53.18A152 152 0 0 1 200 48Z" fill="url(#sweep-color)"></path>
+          <path d="M200 200V48" class="sweep-line"></path>
+        </g>
+        <g class="directions" aria-hidden="true">
+          <text x="200" y="26">N</text>
+          <text x="380" y="205">E</text>
+          <text x="200" y="386">S</text>
+          <text x="20" y="205">W</text>
+        </g>
+        <circle cx="200" cy="200" r="3" class="origin-dot" aria-hidden="true"></circle>
+        <g id="blips"></g>
+        <circle id="selection-ring" r="10" class="selection-ring" visibility="hidden" aria-hidden="true"></circle>
+      </svg>
+      <p class="origin-caption">Origin: <span id="origin-label"></span></p>
+      <p id="radar-note" class="help"></p>
+    </section>
+  </div>
+  <section class="destinations" aria-labelledby="sites-title">
+    <div class="section-heading">
+      <h2 id="sites-title">Nearest Registered Nodes</h2>
+      <p class="help">Sorted ascending by haversine distance.</p>
+    </div>
+    <ol id="sites"></ol>
+  </section>
+  <p id="notice" role="status" aria-live="polite"></p>
+  <footer>
+    <p>Spherical calculations based on mean Earth radius of 6,371.0088 km.</p>
+  </footer>
+</main>
+</body>
+</html>
