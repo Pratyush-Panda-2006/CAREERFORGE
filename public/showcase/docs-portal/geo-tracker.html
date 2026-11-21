@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Location proximity radar | Prisma Docs</title>
+  <link rel="stylesheet" href="./geo-tracker.css"><script type="module" src="./geo-tracker.js"></script>
+</head>
+<body>
+<main data-geo-radar>
+  <header><a href="./index.html">Prisma Docs</a><span>Region distance workbench</span></header>
+  <section class="intro"><h1>Compare demo edge regions.</h1><p>Compare fictional edge regions by straight-line distance. Adjust the origin and range, then inspect a location.</p><p class="muted">Illustrative edge-region coordinates, not a live infrastructure map or latency measurement. Calculations stay in this browser; the radar does not use a map service or request your location.</p></section>
+  <div class="workspace">
+    <section class="controls" aria-labelledby="origin-title">
+      <h2 id="origin-title">Client origin</h2>
+      <form id="origin-form">
+        <div class="coordinate-inputs"><label>Latitude (degrees)<input id="latitude" type="number" min="-90" max="90" step="any" value="37.7749" required></label><label>Longitude (degrees)<input id="longitude" type="number" min="-180" max="180" step="any" value="-122.4194" required></label></div>
+        <button type="submit" class="primary">Apply origin</button>
+      </form>
+      <div class="range-control"><label for="range">Radar range (km)</label><output id="range-value" for="range">2000 km</output><input id="range" type="range" min="1" max="21000" step="1" value="2000"></div>
+      <div class="buttons"><button id="pause" type="button" aria-pressed="false">Pause sweep</button><button id="dateline" type="button">Try dateline example</button><button id="reset" type="button">Reset demo</button></div>
+      <p class="help">North is up. Ring spacing is linear in distance. Select a blip with a pointer or Tab, Enter and Space. Animation carries no measurements and respects reduced motion.</p>
+      <section class="details" aria-labelledby="site-name" aria-live="polite">
+        <h2 id="site-name">Selected site</h2>
+        <dl><div><dt>Distance</dt><dd id="site-distance"></dd></div><div><dt>Initial bearing</dt><dd id="site-bearing"></dd></div><div><dt>Coordinates</dt><dd id="site-coordinate"></dd></div><div><dt>Visibility</dt><dd id="site-range"></dd></div></dl>
+      </section>
+    </section>
+    <section class="radar-panel" aria-labelledby="radar-heading">
+      <div class="radar-heading"><h2 id="radar-heading">Proximity radar</h2><span id="site-count"></span></div>
+      <svg viewBox="0 0 400 400" role="group" aria-labelledby="radar-title radar-description">
+        <title id="radar-title">Demo edge regions</title><desc id="radar-description">Distance-scaled circular radar, north up. Focus or activate a site to inspect its distance and bearing.</desc>
+        <defs><linearGradient id="sweep-color"><stop stop-color="#8ec5ff" stop-opacity="0"></stop><stop offset="1" stop-color="#8ec5ff" stop-opacity=".26"></stop></linearGradient></defs>
+        <circle cx="200" cy="200" r="152" class="radar-disc"></circle>
+        <g id="rings" aria-hidden="true"></g><path d="M48 200H352M200 48V352" class="crosshair" aria-hidden="true"></path>
+        <g class="sweep" aria-hidden="true"><path d="M200 200L160.66 53.18A152 152 0 0 1 200 48Z" fill="url(#sweep-color)"></path><path d="M200 200V48" class="sweep-line"></path></g>
+        <g class="directions" aria-hidden="true"><text x="200" y="26">N</text><text x="380" y="205">E</text><text x="200" y="386">S</text><text x="20" y="205">W</text></g>
+        <circle cx="200" cy="200" r="3" class="origin-dot" aria-hidden="true"></circle><g id="blips"></g><circle id="selection-ring" r="10" class="selection-ring" visibility="hidden" aria-hidden="true"></circle>
+      </svg>
+      <p class="origin-caption">Origin <span id="origin-label"></span></p>
+      <p id="radar-note" class="help"></p>
+    </section>
+  </div>
+  <section class="destinations" aria-labelledby="sites-title"><div class="section-heading"><h2 id="sites-title">Nearest demo edge regions</h2><p class="help">All sites remain in the list; the radar shows those inside range.</p></div><ol id="sites"></ol></section>
+  <p id="notice" role="status" aria-live="polite"></p>
+  <footer><p>Spherical distances use a mean Earth radius of 6,371.0088 km. Bearings are initial headings, clockwise from north. Coincident or antipodal points and a polar origin have no unique heading.</p><p>Proximity is straight-line distance. Distance does not measure network latency, jurisdiction or capacity. No request routing or API configuration is changed.</p></footer>
+</main>
+</body>
+</html>
