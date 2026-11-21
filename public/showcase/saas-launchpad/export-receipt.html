@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Cloud Certificate & PNG Receipt Exporter</title>
+  <link rel="stylesheet" href="export-receipt.css">
+</head>
+<body class="receipt-body">
+  <div class="receipt-page-container" id="saas-receipt-container">
+    <header class="receipt-header">
+      <div class="receipt-tag">CANVAS 2D VECTOR GENERATOR</div>
+      <h2>Enterprise Cloud Receipt & Certificate Exporter</h2>
+      <p>Generate high-DPI compliance certificates and cloud billing receipts with verifiable barcode parity checksums.</p>
+    </header>
+
+    <div class="receipt-grid">
+      <!-- Input Controls Section -->
+      <div class="receipt-controls-panel">
+        <h3>Invoice Configuration</h3>
+
+        <div class="form-group">
+          <label for="inp-customer">Customer Organization</label>
+          <input type="text" id="inp-customer" value="Nexus Global Systems LLC" class="receipt-input">
+        </div>
+
+        <div class="form-group">
+          <label for="inp-invoice-id">Invoice & License Ref</label>
+          <input type="text" id="inp-invoice-id" value="INV-2026-CLOUD-9942" class="receipt-input">
+        </div>
+
+        <div class="form-group">
+          <label for="inp-region">Cluster Deployment Region</label>
+          <input type="text" id="inp-region" value="AWS us-east-1 + eu-central-1 (Multi-Region)" class="receipt-input">
+        </div>
+
+        <div class="form-group">
+          <label for="inp-plan">Subscription Tier Plan</label>
+          <select id="inp-plan" class="receipt-select">
+            <option value="ENTERPRISE UNLIMITED DEDICATED CLUSTER">Enterprise Unlimited Dedicated Cluster</option>
+            <option value="SCALE-TIER HIGH-THROUGHPUT CLUSTER">Scale-Tier High-Throughput Cluster</option>
+            <option value="STARTUP ACCELERATOR SEED PASS">Startup Accelerator Seed Pass</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="inp-amount">Verified Annual Amount</label>
+          <input type="text" id="inp-amount" value="$58,200.00 USD" class="receipt-input">
+        </div>
+
+        <div class="receipt-actions">
+          <button id="btn-refresh-canvas" class="receipt-btn receipt-btn-secondary">Update Preview</button>
+          <button id="btn-download-png" class="receipt-btn receipt-btn-primary">Download PNG Receipt</button>
+        </div>
+      </div>
+
+      <!-- Live Canvas Preview Viewport -->
+      <div class="receipt-preview-viewport">
+        <div class="viewport-toolbar">
+          <span class="preview-resolution-tag">640 × 840 HIGH-DPI CANVAS</span>
+          <button id="btn-zoom-toggle" class="zoom-btn" title="Toggle Scale">Zoom 100%</button>
+        </div>
+        <div class="canvas-frame">
+          <canvas id="saas-receipt-canvas" width="640" height="840"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { SaasLaunchpadReceiptGenerator } from './export-receipt.js';
+    const generator = new SaasLaunchpadReceiptGenerator();
+
+    const canvas = document.getElementById('saas-receipt-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const inpCustomer = document.getElementById('inp-customer');
+    const inpInvoiceId = document.getElementById('inp-invoice-id');
+    const inpRegion = document.getElementById('inp-region');
+    const inpPlan = document.getElementById('inp-plan');
+    const inpAmount = document.getElementById('inp-amount');
+
+    const btnRefresh = document.getElementById('btn-refresh-canvas');
+    const btnDownload = document.getElementById('btn-download-png');
+    const btnZoom = document.getElementById('btn-zoom-toggle');
+    const canvasFrame = document.querySelector('.canvas-frame');
+
+    function redrawReceipt() {
+      generator.renderCanvas(ctx, {
+        customer: inpCustomer.value,
+        invoiceId: inpInvoiceId.value,
+        clusterRegion: inpRegion.value,
+        plan: inpPlan.value,
+        totalAmount: inpAmount.value
+      });
+    }
+
+    btnRefresh?.addEventListener('click', redrawReceipt);
+    [inpCustomer, inpInvoiceId, inpRegion, inpPlan, inpAmount].forEach(elem => {
+      elem?.addEventListener('input', redrawReceipt);
+    });
+
+    btnDownload?.addEventListener('click', () => {
+      const code = inpInvoiceId.value || 'receipt';
+      generator.downloadBlob(canvas, `${code}.png`);
+    });
+
+    btnZoom?.addEventListener('click', () => {
+      canvasFrame.classList.toggle('zoomed');
+      btnZoom.textContent = canvasFrame.classList.contains('zoomed') ? 'Zoom 50%' : 'Zoom 100%';
+    });
+
+    redrawReceipt();
+  </script>
+</body>
+</html>
