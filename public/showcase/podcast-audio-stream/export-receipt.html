@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Audio Stream - Certificate & Receipt Exporter</title>
+  <link rel="stylesheet" href="export-receipt.css">
+</head>
+<body class="receipt-body">
+  <main class="receipt-container">
+    <header class="receipt-header">
+      <div class="header-left">
+        <h1 class="header-title">Podcast Audio Stream Certificate Exporter</h1>
+        <p class="header-desc">High-DPI vector canvas renderer with barcode parity verification</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="downloadBtn">Export PNG</button>
+      </div>
+    </header>
+
+    <div class="receipt-workspace">
+      <section class="controls-panel">
+        <div class="form-group">
+          <label for="entityName">CREATOR / PRODUCTION HOUSE</label>
+          <input type="text" id="entityName" class="form-input" value="Nexus Wavecast Studios Ltd">
+        </div>
+        <div class="form-group">
+          <label for="vaultReference">Episode Master Audio License ISRC</label>
+          <input type="text" id="vaultReference" class="form-input" value="PAS-AUDIO-2026-EP1076">
+        </div>
+        <div class="form-group">
+          <label for="certId">Certificate Reference ID</label>
+          <input type="text" id="certId" class="form-input" value="PODCAST-AUDIO-STREAM-2026-TX1079">
+        </div>
+        <div class="form-group">
+          <label for="amountVal">Creator Syndication Royalty (USD)</label>
+          <input type="range" id="amountVal" min="10" max="5000" value="5000" class="form-range">
+          <span class="range-display" id="amountDisplay">18450 Registered</span>
+        </div>
+        <button class="btn btn-secondary" id="refreshBtn">Re-render Preview</button>
+      </section>
+
+      <section class="canvas-viewport-panel">
+        <div class="canvas-frame">
+          <canvas id="receiptCanvas" width="640" height="840"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { PodcastAudioStreamReceiptGenerator } from './export-receipt.js';
+
+    const canvas = document.getElementById('receiptCanvas');
+    const ctx = canvas.getContext('2d');
+    const generator = new PodcastAudioStreamReceiptGenerator();
+
+    const entityNameInput = document.getElementById('entityName');
+    const vaultReferenceInput = document.getElementById('vaultReference');
+    const certIdInput = document.getElementById('certId');
+    const amountValInput = document.getElementById('amountVal');
+    const amountDisplay = document.getElementById('amountDisplay');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    function render() {
+      const data = {
+        name: entityNameInput.value,
+        vault: vaultReferenceInput.value,
+        certId: certIdInput.value,
+        amount: parseInt(amountValInput.value, 10),
+        date: new Date().toISOString().split('T')[0]
+      };
+      generator.renderCanvas(ctx, data);
+    }
+
+    amountValInput.addEventListener('input', (e) => {
+      amountDisplay.textContent = `${Number(e.target.value).toLocaleString()} Registered`;
+      render();
+    });
+
+    refreshBtn.addEventListener('click', render);
+    downloadBtn.addEventListener('click', () => {
+      generator.downloadBlob(canvas, 'podcast-audio-stream-certificate.png');
+    });
+
+    render();
+  </script>
+</body>
+</html>
