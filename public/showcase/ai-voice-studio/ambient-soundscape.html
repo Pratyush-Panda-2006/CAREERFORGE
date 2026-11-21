@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - Ambient Soundscape Generator & Acoustic Mixer</title>
+  <link rel="stylesheet" href="ambient-soundscape.css">
+</head>
+<body>
+  <div class="soundscape-app-container">
+    <header class="soundscape-header">
+      <div class="header-badge">AUDIO-SYNTH v3.2</div>
+      <h1>AI Voice Studio - Ambient Soundscape & Mixer</h1>
+      <p>Procedural Web Audio acoustic soundscape synthesizer, binaural noise generator, and multi-channel vocal booth mixer</p>
+    </header>
+
+    <main class="mixer-layout">
+      <!-- Master Control Section -->
+      <section class="master-panel">
+        <div class="panel-title">Master Vocal Deck</div>
+        <div class="rotary-control-group">
+          <label for="master-volume-slider">Master Output Gain</label>
+          <input type="range" id="master-volume-slider" min="0" max="1" step="0.01" value="0.75" class="rotary-slider">
+          <span id="master-volume-val" class="gain-readout">75%</span>
+        </div>
+
+        <div class="playback-controls">
+          <button id="toggle-play-btn" class="primary-btn">▶ Start Soundscape</button>
+        </div>
+
+        <div class="preset-selector">
+          <label for="preset-select">Acoustic Mood Presets:</label>
+          <select id="preset-select" class="cyber-select">
+            <option value="Studio Vocal Isolation">Studio Vocal Isolation</option>
+            <option value="Podcast Recording Warmth">Podcast Recording Warmth</option>
+            <option value="Deep Binaural Meditation">Deep Binaural Meditation</option>
+          </select>
+        </div>
+
+        <!-- Equalizer Visualizer Bars -->
+        <div class="equalizer-display" id="equalizer-bars">
+          <div class="eq-bar bar-1"></div>
+          <div class="eq-bar bar-2"></div>
+          <div class="eq-bar bar-3"></div>
+          <div class="eq-bar bar-4"></div>
+          <div class="eq-bar bar-5"></div>
+          <div class="eq-bar bar-6"></div>
+          <div class="eq-bar bar-7"></div>
+          <div class="eq-bar bar-8"></div>
+        </div>
+      </section>
+
+      <!-- Multi-Channel Mixer Section -->
+      <section class="channels-panel">
+        <div class="panel-title">Multi-Channel Acoustic Layers</div>
+        <div class="channels-grid">
+          <!-- Rain / Binaural Layer -->
+          <div class="channel-card" data-channel="rain">
+            <div class="channel-header">
+              <span class="channel-icon">🌧️</span>
+              <span class="channel-name">Acoustic Warmth (Rain)</span>
+            </div>
+            <input type="range" class="channel-slider" id="gain-rain" min="0" max="1" step="0.01" value="0.25">
+            <div class="channel-meta">
+              <span>Gain: <strong id="val-rain">25%</strong></span>
+              <span class="badge-type">Pink Noise</span>
+            </div>
+          </div>
+
+          <!-- Wind / Booth Airflow Layer -->
+          <div class="channel-card" data-channel="wind">
+            <div class="channel-header">
+              <span class="channel-icon">💨</span>
+              <span class="channel-name">Booth Airflow (Wind)</span>
+            </div>
+            <input type="range" class="channel-slider" id="gain-wind" min="0" max="1" step="0.01" value="0.35">
+            <div class="channel-meta">
+              <span>Gain: <strong id="val-wind">35%</strong></span>
+              <span class="badge-type">Bandpass</span>
+            </div>
+          </div>
+
+          <!-- White Noise / Pre-Amp Dither Layer -->
+          <div class="channel-card" data-channel="whiteNoise">
+            <div class="channel-header">
+              <span class="channel-icon">📻</span>
+              <span class="channel-name">Pre-Amp Dither (Noise)</span>
+            </div>
+            <input type="range" class="channel-slider" id="gain-whiteNoise" min="0" max="1" step="0.01" value="0.2">
+            <div class="channel-meta">
+              <span>Gain: <strong id="val-whiteNoise">20%</strong></span>
+              <span class="badge-type">White Noise</span>
+            </div>
+          </div>
+
+          <!-- Chimes / Harmonic Resonance Layer -->
+          <div class="channel-card" data-channel="chimes">
+            <div class="channel-header">
+              <span class="channel-icon">🔔</span>
+              <span class="channel-name">Harmonic Bells (Chimes)</span>
+            </div>
+            <input type="range" class="channel-slider" id="gain-chimes" min="0" max="1" step="0.01" value="0.4">
+            <div class="channel-meta">
+              <span>Gain: <strong id="val-chimes">40%</strong></span>
+              <span class="badge-type">Resonator</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="soundscape-footer">
+      <div id="audio-status-banner" class="status-banner">Audio Engine: Standby (Web Audio API Synthesizer Ready)</div>
+    </footer>
+  </div>
+
+  <script type="module" src="ambient-soundscape.js"></script>
+</body>
+</html>

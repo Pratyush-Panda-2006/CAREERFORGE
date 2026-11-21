@@ -1,0 +1,273 @@
+/**
+ * AI Voice Studio - Ambient Soundscape Generator & Acoustic Mixer Styling
+ */
+
+:root {
+  --voice-bg: #090a15;
+  --voice-card: #13172d;
+  --voice-card-light: #1c2242;
+  --voice-border: #29325f;
+  --voice-accent: #8b5cf6;
+  --voice-accent-glow: rgba(139, 92, 246, 0.35);
+  --voice-cyan: #38bdf8;
+  --voice-pink: #ec4899;
+  --voice-text: #f8fafc;
+  --voice-dim: #94a3b8;
+  --voice-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--voice-bg);
+  color: var(--voice-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.soundscape-app-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.soundscape-header {
+  border-bottom: 2px solid var(--voice-border);
+  padding-bottom: 16px;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid var(--voice-accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--voice-font);
+  color: var(--voice-accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.soundscape-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--voice-accent);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.soundscape-header p {
+  margin: 0;
+  color: var(--voice-dim);
+  font-size: 0.95rem;
+}
+
+.mixer-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .mixer-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.master-panel,
+.channels-panel {
+  background: var(--voice-card);
+  border: 1px solid var(--voice-border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-title {
+  font-size: 1.05rem;
+  color: var(--voice-cyan);
+  font-weight: 600;
+  border-bottom: 1px solid var(--voice-border);
+  padding-bottom: 8px;
+}
+
+.rotary-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rotary-control-group label {
+  font-size: 0.85rem;
+  color: var(--voice-dim);
+}
+
+.rotary-slider,
+.channel-slider {
+  width: 100%;
+  accent-color: var(--voice-accent);
+  cursor: pointer;
+}
+
+.gain-readout {
+  font-family: var(--voice-font);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--voice-accent);
+  text-align: right;
+}
+
+.playback-controls {
+  display: flex;
+  justify-content: center;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, var(--voice-accent), #7c3aed);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 0 16px var(--voice-accent-glow);
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.primary-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.preset-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preset-selector label {
+  font-size: 0.82rem;
+  color: var(--voice-dim);
+}
+
+.cyber-select {
+  background: #090a15;
+  border: 1px solid var(--voice-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--voice-text);
+  font-family: var(--voice-font);
+  font-size: 0.85rem;
+}
+
+.cyber-select:focus {
+  outline: none;
+  border-color: var(--voice-accent);
+}
+
+/* Equalizer Visualizer */
+.equalizer-display {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 60px;
+  background: #090a15;
+  border-radius: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--voice-border);
+}
+
+.eq-bar {
+  width: 8px;
+  background: linear-gradient(to top, var(--voice-accent), var(--voice-cyan));
+  border-radius: 3px 3px 0 0;
+  height: 10%;
+  transition: height 0.15s ease-out;
+}
+
+.equalizer-display.playing .bar-1 { animation: eq-anim 0.8s infinite ease-in-out; }
+.equalizer-display.playing .bar-2 { animation: eq-anim 1.1s infinite ease-in-out 0.1s; }
+.equalizer-display.playing .bar-3 { animation: eq-anim 0.7s infinite ease-in-out 0.3s; }
+.equalizer-display.playing .bar-4 { animation: eq-anim 1.2s infinite ease-in-out 0.2s; }
+.equalizer-display.playing .bar-5 { animation: eq-anim 0.9s infinite ease-in-out 0.4s; }
+.equalizer-display.playing .bar-6 { animation: eq-anim 1.0s infinite ease-in-out 0.15s; }
+.equalizer-display.playing .bar-7 { animation: eq-anim 0.6s infinite ease-in-out 0.25s; }
+.equalizer-display.playing .bar-8 { animation: eq-anim 1.3s infinite ease-in-out 0.35s; }
+
+@keyframes eq-anim {
+  0%, 100% { height: 15%; }
+  50% { height: 85%; }
+}
+
+/* Channels Grid */
+.channels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.channel-card {
+  background: #090a15;
+  border: 1px solid var(--voice-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+
+.channel-card:hover {
+  border-color: var(--voice-accent);
+}
+
+.channel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.channel-icon {
+  font-size: 1.3rem;
+}
+
+.channel-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--voice-text);
+}
+
+.channel-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--voice-dim);
+  font-family: var(--voice-font);
+}
+
+.badge-type {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--voice-cyan);
+  border: 1px solid var(--voice-border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+}
+
+.soundscape-footer {
+  border-top: 1px solid var(--voice-border);
+  padding-top: 12px;
+}
+
+.status-banner {
+  font-size: 0.82rem;
+  font-family: var(--voice-font);
+  color: var(--voice-dim);
+}
