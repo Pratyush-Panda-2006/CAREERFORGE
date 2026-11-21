@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fintech Vault - Transaction Settlement Receipt Exporter</title>
+  <link rel="stylesheet" href="export-receipt.css">
+</head>
+<body class="receipt-body">
+  <main class="receipt-container">
+    <header class="receipt-header">
+      <div class="header-left">
+        <h1 class="header-title">Fintech Vault Settlement Certificate Exporter</h1>
+        <p class="header-desc">High-DPI vector canvas renderer with barcode parity verification</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="downloadBtn">Export PNG</button>
+      </div>
+    </header>
+
+    <div class="receipt-workspace">
+      <section class="controls-panel">
+        <div class="form-group">
+          <label for="entityName">Counterparty / Institution</label>
+          <input type="text" id="entityName" class="form-input" value="Apex Clearinghouse Corp">
+        </div>
+        <div class="form-group">
+          <label for="vaultReference">Vault / Ledger Account</label>
+          <input type="text" id="vaultReference" class="form-input" value="VAULT-ETH-MULTI-09">
+        </div>
+        <div class="form-group">
+          <label for="certId">Settlement Reference ID</label>
+          <input type="text" id="certId" class="form-input" value="VLT-2026-TX1059">
+        </div>
+        <div class="form-group">
+          <label for="amountVal">Settlement Value ($K)</label>
+          <input type="range" id="amountVal" min="10" max="5000" value="750" class="form-range">
+          <span class="range-display" id="amountDisplay">$750,000 Settled</span>
+        </div>
+        <button class="btn btn-secondary" id="refreshBtn">Re-render Preview</button>
+      </section>
+
+      <section class="canvas-viewport-panel">
+        <div class="canvas-frame">
+          <canvas id="receiptCanvas" width="640" height="840"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { FintechVaultReceiptGenerator } from './export-receipt.js';
+
+    const canvas = document.getElementById('receiptCanvas');
+    const ctx = canvas.getContext('2d');
+    const generator = new FintechVaultReceiptGenerator();
+
+    const entityNameInput = document.getElementById('entityName');
+    const vaultReferenceInput = document.getElementById('vaultReference');
+    const certIdInput = document.getElementById('certId');
+    const amountValInput = document.getElementById('amountVal');
+    const amountDisplay = document.getElementById('amountDisplay');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    function redraw() {
+      const data = {
+        name: entityNameInput.value,
+        vault: vaultReferenceInput.value,
+        certId: certIdInput.value,
+        amount: parseInt(amountValInput.value, 10) * 1000,
+        date: new Date().toISOString().split('T')[0]
+      };
+      generator.renderCanvas(ctx, data);
+    }
+
+    amountValInput.addEventListener('input', (e) => {
+      amountDisplay.textContent = `$${parseInt(e.target.value, 10).toLocaleString()},000 Settled`;
+      redraw();
+    });
+
+    entityNameInput.addEventListener('input', redraw);
+    vaultReferenceInput.addEventListener('input', redraw);
+    certIdInput.addEventListener('input', redraw);
+    refreshBtn.addEventListener('click', redraw);
+
+    downloadBtn.addEventListener('click', () => {
+      generator.downloadBlob(canvas, `fintech-settlement-${certIdInput.value}.png`);
+    });
+
+    redraw();
+  </script>
+</body>
+</html>
