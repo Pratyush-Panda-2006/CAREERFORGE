@@ -1,0 +1,273 @@
+/**
+ * Automotive Hypercar - Cockpit Acoustic Soundscape & Engine Mixer Styling
+ */
+
+:root {
+  --car-bg: #07090e;
+  --car-card: #0e131d;
+  --car-card-light: #161e2e;
+  --car-border: #233048;
+  --car-accent: #f97316;
+  --car-accent-glow: rgba(249, 115, 22, 0.35);
+  --car-red: #ef4444;
+  --car-cyan: #38bdf8;
+  --car-text: #f8fafc;
+  --car-dim: #94a3b8;
+  --car-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--car-bg);
+  color: var(--car-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.soundscape-app-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.soundscape-header {
+  border-bottom: 2px solid var(--car-border);
+  padding-bottom: 16px;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(249, 115, 22, 0.15);
+  border: 1px solid var(--car-accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--car-font);
+  color: var(--car-accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.soundscape-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--car-accent);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.soundscape-header p {
+  margin: 0;
+  color: var(--car-dim);
+  font-size: 0.95rem;
+}
+
+.mixer-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .mixer-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.master-panel,
+.channels-panel {
+  background: var(--car-card);
+  border: 1px solid var(--car-border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-title {
+  font-size: 1.05rem;
+  color: var(--car-accent);
+  font-weight: 600;
+  border-bottom: 1px solid var(--car-border);
+  padding-bottom: 8px;
+}
+
+.rotary-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rotary-control-group label {
+  font-size: 0.85rem;
+  color: var(--car-dim);
+}
+
+.rotary-slider,
+.channel-slider {
+  width: 100%;
+  accent-color: var(--car-accent);
+  cursor: pointer;
+}
+
+.gain-readout {
+  font-family: var(--car-font);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--car-accent);
+  text-align: right;
+}
+
+.playback-controls {
+  display: flex;
+  justify-content: center;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, var(--car-accent), #ea580c);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 0 16px var(--car-accent-glow);
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.primary-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.preset-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preset-selector label {
+  font-size: 0.82rem;
+  color: var(--car-dim);
+}
+
+.cyber-select {
+  background: #07090e;
+  border: 1px solid var(--car-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--car-text);
+  font-family: var(--car-font);
+  font-size: 0.85rem;
+}
+
+.cyber-select:focus {
+  outline: none;
+  border-color: var(--car-accent);
+}
+
+/* Equalizer Visualizer */
+.equalizer-display {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 60px;
+  background: #07090e;
+  border-radius: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--car-border);
+}
+
+.eq-bar {
+  width: 8px;
+  background: linear-gradient(to top, var(--car-red), var(--car-accent));
+  border-radius: 3px 3px 0 0;
+  height: 10%;
+  transition: height 0.15s ease-out;
+}
+
+.equalizer-display.playing .bar-1 { animation: eq-anim 0.8s infinite ease-in-out; }
+.equalizer-display.playing .bar-2 { animation: eq-anim 1.1s infinite ease-in-out 0.1s; }
+.equalizer-display.playing .bar-3 { animation: eq-anim 0.7s infinite ease-in-out 0.3s; }
+.equalizer-display.playing .bar-4 { animation: eq-anim 1.2s infinite ease-in-out 0.2s; }
+.equalizer-display.playing .bar-5 { animation: eq-anim 0.9s infinite ease-in-out 0.4s; }
+.equalizer-display.playing .bar-6 { animation: eq-anim 1.0s infinite ease-in-out 0.15s; }
+.equalizer-display.playing .bar-7 { animation: eq-anim 0.6s infinite ease-in-out 0.25s; }
+.equalizer-display.playing .bar-8 { animation: eq-anim 1.3s infinite ease-in-out 0.35s; }
+
+@keyframes eq-anim {
+  0%, 100% { height: 15%; }
+  50% { height: 85%; }
+}
+
+/* Channels Grid */
+.channels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.channel-card {
+  background: #07090e;
+  border: 1px solid var(--car-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+
+.channel-card:hover {
+  border-color: var(--car-accent);
+}
+
+.channel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.channel-icon {
+  font-size: 1.3rem;
+}
+
+.channel-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--car-text);
+}
+
+.channel-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--car-dim);
+  font-family: var(--car-font);
+}
+
+.badge-type {
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--car-accent);
+  border: 1px solid var(--car-border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+}
+
+.soundscape-footer {
+  border-top: 1px solid var(--car-border);
+  padding-top: 12px;
+}
+
+.status-banner {
+  font-size: 0.82rem;
+  font-family: var(--car-font);
+  color: var(--car-dim);
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar - Cockpit Acoustic Soundscape & Engine Mixer</title>
+  <link rel="stylesheet" href="ambient-soundscape.css">
+</head>
+<body>
+  <div class="soundscape-app-container">
+    <header class="soundscape-header">
+      <div class="header-badge">AERO-ACOUSTIC v3.5</div>
+      <h1>Automotive Hypercar - Cockpit Soundscape & Mixer</h1>
+      <p>Procedural Web Audio acoustic soundscape synthesizer, aero-dynamic induction simulation, and multi-channel engine harmonic mixer</p>
+    </header>
+
+    <main class="mixer-layout">
+      <!-- Master Control Section -->
+      <section class="master-panel">
+        <div class="panel-title">Master Cockpit Deck</div>
+        <div class="rotary-control-group">
+          <label for="master-volume-slider">Master Exhaust Gain</label>
+          <input type="range" id="master-volume-slider" min="0" max="1" step="0.01" value="0.75" class="rotary-slider">
+          <span id="master-volume-val" class="gain-readout">75%</span>
+        </div>
+
+        <div class="playback-controls">
+          <button id="toggle-play-btn" class="primary-btn">▶ Ignite Cockpit Soundscape</button>
+        </div>
+
+        <div class="preset-selector">
+          <label for="preset-select">Dynamic Track Drive Presets:</label>
+          <select id="preset-select" class="cyber-select">
+            <option value="Nürburgring Attack Pace">Nürburgring Attack Pace</option>
+            <option value="Monaco Grand Touring Cruise">Monaco Grand Touring Cruise</option>
+            <option value="High-Speed Wind Tunnel Aero">High-Speed Wind Tunnel Aero</option>
+          </select>
+        </div>
+
+        <!-- Equalizer Visualizer Bars -->
+        <div class="equalizer-display" id="equalizer-bars">
+          <div class="eq-bar bar-1"></div>
+          <div class="eq-bar bar-2"></div>
+          <div class="eq-bar bar-3"></div>
+          <div class="eq-bar bar-4"></div>
+          <div class="eq-bar bar-5"></div>
+          <div class="eq-bar bar-6"></div>
+          <div class="eq-bar bar-7"></div>
+          <div class="eq-bar bar-8"></div>
+        </div>
+      </section>
+
+      <!-- Multi-Channel Mixer Section -->
+      <section class="channels-panel">
+        <div class="panel-title">Multi-Channel Powertrain Layers</div>
+        <div class="channels-grid">
+          <!-- Rain / Aero Downforce Layer -->
+          <div class="channel-card" data-channel="rain">
+            <div class="channel-header">
+              <span class="channel-icon">🏎️</span>
+              <span class="channel-name">Aero Downforce (Rain)</span>
+            </div>
+            <input type="range" class="channel-slider" id="gain-rain" min="0" max="1" step="0.01" value="0.35">
+            <div class="channel-meta">
+              <span>Gain: <strong id="val-rain">35%</strong></span>
+              <span class="badge-type">Pink Noise</span>
+            </div>
+          </div>
+
+          <!-- Wind / Turbo Spool Layer -->
+          <div class="channel-card" data-channel="wind">
+            <div class="channel-header">
+              <span class="channel-icon">💨</span>
+              <span class="channel-name">Turbocharger Spool (Wind)</span>
+            </div>
+            <input type="range" class="channel-slider" id="gain-wind" min="0" max="1" step="0.01" value="0.55">
+            <div class="channel-meta">
+              <span>Gain: <strong id="val-wind">55%</strong></span>
+              <span class="badge-type">Bandpass</span>
+            </div>
+          </div>
+
+          <!-- White Noise / V8 Rumble Layer -->
+          <div class="channel-card" data-channel="whiteNoise">
+            <div class="channel-header">
+              <span class="channel-icon">⚡</span>
+              <span class="channel-name">V8 Engine Rumble (Noise)</span>
+            </div>
+            <input type="range" class="channel-slider" id="gain-whiteNoise" min="0" max="1" step="0.01" value="0.3">
+            <div class="channel-meta">
+              <span>Gain: <strong id="val-whiteNoise">30%</strong></span>
+              <span class="badge-type">White Noise</span>
+            </div>
+          </div>
+
+          <!-- Chimes / Titanium Exhaust Layer -->
+          <div class="channel-card" data-channel="chimes">
+            <div class="channel-header">
+              <span class="channel-icon">🔥</span>
+              <span class="channel-name">Titanium Exhaust (Chimes)</span>
+            </div>
+            <input type="range" class="channel-slider" id="gain-chimes" min="0" max="1" step="0.01" value="0.45">
+            <div class="channel-meta">
+              <span>Gain: <strong id="val-chimes">45%</strong></span>
+              <span class="badge-type">Harmonic</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="soundscape-footer">
+      <div id="audio-status-banner" class="status-banner">Audio Engine: Standby (Web Audio API Synthesizer Ready)</div>
+    </footer>
+  </div>
+
+  <script type="module" src="ambient-soundscape.js"></script>
+</body>
+</html>
