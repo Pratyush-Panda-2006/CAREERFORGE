@@ -1,0 +1,224 @@
+/**
+ * Cybersecurity Sentinel - Ambient Soundscape Synthesizer & Acoustic Mixer Styling
+ */
+
+:root {
+  --cyber-red: #ef4444;
+  --cyber-crimson: #dc2626;
+  --cyber-cyan: #06b6d4;
+  --cyber-blue: #38bdf8;
+  --cyber-dark: #050811;
+  --cyber-card: #0d1322;
+  --cyber-border: #162035;
+  --cyber-dim: #8292ab;
+  --cyber-text: #e2e8f0;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--cyber-dark);
+  color: var(--cyber-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.soundscape-container {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.soundscape-header {
+  border-bottom: 2px solid var(--cyber-border);
+  padding-bottom: 16px;
+}
+
+.soundscape-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--cyber-red);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.soundscape-header p {
+  margin: 0;
+  color: var(--cyber-dim);
+  font-size: 0.95rem;
+}
+
+.visualizer-card {
+  background: var(--cyber-card);
+  border: 1px solid var(--cyber-border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+
+.eq-meter {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 80px;
+  width: 100%;
+  max-width: 380px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 8px;
+  border: 1px solid var(--cyber-border);
+}
+
+.eq-bar {
+  flex: 1;
+  background: linear-gradient(to top, var(--cyber-cyan), var(--cyber-crimson), var(--cyber-red));
+  height: 15%;
+  border-radius: 3px;
+  transition: height 0.15s ease-in-out;
+}
+
+.visualizer-card.playing .eq-bar:nth-child(1) { animation: cyberEqPulse 0.9s infinite alternate; }
+.visualizer-card.playing .eq-bar:nth-child(2) { animation: cyberEqPulse 1.2s infinite alternate 0.2s; }
+.visualizer-card.playing .eq-bar:nth-child(3) { animation: cyberEqPulse 0.8s infinite alternate 0.4s; }
+.visualizer-card.playing .eq-bar:nth-child(4) { animation: cyberEqPulse 1.4s infinite alternate 0.1s; }
+.visualizer-card.playing .eq-bar:nth-child(5) { animation: cyberEqPulse 1.1s infinite alternate 0.3s; }
+.visualizer-card.playing .eq-bar:nth-child(6) { animation: cyberEqPulse 0.7s infinite alternate 0.5s; }
+.visualizer-card.playing .eq-bar:nth-child(7) { animation: cyberEqPulse 1.3s infinite alternate 0.2s; }
+.visualizer-card.playing .eq-bar:nth-child(8) { animation: cyberEqPulse 1.0s infinite alternate 0.4s; }
+
+@keyframes cyberEqPulse {
+  0% { height: 15%; opacity: 0.6; }
+  50% { height: 78%; opacity: 1; }
+  100% { height: 35%; opacity: 0.8; }
+}
+
+.sound-btn {
+  background: linear-gradient(135deg, var(--cyber-red), var(--cyber-cyan));
+  color: #050811;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sound-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.45);
+}
+
+.sound-btn.playing {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+}
+
+.mixer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.control-panel {
+  background: var(--cyber-card);
+  border: 1px solid var(--cyber-border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.control-panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.15rem;
+  color: var(--cyber-red);
+}
+
+.panel-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--cyber-dim);
+  margin-bottom: 6px;
+}
+
+.preset-dropdown {
+  width: 100%;
+  padding: 10px;
+  background: #050811;
+  color: var(--cyber-text);
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  outline: none;
+}
+
+.preset-dropdown:focus {
+  border-color: var(--cyber-red);
+}
+
+.channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.channel-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.channel-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.channel-name {
+  color: var(--cyber-text);
+}
+
+.channel-val {
+  color: var(--cyber-cyan);
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.channel-slider {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #162035;
+  outline: none;
+}
+
+.channel-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--cyber-red);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+}
+
+.master-row {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--cyber-border);
+}
+
+.soundscape-footer {
+  text-align: center;
+  padding: 12px;
+}
+
+.status-indicator {
+  font-size: 0.85rem;
+  color: var(--cyber-dim);
+}
