@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Documentation Audit Certificate Exporter</title>
+  <link rel="stylesheet" href="export-receipt.css">
+</head>
+<body class="receipt-body">
+  <main class="receipt-container">
+    <header class="receipt-header">
+      <div class="header-left">
+        <h1 class="header-title">Docs Portal Certificate & Receipt Exporter</h1>
+        <p class="header-desc">High-DPI vector canvas renderer with barcode parity verification</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="downloadBtn">Export PNG</button>
+      </div>
+    </header>
+
+    <div class="receipt-workspace">
+      <section class="controls-panel">
+        <div class="form-group">
+          <label for="docTitle">Documentation Project</label>
+          <input type="text" id="docTitle" class="form-input" value="Core Platform API v2.4">
+        </div>
+        <div class="form-group">
+          <label for="auditorName">Lead Auditor / Tech Writer</label>
+          <input type="text" id="auditorName" class="form-input" value="Elena Rostova">
+        </div>
+        <div class="form-group">
+          <label for="certId">Verification Reference</label>
+          <input type="text" id="certId" class="form-input" value="DOCS-2026-N1047">
+        </div>
+        <div class="form-group">
+          <label for="coverageVal">Documentation Coverage (%)</label>
+          <input type="range" id="coverageVal" min="70" max="100" value="99" class="form-range">
+          <span class="range-display" id="coverageDisplay">99% Coverage</span>
+        </div>
+        <button class="btn btn-secondary" id="refreshBtn">Re-render Preview</button>
+      </section>
+
+      <section class="canvas-viewport-panel">
+        <div class="canvas-frame">
+          <canvas id="receiptCanvas" width="640" height="840"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { DocsPortalReceiptGenerator } from './export-receipt.js';
+
+    const canvas = document.getElementById('receiptCanvas');
+    const ctx = canvas.getContext('2d');
+    const generator = new DocsPortalReceiptGenerator();
+
+    const docTitleInput = document.getElementById('docTitle');
+    const auditorNameInput = document.getElementById('auditorName');
+    const certIdInput = document.getElementById('certId');
+    const coverageValInput = document.getElementById('coverageVal');
+    const coverageDisplay = document.getElementById('coverageDisplay');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    function redraw() {
+      const data = {
+        title: docTitleInput.value,
+        auditor: auditorNameInput.value,
+        certId: certIdInput.value,
+        coverage: parseInt(coverageValInput.value, 10),
+        date: new Date().toISOString().split('T')[0]
+      };
+      generator.renderCanvas(ctx, data);
+    }
+
+    coverageValInput.addEventListener('input', (e) => {
+      coverageDisplay.textContent = e.target.value + '% Coverage';
+      redraw();
+    });
+
+    docTitleInput.addEventListener('input', redraw);
+    auditorNameInput.addEventListener('input', redraw);
+    certIdInput.addEventListener('input', redraw);
+    refreshBtn.addEventListener('click', redraw);
+
+    downloadBtn.addEventListener('click', () => {
+      generator.downloadBlob(canvas, `docs-cert-${certIdInput.value}.png`);
+    });
+
+    redraw();
+  </script>
+</body>
+</html>
