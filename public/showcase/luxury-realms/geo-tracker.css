@@ -1,0 +1,245 @@
+/**
+ * Luxury Realms - Geospatial Proximity Calculator & Location Radar Styling
+ */
+
+:root {
+  --lux-gold: #d4af37;
+  --lux-gold-light: #f59e0b;
+  --lux-bronze: #b45309;
+  --lux-dark: #0c0a09;
+  --lux-card: #1c1917;
+  --lux-border: #292524;
+  --lux-dim: #a8a29e;
+  --lux-text: #f5f5f4;
+  --lux-blip: #f59e0b;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--lux-dark);
+  color: var(--lux-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.radar-dashboard {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.radar-header {
+  border-bottom: 2px solid var(--lux-border);
+  padding-bottom: 16px;
+}
+
+.radar-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--lux-gold);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.radar-header p {
+  margin: 0;
+  color: var(--lux-dim);
+  font-size: 0.95rem;
+}
+
+.radar-controls-card {
+  background: var(--lux-card);
+  border: 1px solid var(--lux-border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-group label {
+  font-size: 0.82rem;
+  color: var(--lux-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.control-group input {
+  background: #0c0a09;
+  border: 1px solid var(--lux-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--lux-text);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.9rem;
+}
+
+.control-group input:focus {
+  outline: none;
+  border-color: var(--lux-gold);
+}
+
+.scan-btn {
+  background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-light));
+  color: #0c0a09;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.scan-btn:hover {
+  opacity: 0.9;
+}
+
+.radar-status {
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--lux-dim);
+  margin-top: 4px;
+}
+
+.radar-main-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.radar-display-wrapper {
+  background: var(--lux-card);
+  border: 1px solid var(--lux-border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.radar-viewport {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #221c17 0%, #0c0a09 100%);
+  border: 2px solid var(--lux-gold);
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.25);
+  overflow: hidden;
+}
+
+.radar-grid-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(212, 175, 55, 0.3);
+  pointer-events: none;
+}
+
+.ring-outer { width: 85%; height: 85%; }
+.ring-mid { width: 55%; height: 55%; }
+.ring-inner { width: 25%; height: 25%; }
+
+.radar-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(from 0deg, rgba(212, 175, 55, 0.4) 0deg, transparent 60deg, transparent 360deg);
+  border-radius: 50%;
+  animation: luxRadarScan 3s linear infinite;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+@keyframes luxRadarScan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-blip {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--lux-blip);
+  box-shadow: 0 0 10px var(--lux-blip);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.radar-blip:hover {
+  transform: translate(-50%, -50%) scale(1.6);
+  background: #ffffff;
+}
+
+.radar-results-wrapper {
+  background: var(--lux-card);
+  border: 1px solid var(--lux-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.results-heading {
+  margin: 0;
+  color: var(--lux-gold);
+  font-size: 1.15rem;
+}
+
+.nodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.node-card {
+  background: #0c0a09;
+  border: 1px solid var(--lux-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.node-card-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--lux-text);
+}
+
+.node-dist {
+  color: var(--lux-gold-light);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.node-category {
+  font-size: 0.75rem;
+  color: var(--lux-dim);
+}
+
+.node-bearing {
+  font-size: 0.78rem;
+  color: var(--lux-gold);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
