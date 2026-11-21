@@ -1,0 +1,313 @@
+/**
+ * AI Voice Studio - Studio Radar & Proximity Calculator Styling
+ */
+
+:root {
+  --voice-bg: #090a15;
+  --voice-card: #13172d;
+  --voice-card-light: #1c2242;
+  --voice-border: #29325f;
+  --voice-accent: #8b5cf6;
+  --voice-accent-glow: rgba(139, 92, 246, 0.35);
+  --voice-cyan: #38bdf8;
+  --voice-green: #10b981;
+  --voice-text: #f8fafc;
+  --voice-dim: #94a3b8;
+  --voice-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--voice-bg);
+  color: var(--voice-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.geo-container {
+  max-width: 1060px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.geo-header {
+  border-bottom: 2px solid var(--voice-border);
+  padding-bottom: 16px;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid var(--voice-accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--voice-font);
+  color: var(--voice-accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.geo-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--voice-accent);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.geo-header p {
+  margin: 0;
+  color: var(--voice-dim);
+  font-size: 0.95rem;
+}
+
+.geo-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .geo-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.radar-panel,
+.nodes-panel {
+  background: var(--voice-card);
+  border: 1px solid var(--voice-border);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--voice-cyan);
+}
+
+.sweep-live-indicator {
+  font-size: 0.75rem;
+  color: var(--voice-green);
+  font-family: var(--voice-font);
+  letter-spacing: 0.5px;
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Radar Display Viewport */
+.radar-display {
+  width: 320px;
+  height: 320px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a1638 0%, #090a15 75%);
+  border: 2px solid var(--voice-accent);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 24px var(--voice-accent-glow);
+}
+
+.radar-sweep-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(139, 92, 246, 0.4) 0deg, rgba(139, 92, 246, 0) 60deg);
+  animation: radar-sweep 4s linear infinite;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed rgba(139, 92, 246, 0.35);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ring-1 { width: 90px; height: 90px; }
+.ring-2 { width: 180px; height: 180px; }
+.ring-3 { width: 270px; height: 270px; }
+
+.crosshair-v {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  background: rgba(139, 92, 246, 0.25);
+  pointer-events: none;
+}
+
+.crosshair-h {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(139, 92, 246, 0.25);
+  pointer-events: none;
+}
+
+.radar-blips-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.radar-blip {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: var(--voice-accent);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px var(--voice-accent);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.radar-blip:hover {
+  transform: translate(-50%, -50%) scale(1.6);
+  background-color: var(--voice-cyan);
+}
+
+.coords-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.input-group label {
+  font-size: 0.78rem;
+  color: var(--voice-dim);
+}
+
+.input-group input {
+  background: #090a15;
+  border: 1px solid var(--voice-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--voice-text);
+  font-family: var(--voice-font);
+  font-size: 0.88rem;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--voice-accent);
+}
+
+.primary-btn {
+  background: var(--voice-accent);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+.radar-status {
+  font-size: 0.82rem;
+  font-family: var(--voice-font);
+  color: var(--voice-dim);
+  padding: 8px 12px;
+  background: #090a15;
+  border-radius: 6px;
+  border: 1px solid var(--voice-border);
+}
+
+.nodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+.node-card {
+  background: #090a15;
+  border: 1px solid var(--voice-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.node-card:hover {
+  border-color: var(--voice-accent);
+  transform: translateX(3px);
+}
+
+.node-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--voice-text);
+}
+
+.node-dist {
+  color: var(--voice-cyan);
+  font-family: var(--voice-font);
+  font-size: 0.85rem;
+}
+
+.node-category {
+  font-size: 0.78rem;
+  color: var(--voice-accent);
+}
+
+.node-bearing {
+  font-size: 0.74rem;
+  font-family: var(--voice-font);
+  color: var(--voice-dim);
+}
