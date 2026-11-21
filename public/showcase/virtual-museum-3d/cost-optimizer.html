@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Compare illustrative compute, storage and bandwidth costs with graduated volume pricing for Virtual Museum 3D." />
+    <title>Virtual Museum 3D - Resource Cost Optimizer Sandbox</title>
+    <link rel="stylesheet" href="cost-optimizer.css" />
+    <script type="module" src="cost-optimizer.js"></script>
+  </head>
+  <body>
+    <div class="optimizer-container">
+      <header class="optimizer-header">
+        <div class="header-badge">VIRTUAL-MUSEUM-3D OPTIMIZER</div>
+        <h1>Virtual Museum 3D - Cost Optimizer Sandbox</h1>
+        <p>Interactive resource provisioning and dynamic cost estimation modeling tiered consumption pricing</p>
+      </header>
+
+      <main id="sandbox" data-cost-optimizer class="workspace">
+        <section class="resource-panel" aria-labelledby="resources-title">
+          <h2 id="resources-title">Monthly Resource Allocation</h2>
+          <div class="resource">
+            <label for="compute-units">Compute <span>hours / month</span></label>
+            <input id="compute-units" type="number" min="0" max="1000000" step="1" value="320" />
+            <input id="compute-slider" type="range" aria-label="Compute usage slider" min="0" max="5000" step="1" value="320" />
+            <span id="compute-tier" class="tier"></span>
+          </div>
+          <div class="resource">
+            <label for="storage-units">Storage <span>GB / month</span></label>
+            <input id="storage-units" type="number" min="0" max="1000000" step="1" value="200" />
+            <input id="storage-slider" type="range" aria-label="Storage usage slider" min="0" max="5000" step="1" value="200" />
+            <span id="storage-tier" class="tier"></span>
+          </div>
+          <div class="resource">
+            <label for="bandwidth-units">Bandwidth <span>GB / month</span></label>
+            <input id="bandwidth-units" type="number" min="0" max="1000000" step="1" value="500" />
+            <input id="bandwidth-slider" type="range" aria-label="Bandwidth usage slider" min="0" max="5000" step="1" value="500" />
+            <span id="bandwidth-tier" class="tier"></span>
+          </div>
+          <button id="zero-resources" type="button" class="subtle-button">Set all usage to zero</button>
+        </section>
+
+        <section class="quote-panel" aria-labelledby="quote-title">
+          <h2 id="quote-title">Estimated Usage Quote</h2>
+          <fieldset>
+            <legend>Billing period</legend>
+            <label><input type="radio" name="billing" value="monthly" checked /> Monthly</label>
+            <label><input type="radio" name="billing" value="annual" /> Annual (10% off)</label>
+          </fieldset>
+
+          <div class="price" role="status" aria-live="polite" aria-atomic="true">
+            <span id="billing-caption">Demo monthly invoice</span>
+            <output id="quote-total">â€”</output>
+            <span id="monthly-equivalent"></span>
+          </div>
+          <p id="quote-error" class="error" role="alert" hidden></p>
+
+          <div class="breakdown">
+            <div class="donut" id="cost-donut" aria-hidden="true"><span id="chart-label">Cost mix</span></div>
+            <table>
+              <caption>Resource cost breakdown</caption>
+              <tbody>
+                <tr><th scope="row"><i class="compute-dot"></i>Compute</th><td id="compute-cost">â€”</td></tr>
+                <tr><th scope="row"><i class="storage-dot"></i>Storage</th><td id="storage-cost">â€”</td></tr>
+                <tr><th scope="row"><i class="bandwidth-dot"></i>Bandwidth</th><td id="bandwidth-cost">â€”</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <dl class="totals">
+            <div><dt>Base-rate subtotal</dt><dd id="subtotal">â€”</dd></div>
+            <div><dt>Graduated volume savings</dt><dd id="volume-discount">â€”</dd></div>
+            <div><dt>Annual prepayment savings</dt><dd id="annual-discount">â€”</dd></div>
+          </dl>
+
+          <button id="download-quote" type="button" class="primary-button" disabled>Download Demo Quote</button>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
