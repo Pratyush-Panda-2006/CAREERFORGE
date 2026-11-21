@@ -1,0 +1,229 @@
+/**
+ * Podcast Audio Stream - Feed Payload Compression Suite Styling
+ */
+
+:root {
+  --pod-bg: #0b0d13;
+  --pod-card: #141824;
+  --pod-card-light: #1e2436;
+  --pod-border: #2b334a;
+  --pod-amber: #f59e0b;
+  --pod-orange: #f97316;
+  --pod-yellow: #fbbf24;
+  --pod-text: #f8fafc;
+  --pod-dim: #94a3b8;
+  --pod-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--pod-bg);
+  color: var(--pod-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.compression-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.compression-header {
+  border-bottom: 2px solid var(--pod-border);
+  padding-bottom: 16px;
+  position: relative;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--pod-amber);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--pod-font);
+  color: var(--pod-amber);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.compression-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--pod-amber);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.compression-header p {
+  margin: 0;
+  color: var(--pod-dim);
+  font-size: 0.95rem;
+}
+
+.metrics-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  background: var(--pod-card);
+  border: 1px solid var(--pod-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.metric-card:hover {
+  border-color: var(--pod-amber);
+  transform: translateY(-2px);
+}
+
+.metric-card.highlight {
+  border-color: var(--pod-amber);
+  background: linear-gradient(135deg, var(--pod-card) 0%, rgba(245, 158, 11, 0.12) 100%);
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: var(--pod-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: var(--pod-font);
+}
+
+.metric-card.highlight .metric-value {
+  color: var(--pod-yellow);
+}
+
+.workbench-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 800px) {
+  .workbench-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.workbench-panel {
+  background: var(--pod-card);
+  border: 1px solid var(--pod-border);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--pod-border);
+  padding-bottom: 10px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.payload-textarea {
+  width: 100%;
+  height: 220px;
+  box-sizing: border-box;
+  background: var(--pod-card-light);
+  border: 1px solid var(--pod-border);
+  border-radius: 6px;
+  padding: 12px;
+  color: var(--pod-text);
+  font-family: var(--pod-font);
+  font-size: 0.85rem;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.payload-textarea:focus {
+  outline: none;
+  border-color: var(--pod-amber);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.bytecode-viewer, .decompressed-viewer {
+  width: 100%;
+  height: 220px;
+  box-sizing: border-box;
+  background: #08090e;
+  border: 1px solid var(--pod-border);
+  border-radius: 6px;
+  padding: 12px;
+  color: var(--pod-yellow);
+  font-family: var(--pod-font);
+  font-size: 0.82rem;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.decompressed-viewer {
+  height: 120px;
+  color: #38bdf8;
+  border-color: #0284c7;
+  background: #04101d;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.primary-btn, .secondary-btn {
+  padding: 9px 16px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, var(--pod-amber) 0%, var(--pod-orange) 100%);
+  color: #fff;
+  border: none;
+}
+
+.primary-btn:hover {
+  opacity: 0.92;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.secondary-btn {
+  background: var(--pod-card-light);
+  color: var(--pod-dim);
+  border: 1px solid var(--pod-border);
+}
+
+.secondary-btn:hover {
+  background: #28314a;
+  color: #fff;
+  border-color: var(--pod-dim);
+}
