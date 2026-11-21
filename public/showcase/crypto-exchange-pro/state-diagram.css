@@ -1,0 +1,245 @@
+/**
+ * Crypto Exchange Pro - Order Lifecycle State Machine Visualizer Styling
+ */
+
+:root {
+  --crypto-emerald: #10b981;
+  --crypto-green: #059669;
+  --crypto-amber: #f59e0b;
+  --crypto-blue: #3b82f6;
+  --crypto-dark: #0a0e17;
+  --crypto-card: #111827;
+  --crypto-border: #1f2937;
+  --crypto-dim: #9ca3af;
+  --crypto-text: #f3f4f6;
+  --crypto-danger: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--crypto-dark);
+  color: var(--crypto-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.fsm-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fsm-header {
+  border-bottom: 2px solid var(--crypto-border);
+  padding-bottom: 16px;
+}
+
+.fsm-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--crypto-emerald);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.fsm-header p {
+  margin: 0;
+  color: var(--crypto-dim);
+  font-size: 0.95rem;
+}
+
+.status-banner {
+  background: var(--crypto-card);
+  border: 1px solid var(--crypto-border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-label {
+  font-size: 0.9rem;
+  color: var(--crypto-dim);
+}
+
+.badge-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--crypto-emerald);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.fsm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.graph-panel,
+.controls-panel {
+  background: var(--crypto-card);
+  border: 1px solid var(--crypto-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--crypto-emerald);
+}
+
+.panel-hint {
+  font-size: 0.8rem;
+  color: var(--crypto-dim);
+}
+
+.nodes-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.fsm-node {
+  background: #0a0e17;
+  border: 1px solid var(--crypto-border);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.25s ease-in-out;
+}
+
+.fsm-node.active {
+  border-color: var(--crypto-emerald);
+  background: rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
+  transform: translateY(-2px);
+}
+
+.fsm-node.danger.active {
+  border-color: var(--crypto-danger);
+  background: rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+}
+
+.node-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--crypto-text);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.fsm-node.active .node-title {
+  color: var(--crypto-emerald);
+}
+
+.fsm-node.danger.active .node-title {
+  color: var(--crypto-danger);
+}
+
+.node-desc {
+  font-size: 0.78rem;
+  color: var(--crypto-dim);
+}
+
+.event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-btn {
+  background: linear-gradient(135deg, var(--crypto-emerald), var(--crypto-blue));
+  color: #07090e;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.event-btn:hover {
+  opacity: 0.9;
+}
+
+.event-btn.danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+}
+
+.history-container {
+  height: 120px;
+  overflow-y: auto;
+  background: #0a0e17;
+  border: 1px solid var(--crypto-border);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.history-item {
+  color: var(--crypto-dim);
+}
+
+.history-item.recent {
+  color: var(--crypto-emerald);
+}
+
+.mermaid-preview {
+  height: 130px;
+  overflow-y: auto;
+  background: #0a0e17;
+  border: 1px solid var(--crypto-border);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0;
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.8rem;
+  color: var(--crypto-blue);
+  white-space: pre;
+}
+
+.secondary-btn {
+  background: #1f2937;
+  border: 1px solid var(--crypto-border);
+  color: var(--crypto-dim);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+  border-color: var(--crypto-emerald);
+  color: var(--crypto-text);
+}
