@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rendering stress lab | SYNAPSE-EEG</title><link rel="stylesheet" href="./telemetry-stress-tester.css"><script type="module" src="./telemetry-stress-tester.js"></script></head>
+<body><main data-stress-lab aria-busy="false">
+<header><a href="./index.html">SYNAPSE-EEG</a><span>Local rendering lab</span></header>
+<section class="intro"><p class="eyebrow">PERFORMANCE / BROWSER WORKLOAD</p><h1>Measure the frames.</h1><p>Run a bounded, 64-node visual workload and inspect this tab’s frame intervals and DOM work. The tiles below are synthetic test data.</p></section>
+<div class="workspace">
+<section aria-labelledby="run-title"><h2 id="run-title">Choose a test</h2>
+<form id="form"><label for="iterations">Measured frames (12–600)</label><input id="iterations" type="number" min="12" max="600" step="1" value="60" required><div class="buttons"><button id="start" type="submit">Start benchmark</button><button id="stop" type="button" disabled>Stop</button></div></form>
+<p class="help">A 60-frame run takes about one second at 60 Hz. Stop at any time. Leaving this tab cancels the run.</p>
+<label for="progress">Run progress</label><progress id="progress" max="60" value="0"></progress><p id="frame-count">No frames measured</p>
+<div class="workload-heading"><h2 id="workload-title">Synthetic channel tiles</h2><span><output id="node-count">0</output> test nodes</span></div><div id="workload" class="workload" aria-labelledby="workload-title" aria-hidden="true"></div>
+</section>
+<section class="metrics" aria-label="Measured results">
+<div class="fps-dial"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="45" class="track"></circle><circle id="fps-ring" cx="60" cy="60" r="45" stroke-dasharray="283" stroke-dashoffset="283"></circle></svg><div><output id="fps-value">—</output><span>rAF frames / second</span></div></div>
+<dl><div><dt>Frame jitter</dt><dd id="jitter-value">—</dd></div><div><dt>DOM / layout cost</dt><dd id="layout-value">—</dd></div><div><dt>Approximate JS heap</dt><dd id="heap-value">—</dd></div></dl><p id="heap-change" class="help">Heap sampled only when supported</p>
+<div class="score"><span>Workload index</span><output id="score-value">—</output><span>/ 100</span></div>
+</section></div>
+<p id="status" role="status" aria-live="polite">Ready. Measurements stay in this page; nothing is stored or uploaded.</p>
+<section class="method"><h2>Read the measurements</h2><p>FPS uses actual requestAnimationFrame callback intervals. Jitter is the mean absolute change between consecutive intervals. DOM/layout cost times 64 node updates and a forced geometry read; it is a rendering proxy, not direct GPU paint timing.</p><p>The workload index combines 60% frame rate (60 Hz reference), 20% jitter and 20% DOM/layout cost. It compares this workload in this browser, not overall hardware quality. Approximate Chromium JS heap readings are optional and excluded from the score; garbage collection may lower the reading.</p><p>Use the same browser, frame count and workload when comparing runs. Other tabs, power settings, display refresh rate and developer tools can affect results.</p></section>
+<details><summary>Last run report</summary><pre id="report">No completed or stopped run yet.</pre></details>
+<footer>Local test only. No live weather, sensor or medical data is collected.</footer>
+</main></body></html>
