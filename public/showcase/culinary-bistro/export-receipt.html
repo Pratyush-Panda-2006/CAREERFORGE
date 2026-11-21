@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Culinary Bistro - Dining Invoice & Certificate Exporter</title>
+  <link rel="stylesheet" href="export-receipt.css">
+</head>
+<body class="receipt-body">
+  <main class="receipt-container">
+    <header class="receipt-header">
+      <div class="header-left">
+        <h1 class="header-title">Culinary Bistro Dining Receipt Exporter</h1>
+        <p class="header-desc">High-DPI vector canvas renderer with barcode parity verification</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="downloadBtn">Export PNG</button>
+      </div>
+    </header>
+
+    <div class="receipt-workspace">
+      <section class="controls-panel">
+        <div class="form-group">
+          <label for="guestName">Guest Name</label>
+          <input type="text" id="guestName" class="form-input" value="Arthur Pendelton">
+        </div>
+        <div class="form-group">
+          <label for="tableInfo">Table & Seating</label>
+          <input type="text" id="tableInfo" class="form-input" value="Table 12 (Terrace Garden)">
+        </div>
+        <div class="form-group">
+          <label for="certId">Reservation / Check Reference</label>
+          <input type="text" id="certId" class="form-input" value="BISTRO-2026-T1051">
+        </div>
+        <div class="form-group">
+          <label for="amountVal">Bill Total ($)</label>
+          <input type="range" id="amountVal" min="50" max="600" value="240" class="form-range">
+          <span class="range-display" id="amountDisplay">$240.00 Total</span>
+        </div>
+        <button class="btn btn-secondary" id="refreshBtn">Re-render Preview</button>
+      </section>
+
+      <section class="canvas-viewport-panel">
+        <div class="canvas-frame">
+          <canvas id="receiptCanvas" width="640" height="840"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { CulinaryBistroReceiptGenerator } from './export-receipt.js';
+
+    const canvas = document.getElementById('receiptCanvas');
+    const ctx = canvas.getContext('2d');
+    const generator = new CulinaryBistroReceiptGenerator();
+
+    const guestNameInput = document.getElementById('guestName');
+    const tableInfoInput = document.getElementById('tableInfo');
+    const certIdInput = document.getElementById('certId');
+    const amountValInput = document.getElementById('amountVal');
+    const amountDisplay = document.getElementById('amountDisplay');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    function redraw() {
+      const data = {
+        name: guestNameInput.value,
+        table: tableInfoInput.value,
+        certId: certIdInput.value,
+        amount: parseInt(amountValInput.value, 10),
+        date: new Date().toISOString().split('T')[0]
+      };
+      generator.renderCanvas(ctx, data);
+    }
+
+    amountValInput.addEventListener('input', (e) => {
+      amountDisplay.textContent = `$${e.target.value}.00 Total`;
+      redraw();
+    });
+
+    guestNameInput.addEventListener('input', redraw);
+    tableInfoInput.addEventListener('input', redraw);
+    certIdInput.addEventListener('input', redraw);
+    refreshBtn.addEventListener('click', redraw);
+
+    downloadBtn.addEventListener('click', () => {
+      generator.downloadBlob(canvas, `bistro-receipt-${certIdInput.value}.png`);
+    });
+
+    redraw();
+  </script>
+</body>
+</html>
