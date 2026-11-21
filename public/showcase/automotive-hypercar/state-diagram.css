@@ -1,0 +1,303 @@
+/**
+ * Automotive Hypercar - FSM Drive Mode Visualizer Styling
+ */
+
+:root {
+  --car-bg: #07090e;
+  --car-card: #0e131d;
+  --car-card-light: #161e2e;
+  --car-border: #233048;
+  --car-accent: #f97316;
+  --car-accent-glow: rgba(249, 115, 22, 0.35);
+  --car-red: #ef4444;
+  --car-cyan: #38bdf8;
+  --car-text: #f8fafc;
+  --car-dim: #94a3b8;
+  --car-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--car-bg);
+  color: var(--car-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.fsm-app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fsm-header {
+  border-bottom: 2px solid var(--car-border);
+  padding-bottom: 16px;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(249, 115, 22, 0.15);
+  border: 1px solid var(--car-accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--car-font);
+  color: var(--car-accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.fsm-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--car-accent);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.fsm-header p {
+  margin: 0;
+  color: var(--car-dim);
+  font-size: 0.95rem;
+}
+
+.status-banner {
+  background: var(--car-card);
+  border: 1px solid var(--car-border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-label {
+  font-size: 0.88rem;
+  color: var(--car-dim);
+  margin-right: 10px;
+}
+
+.state-badge {
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--car-accent);
+  border: 1px solid var(--car-accent);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: var(--car-font);
+  font-size: 0.92rem;
+  font-weight: 700;
+  box-shadow: 0 0 10px var(--car-accent-glow);
+}
+
+.fsm-workspace {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .fsm-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.graph-section {
+  background: var(--car-card);
+  border: 1px solid var(--car-border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-title {
+  font-size: 1.05rem;
+  color: var(--car-accent);
+  font-weight: 600;
+}
+
+.nodes-canvas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #07090e;
+  border-radius: 8px;
+  border: 1px dashed var(--car-border);
+}
+
+.connector-arrow {
+  color: var(--car-dim);
+  text-align: center;
+  font-size: 1.2rem;
+  user-select: none;
+}
+
+.fsm-node {
+  background: #0e131d;
+  border: 1px solid var(--car-border);
+  border-radius: 8px;
+  padding: 12px 10px;
+  text-align: center;
+  transition: all 0.25s ease;
+  cursor: default;
+}
+
+.fsm-node.active {
+  border-color: var(--car-accent);
+  background: rgba(249, 115, 22, 0.15);
+  box-shadow: 0 0 14px var(--car-accent-glow);
+  transform: translateY(-2px);
+}
+
+.node-icon {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.node-title {
+  font-size: 0.72rem;
+  font-family: var(--car-font);
+  font-weight: 700;
+  color: var(--car-text);
+  word-break: break-all;
+}
+
+.fsm-node.active .node-title {
+  color: var(--car-accent);
+}
+
+.node-sub {
+  font-size: 0.65rem;
+  color: var(--car-dim);
+  margin-top: 4px;
+}
+
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.controls-panel h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--car-accent);
+}
+
+.event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.event-btn {
+  background: linear-gradient(135deg, #161e2e, #0e131d);
+  color: var(--car-accent);
+  border: 1px solid var(--car-accent);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.84rem;
+  font-family: var(--car-font);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.event-btn:hover {
+  background: var(--car-accent);
+  color: #07090e;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-box {
+  background: var(--car-card);
+  border: 1px solid var(--car-border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--car-accent);
+}
+
+.code-box {
+  background: #07090e;
+  border: 1px solid var(--car-border);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 0;
+  font-family: var(--car-font);
+  font-size: 0.78rem;
+  color: #fdba74;
+  white-space: pre;
+  overflow-x: auto;
+  max-height: 180px;
+}
+
+.history-list {
+  background: #07090e;
+  border: 1px solid var(--car-border);
+  border-radius: 6px;
+  padding: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-item {
+  font-size: 0.76rem;
+  font-family: var(--car-font);
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: rgba(22, 30, 46, 0.6);
+  border-left: 3px solid var(--car-accent);
+  color: var(--car-text);
+  line-height: 1.4;
+}
+
+.history-empty {
+  color: var(--car-dim);
+  font-size: 0.8rem;
+  font-style: italic;
+  padding: 8px;
+}
+
+.secondary-btn {
+  background: var(--car-card-light);
+  color: var(--car-text);
+  border: 1px solid var(--car-border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+  background: #233048;
+  border-color: var(--car-accent);
+}
