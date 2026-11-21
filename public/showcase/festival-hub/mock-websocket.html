@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - WebSocket & RPC Streaming Hub</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+</head>
+<body class="ws-body">
+  <div class="ws-hub-container" id="festival-websocket-container">
+    <header class="ws-header">
+      <div class="ws-tag">RPC & STREAMING INGESTION</div>
+      <h2>Stage Telemetry WebSocket Bus</h2>
+      <p>Simulated bi-directional real-time stream managing stage audio feeds, DMX512 light rigs, and artist timing synchronizers.</p>
+    </header>
+
+    <!-- Connection Bar -->
+    <div class="ws-connection-bar">
+      <div class="ws-status-wrap">
+        <span class="ws-status-dot connected" id="ws-status-indicator"></span>
+        <strong id="ws-status-text">CONNECTED</strong>
+        <span class="ws-endpoint" id="ws-endpoint-url">wss://stream.festivalhub.live/v1/telemetry</span>
+      </div>
+
+      <div class="ws-actions">
+        <button id="btn-toggle-connect" class="ws-btn ws-btn-secondary">Disconnect</button>
+        <button id="btn-simulate-dropout" class="ws-btn ws-btn-warning">Simulate Dropout</button>
+      </div>
+    </div>
+
+    <!-- Latency & Metric Counters -->
+    <div class="ws-gauges-grid">
+      <div class="ws-gauge-card">
+        <span class="gauge-label">Heartbeat Latency</span>
+        <strong class="gauge-value" id="gauge-latency">18 ms</strong>
+      </div>
+      <div class="ws-gauge-card">
+        <span class="gauge-label">Packets Ingested</span>
+        <strong class="gauge-value" id="gauge-sent">0</strong>
+      </div>
+      <div class="ws-gauge-card">
+        <span class="gauge-label">Sub Deliveries</span>
+        <strong class="gauge-value" id="gauge-recv">0</strong>
+      </div>
+      <div class="ws-gauge-card">
+        <span class="gauge-label">Dropped Packets</span>
+        <strong class="gauge-value" id="gauge-dropped">0</strong>
+      </div>
+    </div>
+
+    <!-- Channel Subscription Pills -->
+    <div class="ws-channels-section">
+      <h3>Active Pub/Sub Topics</h3>
+      <div class="ws-pills-row" id="ws-pills">
+        <span class="ws-pill active" data-channel="stage/main/audio">🎵 stage/main/audio</span>
+        <span class="ws-pill active" data-channel="lighting/dmx/lasers">💡 lighting/dmx/lasers</span>
+        <span class="ws-pill active" data-channel="crowd/density/zone-a">👥 crowd/density/zone-a</span>
+        <span class="ws-pill" data-channel="pyro/cue/triggers">💥 pyro/cue/triggers</span>
+      </div>
+    </div>
+
+    <!-- Packet Stream Log -->
+    <div class="ws-log-section">
+      <div class="ws-log-header">
+        <h3>Live Packet Stream (Monospace)</h3>
+        <button id="btn-publish-test" class="ws-btn ws-btn-primary">+ Emit RPC Test Pulse</button>
+      </div>
+      <div class="ws-packet-log" id="ws-stream-log" role="log" aria-live="polite">
+        <div class="ws-log-entry system">[SYSTEM] Socket connected to wss://stream.festivalhub.live/v1/telemetry</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { FestivalHubSocketEmulator } from './mock-websocket.js';
+    const socket = new FestivalHubSocketEmulator();
+    socket.connect();
+
+    const statusDot = document.getElementById('ws-status-indicator');
+    const statusText = document.getElementById('ws-status-text');
+    const toggleBtn = document.getElementById('btn-toggle-connect');
+    const dropoutBtn = document.getElementById('btn-simulate-dropout');
+    const logBox = document.getElementById('ws-stream-log');
+
+    function appendLog(channel, payload, isSystem = false) {
+      const entry = document.createElement('div');
+      entry.className = `ws-log-entry ${isSystem ? 'system' : ''}`;
+      const time = new Date().toISOString().substring(11, 19);
+      entry.textContent = `[${time}] [${channel}] ${JSON.stringify(payload)}`;
+      logBox.prepend(entry);
+      if (logBox.children.length > 40) logBox.lastElementChild.remove();
+    }
+
+    function updateMetrics() {
+      const m = socket.getMetrics();
+      document.getElementById('gauge-latency').textContent = `${m.lastLatencyMs} ms`;
+      document.getElementById('gauge-sent').textContent = m.packetsSent;
+      document.getElementById('gauge-recv').textContent = m.packetsReceived;
+      document.getElementById('gauge-dropped').textContent = m.packetsDropped;
+
+      statusDot.className = `ws-status-dot ${socket.state.toLowerCase()}`;
+      statusText.textContent = socket.state;
+    }
+
+    // Subscribe to default topics
+    socket.subscribe('stage/main/audio', (pkt) => appendLog(pkt.channel, pkt.payload));
+    socket.subscribe('lighting/dmx/lasers', (pkt) => appendLog(pkt.channel, pkt.payload));
+    socket.subscribe('crowd/density/zone-a', (pkt) => appendLog(pkt.channel, pkt.payload));
+
+    socket.subscribe('__system:heartbeat', (data) => {
+      updateMetrics();
+    });
+
+    socket.subscribe('__system:dropout', (data) => {
+      appendLog('SYSTEM', 'Connection interrupted. Reconnecting with exponential backoff...', true);
+      updateMetrics();
+    });
+
+    socket.subscribe('__system:reconnected', (data) => {
+      appendLog('SYSTEM', 'Successfully restored bi-directional streaming connection.', true);
+      updateMetrics();
+    });
+
+    toggleBtn?.addEventListener('click', () => {
+      if (socket.state === 'CONNECTED') {
+        socket.disconnect();
+        toggleBtn.textContent = 'Reconnect';
+      } else {
+        socket.connect();
+        toggleBtn.textContent = 'Disconnect';
+      }
+      updateMetrics();
+    });
+
+    dropoutBtn?.addEventListener('click', () => {
+      dropoutBtn.disabled = true;
+      socket.simulateDropout(2000).then(() => {
+        dropoutBtn.disabled = false;
+        updateMetrics();
+      });
+      updateMetrics();
+    });
+
+    document.getElementById('btn-publish-test')?.addEventListener('click', () => {
+      socket.publish('stage/main/audio', {
+        rmsDb: -6.2,
+        peakDb: -1.4,
+        eqPreset: 'Electronic-BassBoost',
+        latencyUs: 450
+      });
+      updateMetrics();
+    });
+
+    // Auto-stream sample telemetry every 3 seconds
+    setInterval(() => {
+      if (socket.state === 'CONNECTED') {
+        socket.publish('lighting/dmx/lasers', {
+          universe: 1,
+          fixtureCount: 48,
+          activeBeamAngleDeg: 120,
+          strobeHz: 14
+        });
+        updateMetrics();
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
