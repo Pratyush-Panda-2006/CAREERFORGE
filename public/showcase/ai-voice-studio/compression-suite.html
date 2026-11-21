@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - Vocal Audio Compression & Payload Shrinkage Analyzer</title>
+  <link rel="stylesheet" href="compression-suite.css">
+</head>
+<body>
+  <div class="compression-container">
+    <header class="compression-header">
+      <div class="header-badge">VOICE-LZW v3.1</div>
+      <h1>AI Voice Studio - Audio Telemetry Compression Suite</h1>
+      <p>High-efficiency client-side LZW phoneme metadata, speech model weights & synthesis transcript shrinkage analyzer</p>
+    </header>
+
+    <div class="metrics-dashboard">
+      <div class="metric-card">
+        <span class="metric-label">Original Vocal Payload</span>
+        <span id="raw-bytes" class="metric-value">0 B</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Compressed Footprint</span>
+        <span id="compressed-bytes" class="metric-value">0 B</span>
+      </div>
+      <div class="metric-card highlight">
+        <span class="metric-label">Bandwidth Savings</span>
+        <span id="savings-percent" class="metric-value">0.0%</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Compression Ratio</span>
+        <span id="compression-ratio" class="metric-value">1.000x</span>
+      </div>
+    </div>
+
+    <main class="workbench-grid">
+      <div class="workbench-panel">
+        <div class="panel-header">
+          <h3>Vocal Synthesis Metadata & Script Payload Input</h3>
+          <button id="load-sample-btn" class="secondary-btn">Load Voice Sample</button>
+        </div>
+        <textarea id="voice-input" class="payload-textarea" placeholder="Enter phoneme timings, voice model metadata JSON, speech transcripts, or pitch curve vectors..."></textarea>
+        <div class="button-group">
+          <button id="compress-btn" class="primary-btn">Compress Payload (LZW)</button>
+          <button id="clear-btn" class="secondary-btn">Clear</button>
+        </div>
+      </div>
+
+      <div class="workbench-panel">
+        <div class="panel-header">
+          <h3>Compressed Bytecode & Token Stream</h3>
+          <button id="download-btn" class="secondary-btn">Export Binary</button>
+        </div>
+        <div id="bytecode-display" class="bytecode-viewer">Waiting for voice data payload input...</div>
+        <div class="button-group">
+          <button id="decompress-btn" class="primary-btn">Decompress & Verify</button>
+        </div>
+        <div id="decompressed-display" class="decompressed-viewer" style="display: none;"></div>
+      </div>
+    </main>
+
+    <footer class="compression-footer">
+      <div id="engine-status" class="engine-status">Engine Status: Ready (UTF-8 LZW 16-Bit Engine)</div>
+    </footer>
+  </div>
+
+  <script type="module" src="compression-suite.js"></script>
+</body>
+</html>
