@@ -1,0 +1,218 @@
+:root {
+  --sound-bg: #0f172a;
+  --sound-card: #1e293b;
+  --sound-border: #334155;
+  --sound-accent: #38bdf8;
+  --sound-glow: #7dd3fc;
+  --sound-text: #f8fafc;
+  --sound-dim: rgba(255, 255, 255, 0.65);
+  --sound-font: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--sound-bg);
+  color: var(--sound-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.soundscape-container {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.soundscape-header {
+  border-bottom: 2px solid var(--sound-border);
+  padding-bottom: 16px;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--sound-border);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--sound-font);
+  color: var(--sound-accent);
+  margin-bottom: 8px;
+}
+
+.soundscape-header h1 {
+  margin: 0 0 6px 0;
+  font-size: 1.5rem;
+  color: var(--sound-text);
+}
+
+.soundscape-header p {
+  margin: 0;
+  color: var(--sound-dim);
+  font-size: 0.95rem;
+}
+
+.visualizer-card {
+  background: var(--sound-card);
+  border: 1px solid var(--sound-border);
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.eq-meter {
+  display: flex;
+  gap: 8px;
+  height: 60px;
+  align-items: flex-end;
+}
+
+.eq-bar {
+  width: 12px;
+  background: var(--sound-border);
+  border-radius: 4px;
+  height: 8px;
+  transition: height 0.2s ease, background-color 0.2s ease;
+}
+
+.visualizer-card.playing .eq-bar {
+  background: var(--sound-accent);
+  box-shadow: 0 0 8px var(--sound-glow);
+  animation: eqPulse 1.2s infinite ease-in-out alternate;
+}
+
+.visualizer-card.playing .eq-bar:nth-child(1) { animation-delay: 0.1s; height: 35px; }
+.visualizer-card.playing .eq-bar:nth-child(2) { animation-delay: 0.3s; height: 50px; }
+.visualizer-card.playing .eq-bar:nth-child(3) { animation-delay: 0.2s; height: 28px; }
+.visualizer-card.playing .eq-bar:nth-child(4) { animation-delay: 0.5s; height: 58px; }
+.visualizer-card.playing .eq-bar:nth-child(5) { animation-delay: 0.15s; height: 42px; }
+.visualizer-card.playing .eq-bar:nth-child(6) { animation-delay: 0.4s; height: 30px; }
+.visualizer-card.playing .eq-bar:nth-child(7) { animation-delay: 0.25s; height: 48px; }
+.visualizer-card.playing .eq-bar:nth-child(8) { animation-delay: 0.35s; height: 20px; }
+
+@keyframes eqPulse {
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1.0); }
+}
+
+.sound-btn {
+  padding: 10px 24px;
+  background: var(--sound-accent);
+  color: #000;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.sound-btn:hover {
+  opacity: 0.9;
+}
+
+.sound-btn.playing {
+  background: #ef4444;
+  color: #fff;
+}
+
+.mixer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .mixer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.control-panel {
+  background: var(--sound-card);
+  border: 1px solid var(--sound-border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.control-panel h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--sound-text);
+  border-bottom: 1px solid var(--sound-border);
+  padding-bottom: 8px;
+}
+
+.panel-label {
+  font-size: 0.85rem;
+  color: var(--sound-dim);
+}
+
+.preset-dropdown {
+  background: var(--sound-bg);
+  color: var(--sound-text);
+  border: 1px solid var(--sound-border);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.channel-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.channel-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.channel-name {
+  color: var(--sound-text);
+}
+
+.channel-val {
+  color: var(--sound-accent);
+  font-family: var(--sound-font);
+}
+
+.channel-slider {
+  width: 100%;
+  accent-color: var(--sound-accent);
+}
+
+.master-row {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--sound-border);
+}
+
+.soundscape-footer {
+  text-align: center;
+  padding: 12px;
+  background: var(--sound-card);
+  border: 1px solid var(--sound-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: var(--sound-font);
+  color: var(--sound-dim);
+}
