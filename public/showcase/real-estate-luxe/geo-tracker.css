@@ -1,0 +1,69 @@
+:root {
+  color-scheme: dark;
+  background: #0b111a;
+  color: #dbe4f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --surface: #141e2c;
+  --muted: #8b9bb0;
+  --line: #24354c;
+  --accent: #00f2fe;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 1140px; margin: auto; padding: 24px 32px; }
+header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 16px; font-size: 13px; }
+a { color: inherit; text-decoration: none; font-weight: bold; }
+.intro { padding: 20px 0; }
+h1 { font-size: 2rem; margin: 8px 0 12px; color: #fff; }
+.intro p { font-size: 14px; line-height: 1.6; max-width: 700px; margin: 4px 0; }
+.muted, .help { color: var(--muted); font-size: 12px; }
+.workspace { display: grid; grid-template-columns: 1fr 1.2fr; gap: 32px; border-top: 1px solid var(--line); padding: 24px 0; }
+.coordinate-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+label { display: block; font-size: 12px; color: var(--muted); }
+input, button { font: inherit; color: inherit; border: 1px solid var(--line); background: var(--surface); border-radius: 4px; }
+input[type=number] { display: block; width: 100%; padding: 8px 10px; font-family: monospace; font-size: 13px; margin: 6px 0 12px; }
+button { padding: 8px 14px; cursor: pointer; font-size: 12px; }
+button.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+.range-control { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; margin: 20px 0 16px; }
+.range-control output { font-family: monospace; font-size: 13px; color: var(--accent); }
+.range-control input { grid-column: 1/-1; width: 100%; accent-color: var(--accent); }
+.buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.details { border-top: 1px solid var(--line); padding-top: 18px; }
+.details h2 { color: var(--accent); font-size: 14px; margin: 0 0 10px; }
+dl { margin: 0; }
+dl > div { display: flex; justify-content: space-between; margin: 8px 0; font-size: 12px; }
+dt { color: var(--muted); }
+dd { margin: 0; font-family: monospace; }
+.radar-panel { background: #0e1724; border-radius: 8px; padding: 18px; border: 1px solid var(--line); }
+.radar-heading { display: flex; align-items: center; justify-content: space-between; }
+.radar-heading h2 { margin: 0; font-size: 14px; }
+svg { display: block; width: 100%; height: auto; margin: 10px auto; }
+.radar-disc { fill: #101c2c; }
+.range-ring { fill: none; stroke: #233b59; stroke-width: 1; }
+.crosshair { stroke: #1a2d44; stroke-width: 1; }
+.ring-label { font-size: 10px; fill: #6b86a8; }
+.directions { fill: #8b9bb0; font: 12px monospace; text-anchor: middle; }
+.origin-dot { fill: #fff; }
+.sweep-line { stroke: var(--accent); stroke-width: 1.5; }
+.sweep { transform-origin: 200px 200px; animation: scan 8s linear infinite; }
+.paused .sweep { animation-play-state: paused; }
+.site-blip { fill: var(--accent); stroke: #0b111a; stroke-width: 2; cursor: pointer; filter: drop-shadow(0 0 4px var(--accent)); }
+.site-blip[aria-pressed=true] { fill: #fff; stroke: var(--accent); }
+.selection-ring { fill: none; stroke: #fff; stroke-width: 2; pointer-events: none; }
+.origin-caption { font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; }
+.destinations { padding: 20px 0; border-top: 1px solid var(--line); }
+.section-heading { display: flex; justify-content: space-between; align-items: baseline; }
+.section-heading h2 { margin: 0; font-size: 15px; }
+ol { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+li button { display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; padding: 12px; }
+li button span { font-size: 11px; color: var(--muted); }
+li strong { font-size: 12px; color: #fff; }
+#notice { font-size: 12px; min-height: 20px; color: var(--accent); }
+footer { padding: 16px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+
+@keyframes scan { to { transform: rotate(360deg); } }
+@media (max-width: 768px) {
+  .workspace { grid-template-columns: 1fr; gap: 20px; }
+  ol { grid-template-columns: 1fr; }
+}
