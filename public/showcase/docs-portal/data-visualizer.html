@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Multi-Axis Radar Visualizer</title>
+  <link rel="stylesheet" href="data-visualizer.css">
+</head>
+<body class="radar-body">
+  <main class="radar-container">
+    <header class="radar-header">
+      <div class="header-left">
+        <h1 class="header-title">Docs Portal Metrics Radar</h1>
+        <p class="header-desc">Polar coordinate visualizer for documentation quality & API telemetry</p>
+      </div>
+      <div class="metrics-badge">
+        <span class="badge-label">Enclosed Area:</span>
+        <span class="badge-val" id="areaDisplay">0 sq px</span>
+      </div>
+    </header>
+
+    <div class="radar-workspace">
+      <section class="chart-canvas-panel">
+        <div class="svg-wrapper">
+          <svg id="radarSvg" width="460" height="460" viewBox="0 0 460 460">
+            <!-- Web grid, spokes, polygon fill, and vertices rendered dynamically -->
+          </svg>
+        </div>
+      </section>
+
+      <section class="metrics-controls-panel">
+        <div class="panel-header">
+          <h3>Metric Sliders</h3>
+          <button class="btn btn-sm" id="resetSlidersBtn">Reset</button>
+        </div>
+        <div class="sliders-list" id="slidersContainer">
+          <!-- Range sliders injected by script -->
+        </div>
+        <div class="summary-card">
+          <h4>Overall Quality Index</h4>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="qualityFill" style="width: 85%;"></div>
+          </div>
+          <span class="summary-text" id="qualityScoreText">85% Composite Score</span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { DocsPortalRadarChart } from './data-visualizer.js';
+
+    const chart = new DocsPortalRadarChart();
+    const svgElem = document.getElementById('radarSvg');
+    const areaDisplay = document.getElementById('areaDisplay');
+    const slidersContainer = document.getElementById('slidersContainer');
+    const qualityFill = document.getElementById('qualityFill');
+    const qualityScoreText = document.getElementById('qualityScoreText');
+
+    function renderSvg() {
+      svgElem.innerHTML = '';
+
+      // Render concentric web rings
+      const rings = chart.generateWebGrid(5);
+      rings.forEach((ring) => {
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        poly.setAttribute('points', ring);
+        poly.setAttribute('class', 'grid-ring');
+        svgElem.appendChild(poly);
+      });
+
+      // Render spokes
+      const spokes = chart.getSpokeCoordinates();
+      spokes.forEach((spoke) => {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', spoke.x1);
+        line.setAttribute('y1', spoke.y1);
+        line.setAttribute('x2', spoke.x2);
+        line.setAttribute('y2', spoke.y2);
+        line.setAttribute('class', 'axis-spoke');
+        svgElem.appendChild(line);
+
+        // Label
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', spoke.labelX);
+        text.setAttribute('y', spoke.labelY);
+        text.setAttribute('class', 'axis-label');
+        text.setAttribute('text-anchor', 'middle');
+        text.textContent = spoke.name;
+        svgElem.appendChild(text);
+      });
+
+      // Render data polygon
+      const pointsString = chart.generatePolygonPoints();
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      polygon.setAttribute('points', pointsString);
+      polygon.setAttribute('class', 'data-polygon');
+      svgElem.appendChild(polygon);
+
+      // Render vertex dots
+      const vertices = chart.getVertexCoordinates();
+      vertices.forEach((v) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', v.x);
+        circle.setAttribute('cy', v.y);
+        circle.setAttribute('r', '5');
+        circle.setAttribute('class', 'vertex-dot');
+        svgElem.appendChild(circle);
+      });
+
+      // Update area & summary stats
+      const area = chart.computeEnclosedArea();
+      areaDisplay.textContent = Math.round(area).toLocaleString() + ' sq px';
+
+      const summary = chart.getMetricsSummary();
+      qualityFill.style.width = Math.round(summary.averageScore * 100) + '%';
+      qualityScoreText.textContent = Math.round(summary.averageScore * 100) + '% Composite Score';
+    }
+
+    function initSliders() {
+      slidersContainer.innerHTML = '';
+      chart.metrics.forEach((m) => {
+        const group = document.createElement('div');
+        group.className = 'slider-group';
+        group.innerHTML = `
+          <div class="slider-header">
+            <span class="slider-label">${m.name}</span>
+            <span class="slider-val" id="val_${m.key}">${Math.round(m.value * 100)}%</span>
+          </div>
+          <input type="range" min="0" max="100" value="${Math.round(m.value * 100)}" data-key="${m.key}" class="metric-slider">
+        `;
+        const sliderInput = group.querySelector('input');
+        sliderInput.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10) / 100;
+          chart.updateMetric(m.key, val);
+          document.getElementById('val_' + m.key).textContent = e.target.value + '%';
+          renderSvg();
+        });
+        slidersContainer.appendChild(group);
+      });
+    }
+
+    document.getElementById('resetSlidersBtn').addEventListener('click', () => {
+      chart.resetMetrics();
+      initSliders();
+      renderSvg();
+    });
+
+    initSliders();
+    renderSvg();
+  </script>
+</body>
+</html>
