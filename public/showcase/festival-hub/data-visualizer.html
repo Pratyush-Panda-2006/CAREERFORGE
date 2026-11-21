@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub - Polar Radar Metrics Visualizer</title>
+  <link rel="stylesheet" href="data-visualizer.css">
+</head>
+<body class="radar-body">
+  <div class="radar-container" id="festival-hub-radar-container">
+    <header class="radar-header">
+      <div class="radar-tag">POLAR TELEMETRY MATRIX</div>
+      <h2>Stage Acoustics & Vibe Radar</h2>
+      <p>Multi-axis real-time sensory evaluation for festival stages, acoustic arrays, and crowd safety dynamics.</p>
+    </header>
+
+    <div class="radar-grid-layout">
+      <!-- SVG Chart Canvas Area -->
+      <div class="radar-canvas-panel">
+        <svg id="festival-radar-svg" viewBox="0 0 400 400" class="radar-svg" role="img" aria-label="Polar Radar Chart">
+          <defs>
+            <radialGradient id="radarGlowGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ec4899" stop-opacity="0.45" />
+              <stop offset="100%" stop-color="#a855f7" stop-opacity="0.05" />
+            </radialGradient>
+            <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Dynamic Webs & Axes rendered via script -->
+          <g id="radar-web-group"></g>
+          <g id="radar-axes-group"></g>
+          <polygon id="radar-polygon" class="radar-poly" points="" filter="url(#neonGlow)"></polygon>
+          <g id="radar-vertices-group"></g>
+        </svg>
+
+        <div id="radar-tooltip" class="radar-vertex-tooltip" style="display: none;"></div>
+      </div>
+
+      <!-- Controls & KPI Panel -->
+      <div class="radar-controls-panel">
+        <h3>Metrics Calibration</h3>
+        <div class="radar-sliders-list" id="radar-sliders">
+          <!-- Dynamically populated sliders -->
+        </div>
+
+        <div class="radar-kpi-summary">
+          <div class="kpi-item">
+            <span>Enclosed Area:</span>
+            <strong id="kpi-area">0 px²</strong>
+          </div>
+          <div class="kpi-item">
+            <span>Overall Score:</span>
+            <strong id="kpi-score">0%</strong>
+          </div>
+          <div class="kpi-item">
+            <span>Peak Metric:</span>
+            <strong id="kpi-peak">-</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { FestivalHubRadarChart } from './data-visualizer.js';
+    const chart = new FestivalHubRadarChart();
+
+    const svg = document.getElementById('festival-radar-svg');
+    const webGroup = document.getElementById('radar-web-group');
+    const axesGroup = document.getElementById('radar-axes-group');
+    const poly = document.getElementById('radar-polygon');
+    const verticesGroup = document.getElementById('radar-vertices-group');
+    const slidersContainer = document.getElementById('radar-sliders');
+    const tooltip = document.getElementById('radar-tooltip');
+
+    function renderStaticWebs() {
+      const webs = chart.generateWebPolygons(5);
+      webGroup.innerHTML = webs.map(w => `<polygon class="web-line" points="${w.pointsString}" />`).join('');
+
+      const axes = chart.generateAxes();
+      axesGroup.innerHTML = axes.map(a => `
+        <line class="axis-spoke" x1="${a.x1}" y1="${a.y1}" x2="${a.x2}" y2="${a.y2}" />
+        <text class="axis-label" x="${a.labelX}" y="${a.labelY}">${a.label}</text>
+      `).join('');
+    }
+
+    function renderChart() {
+      const { points, pointsString } = chart.generatePolygonPoints();
+      poly.setAttribute('points', pointsString);
+
+      verticesGroup.innerHTML = points.map(p => `
+        <circle class="radar-vertex" cx="${p.x}" cy="${p.y}" r="4.5" data-label="${p.label}" data-val="${p.value}" />
+      `).join('');
+
+      const summary = chart.getMetricsSummary();
+      document.getElementById('kpi-area').textContent = `${summary.enclosedArea} px²`;
+      document.getElementById('kpi-score').textContent = `${summary.overallPerformanceScore}%`;
+      document.getElementById('kpi-peak').textContent = `${summary.peakMetric} (${summary.peakValue}%)`;
+    }
+
+    function initSliders() {
+      slidersContainer.innerHTML = chart.metrics.map(m => `
+        <div class="slider-row">
+          <label for="slider-${m.key}">
+            <span>${m.label}</span>
+            <span class="val-display" id="val-${m.key}">${m.value}%</span>
+          </label>
+          <input type="range" id="slider-${m.key}" min="10" max="100" value="${m.value}" data-key="${m.key}">
+        </div>
+      `).join('');
+
+      slidersContainer.querySelectorAll('input[type="range"]').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const key = e.target.getAttribute('data-key');
+          const val = Number(e.target.value);
+          chart.setMetricValue(key, val);
+          document.getElementById(`val-${key}`).textContent = `${val}%`;
+          renderChart();
+        });
+      });
+    }
+
+    renderStaticWebs();
+    renderChart();
+    initSliders();
+  </script>
+</body>
+</html>
