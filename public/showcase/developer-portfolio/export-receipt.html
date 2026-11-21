@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Portfolio - Verification Certificate Exporter</title>
+  <link rel="stylesheet" href="export-receipt.css">
+</head>
+<body class="receipt-body">
+  <main class="receipt-container">
+    <header class="receipt-header">
+      <div class="header-left">
+        <h1 class="header-title">Developer Certificate & Receipt Exporter</h1>
+        <p class="header-desc">High-DPI vector canvas renderer with barcode parity verification</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="downloadBtn">Export PNG</button>
+      </div>
+    </header>
+
+    <div class="receipt-workspace">
+      <section class="controls-panel">
+        <div class="form-group">
+          <label for="devName">Developer Name</label>
+          <input type="text" id="devName" class="form-input" value="Alex Rivera">
+        </div>
+        <div class="form-group">
+          <label for="roleTitle">Engineering Title</label>
+          <input type="text" id="roleTitle" class="form-input" value="Principal Systems Architect">
+        </div>
+        <div class="form-group">
+          <label for="certId">Verification Reference</label>
+          <input type="text" id="certId" class="form-input" value="PORT-2026-X948">
+        </div>
+        <div class="form-group">
+          <label for="scoreVal">Skill Rating (%)</label>
+          <input type="range" id="scoreVal" min="70" max="100" value="98" class="form-range">
+          <span class="range-display" id="scoreDisplay">98% Competency</span>
+        </div>
+        <button class="btn btn-secondary" id="refreshBtn">Re-render Preview</button>
+      </section>
+
+      <section class="canvas-viewport-panel">
+        <div class="canvas-frame">
+          <canvas id="receiptCanvas" width="640" height="840"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { DeveloperPortfolioReceiptGenerator } from './export-receipt.js';
+
+    const canvas = document.getElementById('receiptCanvas');
+    const ctx = canvas.getContext('2d');
+    const generator = new DeveloperPortfolioReceiptGenerator();
+
+    const devNameInput = document.getElementById('devName');
+    const roleTitleInput = document.getElementById('roleTitle');
+    const certIdInput = document.getElementById('certId');
+    const scoreValInput = document.getElementById('scoreVal');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    function redraw() {
+      const data = {
+        name: devNameInput.value,
+        title: roleTitleInput.value,
+        certId: certIdInput.value,
+        score: parseInt(scoreValInput.value, 10),
+        date: new Date().toISOString().split('T')[0]
+      };
+      generator.renderCanvas(ctx, data);
+    }
+
+    scoreValInput.addEventListener('input', (e) => {
+      scoreDisplay.textContent = e.target.value + '% Competency';
+      redraw();
+    });
+
+    devNameInput.addEventListener('input', redraw);
+    roleTitleInput.addEventListener('input', redraw);
+    certIdInput.addEventListener('input', redraw);
+    refreshBtn.addEventListener('click', redraw);
+
+    downloadBtn.addEventListener('click', () => {
+      generator.downloadBlob(canvas, `developer-cert-${certIdInput.value}.png`);
+    });
+
+    // Initial render
+    redraw();
+  </script>
+</body>
+</html>
