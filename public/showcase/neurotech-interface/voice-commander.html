@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neurotech Interface - Voice Commander & Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <main class="voice-commander-container">
+    <header class="voice-commander-header">
+      <div class="voice-commander-tag">Neurotech Interface Accessibility</div>
+      <h1>Voice Commander & Speech Dispatcher</h1>
+      <p>Voice-driven neural telemetry controller capturing spoken directives via Web Speech API, matching action grammars, and providing audio synthesis responses.</p>
+    </header>
+
+    <div class="voice-commander-grid">
+      <!-- Voice Input Controller & Mic Section -->
+      <section class="voice-commander-card voice-commander-mic-card" aria-labelledby="micCardTitle">
+        <h2 id="micCardTitle">
+          <span>Microphone Input</span>
+          <span class="voice-commander-status-badge badge-idle" id="statusBadge" role="status" aria-live="polite">IDLE</span>
+        </h2>
+
+        <div class="voice-commander-mic-wrapper">
+          <div class="voice-commander-rings-container">
+            <button type="button" class="voice-commander-mic-btn" id="micToggleBtn" aria-label="Toggle voice command microphone" aria-pressed="false">
+              <svg class="voice-commander-mic-icon" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+              </svg>
+            </button>
+            <div class="voice-commander-ring ring-1"></div>
+            <div class="voice-commander-ring ring-2"></div>
+            <div class="voice-commander-ring ring-3"></div>
+          </div>
+
+          <div class="voice-commander-wave-visualizer" id="waveVisualizer" aria-hidden="true">
+            <div class="voice-commander-wave-bar"></div>
+            <div class="voice-commander-wave-bar"></div>
+            <div class="voice-commander-wave-bar"></div>
+            <div class="voice-commander-wave-bar"></div>
+            <div class="voice-commander-wave-bar"></div>
+            <div class="voice-commander-wave-bar"></div>
+            <div class="voice-commander-wave-bar"></div>
+          </div>
+        </div>
+
+        <div class="voice-commander-controls-row">
+          <button type="button" class="voice-commander-action-btn" id="micStopBtn" disabled>
+            Stop Listening
+          </button>
+        </div>
+
+        <div class="voice-commander-status-bar" role="region" aria-label="Speech commander status">
+          <p class="voice-commander-status-details" id="statusDetails" aria-live="polite">Commander standby. Press mic to speak.</p>
+        </div>
+
+        <div class="voice-commander-section-group">
+          <span class="voice-commander-sub-title">Quick Action Triggers</span>
+          <div class="voice-commander-phrase-tags">
+            <button type="button" class="voice-commander-phrase-btn" data-phrase="go to dashboard">Dashboard</button>
+            <button type="button" class="voice-commander-phrase-btn" data-phrase="show help">Show Help</button>
+            <button type="button" class="voice-commander-phrase-btn" data-phrase="toggle telemetry">Toggle Telemetry</button>
+            <button type="button" class="voice-commander-phrase-btn" data-phrase="calibrate sensors">Calibrate Sensors</button>
+            <button type="button" class="voice-commander-phrase-btn" data-phrase="filter alpha">Filter Alpha Wave</button>
+            <button type="button" class="voice-commander-phrase-btn" data-phrase="read page">Read Page</button>
+            <button type="button" class="voice-commander-phrase-btn" data-phrase="clear history">Clear History</button>
+            <button type="button" class="voice-commander-phrase-btn" data-phrase="emergency stop">Emergency Stop</button>
+          </div>
+        </div>
+
+        <div class="voice-commander-section-group">
+          <span class="voice-commander-sub-title">Simulate Voice Input</span>
+          <div class="voice-commander-sim-row">
+            <input type="text" id="simulatedInput" placeholder="e.g. 'show help' or 'toggle telemetry'" aria-label="Simulate voice command text input">
+            <button type="button" id="simulatedSubmit">Dispatch</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Command Stream Console & History Feed -->
+      <section class="voice-commander-card voice-commander-console-card" aria-labelledby="consoleCardTitle">
+        <h2 id="consoleCardTitle">
+          <span>Command Stream Console</span>
+          <button type="button" class="voice-commander-clear-btn" id="clearHistoryBtn" aria-label="Clear command feed history">Clear Feed</button>
+        </h2>
+
+        <div class="voice-commander-console-wrapper">
+          <div class="voice-commander-console-feed" id="consoleOutput" role="log" aria-live="polite" aria-atomic="false">
+            <div class="voice-commander-empty-log">Console feed initialized. Speak or dispatch directives to view real-time log.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Speech Confirmation Toast -->
+  <aside class="voice-commander-toast" id="speechToast" role="status" aria-live="polite">
+    <div class="voice-commander-toast-icon" aria-hidden="true">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+      </svg>
+    </div>
+    <span class="voice-commander-toast-msg" id="toastMsg">Command synthesized.</span>
+  </aside>
+
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>

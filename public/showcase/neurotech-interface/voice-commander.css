@@ -1,0 +1,539 @@
+/* Neurotech Interface - Voice Commander & Speech Dispatcher Styling */
+/* Scoped with voice-commander- prefix to guarantee zero merge conflict / style pollution */
+
+:root {
+  --vc-bg-primary: #030712;
+  --vc-bg-secondary: #0b1329;
+  --vc-bg-tertiary: #111c38;
+  --vc-border-color: #1e293b;
+  --vc-border-focus: #38bdf8;
+  --vc-accent-cyan: #38bdf8;
+  --vc-accent-blue: #2563eb;
+  --vc-accent-green: #34d399;
+  --vc-accent-amber: #fbbf24;
+  --vc-accent-rose: #f43f5e;
+  --vc-text-main: #f8fafc;
+  --vc-text-muted: #94a3b8;
+  --vc-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --vc-font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--vc-bg-primary);
+  color: var(--vc-text-main);
+  font-family: var(--vc-font-sans);
+  line-height: 1.5;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.voice-commander-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Header & Tags */
+.voice-commander-header {
+  background: linear-gradient(180deg, var(--vc-bg-secondary) 0%, rgba(11, 19, 41, 0.4) 100%);
+  border: 1px solid var(--vc-border-color);
+  border-radius: 12px;
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.voice-commander-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--vc-accent-cyan), transparent);
+}
+
+.voice-commander-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vc-accent-cyan);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  margin-bottom: 0.75rem;
+}
+
+.voice-commander-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--vc-text-main);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.voice-commander-header p {
+  color: var(--vc-text-muted);
+  font-size: 0.95rem;
+  max-width: 800px;
+}
+
+/* Responsive Grid Layout */
+.voice-commander-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 860px) {
+  .voice-commander-grid {
+    grid-template-columns: 360px 1fr;
+  }
+}
+
+/* Card Containers */
+.voice-commander-card {
+  background: var(--vc-bg-secondary);
+  border: 1px solid var(--vc-border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.voice-commander-card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--vc-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Status Badges */
+.voice-commander-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--vc-bg-primary);
+  border: 1px solid var(--vc-border-color);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.voice-commander-status-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.badge-idle {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--vc-text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.badge-listening {
+  background: rgba(52, 211, 153, 0.2);
+  color: var(--vc-accent-green);
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  animation: vc-pulse-badge 1.5s infinite;
+}
+
+.badge-error,
+.badge-unavailable {
+  background: rgba(244, 63, 94, 0.2);
+  color: var(--vc-accent-rose);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+}
+
+@keyframes vc-pulse-badge {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.voice-commander-status-details {
+  font-size: 0.85rem;
+  color: var(--vc-text-muted);
+  line-height: 1.4;
+}
+
+/* Microphone Area & Wave Rings */
+.voice-commander-mic-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 0 0.5rem 0;
+  position: relative;
+}
+
+.voice-commander-rings-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-commander-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid var(--vc-accent-cyan);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.voice-commander-mic-btn {
+  position: relative;
+  z-index: 2;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--vc-accent-cyan);
+  background: var(--vc-bg-tertiary);
+  color: var(--vc-accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+}
+
+.voice-commander-mic-btn:hover {
+  transform: scale(1.06);
+  background: rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+}
+
+.voice-commander-mic-btn:focus-visible {
+  outline: 2px solid var(--vc-accent-cyan);
+  outline-offset: 4px;
+}
+
+.voice-commander-mic-btn.active {
+  background: var(--vc-accent-cyan);
+  color: var(--vc-bg-primary);
+  border-color: #fff;
+  box-shadow: 0 0 35px rgba(56, 189, 248, 0.6);
+}
+
+.voice-commander-mic-icon {
+  width: 32px;
+  height: 32px;
+}
+
+/* Pulsing Wave Animation when Active */
+.voice-commander-mic-btn.active ~ .voice-commander-ring.ring-1 {
+  animation: vc-pulse-ring 2s infinite ease-out;
+}
+.voice-commander-mic-btn.active ~ .voice-commander-ring.ring-2 {
+  animation: vc-pulse-ring 2s infinite 0.6s ease-out;
+}
+.voice-commander-mic-btn.active ~ .voice-commander-ring.ring-3 {
+  animation: vc-pulse-ring 2s infinite 1.2s ease-out;
+}
+
+@keyframes vc-pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* Audio Wave Visualizer */
+.voice-commander-wave-visualizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 36px;
+  margin-top: 0.5rem;
+}
+
+.voice-commander-wave-bar {
+  width: 4px;
+  height: 6px;
+  background-color: var(--vc-border-color);
+  border-radius: 3px;
+  transition: height 0.2s ease, background-color 0.2s ease;
+}
+
+.voice-commander-wave-visualizer.animating .voice-commander-wave-bar {
+  background-color: var(--vc-accent-cyan);
+  animation: vc-wave-bounce 1s infinite ease-in-out;
+}
+
+.voice-commander-wave-visualizer.animating .voice-commander-wave-bar:nth-child(1) { animation-delay: 0.0s; }
+.voice-commander-wave-visualizer.animating .voice-commander-wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.voice-commander-wave-visualizer.animating .voice-commander-wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.voice-commander-wave-visualizer.animating .voice-commander-wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.voice-commander-wave-visualizer.animating .voice-commander-wave-bar:nth-child(5) { animation-delay: 0.6s; }
+.voice-commander-wave-visualizer.animating .voice-commander-wave-bar:nth-child(6) { animation-delay: 0.35s; }
+.voice-commander-wave-visualizer.animating .voice-commander-wave-bar:nth-child(7) { animation-delay: 0.15s; }
+
+@keyframes vc-wave-bounce {
+  0%, 100% { height: 6px; }
+  50% { height: 32px; }
+}
+
+/* Control Buttons Row */
+.voice-commander-controls-row {
+  display: flex;
+  justify-content: center;
+}
+
+.voice-commander-action-btn {
+  background: var(--vc-bg-tertiary);
+  border: 1px solid var(--vc-border-color);
+  color: var(--vc-text-muted);
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.voice-commander-action-btn:not(:disabled):hover {
+  background: rgba(244, 63, 94, 0.15);
+  border-color: var(--vc-accent-rose);
+  color: var(--vc-accent-rose);
+}
+
+.voice-commander-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Presets & Triggers */
+.voice-commander-section-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.voice-commander-sub-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--vc-text-muted);
+  letter-spacing: 0.05em;
+}
+
+.voice-commander-phrase-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.voice-commander-phrase-btn {
+  background: var(--vc-bg-tertiary);
+  border: 1px solid var(--vc-border-color);
+  color: var(--vc-text-main);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.voice-commander-phrase-btn:hover {
+  border-color: var(--vc-accent-cyan);
+  color: var(--vc-accent-cyan);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.voice-commander-phrase-btn:focus-visible {
+  outline: 2px solid var(--vc-accent-cyan);
+}
+
+.voice-commander-sim-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.voice-commander-sim-row input {
+  flex: 1;
+  background: var(--vc-bg-primary);
+  border: 1px solid var(--vc-border-color);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  color: var(--vc-text-main);
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.voice-commander-sim-row input:focus {
+  border-color: var(--vc-border-focus);
+}
+
+.voice-commander-sim-row button {
+  background: var(--vc-bg-tertiary);
+  border: 1px solid var(--vc-border-color);
+  color: var(--vc-accent-cyan);
+  padding: 0 0.85rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.voice-commander-sim-row button:hover {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: var(--vc-accent-cyan);
+}
+
+/* Dark Command Stream Console */
+.voice-commander-console-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.voice-commander-clear-btn {
+  background: none;
+  border: none;
+  color: var(--vc-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.voice-commander-clear-btn:hover {
+  color: var(--vc-accent-rose);
+}
+
+.voice-commander-console-feed {
+  flex: 1;
+  min-height: 320px;
+  background: #02050c;
+  border: 1px solid var(--vc-border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: var(--vc-font-mono);
+  font-size: 0.85rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.voice-commander-empty-log {
+  color: #475569;
+  text-align: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  font-style: italic;
+}
+
+.voice-commander-log-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 3px solid transparent;
+}
+
+.voice-commander-log-line.matched {
+  border-left-color: var(--vc-accent-cyan);
+}
+
+.voice-commander-log-line.unrecognized {
+  border-left-color: var(--vc-accent-amber);
+}
+
+.voice-commander-log-time {
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.voice-commander-log-transcript {
+  color: var(--vc-accent-cyan);
+  font-weight: 600;
+}
+
+.voice-commander-log-arrow {
+  color: #475569;
+}
+
+.voice-commander-log-response {
+  color: #e2e8f0;
+}
+
+/* Speech Confirmation Toast */
+.voice-commander-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--vc-bg-tertiary);
+  border: 1px solid var(--vc-accent-cyan);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.3);
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--vc-text-main);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+  max-width: 400px;
+}
+
+.voice-commander-toast.voice-commander-toast-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.voice-commander-toast-icon {
+  color: var(--vc-accent-cyan);
+  flex-shrink: 0;
+}
+
+.voice-commander-toast-msg {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Accessibility: Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .voice-commander-mic-btn,
+  .voice-commander-toast {
+    transition: none;
+  }
+  .voice-commander-mic-btn.active ~ .voice-commander-ring,
+  .voice-commander-wave-visualizer.animating .voice-commander-wave-bar,
+  .voice-commander-status-badge {
+    animation: none;
+  }
+}
