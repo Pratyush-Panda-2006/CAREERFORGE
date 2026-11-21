@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Logistics — Resource Allocation & Dynamic Cost Optimizer</title>
+  <link rel="stylesheet" href="cost-optimizer.css">
+</head>
+<body class="cost-optimizer-body">
+  <div class="optimizer-container">
+    <header class="optimizer-header">
+      <span class="category-badge">Global Freight Infrastructure</span>
+      <h1>Supply Chain Logistics Dynamic Cost Optimizer</h1>
+      <p>Interactive resource provisioning sandbox modeling multi-tiered consumption pricing, volume discount thresholds, and real-time expense projections in Indian Rupees (INR).</p>
+    </header>
+
+    <main class="optimizer-grid">
+      <!-- Resource Controls Section -->
+      <section class="controls-card" aria-labelledby="controls-heading">
+        <h2 id="controls-heading">Resource Allocation Sliders</h2>
+
+        <!-- Billing Frequency Toggle -->
+        <div class="billing-toggle-container">
+          <span class="billing-label" id="billing-cycle-label">Billing Cycle:</span>
+          <div class="toggle-control-group">
+            <span id="label-monthly">Monthly</span>
+            <label class="switch" for="billing-toggle">
+              <input type="checkbox" id="billing-toggle" aria-labelledby="billing-cycle-label">
+              <span class="switch-slider"></span>
+            </label>
+            <span id="label-annual" class="annual-badge">Annual (15% Off)</span>
+          </div>
+        </div>
+
+        <!-- Slider 1: Compute Nodes -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="slider-compute" class="slider-label">
+              <span class="resource-indicator resource-compute"></span>
+              Compute Nodes (vCPU Clusters)
+            </label>
+            <span id="val-compute" class="slider-val" aria-live="polite">8 vCPU Nodes</span>
+          </div>
+          <input type="range" id="slider-compute" class="styled-slider" min="1" max="100" value="8" step="1" aria-valuemin="1" aria-valuemax="100" aria-valuenow="8" aria-label="Compute Nodes">
+        </div>
+
+        <!-- Slider 2: Telemetry & Manifest Storage -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="slider-storage" class="slider-label">
+              <span class="resource-indicator resource-storage"></span>
+              Telemetry & Manifest Storage (GB)
+            </label>
+            <span id="val-storage" class="slider-val" aria-live="polite">150 GB</span>
+          </div>
+          <input type="range" id="slider-storage" class="styled-slider" min="10" max="2500" value="150" step="10" aria-valuemin="10" aria-valuemax="2500" aria-valuenow="150" aria-label="Storage in GB">
+        </div>
+
+        <!-- Slider 3: Global Tracking Bandwidth -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="slider-bandwidth" class="slider-label">
+              <span class="resource-indicator resource-bandwidth"></span>
+              Global Tracking Egress Bandwidth (GB)
+            </label>
+            <span id="val-bandwidth" class="slider-val" aria-live="polite">800 GB</span>
+          </div>
+          <input type="range" id="slider-bandwidth" class="styled-slider" min="50" max="10000" value="800" step="50" aria-valuemin="50" aria-valuemax="10000" aria-valuenow="800" aria-label="Egress Bandwidth in GB">
+        </div>
+      </section>
+
+      <!-- Cost Breakdown & Donut Card -->
+      <section class="quote-card" aria-labelledby="projection-heading">
+        <div class="quote-header">
+          <h2 id="projection-heading">Real-Time Expense Projection</h2>
+          <span id="tier-badge" class="tier-badge tier-starter" aria-label="Current Tier">Tier 1 • Starter</span>
+        </div>
+
+        <!-- Dynamic Price Ticker -->
+        <div class="price-ticker-box">
+          <div class="price-label">Estimated Projected Cost</div>
+          <div id="total-price-val" class="total-price" aria-live="polite">₹17,800.00</div>
+          <div id="billing-period-label" class="billing-period">/ month</div>
+
+          <div class="sub-price-row">
+            <span>List Subtotal:</span>
+            <span id="base-price-val">₹17,800.00</span>
+          </div>
+          <div class="sub-price-row">
+            <span>Volume & Commitment Savings:</span>
+            <span id="discount-price-val" class="savings-tag">-₹0.00</span>
+          </div>
+        </div>
+
+        <!-- Breakdown Donut Section -->
+        <div class="breakdown-wrapper">
+          <h3 class="breakdown-heading">Resource Cost Breakdown</h3>
+          <div class="donut-section">
+            <svg class="donut-chart-svg" viewBox="0 0 100 100" role="img" aria-label="Cost distribution chart">
+              <circle class="donut-bg" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-segment-compute" class="donut-segment seg-compute" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-segment-storage" class="donut-segment seg-storage" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-segment-bandwidth" class="donut-segment seg-bandwidth" cx="50" cy="50" r="45"></circle>
+            </svg>
+
+            <div class="donut-legend">
+              <div class="legend-item">
+                <span class="legend-label">
+                  <span class="resource-indicator resource-compute"></span> Compute Nodes
+                </span>
+                <span id="cost-compute" class="legend-val">₹9,600.00</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-label">
+                  <span class="resource-indicator resource-storage"></span> Storage
+                </span>
+                <span id="cost-storage" class="legend-val">₹3,000.00</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-label">
+                  <span class="resource-indicator resource-bandwidth"></span> Egress Bandwidth
+                </span>
+                <span id="cost-bandwidth" class="legend-val">₹5,200.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="optimizer-nav">
+      <a href="index.html" class="back-link">← Return to Supply Chain Logistics Showcase</a>
+    </footer>
+  </div>
+
+  <script type="module" src="cost-optimizer.js"></script>
+</body>
+</html>
