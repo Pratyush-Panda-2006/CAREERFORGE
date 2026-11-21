@@ -1,0 +1,314 @@
+/**
+ * Aerospace Orbiter - Spaceport Radar & Proximity Calculator Styling
+ */
+
+:root {
+  --aero-bg: #030712;
+  --aero-card: #0b1329;
+  --aero-card-light: #162447;
+  --aero-border: #1f3563;
+  --aero-accent: #38bdf8;
+  --aero-accent-glow: rgba(56, 189, 248, 0.3);
+  --aero-cyan: #06b6d4;
+  --aero-green: #10b981;
+  --aero-amber: #f59e0b;
+  --aero-text: #f8fafc;
+  --aero-dim: #94a3b8;
+  --aero-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--aero-bg);
+  color: var(--aero-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.geo-container {
+  max-width: 1060px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.geo-header {
+  border-bottom: 2px solid var(--aero-border);
+  padding-bottom: 16px;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid var(--aero-accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--aero-font);
+  color: var(--aero-accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.geo-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--aero-accent);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.geo-header p {
+  margin: 0;
+  color: var(--aero-dim);
+  font-size: 0.95rem;
+}
+
+.geo-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .geo-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.radar-panel,
+.nodes-panel {
+  background: var(--aero-card);
+  border: 1px solid var(--aero-border);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--aero-accent);
+}
+
+.sweep-live-indicator {
+  font-size: 0.75rem;
+  color: var(--aero-green);
+  font-family: var(--aero-font);
+  letter-spacing: 0.5px;
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Radar Display Viewport */
+.radar-display {
+  width: 320px;
+  height: 320px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, #081736 0%, #030712 75%);
+  border: 2px solid var(--aero-accent);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 24px var(--aero-accent-glow);
+}
+
+.radar-sweep-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(56, 189, 248, 0.4) 0deg, rgba(56, 189, 248, 0) 60deg);
+  animation: radar-sweep 4s linear infinite;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed rgba(56, 189, 248, 0.35);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ring-1 { width: 90px; height: 90px; }
+.ring-2 { width: 180px; height: 180px; }
+.ring-3 { width: 270px; height: 270px; }
+
+.crosshair-v {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  background: rgba(56, 189, 248, 0.25);
+  pointer-events: none;
+}
+
+.crosshair-h {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(56, 189, 248, 0.25);
+  pointer-events: none;
+}
+
+.radar-blips-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.radar-blip {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: var(--aero-accent);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px var(--aero-accent);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.radar-blip:hover {
+  transform: translate(-50%, -50%) scale(1.6);
+  background-color: var(--aero-green);
+}
+
+.coords-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.input-group label {
+  font-size: 0.78rem;
+  color: var(--aero-dim);
+}
+
+.input-group input {
+  background: #040816;
+  border: 1px solid var(--aero-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--aero-text);
+  font-family: var(--aero-font);
+  font-size: 0.88rem;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--aero-accent);
+}
+
+.primary-btn {
+  background: var(--aero-accent);
+  color: #030712;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+.radar-status {
+  font-size: 0.82rem;
+  font-family: var(--aero-font);
+  color: var(--aero-dim);
+  padding: 8px 12px;
+  background: #040816;
+  border-radius: 6px;
+  border: 1px solid var(--aero-border);
+}
+
+.nodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+.node-card {
+  background: #040816;
+  border: 1px solid var(--aero-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.node-card:hover {
+  border-color: var(--aero-accent);
+  transform: translateX(3px);
+}
+
+.node-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--aero-text);
+}
+
+.node-dist {
+  color: var(--aero-cyan);
+  font-family: var(--aero-font);
+  font-size: 0.85rem;
+}
+
+.node-category {
+  font-size: 0.78rem;
+  color: var(--aero-accent);
+}
+
+.node-bearing {
+  font-size: 0.74rem;
+  font-family: var(--aero-font);
+  color: var(--aero-dim);
+}

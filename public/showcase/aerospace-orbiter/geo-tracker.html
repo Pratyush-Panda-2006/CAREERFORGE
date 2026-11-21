@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter - Spaceport Radar & Proximity Calculator</title>
+  <link rel="stylesheet" href="geo-tracker.css">
+</head>
+<body>
+  <div class="geo-container">
+    <header class="geo-header">
+      <div class="header-badge">ORBITAL-RADAR v4.2</div>
+      <h1>Aerospace Orbiter - Spaceport Radar & Proximity Calculator</h1>
+      <p>Autonomous geospatial coordinate proximity engine, Haversine spherical calculator, and orbital spaceport tracking radar</p>
+    </header>
+
+    <div class="geo-layout">
+      <!-- Radar Viewport and Controls -->
+      <section class="radar-panel">
+        <div class="panel-header">
+          <h3>Orbital Tracking Radar Sweep</h3>
+          <span class="sweep-live-indicator">● TELEMETRY ACTIVE</span>
+        </div>
+
+        <div class="radar-display">
+          <div class="radar-sweep-beam"></div>
+          <div class="radar-ring ring-1"></div>
+          <div class="radar-ring ring-2"></div>
+          <div class="radar-ring ring-3"></div>
+          <div class="crosshair-v"></div>
+          <div class="crosshair-h"></div>
+          <div id="radar-sweep-canvas" class="radar-blips-layer"></div>
+        </div>
+
+        <div class="coords-form">
+          <div class="input-group">
+            <label for="user-lat">Orbital Sub-Point Latitude:</label>
+            <input type="number" id="user-lat" step="0.0001" value="28.5729">
+          </div>
+          <div class="input-group">
+            <label for="user-lon">Orbital Sub-Point Longitude:</label>
+            <input type="number" id="user-lon" step="0.0001" value="-80.6490">
+          </div>
+          <button id="scan-radar-btn" class="primary-btn">Compute Proximity</button>
+        </div>
+
+        <div id="radar-status" class="radar-status">Ready. Initialized at Kennedy Space Center ground station.</div>
+      </section>
+
+      <!-- Sorted Spaceports List -->
+      <section class="nodes-panel">
+        <div class="panel-header">
+          <h3>Tracked Global Spaceports & Ground Stations</h3>
+        </div>
+        <div id="nodes-list" class="nodes-list"></div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="geo-tracker.js"></script>
+</body>
+</html>
