@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotics Automata - Web Speech API Voice Commander</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <div class="voice-container">
+    <header class="voice-header">
+      <div class="badge-tag">Robotics Automata Voice Commander</div>
+      <h1>Web Speech API Voice Commander</h1>
+      <p id="statusBadge">Idle &bull; Click mic to begin listening</p>
+    </header>
+
+    <section class="voice-grid">
+      <section class="voice-card controls-card">
+        <h2>Mic Activation</h2>
+        <button type="button" id="micBtn" class="mic-btn" aria-label="Activate voice recognition">
+          <span class="mic-icon">🎤</span>
+          <span class="mic-label">Start Listening</span>
+        </button>
+        <div class="wave-visualizer" id="waveVisualizer">
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div>
+        </div>
+        <p class="mic-hint">Speak commands like "start automation", "status", "stop", or "help".</p>
+      </section>
+
+      <section class="voice-card console-card">
+        <h2>Recognized Command Stream</h2>
+        <div class="command-history" id="commandHistory">
+          <div class="history-entry empty">No commands recognized yet.</div>
+        </div>
+      </section>
+    </section>
+
+    <div class="toast" id="speechToast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
