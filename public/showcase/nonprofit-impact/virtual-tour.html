@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nonprofit Impact - Feature Spotlight Onboarding Tour</title>
+  <link rel="stylesheet" href="./virtual-tour.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #tour-root {
+      max-width: 850px;
+      width: 100%;
+    }
+    .nonprofit-impact-mock-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      max-width: 850px;
+      width: 100%;
+    }
+    .mock-card {
+      padding: 1.5rem;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: #cbd5e1;
+    }
+    .mock-card h4 {
+      margin: 0 0 0.5rem 0;
+      color: #10b981;
+      font-size: 1.1rem;
+    }
+    .mock-card p {
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div id="tour-root"></div>
+
+  <div class="nonprofit-impact-mock-grid">
+    <div id="impact-card" class="mock-card">
+      <h4>Impact Dashboard</h4>
+      <p>Live counter of verified lives impacted and supplies dispatched.</p>
+    </div>
+    <div id="grant-card" class="mock-card">
+      <h4>Grant Ledger</h4>
+      <p>Cryptographically verifiable fund tracking and audit trail.</p>
+    </div>
+    <div id="volunteer-card" class="mock-card">
+      <h4>Volunteer Grid</h4>
+      <p>Geospatial routing and volunteer dispatch management.</p>
+    </div>
+    <div id="carbon-card" class="mock-card">
+      <h4>Carbon Registry</h4>
+      <p>GIS verified carbon credits and canopy growth indexing.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { NonprofitImpactTourGuide } from './virtual-tour.js';
+
+    const root = document.getElementById('tour-root');
+    const guide = new NonprofitImpactTourGuide();
+    guide.renderToDOM(root);
+  </script>
+</body>
+</html>
