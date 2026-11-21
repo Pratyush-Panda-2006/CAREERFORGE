@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Vitality - Mathematical Expression Parser & Dynamic KPI Calculator</title>
+  <link rel="stylesheet" href="./formula-evaluator.css">
+</head>
+<body>
+  <div class="kpi-calculator-container">
+    <header class="calculator-header">
+      <div class="header-badge">Health & Longevity Metrics</div>
+      <h1>Dynamic Vitality KPI Calculator</h1>
+      <p>Evaluate custom physiological equations, caloric burns, and metabolic indices in real-time.</p>
+    </header>
+
+    <div class="formula-card">
+      <div class="input-group">
+        <label for="formula-input">Mathematical Expression</label>
+        <div class="input-wrapper">
+          <input type="text" id="formula-input" value="(heart_rate * 0.65) + (target_vo2 * 2.2) - (metabolic_burn / 10)" placeholder="e.g. (heart_rate * 0.7) + (vo2_max * 1.5)" />
+          <button id="evaluate-btn" class="btn-primary">Calculate KPI</button>
+        </div>
+        <div class="token-helper-pills">
+          <span class="pill" data-insert="heart_rate">heart_rate</span>
+          <span class="pill" data-insert="target_vo2">target_vo2</span>
+          <span class="pill" data-insert="metabolic_burn">metabolic_burn</span>
+          <span class="pill" data-insert="hydration_factor">hydration_factor</span>
+          <span class="pill operator" data-insert=" + ">+</span>
+          <span class="pill operator" data-insert=" - ">-</span>
+          <span class="pill operator" data-insert=" * ">*</span>
+          <span class="pill operator" data-insert=" / ">/</span>
+          <span class="pill operator" data-insert=" ^ ">^</span>
+        </div>
+      </div>
+
+      <div class="parameters-grid">
+        <div class="param-card">
+          <div class="param-header">
+            <span class="param-name">heart_rate (bpm)</span>
+            <span class="param-val" id="val-heart_rate">72</span>
+          </div>
+          <input type="range" class="param-slider" id="slider-heart_rate" min="40" max="200" value="72" />
+        </div>
+
+        <div class="param-card">
+          <div class="param-header">
+            <span class="param-name">target_vo2 (mL/kg/min)</span>
+            <span class="param-val" id="val-target_vo2">45</span>
+          </div>
+          <input type="range" class="param-slider" id="slider-target_vo2" min="20" max="85" value="45" />
+        </div>
+
+        <div class="param-card">
+          <div class="param-header">
+            <span class="param-name">metabolic_burn (kcal)</span>
+            <span class="param-val" id="val-metabolic_burn">550</span>
+          </div>
+          <input type="range" class="param-slider" id="slider-metabolic_burn" min="100" max="2500" value="550" />
+        </div>
+
+        <div class="param-card">
+          <div class="param-header">
+            <span class="param-name">hydration_factor (idx)</span>
+            <span class="param-val" id="val-hydration_factor">1.2</span>
+          </div>
+          <input type="range" class="param-slider" id="slider-hydration_factor" min="0.5" max="2.0" step="0.1" value="1.2" />
+        </div>
+      </div>
+
+      <div id="error-banner" class="error-banner hidden"></div>
+
+      <div class="result-display-card">
+        <div class="result-label">Computed Longevity Index</div>
+        <div class="result-value" id="kpi-result">--</div>
+        <div class="result-meta" id="rpn-tokens">Tokens: Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { HealthVitalityFormulaParser } from './formula-evaluator.js';
+    const parser = new HealthVitalityFormulaParser();
+    const container = document.querySelector('.kpi-calculator-container');
+    parser.renderToDOM(container);
+  </script>
+</body>
+</html>
