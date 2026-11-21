@@ -1,0 +1,211 @@
+/**
+ * Luxury Realms - Estate Portfolio Compression & Payload Shrinkage Analyzer Styling
+ */
+
+:root {
+  --lux-gold: #d4af37;
+  --lux-gold-light: #f59e0b;
+  --lux-bronze: #b45309;
+  --lux-dark: #0c0a09;
+  --lux-card: #1c1917;
+  --lux-border: #292524;
+  --lux-dim: #a8a29e;
+  --lux-text: #f5f5f4;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--lux-dark);
+  color: var(--lux-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.compression-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.compression-header {
+  border-bottom: 2px solid var(--lux-border);
+  padding-bottom: 16px;
+}
+
+.compression-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--lux-gold);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.compression-header p {
+  margin: 0;
+  color: var(--lux-dim);
+  font-size: 0.95rem;
+}
+
+.metrics-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  background: var(--lux-card);
+  border: 1px solid var(--lux-border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--lux-gold);
+}
+
+.metric-card.highlight {
+  border-color: var(--lux-gold);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(245, 158, 11, 0.08));
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: var(--lux-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--lux-gold-light);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+.metric-card.highlight .metric-value {
+  color: var(--lux-gold);
+}
+
+.workbench-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.workbench-panel {
+  background: var(--lux-card);
+  border: 1px solid var(--lux-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--lux-gold);
+}
+
+.payload-textarea {
+  width: 100%;
+  height: 220px;
+  background: #0c0a09;
+  border: 1px solid var(--lux-border);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--lux-text);
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.payload-textarea:focus {
+  outline: none;
+  border-color: var(--lux-gold);
+}
+
+.bytecode-viewer,
+.decompressed-viewer {
+  min-height: 140px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #0c0a09;
+  border: 1px solid var(--lux-border);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: #fbbf24;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.decompressed-viewer {
+  color: var(--lux-text);
+  border-color: var(--lux-gold);
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.primary-btn {
+  flex: 1;
+  background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-light));
+  color: #0c0a09;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+.secondary-btn {
+  background: #292524;
+  border: 1px solid var(--lux-border);
+  color: var(--lux-dim);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+  border-color: var(--lux-gold);
+  color: var(--lux-text);
+}
+
+.compression-footer {
+  text-align: center;
+  padding: 8px;
+}
+
+.status-indicator {
+  font-size: 0.85rem;
+  color: var(--lux-dim);
+}
