@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Culinary Bistro - Kitchen & Order Streaming Hub</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+</head>
+<body class="socket-hub-body">
+  <main class="socket-container">
+    <header class="socket-header">
+      <div class="header-left">
+        <h1 class="hub-title">Bistro Kitchen & Floor Telemetry</h1>
+        <p class="hub-subtitle">Bi-directional WebSub streaming for kitchen tickets and table status</p>
+      </div>
+      <div class="connection-status-badge" id="connectionStatus">
+        <span class="status-pulse-dot" id="statusDot"></span>
+        <span class="status-text" id="statusLabel">DISCONNECTED</span>
+      </div>
+    </header>
+
+    <section class="socket-controls-grid">
+      <div class="control-card">
+        <h3>Stream Management</h3>
+        <div class="button-group">
+          <button class="btn btn-connect" id="connectBtn">Connect Stream</button>
+          <button class="btn btn-disconnect" id="disconnectBtn" disabled>Disconnect</button>
+          <button class="btn btn-dropout" id="dropoutBtn" disabled>Simulate Dropout</button>
+        </div>
+      </div>
+
+      <div class="control-card">
+        <h3>Active Channels</h3>
+        <div class="topics-pills" id="topicPills">
+          <span class="topic-pill active" data-channel="kitchen/tickets">kitchen/tickets</span>
+          <span class="topic-pill active" data-channel="floor/tables">floor/tables</span>
+          <span class="topic-pill active" data-channel="bar/cocktails">bar/cocktails</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="metrics-gauges-row">
+      <div class="gauge-card">
+        <span class="gauge-label">Packets In</span>
+        <span class="gauge-val" id="metricPacketsIn">0</span>
+      </div>
+      <div class="gauge-card">
+        <span class="gauge-label">Packets Out</span>
+        <span class="gauge-val" id="metricPacketsOut">0</span>
+      </div>
+      <div class="gauge-card">
+        <span class="gauge-label">Dropped</span>
+        <span class="gauge-val text-alert" id="metricDropped">0</span>
+      </div>
+      <div class="gauge-card">
+        <span class="gauge-label">Latency</span>
+        <span class="gauge-val text-success" id="metricLatency">-- ms</span>
+      </div>
+    </section>
+
+    <section class="log-card">
+      <div class="log-header">
+        <h3>Live Event Packets</h3>
+        <button class="btn btn-sm" id="clearLogBtn">Clear Log</button>
+      </div>
+      <pre class="packet-stream-feed" id="streamLog">// Stream idle. Connect to receive live kitchen orders and dispatch stream...</pre>
+    </section>
+  </main>
+
+  <script type="module">
+    import { CulinaryBistroSocketEmulator } from './mock-websocket.js';
+
+    const socket = new CulinaryBistroSocketEmulator();
+    const statusLabel = document.getElementById('statusLabel');
+    const statusDot = document.getElementById('statusDot');
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const dropoutBtn = document.getElementById('dropoutBtn');
+    const logElem = document.getElementById('streamLog');
+    const packetsIn = document.getElementById('metricPacketsIn');
+    const packetsOut = document.getElementById('metricPacketsOut');
+    const packetsDropped = document.getElementById('metricDropped');
+    const metricLatency = document.getElementById('metricLatency');
+
+    function updateUiState() {
+      statusLabel.textContent = socket.state;
+      statusDot.className = 'status-pulse-dot ' + socket.state.toLowerCase();
+      connectBtn.disabled = socket.state === 'CONNECTED';
+      disconnectBtn.disabled = socket.state === 'DISCONNECTED';
+      dropoutBtn.disabled = socket.state !== 'CONNECTED';
+      packetsIn.textContent = socket.metrics.packetsReceived;
+      packetsOut.textContent = socket.metrics.packetsSent;
+      packetsDropped.textContent = socket.metrics.packetsDropped;
+      metricLatency.textContent = socket.metrics.lastLatencyMs + ' ms';
+    }
+
+    connectBtn.addEventListener('click', () => {
+      socket.connect();
+      updateUiState();
+      socket.subscribe('kitchen/tickets', (pkt) => {
+        logElem.textContent = `[${pkt.channel}] ${JSON.stringify(pkt.payload)}\n` + logElem.textContent.slice(0, 3000);
+        updateUiState();
+      });
+      socket.subscribe('floor/tables', (pkt) => {
+        logElem.textContent = `[${pkt.channel}] ${JSON.stringify(pkt.payload)}\n` + logElem.textContent.slice(0, 3000);
+        updateUiState();
+      });
+    });
+
+    disconnectBtn.addEventListener('click', () => {
+      socket.disconnect();
+      updateUiState();
+    });
+
+    dropoutBtn.addEventListener('click', () => {
+      socket.simulateDropout(2500);
+      updateUiState();
+    });
+
+    document.getElementById('clearLogBtn').addEventListener('click', () => {
+      logElem.textContent = '// Log cleared.';
+    });
+  </script>
+</body>
+</html>
