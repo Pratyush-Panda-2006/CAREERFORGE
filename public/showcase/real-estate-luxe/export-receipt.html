@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Estate Luxe - Escrow Certificate & Receipt Exporter</title>
+  <link rel="stylesheet" href="export-receipt.css">
+</head>
+<body class="receipt-body">
+  <main class="receipt-container">
+    <header class="receipt-header">
+      <div class="header-left">
+        <h1 class="header-title">Luxury Real Estate Deed & Escrow Exporter</h1>
+        <p class="header-desc">High-DPI vector canvas renderer with barcode parity verification</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="downloadBtn">Export PNG</button>
+      </div>
+    </header>
+
+    <div class="receipt-workspace">
+      <section class="controls-panel">
+        <div class="form-group">
+          <label for="buyerName">Purchaser / Entity Name</label>
+          <input type="text" id="buyerName" class="form-input" value="Bel-Air Trust LLC">
+        </div>
+        <div class="form-group">
+          <label for="propertyAddress">Estate / Parcel Reference</label>
+          <input type="text" id="propertyAddress" class="form-input" value="1040 Bel-Air Crest Road">
+        </div>
+        <div class="form-group">
+          <label for="certId">Escrow Certificate ID</label>
+          <input type="text" id="certId" class="form-input" value="LUXE-2026-E1055">
+        </div>
+        <div class="form-group">
+          <label for="escrowVal">Escrow Valuation ($M)</label>
+          <input type="range" id="escrowVal" min="1" max="25" value="14" class="form-range">
+          <span class="range-display" id="escrowDisplay">$14,000,000 Verified</span>
+        </div>
+        <button class="btn btn-secondary" id="refreshBtn">Re-render Preview</button>
+      </section>
+
+      <section class="canvas-viewport-panel">
+        <div class="canvas-frame">
+          <canvas id="receiptCanvas" width="640" height="840"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { RealEstateLuxeReceiptGenerator } from './export-receipt.js';
+
+    const canvas = document.getElementById('receiptCanvas');
+    const ctx = canvas.getContext('2d');
+    const generator = new RealEstateLuxeReceiptGenerator();
+
+    const buyerNameInput = document.getElementById('buyerName');
+    const propertyAddressInput = document.getElementById('propertyAddress');
+    const certIdInput = document.getElementById('certId');
+    const escrowValInput = document.getElementById('escrowVal');
+    const escrowDisplay = document.getElementById('escrowDisplay');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    function redraw() {
+      const data = {
+        name: buyerNameInput.value,
+        estate: propertyAddressInput.value,
+        certId: certIdInput.value,
+        valuation: parseInt(escrowValInput.value, 10) * 1000000,
+        date: new Date().toISOString().split('T')[0]
+      };
+      generator.renderCanvas(ctx, data);
+    }
+
+    escrowValInput.addEventListener('input', (e) => {
+      escrowDisplay.textContent = `$${e.target.value},000,000 Verified`;
+      redraw();
+    });
+
+    buyerNameInput.addEventListener('input', redraw);
+    propertyAddressInput.addEventListener('input', redraw);
+    certIdInput.addEventListener('input', redraw);
+    refreshBtn.addEventListener('click', redraw);
+
+    downloadBtn.addEventListener('click', () => {
+      generator.downloadBlob(canvas, `luxe-deed-${certIdInput.value}.png`);
+    });
+
+    redraw();
+  </script>
+</body>
+</html>
