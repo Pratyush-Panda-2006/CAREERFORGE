@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - WebSocket & RPC Streaming Hub</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+</head>
+<body class="ws-body">
+  <div class="ws-hub-container" id="saas-websocket-container">
+    <header class="ws-header">
+      <div class="ws-tag">RPC STREAMING & LIVE PUBSUB</div>
+      <h2>Cloud Cluster WebSocket Stream</h2>
+      <p>Low-latency bi-directional event stream orchestrating kubernetes pod lifecycle events, edge ingress metrics, and automated failover RPCs.</p>
+    </header>
+
+    <!-- Connection Bar -->
+    <div class="ws-connection-bar">
+      <div class="ws-status-wrap">
+        <span class="ws-status-dot connected" id="ws-status-indicator"></span>
+        <strong id="ws-status-text">CONNECTED</strong>
+        <span class="ws-endpoint" id="ws-endpoint-url">wss://stream.saaslaunchpad.io/v2/events</span>
+      </div>
+
+      <div class="ws-actions">
+        <button id="btn-toggle-connect" class="ws-btn ws-btn-secondary">Disconnect</button>
+        <button id="btn-simulate-dropout" class="ws-btn ws-btn-warning">Simulate Dropout</button>
+      </div>
+    </div>
+
+    <!-- Gauges Grid -->
+    <div class="ws-gauges-grid">
+      <div class="ws-gauge-card">
+        <span class="gauge-label">Heartbeat Latency</span>
+        <strong class="gauge-value" id="gauge-latency">14 ms</strong>
+      </div>
+      <div class="ws-gauge-card">
+        <span class="gauge-label">RPC Packets Out</span>
+        <strong class="gauge-value" id="gauge-sent">0</strong>
+      </div>
+      <div class="ws-gauge-card">
+        <span class="gauge-label">Sub Ingestion</span>
+        <strong class="gauge-value" id="gauge-recv">0</strong>
+      </div>
+      <div class="ws-gauge-card">
+        <span class="gauge-label">Dropped Packets</span>
+        <strong class="gauge-value" id="gauge-dropped">0</strong>
+      </div>
+    </div>
+
+    <!-- Channels Section -->
+    <div class="ws-channels-section">
+      <h3>Active Pub/Sub Topics</h3>
+      <div class="ws-pills-row" id="ws-pills">
+        <span class="ws-pill active" data-channel="cluster/telemetry/nodes">⚡ cluster/telemetry/nodes</span>
+        <span class="ws-pill active" data-channel="k8s/deployments/events">📦 k8s/deployments/events</span>
+        <span class="ws-pill active" data-channel="ingress/traffic/rps">🌐 ingress/traffic/rps</span>
+        <span class="ws-pill" data-channel="alerts/pager/critical">🚨 alerts/pager/critical</span>
+      </div>
+    </div>
+
+    <!-- Live Packet Stream Section -->
+    <div class="ws-log-section">
+      <div class="ws-log-header">
+        <h3>Live Event Stream (Monospace)</h3>
+        <button id="btn-publish-test" class="ws-btn ws-btn-primary">+ Emit RPC Cluster Event</button>
+      </div>
+      <div class="ws-packet-log" id="ws-stream-log" role="log" aria-live="polite">
+        <div class="ws-log-entry system">[SYSTEM] Socket session established with wss://stream.saaslaunchpad.io/v2/events</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { SaasLaunchpadSocketEmulator } from './mock-websocket.js';
+    const socket = new SaasLaunchpadSocketEmulator();
+    socket.connect();
+
+    const statusDot = document.getElementById('ws-status-indicator');
+    const statusText = document.getElementById('ws-status-text');
+    const toggleBtn = document.getElementById('btn-toggle-connect');
+    const dropoutBtn = document.getElementById('btn-simulate-dropout');
+    const logBox = document.getElementById('ws-stream-log');
+
+    function appendLog(channel, payload, isSystem = false) {
+      const entry = document.createElement('div');
+      entry.className = `ws-log-entry ${isSystem ? 'system' : ''}`;
+      const time = new Date().toISOString().substring(11, 19);
+      entry.textContent = `[${time}] [${channel}] ${JSON.stringify(payload)}`;
+      logBox.prepend(entry);
+      if (logBox.children.length > 40) logBox.lastElementChild.remove();
+    }
+
+    function updateMetrics() {
+      const m = socket.getMetrics();
+      document.getElementById('gauge-latency').textContent = `${m.lastLatencyMs} ms`;
+      document.getElementById('gauge-sent').textContent = m.packetsSent;
+      document.getElementById('gauge-recv').textContent = m.packetsReceived;
+      document.getElementById('gauge-dropped').textContent = m.packetsDropped;
+
+      statusDot.className = `ws-status-dot ${socket.state.toLowerCase()}`;
+      statusText.textContent = socket.state;
+    }
+
+    // Subscribe to default topics
+    socket.subscribe('cluster/telemetry/nodes', (pkt) => appendLog(pkt.channel, pkt.payload));
+    socket.subscribe('k8s/deployments/events', (pkt) => appendLog(pkt.channel, pkt.payload));
+    socket.subscribe('ingress/traffic/rps', (pkt) => appendLog(pkt.channel, pkt.payload));
+
+    socket.subscribe('__system:heartbeat', (data) => {
+      updateMetrics();
+    });
+
+    socket.subscribe('__system:dropout', (data) => {
+      appendLog('SYSTEM', 'Network drop detected. Attempting automated reconnection backoff...', true);
+      updateMetrics();
+    });
+
+    socket.subscribe('__system:reconnected', (data) => {
+      appendLog('SYSTEM', 'Connection re-established. Stream resumed.', true);
+      updateMetrics();
+    });
+
+    toggleBtn?.addEventListener('click', () => {
+      if (socket.state === 'CONNECTED') {
+        socket.disconnect();
+        toggleBtn.textContent = 'Reconnect';
+      } else {
+        socket.connect();
+        toggleBtn.textContent = 'Disconnect';
+      }
+      updateMetrics();
+    });
+
+    dropoutBtn?.addEventListener('click', () => {
+      dropoutBtn.disabled = true;
+      socket.simulateDropout(2000).then(() => {
+        dropoutBtn.disabled = false;
+        updateMetrics();
+      });
+      updateMetrics();
+    });
+
+    document.getElementById('btn-publish-test')?.addEventListener('click', () => {
+      socket.publish('k8s/deployments/events', {
+        cluster: 'us-east-prod-1',
+        pod: 'auth-gateway-7b99c',
+        status: 'READY',
+        uptimeSeconds: 84920
+      });
+      updateMetrics();
+    });
+
+    // Auto-stream telemetry every 3 seconds
+    setInterval(() => {
+      if (socket.state === 'CONNECTED') {
+        socket.publish('ingress/traffic/rps', {
+          rps: Math.floor(14500 + Math.random() * 2500),
+          errorRatePct: 0.02,
+          p99LatencyMs: 14.2
+        });
+        updateMetrics();
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
