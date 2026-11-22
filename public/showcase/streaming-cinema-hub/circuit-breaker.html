@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming Cinema Hub — Fault-Tolerant Circuit Breaker Simulator</title>
+  <link rel="stylesheet" href="circuit-breaker.css">
+</head>
+<body>
+  <div class="circuit-container">
+    <!-- Top Header -->
+    <header class="circuit-header">
+      <div class="header-content">
+        <span class="header-badge">API Resilience & System Stability</span>
+        <h1>⚡ Fault-Tolerant Circuit Breaker & Resilience Simulator</h1>
+        <p>
+          Simulate high-throughput streaming cinema API failures, test tri-state recovery dynamics (Closed, Open, Half-Open), and observe automated upstream shielding against cascading failures.
+        </p>
+      </div>
+      <a href="index.html" class="back-link">← Back to Showcase Hub</a>
+    </header>
+
+    <!-- Tri-State Status Banner -->
+    <section class="status-card" aria-label="Circuit Breaker Status">
+      <div class="status-primary-row">
+        <div class="state-meta">
+          <!-- Signal Lamps -->
+          <div class="signal-lamps" title="Circuit Status Indicator Lamps">
+            <div id="lampGreen" class="lamp lamp-green active" title="CLOSED (Healthy)"></div>
+            <div id="lampYellow" class="lamp lamp-yellow" title="HALF_OPEN (Trial)"></div>
+            <div id="lampRed" class="lamp lamp-red" title="OPEN (Tripped)"></div>
+          </div>
+          <div>
+            <span id="statePill" class="state-pill state-closed">CLOSED</span>
+            <div id="stateDesc" class="state-desc">Circuit Closed: Healthy state. Traffic flows unimpeded.</div>
+          </div>
+        </div>
+        <div>
+          <div id="cooldownCounter" class="cooldown-counter cooldown-idle">None (Ready)</div>
+        </div>
+      </div>
+
+      <!-- Threshold & Trial Meters -->
+      <div class="meters-grid">
+        <div class="meter-box">
+          <div class="meter-header">
+            <span>Failure Threshold Meter</span>
+            <span id="failureMeterText">0 / 3 Failures</span>
+          </div>
+          <div class="meter-bar-track">
+            <div id="failureMeterBar" class="meter-bar-fill fill-fail" style="width: 0%;"></div>
+          </div>
+        </div>
+        <div class="meter-box">
+          <div class="meter-header">
+            <span>Half-Open Recovery Trial Meter</span>
+            <span id="trialMeterText">0 / 2 Trials</span>
+          </div>
+          <div class="meter-bar-track">
+            <div id="trialMeterBar" class="meter-bar-fill fill-trial" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Telemetry Key Metrics -->
+    <section class="metrics-row" aria-label="Breaker Telemetry Metrics">
+      <div class="metric-card">
+        <div class="metric-label">Total Requests</div>
+        <div id="metricTotal" class="metric-val val-cyan">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Successful</div>
+        <div id="metricSuccess" class="metric-val val-green">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Failed</div>
+        <div id="metricFailed" class="metric-val val-red">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Fast-Failed (Blocked)</div>
+        <div id="metricRejected" class="metric-val val-amber">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Timeouts</div>
+        <div id="metricTimeouts" class="metric-val val-amber">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Trips</div>
+        <div id="metricTrips" class="metric-val val-red">0</div>
+      </div>
+    </section>
+
+    <!-- Interactive Simulation Controls & Config -->
+    <div class="dashboard-grid">
+      <!-- Simulation Controls -->
+      <section class="panel-card">
+        <h2 class="panel-title">🕹️ API Traffic & Chaos Simulator</h2>
+        <p class="panel-subtitle">Dispatch test payloads or simulate extreme network volatility.</p>
+
+        <div class="button-stack">
+          <!-- Single Requests -->
+          <div class="btn-row">
+            <button type="button" id="btnSimulateSuccess" class="sim-btn btn-success">
+              🟢 200 OK CDN
+            </button>
+            <button type="button" id="btnSimulateFail" class="sim-btn btn-danger">
+              🔴 503 Gateway Error
+            </button>
+            <button type="button" id="btnSimulateTimeout" class="sim-btn btn-warning">
+              ⏳ Timeout (>1s)
+            </button>
+          </div>
+
+          <!-- Chaos Scenarios -->
+          <div class="btn-row">
+            <button type="button" id="btnBurstFailures" class="sim-btn btn-danger" title="Dispatches 3 consecutive errors to breach threshold">
+              💥 Burst 3 Failures
+            </button>
+            <button type="button" id="btnBurstSuccesses" class="sim-btn btn-accent" title="Dispatches 2 consecutive successful trials">
+              🧪 Burst 2 Trials
+            </button>
+          </div>
+
+          <!-- Direct Operations -->
+          <div class="btn-row">
+            <button type="button" id="btnManualTrip" class="sim-btn btn-danger">
+              🚨 Manual Trip
+            </button>
+            <button type="button" id="btnResetTimeout" class="sim-btn btn-warning" title="Resets cooldown to 0 to test immediately">
+              ⏱️ Reset Cooldown
+            </button>
+            <button type="button" id="btnResetCircuit" class="sim-btn btn-secondary">
+              🔄 Reset Circuit
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Engine Configuration -->
+      <section class="panel-card">
+        <h2 class="panel-title">⚙️ Engine Configuration</h2>
+        <p class="panel-subtitle">Dynamically adjust resilience thresholds and cooldown parameters.</p>
+
+        <form class="config-form" onsubmit="return false;">
+          <div class="form-field">
+            <label for="cfgThreshold">Failure Threshold</label>
+            <input type="number" id="cfgThreshold" value="3" min="1" max="10">
+          </div>
+          <div class="form-field">
+            <label for="cfgCooldown">Cooldown (ms)</label>
+            <input type="number" id="cfgCooldown" value="3000" min="200" step="500">
+          </div>
+          <div class="form-field">
+            <label for="cfgTimeout">Request Timeout (ms)</label>
+            <input type="number" id="cfgTimeout" value="1000" min="100" step="250">
+          </div>
+          <div class="form-field">
+            <label for="cfgTrials">Half-Open Success Trials</label>
+            <input type="number" id="cfgTrials" value="2" min="1" max="5">
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <!-- Live Telemetry Stream -->
+    <section class="telemetry-card" aria-label="Real-Time Event Stream">
+      <div class="telemetry-header-bar">
+        <div>
+          <h2 class="panel-title">📡 Real-Time Telemetry Event Stream</h2>
+          <p class="panel-subtitle" style="margin-bottom: 0;">Live audit record of executions, trips, state transitions, and aborts.</p>
+        </div>
+        <button type="button" id="btnClearLogs" class="sim-btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
+          Clear Stream
+        </button>
+      </div>
+
+      <div id="telemetryLogContainer" class="telemetry-stream-container">
+        <!-- Event rows dynamically appended here -->
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="circuit-breaker.js"></script>
+</body>
+</html>
