@@ -1,0 +1,74 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  color: #f8f0e8;
+  background: #15131b;
+  --surface: #211d2a;
+  --border: #4a4257;
+  --muted: #c1b5cb;
+  --accent: #f2bb70;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { width: min(100% - 32px, 1060px); margin: auto; padding: 34px 0 26px; }
+header { margin-bottom: 24px; }
+a { color: var(--accent); text-underline-offset: .24em; }
+h1 { font: 600 clamp(2rem, 6vw, 4rem)/1.08 Georgia, serif; margin: 18px 0 8px; }
+header p, #keys, footer { color: var(--muted); line-height: 1.5; }
+
+.toolbar, .actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.toolbar { border-radius: 12px 12px 0 0; }
+.actions { border-radius: 0 0 12px 12px; }
+fieldset { display: flex; flex-wrap: wrap; gap: 5px; border: 0; padding: 0; margin: 0; }
+legend { margin-bottom: 4px; }
+fieldset label, button, .setting { font-size: .88rem; }
+fieldset label, .setting { display: flex; align-items: center; gap: 6px; }
+fieldset label { min-height: 40px; padding-inline: 7px; border: 1px solid transparent; border-radius: 6px; }
+fieldset label:has(:checked) { border-color: var(--accent); color: var(--accent); }
+input { accent-color: var(--accent); }
+input[type=color] { width: 42px; min-height: 36px; }
+input[type=range] { width: min(105px, 32vw); }
+output { min-width: 4ch; }
+
+#board {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-inline: 1px solid var(--border);
+  background: radial-gradient(#5b5266 1px, transparent 1px) #191622;
+  background-size: 18px 18px;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+#cursor { visibility: hidden; }
+#board:focus-visible #cursor { visibility: visible; }
+
+button {
+  min-height: 40px;
+  background: #2e2739;
+  color: inherit;
+  font-family: inherit;
+  border: 1px solid #625570;
+  border-radius: 6px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+button:disabled { opacity: .5; cursor: default; }
+#export { background: var(--accent); color: #221423; border-color: transparent; }
+#count { margin-left: auto; font-size: .82rem; color: var(--muted); }
+:focus-visible { outline: 2px solid #fff0bb; outline-offset: 3px; }
+#keys, #status, footer { font-size: .875rem; }
+#status { min-height: 1.3em; color: var(--accent); }
+footer { padding-top: 14px; border-top: 1px solid var(--border); }
