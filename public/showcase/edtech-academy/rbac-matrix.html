@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EdTech Academy - Role-Based Access Control Matrix & Policy Guard</title>
+  <link rel="stylesheet" href="rbac-matrix.css">
+</head>
+<body>
+  <div class="ed-page-wrapper">
+    <header class="ed-hero-header">
+      <div class="ed-academy-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Nexus Spring of Code 2026 • Security Architecture
+      </div>
+      <h1>Educational Access Control Matrix & Policy Guard</h1>
+      <p>
+        Unified Role-Based Access Control (RBAC) hierarchy and Attribute-Based Access Control (ABAC) dynamic policy evaluator.
+        Enforces course-level isolation, submission deadlines, and assessment proctoring flags.
+      </p>
+    </header>
+
+    <!-- Main dynamic application root -->
+    <main id="rbac-console-root"></main>
+  </div>
+
+  <script type="module">
+    import { EdTechAcademyRbacMatrix } from './rbac-matrix.js';
+
+    const matrix = new EdTechAcademyRbacMatrix();
+    const root = document.getElementById('rbac-console-root');
+
+    // Pre-populate with realistic academic audit events for an engaging initial state
+    matrix.can('Student', 'course:view', { courseId: 'CS-101-INTRO', enrollmentStatus: 'active' });
+    matrix.can('Student', 'assignment:submit', { courseId: 'CS-101-INTRO', enrollmentStatus: 'active', deadline: new Date(Date.now() + 3600000).toISOString() });
+    matrix.can('Teaching Assistant', 'assignment:grade', { courseId: 'CS-101-INTRO' });
+    matrix.can('Instructor', 'curriculum:publish', { courseId: 'MATH-202-LINEAR-ALGEBRA' });
+    matrix.can('Student', 'assignment:submit', { courseId: 'PHYS-301-QUANTUM', enrollmentStatus: 'dropped' });
+    matrix.can('Student', 'quiz:take', { courseId: 'CS-401-SECURITY', proctoringMode: 'active', fullscreenExitDetected: true });
+
+    // Render interactive console
+    matrix.render(root);
+  </script>
+</body>
+</html>
