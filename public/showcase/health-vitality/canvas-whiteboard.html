@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clinical Whiteboard &amp; Vector Sketchpad | VitalityAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <script type="module" src="canvas-whiteboard.js"></script>
+</head>
+<body>
+  <main class="whiteboard-app-container" data-health-vitality-canvas>
+    <!-- Header -->
+    <header class="whiteboard-header">
+      <div class="header-left">
+        <a href="index.html" class="back-link">← VitalityAI Showcase</a>
+        <div class="header-badge">
+          <span class="badge-dot"></span>
+          <span>CLINICAL VECTOR WHITEBOARD</span>
+        </div>
+      </div>
+      <div class="header-center">
+        <h1 class="header-title">Collaborative Anatomical &amp; Rehab Sketchpad</h1>
+        <p class="header-subtitle">Vector drawing engine with Catmull-Rom smoothing for rehabilitation diagrams, postural annotation, and workout routing.</p>
+      </div>
+      <div class="header-right">
+        <div class="template-selector-wrap">
+          <label for="template-select" class="template-label">Clinical Backdrop:</label>
+          <select id="template-select" class="template-select" aria-label="Select Clinical Template">
+            <option value="none">Blank Slate</option>
+            <option value="anatomy">Anatomical Human Figure</option>
+            <option value="goniometer">Joint Angle &amp; Range of Motion</option>
+            <option value="grid">Medical Coordinate Grid</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="whiteboard-workspace">
+      <!-- Floating Glassmorphism Tool Dock -->
+      <aside class="floating-tool-dock" aria-label="Whiteboard Drawing Palette">
+        <!-- Tools Section -->
+        <div class="dock-section">
+          <span class="dock-section-title">Tools</span>
+          <div class="tool-grid">
+            <button type="button" class="dock-btn active" data-tool="pen" title="Pen Tool (P)" aria-label="Pen Tool">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                <path d="M2 2l7.586 7.586"/>
+                <circle cx="11" cy="11" r="2"/>
+              </svg>
+              <span class="btn-label">Pen</span>
+            </button>
+
+            <button type="button" class="dock-btn" data-tool="highlighter" title="Highlighter (H)" aria-label="Highlighter">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 11-6 6v3h3l6-6"/>
+                <path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>
+              </svg>
+              <span class="btn-label">Highlight</span>
+            </button>
+
+            <button type="button" class="dock-btn" data-tool="eraser" title="Eraser (E)" aria-label="Eraser">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/>
+                <path d="M22 21H7"/>
+                <path d="m5 11 9 9"/>
+              </svg>
+              <span class="btn-label">Eraser</span>
+            </button>
+
+            <button type="button" class="dock-btn" data-tool="line" title="Straight Line (L)" aria-label="Line Tool">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="5" y1="19" x2="19" y2="5"/>
+              </svg>
+              <span class="btn-label">Line</span>
+            </button>
+
+            <button type="button" class="dock-btn" data-tool="rectangle" title="Rectangle (R)" aria-label="Rectangle Tool">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+              </svg>
+              <span class="btn-label">Rect</span>
+            </button>
+
+            <button type="button" class="dock-btn" data-tool="ellipse" title="Ellipse / Circle (C)" aria-label="Ellipse Tool">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <ellipse cx="12" cy="12" rx="9" ry="6"/>
+              </svg>
+              <span class="btn-label">Ellipse</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Color Palette -->
+        <div class="dock-section">
+          <span class="dock-section-title">Color Palette</span>
+          <div class="color-swatches" role="radiogroup" aria-label="Color Selection">
+            <button type="button" class="swatch-btn active" data-color="#0d9488" style="--swatch-color: #0d9488" title="Vibrant Teal (#0d9488)" aria-label="Vibrant Teal"></button>
+            <button type="button" class="swatch-btn" data-color="#10b981" style="--swatch-color: #10b981" title="Clinical Emerald (#10b981)" aria-label="Clinical Emerald"></button>
+            <button type="button" class="swatch-btn" data-color="#ef4444" style="--swatch-color: #ef4444" title="Heart Red (#ef4444)" aria-label="Heart Red"></button>
+            <button type="button" class="swatch-btn" data-color="#f59e0b" style="--swatch-color: #f59e0b" title="Vitality Amber (#f59e0b)" aria-label="Vitality Amber"></button>
+            <div class="custom-color-wrap" title="Custom Color Picker">
+              <input type="color" id="custom-color" value="#0d9488" aria-label="Custom Color Picker">
+            </div>
+          </div>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Stroke Width -->
+        <div class="dock-section">
+          <div class="slider-header">
+            <span class="dock-section-title">Stroke Width</span>
+            <span id="stroke-width-display" class="slider-val">4px</span>
+          </div>
+          <div class="slider-control-row">
+            <input type="range" id="stroke-width-slider" min="1" max="50" value="4" class="range-slider" aria-label="Stroke Width Slider">
+            <div class="brush-preview-wrap" aria-hidden="true">
+              <div id="brush-preview-dot" class="brush-preview-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opacity Slider -->
+        <div class="dock-section">
+          <div class="slider-header">
+            <span class="dock-section-title">Opacity</span>
+            <span id="opacity-display" class="slider-val">100%</span>
+          </div>
+          <input type="range" id="opacity-slider" min="10" max="100" value="100" class="range-slider" aria-label="Brush Opacity Slider">
+        </div>
+
+        <!-- Smoothing Toggle -->
+        <div class="dock-section">
+          <label class="toggle-control">
+            <input type="checkbox" id="smoothing-toggle" checked>
+            <span class="toggle-indicator"></span>
+            <span class="toggle-text">Catmull-Rom Smoothing</span>
+          </label>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- History Actions -->
+        <div class="dock-section">
+          <span class="dock-section-title">History</span>
+          <div class="action-grid">
+            <button type="button" id="btn-undo" class="action-btn" disabled title="Undo (Ctrl+Z)" aria-label="Undo">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 7v6h6"/>
+                <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+              </svg>
+              <span>Undo</span>
+            </button>
+            <button type="button" id="btn-redo" class="action-btn" disabled title="Redo (Ctrl+Y)" aria-label="Redo">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 7v6h-6"/>
+                <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/>
+              </svg>
+              <span>Redo</span>
+            </button>
+            <button type="button" id="btn-clear" class="action-btn danger" title="Clear Canvas" aria-label="Clear Canvas">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              <span>Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Export & Storage Actions -->
+        <div class="dock-section">
+          <span class="dock-section-title">Export / Save</span>
+          <div class="export-grid">
+            <button type="button" id="btn-export-svg" class="action-btn primary" title="Export as Vector SVG" aria-label="Export SVG">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span>SVG</span>
+            </button>
+            <button type="button" id="btn-export-png" class="action-btn" title="Download Image PNG" aria-label="Download PNG">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>PNG</span>
+            </button>
+            <button type="button" id="btn-export-json" class="action-btn" title="Export Vector Stroke Array (JSON)" aria-label="Export JSON">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+              </svg>
+              <span>JSON</span>
+            </button>
+            <label class="action-btn file-label" title="Import JSON Vector Strokes" aria-label="Import JSON">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span>Import</span>
+              <input type="file" id="import-json-file" accept=".json" class="visually-hidden">
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Drawing Canvas Viewport -->
+      <section class="canvas-viewport" aria-label="Vector Whiteboard Canvas Viewport">
+        <!-- Template Backdrop Overlay (Anatomy, Goniometer, Grid) -->
+        <div id="canvas-template-overlay" class="template-overlay template-none" aria-hidden="true">
+          <svg class="anatomy-svg" viewBox="0 0 600 800" fill="none" stroke="rgba(16, 185, 129, 0.25)" stroke-width="1.5">
+            <!-- Stylized Human Figure (Anatomical Template) -->
+            <!-- Head -->
+            <ellipse cx="300" cy="110" rx="36" ry="46" stroke-dasharray="4 2"/>
+            <!-- Neck & Spine -->
+            <line x1="300" y1="156" x2="300" y2="400" stroke-dasharray="2 4"/>
+            <!-- Shoulders & Torso -->
+            <path d="M220 180 Q300 170 380 180 L350 380 Q300 400 250 380 Z"/>
+            <!-- Arms -->
+            <path d="M220 180 L170 290 L140 400"/>
+            <path d="M380 180 L430 290 L460 400"/>
+            <!-- Pelvis & Legs -->
+            <path d="M250 380 L230 550 L220 740"/>
+            <path d="M350 380 L370 550 L380 740"/>
+            <!-- Joint Markers -->
+            <circle cx="220" cy="180" r="7" fill="rgba(13, 148, 136, 0.3)"/>
+            <circle cx="380" cy="180" r="7" fill="rgba(13, 148, 136, 0.3)"/>
+            <circle cx="170" cy="290" r="6" fill="rgba(13, 148, 136, 0.3)"/>
+            <circle cx="430" cy="290" r="6" fill="rgba(13, 148, 136, 0.3)"/>
+            <circle cx="230" cy="550" r="7" fill="rgba(13, 148, 136, 0.3)"/>
+            <circle cx="370" cy="550" r="7" fill="rgba(13, 148, 136, 0.3)"/>
+            <circle cx="220" cy="740" r="5" fill="rgba(13, 148, 136, 0.3)"/>
+            <circle cx="380" cy="740" r="5" fill="rgba(13, 148, 136, 0.3)"/>
+          </svg>
+
+          <svg class="goniometer-svg" viewBox="0 0 800 600" fill="none" stroke="rgba(245, 158, 11, 0.2)" stroke-width="1.2">
+            <!-- Range of Motion Circles & Angle Radials -->
+            <circle cx="400" cy="300" r="220" stroke-dasharray="4 4"/>
+            <circle cx="400" cy="300" r="150" stroke-dasharray="2 4"/>
+            <circle cx="400" cy="300" r="80"/>
+            <line x1="100" y1="300" x2="700" y2="300"/>
+            <line x1="400" y1="50" x2="400" y2="550"/>
+            <line x1="188" y1="88" x2="612" y2="512" stroke-dasharray="3 3"/>
+            <line x1="188" y1="512" x2="612" y2="88" stroke-dasharray="3 3"/>
+            <text x="410" y="70" fill="rgba(245, 158, 11, 0.6)" font-size="12">90° (Flexion)</text>
+            <text x="680" y="290" fill="rgba(245, 158, 11, 0.6)" font-size="12">0° (Neutral)</text>
+            <text x="410" y="540" fill="rgba(245, 158, 11, 0.6)" font-size="12">270° (Extension)</text>
+            <text x="110" y="290" fill="rgba(245, 158, 11, 0.6)" font-size="12">180°</text>
+          </svg>
+
+          <div class="medical-grid"></div>
+        </div>
+
+        <canvas id="whiteboard-canvas" class="whiteboard-canvas" width="1200" height="800"></canvas>
+
+        <!-- Viewport Floating Status Bar -->
+        <footer class="canvas-status-bar">
+          <div class="status-left">
+            <span class="status-indicator"></span>
+            <span id="canvas-coords" class="coord-display">0, 0 px</span>
+            <span class="status-sep">|</span>
+            <span id="stroke-count" class="stroke-display">0 strokes</span>
+          </div>
+          <div class="status-right">
+            <span class="shortcut-pill">P: Pen</span>
+            <span class="shortcut-pill">H: High</span>
+            <span class="shortcut-pill">E: Erase</span>
+            <span class="shortcut-pill">L: Line</span>
+            <span class="shortcut-pill">R: Rect</span>
+            <span class="shortcut-pill">C: Ellipse</span>
+            <span class="shortcut-pill">Ctrl+Z: Undo</span>
+          </div>
+        </footer>
+      </section>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="toast-notification" role="status" aria-live="polite"></div>
+  </main>
+</body>
+</html>
