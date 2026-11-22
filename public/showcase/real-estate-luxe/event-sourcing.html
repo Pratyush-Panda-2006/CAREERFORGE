@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Estate Luxe â€” Event Sourcing Ledger & Temporal Replay Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="event-sourcing.css">
+</head>
+<body class="luxe-ledger-body">
+  <div class="ledger-wrapper">
+    <!-- Header -->
+    <header class="ledger-header">
+      <div class="header-title-wrap">
+        <div class="brand-badge">Real Estate Luxe Â· Temporal Engine</div>
+        <h1>Event Sourcing Ledger & Temporal Replay</h1>
+        <p>Immutable append-only domain events, cryptographic hash audit chains, and deterministic temporal rewind</p>
+      </div>
+      <div class="header-meta-actions">
+        <div id="ledgerIntegrityBadge" class="status-badge status-valid">âœ“ HASH CHAIN VERIFIED (0 EVENTS)</div>
+        <button type="button" id="exportLedgerBtn" class="btn-luxe">ðŸ“¥ Export JSON</button>
+        <button type="button" id="importLedgerBtn" class="btn-luxe">ðŸ“¤ Import JSON</button>
+        <input type="file" id="ledgerFileInput" accept=".json" style="display: none;">
+        <button type="button" id="clearLedgerBtn" class="btn-luxe btn-danger">ðŸ”„ Reset Ledger</button>
+      </div>
+    </header>
+
+    <!-- Property Lifecycle Action Console -->
+    <section class="action-console-card">
+      <div class="section-label-bar">
+        <span class="section-label">ðŸ›ï¸ Property Lifecycle Mutations (Append-Only Events)</span>
+        <span id="activeScenarioLabel" style="font-size: 0.8rem; color: var(--gold-primary);">Ready for domain mutations</span>
+      </div>
+      <div class="lifecycle-buttons-grid">
+        <button type="button" id="btnListProperty" class="btn-luxe">
+          <span>ðŸ“</span> List Luxury Estate ($34.5M)
+        </button>
+        <button type="button" id="btnAdjustPrice" class="btn-luxe">
+          <span>ðŸ“‰</span> Adjust Price (-$1.5M)
+        </button>
+        <button type="button" id="btnSubmitOffer" class="btn-luxe">
+          <span>ðŸ’°</span> Submit All-Cash Offer ($32M)
+        </button>
+        <button type="button" id="btnAcceptOffer" class="btn-luxe">
+          <span>âœ…</span> Accept Offer
+        </button>
+        <button type="button" id="btnDepositEscrow" class="btn-luxe">
+          <span>ðŸ¦</span> Deposit Earnest Escrow ($1.6M)
+        </button>
+        <button type="button" id="btnCompleteInspection" class="btn-luxe">
+          <span>ðŸ”</span> Complete Inspection (Grade A+)
+        </button>
+        <button type="button" id="btnClearContingency" class="btn-luxe">
+          <span>ðŸ“œ</span> Clear Contingencies
+        </button>
+        <button type="button" id="btnTransferTitle" class="btn-luxe">
+          <span>ðŸ”‘</span> Convey Title Deed
+        </button>
+        <button type="button" id="btnCloseSale" class="btn-luxe btn-gold">
+          <span>ðŸ †</span> Close Sale & Settle
+        </button>
+        <button type="button" id="btnRunPresetScenario" class="btn-luxe btn-preset">
+          <span>âš¡</span> Run Full Escrow Scenario
+        </button>
+        <button type="button" id="btnSimulateTamper" class="btn-luxe" style="border-color: rgba(244, 63, 94, 0.4); color: #fda4af;">
+          <span>âš </span> Tamper Simulation Test
+        </button>
+      </div>
+    </section>
+
+    <!-- Temporal Timeline Scrubber & Transport Playback Bar -->
+    <section class="replay-scrubber-card">
+      <div class="scrubber-header">
+        <div class="cursor-indicator">
+          <span class="version-pill" id="cursorVersionPill">v0</span>
+          <span class="cursor-summary-text" id="cursorSummaryText">Viewing Genesis Initial State (0 of 0 events)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" id="btnTakeSnapshot" class="btn-luxe" style="padding: 4px 10px; font-size: 0.8rem;">
+            <span>ðŸ“¸</span> Create Snapshot
+          </button>
+          <select id="playbackSpeedSelect" class="speed-select">
+            <option value="1200">0.5x Speed (1.2s)</option>
+            <option value="600" selected>1.0x Normal (0.6s)</option>
+            <option value="250">2.0x Fast (0.25s)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="timeline-slider-track">
+        <input type="range" id="timelineScrubber" min="0" max="0" value="0" class="luxe-slider">
+      </div>
+
+      <div class="transport-controls-row">
+        <div class="transport-btns-group">
+          <button type="button" id="btnJumpFirst" class="btn-transport" title="Jump to Genesis">|â—€ First</button>
+          <button type="button" id="btnStepBack" class="btn-transport" title="Step Back 1 Event">â—€ Step</button>
+          <button type="button" id="btnPlayPause" class="btn-transport" title="Play / Pause Replay">â–¶ Play</button>
+          <button type="button" id="btnStepForward" class="btn-transport" title="Step Forward 1 Event">Step â–¶</button>
+          <button type="button" id="btnJumpLast" class="btn-transport" title="Jump to Latest">Last â–¶|</button>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);" id="timelineTimestampText">
+          Timestamp: Initialized
+        </div>
+      </div>
+    </section>
+
+    <!-- Two-Column Workspace -->
+    <div class="ledger-workspace-grid">
+      <!-- Left Column: Immutable Event Log Table -->
+      <section class="panel-card">
+        <div class="panel-header-bar">
+          <h2>â˜° Immutable Event Stream</h2>
+          <span id="eventCountBadge" class="status-badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border-subtle);">0 Recorded</span>
+        </div>
+        <div class="events-table-wrap">
+          <table class="events-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">Ver</th>
+                <th style="width: 140px;">Event Type</th>
+                <th>Domain Summary</th>
+                <th style="width: 110px;">Hash Signature</th>
+                <th style="width: 80px;">Time</th>
+              </tr>
+            </thead>
+            <tbody id="eventsTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Right Column: State Inspector & Diff Inspector -->
+      <section class="panel-card">
+        <div class="panel-header-bar">
+          <div class="state-tabs">
+            <button type="button" id="tabEstateCard" class="tab-btn active">Estate Status</button>
+            <button type="button" id="tabStateDiff" class="tab-btn">Step Mutation Diff</button>
+            <button type="button" id="tabRawJson" class="tab-btn">State JSON</button>
+          </div>
+          <span id="stateVersionBadge" class="status-badge" style="background: rgba(245, 158, 11, 0.12); color: var(--gold-light); border: 1px solid var(--border-gold);">Replayed v0</span>
+        </div>
+
+        <div class="state-content-body">
+          <!-- View 1: Visual Estate Card -->
+          <div id="viewEstateCard">
+            <div class="estate-card-preview">
+              <div class="estate-title-row">
+                <div class="estate-title" id="dispEstateTitle">The Bel-Air Promontory Villa</div>
+                <div class="estate-status-tag" id="dispEstateStatus">UNLISTED</div>
+              </div>
+              <div class="estate-address" id="dispEstateAddress">10480 Bellagio Road, Bel Air, Los Angeles, CA 90077</div>
+
+              <div class="estate-price-grid">
+                <div>
+                  <div class="price-item-label">Current List / Agreed Price</div>
+                  <div class="price-item-val" id="dispListPrice">$0</div>
+                </div>
+                <div>
+                  <div class="price-item-label">Original Asking Price</div>
+                  <div class="price-item-val" id="dispOriginalPrice">$0</div>
+                </div>
+              </div>
+
+              <div class="estate-specs-chips" id="dispSpecsContainer">
+                <span class="spec-chip">ðŸ›ï¸ 7 Bedrooms</span>
+                <span class="spec-chip">ðŸ› 11 Bathrooms</span>
+                <span class="spec-chip">ðŸ“ 16,500 Sq Ft</span>
+                <span class="spec-chip">â˜€ï¸ Panoramic City-to-Ocean Views</span>
+              </div>
+            </div>
+
+            <!-- Transaction Milestones Status -->
+            <div style="font-family: var(--font-serif); font-size: 0.85rem; color: var(--champagne); margin-bottom: 8px;">
+              Acquisition Milestones (State Reconstructed)
+            </div>
+            <div class="milestones-checklist">
+              <div class="milestone-item" id="mListing">
+                <span><span class="m-icon">â—‹</span> Exclusive Listing Agreement</span>
+                <span id="mListingVal" style="color: var(--text-dim);">Pending</span>
+              </div>
+              <div class="milestone-item" id="mOffer">
+                <span><span class="m-icon">â—‹</span> Luxury Buyer Offer Submitted</span>
+                <span id="mOfferVal" style="color: var(--text-dim);">No Active Offer</span>
+              </div>
+              <div class="milestone-item" id="mEscrow">
+                <span><span class="m-icon">â—‹</span> Earnest Escrow Wire Funded</span>
+                <span id="mEscrowVal" style="color: var(--text-dim);">Unfunded</span>
+              </div>
+              <div class="milestone-item" id="mInspection">
+                <span><span class="m-icon">â—‹</span> Architectural & Structural Inspection</span>
+                <span id="mInspectionVal" style="color: var(--text-dim);">Not Inspected</span>
+              </div>
+              <div class="milestone-item" id="mContingencies">
+                <span><span class="m-icon">â—‹</span> Contingencies Cleared</span>
+                <span id="mContingenciesVal" style="color: var(--text-dim);">0 Cleared</span>
+              </div>
+              <div class="milestone-item" id="mTitle">
+                <span><span class="m-icon">â—‹</span> Title Deed Conveyance</span>
+                <span id="mTitleVal" style="color: var(--text-dim);">Unconveyed</span>
+              </div>
+              <div class="milestone-item" id="mClosing">
+                <span><span class="m-icon">â—‹</span> Final Settlement & Key Transfer</span>
+                <span id="mClosingVal" style="color: var(--text-dim);">Open</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- View 2: Step Mutation Diff -->
+          <div id="viewStateDiff" style="display: none;">
+            <div id="diffSummaryBanner" style="font-size: 0.85rem; color: var(--champagne); margin-bottom: 12px;">
+              Select a temporal version to inspect mutations
+            </div>
+            <div id="diffChangesContainer">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- View 3: Raw Materialized JSON -->
+          <div id="viewRawJson" style="display: none;">
+            <pre class="code-box" id="jsonStateDisplay">// Replaying materialized domain state...</pre>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Snapshots Card -->
+    <section class="snapshots-card">
+      <div class="section-label-bar">
+        <span class="section-label">ðŸ“¸ Replay Snapshots (Fast-Forward Checkpoints)</span>
+        <span id="snapshotCountText" style="font-size: 0.8rem; color: var(--text-muted);">0 Saved</span>
+      </div>
+      <div class="snapshots-grid" id="snapshotsContainer">
+        <div style="font-size: 0.85rem; color: var(--text-dim);">No checkpoints saved yet. Click "Create Snapshot" above to register an accelerated restore point.</div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="ledger-footer">
+      <div>
+        <span>Real Estate Luxe &copy; 2026 Nexus Spring of Code (NSoC '26) â€” Issue #2830</span>
+      </div>
+      <div>
+        <a href="index.html" class="back-link">â† Return to Real Estate Luxe Showcase</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Interactive Modular Logic -->
+  <script type="module">
+    import {
+      RealEstateLuxeEventSourcingLedger,
+      EVENT_TYPES,
+      computeEventChecksum
+    } from './event-sourcing.js';
+
+    // Initialize Ledger Instance
+    const ledger = new RealEstateLuxeEventSourcingLedger({
+      storageKey: 'real_estate_luxe_showcase_ledger_v1',
+      playbackSpeed: 600
+    });
+
+    // DOM Elements
+    const integrityBadge = document.getElementById('ledgerIntegrityBadge');
+    const scrubber = document.getElementById('timelineScrubber');
+    const cursorVersionPill = document.getElementById('cursorVersionPill');
+    const cursorSummaryText = document.getElementById('cursorSummaryText');
+    const timelineTimestampText = document.getElementById('timelineTimestampText');
+    const eventCountBadge = document.getElementById('eventCountBadge');
+    const eventsTableBody = document.getElementById('eventsTableBody');
+    const stateVersionBadge = document.getElementById('stateVersionBadge');
+
+    // Estate Card display elements
+    const dispEstateTitle = document.getElementById('dispEstateTitle');
+    const dispEstateStatus = document.getElementById('dispEstateStatus');
+    const dispEstateAddress = document.getElementById('dispEstateAddress');
+    const dispListPrice = document.getElementById('dispListPrice');
+    const dispOriginalPrice = document.getElementById('dispOriginalPrice');
+
+    // Milestones
+    const mListing = document.getElementById('mListing');
+    const mListingVal = document.getElementById('mListingVal');
+    const mOffer = document.getElementById('mOffer');
+    const mOfferVal = document.getElementById('mOfferVal');
+    const mEscrow = document.getElementById('mEscrow');
+    const mEscrowVal = document.getElementById('mEscrowVal');
+    const mInspection = document.getElementById('mInspection');
+    const mInspectionVal = document.getElementById('mInspectionVal');
+    const mContingencies = document.getElementById('mContingencies');
+    const mContingenciesVal = document.getElementById('mContingenciesVal');
+    const mTitle = document.getElementById('mTitle');
+    const mTitleVal = document.getElementById('mTitleVal');
+    const mClosing = document.getElementById('mClosing');
+    const mClosingVal = document.getElementById('mClosingVal');
+
+    // Tabs & Views
+    const tabEstateCard = document.getElementById('tabEstateCard');
+    const tabStateDiff = document.getElementById('tabStateDiff');
+    const tabRawJson = document.getElementById('tabRawJson');
+    const viewEstateCard = document.getElementById('viewEstateCard');
+    const viewStateDiff = document.getElementById('viewStateDiff');
+    const viewRawJson = document.getElementById('viewRawJson');
+    const jsonStateDisplay = document.getElementById('jsonStateDisplay');
+    const diffChangesContainer = document.getElementById('diffChangesContainer');
+    const diffSummaryBanner = document.getElementById('diffSummaryBanner');
+
+    // Snapshots
+    const snapshotsContainer = document.getElementById('snapshotsContainer');
+    const snapshotCountText = document.getElementById('snapshotCountText');
+
+    // Transport buttons
+    const btnJumpFirst = document.getElementById('btnJumpFirst');
+    const btnStepBack = document.getElementById('btnStepBack');
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const btnStepForward = document.getElementById('btnStepForward');
+    const btnJumpLast = document.getElementById('btnJumpLast');
+    const playbackSpeedSelect = document.getElementById('playbackSpeedSelect');
+
+    let activeTab = 'card';
+
+    // Tab switching
+    function switchTab(tab) {
+      activeTab = tab;
+      tabEstateCard.classList.toggle('active', tab === 'card');
+      tabStateDiff.classList.toggle('active', tab === 'diff');
+      tabRawJson.classList.toggle('active', tab === 'json');
+
+      viewEstateCard.style.display = tab === 'card' ? 'block' : 'none';
+      viewStateDiff.style.display = tab === 'diff' ? 'block' : 'none';
+      viewRawJson.style.display = tab === 'json' ? 'block' : 'none';
+
+      renderActiveState();
+    }
+
+    tabEstateCard.addEventListener('click', () => switchTab('card'));
+    tabStateDiff.addEventListener('click', () => switchTab('diff'));
+    tabRawJson.addEventListener('click', () => switchTab('json'));
+
+    // Render Event Stream Table
+    function renderEventTable() {
+      const events = ledger.getEvents();
+      eventCountBadge.textContent = `${events.length} Recorded`;
+      eventsTableBody.replaceChildren();
+
+      if (events.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="5" style="text-align: center; color: var(--text-dim); padding: 24px;">Ledger is empty. Click any lifecycle mutation above to append an event.</td>`;
+        eventsTableBody.appendChild(row);
+        return;
+      }
+
+      events.forEach((evt) => {
+        const tr = document.createElement('tr');
+        tr.className = 'event-row';
+        if (evt.version === ledger.cursorIndex) {
+          tr.classList.add('active-temporal-step');
+        } else if (evt.version > ledger.cursorIndex) {
+          tr.classList.add('future-step');
+        }
+
+        const dateStr = new Date(evt.timestamp).toLocaleTimeString();
+        const shortHash = evt.checksum ? `${evt.checksum.substring(0, 10)}...` : 'n/a';
+        let summaryText = '';
+        if (evt.type === EVENT_TYPES.PROPERTY_LISTED) {
+          summaryText = `Listed at $${(evt.payload.listPrice || 0).toLocaleString()} - ${evt.payload.title || 'Estate'}`;
+        } else if (evt.type === EVENT_TYPES.PRICE_ADJUSTED) {
+          summaryText = `Adjusted to $${(evt.payload.newPrice || 0).toLocaleString()} (${evt.payload.reason || ''})`;
+        } else if (evt.type === EVENT_TYPES.OFFER_SUBMITTED) {
+          summaryText = `Offer from ${evt.payload.buyerName || 'Buyer'} for $${(evt.payload.offerAmount || 0).toLocaleString()}`;
+        } else if (evt.type === EVENT_TYPES.OFFER_ACCEPTED) {
+          summaryText = `Agreed price $${(evt.payload.acceptedPrice || 0).toLocaleString()}`;
+        } else if (evt.type === EVENT_TYPES.ESCROW_DEPOSITED) {
+          summaryText = `Earnest wire $${(evt.payload.amount || 0).toLocaleString()} in escrow`;
+        } else if (evt.type === EVENT_TYPES.INSPECTION_COMPLETED) {
+          summaryText = `Inspection passed: ${evt.payload.inspector || 'Structural'}`;
+        } else if (evt.type === EVENT_TYPES.CONTINGENCY_CLEARED) {
+          summaryText = `Cleared: ${evt.payload.contingencyName || 'Contingency'}`;
+        } else if (evt.type === EVENT_TYPES.TITLE_TRANSFERRED) {
+          summaryText = `Deed #${evt.payload.deedBookNumber || 'Recorded'}`;
+        } else if (evt.type === EVENT_TYPES.SALE_CLOSED) {
+          summaryText = `ðŸ † Closed: $${(evt.payload.finalSalePrice || 0).toLocaleString()}`;
+        } else {
+          summaryText = JSON.stringify(evt.payload);
+        }
+
+        tr.innerHTML = `
+          <td style="font-family: var(--font-mono); font-weight: 600; color: var(--gold-light);">v${evt.version}</td>
+          <td><span class="type-chip type-${evt.type}">${evt.type}</span></td>
+          <td style="color: var(--text-main); font-size: 0.82rem;">${summaryText}</td>
+          <td><span class="checksum-chip" title="${evt.checksum}">${shortHash}</span></td>
+          <td style="color: var(--text-dim); font-size: 0.78rem;">${dateStr}</td>
+        `;
+
+        tr.addEventListener('click', () => {
+          ledger.scrub(evt.version);
+          updateUI();
+        });
+
+        eventsTableBody.appendChild(tr);
+      });
+    }
+
+    // Render Materialized State Views
+    function renderActiveState() {
+      const state = ledger.getStateAt(ledger.cursorIndex);
+      stateVersionBadge.textContent = `Replayed v${state.version}`;
+
+      // Update Card View
+      dispEstateTitle.textContent = state.property.title || 'Unlisted Luxury Estate';
+      dispEstateStatus.textContent = state.property.status;
+      dispEstateAddress.textContent = state.property.address 
+        ? `${state.property.address}, ${state.property.city}, ${state.property.state} ${state.property.zip}`
+        : 'Exclusive Bel-Air Enclave, Los Angeles, CA';
+      dispListPrice.textContent = `$${state.property.listPrice.toLocaleString()}`;
+      dispOriginalPrice.textContent = `$${state.property.originalPrice.toLocaleString()}`;
+
+      // Update Milestones checklist
+      updateMilestone(mListing, mListingVal, state.property.status !== 'UNLISTED', state.property.status !== 'UNLISTED' ? `Listed at $${state.property.originalPrice.toLocaleString()}` : 'Unlisted');
+      updateMilestone(mOffer, mOfferVal, !!state.activeOffer, state.activeOffer ? `${state.activeOffer.buyer} ($${state.activeOffer.amount.toLocaleString()})` : 'None');
+      updateMilestone(mEscrow, mEscrowVal, state.escrow.opened, state.escrow.opened ? `$${state.escrow.amountDeposited.toLocaleString()} (${state.escrow.escrowHolder})` : 'Unfunded');
+      updateMilestone(mInspection, mInspectionVal, state.inspection.completed, state.inspection.completed ? `Passed (${state.inspection.rating || 'A+'})` : 'Pending');
+      updateMilestone(mContingencies, mContingenciesVal, state.contingencies.length > 0, `${state.contingencies.length} Cleared`);
+      updateMilestone(mTitle, mTitleVal, state.title.transferred, state.title.transferred ? `${state.title.deedBookNumber}` : 'Pending Notary');
+      updateMilestone(mClosing, mClosingVal, state.closing.isClosed, state.closing.isClosed ? `Closed @ $${state.closing.finalSalePrice.toLocaleString()}` : 'Open Escrow');
+
+      // Update Diff View
+      if (ledger.cursorIndex > 0) {
+        const prevState = ledger.getStateAt(ledger.cursorIndex - 1);
+        const diff = ledger.computeDiff(prevState, state);
+        diffSummaryBanner.textContent = `${diff.summary}`;
+        diffChangesContainer.replaceChildren();
+
+        if (diff.changes.length === 0) {
+          diffChangesContainer.innerHTML = '<div style="color: var(--text-dim); font-size: 0.85rem;">No state mutations detected between versions.</div>';
+        } else {
+          diff.changes.forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'diff-change-item';
+            const valOld = typeof c.oldValue === 'object' ? JSON.stringify(c.oldValue) : String(c.oldValue ?? 'â€”');
+            const valNew = typeof c.newValue === 'object' ? JSON.stringify(c.newValue) : String(c.newValue ?? 'â€”');
+            item.innerHTML = `
+              <span class="diff-path">${c.path}</span>
+              <div>
+                <span class="diff-val-old">${valOld}</span>
+                â†’
+                <span class="diff-val-new">${valNew}</span>
+              </div>
+            `;
+            diffChangesContainer.appendChild(item);
+          });
+        }
+      } else {
+        diffSummaryBanner.textContent = 'Genesis State (Initial blank baseline)';
+        diffChangesContainer.innerHTML = '<div style="color: var(--text-dim); font-size: 0.85rem;">Initial unlisted configuration.</div>';
+      }
+
+      // Update Raw JSON View
+      jsonStateDisplay.textContent = JSON.stringify(state, null, 2);
+    }
+
+    function updateMilestone(el, valEl, passed, label) {
+      el.classList.toggle('passed', passed);
+      const icon = el.querySelector('.m-icon');
+      if (icon) icon.textContent = passed ? 'âœ“' : 'â—‹';
+      if (valEl) {
+        valEl.textContent = label;
+        valEl.style.color = passed ? 'var(--emerald)' : 'var(--text-dim)';
+      }
+    }
+
+    // Render Snapshots
+    function renderSnapshots() {
+      const snaps = ledger.getSnapshots();
+      snapshotCountText.textContent = `${snaps.length} Saved`;
+      snapshotsContainer.replaceChildren();
+
+      if (snaps.length === 0) {
+        snapshotsContainer.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-dim);">No checkpoints saved yet. Click "Create Snapshot" above to register an accelerated restore point.</div>';
+        return;
+      }
+
+      snaps.forEach(snap => {
+        const pill = document.createElement('div');
+        pill.className = 'snapshot-pill';
+        pill.innerHTML = `
+          <div>
+            <span class="snap-version">v${snap.version}</span>
+            <span class="snap-tag">${snap.tag}</span>
+          </div>
+          <button type="button" class="btn-luxe" style="padding: 2px 8px; font-size: 0.75rem;">Restore</button>
+        `;
+        pill.querySelector('button').addEventListener('click', () => {
+          ledger.restoreFromSnapshot(snap.id);
+          updateUI();
+        });
+        snapshotsContainer.appendChild(pill);
+      });
+    }
+
+    // Full UI Refresh
+    function updateUI() {
+      const totalEvents = ledger.length;
+      scrubber.max = totalEvents;
+      scrubber.value = ledger.cursorIndex;
+
+      cursorVersionPill.textContent = `v${ledger.cursorIndex}`;
+      cursorSummaryText.textContent = `Viewing Version ${ledger.cursorIndex} of ${totalEvents} events`;
+
+      if (ledger.cursorIndex > 0 && ledger.events[ledger.cursorIndex - 1]) {
+        const curEvt = ledger.events[ledger.cursorIndex - 1];
+        timelineTimestampText.textContent = `Recorded: ${new Date(curEvt.timestamp).toLocaleString()}`;
+      } else {
+        timelineTimestampText.textContent = 'Genesis state (v0)';
+      }
+
+      const integrity = ledger.verifyLedgerIntegrity();
+      if (integrity.isValid) {
+        integrityBadge.className = 'status-badge status-valid';
+        integrityBadge.textContent = `âœ“ HASH CHAIN VERIFIED (${integrity.totalEvents} EVENTS)`;
+      } else {
+        integrityBadge.className = 'status-badge status-invalid';
+        integrityBadge.textContent = `âš  INTEGRITY COMPROMISED (EVENT #${integrity.corruptedIndex + 1})`;
+      }
+
+      renderEventTable();
+      renderActiveState();
+      renderSnapshots();
+    }
+
+    // Wire Scrubber Slider
+    scrubber.addEventListener('input', (e) => {
+      ledger.scrub(parseInt(e.target.value, 10));
+      updateUI();
+    });
+
+    // Wire Transport Controls
+    btnJumpFirst.addEventListener('click', () => {
+      ledger.jumpToStart();
+      updateUI();
+    });
+
+    btnStepBack.addEventListener('click', () => {
+      ledger.stepBackward();
+      updateUI();
+    });
+
+    btnStepForward.addEventListener('click', () => {
+      ledger.stepForward();
+      updateUI();
+    });
+
+    btnJumpLast.addEventListener('click', () => {
+      ledger.jumpToEnd();
+      updateUI();
+    });
+
+    btnPlayPause.addEventListener('click', () => {
+      if (ledger.isPlaying) {
+        ledger.pause();
+        btnPlayPause.textContent = 'â–¶ Play';
+        btnPlayPause.classList.remove('active-play');
+      } else {
+        btnPlayPause.textContent = 'â¸ Pause';
+        btnPlayPause.classList.add('active-play');
+        ledger.playbackSpeed = parseInt(playbackSpeedSelect.value, 10);
+        ledger.play(() => {
+          updateUI();
+          if (!ledger.isPlaying) {
+            btnPlayPause.textContent = 'â–¶ Play';
+            btnPlayPause.classList.remove('active-play');
+          }
+        });
+      }
+    });
+
+    playbackSpeedSelect.addEventListener('change', (e) => {
+      ledger.playbackSpeed = parseInt(e.target.value, 10);
+      if (ledger.isPlaying) {
+        ledger.pause();
+        ledger.play(() => {
+          updateUI();
+          if (!ledger.isPlaying) {
+            btnPlayPause.textContent = 'â–¶ Play';
+            btnPlayPause.classList.remove('active-play');
+          }
+        });
+      }
+    });
+
+    // Snapshot button
+    document.getElementById('btnTakeSnapshot').addEventListener('click', () => {
+      const tag = prompt('Enter a label for this checkpoint snapshot:', `Milestone @ v${ledger.cursorIndex}`);
+      if (tag !== null) {
+        ledger.createSnapshot(tag, ledger.cursorIndex);
+        updateUI();
+      }
+    });
+
+    // Wire Lifecycle Mutation Buttons
+    document.getElementById('btnListProperty').addEventListener('click', () => {
+      ledger.append(EVENT_TYPES.PROPERTY_LISTED, {
+        propertyId: 'ESTATE-BELAIR-10480',
+        title: 'The Bellagio Promontory Villa',
+        address: '10480 Bellagio Road',
+        city: 'Bel-Air',
+        state: 'CA',
+        zip: '90077',
+        listPrice: 34500000,
+        bedrooms: 7,
+        bathrooms: 11,
+        sqft: 16500,
+        lotSizeAcres: 2.4,
+        sellerName: 'Bel-Air Trust & Asset Fund',
+        agent: 'Victoria Sterling-Vance',
+        brokerage: 'Luxe Global Real Estate'
+      });
+      updateUI();
+    });
+
+    document.getElementById('btnAdjustPrice').addEventListener('click', () => {
+      const curState = ledger.getMaterializedState();
+      const newPrice = Math.max(1000000, (curState.property.listPrice || 34500000) - 1500000);
+      ledger.append(EVENT_TYPES.PRICE_ADJUSTED, {
+        newPrice,
+        reason: 'Selective Spring Market Repositioning'
+      });
+      updateUI();
+    });
+
+    document.getElementById('btnSubmitOffer').addEventListener('click', () => {
+      ledger.append(EVENT_TYPES.OFFER_SUBMITTED, {
+        offerId: `OFF-${Date.now().toString(36).toUpperCase()}`,
+        buyerName: 'Geneva Sovereign Family Office',
+        offerAmount: 32000000,
+        earnestMoney: 1600000,
+        terms: 'All-Cash Wire, 14-day expedited closing',
+        contingencies: ['Architectural Inspection', 'Title Search & Insurance']
+      });
+      updateUI();
+    });
+
+    document.getElementById('btnAcceptOffer').addEventListener('click', () => {
+      const curState = ledger.getMaterializedState();
+      ledger.append(EVENT_TYPES.OFFER_ACCEPTED, {
+        acceptedPrice: curState.activeOffer ? curState.activeOffer.amount : 32000000,
+        acceptanceDate: Date.now()
+      });
+      updateUI();
+    });
+
+    document.getElementById('btnDepositEscrow').addEventListener('click', () => {
+      ledger.append(EVENT_TYPES.ESCROW_DEPOSITED, {
+        amount: 1600000,
+        escrowHolder: 'First American Title & Luxury Escrow Co.',
+        accountNumber: 'ESC-BELAIR-99214'
+      });
+      updateUI();
+    });
+
+    document.getElementById('btnCompleteInspection').addEventListener('click', () => {
+      ledger.append(EVENT_TYPES.INSPECTION_COMPLETED, {
+        inspector: 'Pacific Architectural & Structural Engineering Auditors',
+        passed: true,
+        rating: 'Grade A+ Pristine',
+        findings: [
+          'Foundation anchored to bedrock with zero seismic strain',
+          'Triple-redundant smart HVAC systems verified',
+          'Olympic ozone filtration infinity pool certified'
+        ]
+      });
+      updateUI();
+    });
+
+    document.getElementById('btnClearContingency').addEventListener('click', () => {
+      ledger.append(EVENT_TYPES.CONTINGENCY_CLEARED, {
+        contingencyName: 'Geological & Structural Survey',
+        verifiedBy: 'Senior City Building Inspector'
+      });
+      ledger.append(EVENT_TYPES.CONTINGENCY_CLEARED, {
+        contingencyName: 'Title & Municipal Lien Clearance',
+        verifiedBy: 'Escrow Chief Counsel'
+      });
+      updateUI();
+    });
+
+    document.getElementById('btnTransferTitle').addEventListener('click', () => {
+      ledger.append(EVENT_TYPES.TITLE_TRANSFERRED, {
+        titleCompany: 'Fidelity National Title Insurance Co.',
+        deedBookNumber: 'DEED-CA-BELAIR-2026-8812',
+        notary: 'California Commissioned Notary #948210'
+      });
+      updateUI();
+    });
+
+    document.getElementById('btnCloseSale').addEventListener('click', () => {
+      const curState = ledger.getMaterializedState();
+      ledger.append(EVENT_TYPES.SALE_CLOSED, {
+        finalSalePrice: curState.property.listPrice || 32000000,
+        settlementAgent: 'Beverly Hills Luxury Closing Counsel',
+        keysDelivered: true,
+        commissionPayout: (curState.property.listPrice || 32000000) * 0.05
+      });
+      updateUI();
+    });
+
+    // Run Full Preset Multi-Million Scenario
+    document.getElementById('btnRunPresetScenario').addEventListener('click', () => {
+      ledger.clear();
+
+      ledger.append(EVENT_TYPES.PROPERTY_LISTED, {
+        propertyId: 'ESTATE-BELAIR-10480',
+        title: 'The Bellagio Promontory Villa',
+        address: '10480 Bellagio Road',
+        city: 'Bel-Air',
+        state: 'CA',
+        zip: '90077',
+        listPrice: 34500000,
+        bedrooms: 7,
+        bathrooms: 11,
+        sqft: 16500,
+        sellerName: 'Bel-Air Trust & Asset Fund',
+        agent: 'Victoria Sterling-Vance'
+      });
+
+      ledger.append(EVENT_TYPES.PRICE_ADJUSTED, {
+        newPrice: 33000000,
+        reason: 'Autumn Portfolio Realignment'
+      });
+
+      ledger.append(EVENT_TYPES.OFFER_SUBMITTED, {
+        offerId: 'OFF-GENEVA-771',
+        buyerName: 'Geneva Sovereign Family Office',
+        offerAmount: 32000000,
+        earnestMoney: 1600000,
+        terms: 'All-Cash Wire, 14-day close'
+      });
+
+      ledger.append(EVENT_TYPES.OFFER_ACCEPTED, {
+        acceptedPrice: 32000000
+      });
+
+      ledger.createSnapshot('Offer Acceptance Checkpoint');
+
+      ledger.append(EVENT_TYPES.ESCROW_DEPOSITED, {
+        amount: 1600000,
+        escrowHolder: 'First American Title & Luxury Escrow Co.'
+      });
+
+      ledger.append(EVENT_TYPES.INSPECTION_COMPLETED, {
+        inspector: 'Pacific Architectural & Structural Engineering Auditors',
+        passed: true,
+        rating: 'Grade A+ Pristine'
+      });
+
+      ledger.append(EVENT_TYPES.CONTINGENCY_CLEARED, {
+        contingencyName: 'Geological & Structural Survey',
+        verifiedBy: 'Senior City Building Inspector'
+      });
+
+      ledger.append(EVENT_TYPES.TITLE_TRANSFERRED, {
+        titleCompany: 'Fidelity National Title Insurance Co.',
+        deedBookNumber: 'DEED-CA-BELAIR-2026-8812'
+      });
+
+      ledger.append(EVENT_TYPES.SALE_CLOSED, {
+        finalSalePrice: 32000000,
+        settlementAgent: 'Beverly Hills Luxury Closing Counsel',
+        keysDelivered: true
+      });
+
+      updateUI();
+    });
+
+    // Tamper Simulation Test
+    document.getElementById('btnSimulateTamper').addEventListener('click', () => {
+      if (ledger.length === 0) {
+        alert('Please append or run a scenario first before running tamper simulation.');
+        return;
+      }
+      const targetIdx = Math.floor(ledger.length / 2);
+      // Directly corrupt internal block payload to trigger cryptographic chain breakage
+      ledger.events[targetIdx] = {
+        ...ledger.events[targetIdx],
+        payload: { ...ledger.events[targetIdx].payload, tamperedMaliciousData: true }
+      };
+      updateUI();
+      alert(`âš  Tamper Simulation Triggered: Injected modified payload into Event #${targetIdx + 1}. Cryptographic audit chain immediately flagged the corruption!`);
+    });
+
+    // Export JSON
+    document.getElementById('exportLedgerBtn').addEventListener('click', () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(ledger.exportJSON());
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `real-estate-luxe-ledger-${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    // Import JSON
+    const fileInput = document.getElementById('ledgerFileInput');
+    document.getElementById('importLedgerBtn').addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          ledger.importJSON(event.target.result);
+          updateUI();
+          alert('Ledger imported successfully and hash chain verified!');
+        } catch (err) {
+          alert('Failed to import ledger: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Reset Ledger
+    document.getElementById('clearLedgerBtn').addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear the entire event ledger?')) {
+        ledger.clear();
+        updateUI();
+      }
+    });
+
+    // Initial check: if ledger is empty, auto-populate standard multi-million scenario
+    if (ledger.length === 0) {
+      document.getElementById('btnRunPresetScenario').click();
+    } else {
+      updateUI();
+    }
+  </script>
+</body>
+</html>
