@@ -55,13 +55,12 @@ const level1Templates = [
     level: "level1",
     points: "3 Points",
     labels: ["nsoc26", "level1", "enhancement", "good-first-issue"],
-    codeRequirement: "Minimum 40+ lines of clean, structured code across dedicated HTML, CSS, and JS files.",
     theme: "Custom Color Palette & Dynamic Theme Switcher",
     desc: (p) => `Build an isolated client-side theme customizer and color palette switcher for ${p.name} that lets users preview accessible UI accent colors, test contrast ratios, and persist active preferences in localStorage.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/theme-palette.html\` with interactive color swatch pickers, contrast preview cards, and active theme badge (~15 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/theme-palette.css\` with smooth CSS variable theme transitions, swatch hover glow rings, and responsive preview layout (~20 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/theme-palette.js\` implementing class \`${toPascal(p.slug)}ThemePalette\` with \`setAccentColor(hex)\`, \`getStoredTheme()\`, and \`calculateContrast(hex)\` (~25 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/theme-palette.html\` with interactive color swatch pickers, contrast preview cards, and active theme badge.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/theme-palette.css\` with smooth CSS variable theme transitions, swatch hover glow rings, and responsive preview layout.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/theme-palette.js\` implementing class \`${toPascal(p.slug)}ThemePalette\` with \`setAccentColor(hex)\`, \`getStoredTheme()\`, and \`calculateContrast(hex)\`.`
     ]
   },
   {
@@ -69,13 +68,12 @@ const level1Templates = [
     level: "level1",
     points: "3 Points",
     labels: ["nsoc26", "level1", "enhancement", "good-first-issue"],
-    codeRequirement: "Minimum 40+ lines of clean, structured code across dedicated HTML, CSS, and JS files.",
     theme: "Interactive Searchable FAQ & Collapsible Accordion Drawer",
     desc: (p) => `Build a lightweight, self-contained FAQ search panel and accessible accordion drawer for ${p.name} that provides real-time keyword filtering, smooth expand/collapse transitions, and full ARIA keyboard navigation.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/quick-faq.html\` with instant search query input, collapsible FAQ item accordions, and category pill filters (~15 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/quick-faq.css\` with animated chevron rotations, slide-down panel disclosure, and clean typography (~20 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/quick-faq.js\` implementing class \`${toPascal(p.slug)}QuickFAQ\` with \`filterQuestions(query)\`, \`toggleAccordion(id)\`, and \`highlightMatches(term)\` (~25 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/quick-faq.html\` with instant search query input, collapsible FAQ item accordions, and category pill filters.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/quick-faq.css\` with animated chevron rotations, slide-down panel disclosure, and clean typography.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/quick-faq.js\` implementing class \`${toPascal(p.slug)}QuickFAQ\` with \`filterQuestions(query)\`, \`toggleAccordion(id)\`, and \`highlightMatches(term)\`.`
     ]
   },
   {
@@ -83,13 +81,12 @@ const level1Templates = [
     level: "level1",
     points: "3 Points",
     labels: ["nsoc26", "level1", "enhancement", "good-first-issue"],
-    codeRequirement: "Minimum 40+ lines of clean, structured code across dedicated HTML, CSS, and JS files.",
     theme: "Keyboard Shortcut Cheat-Sheet & Command Reference Overlay",
     desc: (p) => `Build an accessible in-browser shortcut reference dialog and interactive hotkey cheat-sheet for ${p.name} that displays categorized keybindings with instant clipboard copying and keypress simulation.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/shortcut-cheatsheet.html\` with search filter bar, grouped shortcut badge cards, and modal backdrop container (~15 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/shortcut-cheatsheet.css\` with realistic keyboard keycap styling (\`<kbd>\`), active press effects, and smooth backdrop blur (~20 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/shortcut-cheatsheet.js\` implementing class \`${toPascal(p.slug)}ShortcutGuide\` with \`searchShortcuts(query)\`, \`listenForHotkey(event)\`, and \`copyKeyCombo(id)\` (~25 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/shortcut-cheatsheet.html\` with search filter bar, grouped shortcut badge cards, and modal backdrop container.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/shortcut-cheatsheet.css\` with realistic keyboard keycap styling (\`<kbd>\`), active press effects, and smooth backdrop blur.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/shortcut-cheatsheet.js\` implementing class \`${toPascal(p.slug)}ShortcutGuide\` with \`searchShortcuts(query)\`, \`listenForHotkey(event)\`, and \`copyKeyCombo(id)\`.`
     ]
   }
 ];
@@ -101,13 +98,12 @@ const level2Templates = [
     level: "level2",
     points: "5 Points",
     labels: ["nsoc26", "level2", "enhancement"],
-    codeRequirement: "Minimum 60+ lines of clean, structured code across dedicated HTML, CSS, and JS files.",
     theme: "Interactive Metric ROI & Cost-Savings Forecaster",
     desc: (p) => `Build an interactive return-on-investment (ROI) and cost-efficiency forecaster for ${p.name} that models projected annual savings, efficiency gains, and break-even timelines based on dynamic user parameter inputs.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/roi-calculator.html\` with numerical sliders (team size, hours saved, hourly cost), summary metrics banner, and projected savings breakdown (~20 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/roi-calculator.css\` with gradient progress meters, tabular data cards, and currency highlight badges (~25 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/roi-calculator.js\` implementing class \`${toPascal(p.slug)}RoiEngine\` with \`calculateAnnualSavings(inputs)\`, \`computeBreakEvenMonths(investment)\`, and \`formatCurrency(amount)\` (~35 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/roi-calculator.html\` with numerical sliders (team size, hours saved, hourly cost), summary metrics banner, and projected savings breakdown.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/roi-calculator.css\` with gradient progress meters, tabular data cards, and currency highlight badges.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/roi-calculator.js\` implementing class \`${toPascal(p.slug)}RoiEngine\` with \`calculateAnnualSavings(inputs)\`, \`computeBreakEvenMonths(investment)\`, and \`formatCurrency(amount)\`.`
     ]
   },
   {
@@ -115,13 +111,12 @@ const level2Templates = [
     level: "level2",
     points: "5 Points",
     labels: ["nsoc26", "level2", "enhancement"],
-    codeRequirement: "Minimum 60+ lines of clean, structured code across dedicated HTML, CSS, and JS files.",
     theme: "Client-Side CSV Data Importer & Tabular Previewer",
     desc: (p) => `Build a browser-native drag-and-drop CSV parser and tabular data inspector for ${p.name} that detects delimiters, validates row schemas, sorts columns, and exports sanitized JSON data.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/csv-importer.html\` with drag-and-drop dropzone, parsed data preview table, and export JSON button (~20 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/csv-importer.css\` with drag-over pulse animation, zebra-striped table rows, and column sort indicator arrows (~25 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/csv-importer.js\` implementing class \`${toPascal(p.slug)}CsvImporter\` with \`parseCSV(text)\`, \`detectDelimiter(sample)\`, and \`sortColumn(colIndex, asc)\` (~35 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/csv-importer.html\` with drag-and-drop dropzone, parsed data preview table, and export JSON button.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/csv-importer.css\` with drag-over pulse animation, zebra-striped table rows, and column sort indicator arrows.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/csv-importer.js\` implementing class \`${toPascal(p.slug)}CsvImporter\` with \`parseCSV(text)\`, \`detectDelimiter(sample)\`, and \`sortColumn(colIndex, asc)\`.`
     ]
   },
   {
@@ -129,13 +124,12 @@ const level2Templates = [
     level: "level2",
     points: "5 Points",
     labels: ["nsoc26", "level2", "enhancement"],
-    codeRequirement: "Minimum 60+ lines of clean, structured code across dedicated HTML, CSS, and JS files.",
     theme: "Interactive QR Code & Deep-Link Matrix Generator",
     desc: (p) => `Build a standalone deep-link URL encoder and procedural SVG QR code generator for ${p.name} that allows custom payload inputs, error-correction level selection, and instant 1-click SVG/PNG downloads.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/qr-generator.html\` with URL/payload input field, error-correction level selector, SVG QR preview stage, and download triggers (~20 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/qr-generator.css\` with sharp SVG pixel rendering, responsive container bounds, and modern action button styling (~25 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/qr-generator.js\` implementing class \`${toPascal(p.slug)}QrGenerator\` with \`generateQrMatrix(data, ecLevel)\`, \`renderSVG(matrix)\`, and \`downloadAsset(format)\` (~35 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/qr-generator.html\` with URL/payload input field, error-correction level selector, SVG QR preview stage, and download triggers.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/qr-generator.css\` with sharp SVG pixel rendering, responsive container bounds, and modern action button styling.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/qr-generator.js\` implementing class \`${toPascal(p.slug)}QrGenerator\` with \`generateQrMatrix(data, ecLevel)\`, \`renderSVG(matrix)\`, and \`downloadAsset(format)\`.`
     ]
   }
 ];
@@ -147,14 +141,13 @@ const level3Templates = [
     level: "level3",
     points: "10 Points",
     labels: ["nsoc26", "level3", "enhancement"],
-    codeRequirement: "Minimum 100+ lines of clean, structured code across dedicated HTML, CSS, JS, and test file.",
     theme: "Role-Based Access Control (RBAC) Permission Matrix & Policy Guard",
     desc: (p) => `Build an isolated role-based access control (RBAC) authorization engine and interactive permission grid for ${p.name} that calculates bitmask permissions, validates user role inheritance, and evaluates dynamic access grants.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/rbac-matrix.html\` with role-to-permission matrix checkboxes, active simulation selector, and access evaluation badge (~25 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/rbac-matrix.css\` with interactive matrix grid cells, green/red access permission pills, and policy editor drawer (~35 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/rbac-matrix.js\` implementing class \`${toPascal(p.slug)}RbacEngine\` with \`assignRole(user, role)\`, \`checkPermission(role, action)\`, and \`evaluatePolicyBitmask(mask)\` (~45 lines).`,
-      `Isolated Unit Test: Create \`public/showcase/${p.slug}/rbac-matrix.test.mjs\` asserting role inheritance resolution, wild-card action matching, and unauthorized privilege rejection with node:test (~25 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/rbac-matrix.html\` with role-to-permission matrix checkboxes, active simulation selector, and access evaluation badge.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/rbac-matrix.css\` with interactive matrix grid cells, green/red access permission pills, and policy editor drawer.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/rbac-matrix.js\` implementing class \`${toPascal(p.slug)}RbacEngine\` with \`assignRole(user, role)\`, \`checkPermission(role, action)\`, and \`evaluatePolicyBitmask(mask)\`.`,
+      `Isolated Unit Test: Create \`public/showcase/${p.slug}/rbac-matrix.test.mjs\` asserting role inheritance resolution, wild-card action matching, and unauthorized privilege rejection with node:test.`
     ]
   },
   {
@@ -162,14 +155,13 @@ const level3Templates = [
     level: "level3",
     points: "10 Points",
     labels: ["nsoc26", "level3", "enhancement"],
-    codeRequirement: "Minimum 100+ lines of clean, structured code across dedicated HTML, CSS, JS, and test file.",
     theme: "Probabilistic Bloom Filter & Membership Query Visualizer",
     desc: (p) => `Build an autonomous in-browser Bloom Filter probabilistic set engine and bit-array visualizer for ${p.name} that maps string hashes onto a fixed-size bit array, computes theoretical false-positive rates, and visually highlights hash collisions.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/bloom-filter.html\` with element insert input, membership probe query bar, and animated bit array memory grid (~25 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/bloom-filter.css\` with high-contrast bit cell toggles (0 vs 1), hash collision glowing accents, and stats HUD panel (~35 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/bloom-filter.js\` implementing class \`${toPascal(p.slug)}BloomFilter\` with \`insert(item)\`, \`contains(item)\`, and \`calculateFalsePositiveRate()\` (~45 lines).`,
-      `Isolated Unit Test: Create \`public/showcase/${p.slug}/bloom-filter.test.mjs\` testing zero false-negatives guarantee, hash distribution uniformity, and false-positive upper bounds with node:test (~25 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/bloom-filter.html\` with element insert input, membership probe query bar, and animated bit array memory grid.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/bloom-filter.css\` with high-contrast bit cell toggles (0 vs 1), hash collision glowing accents, and stats HUD panel.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/bloom-filter.js\` implementing class \`${toPascal(p.slug)}BloomFilter\` with \`insert(item)\`, \`contains(item)\`, and \`calculateFalsePositiveRate()\`.`,
+      `Isolated Unit Test: Create \`public/showcase/${p.slug}/bloom-filter.test.mjs\` testing zero false-negatives guarantee, hash distribution uniformity, and false-positive upper bounds with node:test.`
     ]
   },
   {
@@ -177,14 +169,13 @@ const level3Templates = [
     level: "level3",
     points: "10 Points",
     labels: ["nsoc26", "level3", "enhancement"],
-    codeRequirement: "Minimum 100+ lines of clean, structured code across dedicated HTML, CSS, JS, and test file.",
     theme: "Fault-Tolerant Circuit Breaker & API Resilience Simulator",
     desc: (p) => `Build an autonomous client-side Circuit Breaker resilience engine for ${p.name} that manages tri-state failure recovery (Closed, Open, Half-Open), counts consecutive errors, executes exponential backoff, and protects application state from cascading service failures.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/circuit-breaker.html\` with interactive mock request dispatch buttons (Success, Fail, Timeout), tri-state status indicator, and telemetry event stream (~25 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/circuit-breaker.css\` with state indicator lamps (Green, Red, Yellow), failure threshold meter, and real-time event log rows (~35 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/circuit-breaker.js\` implementing class \`${toPascal(p.slug)}CircuitBreaker\` with \`execute(fn)\`, \`trip()\`, and \`resetTimeout()\` (~45 lines).`,
-      `Isolated Unit Test: Create \`public/showcase/${p.slug}/circuit-breaker.test.mjs\` testing transition from Closed to Open on threshold breach, half-open trial executions, and fallback recovery with node:test (~25 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/circuit-breaker.html\` with interactive mock request dispatch buttons (Success, Fail, Timeout), tri-state status indicator, and telemetry event stream.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/circuit-breaker.css\` with state indicator lamps (Green, Red, Yellow), failure threshold meter, and real-time event log rows.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/circuit-breaker.js\` implementing class \`${toPascal(p.slug)}CircuitBreaker\` with \`execute(fn)\`, \`trip()\`, and \`resetTimeout()\`.`,
+      `Isolated Unit Test: Create \`public/showcase/${p.slug}/circuit-breaker.test.mjs\` testing transition from Closed to Open on threshold breach, half-open trial executions, and fallback recovery with node:test.`
     ]
   },
   {
@@ -192,39 +183,19 @@ const level3Templates = [
     level: "level3",
     points: "10 Points",
     labels: ["nsoc26", "level3", "enhancement"],
-    codeRequirement: "Minimum 100+ lines of clean, structured code across dedicated HTML, CSS, JS, and test file.",
     theme: "Event Sourcing Ledger & Temporal State Replay Engine",
     desc: (p) => `Build an in-memory event-sourcing ledger and temporal state replay engine for ${p.name} that stores state mutations as immutable append-only events, computes current snapshots, and offers forward/backward time-travel replay.`,
     guide: (p) => [
-      `Dedicated HTML: Create \`public/showcase/${p.slug}/event-sourcing.html\` with event submission controls, immutable append-only ledger table, and temporal timeline scrub bar (~25 lines).`,
-      `Dedicated CSS: Create \`public/showcase/${p.slug}/event-sourcing.css\` with event timeline chips, state snapshot comparison panels, and active playback controls (~35 lines).`,
-      `Dedicated Module JS: Create \`public/showcase/${p.slug}/event-sourcing.js\` implementing class \`${toPascal(p.slug)}EventSourcingLedger\` with \`appendEvent(type, payload)\`, \`replayToTimestamp(ts)\`, and \`getMaterializedState()\` (~45 lines).`,
-      `Isolated Unit Test: Create \`public/showcase/${p.slug}/event-sourcing.test.mjs\` testing event ledger immutability, deterministic state reconstruction, and historical rewind accuracy with node:test (~25 lines).`
+      `Dedicated HTML: Create \`public/showcase/${p.slug}/event-sourcing.html\` with event submission controls, immutable append-only ledger table, and temporal timeline scrub bar.`,
+      `Dedicated CSS: Create \`public/showcase/${p.slug}/event-sourcing.css\` with event timeline chips, state snapshot comparison panels, and active playback controls.`,
+      `Dedicated Module JS: Create \`public/showcase/${p.slug}/event-sourcing.js\` implementing class \`${toPascal(p.slug)}EventSourcingLedger\` with \`appendEvent(type, payload)\`, \`replayToTimestamp(ts)\`, and \`getMaterializedState()\`.`,
+      `Isolated Unit Test: Create \`public/showcase/${p.slug}/event-sourcing.test.mjs\` testing event ledger immutability, deterministic state reconstruction, and historical rewind accuracy with node:test.`
     ]
   }
 ];
 
-// Generate 100 Issues across 40 projects
-// We will assign:
-// 30 Level 1 tasks
-// 35 Level 2 tasks
-// 35 Level 3 tasks
-// Total = 100 tasks!
-// Distribution: 20 projects get 3 tasks (60), 20 projects get 2 tasks (40) => 100 tasks.
-
 const allIssues = [];
-let issueCounter = 1201; // Continuous numbering starting from 1201!
-
-// To ensure balanced distribution of levels:
-// Projects 0 to 19 (20 projects): get 1 Level 1, 1 Level 2, 1 Level 3 = 20 L1, 20 L2, 20 L3 (60 tasks)
-// Projects 20 to 29 (10 projects): get 1 Level 1, 1 Level 2 = 10 L1, 10 L2 (20 tasks)
-// Projects 30 to 34 (5 projects): get 1 Level 2, 1 Level 3 = 5 L2, 5 L3 (10 tasks)
-// Projects 35 to 39 (5 projects): get 2 Level 3 = 10 L3 (10 tasks)
-// Total counts:
-// Level 1: 20 + 10 = 30 tasks
-// Level 2: 20 + 10 + 5 = 35 tasks
-// Level 3: 20 + 5 + 10 = 35 tasks
-// Total: 30 + 35 + 35 = 100 tasks!
+let issueCounter = 1201;
 
 let l1Idx = 0;
 let l2Idx = 0;
@@ -272,8 +243,7 @@ for (let pIdx = 0; pIdx < projects.length; pIdx++) {
       description: t.desc(p),
       featureFile: t.featureFile,
       suggestions: t.guide(p),
-      zeroConflictGuarantee: `Zero-Merge-Conflict Guarantee: This task is implemented strictly in its own isolated files (${filesList}). Do not modify common files (index.html, styles.css, script.js) to guarantee 100% conflict-free merging!`,
-      codeRequirement: t.codeRequirement
+      zeroConflictGuarantee: `Zero-Merge-Conflict Guarantee: This task is implemented strictly in its own isolated files (${filesList}). Do not modify common files (index.html, styles.css, script.js) to guarantee 100% conflict-free merging!`
     });
   }
 }
@@ -309,11 +279,11 @@ let md = `# 🚀 CAREERFORGE Batch 17 Issues Catalog: 100 Multi-Level Contributo
 
 Batch 17 provides opportunities for contributors across all skill levels under Nexus Spring of Code 2026:
 
-| Tier | Label | Points | Code Footprint | Conflict Prevention Strategy |
+| Tier | Label | Points | Deliverable | Conflict Prevention Strategy |
 | :---: | :---: | :---: | :---: | :--- |
-| **Level 1** | \`level1\` | **3 Points** | **≥ 40 lines** | **Isolated UI Sub-View:** Build in dedicated HTML/CSS/JS without touching shared files. |
-| **Level 2** | \`level2\` | **5 Points** | **≥ 60 lines** | **Interactive Tool & Component:** Build dynamic calculator, parser, or generator in dedicated files. |
-| **Level 3** | \`level3\` | **10 Points** | **≥ 100 lines** | **Isolated File Quartet:** Build complete engine with dedicated HTML, CSS, JS, and Unit Test. |
+| **Level 1** | \`level1\` | **3 Points** | **Isolated UI Sub-View** | Build in dedicated HTML/CSS/JS without touching shared files. |
+| **Level 2** | \`level2\` | **5 Points** | **Interactive Tool & Component** | Build dynamic calculator, parser, or generator in dedicated files. |
+| **Level 3** | \`level3\` | **10 Points** | **Isolated Engine & Test Suite** | Build complete engine with dedicated HTML, CSS, JS, and Unit Test. |
 
 ### 🛡️ Why Contributors Face ZERO Merge Conflicts:
 - **No Shared File Contention:** Tasks do not modify existing shared files (\`index.html\`, \`styles.css\`, \`script.js\`).
@@ -350,7 +320,6 @@ for (const item of allIssues) {
   md += `- **Labels:** \`${item.labels.join('`, `')}\`\n`;
   md += `- **Showcase Path:** \`public/showcase/${item.project}/\`\n`;
   md += `- **Points:** **${item.points}** (${levelText})\n`;
-  md += `- **Code Requirement:** **${item.codeRequirement}**\n`;
   md += `- **Conflict-Free Guard:** ${item.zeroConflictGuarantee}\n`;
   md += `- **Description:** ${item.description}\n`;
   md += `- **Step-by-Step Implementation Guide:**\n`;
@@ -438,8 +407,7 @@ function formatBody(item) {
   return '### 🌸 Nexus Spring of Code 2026 (NSoC \\'26) — Issue Specification\\n\\n' +
     '**Target Showcase Directory:** \`public/showcase/' + item.project + '/\`\\n' +
     '**Difficulty Tier:** **' + levelTitle + '**\\n' +
-    '**Award Value:** **' + item.points + '**\\n' +
-    '**Required Code Size:** **' + item.codeRequirement + '**\\n\\n' +
+    '**Award Value:** **' + item.points + '**\\n\\n' +
     '---\\n\\n' +
     '### 🛡️ Zero-Merge-Conflict Guarantee\\n' +
     item.zeroConflictGuarantee + '\\n\\n' +
