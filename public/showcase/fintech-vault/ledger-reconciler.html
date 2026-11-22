@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fintech Vault - General Ledger Reconciler & Fraud Anomaly Detector</title>
+  <link rel="stylesheet" href="ledger-reconciler.css">
+</head>
+<body>
+  <div class="reconciler-container">
+    <header class="reconciler-header">
+      <div class="header-badge">FINTECH VAULT INSTITUTIONAL ACCOUNTING</div>
+      <h1>Double-Entry General Ledger & Anomaly Detection</h1>
+      <p>Autonomous client-side double-entry trial balance reconciliation, transaction hash chaining, and real-time Z-score fraud detection</p>
+    </header>
+
+    <div id="anomaly-banner" class="anomaly-banner" style="display: none;"></div>
+
+    <section class="metrics-grid" aria-label="Reconciliation Dashboard">
+      <div class="metric-card">
+        <span class="metric-label">Total Debits</span>
+        <span id="total-debits" class="metric-value debit">$0.00</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Total Credits</span>
+        <span id="total-credits" class="metric-value credit">$0.00</span>
+      </div>
+      <div class="metric-card highlight">
+        <span class="metric-label">Reconciliation Status</span>
+        <span id="balance-status" class="status-badge status-balanced">RECONCILED (ZERO-SUM)</span>
+      </div>
+      <div class="metric-card alert">
+        <span class="metric-label">Anomalies Detected</span>
+        <span id="anomaly-count" class="metric-value alert">0</span>
+      </div>
+    </section>
+
+    <main class="workbench-grid">
+      <section class="workbench-panel">
+        <div class="panel-header">
+          <h3>Post Journal Entry</h3>
+          <button id="load-sample-btn" type="button" class="secondary-btn">Load Sample Entries</button>
+        </div>
+        <form id="entry-form" onsubmit="return false;" class="entry-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="debit-account">Debit Account (Dr)</label>
+              <input id="debit-account" type="text" placeholder="e.g. Cash Reserves" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="credit-account">Credit Account (Cr)</label>
+              <input id="credit-account" type="text" placeholder="e.g. Treasury Note" class="form-input">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="entry-amount">Amount (USD)</label>
+              <input id="entry-amount" type="number" step="0.01" min="0.01" placeholder="50000.00" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="entry-memo">Transaction Memo</label>
+              <input id="entry-memo" type="text" placeholder="e.g. Q4 Liquidity Wire" class="form-input">
+            </div>
+          </div>
+          <button id="post-entry-btn" type="button" class="primary-btn">Post Balanced Entry</button>
+        </form>
+
+        <div class="entries-log">
+          <h4>Recent Chained Journal Entries</h4>
+          <div id="entries-list" class="entries-list">No entries posted yet.</div>
+        </div>
+      </section>
+
+      <section class="workbench-panel">
+        <div class="panel-header">
+          <h3>Trial Balance & Account Ledger</h3>
+          <button id="export-audit-btn" type="button" class="secondary-btn">Export Audit JSON</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="ledger-table">
+            <thead>
+              <tr>
+                <th>Account</th>
+                <th>Debit ($)</th>
+                <th>Credit ($)</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-table-body">
+              <tr>
+                <td colspan="3" class="empty-cell">No accounts initialized. Post an entry or load samples.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="reconciler-footer">
+      <span>Security Engine: Chained Cryptographic Blocks • Dynamic Z-Score Outlier Verification Ready</span>
+    </footer>
+  </div>
+
+  <script type="module" src="ledger-reconciler.js"></script>
+</body>
+</html>
