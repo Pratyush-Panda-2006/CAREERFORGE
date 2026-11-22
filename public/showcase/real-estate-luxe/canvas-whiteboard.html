@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanguard Estates — Architectural Whiteboard & Vector Sketchpad</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="sketchpad-app">
+    <!-- Top Navigation Header -->
+    <header class="top-nav">
+      <div class="nav-left">
+        <a href="index.html" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Vanguard Estates
+        </a>
+        <div class="brand-badge">VANGUARD</div>
+        <div class="app-title">Architectural Vector Sketchpad & Whiteboard</div>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btn-undo" class="action-btn" title="Undo (Ctrl+Z)" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7v6h6"></path>
+            <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path>
+          </svg>
+          Undo
+        </button>
+        <button id="btn-redo" class="action-btn" title="Redo (Ctrl+Y)" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 7v6h-6"></path>
+            <path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"></path>
+          </svg>
+          Redo
+        </button>
+        <button id="btn-clear" class="action-btn btn-danger" title="Clear Canvas">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          Clear
+        </button>
+
+        <button id="btn-load-json" class="action-btn" title="Load Workspace JSON">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Import JSON
+        </button>
+        <input type="file" id="file-loader" accept=".json" style="display: none;">
+
+        <button id="btn-export-svg" class="action-btn" title="Export Vector SVG">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          SVG
+        </button>
+        <button id="btn-export-png" class="action-btn" title="Export High-Res PNG">
+          PNG
+        </button>
+        <button id="btn-export-json" class="action-btn btn-primary" title="Export Floorplan JSON">
+          Export JSON
+        </button>
+      </div>
+    </header>
+
+    <!-- Sketchpad Workspace -->
+    <main class="workspace-container">
+      <div class="canvas-wrapper">
+        <canvas id="whiteboard-canvas"></canvas>
+      </div>
+
+      <!-- Floating Luxury Dock Toolbar -->
+      <aside class="luxury-dock" aria-label="Drawing Tools">
+        <!-- Tools Selection -->
+        <div class="dock-section">
+          <div class="dock-section-title">Tools</div>
+          <div class="tool-grid">
+            <button class="tool-btn active" data-tool="pen" title="Freehand Spline Pen (P)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                <path d="M2 2l7.586 7.586"></path>
+                <circle cx="11" cy="11" r="2"></circle>
+              </svg>
+              <span class="tool-label">Pen</span>
+            </button>
+
+            <button class="tool-btn" data-tool="eraser" title="Eraser (E)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <path d="M20 20H7L3 16C2 15 2 13 3 12L13 2L22 11L20 20Z"></path>
+                <path d="M18 11L11 18"></path>
+              </svg>
+              <span class="tool-label">Eraser</span>
+            </button>
+
+            <button class="tool-btn" data-tool="dimension" title="Dimension Ruler (D)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <path d="M2 12h20"></path>
+                <path d="M6 8v8"></path>
+                <path d="M18 8v8"></path>
+              </svg>
+              <span class="tool-label">Measure</span>
+            </button>
+
+            <button class="tool-btn" data-tool="pin" title="Inspection Callout Pin (I)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span class="tool-label">Pin</span>
+            </button>
+
+            <button class="tool-btn" data-tool="rectangle" title="Zone / Room Rectangle (R)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              </svg>
+              <span class="tool-label">Zone</span>
+            </button>
+
+            <button class="tool-btn" data-tool="circle" title="Rotunda / Column Circle (C)">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+              </svg>
+              <span class="tool-label">Circle</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Color Palette Swatches -->
+        <div class="dock-section">
+          <div class="dock-section-title">Palette</div>
+          <div class="swatch-grid">
+            <button class="swatch-btn active" data-color="#d4af37" title="Champagne Gold" style="background-color: #d4af37;"></button>
+            <button class="swatch-btn" data-color="#e2e8f0" title="Platinum Silver" style="background-color: #e2e8f0;"></button>
+            <button class="swatch-btn" data-color="#e5c396" title="Warm Sand" style="background-color: #e5c396;"></button>
+            <button class="swatch-btn" data-color="#2563eb" title="Sapphire Blue" style="background-color: #2563eb;"></button>
+            <button class="swatch-btn" data-color="#10b981" title="Emerald Estate" style="background-color: #10b981;"></button>
+            <button class="swatch-btn" data-color="#f43f5e" title="Rose Luxe" style="background-color: #f43f5e;"></button>
+            <button class="swatch-btn" data-color="#0d0f12" title="Obsidian Navy" style="background-color: #0d0f12; border-color: #334155;"></button>
+          </div>
+        </div>
+
+        <!-- Stroke Width Slider -->
+        <div class="dock-section">
+          <div class="slider-group">
+            <div class="slider-header">
+              <span>Stroke Width</span>
+              <span id="stroke-width-val" class="slider-val">3px</span>
+            </div>
+            <input type="range" id="stroke-width-slider" min="1" max="40" value="3">
+          </div>
+        </div>
+
+        <!-- Opacity Slider -->
+        <div class="dock-section">
+          <div class="slider-group">
+            <div class="slider-header">
+              <span>Opacity</span>
+              <span id="opacity-val" class="slider-val">100%</span>
+            </div>
+            <input type="range" id="opacity-slider" min="10" max="100" value="100">
+          </div>
+        </div>
+
+        <!-- Template Backdrop Switcher -->
+        <div class="dock-section">
+          <div class="dock-section-title">Backdrop</div>
+          <select id="backdrop-select" class="luxe-select">
+            <option value="cad-grid" selected>CAD Grid (100px / 20px)</option>
+            <option value="penthouse-blueprint">Penthouse Blueprint</option>
+            <option value="estate-plot">Estate Plot 42A</option>
+            <option value="none">Clean Obsidian Slate</option>
+          </select>
+        </div>
+      </aside>
+
+      <!-- Bottom HUD Status Bar -->
+      <footer class="bottom-hud">
+        <div class="hud-item">
+          <span>Tool:</span>
+          <span id="hud-tool" class="hud-val">Pen</span>
+        </div>
+        <div class="hud-divider"></div>
+        <div class="hud-item">
+          <span>Strokes:</span>
+          <span id="hud-strokes" class="hud-val">0</span>
+        </div>
+        <div class="hud-divider"></div>
+        <div class="hud-item">
+          <span>Scale:</span>
+          <span class="hud-val">1px = 0.05m</span>
+        </div>
+        <div class="hud-divider"></div>
+        <div class="hud-item">
+          <span>Cursor:</span>
+          <span id="hud-coords" class="hud-val">X: 0px, Y: 0px</span>
+        </div>
+      </footer>
+
+      <!-- Toast Feedback -->
+      <div id="toast" class="toast-notice" role="status" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { RealEstateLuxeWhiteboardCanvas, PALETTE } from './canvas-whiteboard.js';
+
+    const canvasEl = document.getElementById('whiteboard-canvas');
+    const sketchpad = new RealEstateLuxeWhiteboardCanvas(canvasEl, {
+      tool: 'pen',
+      color: PALETTE.champagneGold,
+      strokeWidth: 3,
+      opacity: 1.0,
+      scale: 0.05,
+      backdrop: 'cad-grid'
+    });
+
+    // Elements
+    const btnUndo = document.getElementById('btn-undo');
+    const btnRedo = document.getElementById('btn-redo');
+    const btnClear = document.getElementById('btn-clear');
+    const btnExportSVG = document.getElementById('btn-export-svg');
+    const btnExportPNG = document.getElementById('btn-export-png');
+    const btnExportJSON = document.getElementById('btn-export-json');
+    const btnLoadJSON = document.getElementById('btn-load-json');
+    const fileLoader = document.getElementById('file-loader');
+    const strokeSlider = document.getElementById('stroke-width-slider');
+    const strokeVal = document.getElementById('stroke-width-val');
+    const opacitySlider = document.getElementById('opacity-slider');
+    const opacityVal = document.getElementById('opacity-val');
+    const backdropSelect = document.getElementById('backdrop-select');
+    const hudTool = document.getElementById('hud-tool');
+    const hudStrokes = document.getElementById('hud-strokes');
+    const hudCoords = document.getElementById('hud-coords');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function updateActionState() {
+      btnUndo.disabled = !sketchpad.canUndo();
+      btnRedo.disabled = !sketchpad.canRedo();
+      hudStrokes.textContent = sketchpad.getStrokes().length;
+    }
+
+    // Sync state on change
+    sketchpad.on('change', () => updateActionState());
+    sketchpad.on('stroke:add', () => updateActionState());
+    sketchpad.on('undo', () => updateActionState());
+    sketchpad.on('redo', () => updateActionState());
+    sketchpad.on('clear', () => updateActionState());
+    sketchpad.on('load', (info) => {
+      updateActionState();
+      showToast(`Loaded ${info.strokeCount} strokes from JSON`);
+    });
+
+    // Tool switching
+    const toolBtns = document.querySelectorAll('.tool-btn');
+    toolBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        toolBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tool = btn.dataset.tool;
+        sketchpad.setTool(tool);
+        hudTool.textContent = tool.charAt(0).toUpperCase() + tool.slice(1);
+      });
+    });
+
+    // Color swatches
+    const swatchBtns = document.querySelectorAll('.swatch-btn');
+    swatchBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        swatchBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        sketchpad.setColor(btn.dataset.color);
+      });
+    });
+
+    // Stroke width slider
+    strokeSlider.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      strokeVal.textContent = `${val}px`;
+      sketchpad.setStrokeWidth(val);
+    });
+
+    // Opacity slider
+    opacitySlider.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      opacityVal.textContent = `${val}%`;
+      sketchpad.setOpacity(val / 100);
+    });
+
+    // Backdrop selector
+    backdropSelect.addEventListener('change', (e) => {
+      sketchpad.setBackdrop(e.target.value);
+      showToast(`Backdrop set to ${e.target.options[e.target.selectedIndex].text}`);
+    });
+
+    // Undo / Redo / Clear
+    btnUndo.addEventListener('click', () => sketchpad.undo());
+    btnRedo.addEventListener('click', () => sketchpad.redo());
+    btnClear.addEventListener('click', () => {
+      if (confirm('Clear entire architectural canvas?')) {
+        sketchpad.clear();
+        showToast('Canvas cleared');
+      }
+    });
+
+    // Coordinate HUD tracking
+    canvasEl.addEventListener('pointermove', (e) => {
+      const rect = canvasEl.getBoundingClientRect();
+      const x = Math.round(e.clientX - rect.left);
+      const y = Math.round(e.clientY - rect.top);
+      const xm = (x * 0.05).toFixed(1);
+      const ym = (y * 0.05).toFixed(1);
+      hudCoords.textContent = `X: ${x}px (${xm}m), Y: ${y}px (${ym}m)`;
+    });
+
+    // Export SVG
+    btnExportSVG.addEventListener('click', () => {
+      const svg = sketchpad.exportSVG();
+      const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vanguard-floorplan-${Date.now()}.svg`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Exported Vector SVG');
+    });
+
+    // Export PNG
+    btnExportPNG.addEventListener('click', () => {
+      const url = canvasEl.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vanguard-floorplan-${Date.now()}.png`;
+      a.click();
+      showToast('Exported High-Res PNG');
+    });
+
+    // Export JSON
+    btnExportJSON.addEventListener('click', () => {
+      const json = sketchpad.exportJSON({ pretty: true });
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vanguard-floorplan-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Exported Workspace JSON');
+    });
+
+    // Load JSON
+    btnLoadJSON.addEventListener('click', () => fileLoader.click());
+    fileLoader.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          sketchpad.loadJSON(evt.target.result);
+        } catch (err) {
+          alert(`Failed to load JSON: ${err.message}`);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          sketchpad.redo();
+        } else {
+          sketchpad.undo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        sketchpad.redo();
+      } else if (e.key.toLowerCase() === 'p') {
+        document.querySelector('[data-tool="pen"]')?.click();
+      } else if (e.key.toLowerCase() === 'e') {
+        document.querySelector('[data-tool="eraser"]')?.click();
+      } else if (e.key.toLowerCase() === 'd') {
+        document.querySelector('[data-tool="dimension"]')?.click();
+      } else if (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'm') {
+        document.querySelector('[data-tool="pin"]')?.click();
+      } else if (e.key.toLowerCase() === 'r') {
+        document.querySelector('[data-tool="rectangle"]')?.click();
+      } else if (e.key.toLowerCase() === 'c') {
+        document.querySelector('[data-tool="circle"]')?.click();
+      }
+    });
+
+    updateActionState();
+  </script>
+</body>
+</html>
