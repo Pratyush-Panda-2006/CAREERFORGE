@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financial Architecture Sketchpad &amp; Vector Whiteboard | ApexVault</title>
+  <meta name="description" content="Collaborative freehand vector sketchpad and institutional whiteboard canvas for designing zero-trust fintech architectures, payment flows, and escrow enclaves." />
+  <link rel="stylesheet" href="canvas-whiteboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <a href="index.html" class="brand-section" title="Return to ApexVault Dashboard">
+      <div class="brand-badge">💎</div>
+      <span class="brand-title">ApexVault</span>
+      <span class="brand-subtitle">Vector Whiteboard // Arch-Studio</span>
+    </a>
+
+    <div class="header-actions">
+      <a href="state-diagram.html" class="btn-nav">
+        <span>Workflow Mapper</span>
+      </a>
+      <a href="audit-trail.html" class="btn-nav">
+        <span>Audit Logs</span>
+      </a>
+      <a href="index.html" class="btn-nav">
+        <span>Back to Vault &rarr;</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Canvas Workspace -->
+  <main class="workspace-container" id="workspace">
+    <canvas id="whiteboard-canvas"></canvas>
+
+    <!-- Floating Security Dock Toolbar -->
+    <section class="floating-dock" aria-label="Whiteboard Toolbar">
+      <!-- Tools -->
+      <div class="dock-group" role="toolbar" aria-label="Drawing Tools">
+        <button type="button" class="tool-btn active" data-tool="pen" title="Freehand Pen (P)">
+          <span class="icon">✏️</span>
+          <span>Pen</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="flow" title="Flow Arrow (F)">
+          <span class="icon">➔</span>
+          <span>Flow</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="node" title="Security Node (N)">
+          <span class="icon">🛡️</span>
+          <span>Node</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="rectangle" title="Boundary Rectangle (R)">
+          <span class="icon">⬚</span>
+          <span>Perimeter</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="circle" title="Enclave Circle (C)">
+          <span class="icon">◯</span>
+          <span>Enclave</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="eraser" title="Stroke Eraser (E)">
+          <span class="icon">🧹</span>
+          <span>Eraser</span>
+        </button>
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Color Swatches -->
+      <div class="dock-group" aria-label="Palette Swatches">
+        <button type="button" class="swatch-btn active" data-color="#10b981" style="background-color: #10b981;" title="Emerald Green (Liquidity)"></button>
+        <button type="button" class="swatch-btn" data-color="#0284c7" style="background-color: #0284c7;" title="Azure Blue (Settlement)"></button>
+        <button type="button" class="swatch-btn" data-color="#6366f1" style="background-color: #6366f1;" title="Indigo Security (Enclaves)"></button>
+        <button type="button" class="swatch-btn" data-color="#f59e0b" style="background-color: #f59e0b;" title="Amber Gold (Escrow Core)"></button>
+        <button type="button" class="swatch-btn" data-color="#ec4899" style="background-color: #ec4899;" title="Rose Alert (HSM Keys)"></button>
+        <button type="button" class="swatch-btn" data-color="#ffffff" style="background-color: #ffffff;" title="Pure White (Ledger)"></button>
+        <button type="button" class="swatch-btn" data-color="#081226" style="background-color: #081226; border: 1px solid #334155;" title="Vault Navy (Background Blend)"></button>
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Stroke Width & Opacity -->
+      <div class="dock-group">
+        <div class="slider-control" title="Stroke Width">
+          <span>W:</span>
+          <input type="range" id="stroke-slider" min="1" max="24" value="3" aria-label="Stroke Width" />
+          <span class="slider-val" id="stroke-val">3px</span>
+        </div>
+        <div class="slider-control" title="Stroke Opacity">
+          <span>O:</span>
+          <input type="range" id="opacity-slider" min="10" max="100" value="100" aria-label="Stroke Opacity" />
+          <span class="slider-val" id="opacity-val">100%</span>
+        </div>
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Node Badge Customization -->
+      <div class="dock-group">
+        <input type="text" id="node-label-input" class="text-input" value="ESCROW_VAULT" placeholder="Node Label" title="Node Label" />
+        <select id="template-select" class="select-input" title="Architecture Templates">
+          <option value="none">Template: Blank</option>
+          <option value="payment-flow">Payment Flow</option>
+          <option value="escrow-engine">Escrow Engine</option>
+          <option value="security-boundary">Security Boundary</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Side Dock for Actions & Exports -->
+    <aside class="side-dock" aria-label="Whiteboard Actions">
+      <button type="button" class="action-btn" id="btn-undo" title="Undo (Ctrl+Z)" disabled>
+        <span>↩️</span>
+        <span>Undo</span>
+      </button>
+      <button type="button" class="action-btn" id="btn-redo" title="Redo (Ctrl+Y)" disabled>
+        <span>↪️</span>
+        <span>Redo</span>
+      </button>
+      <button type="button" class="action-btn" id="btn-grid" title="Toggle Grid Guide">
+        <span>▦</span>
+        <span>Grid</span>
+      </button>
+      <button type="button" class="action-btn btn-danger" id="btn-clear" title="Clear Canvas">
+        <span>🗑️</span>
+        <span>Clear</span>
+      </button>
+
+      <div class="dock-divider" style="width: 100%; height: 1px; margin: 0.2rem 0;"></div>
+
+      <button type="button" class="action-btn btn-export" id="btn-export-svg" title="Export Vector SVG">
+        <span>⚡</span>
+        <span>SVG Export</span>
+      </button>
+      <button type="button" class="action-btn btn-export" id="btn-export-png" title="Export PNG Snapshot">
+        <span>🖼️</span>
+        <span>PNG Export</span>
+      </button>
+      <button type="button" class="action-btn btn-export" id="btn-export-json" title="Export Architecture JSON">
+        <span>💾</span>
+        <span>JSON Export</span>
+      </button>
+      <button type="button" class="action-btn" id="btn-load-json" title="Load Architecture JSON">
+        <span>📂</span>
+        <span>Load JSON</span>
+      </button>
+      <input type="file" id="file-loader" accept=".json" />
+    </aside>
+  </main>
+
+  <!-- Bottom Telemetry & Status Bar -->
+  <footer class="status-bar">
+    <div class="status-left">
+      <div class="status-item">
+        <span class="status-indicator"></span>
+        <span>VAULT SANDBOX: ACTIVE</span>
+      </div>
+      <div class="status-item">
+        <span>TOOL:</span>
+        <span id="status-tool" class="status-badge">PEN</span>
+      </div>
+      <div class="status-item">
+        <span>STROKES:</span>
+        <span id="status-strokes">0</span>
+      </div>
+      <div class="status-item">
+        <span>TEMPLATE:</span>
+        <span id="status-template">NONE</span>
+      </div>
+    </div>
+
+    <div class="status-right">
+      <div class="status-item shortcuts-hint">
+        <span>Shortcuts: [P]en, [F]low, [N]ode, [R]ect, [C]ircle, [E]raser, [Ctrl+Z] Undo</span>
+      </div>
+      <div class="status-item">
+        <span>COORD:</span>
+        <span id="status-coord">0, 0</span>
+      </div>
+      <div class="status-item">
+        <span>SECURITY:</span>
+        <span class="status-badge">PCI-DSS L1 READY</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main Controller Application Script -->
+  <script type="module">
+    import { FintechVaultWhiteboardCanvas, FINTECH_PALETTE } from './canvas-whiteboard.js';
+
+    const canvas = document.getElementById('whiteboard-canvas');
+    const board = new FintechVaultWhiteboardCanvas(canvas, {
+      tool: 'pen',
+      color: FINTECH_PALETTE.emeraldGreen,
+      strokeWidth: 3,
+      opacity: 1.0,
+      showGrid: true,
+    });
+
+    window.__apexVaultWhiteboard = board;
+
+    // Elements
+    const toolButtons = document.querySelectorAll('.tool-btn');
+    const swatchButtons = document.querySelectorAll('.swatch-btn');
+    const strokeSlider = document.getElementById('stroke-slider');
+    const strokeVal = document.getElementById('stroke-val');
+    const opacitySlider = document.getElementById('opacity-slider');
+    const opacityVal = document.getElementById('opacity-val');
+    const nodeLabelInput = document.getElementById('node-label-input');
+    const templateSelect = document.getElementById('template-select');
+    const btnUndo = document.getElementById('btn-undo');
+    const btnRedo = document.getElementById('btn-redo');
+    const btnGrid = document.getElementById('btn-grid');
+    const btnClear = document.getElementById('btn-clear');
+    const btnExportSvg = document.getElementById('btn-export-svg');
+    const btnExportPng = document.getElementById('btn-export-png');
+    const btnExportJson = document.getElementById('btn-export-json');
+    const btnLoadJson = document.getElementById('btn-load-json');
+    const fileLoader = document.getElementById('file-loader');
+
+    // Status elements
+    const statusTool = document.getElementById('status-tool');
+    const statusStrokes = document.getElementById('status-strokes');
+    const statusTemplate = document.getElementById('status-template');
+    const statusCoord = document.getElementById('status-coord');
+
+    function updateActionButtons() {
+      btnUndo.disabled = !board.canUndo;
+      btnRedo.disabled = !board.canRedo;
+      statusStrokes.textContent = board.historyCount;
+    }
+
+    // Tool switching
+    toolButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tool = btn.dataset.tool;
+        board.setTool(tool);
+      });
+    });
+
+    board.on('tool:change', ({ tool }) => {
+      toolButtons.forEach((b) => b.classList.toggle('active', b.dataset.tool === tool));
+      statusTool.textContent = tool.toUpperCase();
+    });
+
+    // Color Swatches
+    swatchButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const color = btn.dataset.color;
+        board.setColor(color);
+      });
+    });
+
+    board.on('color:change', ({ color }) => {
+      swatchButtons.forEach((b) => b.classList.toggle('active', b.dataset.color.toLowerCase() === color.toLowerCase()));
+    });
+
+    // Stroke width slider
+    strokeSlider.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      strokeVal.textContent = `${val}px`;
+      board.setStrokeWidth(val);
+    });
+
+    // Opacity slider
+    opacitySlider.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      opacityVal.textContent = `${val}%`;
+      board.setOpacity(val / 100);
+    });
+
+    // Node label input
+    nodeLabelInput.addEventListener('input', (e) => {
+      board.setNodeLabel(e.target.value);
+    });
+
+    // Template selection
+    templateSelect.addEventListener('change', (e) => {
+      const selected = e.target.value;
+      board.setTemplate(selected);
+      statusTemplate.textContent = selected.toUpperCase();
+    });
+
+    // Undo / Redo / Clear
+    btnUndo.addEventListener('click', () => board.undo());
+    btnRedo.addEventListener('click', () => board.redo());
+    btnClear.addEventListener('click', () => {
+      if (confirm('Clear the entire architecture whiteboard?')) {
+        board.clear();
+      }
+    });
+
+    // Grid toggle
+    btnGrid.addEventListener('click', () => {
+      board.setShowGrid(!board.showGrid);
+    });
+    board.on('grid:change', ({ showGrid }) => {
+      btnGrid.style.color = showGrid ? 'var(--color-emerald)' : 'var(--vault-text-secondary)';
+    });
+
+    // Change listener
+    board.on('change', () => {
+      updateActionButtons();
+    });
+
+    // Pointer hover telemetry
+    board.on('pointer:hover', ({ x, y }) => {
+      statusCoord.textContent = `${x}, ${y}`;
+    });
+    board.on('stroke:point', ({ point }) => {
+      if (point) statusCoord.textContent = `${point.x}, ${point.y}`;
+    });
+
+    // --- Export Helpers ---
+
+    function triggerDownload(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    // Export SVG
+    btnExportSvg.addEventListener('click', () => {
+      try {
+        const svgContent = board.exportSVG();
+        const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        triggerDownload(blob, `apexvault-architecture-${Date.now()}.svg`);
+      } catch (err) {
+        alert(`Export failed: ${err.message}`);
+      }
+    });
+
+    // Export PNG
+    btnExportPng.addEventListener('click', () => {
+      try {
+        const dataUrl = board.exportPNG();
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = `apexvault-architecture-${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        alert(`Export PNG failed: ${err.message}`);
+      }
+    });
+
+    // Export JSON
+    btnExportJson.addEventListener('click', () => {
+      try {
+        const jsonContent = board.exportJSON(true);
+        const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' });
+        triggerDownload(blob, `apexvault-architecture-${Date.now()}.json`);
+      } catch (err) {
+        alert(`Export JSON failed: ${err.message}`);
+      }
+    });
+
+    // Load JSON file
+    btnLoadJson.addEventListener('click', () => {
+      fileLoader.click();
+    });
+
+    fileLoader.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const content = evt.target.result;
+          board.loadJSON(content);
+          if (board.backdropTemplate) {
+            templateSelect.value = board.backdropTemplate;
+            statusTemplate.textContent = board.backdropTemplate.toUpperCase();
+          }
+        } catch (err) {
+          alert(`Failed to load architecture JSON: ${err.message}`);
+        } finally {
+          fileLoader.value = '';
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      // Ignore if typing in text input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          board.redo();
+        } else {
+          board.undo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        board.redo();
+      } else if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+        switch (e.key.toLowerCase()) {
+          case 'p':
+            board.setTool('pen');
+            break;
+          case 'f':
+            board.setTool('flow');
+            break;
+          case 'n':
+            board.setTool('node');
+            break;
+          case 'r':
+            board.setTool('rectangle');
+            break;
+          case 'c':
+            board.setTool('circle');
+            break;
+          case 'e':
+            board.setTool('eraser');
+            break;
+        }
+      }
+    });
+
+    // Initial button state
+    updateActionButtons();
+  </script>
+</body>
+</html>
