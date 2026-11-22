@@ -1,0 +1,554 @@
+/**
+ * Edtech Academy - Collaborative Freehand Vector Sketchpad & Whiteboard Styling
+ * Issue #2075 - Modular CSS with glassmorphism, responsive dock, and crisp high-DPI scaling
+ */
+
+:root {
+  --bg-space: #070a13;
+  --bg-surface: #0b0f19;
+  --bg-card: #131b2e;
+  --bg-canvas: #0f172a;
+  --border-subtle: #1e293b;
+  --border-glass: rgba(99, 102, 241, 0.25);
+  --border-focus: #6366f1;
+  --indigo-primary: #4f46e5;
+  --indigo-glow: rgba(79, 70, 229, 0.4);
+  --violet-primary: #7c3aed;
+  --violet-glow: rgba(124, 58, 237, 0.35);
+  --cyan-accent: #06b6d4;
+  --emerald-accent: #10b981;
+  --rose-accent: #ef4444;
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
+  --text-muted: #64748b;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Fira Code', 'JetBrains Mono', 'Segoe UI Mono', monospace;
+  --glass-bg: rgba(15, 23, 42, 0.82);
+  --glass-blur: blur(14px);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-dock: 0 16px 36px -10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(79, 70, 229, 0.15);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-space);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.whiteboard-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 16px 24px;
+  gap: 16px;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ==========================================
+   Header Styling
+   ========================================== */
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.brand-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.8px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #818cf8;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.brand-title {
+  margin: 0 0 4px 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  max-width: 650px;
+  line-height: 1.4;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.action-btn .btn-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, var(--indigo-primary), var(--violet-primary));
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 14px var(--indigo-glow);
+}
+
+.action-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--indigo-glow);
+}
+
+.action-btn.secondary {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border-color: var(--border-subtle);
+}
+
+.action-btn.secondary:hover {
+  background: #1e293b;
+  border-color: var(--border-focus);
+}
+
+/* ==========================================
+   Floating Tool Dock Toolbar
+   ========================================== */
+
+.dock-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.toolbar-dock {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-glass);
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-dock);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dock-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dock-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border-subtle);
+}
+
+/* Tool Buttons */
+.tool-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 50px;
+}
+
+.tool-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: stroke 0.2s ease;
+}
+
+.tool-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.tool-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.tool-btn.active {
+  color: #ffffff;
+  background: rgba(99, 102, 241, 0.22);
+  border: 1px solid var(--indigo-primary);
+  box-shadow: 0 0 12px var(--indigo-glow);
+}
+
+/* Color Swatches */
+.swatches-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.color-chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--chip-color);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  padding: 0;
+}
+
+.color-chip:hover {
+  transform: scale(1.15);
+}
+
+.color-chip.active {
+  border-color: #ffffff;
+  box-shadow: 0 0 8px var(--chip-color);
+  transform: scale(1.1);
+}
+
+.custom-color-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px dashed var(--text-dim);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.custom-color-wrapper:hover {
+  border-color: var(--indigo-primary);
+}
+
+.custom-color-wrapper input[type="color"] {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 48px;
+  height: 48px;
+  border: none;
+  cursor: pointer;
+  background: none;
+  opacity: 0;
+}
+
+.custom-color-wrapper .color-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+}
+
+/* Brush Controls */
+.brush-controls-group {
+  gap: 12px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.control-name {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  width: 32px;
+}
+
+.range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 76px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--border-subtle);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--indigo-primary);
+  cursor: pointer;
+  box-shadow: 0 0 6px var(--indigo-glow);
+  transition: transform 0.15s ease;
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.control-val {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-main);
+  min-width: 34px;
+  text-align: right;
+}
+
+.brush-preview-box {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+#brush-preview-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--indigo-primary);
+  transition: all 0.15s ease;
+}
+
+/* History & Grid Action Buttons */
+.dock-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dock-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.dock-action-btn:hover {
+  color: var(--text-main);
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.dock-action-btn.active {
+  color: var(--cyan-accent);
+  border-color: var(--cyan-accent);
+  background: rgba(6, 182, 212, 0.12);
+}
+
+.dock-action-btn.danger:hover {
+  color: #ffffff;
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--rose-accent);
+}
+
+/* ==========================================
+   Canvas Workspace Viewport
+   ========================================== */
+
+.canvas-workspace {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.canvas-viewport-wrapper {
+  position: relative;
+  width: 100%;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 1px 1px rgba(99, 102, 241, 0.1);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#whiteboard-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+  background-color: var(--bg-canvas);
+  touch-action: none;
+}
+
+/* ==========================================
+   Footer Status Banner
+   ========================================== */
+
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-pill {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--emerald-accent);
+  box-shadow: 0 0 8px var(--emerald-accent);
+}
+
+.status-metrics {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+}
+
+.metric-item strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.badge-hidpi {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  font-size: 0.7rem;
+}
+
+/* ==========================================
+   Responsive Adaptations
+   ========================================== */
+
+@media (max-width: 1024px) {
+  .toolbar-dock {
+    gap: 10px;
+    padding: 8px 12px;
+  }
+
+  .range-slider {
+    width: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .whiteboard-app {
+    padding: 12px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .toolbar-dock {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .dock-divider {
+    width: 100%;
+    height: 1px;
+  }
+
+  .dock-group {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .app-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
