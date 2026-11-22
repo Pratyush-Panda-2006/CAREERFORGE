@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Audio Stream — Probabilistic Bloom Filter & Stream Deduplicator</title>
+  <link rel="stylesheet" href="bloom-filter.css">
+</head>
+<body>
+  <div class="bloom-app-container" data-bloom-filter-app>
+    <!-- Navigation Back to Showcase -->
+    <nav class="top-nav">
+      <a href="index.html" class="back-link">← Return to Podcast Audio Stream Showcase</a>
+      <div class="stream-status-pill">
+        <span class="live-dot"></span> LIVE FEED ACTIVE
+      </div>
+    </nav>
+
+    <!-- Header Section with Studio Waveform Accent -->
+    <header class="studio-header">
+      <div class="header-content">
+        <div class="studio-badge">
+          <span class="badge-icon">⚡</span>
+          <span>STREAM DEDUPLICATION ENGINE v3.4</span>
+        </div>
+        <h1>Podcast Audio Stream Bloom Filter</h1>
+        <p class="subtitle">
+          Ultra-low memory probabilistic episode & track membership visualizer with 
+          <span class="highlight-cyan">Kirsch-Mitzenmacher Murmur3/FNV-1a double-hashing</span> and a 
+          <span class="highlight-magenta">0% False Negative Guarantee</span>.
+        </p>
+      </div>
+
+      <!-- Live Animated Audio Waveform Canvas -->
+      <div class="header-waveform-wrap">
+        <div class="waveform-label">LIVE STREAM AUDIO DSP SPECTRUM</div>
+        <canvas id="waveform-canvas" class="waveform-canvas" width="340" height="48"></canvas>
+      </div>
+    </header>
+
+    <!-- Live Saturation & Telemetry Bar -->
+    <section class="telemetry-dashboard">
+      <div class="stat-card">
+        <span class="stat-label">Bitset Capacity (m)</span>
+        <span id="stat-size" class="stat-value highlight-cyan">512 bits</span>
+        <span class="stat-sub">Footprint: <strong id="memory-footprint">64 Bytes</strong></span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Hash Functions (k)</span>
+        <span id="stat-hashes" class="stat-value highlight-purple">4 hashes</span>
+        <span class="stat-sub">Murmur3 + FNV-1a</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Episodes Ingested (n)</span>
+        <span id="stat-items" class="stat-value highlight-lime">3</span>
+        <span class="stat-sub">Stream Ingest Count</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Active Bits Flipped</span>
+        <span id="stat-bits" class="stat-value">12 / 512</span>
+        <span class="stat-sub">Bits Set to 1</span>
+      </div>
+
+      <div class="stat-card saturation-card">
+        <div class="stat-header-row">
+          <span class="stat-label">Matrix Saturation</span>
+          <span id="stat-saturation" class="stat-value highlight-amber">2.3%</span>
+        </div>
+        <div class="progress-track">
+          <div id="stat-saturation-bar" class="progress-fill normal" style="width: 2.3%;"></div>
+        </div>
+        <span class="stat-sub">Optimal threshold: &lt; 50%</span>
+      </div>
+
+      <div class="stat-card fpr-card">
+        <span class="stat-label">Est. False Positive Rate (p)</span>
+        <span id="stat-fpr" class="stat-value highlight-pink">0.0001%</span>
+        <span class="stat-sub guarantee-tag">0% False Negative Guarantee</span>
+      </div>
+    </section>
+
+    <!-- Main Studio Workbench Grid -->
+    <main class="workbench-grid">
+      <!-- Left Panel: Episode Stream Ingest & Adder -->
+      <section class="panel studio-panel ingest-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-icon">🎙️</span>
+            <h2>Episode Stream Ingest (Adder)</h2>
+          </div>
+          <span class="panel-tag">Double-Hash & Set</span>
+        </div>
+
+        <p class="panel-description">
+          Add live podcast episode IDs, track markers, or sponsor stingers into the stream bloom filter.
+        </p>
+
+        <div class="input-action-group">
+          <input 
+            type="text" 
+            id="track-id-input" 
+            class="studio-input" 
+            placeholder="e.g. ep-404-dsp-frequency or trk-synth-88"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button id="add-track-btn" class="studio-btn primary-btn" type="button">
+            <span class="btn-icon">➕</span> Add To Stream
+          </button>
+        </div>
+
+        <!-- Quick Ingest Chips -->
+        <div class="presets-container">
+          <span class="presets-label">Preset Audio Feed IDs:</span>
+          <div class="chip-cloud">
+            <button type="button" class="preset-chip" data-value="ep-104-neural-vocoder">🎙️ Ep #104: Neural Vocoder</button>
+            <button type="button" class="preset-chip" data-value="trk-analog-synth-09">🎵 Synth Track #09</button>
+            <button type="button" class="preset-chip" data-value="mic-host-feed-main">🎧 Host Mic Channel</button>
+            <button type="button" class="preset-chip" data-value="ad-sponsor-stinger-x">📻 Sponsor Stinger</button>
+            <button type="button" class="preset-chip" data-value="ch-id3-interview-intro">⚡ ID3 Chapter: Intro</button>
+          </div>
+        </div>
+
+        <!-- Batch & Stress Test Actions -->
+        <div class="batch-controls">
+          <button id="batch-10-btn" class="studio-btn secondary-btn" type="button">
+            ⚡ +10 Episodes Batch
+          </button>
+          <button id="batch-25-btn" class="studio-btn secondary-btn" type="button">
+            🚀 +25 Stream Burst
+          </button>
+          <button id="add-duplicate-btn" class="studio-btn warning-btn" type="button">
+            🔁 Ingest Duplicate Track
+          </button>
+        </div>
+      </section>
+
+      <!-- Right Panel: Membership Query Tester -->
+      <section class="panel studio-panel query-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-icon">🔍</span>
+            <h2>Ultra-Fast Membership Query Tester</h2>
+          </div>
+          <span class="panel-tag highlight-tag">O(k) Lookup</span>
+        </div>
+
+        <p class="panel-description">
+          Query live stream membership. If any double-hash bit is 0, the item is 
+          <strong>100% guaranteed never streamed</strong>.
+        </p>
+
+        <div class="input-action-group">
+          <input 
+            type="text" 
+            id="query-input" 
+            class="studio-input" 
+            placeholder="Query Episode ID to test stream presence..."
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button id="query-btn" class="studio-btn cyan-btn" type="button">
+            <span class="btn-icon">⚡</span> Query Stream
+          </button>
+        </div>
+
+        <!-- Dynamic Query Result Verdict Banner -->
+        <div id="query-result-card" class="result-card" style="display: none;">
+          <div class="verdict-header">
+            <h3 id="verdict-title">VERDICT</h3>
+          </div>
+          <p id="verdict-desc" class="verdict-text"></p>
+          <div id="hash-breakdown" class="hash-breakdown-box"></div>
+        </div>
+
+        <!-- Query Helper Hints -->
+        <div class="query-hint-box">
+          <div class="hint-item">
+            <span class="hint-bullet cyan">●</span>
+            <span><strong>Definite Negative:</strong> If <em>any</em> hash bit is 0, track is definitely NOT in stream (0% false negatives).</span>
+          </div>
+          <div class="hint-item">
+            <span class="hint-bullet purple">●</span>
+            <span><strong>Probable Positive:</strong> If <em>all</em> $k$ bits are 1, track is probably in stream (subject to small FPR $p$).</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Neon Bit Array Matrix Grid Section -->
+    <section class="panel studio-panel matrix-panel">
+      <div class="panel-header matrix-header">
+        <div class="panel-title-wrap">
+          <span class="panel-icon">🎛️</span>
+          <h2>Neon Bit Array Matrix Grid</h2>
+        </div>
+        <div class="matrix-legend">
+          <span class="legend-item"><span class="legend-dot inactive"></span> 0: Unset Bit</span>
+          <span class="legend-item"><span class="legend-dot active"></span> 1: Active Stream Bit</span>
+          <span class="legend-item"><span class="legend-dot queried"></span> Active Query Position</span>
+        </div>
+      </div>
+
+      <div class="matrix-scroll-wrapper">
+        <div id="bit-grid" class="bit-grid">
+          <!-- Dynamically populated bit cells -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Workbench Grid: Optimal Sizer & Audit Stream Log -->
+    <div class="workbench-grid lower-grid">
+      <!-- Optimal Parameter Sizer Tool -->
+      <section class="panel studio-panel sizer-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-icon">📐</span>
+            <h2>Optimal Filter Dimension Sizer</h2>
+          </div>
+          <span class="panel-tag">Mathematical Calculator</span>
+        </div>
+
+        <p class="panel-description">
+          Compute mathematically optimal bit array size ($m$) and hash count ($k$) based on expected episode volume and error budget.
+        </p>
+
+        <div class="calc-form">
+          <div class="form-group">
+            <label for="calc-items">Expected Stream Volume (n items):</label>
+            <input type="number" id="calc-items" class="studio-input small-input" value="100" min="10" max="50000" step="10">
+          </div>
+
+          <div class="form-group">
+            <label for="calc-fpr">Acceptable False Positive Rate (p):</label>
+            <select id="calc-fpr" class="studio-select">
+              <option value="0.05">5.0% (Relaxed Stream Caching)</option>
+              <option value="0.01" selected>1.0% (Standard Podcast Deduplication)</option>
+              <option value="0.001">0.1% (High Fidelity / Sensitive Stream)</option>
+              <option value="0.0001">0.01% (Mission Critical Broadcast)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="calc-results-row">
+          <div class="calc-stat">
+            <span class="calc-label">Required Bits (m)</span>
+            <span id="calc-res-m" class="calc-val highlight-cyan">959 bits</span>
+          </div>
+          <div class="calc-stat">
+            <span class="calc-label">Optimal Hashes (k)</span>
+            <span id="calc-res-k" class="calc-val highlight-purple">7 hashes</span>
+          </div>
+          <div class="calc-stat">
+            <span class="calc-label">RAM Footprint</span>
+            <span id="calc-res-bytes" class="calc-val highlight-lime">120 B</span>
+          </div>
+        </div>
+
+        <button id="apply-calc-btn" class="studio-btn primary-btn full-width" type="button">
+          ⚙️ Reconfigure Filter With Optimal Dimensions
+        </button>
+      </section>
+
+      <!-- Stream Audit & Ingest Feed -->
+      <section class="panel studio-panel log-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-icon">📜</span>
+            <h2>Stream Ingest & Query Audit Log</h2>
+          </div>
+          <button id="clear-filter-btn" class="studio-btn danger-btn small-btn" type="button">
+            🗑️ Clear Filter
+          </button>
+        </div>
+
+        <div class="log-scroll-area">
+          <ul id="audit-log-list" class="log-list">
+            <!-- Dynamically populated audit feed items -->
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="studio-footer">
+      <div class="footer-left">
+        <strong>Podcast Audio Stream DSP Showcase</strong> • Nexus Spring of Code 2026
+      </div>
+      <div class="footer-right">
+        Double-Hashing: <code>Murmur3(h1) ⊕ FNV-1a(h2)</code> • Zero False Negative Guaranteed
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="bloom-filter.js"></script>
+</body>
+</html>
