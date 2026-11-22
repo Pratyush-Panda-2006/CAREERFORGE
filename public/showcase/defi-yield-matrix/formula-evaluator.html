@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Yield Matrix - Mathematical Expression Parser & Dynamic KPI Calculator</title>
+  <link rel="stylesheet" href="./formula-evaluator.css">
+</head>
+<body>
+  <div class="kpi-calculator-container">
+    <header class="calculator-header">
+      <div class="header-badge">DeFi Yield & Staking Analytics</div>
+      <h1>Dynamic Yield KPI Calculator</h1>
+      <p>Evaluate custom yield farming equations, staking reward compounding, and net APY in real-time.</p>
+    </header>
+
+    <div class="formula-card">
+      <div class="input-group">
+        <label for="formula-input">Mathematical Expression</label>
+        <div class="input-wrapper">
+          <input type="text" id="formula-input" value="(staked_amount * base_apr * multiplier) - gas_cost" placeholder="e.g. (staked_amount * base_apr * multiplier) - gas_cost" />
+          <button id="evaluate-btn" class="btn-primary">Calculate KPI</button>
+        </div>
+        <div class="token-helper-pills">
+          <span class="pill" data-insert="staked_amount">staked_amount</span>
+          <span class="pill" data-insert="base_apr">base_apr</span>
+          <span class="pill" data-insert="multiplier">multiplier</span>
+          <span class="pill" data-insert="gas_cost">gas_cost</span>
+          <span class="pill operator" data-insert=" + ">+</span>
+          <span class="pill operator" data-insert=" - ">-</span>
+          <span class="pill operator" data-insert=" * ">*</span>
+          <span class="pill operator" data-insert=" / ">/</span>
+          <span class="pill operator" data-insert=" ^ ">^</span>
+        </div>
+      </div>
+
+      <div class="parameters-grid">
+        <div class="param-card">
+          <div class="param-header">
+            <span class="param-name">staked_amount ($)</span>
+            <span class="param-val" id="val-staked_amount">5000</span>
+          </div>
+          <input type="range" class="param-slider" id="slider-staked_amount" min="100" max="50000" value="5000" />
+        </div>
+
+        <div class="param-card">
+          <div class="param-header">
+            <span class="param-name">base_apr (ratio)</span>
+            <span class="param-val" id="val-base_apr">0.12</span>
+          </div>
+          <input type="range" class="param-slider" id="slider-base_apr" min="0.01" max="0.50" step="0.01" value="0.12" />
+        </div>
+
+        <div class="param-card">
+          <div class="param-header">
+            <span class="param-name">multiplier (x)</span>
+            <span class="param-val" id="val-multiplier">1.5</span>
+          </div>
+          <input type="range" class="param-slider" id="slider-multiplier" min="1.0" max="5.0" step="0.1" value="1.5" />
+        </div>
+
+        <div class="param-card">
+          <div class="param-header">
+            <span class="param-name">gas_cost ($)</span>
+            <span class="param-val" id="val-gas_cost">25</span>
+          </div>
+          <input type="range" class="param-slider" id="slider-gas_cost" min="5" max="200" value="25" />
+        </div>
+      </div>
+
+      <div id="error-banner" class="error-banner hidden"></div>
+
+      <div class="result-display-card">
+        <div class="result-label">Computed Net Annual Reward ($)</div>
+        <div class="result-value" id="kpi-result">--</div>
+        <div class="result-meta" id="rpn-tokens">Tokens: Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { DefiYieldMatrixFormulaParser } from './formula-evaluator.js';
+    const parser = new DefiYieldMatrixFormulaParser();
+    const container = document.querySelector('.kpi-calculator-container');
+    parser.renderToDOM(container);
+  </script>
+</body>
+</html>
