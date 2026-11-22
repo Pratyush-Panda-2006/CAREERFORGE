@@ -41,39 +41,36 @@ const authorToUser = {
 };
 
 /**
- * Load existing leaderboard data and cache if available,
- * or recover baseline from git history if current file is empty.
+ * Check if a PR satisfies the user criteria:
+ * - From this repository
+ * - Merged
+ * - Has nsoc26 label
+ * - Has level3, level2, or level1 label
  */
-function loadExistingLeaderboard() {
-  try {
-    if (fs.existsSync(OUTPUT_PATH)) {
-      const raw = fs.readFileSync(OUTPUT_PATH, "utf-8");
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed.contributors) && parsed.contributors.length > 0) {
-        return parsed;
-      }
-    }
-  } catch (err) {
-    console.warn("[Leaderboard Sync] Warning: Could not read existing leaderboard cache:", err.message);
+function isQualifiedNsocPr(pr) {
+  if (!pr.merged_at) return false;
+
+  const user = pr.user?.login;
+  if (isExcludedUser(user)) return false;
+
+  const labels = (pr.labels || []).map(l => (typeof l === "string" ? l : l.name || "").toLowerCase());
+  const hasNsoc = labels.includes("nsoc26");
+  const hasLevel = labels.some(l => ["level1", "level2", "level3"].includes(l));
+
+  if (hasNsoc && hasLevel) {
+    return true;
   }
 
-  // Recover baseline from git history before the wipe commit
-  try {
-    const gitBaseline = execSync("git show e07bf7b~1:public/leaderboard.json", { encoding: "utf-8" });
-    const parsed = JSON.parse(gitBaseline);
-    if (Array.isArray(parsed.contributors) && parsed.contributors.length > 0) {
-      console.log("[Leaderboard Sync] Successfully restored valid baseline from git history (395 merged PRs).");
-      return parsed;
-    }
-  } catch (err) {
-    console.warn("[Leaderboard Sync] Could not recover git baseline:", err.message);
-  }
+  // Fallback: Check if title, body, or head branch explicitly identifies nsoc26 and level
+  const text = ((pr.title || "") + " " + (pr.body || "") + " " + (pr.head?.ref || "")).toLowerCase();
+  const textNsoc = hasNsoc || text.includes("nsoc26") || text.includes("nsoc");
+  const textLevel = hasLevel || text.includes("level1") || text.includes("level2") || text.includes("level3");
 
-  return null;
+  return textNsoc && textLevel;
 }
 
 /**
- * Scan git log to extract all merged PRs and match them to authors
+ * Scan git history for NSoC merged PR commits
  */
 function scanGitCommits(processedPrNumbers, contributorStats) {
   try {
@@ -88,6 +85,10 @@ function scanGitCommits(processedPrNumbers, contributorStats) {
       const lines = c.trim().split("\n");
       const [hash, author, email, subj, ...bodyParts] = lines;
       const body = bodyParts.slice(0, -1).join("\n");
+      const fullText = (subj + " " + body).toLowerCase();
+
+      // Only count commits that correspond to nsoc tasks
+      const isNsocCommit = fullText.includes("nsoc") || fullText.includes("level1") || fullText.includes("level2") || fullText.includes("level3");
 
       let prNumber = null;
       let username = null;
@@ -97,7 +98,7 @@ function scanGitCommits(processedPrNumbers, contributorStats) {
       if (mergePrMatch) {
         prNumber = parseInt(mergePrMatch[1], 10);
         const possibleUser = mergePrMatch[2];
-        if (possibleUser && !possibleUser.includes("Pratyush") && !possibleUser.includes("patch")) {
+        if (possibleUser && !possibleUser.includes("Pratyush") && !possibleUser.includes("patch") && !possibleUser.includes("chore") && !possibleUser.includes("main")) {
           username = possibleUser;
         }
       }
@@ -137,7 +138,7 @@ function scanGitCommits(processedPrNumbers, contributorStats) {
         }
       }
 
-      if (username && !isExcludedUser(username)) {
+      if (username && !isExcludedUser(username) && isNsocCommit) {
         processedPrNumbers.add(prNumber);
         if (!contributorStats[username]) {
           contributorStats[username] = {
@@ -152,9 +153,11 @@ function scanGitCommits(processedPrNumbers, contributorStats) {
       }
     }
 
-    console.log(`[Leaderboard Sync] Scanned git history: +${newlyAdded} merged PRs found.`);
+    if (newlyAdded > 0) {
+      console.log(`[Leaderboard Sync] Scanned git history: +${newlyAdded} eligible NSoC merged PRs found.`);
+    }
   } catch (err) {
-    console.warn("[Leaderboard Sync] Git commit scan failed:", err.message);
+    console.warn("[Leaderboard Sync] Git commit scan warning:", err.message);
   }
 }
 
@@ -163,93 +166,89 @@ async function run() {
   const repoEnv = process.env.GITHUB_REPOSITORY || "Pratyush-Panda-2006/CAREERFORGE";
   const [owner, repo] = repoEnv.split("/");
 
-  console.log(`[Leaderboard Sync] Starting sync for ${owner}/${repo}...`);
+  console.log(`[Leaderboard Sync] Starting NSoC Leaderboard Sync for ${owner}/${repo}...`);
+  console.log(`[Leaderboard Sync] Filtering exclusively: repository ${owner}/${repo}, labels [nsoc26] AND [level1 | level2 | level3]`);
 
-  const existingData = loadExistingLeaderboard();
-  const existingCache = existingData?._cache || {};
   const contributorStats = {};
-  const processedPrNumbers = new Set(existingCache.processed_pr_numbers || []);
+  const processedPrNumbers = new Set();
 
-  // Hydrate contributor stats from existing baseline
-  if (existingData && Array.isArray(existingData.contributors)) {
-    for (const c of existingData.contributors) {
-      if (c.username && !isExcludedUser(c.username)) {
-        contributorStats[c.username] = {
-          username: c.username,
-          avatar_url: c.avatar_url || `https://github.com/${c.username}.png`,
-          profile_url: c.profile_url || `https://github.com/${c.username}`,
-          merged_prs: c.merged_prs || 0
-        };
+  // 1. Fetch closed PRs from GitHub API
+  try {
+    let page = 1;
+    let keepPaging = true;
+
+    while (keepPaging && page <= 25) {
+      const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&per_page=100&page=${page}`;
+      const headers = {
+        Accept: "application/vnd.github+json",
+        "User-Agent": "CAREERFORGE-Leaderboard-Sync",
+        "X-GitHub-Api-Version": "2022-11-28",
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+
+      const res = await fetch(url, { headers });
+      if (!res.ok) {
+        console.warn(`[Leaderboard Sync] API responded with ${res.status} on page ${page}`);
+        break;
       }
-    }
-  }
-  delete contributorStats["harshbok69-bit"];
 
-  // 1. Fetch live from GitHub API if token is provided
-  if (token) {
-    try {
-      const { Octokit } = await import("@octokit/rest");
-      const octokit = new Octokit({ auth: token });
-      console.log("[Leaderboard Sync] Querying GitHub API for merged pull requests...");
+      const pulls = await res.json();
+      if (!pulls || !Array.isArray(pulls) || pulls.length === 0) break;
 
-      const iterator = octokit.paginate.iterator(octokit.rest.pulls.list, {
-        owner,
-        repo,
-        state: "closed",
-        sort: "updated",
-        direction: "desc",
-        per_page: 100
-      });
+      for (const pr of pulls) {
+        if (!pr.merged_at) continue;
 
-      let pageCount = 0;
-      for await (const response of iterator) {
-        pageCount++;
-        const pagePulls = response.data;
-        if (!pagePulls || pagePulls.length === 0) break;
+        const prNum = pr.number;
+        if (processedPrNumbers.has(prNum)) continue;
 
-        for (const pr of pagePulls) {
-          if (pr.merged_at && pr.user && !isExcludedUser(pr.user.login)) {
-            const prNum = pr.number;
-            if (!processedPrNumbers.has(prNum)) {
-              processedPrNumbers.add(prNum);
-              const username = pr.user.login;
-              if (!contributorStats[username]) {
-                contributorStats[username] = {
-                  username,
-                  avatar_url: pr.user.avatar_url || `https://github.com/${username}.png`,
-                  profile_url: pr.user.html_url || `https://github.com/${username}`,
-                  merged_prs: 0
-                };
-              }
-              contributorStats[username].merged_prs += 1;
-            }
+        if (isQualifiedNsocPr(pr)) {
+          processedPrNumbers.add(prNum);
+          const username = pr.user.login;
+
+          if (!contributorStats[username]) {
+            contributorStats[username] = {
+              username,
+              avatar_url: pr.user.avatar_url || `https://github.com/${username}.png`,
+              profile_url: pr.user.html_url || `https://github.com/${username}`,
+              merged_prs: 0
+            };
           }
+          contributorStats[username].merged_prs += 1;
         }
-
-        // Limit pages if running on incremental trigger
-        if (pageCount >= 20) break;
       }
-    } catch (apiErr) {
-      console.warn(`[Leaderboard Sync API Warning]: ${apiErr.message}`);
+
+      if (pulls.length < 100) break;
+      page++;
     }
+    console.log(`[Leaderboard Sync] GitHub API scan identified ${processedPrNumbers.size} eligible NSoC merged PRs.`);
+  } catch (apiErr) {
+    console.warn(`[Leaderboard Sync API Warning]: ${apiErr.message}`);
   }
 
-  // 2. Enrich with local git log commits (catches any squash/merge commits not yet indexed by API)
+  // 2. Enrich with local git log commits if needed
   scanGitCommits(processedPrNumbers, contributorStats);
 
-  // 3. Sort descending by merged PR count
+  // 3. Remove any excluded user that slipped through
+  for (const ex of EXCLUDED_USERS) {
+    delete contributorStats[ex];
+  }
+
+  // 4. Sort descending by merged PR count
   const sorted = Object.values(contributorStats)
     .filter((item) => item.merged_prs > 0 && !isExcludedUser(item.username))
     .sort((a, b) => b.merged_prs - a.merged_prs);
 
-  // Guard: NEVER overwrite with empty contributors
   if (sorted.length === 0) {
-    console.error("[Leaderboard Sync Error]: No contributors found. Aborting write to prevent wipe.");
+    console.error("[Leaderboard Sync Error]: No qualified NSoC contributors found. Aborting write to prevent wipe.");
     process.exit(1);
   }
 
   const leaderboardData = {
     last_updated: new Date().toISOString(),
+    filter_criteria: {
+      repository: `${owner}/${repo}`,
+      required_labels: ["nsoc26", ["level1", "level2", "level3"]]
+    },
     total_merged_prs: processedPrNumbers.size,
     contributors: sorted.map((item, idx) => ({
       rank: idx + 1,
@@ -268,7 +267,7 @@ async function run() {
 
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(leaderboardData, null, 2));
   console.log(
-    `[Leaderboard Sync] Successfully saved ${leaderboardData.contributors.length} contributors (${processedPrNumbers.size} merged PRs total) to public/leaderboard.json`
+    `[Leaderboard Sync] Successfully saved ${leaderboardData.contributors.length} NSoC contributors (${processedPrNumbers.size} eligible merged PRs total) to public/leaderboard.json`
   );
 }
 
