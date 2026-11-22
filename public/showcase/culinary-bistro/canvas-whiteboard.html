@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Culinary Bistro — Haute Plating & Kitchen Flow Vector Whiteboard</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bistro-whiteboard-app">
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <a href="index.html" class="nav-back-link" title="Return to Lumière Bistro Showcase">← Lumière Bistro</a>
+        <div class="brand-divider"></div>
+        <div class="title-meta">
+          <span class="badge-gold">Haute Gastronomie Studio</span>
+          <h1>Plating &amp; Brigade Vector Whiteboard</h1>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btnUndo" class="action-btn" title="Undo last mark (Ctrl+Z)" disabled>
+          <span class="btn-icon">↩</span> Undo
+        </button>
+        <button id="btnRedo" class="action-btn" title="Redo undone mark (Ctrl+Y)" disabled>
+          <span class="btn-icon">↪</span> Redo
+        </button>
+        <button id="btnClear" class="action-btn btn-danger" title="Clear all marks">
+          <span class="btn-icon">🗑️</span> Clear
+        </button>
+        <div class="action-divider"></div>
+        <button id="btnExportSVG" class="action-btn btn-gold" title="Download vector SVG format">
+          <span class="btn-icon">📥</span> Download SVG
+        </button>
+        <button id="btnExportPNG" class="action-btn" title="Export high-resolution PNG image">
+          <span class="btn-icon">🖼️</span> Export PNG
+        </button>
+        <button id="btnSaveJSON" class="action-btn" title="Save whiteboard JSON file">
+          <span class="btn-icon">💾</span> Save JSON
+        </button>
+        <button id="btnLoadJSON" class="action-btn" title="Load saved whiteboard JSON file">
+          <span class="btn-icon">📂</span> Load JSON
+        </button>
+        <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="workspace-container">
+      <!-- Floating Culinary Dock -->
+      <aside class="culinary-dock" aria-label="Culinary tools and palette">
+        <!-- Tools Group -->
+        <div class="dock-section">
+          <span class="section-title">Culinary Tools</span>
+          <div class="tools-grid" role="toolbar" aria-label="Drawing tools">
+            <button type="button" class="tool-btn active" data-tool="pen" title="Chef Pen — Freehand smooth spline">
+              <span class="tool-emoji">🖋️</span>
+              <span class="tool-label">Chef Pen</span>
+            </button>
+            <button type="button" class="tool-btn" data-tool="drizzle" title="Sauce Drizzle — Velvety reduction coulis">
+              <span class="tool-emoji">🍯</span>
+              <span class="tool-label">Drizzle</span>
+            </button>
+            <button type="button" class="tool-btn" data-tool="garnish" title="Herb Garnish — Microgreen leaf callouts">
+              <span class="tool-emoji">🌿</span>
+              <span class="tool-label">Garnish</span>
+            </button>
+            <button type="button" class="tool-btn" data-tool="rectangle" title="Station Zone — Kitchen prep boundary">
+              <span class="tool-emoji">▭</span>
+              <span class="tool-label">Station</span>
+            </button>
+            <button type="button" class="tool-btn" data-tool="circle" title="Cloche Plate — Concentric presentation ring">
+              <span class="tool-emoji">◯</span>
+              <span class="tool-label">Plate</span>
+            </button>
+            <button type="button" class="tool-btn" data-tool="eraser" title="Platter Scraper — Eraser">
+              <span class="tool-emoji">🧹</span>
+              <span class="tool-label">Scraper</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Palette Group -->
+        <div class="dock-section">
+          <span class="section-title">Gourmet Palette</span>
+          <div class="swatches-grid" role="group" aria-label="Color palette">
+            <button type="button" class="swatch-btn active" data-color="#eab308" title="Saffron Gold" style="--c: #eab308;"></button>
+            <button type="button" class="swatch-btn" data-color="#dc2626" title="Paprika Red" style="--c: #dc2626;"></button>
+            <button type="button" class="swatch-btn" data-color="#84cc16" title="Sage Green" style="--c: #84cc16;"></button>
+            <button type="button" class="swatch-btn" data-color="#fefce8" title="Crème White" style="--c: #fefce8;"></button>
+            <button type="button" class="swatch-btn" data-color="#b45309" title="Copper Bronze" style="--c: #b45309;"></button>
+            <button type="button" class="swatch-btn" data-color="#1c1917" title="Charcoal Platter" style="--c: #1c1917;"></button>
+            <button type="button" class="swatch-btn" data-color="#120c0a" title="Truffle Dark" style="--c: #120c0a;"></button>
+            <label class="custom-color-wrapper" title="Pick custom color">
+              <input type="color" id="customColorPicker" value="#eab308">
+              <span class="color-picker-icon">🎨</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Brush Sliders -->
+        <div class="dock-section">
+          <div class="slider-header">
+            <span class="section-title">Stroke Width</span>
+            <span id="strokeWidthValue" class="slider-badge">4px</span>
+          </div>
+          <input type="range" id="strokeWidthSlider" min="1" max="48" value="4" class="bistro-slider">
+
+          <div class="slider-header" style="margin-top: 12px;">
+            <span class="section-title">Opacity</span>
+            <span id="opacityValue" class="slider-badge">100%</span>
+          </div>
+          <input type="range" id="opacitySlider" min="5" max="100" value="100" class="bistro-slider">
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Template Backdrops -->
+        <div class="dock-section">
+          <span class="section-title">Template Backdrop</span>
+          <div class="template-buttons" role="group" aria-label="Template switcher">
+            <button type="button" class="template-btn active" data-template="plating" title="Concentric Michelin plating focal rings">
+              🍽️ Plating Guide
+            </button>
+            <button type="button" class="template-btn" data-template="brigade" title="Kitchen station brigade flow dividers">
+              👨‍🍳 Brigade Flow
+            </button>
+            <button type="button" class="template-btn" data-template="clean" title="Solid slate dark platter">
+              ✨ Clean Slate
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Canvas Center Viewport -->
+      <section class="canvas-viewport-card" aria-label="Drawing canvas viewport">
+        <div class="viewport-header">
+          <div class="viewport-info">
+            <span class="indicator-dot"></span>
+            <span id="activeStatusLabel">Plating Canvas Ready</span>
+          </div>
+          <div class="viewport-telemetry">
+            <span id="coordsDisplay">X: 0, Y: 0</span>
+            <span class="telemetry-separator">•</span>
+            <span id="strokesCount">0 Marks</span>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="whiteboardCanvas" width="960" height="640">
+            Your browser does not support HTML5 Canvas drawing.
+          </canvas>
+        </div>
+
+        <footer class="viewport-footer">
+          <span class="hint-text">💡 <strong>Chef Shortcuts:</strong> Draw freely • Ctrl+Z Undo • Ctrl+Y Redo • Alt+C Clear • Catmull-Rom smoothing auto-applies</span>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <!-- Whiteboard Bootstrap Script -->
+  <script type="module">
+    import { CulinaryBistroWhiteboardCanvas, CULINARY_PALETTE } from './canvas-whiteboard.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const canvasEl = document.getElementById('whiteboardCanvas');
+      const board = new CulinaryBistroWhiteboardCanvas(canvasEl, {
+        width: 960,
+        height: 640,
+        tool: 'pen',
+        color: CULINARY_PALETTE.saffronGold,
+        strokeWidth: 4,
+        opacity: 1.0,
+        template: 'plating'
+      });
+
+      // UI Elements
+      const btnUndo = document.getElementById('btnUndo');
+      const btnRedo = document.getElementById('btnRedo');
+      const btnClear = document.getElementById('btnClear');
+      const btnExportSVG = document.getElementById('btnExportSVG');
+      const btnExportPNG = document.getElementById('btnExportPNG');
+      const btnSaveJSON = document.getElementById('btnSaveJSON');
+      const btnLoadJSON = document.getElementById('btnLoadJSON');
+      const jsonFileInput = document.getElementById('jsonFileInput');
+
+      const toolButtons = document.querySelectorAll('.tool-btn');
+      const swatchButtons = document.querySelectorAll('.swatch-btn');
+      const customColorPicker = document.getElementById('customColorPicker');
+      const strokeWidthSlider = document.getElementById('strokeWidthSlider');
+      const strokeWidthValue = document.getElementById('strokeWidthValue');
+      const opacitySlider = document.getElementById('opacitySlider');
+      const opacityValue = document.getElementById('opacityValue');
+      const templateButtons = document.querySelectorAll('.template-btn');
+
+      const coordsDisplay = document.getElementById('coordsDisplay');
+      const strokesCount = document.getElementById('strokesCount');
+      const activeStatusLabel = document.getElementById('activeStatusLabel');
+
+      // Update UI helper
+      const updateUI = () => {
+        btnUndo.disabled = !board.canUndo;
+        btnRedo.disabled = !board.canRedo;
+        strokesCount.textContent = `${board.strokes.length} Mark${board.strokes.length === 1 ? '' : 's'}`;
+        activeStatusLabel.textContent = `Tool: ${board.tool.charAt(0).toUpperCase() + board.tool.slice(1)} | ${board.color}`;
+      };
+
+      // Board Event Listeners
+      board.on('change', updateUI);
+      board.on('toolChange', ({ tool }) => {
+        toolButtons.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tool === tool);
+        });
+        updateUI();
+      });
+      board.on('colorChange', ({ color }) => {
+        swatchButtons.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.color.toLowerCase() === color.toLowerCase());
+        });
+        customColorPicker.value = color.startsWith('#') && color.length === 7 ? color : customColorPicker.value;
+        updateUI();
+      });
+
+      // Tool selection
+      toolButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          board.setTool(btn.dataset.tool);
+        });
+      });
+
+      // Palette swatches
+      swatchButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          board.setColor(btn.dataset.color);
+        });
+      });
+
+      // Custom color
+      customColorPicker.addEventListener('input', (e) => {
+        board.setColor(e.target.value);
+      });
+
+      // Stroke width slider
+      strokeWidthSlider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        strokeWidthValue.textContent = `${val}px`;
+        board.setStrokeWidth(val);
+      });
+
+      // Opacity slider
+      opacitySlider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        opacityValue.textContent = `${val}%`;
+        board.setOpacity(val / 100);
+      });
+
+      // Template backdrop switcher
+      templateButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          templateButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          board.setTemplate(btn.dataset.template);
+        });
+      });
+
+      // Undo / Redo / Clear
+      btnUndo.addEventListener('click', () => board.undo());
+      btnRedo.addEventListener('click', () => board.redo());
+      btnClear.addEventListener('click', () => {
+        if (confirm('Clear the entire culinary plating canvas?')) {
+          board.clear();
+        }
+      });
+
+      // Export SVG
+      btnExportSVG.addEventListener('click', () => {
+        const svgContent = board.exportSVG();
+        const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lumiere-plating-${Date.now()}.svg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // Export PNG
+      btnExportPNG.addEventListener('click', () => {
+        const dataUrl = canvasEl.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = `lumiere-plating-${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+
+      // Save JSON
+      btnSaveJSON.addEventListener('click', () => {
+        const jsonContent = board.exportJSON(2);
+        const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lumiere-sketchpad-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // Load JSON
+      btnLoadJSON.addEventListener('click', () => {
+        jsonFileInput.click();
+      });
+
+      jsonFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            board.loadJSON(evt.target.result);
+            // Sync UI template button
+            templateButtons.forEach(b => {
+              b.classList.toggle('active', b.dataset.template === board.template);
+            });
+            updateUI();
+          } catch (err) {
+            alert('Failed to load whiteboard JSON: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      // Coordinate tracking on pointer movement
+      canvasEl.addEventListener('pointermove', (e) => {
+        const rect = canvasEl.getBoundingClientRect();
+        const scaleX = canvasEl.width / rect.width;
+        const scaleY = canvasEl.height / rect.height;
+        const dpr = window.devicePixelRatio || 1;
+        const x = Math.round((e.clientX - rect.left) * (scaleX / dpr));
+        const y = Math.round((e.clientY - rect.top) * (scaleY / dpr));
+        coordsDisplay.textContent = `X: ${x}, Y: ${y}`;
+      });
+
+      // Keyboard shortcuts
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            board.redo();
+          } else {
+            board.undo();
+          }
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          board.redo();
+        } else if (e.altKey && e.key.toLowerCase() === 'c') {
+          e.preventDefault();
+          board.clear();
+        }
+      });
+
+      // Initial state refresh
+      updateUI();
+    });
+  </script>
+</body>
+</html>
