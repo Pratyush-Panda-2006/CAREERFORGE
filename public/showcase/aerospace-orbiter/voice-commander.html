@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter - Voice Commander & Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <div class="commander-container">
+    <header class="commander-header">
+      <div class="badge-tag">Orbital Mission Control &bull; Web Speech API</div>
+      <h1>Aerospace Orbiter Voice Commander</h1>
+      <p id="statusBadge" class="status-badge">System Idle &bull; Ready for orbital vocal dispatch</p>
+    </header>
+
+    <main class="commander-grid">
+      <!-- Voice Activation Section -->
+      <section class="commander-card controls-card" aria-labelledby="controls-heading">
+        <h2 id="controls-heading">Voice Command Terminal</h2>
+        <div class="mic-wrapper">
+          <button type="button" id="micBtn" class="mic-btn" aria-label="Toggle voice commander listening mode">
+            <span class="mic-icon">🎙️</span>
+            <span class="mic-label">Activate Orbit Mic</span>
+          </button>
+        </div>
+
+        <!-- Animated Audio Wave Visualizer -->
+        <div class="wave-visualizer" id="waveVisualizer" aria-hidden="true">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <div class="manual-input-row">
+          <input type="text" id="manualInput" placeholder="Speak or enter command (e.g. 'orbit burn', 'telemetry check', 'status')" aria-label="Manual voice command input">
+          <button type="button" id="submitBtn" class="btn-dispatch">Dispatch</button>
+        </div>
+
+        <div class="hint-panel">
+          <span class="hint-title">Vocal Commands:</span>
+          <code>orbit burn</code>, <code>docking alignment</code>, <code>telemetry check</code>, <code>jettison stage</code>, <code>abort mission</code>, <code>status</code>, <code>help</code>
+        </div>
+      </section>
+
+      <!-- Recognized Command Stream Console -->
+      <section class="commander-card stream-card" aria-labelledby="stream-heading">
+        <h2 id="stream-heading">Recognized Command Feed</h2>
+        <div class="command-history" id="commandHistory" role="log" aria-live="polite">
+          <div class="history-entry empty">No telemetry voice transmissions recorded yet.</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Speech Confirmation Toast -->
+    <div class="speech-toast" id="speechToast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
