@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Episode Whiteboard · Waveform</title>
+  <link rel="stylesheet" href="./canvas-whiteboard.css">
+</head>
+<body>
+  <main>
+    <header>
+      <a href="./index.html">← Waveform</a>
+      <h1>Episode whiteboard</h1>
+      <p>Sketch the flow of an episode, then download the board as an editable SVG.</p>
+    </header>
+    <section aria-label="Whiteboard">
+      <div class="toolbar">
+        <fieldset>
+          <legend>Drawing tool</legend>
+          <label><input type="radio" name="tool" value="pen" checked>Pen</label>
+          <label><input type="radio" name="tool" value="line">Line</label>
+          <label><input type="radio" name="tool" value="rectangle">Rectangle</label>
+          <label><input type="radio" name="tool" value="eraser">Eraser</label>
+        </fieldset>
+        <label class="setting">Color <input id="color" type="color" value="#f2bb70"></label>
+        <label class="setting">Width <input id="width" type="range" min="1" max="24" value="5">
+          <output id="width-value" for="width">5 px</output></label>
+      </div>
+      <svg id="board" viewBox="0 0 960 540" tabindex="0" aria-label="Drawing board" aria-describedby="keys">
+        <g id="shapes"></g>
+        <g id="preview" pointer-events="none"></g>
+        <circle id="cursor" cx="480" cy="270" r="7" fill="none" stroke="#fff" stroke-width="2" pointer-events="none"></circle>
+      </svg>
+      <div class="actions">
+        <button id="undo" type="button" disabled>Undo</button>
+        <button id="redo" type="button" disabled>Redo</button>
+        <button id="clear" type="button" disabled>Clear board</button>
+        <button id="export" type="button">Download SVG</button>
+        <span id="count"></span>
+      </div>
+      <p id="keys">Drag to draw or erase whole objects. With the board focused, use the arrow keys to move and Space to start or finish a mark. Escape cancels the current gesture.</p>
+      <p id="status" role="status" aria-live="polite"></p>
+    </section>
+    <footer>The board stays in this tab. Download it before reloading. Undo keeps the last 50 changes.</footer>
+  </main>
+  <script type="module" src="./canvas-whiteboard.js"></script>
+</body>
+</html>
