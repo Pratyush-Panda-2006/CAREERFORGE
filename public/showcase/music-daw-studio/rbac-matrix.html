@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Studio policy workbench · Music DAW Studio</title><link rel="icon" href="data:,"><link rel="stylesheet" href="rbac-matrix.css"></head>
+<body><main>
+<header><span>MUSIC DAW STUDIO / ENGINE LAB</span><a href="index.html">Back to showcase</a></header>
+<div class="intro"><p class="eyebrow">ACCESS / 07 PERMISSIONS / 04 ROLES</p><h1>Make every studio grant<br>accountable.</h1><p>Inspect how direct permissions and inherited roles combine. Try a denied change, then switch to the admin to authorize it. This local simulator never authenticates users or streams audio.</p></div>
+<section class="controls" aria-label="Simulation identities">
+<label>Act as <select id="actor"><option>admin-demo</option><option>composer-demo</option><option>listener-demo</option></select></label>
+<label>Evaluate user <select id="subject"><option>listener-demo</option><option>composer-demo</option></select></label>
+<label>Requested action <select id="action"><option>tracks:write</option><option>tracks:read</option><option>plugins:read</option><option>plugins:write</option><option>master:export</option><option>policy:manage</option><option>roles:assign</option></select></label>
+<output id="access" aria-live="polite"></output>
+</section>
+<section aria-labelledby="matrix-title"><div class="section-heading"><h2 id="matrix-title">The permission matrix</h2><span>Checked = effective access</span></div>
+<p class="hint">Change direct grants as an authorized actor. Inherited grants are marked and stay checked until their parent policy changes. The admin is a fixed bootstrap role.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Permission matrix, horizontally scrollable"><table><caption class="sr-only">Effective permissions by role</caption><thead><tr><th scope="col">Action</th><th scope="col">listener</th><th scope="col">composer</th><th scope="col">producer</th><th scope="col">admin</th></tr></thead><tbody id="matrix-body"></tbody></table></div>
+<pre id="role-summary" aria-label="Inheritance and effective masks"></pre>
+</section>
+<div class="workspace">
+<section><h2>Assign a role</h2><p class="hint">Assignments require <code>roles:assign</code> under the actor's current policy.</p><form id="assign"><label>New role for evaluated user <select id="new-role"><option>listener</option><option>composer</option><option>producer</option><option>admin</option></select></label><button>Assign role</button></form>
+<form id="mask-form"><label>Required permission mask (all bits) <input id="mask" type="text" inputmode="numeric" value="17" maxlength="16"></label><button>Evaluate mask</button></form></section>
+<section><h2>Edit inheritance &amp; patterns</h2><p class="hint">Exact actions, <code>tracks:*</code> or <code>*</code> resolve only to the seven known actions. Unknown actions, malformed policies and inheritance cycles are rejected atomically.</p>
+<label>Policy to edit <select id="edit-role"><option>listener</option><option>composer</option><option selected>producer</option></select></label><div class="buttons"><button id="edit-policy">Open policy editor</button><button id="reset">Reset demo</button></div></section>
+</div>
+<p id="notice" role="status" aria-live="polite">Ready. Listener access is denied for track writes.</p>
+<details><summary>Engine contract &amp; limits</summary><p>The actor selector represents a trusted caller supplying an identity; it is not identity verification. Policies contain additive allow rules. Parent grants are combined with bitwise OR; a wildcard is expanded against the fixed action registry, never evaluated as code. Removing a direct grant cannot cancel an inherited grant. This is not an explicit-deny policy language.</p><p>Bits 0–6 follow the displayed action order. Mask 17 requires tracks read and master export; zero requests no permissions. One-argument <code>evaluatePolicyBitmask(mask)</code> evaluates the listener role. Users are bounded at 32; the four roles and bootstrap admin are fixed. Draft policy input is limited to 2 KB. Nothing is stored, uploaded or applied to real audio tracks. Refresh resets all changes.</p></details>
+<footer>In-memory policy reasoning · no backend, session or account authorization</footer>
+</main>
+<dialog id="policy-dialog" aria-labelledby="policy-title"><form id="policy-form"><h2 id="policy-title">Role policy</h2><label for="policy-json">Parents and permission patterns (JSON)</label><textarea id="policy-json" rows="10" maxlength="2048" spellcheck="false"></textarea><p id="policy-error" role="alert"></p><div class="buttons"><button>Save policy</button><button type="button" id="cancel-policy">Cancel</button></div></form></dialog>
+<script type="module" src="rbac-matrix.js"></script></body></html>
