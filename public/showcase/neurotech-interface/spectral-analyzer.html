@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EEG Spectral Power & Cognitive Engagement Workbench</title>
+  <link rel="stylesheet" href="spectral-analyzer.css">
+</head>
+<body class="neuro-body">
+  <div class="workbench-container" id="spectral-analyzer-container">
+    <header class="workbench-header">
+      <div class="header-badge">BCI Signal Processing Engine</div>
+      <h1>Real-Time EEG Spectral Power & Cognitive Engagement Analyzer</h1>
+      <p class="subtitle">Autonomous client-side Discrete Fourier Transform (DFT), clinical band decomposition (Delta, Theta, Alpha, Beta, Gamma), and cognitive engagement indices.</p>
+    </header>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label for="preset-selector">Signal Simulation Preset:</label>
+        <select id="preset-selector" class="cyber-select">
+          <option value="alpha" selected>Calm Meditation (Alpha Peak - 10 Hz)</option>
+          <option value="beta">Intense Problem Solving (Beta Surge - 22 Hz)</option>
+          <option value="delta">Deep Restorative Sleep (Delta Slow-wave - 2 Hz)</option>
+          <option value="gamma">Sensory Binding / Insight (Gamma Burst - 40 Hz)</option>
+          <option value="mixed">Multi-Channel Composite EEG (Mixed Waves)</option>
+        </select>
+      </div>
+      <button id="recompute-btn" class="cyber-button">Generate & Re-Analyze Waveform</button>
+    </div>
+
+    <!-- Telemetry Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Dominant Frequency Peak</div>
+        <div class="metric-value highlight-cyan" id="metric-peak-freq">10.00 Hz</div>
+        <div class="metric-sub">Sampling Rate: 128 Hz | Nyquist: 64 Hz</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Dominant Neuro-Band</div>
+        <div class="metric-value" id="metric-dominant-band">Alpha (8-13 Hz)</div>
+        <div class="metric-sub">Highest Spectral Power Density</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Cognitive Engagement Index</div>
+        <div class="metric-value highlight-gold" id="metric-engagement-index">0.450</div>
+        <div class="metric-sub">&beta; / (&alpha; + &theta;) Ratio</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Cognitive State</div>
+        <div class="state-badge" id="metric-state-badge">Calm Alertness</div>
+        <div class="metric-desc" id="metric-engagement-desc">Balanced mental state suitable for analytical focus.</div>
+      </div>
+    </div>
+
+    <!-- Visualizers -->
+    <div class="visualizer-grid">
+      <div class="canvas-card">
+        <h3>Raw Time-Domain EEG Signal (128 Samples / sec)</h3>
+        <canvas id="wave-canvas" width="560" height="180"></canvas>
+      </div>
+      <div class="canvas-card">
+        <h3>Power Spectral Density (PSD) Discrete Fourier Spectrum</h3>
+        <canvas id="psd-canvas" width="560" height="180"></canvas>
+        <div class="band-legend">
+          <span class="legend-item"><span class="legend-color legend-delta"></span> Delta (0.5-4Hz)</span>
+          <span class="legend-item"><span class="legend-color legend-theta"></span> Theta (4-8Hz)</span>
+          <span class="legend-item"><span class="legend-color legend-alpha"></span> Alpha (8-13Hz)</span>
+          <span class="legend-item"><span class="legend-color legend-beta"></span> Beta (13-30Hz)</span>
+          <span class="legend-item"><span class="legend-color legend-gamma"></span> Gamma (30-50Hz)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clinical Band Decomposition Bars -->
+    <div class="bands-card">
+      <h3>Clinical Neuro-Band Power Decomposition</h3>
+      <div class="bands-list">
+        <div class="band-row">
+          <div class="band-info">
+            <span class="band-tag tag-delta">Delta (0.5 - 4 Hz)</span>
+            <span class="band-role">Deep Sleep / Physical Restoration</span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-bar bar-delta" id="band-bar-delta"></div>
+          </div>
+          <div class="band-val" id="band-val-delta">0%</div>
+        </div>
+
+        <div class="band-row">
+          <div class="band-info">
+            <span class="band-tag tag-theta">Theta (4 - 8 Hz)</span>
+            <span class="band-role">Deep Meditation / Memory Encoding</span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-bar bar-theta" id="band-bar-theta"></div>
+          </div>
+          <div class="band-val" id="band-val-theta">0%</div>
+        </div>
+
+        <div class="band-row">
+          <div class="band-info">
+            <span class="band-tag tag-alpha">Alpha (8 - 13 Hz)</span>
+            <span class="band-role">Calm Mindfulness / Relaxed Focus</span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-bar bar-alpha" id="band-bar-alpha"></div>
+          </div>
+          <div class="band-val" id="band-val-alpha">0%</div>
+        </div>
+
+        <div class="band-row">
+          <div class="band-info">
+            <span class="band-tag tag-beta">Beta (13 - 30 Hz)</span>
+            <span class="band-role">Active Problem Solving / Analytical Cognition</span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-bar bar-beta" id="band-bar-beta"></div>
+          </div>
+          <div class="band-val" id="band-val-beta">0%</div>
+        </div>
+
+        <div class="band-row">
+          <div class="band-info">
+            <span class="band-tag tag-gamma">Gamma (30 - 50 Hz)</span>
+            <span class="band-role">Cross-Modal Sensory Binding / High Insight</span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-bar bar-gamma" id="band-bar-gamma"></div>
+          </div>
+          <div class="band-val" id="band-val-gamma">0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="spectral-analyzer.js"></script>
+</body>
+</html>
