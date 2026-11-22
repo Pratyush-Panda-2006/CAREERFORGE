@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Merkle-sum liabilities lab</title><link rel="stylesheet" href="merkle-sum.css"></head>
+<body><main><a href="merkle-proof.html">← Inclusion proof lab</a><p class="eyebrow">CRYPTO EXCHANGE · AUDIT WORKBENCH</p><h1>Commit every balance.<br>Verify the total.</h1><p>An offline educational Merkle-sum tree using SHA-256 and exact eight-decimal arithmetic.</p>
+<aside>Simulation only. A matching proof verifies inclusion and committed arithmetic. It does not prove real assets, reserve ownership, solvency, or completeness of the supplied account list.</aside>
+<section class="grid"><div class="panel"><h2>1. Build a commitment</h2><label for="records">Account records (JSON; balances must be strings)</label><textarea id="records" rows="12" spellcheck="false">[
+  {"account":"alice","balance":"1.25000001"},
+  {"account":"bob","balance":"2.5"},
+  {"account":"carol","balance":"0.00000001"}
+]</textarea><label for="reserves">Simulated reserves</label><input id="reserves" value="4.00000000" inputmode="decimal"><button id="build">Build tree</button></div>
+<div class="panel"><h2>2. Inspect and verify</h2><p>Committed total <strong id="total">—</strong></p><label>Trusted root from this build</label><output id="root">—</output><p id="coverage"></p><label for="accounts">Account</label><select id="accounts"></select><button id="inspect" disabled>Inspect proof</button><label for="proof">Editable proof bundle (try changing a sum)</label><textarea id="proof" rows="12" spellcheck="false"></textarea><button id="verify" disabled>Verify against built root</button></div></section>
+<p id="result" role="status" aria-live="polite"></p><details><summary>Commitment rules and limits</summary><p>Balances use unsigned 128-bit units at a fixed scale of 10⁸. Inputs accept 0–8 decimal places, no exponent, sign, whitespace, or leading zeroes. The aggregate has the same bound. Each account is unique after trimming; at most 1,024 leaves are accepted.</p><p>Leaves hash the JSON tuple ["merkle-sum-v1","leaf",account,integerUnits]. Parents hash ["merkle-sum-v1","branch",leftHash,leftSum,rightHash,rightSum]. Odd nodes are promoted unchanged. A singleton root is its leaf, with an empty proof. No balances are duplicated.</p></details>
+</main><script type="module" src="merkle-sum.js"></script></body></html>
