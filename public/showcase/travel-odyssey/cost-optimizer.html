@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Odyssey — Tiered Resource Allocation & Dynamic Cost Optimizer Sandbox</title>
+  <meta name="description" content="NSoC '26 Level 3 Travel Odyssey dynamic cost optimizer sandbox featuring multi-tiered GDS flight queries, hotel inventory sync, offline map cache, and booking efficiency metrics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cost-optimizer.css">
+</head>
+<body class="cost-optimizer-body">
+  <div class="optimizer-layout">
+    <!-- Header -->
+    <header class="optimizer-header">
+      <div class="header-pre-badge">
+        <span class="badge-pill pulse-badge">NSoC '26 LEVEL 3</span>
+        <span class="badge-pill platform-badge">GLOBAL TRAVEL INFRASTRUCTURE</span>
+      </div>
+      <h1 class="main-title">Travel Odyssey Cost Optimizer Sandbox</h1>
+      <p class="subtitle">
+        Interactive resource provisioning simulator modeling multi-tier GDS flight query tariffs, real-time hotel inventory sync nodes, offline map caching, and partner volume discount subsidies.
+      </p>
+
+      <!-- Preset Selection Chips -->
+      <div class="presets-bar" aria-label="Agency Profile Presets">
+        <span class="presets-label">Agency Profiles:</span>
+        <div class="preset-buttons">
+          <button type="button" class="preset-btn" data-preset="backpacker">🏕️ Backpacker / Boutique</button>
+          <button type="button" class="preset-btn" data-preset="regional">🏔️ Regional Operator</button>
+          <button type="button" class="preset-btn" data-preset="enterprise">✈️ Global OTA Enterprise</button>
+          <button type="button" class="preset-btn" data-preset="sovereign">🌐 Sovereign Travel Group</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="optimizer-grid">
+      <!-- Left Column: Resource Controls -->
+      <section class="controls-card glass-panel" aria-labelledby="controls-heading">
+        <div class="panel-header">
+          <h2 id="controls-heading" class="panel-title">Resource Allocation Sliders</h2>
+          <span class="panel-subtitle">Fine-tune infrastructure capacity for your travel platform</span>
+        </div>
+
+        <!-- Contract Billing Switch -->
+        <div class="billing-switch-wrapper">
+          <span class="billing-title">Booking Contract Commitment:</span>
+          <div class="switch-container">
+            <span class="switch-label-opt" id="label-monthly">Monthly</span>
+            <label class="toggle-switch" for="billing-toggle">
+              <input type="checkbox" id="billing-toggle" aria-label="Toggle annual contract discount">
+              <span class="switch-track"></span>
+            </label>
+            <span class="switch-label-opt" id="label-annual">
+              Annual Contract
+              <span class="discount-pill">20% Off</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Slider 1: Global GDS Flight Searches -->
+        <div class="slider-field">
+          <div class="slider-meta">
+            <label for="slider-flight-searches" class="slider-label">
+              <span class="resource-bullet bullet-flight"></span>
+              Global GDS Flight Search Queries
+            </label>
+            <span id="val-flight-searches" class="slider-val-badge">8,000 queries</span>
+          </div>
+          <input type="range" id="slider-flight-searches" class="custom-slider slider-flight" min="500" max="300000" step="500" value="8000" aria-label="Global GDS Flight Search Queries">
+          <div class="slider-hints">
+            <span>500 / mo</span>
+            <span>Tariff: $0.002 - $0.005 / query</span>
+            <span>300k / mo</span>
+          </div>
+        </div>
+
+        <!-- Slider 2: Hotel Inventory Sync Nodes -->
+        <div class="slider-field">
+          <div class="slider-meta">
+            <label for="slider-hotel-nodes" class="slider-label">
+              <span class="resource-bullet bullet-hotel"></span>
+              Hotel Inventory Sync Nodes
+            </label>
+            <span id="val-hotel-nodes" class="slider-val-badge">4 nodes</span>
+          </div>
+          <input type="range" id="slider-hotel-nodes" class="custom-slider slider-hotel" min="1" max="100" step="1" value="4" aria-label="Hotel Inventory Sync Nodes">
+          <div class="slider-hints">
+            <span>1 node</span>
+            <span>Real-time CRS/PMS sync nodes</span>
+            <span>100 nodes</span>
+          </div>
+        </div>
+
+        <!-- Slider 3: Offline Map Caching Storage -->
+        <div class="slider-field">
+          <div class="slider-meta">
+            <label for="slider-map-cache" class="slider-label">
+              <span class="resource-bullet bullet-map"></span>
+              Offline Map Caching Storage (GB)
+            </label>
+            <span id="val-map-cache" class="slider-val-badge">150 GB</span>
+          </div>
+          <input type="range" id="slider-map-cache" class="custom-slider slider-map" min="10" max="5000" step="10" value="150" aria-label="Offline Map Caching Storage in Gigabytes">
+          <div class="slider-hints">
+            <span>10 GB</span>
+            <span>Edge vector tile caches</span>
+            <span>5,000 GB</span>
+          </div>
+        </div>
+
+        <!-- Slider 4: Real-Time Flight Tracker Alerts -->
+        <div class="slider-field">
+          <div class="slider-meta">
+            <label for="slider-flight-alerts" class="slider-label">
+              <span class="resource-bullet bullet-alerts"></span>
+              Real-Time Flight Tracker Alerts
+            </label>
+            <span id="val-flight-alerts" class="slider-val-badge">3,500 alerts</span>
+          </div>
+          <input type="range" id="slider-flight-alerts" class="custom-slider slider-alerts" min="500" max="150000" step="500" value="3500" aria-label="Real-Time Flight Tracker Alerts">
+          <div class="slider-hints">
+            <span>500 / mo</span>
+            <span>Push gate & delay notifications</span>
+            <span>150k / mo</span>
+          </div>
+        </div>
+
+        <!-- Slider 5: Travel Agency API Requests/sec -->
+        <div class="slider-field">
+          <div class="slider-meta">
+            <label for="slider-api-requests" class="slider-label">
+              <span class="resource-bullet bullet-api"></span>
+              Agency API Gateway Throughput
+            </label>
+            <span id="val-api-requests" class="slider-val-badge">20 req/s</span>
+          </div>
+          <input type="range" id="slider-api-requests" class="custom-slider slider-api" min="5" max="500" step="5" value="20" aria-label="Agency API Gateway Throughput in requests per second">
+          <div class="slider-hints">
+            <span>5 req/s</span>
+            <span>B2B booking engine capacity</span>
+            <span>500 req/s</span>
+          </div>
+        </div>
+
+        <!-- Budget Optimizer Sub-Card -->
+        <div class="budget-tool-box">
+          <h3 class="budget-tool-title">⚡ Auto-Allocation by Target Budget</h3>
+          <p class="budget-tool-desc">Provide your target monthly budget to automatically balance optimal operational capacity across all resource dimensions.</p>
+          <div class="budget-input-row">
+            <div class="input-currency-wrapper">
+              <span class="currency-prefix">$</span>
+              <input type="number" id="target-budget-input" min="50" step="50" placeholder="e.g. 1200" aria-label="Target monthly budget in dollars">
+            </div>
+            <button type="button" id="btn-optimize-allocation" class="btn-optimize">Optimize Allocation</button>
+          </div>
+          <div id="optimizer-feedback" class="optimizer-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Right Column: Cost Projection & Breakdown -->
+      <section class="projection-card glass-panel" aria-labelledby="projection-heading">
+        <div class="panel-header flex-between">
+          <div>
+            <h2 id="projection-heading" class="panel-title">Real-Time Cost Projection</h2>
+            <span class="panel-subtitle">Multi-tier tariffs & volume subsidies</span>
+          </div>
+          <div class="tier-badges-group">
+            <span id="tier-badge" class="tier-badge tier-backpacker">Tier 1 • Backpacker / Boutique</span>
+            <span id="tier-discount-badge" class="subsidy-badge">0% Volume Subsidy</span>
+          </div>
+        </div>
+
+        <!-- Price Ticker Box -->
+        <div class="price-ticker-card">
+          <span class="ticker-label">ESTIMATED CONTRACT COST</span>
+          <div class="price-row">
+            <span id="total-price-val" class="price-highlight" aria-live="polite">$335.00</span>
+            <span id="billing-period-label" class="period-text">/ month</span>
+          </div>
+          <div class="monthly-equiv-row hidden">
+            <span>Monthly Equivalent:</span>
+            <strong id="monthly-equivalent-val">$0.00 / mo</strong>
+          </div>
+
+          <div class="subtotal-row">
+            <span>List Catalog Subtotal:</span>
+            <span id="base-price-val" class="subtotal-amount">$335.00</span>
+          </div>
+          <div class="subtotal-row savings-accent">
+            <span>Volume & Multi-Year Savings:</span>
+            <span id="discount-price-val" class="savings-amount">-$0.00</span>
+          </div>
+        </div>
+
+        <!-- Efficiency Card -->
+        <div class="efficiency-card">
+          <div class="eff-stat">
+            <span class="eff-label">Est. Bookings Capacity</span>
+            <span id="bookings-supported-val" class="eff-val">~2,350/mo</span>
+          </div>
+          <div class="eff-divider"></div>
+          <div class="eff-stat">
+            <span class="eff-label">Infrastructure Cost / Booking</span>
+            <span id="cost-per-booking-val" class="eff-val eff-highlight">$0.143</span>
+          </div>
+        </div>
+
+        <!-- SVG Donut Breakdown Section -->
+        <div class="breakdown-container">
+          <h3 class="breakdown-title">Resource Allocation Breakdown</h3>
+          <div class="donut-wrapper">
+            <svg class="donut-svg" viewBox="0 0 100 100" role="img" aria-label="Resource cost distribution">
+              <circle class="donut-track" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-segment-flight" class="donut-seg seg-flight" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-segment-hotel" class="donut-seg seg-hotel" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-segment-map" class="donut-seg seg-map" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-segment-alerts" class="donut-seg seg-alerts" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-segment-api" class="donut-seg seg-api" cx="50" cy="50" r="45"></circle>
+            </svg>
+
+            <!-- Legend with live cost values -->
+            <ul class="breakdown-legend" aria-label="Resource breakdown list">
+              <li class="legend-entry">
+                <span class="legend-color-dot dot-flight"></span>
+                <span class="legend-name">GDS Flight Queries</span>
+                <span id="cost-flight-searches" class="legend-num">$40.00</span>
+              </li>
+              <li class="legend-entry">
+                <span class="legend-color-dot dot-hotel"></span>
+                <span class="legend-name">Hotel Inventory Nodes</span>
+                <span id="cost-hotel-nodes" class="legend-num">$180.00</span>
+              </li>
+              <li class="legend-entry">
+                <span class="legend-color-dot dot-map"></span>
+                <span class="legend-name">Offline Map Caching</span>
+                <span id="cost-map-cache" class="legend-num">$30.00</span>
+              </li>
+              <li class="legend-entry">
+                <span class="legend-color-dot dot-alerts"></span>
+                <span class="legend-name">Flight Tracker Alerts</span>
+                <span id="cost-flight-alerts" class="legend-num">$35.00</span>
+              </li>
+              <li class="legend-entry">
+                <span class="legend-color-dot dot-api"></span>
+                <span class="legend-name">Agency API Gateway</span>
+                <span id="cost-api-requests" class="legend-num">$50.00</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button type="button" id="btn-open-quote-modal" class="btn-primary-action">
+          <span>📜 Generate Agency Contract Quote</span>
+        </button>
+      </section>
+    </main>
+
+    <!-- Footer Navigation -->
+    <footer class="optimizer-footer">
+      <a href="index.html" class="back-link">
+        <span class="back-arrow">←</span> Return to Travel Odyssey Expedition Showcase
+      </a>
+      <span class="footer-meta">NSoC '26 CareerForge Showcase Module • Real-Time Dynamic Pricing Engine</span>
+    </footer>
+  </div>
+
+  <!-- Quote Modal Dialog -->
+  <div id="quote-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-quote-title">
+    <div class="modal-card glass-panel">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="badge-pill">OFFICIAL QUOTE</span>
+          <h3 id="modal-quote-title" class="modal-title">Travel Odyssey Enterprise Contract Quote</h3>
+        </div>
+        <button type="button" id="btn-close-quote-modal" class="btn-close" aria-label="Close quote modal">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-desc">This formal quote estimate reflects current tiered resource provisioning and volume partner subsidies.</p>
+        <div class="quote-pre-container">
+          <pre><code id="quote-json-view" class="code-block">Loading quote...</code></pre>
+        </div>
+        <div id="copy-notice" class="copy-notice hidden">✓ Quote JSON copied to clipboard!</div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="btn-copy-quote" class="modal-btn secondary">📋 Copy JSON</button>
+        <button type="button" id="btn-download-quote" class="modal-btn primary">💾 Download Quote (.json)</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="cost-optimizer.js"></script>
+</body>
+</html>
