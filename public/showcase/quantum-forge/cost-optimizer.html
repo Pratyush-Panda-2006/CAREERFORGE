@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge — Tiered Resource Allocation & Dynamic Cost Optimizer</title>
+  <link rel="stylesheet" href="cost-optimizer.css">
+</head>
+<body class="qf-theme-body">
+  <div id="quantum-cost-optimizer-app" class="qf-app-wrapper">
+    <!-- Top Navigation -->
+    <header class="qf-nav">
+      <div class="qf-nav-left">
+        <span class="qf-logo-icon">⚛️</span>
+        <span class="qf-brand-title">QUANTUM FORGE</span>
+        <span class="qf-badge qf-badge-glow">COST OPTIMIZER SANDBOX</span>
+      </div>
+      <div class="qf-nav-right">
+        <span class="qf-status-pill"><span class="qf-status-dot"></span> QPU Cluster Online</span>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="qf-main-container">
+      <section class="qf-hero-banner">
+        <div class="qf-hero-tag">NSOC '26 LEVEL 3 ARCHITECTURE • ISSUE #2112</div>
+        <h1 class="qf-hero-title">Tiered Resource Allocation & Dynamic Cost Optimizer</h1>
+        <p class="qf-hero-desc">
+          Model multi-tier consumption pricing for quantum compute workloads. Calculate physical superconducting QPU reservations, circuit execution shot volume discounts, cryogenic coherent state memory, and transpiler compiler optimizations with real-time annual commitment savings.
+        </p>
+      </section>
+
+      <!-- Sandbox Grid -->
+      <div class="qf-grid-layout">
+        <!-- Left Column: Controls & Sandbox Sliders -->
+        <div class="qf-col-controls">
+          <!-- Resource Sliders Card -->
+          <div class="qf-card qf-card-glow">
+            <div class="qf-card-header">
+              <div class="qf-card-icon">⚡</div>
+              <div>
+                <h2 class="qf-card-title">Quantum Resource Allocation</h2>
+                <p class="qf-card-subtitle">Adjust algorithmic requirements and hardware instance tiers</p>
+              </div>
+            </div>
+
+            <div class="qf-card-body">
+              <!-- Qubit Allocation Slider -->
+              <div class="qf-control-group">
+                <div class="qf-label-row">
+                  <label for="slider-qubits" class="qf-field-label">Qubit QPU Hardware Instance</label>
+                  <span id="val-qubits" class="qf-field-val">16 Qubits (Standard 16-qubit)</span>
+                </div>
+                <input type="range" id="slider-qubits" min="4" max="256" value="16" step="4" class="qf-slider qf-slider-violet" aria-label="Qubit QPU Hardware Instance">
+                <div class="qf-slider-ticks">
+                  <span>16Q Standard</span>
+                  <span>64Q Advanced</span>
+                  <span>256Q Flagship</span>
+                </div>
+                <div id="badge-qpu-name" class="qf-qpu-pill">Standard 16-qubit • 99.2% Fidelity • 120μs T1</div>
+              </div>
+
+              <!-- Circuit Execution Shots Slider & Input -->
+              <div class="qf-control-group">
+                <div class="qf-label-row">
+                  <label for="slider-shots" class="qf-field-label">Circuit Execution Shots</label>
+                  <div class="qf-val-with-badge">
+                    <span id="badge-volume-tier" class="tier-badge tier-1">Tier 1 (0% OFF)</span>
+                    <span id="val-shots" class="qf-field-val">100,000 shots</span>
+                  </div>
+                </div>
+                <div class="qf-dual-input-row">
+                  <input type="range" id="slider-shots" min="10000" max="15000000" value="100000" step="10000" class="qf-slider qf-slider-cyan" aria-label="Circuit Execution Shots Range">
+                  <input type="number" id="input-shots" min="0" max="50000000" value="100000" step="5000" class="qf-number-input" aria-label="Circuit Execution Shots Count">
+                </div>
+
+                <!-- Next Tier Progress -->
+                <div class="qf-tier-progress-box">
+                  <div class="qf-tier-progress-track">
+                    <div id="tier-progress-fill" class="qf-tier-progress-fill" style="width: 10%;"></div>
+                  </div>
+                  <div id="tier-progress-label" class="qf-tier-progress-label">100,000 / 1,000,000 shots (1 shot to Tier 2)</div>
+                </div>
+              </div>
+
+              <!-- Quantum Simulation Hours Slider -->
+              <div class="qf-control-group">
+                <div class="qf-label-row">
+                  <label for="slider-simulation" class="qf-field-label">Quantum Simulation Hours</label>
+                  <span id="val-simulation" class="qf-field-val">10 hrs</span>
+                </div>
+                <input type="range" id="slider-simulation" min="0" max="100" value="10" step="1" class="qf-slider qf-slider-violet" aria-label="Quantum Simulation Hours">
+                <span class="qf-field-hint">Classical statevector & Kraus noise map emulation ($15.00/hour)</span>
+              </div>
+
+              <!-- Cryogenic Memory Retention Slider -->
+              <div class="qf-control-group">
+                <div class="qf-label-row">
+                  <label for="slider-cryo" class="qf-field-label">Cryogenic Memory Retention</label>
+                  <span id="val-cryo" class="qf-field-val">8 GB</span>
+                </div>
+                <input type="range" id="slider-cryo" min="0" max="64" value="8" step="2" class="qf-slider qf-slider-cyan" aria-label="Cryogenic Memory Retention">
+                <span class="qf-field-hint">Dilution refrigerator coherent state cache buffer ($8.00/GB-month)</span>
+              </div>
+
+              <!-- Compiler Transpiler Pass Select -->
+              <div class="qf-control-group">
+                <label for="select-compiler" class="qf-field-label">Circuit Transpiler & Compiler Optimization</label>
+                <select id="select-compiler" class="qf-select">
+                  <option value="none">None (Direct Gate Assembly - $0/mo)</option>
+                  <option value="standard" selected>Standard (Peephole Synthesis & Commutation - $49/mo)</option>
+                  <option value="aggressive">Aggressive (Clifford+T & Pulse Synthesis - $129/mo)</option>
+                </select>
+                <span class="qf-field-hint">Reduces circuit depth by up to 35%, cutting execution shot noise and hardware runtime.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Billing Commitment Frequency Toggle -->
+          <div class="qf-card qf-card-accent">
+            <div class="qf-frequency-toggle-wrapper">
+              <span class="qf-toggle-title">Billing Commitment</span>
+              <div class="qf-radio-group">
+                <label class="qf-radio-label">
+                  <input type="radio" id="radio-monthly" name="billing-freq" value="monthly" checked>
+                  <span class="qf-radio-custom">Monthly</span>
+                </label>
+                <label class="qf-radio-label">
+                  <input type="radio" id="radio-annual" name="billing-freq" value="annual">
+                  <span class="qf-radio-custom">Annual Commitment <span class="qf-pill-save">Save 20%</span></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Target Budget Optimizer Sandbox Card -->
+          <div class="qf-card">
+            <div class="qf-card-header">
+              <div class="qf-card-icon">🎯</div>
+              <div>
+                <h3 class="qf-card-title">Dynamic Budget Optimizer</h3>
+                <p class="qf-card-subtitle">Inverse optimization solving for maximum execution under strict expense constraints</p>
+              </div>
+            </div>
+            <div class="qf-card-body">
+              <div class="qf-optimizer-inputs">
+                <div class="qf-opt-field">
+                  <label for="opt-target-budget" class="qf-field-label">Target Monthly Budget ($)</label>
+                  <input type="number" id="opt-target-budget" value="1000" min="100" max="25000" step="50" class="qf-number-input">
+                </div>
+                <div class="qf-opt-field">
+                  <label for="opt-required-qubits" class="qf-field-label">Required Algorithm Qubits</label>
+                  <input type="number" id="opt-required-qubits" value="32" min="1" max="256" step="1" class="qf-number-input">
+                </div>
+              </div>
+              <button type="button" id="btn-run-optimizer" class="qf-btn qf-btn-secondary">
+                <span>Run Allocation Optimization</span>
+              </button>
+
+              <div id="opt-result-card" class="qf-opt-result" style="display: none;">
+                <div id="opt-result-text"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Real-Time Pricing Breakdown & Quote -->
+        <div class="qf-col-breakdown">
+          <!-- Pricing Breakdown Card -->
+          <div class="qf-card qf-pricing-card qf-card-glow">
+            <div class="qf-pricing-header">
+              <div>
+                <span class="qf-label-muted">ESTIMATED INVESTMENT RUN-RATE</span>
+                <div class="qf-price-ticker-wrap">
+                  <span id="ticker-price" class="qf-price-ticker">$521.64</span>
+                  <span id="ticker-period" class="qf-price-period">/ month</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Savings Banner -->
+            <div id="savings-banner" class="qf-savings-banner" style="display: none;">
+              <span class="qf-savings-icon">🎉</span>
+              <span>Annual Commitment Savings: <strong id="savings-amount">$1,159.20</strong> / year</span>
+            </div>
+
+            <!-- Itemized Cost Breakdown -->
+            <div class="qf-itemized-list">
+              <div class="qf-item-row">
+                <span class="qf-item-name">QPU Hardware Reservation</span>
+                <span id="row-qpu-cost" class="qf-item-cost">$180.00</span>
+              </div>
+              <div class="qf-item-row">
+                <span class="qf-item-name">Circuit Execution Shots</span>
+                <span id="row-shots-cost" class="qf-item-cost">$40.00</span>
+              </div>
+              <div class="qf-item-row qf-item-discount">
+                <span class="qf-item-name">↳ Volume Tier Discount</span>
+                <span id="row-shots-discount" class="qf-item-cost">$0.00</span>
+              </div>
+              <div class="qf-item-row">
+                <span class="qf-item-name">Quantum Noise Simulation</span>
+                <span id="row-sim-cost" class="qf-item-cost">$150.00</span>
+              </div>
+              <div class="qf-item-row">
+                <span class="qf-item-name">Cryogenic Coherence Retention</span>
+                <span id="row-cryo-cost" class="qf-item-cost">$64.00</span>
+              </div>
+              <div class="qf-item-row">
+                <span class="qf-item-name">Circuit Transpiler Pass</span>
+                <span id="row-compiler-cost" class="qf-item-cost">$49.00</span>
+              </div>
+              <div class="qf-divider"></div>
+              <div class="qf-item-row">
+                <span class="qf-item-name qf-bold">Gross Subtotal</span>
+                <span id="row-subtotal" class="qf-item-cost qf-bold">$483.00</span>
+              </div>
+              <div class="qf-item-row qf-item-discount">
+                <span class="qf-item-name">Annual Commitment Saving (20%)</span>
+                <span id="row-commitment-discount" class="qf-item-cost">$0.00</span>
+              </div>
+              <div class="qf-item-row">
+                <span class="qf-item-name">Infrastructure & Licensing Tax (8%)</span>
+                <span id="row-tax" class="qf-item-cost">$38.64</span>
+              </div>
+              <div class="qf-divider"></div>
+              <div class="qf-item-row qf-annual-row">
+                <span class="qf-item-name">Estimated Annualized Run-Rate</span>
+                <span id="row-annual-run-rate" class="qf-item-cost qf-bold-cyan">$6,259.68</span>
+              </div>
+            </div>
+
+            <!-- Efficiency Recommendation Callout -->
+            <div id="efficiency-recommendation-card" class="qf-recommendation-card">
+              <div class="qf-rec-header">
+                <span class="qf-rec-icon">💡</span>
+                <strong id="rec-title">Efficiency Recommendation</strong>
+              </div>
+              <p id="rec-message" class="qf-rec-body">
+                Switch to Annual Commitment: By switching to annual billing, your organization saves $1,159.20 (20%) per year.
+              </p>
+            </div>
+
+            <!-- Quote Actions -->
+            <div class="qf-quote-action-bar">
+              <button type="button" id="btn-generate-quote" class="qf-btn qf-btn-primary">
+                <span>Generate Formal Quote</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Volume Tier Reference Matrix Card -->
+          <div class="qf-card">
+            <h3 class="qf-matrix-title">Volume Discount Schedule</h3>
+            <div class="qf-tier-table">
+              <div class="qf-tier-table-row qf-tier-head">
+                <span>Tier</span>
+                <span>Shot Volume</span>
+                <span>Discount</span>
+              </div>
+              <div class="qf-tier-table-row">
+                <span><span class="tier-badge tier-1">Tier 1</span></span>
+                <span>0 - 100,000 shots</span>
+                <span class="qf-tier-disc">0%</span>
+              </div>
+              <div class="qf-tier-table-row">
+                <span><span class="tier-badge tier-2">Tier 2</span></span>
+                <span>100,000 - 1,000,000 shots</span>
+                <span class="qf-tier-disc qf-disc-active">10%</span>
+              </div>
+              <div class="qf-tier-table-row">
+                <span><span class="tier-badge tier-3">Tier 3</span></span>
+                <span>1,000,000 - 10,000,000 shots</span>
+                <span class="qf-tier-disc qf-disc-active">20%</span>
+              </div>
+              <div class="qf-tier-table-row">
+                <span><span class="tier-badge tier-4">Tier 4</span></span>
+                <span>&gt; 10,000,000 shots</span>
+                <span class="qf-tier-disc qf-disc-gold">35% Enterprise</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal for Quote Generation Output -->
+    <div id="quote-modal" class="qf-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="qf-modal-backdrop"></div>
+      <div class="qf-modal-content">
+        <div class="qf-modal-header">
+          <div class="qf-modal-title-wrap">
+            <span class="qf-modal-icon">📄</span>
+            <h2 id="modal-title" class="qf-modal-title">Formal Quantum Compute Quote</h2>
+          </div>
+          <button type="button" id="btn-close-modal" class="qf-modal-close" aria-label="Close quote modal">&times;</button>
+        </div>
+        <div class="qf-modal-body">
+          <p class="qf-modal-sub">Structured quote payload with cryptographically unique quote ID, validated itemization, and economic telemetry.</p>
+          <pre id="quote-json-output" class="qf-code-block"></pre>
+        </div>
+        <div class="qf-modal-footer">
+          <button type="button" id="btn-export-json" class="qf-btn qf-btn-secondary">Download JSON</button>
+          <button type="button" id="btn-copy-markdown" class="qf-btn qf-btn-primary">Copy Markdown</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="cost-optimizer.js"></script>
+</body>
+</html>
