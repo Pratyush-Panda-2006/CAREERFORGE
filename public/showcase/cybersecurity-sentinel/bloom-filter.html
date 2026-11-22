@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Sentinel - Probabilistic Bloom Filter & Membership Query Visualizer</title>
+  <link rel="stylesheet" href="bloom-filter.css">
+</head>
+<body class="bloom-body">
+  <div class="hud-container">
+    <!-- Header -->
+    <header class="hud-header">
+      <div class="header-branding">
+        <div class="sentinel-badge">
+          <span class="badge-pulse"></span>
+          <span>CYBERSECURITY SENTINEL // PROBABILISTIC LAB</span>
+        </div>
+        <h1 class="hud-title">Probabilistic Bloom Filter & Membership Query Visualizer</h1>
+        <p class="hud-subtitle">
+          Real-time probabilistic set-membership engine with FNV-1a / Murmur3 double-hashing, 
+          guaranteed 0% false negative bound, and real-time bit saturation telemetry.
+        </p>
+      </div>
+      <div class="hud-status-strip">
+        <div class="status-chip">
+          <span class="chip-label">ALGORITHM</span>
+          <span class="chip-val">FNV-1a + Murmur3 Double-Hash</span>
+        </div>
+        <div class="status-chip">
+          <span class="chip-label">FALSE NEGATIVE</span>
+          <span class="chip-val highlight-green">0.00% GUARANTEED</span>
+        </div>
+        <div class="status-chip">
+          <span class="chip-label">CORE ENGINE</span>
+          <span class="chip-val highlight-cyan">ACTIVE // MONITORED</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top Grid: Operations Deck -->
+    <div class="deck-grid">
+      <!-- Ingestion Deck -->
+      <section class="hud-card ingestion-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="card-icon">⚡</span>
+            <h2>Threat Indicator Ingestion</h2>
+          </div>
+          <span class="card-badge">Write Path</span>
+        </div>
+        <p class="card-desc">
+          Deterministically map malicious indicators (IPs, CVEs, file hashes) into the bit array across <em>k</em> hash functions.
+        </p>
+
+        <div class="presets-container">
+          <span class="preset-label">Quick Threat Samples:</span>
+          <div class="preset-chips">
+            <button class="preset-chip" data-value="192.168.1.105">192.168.1.105</button>
+            <button class="preset-chip" data-value="CVE-2024-38077">CVE-2024-38077</button>
+            <button class="preset-chip" data-value="malware.ransomware.lockbit">LockBit.exe</button>
+            <button class="preset-chip" data-value="apt29-cozybear.sig">APT29-CozyBear</button>
+            <button class="preset-chip" data-value="10.0.50.21">10.0.50.21</button>
+          </div>
+        </div>
+
+        <div class="input-action-row">
+          <input type="text" id="itemInput" placeholder="Enter indicator (e.g., 172.16.0.4, CVE-2026-X, SHA-256)..." autocomplete="off" />
+          <button id="addBtn" class="btn-primary">Add Threat</button>
+        </div>
+
+        <div class="secondary-actions">
+          <button id="batchAddBtn" class="btn-secondary">Ingest Threat Feed (10 Items)</button>
+        </div>
+      </section>
+
+      <!-- Query Deck -->
+      <section class="hud-card query-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="card-icon">🔍</span>
+            <h2>Threat Membership Query Tester</h2>
+          </div>
+          <span class="card-badge">Read Path</span>
+        </div>
+        <p class="card-desc">
+          Test whether a given indicator is present. If any corresponding bit is 0, the item is <strong>definitely not present</strong>.
+        </p>
+
+        <div class="input-action-row">
+          <input type="text" id="queryInput" placeholder="Query threat signature..." autocomplete="off" />
+          <button id="queryBtn" class="btn-cyan">Query Membership</button>
+        </div>
+
+        <!-- Query Result Banner -->
+        <div id="queryResultBanner" class="query-banner hidden">
+          <div class="banner-status-line">
+            <span id="queryResultText">Awaiting membership query...</span>
+          </div>
+          <div id="queryResultIndices" class="banner-indices"></div>
+        </div>
+
+        <div class="query-hint">
+          <span>🛡️ <strong>Sentinel Guarantee:</strong> Zero false negatives. Queries returning absent have 100% certainty.</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- Visualizer Grid Section -->
+    <section class="hud-card visualizer-card">
+      <div class="card-header bit-header">
+        <div class="card-title-group">
+          <span class="card-icon">▦</span>
+          <h2>Bit Array Visualizer Grid</h2>
+        </div>
+        <div class="bit-controls">
+          <div class="control-item">
+            <label for="filterSizeSelect">Size (m):</label>
+            <select id="filterSizeSelect">
+              <option value="64">64 bits</option>
+              <option value="128" selected>128 bits</option>
+              <option value="256">256 bits</option>
+            </select>
+          </div>
+          <div class="control-item">
+            <label for="hashCountSelect">Hashes (k):</label>
+            <select id="hashCountSelect">
+              <option value="2">2 hashes</option>
+              <option value="3">3 hashes</option>
+              <option value="4" selected>4 hashes</option>
+              <option value="6">6 hashes</option>
+              <option value="8">8 hashes</option>
+            </select>
+          </div>
+          <button id="clearBtn" class="btn-danger">Clear Filter</button>
+        </div>
+      </div>
+
+      <div class="grid-legend">
+        <div class="legend-item"><span class="legend-box bit-off"></span> 0 (Unset)</div>
+        <div class="legend-item"><span class="legend-box bit-on"></span> 1 (Set / Occupied)</div>
+        <div class="legend-item"><span class="legend-box bit-active-sample"></span> Active Target Pulse</div>
+      </div>
+
+      <!-- Interactive Bit Grid Matrix -->
+      <div id="bitGrid" class="bit-grid-container" aria-label="Bit Array Grid">
+        <!-- Rendered dynamically by bloom-filter.js -->
+      </div>
+    </section>
+
+    <!-- Telemetry & False-Positive Calculator Section -->
+    <div class="metrics-grid">
+      <!-- Real-time Telemetry Stats -->
+      <section class="hud-card stats-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="card-icon">📊</span>
+            <h2>Filter Telemetry & Density</h2>
+          </div>
+          <span class="card-badge">Real-Time</span>
+        </div>
+
+        <div class="metrics-counters">
+          <div class="metric-cell">
+            <span class="metric-label">Array Size (m)</span>
+            <span class="metric-value" id="metricSize">128</span>
+            <span class="metric-unit">bits</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-label">Hash Functions (k)</span>
+            <span class="metric-value" id="metricHashes">4</span>
+            <span class="metric-unit">hashes</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-label">Ingested Items (n)</span>
+            <span class="metric-value" id="metricItems">0</span>
+            <span class="metric-unit">indicators</span>
+          </div>
+          <div class="metric-cell">
+            <span class="metric-label">Occupied Bits</span>
+            <span class="metric-value" id="metricSetBits">0 / 128</span>
+            <span class="metric-unit">set density</span>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-label-row">
+            <span>Bit Array Saturation</span>
+            <span id="metricSaturation">0.00%</span>
+          </div>
+          <div class="meter-track">
+            <div id="saturationProgressBar" class="meter-bar bar-cyan" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-label-row">
+            <span>Theoretical False Positive Rate (FPR)</span>
+            <span id="metricFpr">0.0000%</span>
+          </div>
+          <div class="meter-track">
+            <div id="fprProgressBar" class="meter-bar bar-amber" style="width: 0%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- False Positive Probability Calculator -->
+      <section class="hud-card calculator-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="card-icon">🧮</span>
+            <h2>Optimal Bounds Calculator</h2>
+          </div>
+          <span class="card-badge">Dimensioning</span>
+        </div>
+        <p class="card-desc">
+          Compute required capacity and optimal hash functions using standard probabilistic formulas: 
+          <code>m = - (n ln p) / (ln 2)²</code>
+        </p>
+
+        <div class="calculator-inputs">
+          <div class="calc-field">
+            <label for="calcItemsInput">Expected Threat Indicators (n):</label>
+            <input type="number" id="calcItemsInput" min="10" max="10000" step="10" value="50" />
+          </div>
+          <div class="calc-field">
+            <label for="calcFprInput">Target False Positive Rate (p):</label>
+            <select id="calcFprInput">
+              <option value="0.001">0.1% (High Precision)</option>
+              <option value="0.01" selected>1.0% (Standard Sentinel)</option>
+              <option value="0.05">5.0% (Compact Memory)</option>
+              <option value="0.10">10.0% (Ultra High Throughput)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="calc-results-box">
+          <div class="calc-result-item">
+            <span class="result-label">Recommended Array Size (m):</span>
+            <span class="result-val highlight-cyan" id="calcOptimalBits">-- bits</span>
+          </div>
+          <div class="calc-result-item">
+            <span class="result-label">Optimal Hash Count (k):</span>
+            <span class="result-val highlight-green" id="calcOptimalHashes">-- hashes</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Real-time Audit Trail -->
+    <section class="hud-card audit-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-icon">📜</span>
+          <h2>Sentinel Operations Audit Stream</h2>
+        </div>
+        <span class="card-badge">Chronological Log</span>
+      </div>
+      <div id="auditLogs" class="audit-console" role="log" aria-live="polite">
+        <!-- Chronological log entries injected by script -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="hud-footer">
+      <span>Cybersecurity Sentinel Modular Suite &bull; Nexus Spring of Code 2026</span>
+      <span>Probabilistic Cryptographic Bit Array &bull; Issue #2860</span>
+    </footer>
+  </div>
+
+  <script type="module" src="bloom-filter.js"></script>
+</body>
+</html>
