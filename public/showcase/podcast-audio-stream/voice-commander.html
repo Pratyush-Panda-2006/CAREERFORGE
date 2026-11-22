@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Audio Stream - Voice Commander & Accessibility Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <div class="commander-app" id="podcastVoiceCommanderApp">
+    <!-- Header Navigation -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="studio-badge">
+          <span class="live-pulse"></span>
+          <span>Studio Audio Dispatcher</span>
+        </div>
+        <h1 class="header-title">Podcast Audio Stream Voice Commander</h1>
+        <p class="header-subtitle">Hands-free vocal scrub navigation, duration skips, speed adjustment, and speech synthesis show notes reader powered by Web Speech API.</p>
+      </div>
+      <div class="header-right">
+        <button id="contrastToggleBtn" class="btn-contrast" aria-label="Toggle High-Contrast Accessibility Mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"/>
+          </svg>
+          <span>Contrast Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Studio Grid -->
+    <main class="studio-grid">
+      <!-- Left Column: Voice Controller & Playback Scrubber -->
+      <div class="grid-column column-left">
+        <!-- Voice Input Mic Section -->
+        <section class="card studio-card mic-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">🎙️</span>
+              <h2>Voice Recognition Commander</h2>
+            </div>
+            <span class="status-badge" id="micStatusBadge">Microphone Idle</span>
+          </div>
+
+          <!-- Pulsing Mic Rings -->
+          <div class="mic-visualizer-section">
+            <div class="mic-ring-container" id="micRingContainer">
+              <div class="mic-ring ring-1"></div>
+              <div class="mic-ring ring-2"></div>
+              <div class="mic-ring ring-3"></div>
+              <button id="micToggleBtn" class="mic-btn" aria-label="Toggle Voice Listening">
+                <svg class="mic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+              </button>
+            </div>
+            <p class="mic-caption" id="micCaption">Click microphone to activate voice commands or use audio shortcuts below</p>
+          </div>
+
+          <!-- Animated Audio Waveform Visualizer -->
+          <div class="audio-wave-container" id="waveVisualizer" aria-hidden="true">
+            <span class="wave-bar bar-1"></span>
+            <span class="wave-bar bar-2"></span>
+            <span class="wave-bar bar-3"></span>
+            <span class="wave-bar bar-4"></span>
+            <span class="wave-bar bar-5"></span>
+            <span class="wave-bar bar-6"></span>
+            <span class="wave-bar bar-7"></span>
+            <span class="wave-bar bar-8"></span>
+            <span class="wave-bar bar-9"></span>
+            <span class="wave-bar bar-10"></span>
+            <span class="wave-bar bar-11"></span>
+            <span class="wave-bar bar-12"></span>
+          </div>
+
+          <!-- Quick Vocal Shortcut Chips -->
+          <div class="quick-chips-wrapper">
+            <span class="chips-title">Vocal Command Grammars:</span>
+            <div class="chips-grid">
+              <button class="voice-chip" data-phrase="resume audio">"resume audio"</button>
+              <button class="voice-chip" data-phrase="pause audio">"pause audio"</button>
+              <button class="voice-chip" data-phrase="skip forward 30 seconds">"skip forward 30s"</button>
+              <button class="voice-chip" data-phrase="rewind 15 seconds">"rewind 15s"</button>
+              <button class="voice-chip" data-phrase="adjust speed 1.5x">"adjust speed 1.5x"</button>
+              <button class="voice-chip" data-phrase="play episode 142">"play episode 142"</button>
+              <button class="voice-chip" data-phrase="bookmark timestamp">"bookmark timestamp"</button>
+              <button class="voice-chip" data-phrase="read show notes">"read show notes"</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Podcast Playback Scrub Controller -->
+        <section class="card studio-card scrub-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">📻</span>
+              <h2>Podcast Playback & Scrub Controller</h2>
+            </div>
+            <div class="stream-pill">
+              <span class="stream-dot"></span>
+              <span>48 kHz • Web Audio</span>
+            </div>
+          </div>
+
+          <div class="episode-metadata">
+            <div class="episode-artwork">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2a10 10 0 0 1 10 10"/>
+              </svg>
+            </div>
+            <div class="episode-details">
+              <h3 class="episode-title" id="episodeTitle">Episode 142: Real-Time Audio Streaming Architecture</h3>
+              <p class="episode-channel" id="episodeChannel">Tech Horizon Studio • Dr. Sarah Chen & Alex Rivera</p>
+            </div>
+          </div>
+
+          <!-- Scrub Slider Bar -->
+          <div class="scrub-control-box">
+            <input type="range" id="scrubRange" class="scrub-slider" min="0" max="2280" value="145" step="1" aria-label="Podcast Audio Scrubber">
+            <div class="scrub-time-row">
+              <span class="time-label" id="currentTimeLabel">02:25</span>
+              <span class="time-label duration" id="totalDurationLabel">38:00</span>
+            </div>
+          </div>
+
+          <!-- Playback Actions Controls -->
+          <div class="playback-actions-row">
+            <button id="rewindBtn" class="btn-control" aria-label="Rewind 15 seconds" title="Rewind 15 seconds">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/>
+              </svg>
+              <span>-15s</span>
+            </button>
+
+            <button id="playPauseBtn" class="btn-play-pause" aria-label="Play or Pause Audio">
+              <svg id="playPauseIcon" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            </button>
+
+            <button id="skipBtn" class="btn-control" aria-label="Skip forward 30 seconds" title="Skip forward 30 seconds">
+              <span>+30s</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 17l5-5-5-5M6 17l5-5-5-5"/>
+              </svg>
+            </button>
+
+            <div class="speed-selector-group">
+              <label for="speedSelect" class="speed-label">Speed:</label>
+              <select id="speedSelect" class="speed-dropdown" aria-label="Playback Speed">
+                <option value="0.5">0.5x</option>
+                <option value="0.75">0.75x</option>
+                <option value="1.0" selected>1.0x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+                <option value="1.75">1.75x</option>
+                <option value="2.0">2.0x</option>
+                <option value="2.5">2.5x</option>
+                <option value="3.0">3.0x</option>
+              </select>
+            </div>
+
+            <button id="addBookmarkBtn" class="btn-bookmark" aria-label="Bookmark Current Timestamp" title="Bookmark Timestamp">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span>Bookmark</span>
+            </button>
+          </div>
+
+          <!-- Bookmarks Row -->
+          <div class="bookmarks-section">
+            <span class="bookmarks-label">Timestamp Bookmarks:</span>
+            <div class="bookmarks-list" id="bookmarksList"></div>
+          </div>
+        </section>
+
+        <!-- Speech Synthesis Dispatcher & Show Notes Preview -->
+        <section class="card studio-card synth-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">🔊</span>
+              <h2>Speech Synthesis Dispatcher & Show Notes</h2>
+            </div>
+            <button id="readSummaryBtn" class="btn-synthesis-trigger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+              <span>Read Episode Summary</span>
+            </button>
+          </div>
+          <div class="synth-output-box">
+            <span class="synth-tag">Synthesizer Dispatch Output:</span>
+            <blockquote class="synth-quote" id="synthOutput">"Podcast Voice Commander initialized. Ready for spoken navigation."</blockquote>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column: Command Stream Console & History Feed -->
+      <div class="grid-column column-right">
+        <section class="card studio-card console-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">⚡</span>
+              <h2>Recognized Voice Command Stream</h2>
+            </div>
+            <button id="clearStreamBtn" class="btn-clear" aria-label="Clear Command History">Clear History</button>
+          </div>
+
+          <!-- Live Feed Stream -->
+          <div class="console-feed-container" id="commandHistoryContainer">
+            <div class="stream-empty">Awaiting voice command input stream...</div>
+          </div>
+
+          <!-- Manual Voice Command Simulator -->
+          <div class="manual-input-box">
+            <label for="manualVoiceInput" class="manual-label">Voice Command Simulation Input:</label>
+            <div class="input-action-row">
+              <input type="text" id="manualVoiceInput" class="voice-text-input" placeholder="Type or paste podcast voice command..." aria-label="Voice Command Simulation">
+              <button id="submitVoiceBtn" class="btn-submit-cmd">
+                <span>Dispatch</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="speech-toast" id="speechToast" role="alert" aria-live="polite"></div>
+
+  <!-- Modular Scripts -->
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
