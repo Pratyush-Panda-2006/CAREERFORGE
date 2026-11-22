@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biotech Genomics - Web Speech API Voice Commander & Accessibility Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <!-- Header & Top Navigation Bar -->
+  <header class="commander-header" role="banner">
+    <div class="header-inner">
+      <div class="brand-wrapper">
+        <div class="brand-icon" aria-hidden="true">🧬</div>
+        <div class="brand-text">
+          <h1>BIOTECH GENOMICS // VOICE COMMANDER</h1>
+          <p>Web Speech API Recognition & Accessibility Speech Dispatcher</p>
+        </div>
+      </div>
+      <div class="header-actions" role="toolbar" aria-label="Accessibility & Configuration Controls">
+        <button id="toggle-contrast-btn" class="btn-header-action" title="Toggle high contrast accessibility theme" aria-pressed="false">
+          <span aria-hidden="true">👁️</span> High Contrast
+        </button>
+        <button id="toggle-theme-btn" class="btn-header-action" title="Toggle dark/light visual theme">
+          <span aria-hidden="true">🌙</span> Dark Mode
+        </button>
+        <button id="toggle-speech-mute-btn" class="btn-header-action" title="Toggle speech synthesis feedback" aria-pressed="false">
+          <span aria-hidden="true">🔊</span> Vocal Feedback
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Showcase Container -->
+  <main class="main-content" role="main">
+
+    <!-- Hero Voice Console: Mic Toggle & Audio Waveform Visualizer -->
+    <section class="hero-voice-console" id="hero-console" aria-labelledby="console-heading">
+      <h2 id="console-heading" class="visually-hidden" style="position: absolute; left: -9999px;">Voice Recognition Control Hub</h2>
+
+      <!-- Circular Mic Button with Pulsing Wave Rings -->
+      <div class="mic-interactive-hub">
+        <div class="pulse-ring ring-1" aria-hidden="true"></div>
+        <div class="pulse-ring ring-2" aria-hidden="true"></div>
+        <div class="pulse-ring ring-3" aria-hidden="true"></div>
+        
+        <button id="mic-toggle-btn" class="mic-btn" aria-label="Toggle Voice Listening" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+          <span id="mic-btn-label">Listen</span>
+        </button>
+      </div>
+
+      <!-- Real-time Status Indicator Pill -->
+      <div class="status-pill" id="voice-status-pill" role="status" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="voice-status-text">Microphone Standby • Click Mic or Speak to Activate</span>
+      </div>
+
+      <!-- Canvas Audio Wave Visualizer -->
+      <div class="visualizer-wrapper">
+        <canvas id="wave-visualizer-canvas" width="680" height="70" aria-label="Audio Wave Frequency Visualizer"></canvas>
+      </div>
+
+      <!-- Real-time Transcript Live Box -->
+      <div class="live-transcript-box" id="live-transcript-box" aria-live="assertive">
+        <span class="placeholder">Awaiting speech input... Say "search gene BRCA1" or "read summary"</span>
+      </div>
+    </section>
+
+    <!-- 2-Column Interactive Workspace -->
+    <div class="workspace-grid">
+
+      <!-- Left Column: Grammar Cheat Sheet & Interactive Workspace Mock -->
+      <div class="card-panel">
+        <div class="panel-title-row">
+          <h2 class="panel-title">
+            <span aria-hidden="true">⚡</span> Voice Grammar Cheat Sheet
+          </h2>
+          <span class="panel-badge">CLICK TO DISPATCH</span>
+        </div>
+
+        <p style="font-size: 0.82rem; color: var(--text-muted);">
+          Spoken commands are continuously parsed against domain grammars with fuzzy tolerance. Click any chip to simulate vocal dispatch:
+        </p>
+
+        <!-- Gene Search Commands -->
+        <div class="cheat-sheet-group">
+          <span class="group-label">Gene Lookup & Search</span>
+          <div class="chip-container">
+            <button class="grammar-chip" data-cmd="search gene BRCA1">🔍 search gene BRCA1</button>
+            <button class="grammar-chip" data-cmd="search gene TP53">🔍 search gene TP53</button>
+            <button class="grammar-chip" data-cmd="search gene EGFR">🔍 search gene EGFR</button>
+          </div>
+        </div>
+
+        <!-- Sequence & Variant Filters -->
+        <div class="cheat-sheet-group">
+          <span class="group-label">Filters & Variants</span>
+          <div class="chip-container">
+            <button class="grammar-chip" data-cmd="filter sequence fasta">🧬 filter sequence fasta</button>
+            <button class="grammar-chip" data-cmd="filter variant pathogenic">⚠️ filter variant pathogenic</button>
+            <button class="grammar-chip" data-cmd="filter variant missense">🔬 filter variant missense</button>
+          </div>
+        </div>
+
+        <!-- Viewport & Canvas Navigation -->
+        <div class="cheat-sheet-group">
+          <span class="group-label">Viewport Canvas & Zoom</span>
+          <div class="chip-container">
+            <button class="grammar-chip" data-cmd="zoom sequence 2x">🔎 zoom sequence 2x</button>
+            <button class="grammar-chip" data-cmd="zoom sequence 10x">🔎 zoom sequence 10x</button>
+            <button class="grammar-chip" data-cmd="zoom sequence in">🔎 zoom sequence in</button>
+            <button class="grammar-chip" data-cmd="reset view">🔄 reset view</button>
+          </div>
+        </div>
+
+        <!-- Dataset Export -->
+        <div class="cheat-sheet-group">
+          <span class="group-label">Export Datasets</span>
+          <div class="chip-container">
+            <button class="grammar-chip" data-cmd="export genome data">💾 export genome data</button>
+            <button class="grammar-chip" data-cmd="export fasta">📄 export fasta</button>
+            <button class="grammar-chip" data-cmd="export json">📦 export json</button>
+          </div>
+        </div>
+
+        <!-- Accessibility & Speech Narration -->
+        <div class="cheat-sheet-group">
+          <span class="group-label">Accessibility & Speech Dispatcher</span>
+          <div class="chip-container">
+            <button class="grammar-chip" data-cmd="toggle contrast">👁️ toggle contrast</button>
+            <button class="grammar-chip" data-cmd="activate dark mode">🌙 activate dark mode</button>
+            <button class="grammar-chip" data-cmd="read sequence details">🗣️ read sequence details</button>
+            <button class="grammar-chip" data-cmd="read summary">📢 read summary</button>
+          </div>
+        </div>
+
+        <!-- Manual Input / Fallback Simulator Form -->
+        <div class="cheat-sheet-group">
+          <span class="group-label">Manual Speech Simulation Input</span>
+          <div class="manual-input-row">
+            <input type="text" id="manual-speech-input" class="speech-text-input" placeholder="Type command e.g. 'search gene BRCA1'..." aria-label="Manual speech input">
+            <button id="dispatch-manual-btn" class="btn-dispatch">Dispatch</button>
+          </div>
+        </div>
+
+        <!-- Live Sequence Mock Display -->
+        <div class="mock-workspace-card">
+          <div class="panel-title-row" style="border: none; padding: 0;">
+            <span class="group-label">Locus Workspace Preview</span>
+            <span id="dataset-source-tag" style="font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono);">GRCh38.p14</span>
+          </div>
+
+          <div class="workspace-meta-row">
+            <div class="meta-box">
+              <span class="meta-label">Active Gene</span>
+              <span id="active-gene-val" class="meta-value">BRCA1</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Filter</span>
+              <span id="active-filter-val" class="meta-value">ALL</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Zoom Scale</span>
+              <span id="active-zoom-val" class="meta-value">1X</span>
+            </div>
+          </div>
+
+          <!-- DNA Sequence Visual Strip -->
+          <div class="dna-sequence-strip" id="dna-strip" aria-label="Visual DNA Sequence Bases">
+            <span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span>
+            <span class="base-a">A</span><span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span>
+            <span class="base-c">C</span><span class="base-t">T</span><span class="base-a">A</span><span class="base-g">G</span>
+            <span class="base-c">C</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-t">T</span>
+            <span class="base-g">G</span><span class="base-a">A</span><span class="base-t">T</span><span class="base-c">C</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Recognized Command Stream Console -->
+      <div class="card-panel">
+        <div class="panel-title-row">
+          <h2 class="panel-title">
+            <span aria-hidden="true">📡</span> Voice Command Stream
+          </h2>
+          <div class="stream-controls">
+            <span class="panel-badge" id="cmd-counter">0 COMMANDS</span>
+            <button id="clear-history-btn" class="btn-sm-clear" title="Clear command history">Clear</button>
+          </div>
+        </div>
+
+        <div class="command-stream-container">
+          <div class="stream-list" id="command-stream-list" role="log" aria-live="polite">
+            <div class="stream-empty-state">
+              No voice commands dispatched yet.<br>
+              Click the microphone button above or choose a grammar chip to start.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Speech Confirmation Toast Container -->
+  <div class="speech-toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Load Biotech Genomics Voice Commander Module -->
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
