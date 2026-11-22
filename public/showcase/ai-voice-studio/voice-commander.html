@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - Voice Commander &amp; Accessibility Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <div class="commander-wrapper">
+    <!-- Header Section -->
+    <header class="commander-header">
+      <div class="header-badges">
+        <span class="badge-tag">AI Voice Studio Engine</span>
+        <span class="badge-tag tag-violet">Web Speech API</span>
+        <span class="badge-tag tag-accessibility">WCAG AAA Accessible</span>
+      </div>
+      <h1>Voice Commander &amp; Accessibility Speech Dispatcher</h1>
+      <p class="header-subtitle">
+        Hands-free vocal directive dispatcher, neural speech synthesizer controller, and interactive accessibility driver for AI Voice Studio.
+      </p>
+    </header>
+
+    <!-- Main Grid Layout -->
+    <main class="commander-layout">
+      <!-- Left Column: Voice Controller & Speech Visualizer -->
+      <section class="card controller-card" aria-labelledby="micControllerHeading">
+        <div class="card-header">
+          <h2 id="micControllerHeading">Vocal Command Deck</h2>
+          <span class="status-badge" id="commanderStatusBadge">Microphone Idle</span>
+        </div>
+
+        <!-- Pulsing Microphone Trigger -->
+        <div class="mic-stage">
+          <div class="mic-rings" id="micRingContainer">
+            <div class="ring ring-1"></div>
+            <div class="ring ring-2"></div>
+            <div class="ring ring-3"></div>
+            <button id="toggleVoiceBtn" class="mic-toggle-btn" aria-label="Toggle Voice Listening" aria-pressed="false">
+              <svg class="mic-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <p class="mic-instruction" id="micInstruction">Click microphone or use trigger commands to begin spoken navigation</p>
+        </div>
+
+        <!-- Animated Audio Waveform Visualizer -->
+        <div class="wave-visualizer" id="waveVisualizer" aria-hidden="true">
+          <span class="wave-bar bar-1"></span>
+          <span class="wave-bar bar-2"></span>
+          <span class="wave-bar bar-3"></span>
+          <span class="wave-bar bar-4"></span>
+          <span class="wave-bar bar-5"></span>
+          <span class="wave-bar bar-6"></span>
+          <span class="wave-bar bar-7"></span>
+          <span class="wave-bar bar-8"></span>
+          <span class="wave-bar bar-9"></span>
+          <span class="wave-bar bar-10"></span>
+          <span class="wave-bar bar-11"></span>
+          <span class="wave-bar bar-12"></span>
+        </div>
+
+        <!-- Synthesis Parameters Card -->
+        <div class="params-card" aria-label="Voice Synthesis Parameters">
+          <div class="params-header">
+            <h3>Active Synthesis Parameters</h3>
+            <span class="live-indicator">LIVE SYNC</span>
+          </div>
+
+          <!-- Model Selection -->
+          <div class="param-row">
+            <label for="paramModelSelect">Neural Model:</label>
+            <select id="paramModelSelect" class="studio-select" aria-label="Selected Voice Model">
+              <option value="eleven-multilingual-v2">eleven-multilingual-v2 (Default)</option>
+              <option value="nova">nova (Conversational)</option>
+              <option value="onyx">onyx (Deep / Authoritative)</option>
+              <option value="alloy">alloy (Neutral Balanced)</option>
+              <option value="echo">echo (Warm Resonance)</option>
+              <option value="shimmer">shimmer (Expressive Bright)</option>
+            </select>
+          </div>
+
+          <!-- Pitch Parameter -->
+          <div class="param-row">
+            <div class="param-label-row">
+              <label for="paramPitchSlider">Pitch Modulation:</label>
+              <span id="paramPitchVal" class="param-value-tag">1.00</span>
+            </div>
+            <input type="range" id="paramPitchSlider" min="0.5" max="2.0" step="0.05" value="1.0" class="studio-range" aria-label="Pitch Level">
+          </div>
+
+          <!-- Speed / Tempo Parameter -->
+          <div class="param-row">
+            <div class="param-label-row">
+              <label for="paramSpeedSlider">Playback Speed / Tempo:</label>
+              <span id="paramSpeedVal" class="param-value-tag">1.00x</span>
+            </div>
+            <input type="range" id="paramSpeedSlider" min="0.5" max="2.5" step="0.05" value="1.0" class="studio-range" aria-label="Playback Speed">
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-btn-row">
+            <button id="previewAudioBtn" class="action-btn btn-primary">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Audition Preview
+            </button>
+            <button id="renderSpeechBtn" class="action-btn btn-accent">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              Render Speech
+            </button>
+            <button id="toggleContrastBtn" class="action-btn btn-outline" title="Toggle Accessibility Contrast Mode">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M12 2a10 10 0 0 1 0 20Z" fill="currentColor"/>
+              </svg>
+              High Contrast
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Command Chips for Hands-Free Testing -->
+        <div class="quick-commands-block">
+          <div class="quick-header">
+            <span>Spoken Command Simulator (Click or Speak):</span>
+          </div>
+          <div class="quick-chips-grid">
+            <button class="chip-btn" data-phrase="select model eleven-multilingual-v2">"select model eleven-multilingual-v2"</button>
+            <button class="chip-btn" data-phrase="generate voice nova">"generate voice nova"</button>
+            <button class="chip-btn" data-phrase="adjust pitch high">"adjust pitch high"</button>
+            <button class="chip-btn" data-phrase="adjust pitch 1.2">"adjust pitch 1.2"</button>
+            <button class="chip-btn" data-phrase="adjust speed 1.5x">"adjust speed 1.5x"</button>
+            <button class="chip-btn" data-phrase="adjust speed fast">"adjust speed fast"</button>
+            <button class="chip-btn" data-phrase="render speech">"render speech"</button>
+            <button class="chip-btn" data-phrase="export audio wav">"export audio wav"</button>
+            <button class="chip-btn" data-phrase="export mp3">"export mp3"</button>
+            <button class="chip-btn" data-phrase="toggle contrast">"toggle contrast"</button>
+            <button class="chip-btn" data-phrase="activate dark mode">"activate dark mode"</button>
+            <button class="chip-btn" data-phrase="preview audio">"preview audio"</button>
+            <button class="chip-btn" data-phrase="speak text">"speak text"</button>
+            <button class="chip-btn" data-phrase="help">"help"</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Command Stream Console & History Feed -->
+      <section class="card console-card" aria-labelledby="historyConsoleHeading">
+        <div class="card-header">
+          <h2 id="historyConsoleHeading">Command Stream Console</h2>
+          <button id="clearStreamBtn" class="btn-clear" aria-label="Clear vocal command history">Clear Stream</button>
+        </div>
+
+        <!-- Live History Stream Container -->
+        <div class="stream-console-container" id="commandHistoryContainer" role="log" aria-live="polite">
+          <div class="stream-empty">Awaiting vocal commands or simulated input stream...</div>
+        </div>
+
+        <!-- Last Synthesized Output Card -->
+        <div class="synthesizer-card" aria-label="Speech Synthesizer Dispatcher Status">
+          <div class="synth-title-row">
+            <span class="synth-indicator-dot"></span>
+            <span class="synth-title">Web Speech API Synthesizer Dispatcher</span>
+          </div>
+          <p class="synth-quote" id="synthesizerOutput">"AI Voice Studio Commander standby. Ready for speech commands."</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast Notification element -->
+  <div class="speech-toast" id="speechToast" role="status" aria-live="polite"></div>
+
+  <!-- ES Module script -->
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
