@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Exchange Pro — Voice Commander &amp; Accessibility Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="commander-app">
+    <!-- Header -->
+    <header class="commander-navbar">
+      <div class="brand-group">
+        <span class="brand-badge">⚡ VORTEX PRO</span>
+        <span class="sub-badge">Web Speech API Voice Trader</span>
+      </div>
+      <div class="header-center">
+        <span id="statusBadge" class="status-badge" role="status" aria-live="polite">
+          Terminal Idle &bull; Ready for spoken voice commands
+        </span>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="a11yContrastBtn" class="btn-a11y" aria-label="Toggle High Contrast Display">
+          <span class="a11y-icon" aria-hidden="true">👁️</span> High Contrast
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Console Grid -->
+    <main class="commander-grid">
+      <!-- Left Column: Voice Terminal & Controls -->
+      <section class="console-card voice-card" aria-labelledby="voice-section-title">
+        <div class="card-header">
+          <h2 id="voice-section-title">Vocal Command Terminal</h2>
+          <span class="engine-badge">Engine: Web Speech API</span>
+        </div>
+
+        <!-- Mic Activation Toggle with Pulsing Rings -->
+        <div class="mic-container">
+          <button type="button" id="micBtn" class="mic-btn" aria-label="Toggle speech recognition listening mode">
+            <div class="mic-pulse-ring ring-1" aria-hidden="true"></div>
+            <div class="mic-pulse-ring ring-2" aria-hidden="true"></div>
+            <span class="mic-icon" aria-hidden="true">🎙️</span>
+            <span class="mic-label">Activate Voice Mic</span>
+          </button>
+        </div>
+
+        <!-- Animated Audio Wave Visualizer -->
+        <div class="wave-visualizer" id="waveVisualizer" aria-label="Audio frequency visualizer" role="img">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <!-- Manual Dispatch & Headless Simulation Bar -->
+        <div class="manual-input-box">
+          <label for="manualInput" class="sr-only">Enter trading directive or speak command</label>
+          <div class="input-wrap">
+            <input type="text" id="manualInput" placeholder="Enter vocal directive (e.g. 'buy 0.5 btc', 'quote eth', 'read portfolio balance')" aria-label="Manual voice command simulation input">
+            <button type="button" id="submitBtn" class="btn-dispatch">Dispatch</button>
+          </div>
+        </div>
+
+        <!-- Quick Grammar Directive Chips -->
+        <div class="chips-container">
+          <span class="chips-title">Quick Vocal Directives:</span>
+          <div class="chips-list">
+            <button type="button" class="chip-cmd" data-cmd="buy 0.5 btc">buy 0.5 btc</button>
+            <button type="button" class="chip-cmd" data-cmd="sell 1.5 eth">sell 1.5 eth</button>
+            <button type="button" class="chip-cmd" data-cmd="buy 500 sol">buy 500 sol</button>
+            <button type="button" class="chip-cmd" data-cmd="quote btc">quote btc</button>
+            <button type="button" class="chip-cmd" data-cmd="check price eth">check price eth</button>
+            <button type="button" class="chip-cmd" data-cmd="switch market eth/usdt">switch market eth/usdt</button>
+            <button type="button" class="chip-cmd" data-cmd="read portfolio balance">read portfolio balance</button>
+            <button type="button" class="chip-cmd" data-cmd="cancel all orders">cancel all orders</button>
+            <button type="button" class="chip-cmd" data-cmd="toggle contrast">toggle contrast</button>
+            <button type="button" class="chip-cmd" data-cmd="help">help</button>
+          </div>
+        </div>
+
+        <!-- Audio Ticker Response Readout Panel -->
+        <div class="ticker-readout-panel" id="tickerReadout" aria-live="polite">
+          <div class="ticker-header">
+            <span class="ticker-label">🔊 Audio Ticker Readout</span>
+            <span class="ticker-tag">Live Market Quote</span>
+          </div>
+          <div class="ticker-content">
+            <div class="ticker-main">
+              <span class="ticker-symbol">BTC/USDT</span>
+              <span class="ticker-price">$68,500.50</span>
+              <span class="ticker-change text-emerald">+3.42%</span>
+            </div>
+            <div class="ticker-range">24h H: $69,200.00 | L: $66,800.00</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Recognized Trading Stream Console -->
+      <section class="console-card stream-card" aria-labelledby="history-section-title">
+        <div class="card-header">
+          <h2 id="history-section-title">Trading Command Stream &amp; Vocal Feed</h2>
+          <button type="button" id="clearHistoryBtn" class="btn-clear" aria-label="Clear vocal command history">Clear Stream</button>
+        </div>
+
+        <div class="command-history" id="commandHistory" role="log" aria-live="polite">
+          <div class="history-entry empty">No trading voice commands captured yet.</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Order Confirmation Modal with Speech Prompt -->
+    <div class="order-modal-overlay" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="modalHeading" aria-hidden="true">
+      <div class="order-modal-card">
+        <div class="modal-header">
+          <h3 id="modalHeading">⚠️ Order Confirmation Required</h3>
+          <span class="modal-side badge-buy">BUY</span>
+        </div>
+        <p class="modal-desc">Review your staged trade before execution on Crypto Exchange Pro:</p>
+
+        <div class="modal-details-grid">
+          <div class="detail-row">
+            <span class="detail-label">Market Pair</span>
+            <span class="detail-value modal-asset">BTC/USDT</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Order Amount</span>
+            <span class="detail-value modal-amount">0.5 BTC</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Est. Total (USD)</span>
+            <span class="detail-value modal-total highlight-val">$34,250.25</span>
+          </div>
+        </div>
+
+        <div class="modal-speech-prompt" role="alert">
+          <span class="speech-icon">🎙️</span>
+          <span>Speech Prompt: Say <strong>"confirm"</strong> to execute or <strong>"reject"</strong> to dismiss.</span>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="confirmOrderBtn" class="btn-confirm">Execute Order</button>
+          <button type="button" id="cancelOrderBtn" class="btn-cancel">Dismiss</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Speech Confirmation Toast -->
+    <div class="speech-toast" id="speechToast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
