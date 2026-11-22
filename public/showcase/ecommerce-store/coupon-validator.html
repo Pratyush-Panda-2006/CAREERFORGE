@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Commerce Store - Cryptographic HMAC Coupon Validator & Cart Discount Engine</title>
+  <link rel="stylesheet" href="coupon-validator.css">
+</head>
+<body>
+  <div class="coupon-container">
+    <header class="coupon-header">
+      <div class="header-badge">E-COMMERCE SECURITY & CHECKOUT ENGINE</div>
+      <h1>HMAC-SHA256 Cryptographic Coupon Authentication</h1>
+      <p>Tamper-proof client-side promotional token verification, threshold validation, and multi-tier volume discount engine</p>
+    </header>
+
+    <div id="verification-banner" class="status-banner" style="display: none;"></div>
+
+    <section class="checkout-grid">
+      <div class="cart-panel">
+        <div class="panel-header">
+          <h3>Shopping Cart Items</h3>
+          <span class="badge">3 Items</span>
+        </div>
+        <div class="cart-items-list">
+          <div class="item-row">
+            <span>Titanium Mechanical Keyboard</span>
+            <span class="price">$180.00</span>
+          </div>
+          <div class="item-row">
+            <span>Ultra-Wide 4K Gaming Monitor</span>
+            <span class="price">$420.00</span>
+          </div>
+          <div class="item-row">
+            <span>Precision Wireless Mouse</span>
+            <span class="price">$65.00</span>
+          </div>
+        </div>
+
+        <div class="summary-breakdown">
+          <div class="summary-line">
+            <span>Subtotal:</span>
+            <span id="cart-subtotal">$665.00</span>
+          </div>
+          <div class="summary-line discount">
+            <span>Volume Tier Discount (10% over $500):</span>
+            <span id="volume-discount">-$66.50 (10%)</span>
+          </div>
+          <div class="summary-line coupon">
+            <span>Cryptographic Coupon Discount:</span>
+            <span id="coupon-discount">-$0.00</span>
+          </div>
+          <div class="summary-line total">
+            <span>Final Estimated Total:</span>
+            <span id="cart-final-total">$598.50</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="validator-panel">
+        <div class="panel-header">
+          <h3>Apply Signed Promo Token</h3>
+        </div>
+        <div class="input-group">
+          <input id="coupon-token-input" type="text" placeholder="Enter signed coupon token (PAYLOAD.HMAC)..." class="token-input">
+          <button id="apply-coupon-btn" type="button" class="primary-btn">Verify & Apply</button>
+        </div>
+
+        <div class="generator-controls">
+          <h4>Security Sandbox & Testing Tools</h4>
+          <div class="button-group">
+            <button id="generate-sample-coupon-btn" type="button" class="secondary-btn">Generate Valid Token (BLACKFRIDAY25)</button>
+            <button id="tamper-coupon-btn" type="button" class="danger-btn">Simulate Tampered Token (Altered %)</button>
+          </div>
+          <div id="token-generated-display" class="token-display">Waiting for token generation...</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="coupon-footer">
+      <span>Cryptographic Engine: HMAC-SHA256 • Tamper Proof Client-Side Promotion Security</span>
+    </footer>
+  </div>
+
+  <script type="module" src="coupon-validator.js"></script>
+</body>
+</html>
