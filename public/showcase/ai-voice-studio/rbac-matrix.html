@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio — RBAC Permission Matrix & Policy Guard</title>
+  <link rel="stylesheet" href="rbac-matrix.css">
+</head>
+<body>
+  <div class="studio-container">
+    <!-- Header -->
+    <header class="studio-header">
+      <div class="header-title-wrap">
+        <h1>🎙️ RBAC Permission Matrix & Policy Guard</h1>
+        <p>Enterprise role-based access control, hierarchical permission inheritance, and dynamic ABAC policy guard for AI audio pipelines.</p>
+      </div>
+      <div class="status-badge status-active">
+        <span class="pulse-dot"></span> POLICY GUARD ACTIVE
+      </div>
+    </header>
+
+    <!-- Role Configuration & Inheritance Panel -->
+    <section class="studio-section">
+      <div class="section-header">
+        <div>
+          <h2>🛡️ Studio Role Hierarchy & Profiles</h2>
+          <span class="section-subtitle">Select a role profile to inspect assigned permissions and inheritance path.</span>
+        </div>
+      </div>
+
+      <!-- Role Selector Tabs -->
+      <div id="roleSelector" class="role-tabs">
+        <!-- Rendered dynamically: Admin, Producer, Voice Talent, Guest -->
+      </div>
+
+      <!-- Selected Role Info Overview -->
+      <div id="roleStatsOverview">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- User Role Assignment Bar -->
+      <div class="user-assign-bar">
+        <span class="form-label">Assign Role to Operator:</span>
+        <select id="userSelect" class="form-select">
+          <option value="alex_admin">alex_admin (System Lead)</option>
+          <option value="sarah_producer">sarah_producer (Senior Audio Producer)</option>
+          <option value="elena_talent">elena_talent (Lead Voice Artist)</option>
+          <option value="marcus_guest">marcus_guest (Client Reviewer)</option>
+        </select>
+
+        <select id="roleAssignSelect" class="form-select">
+          <!-- Populated dynamically -->
+        </select>
+
+        <button type="button" id="assignRoleBtn" class="btn-studio">+ Assign Role</button>
+
+        <div id="userRoleBadges" class="user-badges-wrap">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Permission Matrix Grid -->
+    <section class="studio-section">
+      <div class="section-header">
+        <div>
+          <h2>⚡ Studio Permission Matrix</h2>
+          <span class="section-subtitle">Real-time capabilities matrix across audio production roles. Checkboxes with INH are inherited.</span>
+        </div>
+      </div>
+
+      <div class="matrix-table-wrap">
+        <table class="matrix-table">
+          <thead id="matrixTableHeader">
+            <!-- Rendered dynamically -->
+          </thead>
+          <tbody id="matrixTableBody">
+            <!-- Rendered dynamically with permission switches -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Policy Evaluation Tester / Playground -->
+    <section class="studio-section">
+      <div class="section-header">
+        <div>
+          <h2>🧪 Dynamic Policy Evaluation Playground</h2>
+          <span class="section-subtitle">Simulate authorization requests against contextual ABAC guardrails and resource policies.</span>
+        </div>
+      </div>
+
+      <div class="policy-tester-grid">
+        <div class="field-group">
+          <label for="testUserSelect">Acting User</label>
+          <select id="testUserSelect" class="form-select">
+            <option value="alex_admin">alex_admin (Admin)</option>
+            <option value="sarah_producer" selected>sarah_producer (Producer)</option>
+            <option value="elena_talent">elena_talent (Voice Talent)</option>
+            <option value="marcus_guest">marcus_guest (Guest)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="testActionSelect">Requested Action</label>
+          <select id="testActionSelect" class="form-select">
+            <option value="voice:synthesize">voice:synthesize (Run AI Voice Synthesis)</option>
+            <option value="voice:clone">voice:clone (Clone Voice Model)</option>
+            <option value="audio:export" selected>audio:export (Export Final Master Audio)</option>
+            <option value="project:delete">project:delete (Purge Project Assets)</option>
+            <option value="audio:edit">audio:edit (Edit Studio Timeline)</option>
+            <option value="voice:preview">voice:preview (Audition Preview Sample)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="testResourceOwner">Resource Owner</label>
+          <input type="text" id="testResourceOwner" class="form-input" value="sarah_producer" placeholder="e.g. sarah_producer">
+        </div>
+
+        <div class="field-group">
+          <label for="testEnvironment">Target Environment</label>
+          <select id="testEnvironment" class="form-select">
+            <option value="development">Development Sandbox</option>
+            <option value="staging">Staging Environment</option>
+            <option value="production">Production Cloud</option>
+          </select>
+        </div>
+
+        <div class="field-group checkbox-group">
+          <input type="checkbox" id="testConfidential">
+          <label for="testConfidential"><span>Confidential Asset</span></label>
+        </div>
+      </div>
+
+      <div class="tester-action-row">
+        <button type="button" id="testEvaluateBtn" class="btn-evaluate">⚡ Evaluate Policy Guard</button>
+      </div>
+
+      <!-- Policy Evaluation Output Card -->
+      <div id="policyResultBox" class="policy-result-card result-granted">
+        <div id="policyStatusIndicator" class="policy-status-pill">✓ ACCESS GRANTED</div>
+        <p id="policyReasonText" class="policy-reason-desc">Evaluation pending...</p>
+      </div>
+    </section>
+
+    <!-- Real-time Audit Stream -->
+    <section class="studio-section">
+      <div class="section-header">
+        <div>
+          <h2>📜 RBAC Decision Audit Stream</h2>
+          <span class="section-subtitle">Real-time tamper-evident stream of authorization checks, role mutations, and policy guard decisions.</span>
+        </div>
+        <div class="audit-toolbar">
+          <select id="auditFilterSelect" class="form-select">
+            <option value="">All Event Types</option>
+            <option value="POLICY_EVALUATION">Policy Evaluations</option>
+            <option value="ACCESS_CHECK">Access Checks</option>
+            <option value="ROLE_ASSIGNED">Role Assignments</option>
+            <option value="PERMISSION_MUTATED">Permission Mutations</option>
+          </select>
+          <button type="button" id="exportAuditBtn" class="btn-studio">📥 Export JSON</button>
+          <button type="button" id="clearAuditBtn" class="btn-studio">↺ Clear</button>
+        </div>
+      </div>
+
+      <div id="auditStream" class="audit-stream-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Footer Navigation -->
+    <nav class="studio-nav">
+      <a href="index.html" class="back-link">← Return to AI Voice Studio Showcase</a>
+    </nav>
+  </div>
+
+  <script type="module" src="rbac-matrix.js"></script>
+</body>
+</html>
