@@ -1,0 +1,209 @@
+/* Robotics Automata - Canvas Whiteboard Styles */
+
+:root {
+  --cw-bg: #0b0f19;
+  --cw-card: #121826;
+  --cw-text: #e2e8f0;
+  --cw-muted: #64748b;
+  --cw-accent: #38bdf8;
+  --cw-border: #1e293b;
+  --cw-toolbar-bg: #0f172a;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--cw-bg);
+  color: var(--cw-text);
+  padding: 2rem;
+  line-height: 1.5;
+}
+
+.cw-container {
+  max-width: 820px;
+  margin: 0 auto;
+  background: var(--cw-card);
+  border: 1px solid var(--cw-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+.cw-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--cw-border);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cw-header h1 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  color: var(--cw-accent);
+}
+
+.cw-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--cw-muted);
+}
+
+.cw-status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--cw-accent);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.cw-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--cw-toolbar-bg);
+  border: 1px solid var(--cw-border);
+  border-radius: 8px;
+}
+
+.cw-tool-group,
+.cw-color-group,
+.cw-width-group,
+.cw-action-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cw-tool-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid var(--cw-border);
+  background: var(--cw-bg);
+  color: var(--cw-text);
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cw-tool-btn:hover {
+  border-color: var(--cw-accent);
+  color: var(--cw-accent);
+}
+
+.cw-tool-btn.active {
+  border-color: var(--cw-accent);
+  color: var(--cw-accent);
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.cw-color-label,
+.cw-width-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cw-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.4rem;
+}
+
+.cw-color-chips {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.cw-color-chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--cw-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cw-color-chip:hover {
+  transform: scale(1.15);
+  border-color: var(--cw-accent);
+}
+
+.cw-color-chip.active {
+  border-color: var(--cw-accent);
+  box-shadow: 0 0 0 2px var(--cw-bg);
+}
+
+.cw-width-group input[type=range] {
+  width: 90px;
+  accent-color: var(--cw-accent);
+  cursor: pointer;
+}
+
+.cw-width-group span {
+  font-size: 0.8rem;
+  color: var(--cw-muted);
+  min-width: 18px;
+  text-align: center;
+}
+
+.cw-btn {
+  padding: 0.45rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--cw-border);
+  background: var(--cw-bg);
+  color: var(--cw-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cw-btn:hover {
+  border-color: var(--cw-accent);
+  color: var(--cw-accent);
+}
+
+.cw-btn-undo { color: var(--cw-accent); }
+.cw-btn-redo { color: var(--cw-accent); }
+.cw-btn-clear { color: #f87171; }
+.cw-btn-export { background: var(--cw-accent); color: var(--cw-bg); border-color: var(--cw-accent); }
+
+.cw-btn-export:hover { background: #7dd3fc; }
+
+.cw-canvas-wrap {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid var(--cw-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+  touch-action: none;
+}
+
+.cw-canvas {
+  display: block;
+  width: 100%;
+  height: 420px;
+  cursor: crosshair;
+  background: #ffffff;
+}
+
+.cw-canvas.drawing {
+  cursor: crosshair;
+}
+
+.empty-hint {
+  grid-area: hint;
+  text-align: center;
+  color: var(--cw-muted);
+  padding: 2rem;
+  font-size: 0.85rem;
+}
