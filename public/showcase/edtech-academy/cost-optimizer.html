@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EdTech Academy - Tiered Resource Allocation & Dynamic Cost Optimizer</title>
+  <link rel="stylesheet" href="cost-optimizer.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body data-cost-optimizer>
+  <div class="optimizer-container">
+    <!-- Top Nav -->
+    <header class="top-nav">
+      <a href="index.html" class="nav-brand">
+        <div class="brand-icon">⚡</div>
+        <span class="brand-text">EdTech Academy</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">← Back to Showcase</a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-header">
+      <div class="badge-tag">Academic Cloud Infrastructure</div>
+      <h1>Tiered Resource Allocation & Cost Optimizer</h1>
+      <p>Simulate institutional cloud workloads, model tier-based academic subsidies, and dynamically optimize your per-student delivery cost in real time.</p>
+    </section>
+
+    <!-- Quick Presets Bar -->
+    <div class="presets-bar">
+      <span class="preset-label">Institutional Presets:</span>
+      <button type="button" id="presetBootcamp" class="btn-preset">🎓 Bootcamp Pilot (150)</button>
+      <button type="button" id="presetDept" class="btn-preset">🏛️ Departmental Faculty (800)</button>
+      <button type="button" id="presetCampus" class="btn-preset">🏫 University Campus (4,500)</button>
+      <button type="button" id="presetSystem" class="btn-preset">🌐 Multi-Campus System (16,000)</button>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="optimizer-grid">
+      <!-- Left Column: Controls & Configuration -->
+      <div class="controls-column">
+        <!-- Billing & Academic Subsidy Configuration -->
+        <div class="billing-toggle-container">
+          <div class="billing-switch-wrapper">
+            <span style="font-size: 0.88rem; font-weight: 600;">Billing Commitment:</span>
+            <div class="billing-radio-group">
+              <input type="radio" id="billingMonthly" name="billingFrequency" value="monthly" checked>
+              <label for="billingMonthly" class="billing-radio-label">Monthly</label>
+
+              <input type="radio" id="billingAnnual" name="billingFrequency" value="annual">
+              <label for="billingAnnual" class="billing-radio-label">
+                Annual <span class="savings-badge" style="margin-left: 6px;">Save 20%</span>
+              </label>
+            </div>
+          </div>
+
+          <label class="subsidy-toggle-label">
+            <input type="checkbox" id="academicSubsidyToggle" class="subsidy-checkbox" checked>
+            <span>Academic Accreditation Grant</span>
+            <span class="savings-badge">Up to 20% Subsidy</span>
+          </label>
+        </div>
+
+        <!-- Resource Sliders Card -->
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-icon">
+              <span>📊</span>
+              <span>Workload Parameters</span>
+            </div>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Adjust sliders or enter values</span>
+          </div>
+
+          <!-- Students -->
+          <div class="resource-item">
+            <div class="resource-header">
+              <div>
+                <div class="resource-title">Active Student Seats</div>
+                <div class="resource-desc">Enrolled learners with full platform, course, & assignment access</div>
+              </div>
+              <div class="resource-input-wrap">
+                <input type="number" id="studentsInput" class="resource-number-input" value="500" min="0" max="50000" step="10">
+                <span class="resource-unit-tag">seats</span>
+              </div>
+            </div>
+            <input type="range" id="studentsSlider" class="resource-slider" value="500" min="0" max="20000" step="25">
+          </div>
+
+          <!-- Streams -->
+          <div class="resource-item">
+            <div class="resource-header">
+              <div>
+                <div class="resource-title">Concurrent Classroom Streams</div>
+                <div class="resource-desc">Simultaneous HD interactive video lectures & recitation halls</div>
+              </div>
+              <div class="resource-input-wrap">
+                <input type="number" id="streamsInput" class="resource-number-input" value="15" min="0" max="1000" step="1">
+                <span class="resource-unit-tag">streams</span>
+              </div>
+            </div>
+            <input type="range" id="streamsSlider" class="resource-slider" value="15" min="0" max="300" step="1">
+          </div>
+
+          <!-- Storage -->
+          <div class="resource-item">
+            <div class="resource-header">
+              <div>
+                <div class="resource-title">Video Lecture Repository Storage</div>
+                <div class="resource-desc">Archived syllabus lectures, lab recordings, & transcode storage</div>
+              </div>
+              <div class="resource-input-wrap">
+                <input type="number" id="storageTBInput" class="resource-number-input" value="5" min="0" max="500" step="1">
+                <span class="resource-unit-tag">TB</span>
+              </div>
+            </div>
+            <input type="range" id="storageTBSlider" class="resource-slider" value="5" min="0" max="100" step="1">
+          </div>
+
+          <!-- AI Tutor -->
+          <div class="resource-item">
+            <div class="resource-header">
+              <div>
+                <div class="resource-title">AI Tutor Bot Query Credits</div>
+                <div class="resource-desc">24/7 autonomous TA answering homework & conceptual questions</div>
+              </div>
+              <div class="resource-input-wrap">
+                <input type="number" id="aiCreditsInput" class="resource-number-input" value="10000" min="0" max="1000000" step="500">
+                <span class="resource-unit-tag">queries</span>
+              </div>
+            </div>
+            <input type="range" id="aiCreditsSlider" class="resource-slider" value="10000" min="0" max="250000" step="1000">
+          </div>
+
+          <!-- Proctoring -->
+          <div class="resource-item">
+            <div class="resource-header">
+              <div>
+                <div class="resource-title">Proctoring Verification Sessions</div>
+                <div class="resource-desc">AI-assisted biometric ID verification & anti-cheat exam sessions</div>
+              </div>
+              <div class="resource-input-wrap">
+                <input type="number" id="proctoringInput" class="resource-number-input" value="250" min="0" max="20000" step="25">
+                <span class="resource-unit-tag">sessions</span>
+              </div>
+            </div>
+            <input type="range" id="proctoringSlider" class="resource-slider" value="250" min="0" max="5000" step="50">
+          </div>
+
+          <!-- Budget Auto-Optimizer Sandbox -->
+          <div class="optimizer-tool-box">
+            <div style="font-size: 0.95rem; font-weight: 700; color: #fff;">
+              🎯 Target Budget Capacity Optimizer
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+              Input your target monthly spend to automatically allocate resources and maximize student seats.
+            </div>
+            <div class="tool-input-row">
+              <input type="number" id="targetBudgetInput" class="tool-budget-input" placeholder="e.g. 5000" value="4500">
+              <button type="button" id="btnOptimizeBudget" class="btn-primary">Optimize Allocation</button>
+            </div>
+
+            <!-- Optimizer Output Box -->
+            <div id="optimizeResultCard" class="optimize-result-box" hidden>
+              <div id="optimizeMessage" style="font-size: 0.85rem; color: var(--indigo-light); font-weight: 600;"></div>
+              <div class="alloc-grid">
+                <div class="alloc-item"><span>Student Seats:</span><span id="allocStudents">--</span></div>
+                <div class="alloc-item"><span>Classroom Streams:</span><span id="allocStreams">--</span></div>
+                <div class="alloc-item"><span>Video Storage:</span><span id="allocStorage">--</span></div>
+                <div class="alloc-item"><span>AI Tutor Credits:</span><span id="allocAiCredits">--</span></div>
+                <div class="alloc-item"><span>Allocated Cost:</span><span id="allocTotalCost">--</span></div>
+                <div class="alloc-item"><span>Per-Student / Mo:</span><span id="allocPerStudent">--</span></div>
+              </div>
+              <button type="button" id="btnApplyAllocation" class="btn-secondary" style="width: 100%; margin-top: 8px;">
+                Apply Optimized Allocation to Sliders
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Analytics, Pricing Breakdown & Quote -->
+      <div class="summary-column">
+        <!-- Tier Status Card -->
+        <div class="card tier-display-card">
+          <span id="tierBadge" class="tier-badge">Departmental • Growth</span>
+          <div id="tierName" class="tier-name">Departmental Faculty</div>
+          <p id="tierDescription" class="tier-desc">Tailored for academic departments, university faculties, and expanding digital schools.</p>
+        </div>
+
+        <!-- Total Price Card -->
+        <div class="card total-summary-card">
+          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+            Estimated Net Institutional Cost
+          </span>
+          <div class="price-main-display">
+            <span id="totalCostValue" class="cost-amount">$0.00</span>
+            <span id="billingPeriodLabel" class="cost-period">per month</span>
+          </div>
+          <div id="monthlyEquivalentValue" class="monthly-eq">Billed monthly, cancel anytime</div>
+
+          <div class="metric-per-student-box">
+            <div>
+              <div class="metric-title">Unit Cost Efficiency</div>
+              <div style="font-size: 0.75rem; color: var(--text-sub);">Net cost per active learner</div>
+            </div>
+            <div id="perStudentCostValue" class="metric-highlight">$0.00 / student / mo</div>
+          </div>
+        </div>
+
+        <!-- Discounts & Subsidy Breakdown -->
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-icon">
+              <span>🎁</span>
+              <span>Discounts & Subsidies</span>
+            </div>
+          </div>
+          <div class="savings-list">
+            <div class="savings-row">
+              <span style="color: var(--text-muted);">Catalog Base Cost</span>
+              <span id="subtotalValue" style="color: #fff; font-weight: 600;">$0.00</span>
+            </div>
+            <div class="savings-row">
+              <span style="color: var(--text-muted);">Institutional Volume Tier</span>
+              <span id="volumeDiscountValue" class="discount-val">$0.00 (0%)</span>
+            </div>
+            <div class="savings-row">
+              <span style="color: var(--text-muted);">Academic Accreditation Grant</span>
+              <span id="academicSubsidyValue" class="discount-val">$0.00 (0%)</span>
+            </div>
+            <div class="savings-row">
+              <span style="color: var(--text-muted);">Annual Academic Year Savings</span>
+              <span id="annualDiscountValue" class="discount-val">$0.00 (0%)</span>
+            </div>
+            <div class="savings-row total-row">
+              <span>Total Academic Subsidy Saved</span>
+              <span id="totalSavingsValue" style="color: var(--emerald-light); font-size: 1.05rem;">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Itemized Resource Cost Table -->
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-icon">
+              <span>📑</span>
+              <span>Itemized Resource Breakdown</span>
+            </div>
+          </div>
+          <table class="resource-table">
+            <thead>
+              <tr>
+                <th>Resource</th>
+                <th>Unit Rate</th>
+                <th style="text-align: right;">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Active Student Seats</td>
+                <td id="breakdown-students-rate" class="rate-sub">$4.00 / unit</td>
+                <td id="breakdown-students-cost" class="cost-cell">$0.00</td>
+              </tr>
+              <tr>
+                <td>Virtual Classroom Streams</td>
+                <td id="breakdown-streams-rate" class="rate-sub">$12.00 / unit</td>
+                <td id="breakdown-streams-cost" class="cost-cell">$0.00</td>
+              </tr>
+              <tr>
+                <td>Video Storage Repository</td>
+                <td id="breakdown-storageTB-rate" class="rate-sub">$20.00 / unit</td>
+                <td id="breakdown-storageTB-cost" class="cost-cell">$0.00</td>
+              </tr>
+              <tr>
+                <td>AI Tutor Query Credits</td>
+                <td id="breakdown-aiCredits-rate" class="rate-sub">$0.015 / unit</td>
+                <td id="breakdown-aiCredits-cost" class="cost-cell">$0.00</td>
+              </tr>
+              <tr>
+                <td>Proctoring Verification</td>
+                <td id="breakdown-proctoring-rate" class="rate-sub">$1.20 / unit</td>
+                <td id="breakdown-proctoring-cost" class="cost-cell">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Actions -->
+          <div class="action-buttons-group">
+            <button type="button" id="btnOpenQuote" class="btn-primary" style="width: 100%;">
+              Generate Formal Institutional Quote
+            </button>
+            <button type="button" id="btnDownloadQuote" class="btn-secondary" style="width: 100%;">
+              Export Quote (JSON)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quote Generator Modal -->
+  <div id="quoteModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="badge-tag">Institutional Procurement</span>
+          <h2 style="font-size: 1.3rem; margin-top: 4px;">EdTech Academy Formal Quote</h2>
+        </div>
+        <button type="button" id="btnCloseQuote" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label for="institutionNameInput" style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">
+          Institution Name:
+        </label>
+        <input type="text" id="institutionNameInput" class="tool-budget-input" value="State University of Technology" style="width: 100%;">
+      </div>
+
+      <div class="modal-details">
+        <div class="modal-details-row">
+          <span>Quote Reference ID:</span>
+          <span id="modalQuoteId">--</span>
+        </div>
+        <div class="modal-details-row">
+          <span>Procurement Entity:</span>
+          <span id="modalInstitution">--</span>
+        </div>
+        <div class="modal-details-row">
+          <span>Contract Tier:</span>
+          <span id="modalTier">--</span>
+        </div>
+        <div class="modal-details-row">
+          <span>Unit Metric Cost:</span>
+          <span id="modalPerStudent">--</span>
+        </div>
+        <div class="modal-details-row" style="border-top: 1px dashed var(--border); padding-top: 8px;">
+          <span style="font-weight: 700; color: #fff;">Net Guaranteed Total:</span>
+          <span id="modalTotalCost" style="font-size: 1.2rem; color: var(--emerald-light);">--</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button type="button" onclick="window.print()" class="btn-secondary" style="flex: 1;">Print Quote</button>
+        <button type="button" onclick="document.querySelector('#quoteModal').classList.remove('active')" class="btn-primary" style="flex: 1;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="cost-optimizer.js"></script>
+</body>
+</html>
