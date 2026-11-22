@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Exchange Pro — Temporal Event Sourcing Ledger & State Replay Engine</title>
+  <link rel="stylesheet" href="event-ledger.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="ledger-body">
+  <div id="eventLedgerApp" class="ledger-wrapper">
+    <!-- Top Header Navigation -->
+    <header class="ledger-header">
+      <div class="header-title-wrap">
+        <h1>
+          <span>⚡</span>
+          <span>Crypto Exchange Pro — Event Sourcing Ledger</span>
+        </h1>
+        <p>Deterministic Financial Ledger with Cryptographic Hash Chaining &amp; Temporal State Replay Engine</p>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="back-link">← Return to VortexDEX</a>
+      </div>
+    </header>
+
+    <!-- Cryptographic Hash Verification Banner -->
+    <section id="integrityBanner" class="verification-banner status-valid">
+      <div class="banner-left">
+        <span id="integrityStatusText" class="banner-status-text">
+          ✓ CRYPTOGRAPHIC INTEGRITY: <strong>VERIFIED</strong> (0 blocks linked)
+        </span>
+      </div>
+      <div class="banner-right">
+        <span>Head Hash:</span>
+        <span id="latestHashDisplay" class="hash-preview-badge">0000000000000000000000000000000000000000000000000000000000000000</span>
+        <span id="eventCountBadge" class="user-badge">0 Events</span>
+      </div>
+    </section>
+
+    <!-- Temporal State Scrubber Control Panel -->
+    <section class="scrubber-panel" aria-label="Temporal Replay Controls">
+      <div class="scrubber-header">
+        <div class="scrubber-title">Temporal State Scrubber (Time-Travel Replay Engine)</div>
+        <div id="scrubberTimeDisplay" class="scrubber-timestamp-badge">LIVE (Present State)</div>
+      </div>
+      <div class="scrubber-slider-wrap">
+        <input
+          type="range"
+          id="timeScrubber"
+          class="scrubber-slider"
+          min="0"
+          max="5"
+          value="5"
+          step="1"
+          aria-label="Time travel scrubber"
+        />
+      </div>
+      <div class="scrubber-controls">
+        <button type="button" id="playPauseBtn" class="btn-ledger btn-primary">▶ Play Replay</button>
+        <button type="button" id="stepBackBtn" class="btn-ledger">⏮ Step Back</button>
+        <button type="button" id="stepForwardBtn" class="btn-ledger">⏭ Step Forward</button>
+        <button type="button" id="resetToLiveBtn" class="btn-ledger">🔄 Reset to Present</button>
+        <div style="flex-grow: 1;"></div>
+        <button type="button" id="verifyChainBtn" class="btn-ledger">🔍 Re-Verify Chain</button>
+        <button type="button" id="snapshotBtn" class="btn-ledger">📸 Take Snapshot</button>
+        <button type="button" id="reconstructBtn" class="btn-ledger">🔨 Reconstruct Ledger</button>
+        <button type="button" id="tamperDemoBtn" class="btn-ledger btn-danger">⚠️ Simulate Tamper</button>
+        <button type="button" id="exportJsonBtn" class="btn-ledger">📥 Export Audit Trail</button>
+        <button type="button" id="clearLedgerBtn" class="btn-ledger">🗑 Reset</button>
+      </div>
+    </section>
+
+    <!-- Balance Summary Section -->
+    <section aria-label="Account Balances Overview">
+      <div id="balancesGrid" class="balances-grid">
+        <!-- Injected dynamically based on temporal state replay -->
+      </div>
+    </section>
+
+    <!-- Main Two-Column Grid: Transaction Injector & Event Stream -->
+    <div class="main-grid">
+      <!-- Transaction Injector Form -->
+      <aside class="injector-panel">
+        <h2><span>⚡</span> Transaction Injector</h2>
+        <form id="transactionForm">
+          <div class="form-group">
+            <label for="eventTypeSelect">Event Type</label>
+            <select id="eventTypeSelect" class="form-select">
+              <option value="BALANCE_DEPOSIT">Balance Deposit</option>
+              <option value="BALANCE_WITHDRAWAL">Balance Withdrawal</option>
+              <option value="ORDER_PLACED">Place Limit Order</option>
+              <option value="ORDER_FILLED">Fill Active Order</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="userIdInput">User ID</label>
+              <input type="text" id="userIdInput" class="form-input" value="alice" required />
+            </div>
+            <div class="form-group">
+              <label for="assetSelect">Asset / Pair</label>
+              <select id="assetSelect" class="form-select">
+                <option value="USDT">USDT</option>
+                <option value="BTC">BTC</option>
+                <option value="ETH">ETH</option>
+                <option value="BTC/USDT">BTC/USDT</option>
+                <option value="ETH/USDT">ETH/USDT</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" id="orderFieldsGroup" style="display: none;">
+            <div class="form-group">
+              <label for="sideSelect">Side</label>
+              <select id="sideSelect" class="form-select">
+                <option value="BUY">BUY</option>
+                <option value="SELL">SELL</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="priceInput">Price (USDT)</label>
+              <input type="number" id="priceInput" class="form-input" value="65000" step="any" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="amountInput">Amount</label>
+            <input type="number" id="amountInput" class="form-input" value="1000" step="any" required />
+          </div>
+
+          <button type="submit" class="btn-ledger btn-primary" style="width: 100%; justify-content: center; margin-top: 8px;">
+            + Append Event to Ledger
+          </button>
+        </form>
+      </aside>
+
+      <!-- Event Stream & Audit Trail Table -->
+      <main class="audit-panel">
+        <h2>
+          <span>📜 Immutable Cryptographic Event Stream</span>
+          <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">Sequential SHA-256 Chained Blocks</span>
+        </h2>
+        <div class="table-scroll-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">Index</th>
+                <th style="width: 140px;">Type</th>
+                <th style="width: 100px;">Time</th>
+                <th>Payload</th>
+                <th style="width: 110px;">Prev Hash</th>
+                <th style="width: 110px;">Block Hash</th>
+              </tr>
+            </thead>
+            <tbody id="eventStreamTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <!-- Secondary Grids: Active Open Orders & Executed Trades at Replayed Timestamp -->
+    <div class="secondary-grids">
+      <section class="audit-panel">
+        <h2>Open Orders at Scrubber Position</h2>
+        <div id="openOrdersContainer">
+          <div class="empty-state">No active open orders.</div>
+        </div>
+      </section>
+
+      <section class="audit-panel">
+        <h2>Executed Trade History</h2>
+        <div id="tradeHistoryContainer">
+          <div class="empty-state">No trades executed.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="event-ledger.js"></script>
+</body>
+</html>
