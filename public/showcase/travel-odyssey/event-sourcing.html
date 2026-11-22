@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Odyssey - Event Sourcing Ledger & Temporal Replay Engine</title>
+  <link rel="stylesheet" href="event-sourcing.css">
+</head>
+<body class="event-sourcing-body">
+  <div class="app-container">
+
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">🧭</div>
+        <div class="brand-text">
+          <h1>Travel Odyssey Event Sourcing Ledger</h1>
+          <p>Append-only immutable domain journal, cryptographic state reconstruction & temporal rewind engine</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-verified" id="integrityBadge">● Chain Verified</span>
+        <span class="badge badge-chain">Event Sourcing v1.0</span>
+        <span class="badge badge-tier">NSoC '26 Tier 3</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" id="btnExportJson">Export JSON</button>
+        <button class="btn btn-secondary btn-sm" id="btnImportJson">Import JSON</button>
+        <input type="file" id="fileInputImport" accept=".json" style="display: none;">
+        <button class="btn btn-danger btn-sm" id="btnResetLedger">Reset</button>
+      </div>
+    </header>
+
+    <!-- Temporal Control Bar & Scrubber -->
+    <section class="temporal-bar">
+      <div class="temporal-info-row">
+        <div class="temporal-mode-indicator">
+          <div class="pulse-dot" id="modePulse"></div>
+          <span class="temporal-title" id="modeTitle">LIVE TIMELINE</span>
+          <span class="temporal-cursor-label" id="cursorLabel">Cursor: v0 / v0</span>
+        </div>
+        <div class="playback-group">
+          <label class="form-label" style="margin: 0; margin-right: 6px;">Speed:</label>
+          <select id="playbackSpeed" class="playback-speed-select">
+            <option value="1000">1.0x (1s)</option>
+            <option value="500" selected>2.0x (0.5s)</option>
+            <option value="250">4.0x (0.25s)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="scrubber-container">
+        <span class="scrub-bound">v0</span>
+        <div class="scrubber-wrapper">
+          <input type="range" id="timelineScrubber" min="-1" max="-1" value="-1" class="timeline-slider">
+        </div>
+        <span class="scrub-bound" id="maxBoundLabel">v0</span>
+      </div>
+
+      <div class="playback-toolbar">
+        <div class="playback-group">
+          <button class="btn btn-secondary btn-sm" id="btnJumpStart" title="Jump to Beginning">⏮ Start</button>
+          <button class="btn btn-secondary btn-sm" id="btnStepPrev" title="Step 1 Event Backward">◀ Step Back</button>
+          <button class="btn btn-cyan btn-sm" id="btnPlayPause" title="Auto Replay Events">▶ Play Replay</button>
+          <button class="btn btn-secondary btn-sm" id="btnStepNext" title="Step 1 Event Forward">Step Forward ▶</button>
+          <button class="btn btn-primary btn-sm" id="btnJumpLive" title="Fast Forward to Latest Live State">⏭ Live State</button>
+        </div>
+        <div class="playback-group">
+          <button class="btn btn-emerald btn-sm" id="btnQuickSnapshot">📸 Snapshot State</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Workspace Grid -->
+    <main class="workspace-grid">
+
+      <!-- Left Column: Action Dispatcher & Snapshot Tools -->
+      <section class="column-left">
+
+        <!-- Card: Trip Action Dispatcher -->
+        <article class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon">⚡</span>
+              <div>
+                <h2 class="card-title">Domain Mutation Dispatcher</h2>
+                <p class="card-subtitle">Dispatch immutable domain events into the append-only ledger</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dispatcher Navigation Tabs -->
+          <nav class="dispatcher-nav" id="dispatcherNav">
+            <button class="tab-btn active" data-tab="tab-trip">Create Trip</button>
+            <button class="tab-btn" data-tab="tab-dest">Destination</button>
+            <button class="tab-btn" data-tab="tab-flight">Flight</button>
+            <button class="tab-btn" data-tab="tab-hotel">Hotel</button>
+            <button class="tab-btn" data-tab="tab-activity">Activity</button>
+            <button class="tab-btn" data-tab="tab-budget">Budget</button>
+            <button class="tab-btn" data-tab="tab-status">Status</button>
+            <button class="tab-btn" data-tab="tab-custom">Custom</button>
+          </nav>
+
+          <!-- Tab Pane: Create Trip -->
+          <div class="tab-pane active" id="tab-trip">
+            <form id="formCreateTrip">
+              <div class="form-group">
+                <label class="form-label">Trip Title</label>
+                <input type="text" class="form-input" id="tripTitle" value="Autumn Odyssey: Japan Circuit" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Primary Destination</label>
+                  <input type="text" class="form-input" id="tripDestination" value="Tokyo, Japan">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Initial Budget ($)</label>
+                  <input type="number" class="form-input" id="tripBudget" value="6500" min="0" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Start Date</label>
+                  <input type="date" class="form-input" id="tripStartDate" value="2026-10-01">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">End Date</label>
+                  <input type="date" class="form-input" id="tripEndDate" value="2026-10-15">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Travelers</label>
+                <input type="number" class="form-input" id="tripTravelers" value="2" min="1" max="20">
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Append TRIP_CREATED</button>
+            </form>
+          </div>
+
+          <!-- Tab Pane: Add Destination -->
+          <div class="tab-pane" id="tab-dest">
+            <form id="formAddDestination">
+              <div class="form-group">
+                <label class="form-label">Destination City</label>
+                <input type="text" class="form-input" id="destName" placeholder="e.g. Kyoto" value="Kyoto" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Country</label>
+                <input type="text" class="form-input" id="destCountry" placeholder="e.g. Japan" value="Japan">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Arrival Date</label>
+                  <input type="date" class="form-input" id="destArrival" value="2026-10-05">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Departure Date</label>
+                  <input type="date" class="form-input" id="destDeparture" value="2026-10-10">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-cyan" style="width: 100%; margin-top: 8px;">Append DESTINATION_ADDED</button>
+            </form>
+          </div>
+
+          <!-- Tab Pane: Book Flight -->
+          <div class="tab-pane" id="tab-flight">
+            <form id="formBookFlight">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Airline</label>
+                  <input type="text" class="form-input" id="flightAirline" value="ANA All Nippon Airways" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Flight #</label>
+                  <input type="text" class="form-input" id="flightNumber" value="NH-007" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">From (Origin)</label>
+                  <input type="text" class="form-input" id="flightFrom" value="SFO (San Francisco)" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">To (Destination)</label>
+                  <input type="text" class="form-input" id="flightTo" value="HND (Tokyo Haneda)" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Flight Cost ($)</label>
+                <input type="number" class="form-input" id="flightCost" value="1250" min="0" required>
+              </div>
+              <button type="submit" class="btn btn-emerald" style="width: 100%; margin-top: 8px;">Append FLIGHT_BOOKED</button>
+            </form>
+          </div>
+
+          <!-- Tab Pane: Reserve Hotel -->
+          <div class="tab-pane" id="tab-hotel">
+            <form id="formReserveHotel">
+              <div class="form-group">
+                <label class="form-label">Hotel Name</label>
+                <input type="text" class="form-input" id="hotelName" value="Hoshinoya Kyoto" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Destination</label>
+                  <input type="text" class="form-input" id="hotelDest" value="Kyoto" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Room Type</label>
+                  <input type="text" class="form-input" id="hotelRoom" value="Riverside Suite">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Nights</label>
+                  <input type="number" class="form-input" id="hotelNights" value="4" min="1">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Total Cost ($)</label>
+                  <input type="number" class="form-input" id="hotelCost" value="1800" min="0" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-emerald" style="width: 100%; margin-top: 8px;">Append HOTEL_RESERVED</button>
+            </form>
+          </div>
+
+          <!-- Tab Pane: Add Activity -->
+          <div class="tab-pane" id="tab-activity">
+            <form id="formAddActivity">
+              <div class="form-group">
+                <label class="form-label">Activity Title</label>
+                <input type="text" class="form-input" id="actTitle" value="Private Tea Ceremony & Zen Garden Walk" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Location</label>
+                  <input type="text" class="form-input" id="actLocation" value="Daitoku-ji, Kyoto">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Duration (Hours)</label>
+                  <input type="number" class="form-input" id="actDuration" value="3" min="1">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cost ($)</label>
+                <input type="number" class="form-input" id="actCost" value="220" min="0" required>
+              </div>
+              <button type="submit" class="btn btn-emerald" style="width: 100%; margin-top: 8px;">Append ACTIVITY_SCHEDULED</button>
+            </form>
+          </div>
+
+          <!-- Tab Pane: Adjust Budget -->
+          <div class="tab-pane" id="tab-budget">
+            <form id="formAdjustBudget">
+              <div class="form-group">
+                <label class="form-label">Adjustment Mode</label>
+                <select class="form-select" id="budgetMode">
+                  <option value="delta">Add/Subtract Delta (+$ / -$)</option>
+                  <option value="total">Set Exact Total Budget</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Amount ($)</label>
+                <input type="number" class="form-input" id="budgetAmount" value="1000" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Adjustment Reason</label>
+                <input type="text" class="form-input" id="budgetReason" value="Allocated extra fund for fine dining">
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Append BUDGET_ADJUSTED</button>
+            </form>
+          </div>
+
+          <!-- Tab Pane: Status & Confirm / Cancel -->
+          <div class="tab-pane" id="tab-status">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <form id="formConfirmTrip">
+                <div class="form-group">
+                  <label class="form-label">Confirmation Code</label>
+                  <input type="text" class="form-input" id="confirmCode" value="ODYSSEY-JPN-2026">
+                </div>
+                <button type="submit" class="btn btn-emerald" style="width: 100%;">Append TRIP_CONFIRMED</button>
+              </form>
+              <hr style="border: 0; border-top: 1px solid var(--to-border-subtle); margin: 6px 0;">
+              <form id="formCancelTrip">
+                <div class="form-group">
+                  <label class="form-label">Cancellation Reason</label>
+                  <input type="text" class="form-input" id="cancelReason" value="Schedule conflict or reschedule">
+                </div>
+                <button type="submit" class="btn btn-danger" style="width: 100%;">Append TRIP_CANCELLED</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Tab Pane: Custom Event -->
+          <div class="tab-pane" id="tab-custom">
+            <form id="formCustomEvent">
+              <div class="form-group">
+                <label class="form-label">Event Type</label>
+                <input type="text" class="form-input" id="customType" placeholder="e.g. PASSPORT_RENEWED" value="NOTES_ADDED" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Payload (JSON)</label>
+                <textarea class="form-textarea" id="customPayload">{ "note": "Remember to convert JPY currency before boarding." }</textarea>
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 8px;">Append Custom Event</button>
+            </form>
+          </div>
+        </article>
+
+        <!-- Card: Snapshot Manager -->
+        <article class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon">📷</span>
+              <div>
+                <h2 class="card-title">Snapshot Manager</h2>
+                <p class="card-subtitle">Fast checkpoint caching & instant state restoration</p>
+              </div>
+            </div>
+          </div>
+          <div class="snapshot-input-row">
+            <input type="text" class="form-input" id="snapshotTagInput" placeholder="Snapshot label / tag...">
+            <button class="btn btn-secondary btn-sm" id="btnTakeNamedSnapshot">Take</button>
+          </div>
+          <div class="snapshot-list" id="snapshotList">
+            <div class="empty-placeholder">No snapshots captured yet.</div>
+          </div>
+        </article>
+
+        <!-- Card: Cryptographic Chain Integrity -->
+        <article class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon">🔒</span>
+              <div>
+                <h2 class="card-title">Ledger Integrity & Hash Chain</h2>
+                <p class="card-subtitle">Cryptographic hashing prevents historical tampering</p>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btnVerifyChain">Verify Chain</button>
+          </div>
+          <div class="audit-metrics-grid">
+            <div class="metric-box">
+              <span class="metric-title">Event Count</span>
+              <span class="metric-value" id="auditEventCount">0</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-title">Status</span>
+              <span class="metric-value" style="color: var(--to-emerald);" id="auditStatus">UNBROKEN</span>
+            </div>
+            <div class="metric-box" style="grid-column: span 2;">
+              <span class="metric-title">Latest Checksum</span>
+              <span class="metric-value" id="auditLatestHash" style="font-size: 0.75rem;">GENESIS</span>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- Right Column: Append-Only Event Stream & Materialized State -->
+      <section class="column-right">
+
+        <!-- Card: Append-Only Event Stream Table -->
+        <article class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon">📜</span>
+              <div>
+                <h2 class="card-title">Append-Only Event Stream</h2>
+                <p class="card-subtitle">Complete chronological event stream ledger with individual replay</p>
+              </div>
+            </div>
+            <div class="table-toolbar">
+              <input type="text" class="form-input search-input" id="searchEvents" placeholder="Filter events...">
+            </div>
+          </div>
+
+          <div class="events-table-wrapper">
+            <table class="events-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">Ver</th>
+                  <th style="width: 160px;">Event Type</th>
+                  <th style="width: 80px;">Time</th>
+                  <th>Payload Preview</th>
+                  <th style="width: 110px;">Checksum</th>
+                  <th style="width: 70px; text-align: center;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="eventsTableBody">
+                <tr>
+                  <td colspan="6" class="empty-placeholder">No events in ledger. Dispatch an event or load demo!</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- Card: Materialized State & Inspector -->
+        <article class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon">📊</span>
+              <div>
+                <h2 class="card-title">Materialized Itinerary State</h2>
+                <p class="card-subtitle">Live reconstructed state at current temporal cursor</p>
+              </div>
+            </div>
+          </div>
+
+          <nav class="state-nav">
+            <button class="state-tab-btn active" data-target="view-visual">Visual Dashboard</button>
+            <button class="state-tab-btn" data-target="view-json">State JSON</button>
+            <button class="state-tab-btn" data-target="view-diff">Temporal Diff Viewer</button>
+          </nav>
+
+          <!-- Visual Dashboard View -->
+          <div class="state-view-pane" id="view-visual">
+            <div class="state-visual-grid">
+              
+              <!-- Trip Overview Banner -->
+              <div class="trip-overview-banner">
+                <div>
+                  <div class="trip-banner-title" id="dispTripTitle">No Trip Initialized</div>
+                  <div class="trip-banner-dates" id="dispTripDates">Dates: Not scheduled</div>
+                </div>
+                <div id="dispTripStatus">
+                  <span class="status-pill status-planning">UNINITIALIZED</span>
+                </div>
+              </div>
+
+              <!-- Budget Balance Gauge -->
+              <div class="budget-meter-card">
+                <div class="budget-stats-row">
+                  <div class="budget-stat">
+                    <span class="budget-stat-label">Total Budget</span>
+                    <span class="budget-stat-val" id="dispBudgetTotal">$0</span>
+                  </div>
+                  <div class="budget-stat">
+                    <span class="budget-stat-label">Allocated (Spent)</span>
+                    <span class="budget-stat-val" id="dispBudgetAllocated" style="color: var(--to-amber);">$0</span>
+                  </div>
+                  <div class="budget-stat">
+                    <span class="budget-stat-label">Remaining Balance</span>
+                    <span class="budget-stat-val" id="dispBudgetRemaining" style="color: var(--to-emerald);">$0</span>
+                  </div>
+                </div>
+                <div class="budget-bar-track">
+                  <div class="budget-bar-fill" id="dispBudgetBar" style="width: 0%;"></div>
+                </div>
+              </div>
+
+              <!-- Entities Summary Grid -->
+              <div class="entities-summary-grid">
+                
+                <!-- Destinations Subcard -->
+                <div class="entity-subcard">
+                  <div class="entity-subcard-title">
+                    <span>Destinations</span>
+                    <span id="dispDestCount" style="color: var(--to-cyan-light);">0</span>
+                  </div>
+                  <div class="entity-pill-list" id="dispDestList">
+                    <span style="font-size: 0.75rem; color: var(--to-text-dim);">No destinations added</span>
+                  </div>
+                </div>
+
+                <!-- Flights Subcard -->
+                <div class="entity-subcard">
+                  <div class="entity-subcard-title">
+                    <span>Flights</span>
+                    <span id="dispFlightCount" style="color: var(--to-emerald);">0</span>
+                  </div>
+                  <div class="entity-pill-list" id="dispFlightList">
+                    <span style="font-size: 0.75rem; color: var(--to-text-dim);">No flights booked</span>
+                  </div>
+                </div>
+
+                <!-- Hotels Subcard -->
+                <div class="entity-subcard">
+                  <div class="entity-subcard-title">
+                    <span>Accommodations</span>
+                    <span id="dispHotelCount" style="color: var(--to-indigo-light);">0</span>
+                  </div>
+                  <div class="entity-pill-list" id="dispHotelList">
+                    <span style="font-size: 0.75rem; color: var(--to-text-dim);">No hotels reserved</span>
+                  </div>
+                </div>
+
+                <!-- Activities Subcard -->
+                <div class="entity-subcard">
+                  <div class="entity-subcard-title">
+                    <span>Activities</span>
+                    <span id="dispActivityCount" style="color: var(--to-amber);">0</span>
+                  </div>
+                  <div class="entity-pill-list" id="dispActivityList">
+                    <span style="font-size: 0.75rem; color: var(--to-text-dim);">No activities scheduled</span>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Raw State JSON View -->
+          <div class="state-view-pane" id="view-json" style="display: none;">
+            <pre class="json-code-box" id="jsonStateCode">// Materialized state JSON will appear here</pre>
+          </div>
+
+          <!-- Diff Viewer View -->
+          <div class="state-view-pane" id="view-diff" style="display: none;">
+            <div class="diff-container" id="diffContainer">
+              <div class="diff-header-summary" id="diffSummaryText">
+                Comparing Cursor State vs Live Latest State...
+              </div>
+              <div id="diffItemsList">
+                <div class="empty-placeholder">Cursor is at live latest state. No differences detected.</div>
+              </div>
+            </div>
+          </div>
+
+        </article>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Main Application Script (ES Module) -->
+  <script type="module">
+    import {
+      TravelOdysseyEventSourcingLedger,
+      EVENT_TYPES,
+      computeStructuralDiff
+    } from './event-sourcing.js';
+
+    // Initialize Ledger Instance
+    const ledger = new TravelOdysseyEventSourcingLedger();
+    let playbackInterval = null;
+    let isPlaying = false;
+
+    // DOM Elements
+    const timelineScrubber = document.getElementById('timelineScrubber');
+    const cursorLabel = document.getElementById('cursorLabel');
+    const maxBoundLabel = document.getElementById('maxBoundLabel');
+    const modeTitle = document.getElementById('modeTitle');
+    const modePulse = document.getElementById('modePulse');
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const playbackSpeed = document.getElementById('playbackSpeed');
+    const eventsTableBody = document.getElementById('eventsTableBody');
+    const jsonStateCode = document.getElementById('jsonStateCode');
+    const diffContainer = document.getElementById('diffContainer');
+    const diffItemsList = document.getElementById('diffItemsList');
+    const diffSummaryText = document.getElementById('diffSummaryText');
+    const snapshotList = document.getElementById('snapshotList');
+    const auditEventCount = document.getElementById('auditEventCount');
+    const auditLatestHash = document.getElementById('auditLatestHash');
+    const auditStatus = document.getElementById('auditStatus');
+    const integrityBadge = document.getElementById('integrityBadge');
+    const searchEvents = document.getElementById('searchEvents');
+
+    // Display elements for Visual Dashboard
+    const dispTripTitle = document.getElementById('dispTripTitle');
+    const dispTripDates = document.getElementById('dispTripDates');
+    const dispTripStatus = document.getElementById('dispTripStatus');
+    const dispBudgetTotal = document.getElementById('dispBudgetTotal');
+    const dispBudgetAllocated = document.getElementById('dispBudgetAllocated');
+    const dispBudgetRemaining = document.getElementById('dispBudgetRemaining');
+    const dispBudgetBar = document.getElementById('dispBudgetBar');
+    const dispDestCount = document.getElementById('dispDestCount');
+    const dispDestList = document.getElementById('dispDestList');
+    const dispFlightCount = document.getElementById('dispFlightCount');
+    const dispFlightList = document.getElementById('dispFlightList');
+    const dispHotelCount = document.getElementById('dispHotelCount');
+    const dispHotelList = document.getElementById('dispHotelList');
+    const dispActivityCount = document.getElementById('dispActivityCount');
+    const dispActivityList = document.getElementById('dispActivityList');
+
+    // Setup Dispatcher Navigation Tabs
+    const tabButtons = document.querySelectorAll('#dispatcherNav .tab-btn');
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const target = document.getElementById(btn.dataset.tab);
+        if (target) target.classList.add('active');
+      });
+    });
+
+    // Setup State Inspector Tabs
+    const stateTabButtons = document.querySelectorAll('.state-tab-btn');
+    stateTabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        stateTabButtons.forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.state-view-pane').forEach(p => p.style.display = 'none');
+        btn.classList.add('active');
+        const pane = document.getElementById(btn.dataset.target);
+        if (pane) pane.style.display = 'block';
+      });
+    });
+
+    // Helper: Format event chip CSS class
+    function getChipClass(type) {
+      if (type.includes('TRIP')) return 'chip-trip';
+      if (type.includes('DESTINATION')) return 'chip-dest';
+      if (type.includes('FLIGHT')) return 'chip-flight';
+      if (type.includes('HOTEL')) return 'chip-hotel';
+      if (type.includes('ACTIVITY')) return 'chip-activity';
+      if (type.includes('BUDGET')) return 'chip-budget';
+      if (type.includes('CANCEL')) return 'chip-cancel';
+      return 'chip-other';
+    }
+
+    // Helper: Render Event Stream Table
+    function renderEventTable() {
+      const events = ledger.getEvents();
+      const cursor = ledger.getCursor();
+      const filter = (searchEvents.value || '').toLowerCase().trim();
+
+      if (events.length === 0) {
+        eventsTableBody.innerHTML = `<tr><td colspan="6" class="empty-placeholder">No events in ledger. Dispatch an event or load demo!</td></tr>`;
+        return;
+      }
+
+      const rows = events.map((ev, index) => {
+        const isCurrent = index === cursor;
+        const isFuture = index > cursor;
+        const matches = !filter || ev.type.toLowerCase().includes(filter) || JSON.stringify(ev.payload).toLowerCase().includes(filter);
+        if (!matches) return '';
+
+        const timeStr = new Date(ev.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const payloadPreview = JSON.stringify(ev.payload);
+        const truncatedPayload = payloadPreview.length > 55 ? payloadPreview.slice(0, 52) + '...' : payloadPreview;
+        const shortHash = ev.checksum.slice(0, 8) + '...' + ev.checksum.slice(-4);
+        const rowClass = isCurrent ? 'current-cursor-row' : (isFuture ? 'future-event-row' : '');
+
+        return `
+          <tr class="${rowClass}">
+            <td><strong style="color: var(--to-indigo-light);">v${ev.version}</strong></td>
+            <td><span class="event-chip ${getChipClass(ev.type)}">${ev.type}</span></td>
+            <td style="font-family: var(--to-font-mono); font-size: 0.72rem; color: var(--to-text-muted);">${timeStr}</td>
+            <td style="font-family: var(--to-font-mono); font-size: 0.75rem;" title="${payloadPreview.replace(/"/g, '&quot;')}">${truncatedPayload}</td>
+            <td><span class="hash-preview" title="Checksum: ${ev.checksum}">${shortHash}</span></td>
+            <td style="text-align: center;">
+              <button class="btn btn-secondary btn-sm replay-btn" data-index="${index}" style="padding: 2px 8px; font-size: 0.7rem;">Replay</button>
+            </td>
+          </tr>
+        `;
+      }).filter(Boolean);
+
+      eventsTableBody.innerHTML = rows.length > 0 ? rows.join('') : `<tr><td colspan="6" class="empty-placeholder">No matching events found.</td></tr>`;
+
+      // Attach Replay Row Buttons
+      document.querySelectorAll('.replay-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.currentTarget.dataset.index, 10);
+          pauseReplay();
+          ledger.scrub(idx);
+          updateUI();
+        });
+      });
+    }
+
+    // Helper: Render Snapshots List
+    function renderSnapshots() {
+      const snaps = ledger.getSnapshots();
+      if (snaps.length === 0) {
+        snapshotList.innerHTML = `<div class="empty-placeholder">No snapshots captured yet.</div>`;
+        return;
+      }
+
+      snapshotList.innerHTML = snaps.map((s, idx) => `
+        <div class="snapshot-item">
+          <div class="snapshot-item-info">
+            <span class="snapshot-tag">${s.tag || `Snapshot #${idx + 1}`}</span>
+            <span class="snapshot-meta">v${s.version} • ${new Date(s.timestamp).toLocaleTimeString()}</span>
+          </div>
+          <button class="btn btn-secondary btn-sm restore-snap-btn" data-id="${s.id}">Restore</button>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.restore-snap-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          pauseReplay();
+          ledger.restoreFromSnapshot(e.currentTarget.dataset.id);
+          updateUI();
+        });
+      });
+    }
+
+    // Update Overall UI State
+    function updateUI() {
+      const total = ledger.getEventCount();
+      const cursor = ledger.getCursor();
+      const isLive = cursor === total - 1 || total === 0;
+
+      // Update Scrubber Bounds
+      timelineScrubber.min = -1;
+      timelineScrubber.max = total - 1;
+      timelineScrubber.value = cursor;
+      maxBoundLabel.textContent = `v${total}`;
+
+      // Update Header & Scrubber Mode Text
+      if (isLive) {
+        modeTitle.textContent = 'LIVE TIMELINE';
+        modePulse.className = 'pulse-dot';
+        cursorLabel.textContent = `Live: v${total} / v${total}`;
+      } else {
+        const currentVersion = cursor >= 0 ? ledger.getEvents()[cursor]?.version : 0;
+        modeTitle.textContent = 'TIME TRAVEL MODE';
+        modePulse.className = 'pulse-dot time-traveling';
+        cursorLabel.textContent = `Rewound: Step ${cursor + 1} / ${total} (v${currentVersion})`;
+      }
+
+      // Materialized State at Current Cursor
+      const currentState = ledger.getCurrentState();
+      const latestState = ledger.getMaterializedState();
+
+      // Render Visual Dashboard
+      if (currentState.trip) {
+        dispTripTitle.textContent = currentState.trip.title || 'Untitled Trip';
+        dispTripDates.textContent = `Dates: ${currentState.trip.startDate || 'TBD'} to ${currentState.trip.endDate || 'TBD'}`;
+      } else {
+        dispTripTitle.textContent = 'No Trip Initialized';
+        dispTripDates.textContent = 'Dates: Not scheduled';
+      }
+
+      // Status Pill
+      let statusClass = 'status-planning';
+      if (currentState.status === 'CONFIRMED') statusClass = 'status-confirmed';
+      if (currentState.status === 'CANCELLED') statusClass = 'status-cancelled';
+      dispTripStatus.innerHTML = `<span class="status-pill ${statusClass}">${currentState.status}</span>`;
+
+      // Budget Gauge
+      const totalBudget = currentState.budget.total || 0;
+      const allocated = currentState.budget.allocated || 0;
+      const remaining = currentState.budget.remaining || 0;
+      dispBudgetTotal.textContent = `$${totalBudget.toLocaleString()}`;
+      dispBudgetAllocated.textContent = `$${allocated.toLocaleString()}`;
+      dispBudgetRemaining.textContent = `$${remaining.toLocaleString()}`;
+      dispBudgetRemaining.style.color = remaining < 0 ? 'var(--to-rose)' : 'var(--to-emerald)';
+
+      const percentSpent = totalBudget > 0 ? Math.min(100, Math.round((allocated / totalBudget) * 100)) : 0;
+      dispBudgetBar.style.width = `${percentSpent}%`;
+      dispBudgetBar.className = `budget-bar-fill ${remaining < 0 ? 'overbudget' : ''}`;
+
+      // Destinations List
+      dispDestCount.textContent = currentState.destinations.length;
+      if (currentState.destinations.length > 0) {
+        dispDestList.innerHTML = currentState.destinations.map(d => `<span class="entity-pill">📍 ${d.name} (${d.country || 'Global'})</span>`).join('');
+      } else {
+        dispDestList.innerHTML = `<span style="font-size: 0.75rem; color: var(--to-text-dim);">No destinations added</span>`;
+      }
+
+      // Flights List
+      dispFlightCount.textContent = currentState.flights.length;
+      if (currentState.flights.length > 0) {
+        dispFlightList.innerHTML = currentState.flights.map(f => `
+          <span class="entity-pill" style="${f.status === 'CANCELLED' ? 'text-decoration: line-through; opacity: 0.5;' : ''}">
+            ✈️ ${f.airline} (${f.flightNumber}): ${f.from} ➔ ${f.to} ($${f.cost})
+          </span>
+        `).join('');
+      } else {
+        dispFlightList.innerHTML = `<span style="font-size: 0.75rem; color: var(--to-text-dim);">No flights booked</span>`;
+      }
+
+      // Hotels List
+      dispHotelCount.textContent = currentState.hotels.length;
+      if (currentState.hotels.length > 0) {
+        dispHotelList.innerHTML = currentState.hotels.map(h => `
+          <span class="entity-pill" style="${h.status === 'CANCELLED' ? 'text-decoration: line-through; opacity: 0.5;' : ''}">
+            🏨 ${h.hotelName} in ${h.destination} (${h.nights} nights, $${h.cost})
+          </span>
+        `).join('');
+      } else {
+        dispHotelList.innerHTML = `<span style="font-size: 0.75rem; color: var(--to-text-dim);">No hotels reserved</span>`;
+      }
+
+      // Activities List
+      dispActivityCount.textContent = currentState.activities.length;
+      if (currentState.activities.length > 0) {
+        dispActivityList.innerHTML = currentState.activities.map(a => `
+          <span class="entity-pill">
+            🎟️ ${a.title} ($${a.cost})
+          </span>
+        `).join('');
+      } else {
+        dispActivityList.innerHTML = `<span style="font-size: 0.75rem; color: var(--to-text-dim);">No activities scheduled</span>`;
+      }
+
+      // Raw JSON Box
+      jsonStateCode.textContent = JSON.stringify(currentState, null, 2);
+
+      // Diff Viewer Calculation (Replayed vs Live Latest)
+      const diff = computeStructuralDiff(currentState, latestState);
+      if (diff.totalChanges === 0) {
+        diffSummaryText.textContent = isLive 
+          ? 'Cursor is at live latest state. Replay timeline backward to inspect temporal diffs.' 
+          : 'Replayed state is structurally identical to latest live state.';
+        diffItemsList.innerHTML = `<div class="empty-placeholder">No structural diffs detected.</div>`;
+      } else {
+        diffSummaryText.textContent = `Detected ${diff.totalChanges} difference(s) between Replayed State and Live Latest State:`;
+        diffItemsList.innerHTML = diff.changes.map(ch => {
+          let kindClass = 'diff-modified';
+          let symbol = '~';
+          let valText = `Replayed: ${JSON.stringify(ch.prev)} ➔ Live: ${JSON.stringify(ch.current)}`;
+          if (ch.kind === 'ADDED') {
+            kindClass = 'diff-added';
+            symbol = '+';
+            valText = `Live has newly added: ${JSON.stringify(ch.current)}`;
+          } else if (ch.kind === 'REMOVED') {
+            kindClass = 'diff-removed';
+            symbol = '-';
+            valText = `Live removed field: was ${JSON.stringify(ch.prev)}`;
+          }
+          return `
+            <div class="diff-row ${kindClass}">
+              <span style="font-weight: bold; width: 15px;">${symbol}</span>
+              <span class="diff-path">${ch.path}</span>
+              <span class="diff-value-comparison">${valText}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Audit status metrics
+      const integrity = ledger.verifyLedgerIntegrity();
+      auditEventCount.textContent = total;
+      auditStatus.textContent = integrity.valid ? 'UNBROKEN' : 'CORRUPTED';
+      auditStatus.style.color = integrity.valid ? 'var(--to-emerald)' : 'var(--to-rose)';
+      integrityBadge.className = `badge ${integrity.valid ? 'badge-verified' : 'badge-tier'}`;
+      integrityBadge.textContent = integrity.valid ? '● Chain Verified' : '⚠️ Tampered';
+
+      const allEvents = ledger.getEvents();
+      auditLatestHash.textContent = allEvents.length > 0 ? allEvents[allEvents.length - 1].checksum : 'GENESIS';
+
+      // Render table & snapshots
+      renderEventTable();
+      renderSnapshots();
+    }
+
+    // Playback Controls
+    function startReplay() {
+      if (isPlaying) return;
+      if (ledger.getCursor() >= ledger.getEventCount() - 1) {
+        ledger.jumpToStart();
+      }
+      isPlaying = true;
+      btnPlayPause.textContent = '⏸ Pause Replay';
+      btnPlayPause.className = 'btn btn-secondary btn-sm';
+
+      const intervalMs = parseInt(playbackSpeed.value, 10) || 500;
+      playbackInterval = setInterval(() => {
+        if (ledger.getCursor() < ledger.getEventCount() - 1) {
+          ledger.stepForward();
+          updateUI();
+        } else {
+          pauseReplay();
+        }
+      }, intervalMs);
+    }
+
+    function pauseReplay() {
+      if (!isPlaying) return;
+      isPlaying = false;
+      clearInterval(playbackInterval);
+      playbackInterval = null;
+      btnPlayPause.textContent = '▶ Play Replay';
+      btnPlayPause.className = 'btn btn-cyan btn-sm';
+    }
+
+    btnPlayPause.addEventListener('click', () => {
+      if (isPlaying) {
+        pauseReplay();
+      } else {
+        startReplay();
+      }
+    });
+
+    playbackSpeed.addEventListener('change', () => {
+      if (isPlaying) {
+        pauseReplay();
+        startReplay();
+      }
+    });
+
+    // Transport buttons
+    document.getElementById('btnJumpStart').addEventListener('click', () => {
+      pauseReplay();
+      ledger.jumpToStart();
+      updateUI();
+    });
+
+    document.getElementById('btnStepPrev').addEventListener('click', () => {
+      pauseReplay();
+      ledger.stepBackward();
+      updateUI();
+    });
+
+    document.getElementById('btnStepNext').addEventListener('click', () => {
+      pauseReplay();
+      ledger.stepForward();
+      updateUI();
+    });
+
+    document.getElementById('btnJumpLive').addEventListener('click', () => {
+      pauseReplay();
+      ledger.jumpToEnd();
+      updateUI();
+    });
+
+    // Scrubber input
+    timelineScrubber.addEventListener('input', (e) => {
+      pauseReplay();
+      ledger.scrub(parseInt(e.target.value, 10));
+      updateUI();
+    });
+
+    // Search events input
+    searchEvents.addEventListener('input', () => {
+      renderEventTable();
+    });
+
+    // Snapshot buttons
+    function takeSnapshotPrompted(tag) {
+      ledger.createSnapshot(tag || `Snapshot v${ledger.getEvents()[ledger.getCursor()]?.version || 0}`);
+      updateUI();
+    }
+
+    document.getElementById('btnQuickSnapshot').addEventListener('click', () => {
+      takeSnapshotPrompted();
+    });
+
+    document.getElementById('btnTakeNamedSnapshot').addEventListener('click', () => {
+      const tagInput = document.getElementById('snapshotTagInput');
+      takeSnapshotPrompted(tagInput.value.trim());
+      tagInput.value = '';
+    });
+
+    // Verify Chain button
+    document.getElementById('btnVerifyChain').addEventListener('click', () => {
+      const integrity = ledger.verifyLedgerIntegrity();
+      if (integrity.valid) {
+        alert(`✅ Cryptographic Audit Successful!\nAll ${integrity.verifiedEvents} events verified with sequential versions and valid hash chaining.`);
+      } else {
+        alert(`❌ Verification Failed:\n${integrity.errors.join('\n')}`);
+      }
+    });
+
+    // Export & Import
+    document.getElementById('btnExportJson').addEventListener('click', () => {
+      const json = ledger.exportLedger();
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `travel-odyssey-ledger-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    const fileInputImport = document.getElementById('fileInputImport');
+    document.getElementById('btnImportJson').addEventListener('click', () => {
+      fileInputImport.click();
+    });
+
+    fileInputImport.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          ledger.importLedger(event.target.result);
+          updateUI();
+          alert('✅ Ledger imported successfully!');
+        } catch (err) {
+          alert('❌ Import error: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+      fileInputImport.value = '';
+    });
+
+    document.getElementById('btnResetLedger').addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear the entire ledger?')) {
+        pauseReplay();
+        ledger.clear();
+        updateUI();
+      }
+    });
+
+    // Form Event Submissions
+    document.getElementById('formCreateTrip').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pauseReplay();
+      ledger.append(EVENT_TYPES.TRIP_CREATED, {
+        title: document.getElementById('tripTitle').value,
+        destination: document.getElementById('tripDestination').value,
+        budget: Number(document.getElementById('tripBudget').value),
+        startDate: document.getElementById('tripStartDate').value,
+        endDate: document.getElementById('tripEndDate').value,
+        travelers: Number(document.getElementById('tripTravelers').value)
+      });
+      updateUI();
+    });
+
+    document.getElementById('formAddDestination').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pauseReplay();
+      ledger.append(EVENT_TYPES.DESTINATION_ADDED, {
+        name: document.getElementById('destName').value,
+        country: document.getElementById('destCountry').value,
+        arrivalDate: document.getElementById('destArrival').value,
+        departureDate: document.getElementById('destDeparture').value
+      });
+      updateUI();
+    });
+
+    document.getElementById('formBookFlight').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pauseReplay();
+      ledger.append(EVENT_TYPES.FLIGHT_BOOKED, {
+        airline: document.getElementById('flightAirline').value,
+        flightNumber: document.getElementById('flightNumber').value,
+        from: document.getElementById('flightFrom').value,
+        to: document.getElementById('flightTo').value,
+        cost: Number(document.getElementById('flightCost').value)
+      });
+      updateUI();
+    });
+
+    document.getElementById('formReserveHotel').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pauseReplay();
+      ledger.append(EVENT_TYPES.HOTEL_RESERVED, {
+        hotelName: document.getElementById('hotelName').value,
+        destination: document.getElementById('hotelDest').value,
+        roomType: document.getElementById('hotelRoom').value,
+        nights: Number(document.getElementById('hotelNights').value),
+        cost: Number(document.getElementById('hotelCost').value)
+      });
+      updateUI();
+    });
+
+    document.getElementById('formAddActivity').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pauseReplay();
+      ledger.append(EVENT_TYPES.ACTIVITY_SCHEDULED, {
+        title: document.getElementById('actTitle').value,
+        location: document.getElementById('actLocation').value,
+        durationHours: Number(document.getElementById('actDuration').value),
+        cost: Number(document.getElementById('actCost').value)
+      });
+      updateUI();
+    });
+
+    document.getElementById('formAdjustBudget').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pauseReplay();
+      const mode = document.getElementById('budgetMode').value;
+      const amt = Number(document.getElementById('budgetAmount').value);
+      const reason = document.getElementById('budgetReason').value;
+      if (mode === 'total') {
+        ledger.append(EVENT_TYPES.BUDGET_ADJUSTED, { newTotal: amt, reason });
+      } else {
+        ledger.append(EVENT_TYPES.BUDGET_ADJUSTED, { delta: amt, reason });
+      }
+      updateUI();
+    });
+
+    document.getElementById('formConfirmTrip').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pauseReplay();
+      ledger.append(EVENT_TYPES.TRIP_CONFIRMED, {
+        confirmationCode: document.getElementById('confirmCode').value
+      });
+      updateUI();
+    });
+
+    document.getElementById('formCancelTrip').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pauseReplay();
+      ledger.append(EVENT_TYPES.TRIP_CANCELLED, {
+        reason: document.getElementById('cancelReason').value
+      });
+      updateUI();
+    });
+
+    document.getElementById('formCustomEvent').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pauseReplay();
+      const type = document.getElementById('customType').value;
+      let payload = {};
+      try {
+        payload = JSON.parse(document.getElementById('customPayload').value);
+      } catch {
+        alert('Invalid JSON in payload');
+        return;
+      }
+      ledger.append(type, payload);
+      updateUI();
+    });
+
+    // Populate Initial Demo Itinerary Events
+    function loadDemoEvents() {
+      ledger.append(EVENT_TYPES.TRIP_CREATED, {
+        id: 'trip_jp_2026',
+        title: 'Autumn Odyssey: Japan Circuit',
+        destination: 'Tokyo, Japan',
+        budget: 7500,
+        currency: 'USD',
+        startDate: '2026-10-01',
+        endDate: '2026-10-15',
+        travelers: 2
+      }, { author: 'LeadPlanner' });
+
+      ledger.append(EVENT_TYPES.DESTINATION_ADDED, {
+        name: 'Kyoto',
+        country: 'Japan',
+        arrivalDate: '2026-10-05',
+        departureDate: '2026-10-10'
+      }, { author: 'LeadPlanner' });
+
+      ledger.append(EVENT_TYPES.FLIGHT_BOOKED, {
+        id: 'fl_nh_007',
+        airline: 'All Nippon Airways',
+        flightNumber: 'NH-007',
+        from: 'SFO',
+        to: 'HND',
+        cost: 1450
+      }, { author: 'BookingAgent' });
+
+      ledger.append(EVENT_TYPES.HOTEL_RESERVED, {
+        id: 'ht_aman_01',
+        hotelName: 'Aman Tokyo',
+        destination: 'Tokyo',
+        roomType: 'Deluxe Imperial Suite',
+        nights: 4,
+        cost: 2100
+      }, { author: 'BookingAgent' });
+
+      ledger.append(EVENT_TYPES.HOTEL_RESERVED, {
+        id: 'ht_hosh_02',
+        hotelName: 'Hoshinoya Kyoto',
+        destination: 'Kyoto',
+        roomType: 'Riverside Pavilion',
+        nights: 5,
+        cost: 1950
+      }, { author: 'BookingAgent' });
+
+      ledger.append(EVENT_TYPES.ACTIVITY_SCHEDULED, {
+        id: 'act_tea_01',
+        title: 'Private Uji Tea Ceremony',
+        location: 'Uji, Kyoto',
+        cost: 240,
+        durationHours: 3
+      }, { author: 'Concierge' });
+
+      ledger.append(EVENT_TYPES.BUDGET_ADJUSTED, {
+        delta: 1200,
+        reason: 'Sponsor travel grant addition'
+      }, { author: 'Finance' });
+
+      ledger.append(EVENT_TYPES.TRIP_CONFIRMED, {
+        confirmationCode: 'ODYSSEY-JPN-9988'
+      }, { author: 'LeadPlanner' });
+
+      ledger.createSnapshot('Initial Confirmed Itinerary');
+    }
+
+    loadDemoEvents();
+    updateUI();
+  </script>
+</body>
+</html>
