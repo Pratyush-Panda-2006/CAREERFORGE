@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Esports Hub - Probabilistic Bloom Filter & Membership Query Visualizer</title>
+  <link rel="stylesheet" href="bloom-filter.css">
+</head>
+<body>
+  <div class="bloom-app-container" data-gaming-bloom-app>
+    <!-- Navigation & Header -->
+    <header class="bloom-header">
+      <div class="header-nav-row">
+        <a href="index.html" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Gaming Esports Hub
+        </a>
+        <div class="header-badge">
+          <span class="badge-pulse"></span>
+          ESPORTS MATCHMAKING & ANTI-CHEAT ENGINE
+        </div>
+      </div>
+
+      <div class="header-content">
+        <h1>Probabilistic Bloom Filter & Membership Query Visualizer</h1>
+        <p>
+          Sub-millisecond probabilistic set membership engine powered by Kirsch-Mitzenmacher
+          double-hashing (MurmurHash3 32-bit + FNV-1a 32-bit). Protects competitive esports matchmaking
+          queues from blacklisted cheaters, ban-evaders, and toxic players with an absolute <strong>0% False Negative Guarantee</strong>.
+        </p>
+      </div>
+
+      <!-- Telemetry HUD Bar -->
+      <section class="telemetry-hud" aria-label="Engine Telemetry HUD">
+        <div class="hud-item">
+          <span class="hud-label">Bit Space (m)</span>
+          <span class="hud-value font-mono text-cyan" id="stat-size">256 bits</span>
+          <span class="hud-sub" id="memory-footprint">32 Bytes</span>
+        </div>
+
+        <div class="hud-item">
+          <span class="hud-label">Hash Functions (k)</span>
+          <span class="hud-value font-mono text-purple" id="stat-hashes">4 hashes</span>
+          <span class="hud-sub">Kirsch-Mitzenmacher</span>
+        </div>
+
+        <div class="hud-item">
+          <span class="hud-label">Blacklist Items (n)</span>
+          <span class="hud-value font-mono text-orange" id="stat-items">0</span>
+          <span class="hud-sub">Entities Ingested</span>
+        </div>
+
+        <div class="hud-item">
+          <span class="hud-label">Active Bits Set</span>
+          <span class="hud-value font-mono" id="stat-bits">0 / 256</span>
+          <div class="progress-bar-track">
+            <div class="progress-fill normal" id="stat-saturation-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="hud-item">
+          <span class="hud-label">Memory Saturation</span>
+          <span class="hud-value font-mono text-cyan" id="stat-saturation">0.0%</span>
+          <span class="hud-sub">Bit Density</span>
+        </div>
+
+        <div class="hud-item">
+          <span class="hud-label">Theoretical FPR</span>
+          <span class="hud-value font-mono text-emerald" id="stat-fpr">0.0000%</span>
+          <span class="hud-sub">False Positive Rate</span>
+        </div>
+
+        <div class="hud-item invariant-item">
+          <span class="hud-label">Zero False Negatives</span>
+          <span class="hud-value text-emerald font-bold">100% LOCKED</span>
+          <span class="hud-sub">0% False Negatives</span>
+        </div>
+      </section>
+    </header>
+
+    <!-- Main Workspace Grid -->
+    <main class="bloom-workspace">
+      <!-- Left Column: Ingestion Panel -->
+      <section class="bloom-card ingestion-card" aria-labelledby="ingest-heading">
+        <div class="card-header">
+          <div class="header-icon-wrap icon-orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <div>
+            <h2 id="ingest-heading">Blacklist Entity Ingestion</h2>
+            <p class="card-subtitle">Add banned player tags, cheat signatures, or HWID fingerprints</p>
+          </div>
+        </div>
+
+        <div class="input-form-group">
+          <label for="gamer-tag-input" class="form-label">Player Tag / Cheat Signature</label>
+          <div class="input-action-row">
+            <input
+              type="text"
+              id="gamer-tag-input"
+              class="cyber-input font-mono"
+              placeholder="e.g. AimbotSniper#99, ViperAimbot_v4.dll, hwid:88:ef:..."
+              maxlength="128"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="add-tag-btn" class="btn btn-orange" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Blacklist Tag
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Presets for Blacklist -->
+        <div class="presets-container">
+          <span class="preset-label">Quick Ingest Presets:</span>
+          <div class="preset-chips">
+            <button type="button" class="preset-chip chip-orange" data-preset-insert="FaZe_NoScope#99">FaZe_NoScope#99</button>
+            <button type="button" class="preset-chip chip-orange" data-preset-insert="Spinbotter_v3">Spinbotter_v3</button>
+            <button type="button" class="preset-chip chip-orange" data-preset-insert="sig:driver_hook_x64">sig:driver_hook_x64</button>
+            <button type="button" class="preset-chip chip-orange" data-preset-insert="hwid:c4:98:bb:01:fa">hwid:c4:98:bb:01:fa</button>
+            <button type="button" class="preset-chip chip-orange" data-preset-insert="ToxicSmurf#NA1">ToxicSmurf#NA1</button>
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <button id="batch-10-btn" class="btn btn-secondary" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            Batch Add (10 Tags)
+          </button>
+          <button id="stress-load-btn" class="btn btn-secondary" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            Stress Load (50 Tags)
+          </button>
+          <button id="reset-filter-btn" class="btn btn-danger" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            Reset Memory
+          </button>
+        </div>
+      </section>
+
+      <!-- Right Column: Membership Probe Panel -->
+      <section class="bloom-card query-card" aria-labelledby="query-heading">
+        <div class="card-header">
+          <div class="header-icon-wrap icon-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <div>
+            <h2 id="query-heading">Matchmaking Membership Probe</h2>
+            <p class="card-subtitle">Zero false-negative pre-filtering before database lookup</p>
+          </div>
+        </div>
+
+        <div class="input-form-group">
+          <label for="query-input" class="form-label">Query Player Tag</label>
+          <div class="input-action-row">
+            <input
+              type="text"
+              id="query-input"
+              class="cyber-input font-mono"
+              placeholder="Enter tag to test membership..."
+              maxlength="128"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="query-btn" class="btn btn-cyan" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              Probe Membership
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Presets for Querying -->
+        <div class="presets-container">
+          <span class="preset-label">Test Player Presets:</span>
+          <div class="preset-chips">
+            <button type="button" class="preset-chip chip-green" data-preset-query="T1_Faker#KR">T1_Faker#KR</button>
+            <button type="button" class="preset-chip chip-green" data-preset-query="s1mple#NAVI">s1mple#NAVI</button>
+            <button type="button" class="preset-chip chip-green" data-preset-query="TenZ#SEN">TenZ#SEN</button>
+            <button type="button" class="preset-chip chip-red" data-preset-query="AimbotGod_x9">AimbotGod_x9</button>
+            <button type="button" class="preset-chip chip-red" data-preset-query="ToxicSmurf_EU">ToxicSmurf_EU</button>
+          </div>
+        </div>
+
+        <!-- Diagnostic Verdict Card -->
+        <div id="query-verdict-card" class="verdict-card verdict-idle" aria-live="polite">
+          <div class="verdict-header">
+            <span id="verdict-badge" class="verdict-badge">AWAITING QUERY</span>
+            <span class="engine-tag font-mono">O(k) PROBE</span>
+          </div>
+          <h3 id="verdict-title" class="verdict-title">No Entity Probed</h3>
+          <p id="verdict-desc" class="verdict-desc">
+            Enter an esports player tag or cheat signature to verify blacklist membership.
+          </p>
+          <div id="hash-breakdown" class="hash-breakdown"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bit Array Memory Matrix Section -->
+    <section class="bloom-card bit-matrix-section" aria-labelledby="matrix-heading">
+      <div class="matrix-header-row">
+        <div>
+          <h2 id="matrix-heading">Bit Array Memory Allocation Grid</h2>
+          <p class="card-subtitle">Real-time visualization of individual memory bit cells (0 vs 1) and probe addresses</p>
+        </div>
+
+        <div class="matrix-controls">
+          <div class="control-select-group">
+            <label for="bit-resolution" class="control-label">Bit Space (m):</label>
+            <select id="bit-resolution" class="cyber-select font-mono">
+              <option value="64">64 bits (8 Bytes)</option>
+              <option value="128">128 bits (16 Bytes)</option>
+              <option value="256" selected>256 bits (32 Bytes)</option>
+              <option value="512">512 bits (64 Bytes)</option>
+              <option value="1024">1024 bits (128 Bytes)</option>
+            </select>
+          </div>
+
+          <div class="control-select-group">
+            <label for="hash-count-select" class="control-label">Hashes (k):</label>
+            <select id="hash-count-select" class="cyber-select font-mono">
+              <option value="1">k = 1</option>
+              <option value="2">k = 2</option>
+              <option value="3">k = 3</option>
+              <option value="4" selected>k = 4</option>
+              <option value="5">k = 5</option>
+              <option value="6">k = 6</option>
+              <option value="7">k = 7</option>
+              <option value="8">k = 8</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bit Legend -->
+      <div class="grid-legend-bar">
+        <div class="legend-item"><span class="legend-box bit-inactive"></span> Bit 0 (Unset / Clean)</div>
+        <div class="legend-item"><span class="legend-box bit-active"></span> Bit 1 (Set / Active)</div>
+        <div class="legend-item"><span class="legend-box bit-queried-match"></span> Probe Match (Hit)</div>
+        <div class="legend-item"><span class="legend-box bit-queried-miss"></span> Probe Mismatch (Miss)</div>
+        <div class="legend-item"><span class="legend-box bit-collision"></span> Hash Collision</div>
+        <div id="cell-inspector" class="cell-inspector font-mono">Hover over any bit cell to inspect address</div>
+      </div>
+
+      <!-- Interactive Grid Container -->
+      <div id="bit-grid" class="bit-grid-container" role="grid" aria-label="Bloom Filter Bit Array Matrix"></div>
+    </section>
+
+    <!-- Bottom Split: Optimal Sizing Calculator & Real-Time Audit Log -->
+    <div class="bottom-split-grid">
+      <!-- Optimal Capacity Calculator -->
+      <section class="bloom-card calculator-card" aria-labelledby="calc-heading">
+        <div class="card-header">
+          <div class="header-icon-wrap icon-purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+              <line x1="8" y1="6" x2="16" y2="6"></line>
+              <line x1="16" y1="14" x2="16" y2="18"></line>
+              <path d="M16 10h.01"></path>
+              <path d="M12 10h.01"></path>
+              <path d="M8 10h.01"></path>
+              <path d="M12 14h.01"></path>
+              <path d="M8 14h.01"></path>
+              <path d="M12 18h.01"></path>
+              <path d="M8 18h.01"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 id="calc-heading">Optimal Capacity & Dimension Calculator</h2>
+            <p class="card-subtitle">Calculate optimal bits (m) and hashes (k) for target items (n) and false positive rate (p)</p>
+          </div>
+        </div>
+
+        <div class="calc-form-grid">
+          <div class="calc-field">
+            <label for="calc-items" class="form-label">Expected Blacklist Items (n):</label>
+            <input type="number" id="calc-items" class="cyber-input font-mono" value="100" min="5" max="100000" step="5">
+          </div>
+          <div class="calc-field">
+            <label for="calc-fpr" class="form-label">Target False Positive Rate (p):</label>
+            <select id="calc-fpr" class="cyber-select font-mono">
+              <option value="0.05">5.0% (p = 0.05)</option>
+              <option value="0.01" selected>1.0% (p = 0.01)</option>
+              <option value="0.005">0.5% (p = 0.005)</option>
+              <option value="0.001">0.1% (p = 0.001)</option>
+              <option value="0.0001">0.01% (p = 0.0001)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="calc-results-box">
+          <div class="calc-res-item">
+            <span class="calc-res-label">Optimal Bits (m):</span>
+            <span id="calc-res-m" class="calc-res-val font-mono text-cyan">959 bits</span>
+          </div>
+          <div class="calc-res-item">
+            <span class="calc-res-label">Optimal Hashes (k):</span>
+            <span id="calc-res-k" class="calc-res-val font-mono text-purple">7 hashes</span>
+          </div>
+          <div class="calc-res-item">
+            <span class="calc-res-label">Memory Footprint:</span>
+            <span id="calc-res-bytes" class="calc-res-val font-mono text-orange">120 B (0.12 KB)</span>
+          </div>
+        </div>
+
+        <button id="apply-calc-btn" class="btn btn-purple" type="button">
+          Apply Dimensions to Live Engine
+        </button>
+      </section>
+
+      <!-- Real-Time Audit Log -->
+      <section class="bloom-card audit-log-card" aria-labelledby="audit-heading">
+        <div class="card-header">
+          <div class="header-icon-wrap icon-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </div>
+          <div class="audit-title-wrap">
+            <h2 id="audit-heading">Security Audit Event Stream</h2>
+            <button id="clear-log-btn" class="btn-text-action" type="button">Clear Stream</button>
+          </div>
+        </div>
+
+        <div class="audit-stream-container">
+          <ul id="audit-log-list" class="audit-log-list font-mono" role="log" aria-live="polite"></ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- Architectural Documentation Section -->
+    <footer class="bloom-footer">
+      <div class="footer-card">
+        <h3>Kirsch-Mitzenmacher Double-Hashing Proof & Guarantees</h3>
+        <p>
+          Standard Bloom Filters require <em>k</em> distinct hash functions, which can become computationally expensive.
+          Kirsch & Mitzenmacher proved that two independent hash functions <code>h1(x)</code> (MurmurHash3 32-bit) and
+          <code>h2(x)</code> (FNV-1a 32-bit) can simulate <em>k</em> independent hash functions without asymptotic loss in false
+          positive probability using the recurrence relation:
+        </p>
+        <div class="math-code-box font-mono">
+          g_i(x) = (h1(x) + i &times; h2(x)) mod m, &nbsp; for i &isin; {0, 1, ..., k - 1}
+        </div>
+        <p>
+          <strong>Invariant Guarantee:</strong> If <em>contains(x)</em> returns <code>false</code>, <em>x</em> is
+          provably absent (100% true negative recall). If <em>contains(x)</em> returns <code>true</code>, the match is
+          either real or a false positive bounded by <code>(1 - e<sup>-k&middot;n/m</sup>)<sup>k</sup></code>.
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="bloom-filter.js"></script>
+</body>
+</html>
