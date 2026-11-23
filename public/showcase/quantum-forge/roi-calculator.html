@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quantum Forge - ROI Forecaster</title>
+  <link rel="stylesheet" href="roi-calculator.css">
+</head>
+<body class="roi-body">
+  <div class="roi-container">
+    <h2>Quantum Forge ROI Forecaster</h2>
+    <div id="savingsDisplay" class="savings-display">$0.00</div>
+  </div>
+  <script type="module">
+    import { QuantumForgeRoiEngine } from './roi-calculator.js';
+    const engine = new QuantumForgeRoiEngine();
+    const res = engine.calculateAnnualSavings();
+    document.getElementById('savingsDisplay').textContent = engine.formatCurrency(res.grossAnnualSavings);
+  </script>
+</body>
+</html>
