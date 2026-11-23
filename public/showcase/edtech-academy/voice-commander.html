@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson Voice Shortcuts · Synapse Academy</title>
+  <link rel="stylesheet" href="voice-commander.css">
+  <script type="module" src="voice-commander.js"></script>
+</head>
+<body>
+  <main id="voice-commander">
+    <header>
+      <a href="./index.html">← Synapse Academy</a>
+      <h1>Lesson voice shortcuts</h1>
+      <p>Navigate this three-lesson sample by voice or keyboard.</p>
+    </header>
+    <div class="columns">
+      <section class="card controls" aria-labelledby="command-heading">
+        <h2 id="command-heading">Run a command</h2>
+        <button id="microphone" type="button" aria-pressed="false" aria-describedby="microphone-note">Start microphone</button>
+        <p id="microphone-note">Your browser may send audio to its speech service. The microphone starts only when you ask.</p>
+        <form id="command-form">
+          <label for="command">Type a command</label>
+          <div class="command-line">
+            <input id="command" type="text" required maxlength="120" placeholder="next lesson" autocomplete="off">
+            <button type="submit">Run</button>
+          </div>
+        </form>
+        <label class="speak"><input type="checkbox" id="speak-responses"> Speak responses aloud</label>
+        <p id="status" role="status">Microphone off.</p>
+        <details id="shortcuts">
+          <summary>Available shortcuts</summary>
+          <div class="shortcut-list">
+            <button type="button" data-command="next lesson">Next lesson</button>
+            <button type="button" data-command="previous lesson">Previous lesson</button>
+            <button type="button" data-command="read lesson">Read lesson</button>
+            <button type="button" data-command="show shortcuts">Show shortcuts</button>
+          </div>
+        </details>
+      </section>
+      <div class="right">
+        <section class="card lesson" aria-labelledby="lesson-title">
+          <p id="lesson-position">Lesson 1 of 3</p>
+          <h2 id="lesson-title">Read a model output</h2>
+          <p id="lesson-body">Compare a model’s answer with the task it received. Identify one claim you can verify and one uncertainty that needs a follow-up.</p>
+        </section>
+        <section class="card activity" aria-labelledby="activity-heading">
+          <h2 id="activity-heading">Command history</h2>
+          <p id="empty-history">Run a command to see its result here.</p>
+          <ol id="history"></ol>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
