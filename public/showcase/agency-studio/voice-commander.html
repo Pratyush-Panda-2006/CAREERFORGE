@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency Studio - Web Speech API Voice Commander & Accessibility Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <div class="commander-deck">
+    <!-- Header with Breadcrumb and Actions -->
+    <header class="deck-header">
+      <div class="header-meta">
+        <div class="header-badge">Acoustic Dispatcher v2.4</div>
+        <h1>Agency Studio Voice Commander</h1>
+        <p>Web Speech API command parser, audio feedback synthesizer, and accessibility speech dispatcher for creative studio workflows</p>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="back-link">← Return to Agency Studio</a>
+        <button id="btn-toggle-contrast" class="btn-contrast" aria-label="Toggle accessibility high contrast mode">
+          👁 High Contrast
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Interaction Grid -->
+    <main class="interaction-grid">
+      <!-- Left Column: Mic Activation & Confidence Meter -->
+      <section class="mic-card" id="mic-card">
+        <div class="mic-aura-wrapper" id="mic-aura">
+          <div class="mic-pulse-ring"></div>
+          <div class="mic-pulse-ring"></div>
+          <div class="mic-pulse-ring"></div>
+          <button id="btn-mic-toggle" class="mic-btn" aria-label="Activate microphone voice recognition" title="Click to toggle voice listening">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div id="mic-status-text" class="mic-status-label">Standby • Mic Off</div>
+        <p class="mic-hint">Click mic or select a quick command below</p>
+
+        <div class="confidence-container">
+          <div class="confidence-header">
+            <span>Acoustic Confidence</span>
+            <span id="confidence-val">95%</span>
+          </div>
+          <div class="confidence-bar-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="95">
+            <div id="confidence-fill" class="confidence-bar-fill"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Soundwave Visualizer, Transcript & Speech Synthesizer -->
+      <section class="console-card">
+        <!-- Glowing Neon Soundwave Visualizer -->
+        <div class="soundwave-box" id="soundwave-box" aria-hidden="true">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <!-- Live Speech Transcript Display -->
+        <div class="transcript-box">
+          <div class="transcript-header">
+            <span>Voice Input Stream</span>
+            <span id="action-badge" class="action-badge">READY</span>
+          </div>
+          <div id="transcript-display" class="transcript-content">
+            "Say a command or click a chip below..."
+          </div>
+        </div>
+
+        <!-- Synthesizer Audio Feedback Output -->
+        <div class="synthesizer-bubble">
+          <svg class="synth-speaker-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          <div class="synth-text-wrapper">
+            <div class="synth-label">Synthesizer Response Dispatcher</div>
+            <div id="synth-output-text" class="synth-message">
+              Speech feedback synthesizer ready. Voice recognition initialized.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Quick Creative Command Chips -->
+    <section class="chips-section">
+      <div class="chips-title">Quick Creative Voice Simulation Chips</div>
+      <div class="chips-wrapper">
+        <button class="cmd-chip" data-cmd="go to campaigns">🚀 Go to Campaigns</button>
+        <button class="cmd-chip" data-cmd="navigate to briefs">📋 Navigate to Briefs</button>
+        <button class="cmd-chip" data-cmd="open settings">⚙️ Open Settings</button>
+        <button class="cmd-chip" data-cmd="create campaign Summer Launch for Nike">✨ Create Nike Campaign</button>
+        <button class="cmd-chip" data-cmd="switch theme to neon">🎨 Switch Theme to Neon</button>
+        <button class="cmd-chip" data-cmd="filter assets by video">🎬 Filter Video Assets</button>
+        <button class="cmd-chip" data-cmd="export brief as pdf">📄 Export Brief PDF</button>
+        <button class="cmd-chip" data-cmd="toggle high contrast">👁️ Toggle Contrast</button>
+        <button class="cmd-chip" data-cmd="help">❓ Help Commands</button>
+      </div>
+    </section>
+
+    <!-- Studio Internal State Overview -->
+    <section class="state-grid">
+      <div class="state-card">
+        <span class="state-label">Active View</span>
+        <span id="state-page" class="state-value">campaigns</span>
+      </div>
+      <div class="state-card">
+        <span class="state-label">Theme Mode</span>
+        <span id="state-theme" class="state-value">dark</span>
+      </div>
+      <div class="state-card">
+        <span class="state-label">Asset Filter</span>
+        <span id="state-filter" class="state-value">all</span>
+      </div>
+      <div class="state-card">
+        <span class="state-label">High Contrast</span>
+        <span id="state-contrast" class="state-value">Disabled</span>
+      </div>
+      <div class="state-card">
+        <span class="state-label">Active Campaign</span>
+        <span id="state-campaign" class="state-value coral">None</span>
+      </div>
+    </section>
+
+    <!-- Command History Log -->
+    <section class="history-section">
+      <div class="history-header">
+        <h2>Command Execution Stream</h2>
+        <button id="btn-clear-history" class="btn-clear-history">Clear Log</button>
+      </div>
+      <div id="history-container" class="history-list">
+        <div class="history-empty-state">No voice commands recorded in current session.</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Main Application Logic -->
+  <script type="module">
+    import { AgencyStudioVoiceCommander } from './voice-commander.js';
+
+    const commander = new AgencyStudioVoiceCommander();
+
+    // UI Elements
+    const micCard = document.getElementById('mic-card');
+    const micAura = document.getElementById('mic-aura');
+    const micBtn = document.getElementById('btn-mic-toggle');
+    const micStatus = document.getElementById('mic-status-text');
+    const soundwaveBox = document.getElementById('soundwave-box');
+    const transcriptDisplay = document.getElementById('transcript-display');
+    const actionBadge = document.getElementById('action-badge');
+    const synthOutputText = document.getElementById('synth-output-text');
+    const confidenceVal = document.getElementById('confidence-val');
+    const confidenceFill = document.getElementById('confidence-fill');
+    const historyContainer = document.getElementById('history-container');
+    const clearHistoryBtn = document.getElementById('btn-clear-history');
+    const contrastBtn = document.getElementById('btn-toggle-contrast');
+
+    // State indicators
+    const statePage = document.getElementById('state-page');
+    const stateTheme = document.getElementById('state-theme');
+    const stateFilter = document.getElementById('state-filter');
+    const stateContrast = document.getElementById('state-contrast');
+    const stateCampaign = document.getElementById('state-campaign');
+
+    // Update Mic UI
+    function updateMicUI(isListening) {
+      if (isListening) {
+        micCard.classList.add('is-listening');
+        micAura.classList.add('is-listening');
+        soundwaveBox.classList.add('is-listening');
+        micStatus.textContent = 'Listening... Speak Now';
+      } else {
+        micCard.classList.remove('is-listening');
+        micAura.classList.remove('is-listening');
+        soundwaveBox.classList.remove('is-listening');
+        micStatus.textContent = 'Standby • Mic Off';
+      }
+    }
+
+    // Toggle Mic
+    micBtn.addEventListener('click', () => {
+      commander.toggleListening();
+    });
+
+    // High Contrast Button
+    contrastBtn.addEventListener('click', () => {
+      commander.toggleHighContrast();
+    });
+
+    // Clear History Button
+    clearHistoryBtn.addEventListener('click', () => {
+      commander.clearHistory();
+    });
+
+    // Command Chips Simulation
+    document.querySelectorAll('.cmd-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const cmd = chip.getAttribute('data-cmd');
+        commander.processTranscript(cmd, { confidence: 0.98 });
+      });
+    });
+
+    // Render History Feed
+    function renderHistory() {
+      const history = commander.getHistory();
+      if (!history.length) {
+        historyContainer.innerHTML = '<div class="history-empty-state">No voice commands recorded in current session.</div>';
+        return;
+      }
+
+      historyContainer.innerHTML = history.slice(-10).reverse().map(item => `
+        <div class="history-item">
+          <div class="history-main">
+            <span class="history-transcript">"${item.rawTranscript}"</span>
+            <span class="history-feedback">${item.feedback}</span>
+          </div>
+          <div class="history-side">
+            <span class="action-badge ${item.status === 'success' ? '' : 'error'}">${item.action}</span>
+            <span class="history-time">${new Date(item.timestamp).toLocaleTimeString()} • ${Math.round(item.confidence * 100)}%</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Update State Displays
+    function updateStateUI() {
+      statePage.textContent = commander.activePage;
+      stateTheme.textContent = commander.activeTheme;
+      stateFilter.textContent = commander.activeFilter;
+      stateContrast.textContent = commander.highContrast ? 'Enabled' : 'Disabled';
+      stateCampaign.textContent = commander.activeCampaign
+        ? `${commander.activeCampaign.title} (${commander.activeCampaign.client})`
+        : 'None';
+    }
+
+    // Commander Event Listeners
+    commander.on('listening-start', () => updateMicUI(true));
+    commander.on('listening-stop', () => updateMicUI(false));
+
+    commander.on('interim-transcript', (payload) => {
+      transcriptDisplay.innerHTML = `<span class="transcript-interim">${payload.transcript}...</span>`;
+      actionBadge.textContent = 'ANALYZING';
+      actionBadge.className = 'action-badge';
+    });
+
+    commander.on('contrast-changed', (payload) => {
+      updateStateUI();
+    });
+
+    commander.on('command', (entry) => {
+      transcriptDisplay.textContent = `"${entry.rawTranscript}"`;
+      actionBadge.textContent = entry.action;
+      actionBadge.className = entry.status === 'success' ? 'action-badge' : 'action-badge error';
+      synthOutputText.textContent = entry.feedback;
+
+      const pct = Math.round(entry.confidence * 100);
+      confidenceVal.textContent = `${pct}%`;
+      confidenceFill.style.width = `${pct}%`;
+
+      updateStateUI();
+      renderHistory();
+    });
+
+    commander.on('history-cleared', () => {
+      renderHistory();
+    });
+
+    // Initial state sync
+    updateStateUI();
+    renderHistory();
+  </script>
+</body>
+</html>
