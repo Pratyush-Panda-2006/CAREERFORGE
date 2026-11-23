@@ -1,0 +1,47 @@
+:root {
+  color-scheme: dark;
+  font: 100%/1.55 system-ui, sans-serif;
+  background: #090e1c;
+  color: #ebefff;
+}
+
+body { margin: 0; min-height: 100vh; }
+.console {
+  max-width: 44rem;
+  margin: clamp(1rem, 7vw, 5rem) auto;
+  padding: clamp(1rem, 5vw, 2.5rem);
+  border: 1px solid #42658c;
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, #15223a, #0e1528);
+}
+a { color: #a3f6ff; }
+h1 { font-size: clamp(1.65rem, 5vw, 2.6rem); line-height: 1.14; margin-bottom: 0.5rem; }
+h2 { font-size: 1.2rem; }
+.controls, .command-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
+button, input[type="text"] {
+  min-height: 2.75rem;
+  border: 1px solid #5c86b5;
+  border-radius: 0.6rem;
+  padding: 0.25rem 0.75rem;
+  box-sizing: border-box;
+  font: inherit;
+}
+button { display: inline-flex; align-items: center; justify-content: center; gap: 0.65rem; background: #24537c; color: #fff; cursor: pointer; }
+button:disabled { opacity: 0.7; cursor: default; }
+button:not(:disabled):hover { background: #306991; }
+input[type="text"] { flex: 1 1 16rem; min-width: 0; width: 100%; background: #0a1226; color: #fff; }
+:focus-visible { outline: 2px solid #a3f6ff; outline-offset: 3px; }
+.speech-toggle { display: inline-flex; align-items: center; gap: 0.35rem; }
+.status { border-left: 0.25rem solid #68dde8; padding-left: 0.7rem; overflow-wrap: anywhere; }
+.mic-wave { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: #a3f6ff; }
+[aria-pressed="true"] .mic-wave { animation: pulse 1.2s ease-out infinite; }
+@keyframes pulse {
+  from { box-shadow: 0 0 0 0 rgb(163 246 255 / 0.75); }
+  to { box-shadow: 0 0 0 0.5rem rgb(163 246 255 / 0); }
+}
+.history { padding-inline-start: 1.55rem; }
+.history li { overflow-wrap: anywhere; padding: 0.45rem 0.65rem; border-bottom: 1px solid #42658c; }
+.history li strong { display: block; color: #a3f6ff; }
+#voice-form > label { display: inline-block; margin-bottom: 0.35rem; }
+@media (max-width: 48rem) { .console { margin-inline: 0.8rem; } }
+@media (prefers-reduced-motion: reduce) { [aria-pressed="true"] .mic-wave { animation: none; } }
