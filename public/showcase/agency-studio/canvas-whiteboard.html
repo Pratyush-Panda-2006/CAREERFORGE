@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency Studio — Creative Campaign & Brand Concept Whiteboard Canvas</title>
+  <meta name="description" content="Collaborative freehand vector sketchpad and creative campaign storyboard canvas.">
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="agency-wb-body">
+  <!-- Header Bar -->
+  <header class="agency-wb-header">
+    <div class="agency-wb-brand">
+      <a href="index.html" class="agency-wb-back-link" title="Return to Agency Studio">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Agency Studio</span>
+      </a>
+      <div class="agency-brand-divider"></div>
+      <h1 class="agency-wb-title">
+        Creative Storyboard Whiteboard
+        <span class="agency-badge">NSOC '26 LEVEL 3</span>
+      </h1>
+    </div>
+
+    <!-- Template Backdrop Switcher -->
+    <div class="agency-wb-header-center">
+      <div class="agency-template-box">
+        <label for="templateSelect">Template:</label>
+        <select id="templateSelect" class="agency-select" aria-label="Select Backdrop Template">
+          <option value="storyboard" selected>Campaign Storyboard</option>
+          <option value="mind-map">Brand Identity Mind Map</option>
+          <option value="blank">Blank Slate</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Top Action Exports -->
+    <div class="agency-wb-header-actions">
+      <button type="button" id="importJsonBtn" class="agency-btn" title="Load JSON Diagram">
+        📂 Load JSON
+      </button>
+      <input type="file" id="jsonFileInput" accept=".json,application/json" style="display: none;">
+
+      <button type="button" id="exportJsonBtn" class="agency-btn" title="Download Diagram JSON">
+        💾 Save JSON
+      </button>
+      <button type="button" id="exportSvgBtn" class="agency-btn agency-btn-coral" title="Export Vector SVG">
+        📐 Export SVG
+      </button>
+      <button type="button" id="exportPngBtn" class="agency-btn agency-btn-primary" title="Export PNG Image">
+        🖼️ Export PNG
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Canvas Workspace -->
+  <main class="agency-wb-workspace" id="workspaceContainer">
+    <!-- Floating Glassmorphism Dock -->
+    <nav class="agency-dock" role="toolbar" aria-label="Whiteboard Drawing Tools">
+      <div class="agency-dock-group" id="toolsGroup">
+        <button type="button" class="agency-tool-btn active" data-tool="pen" data-tooltip="Pen (Freehand Bezier Spline)">✏️</button>
+        <button type="button" class="agency-tool-btn" data-tool="eraser" data-tooltip="Eraser">🧹</button>
+        <button type="button" class="agency-tool-btn" data-tool="arrow" data-tooltip="Creative Flow Arrow">➡️</button>
+        <button type="button" class="agency-tool-btn" data-tool="component" data-tooltip="Scene Storyboard Card">🎬</button>
+        <button type="button" class="agency-tool-btn" data-tool="rectangle" data-tooltip="Design Frame (Rectangle)">⬜</button>
+        <button type="button" class="agency-tool-btn" data-tool="circle" data-tooltip="Color Swatch (Circle)">⚪</button>
+      </div>
+
+      <div class="agency-dock-separator"></div>
+
+      <!-- Color Swatches -->
+      <div class="agency-dock-group agency-color-swatches" id="colorSwatches">
+        <button type="button" class="agency-swatch active" data-color="#ff4d6d" style="background-color: #ff4d6d;" title="Neon Coral (#ff4d6d)"></button>
+        <button type="button" class="agency-swatch" data-color="#7928ca" style="background-color: #7928ca;" title="Electric Violet (#7928ca)"></button>
+        <button type="button" class="agency-swatch" data-color="#00f2fe" style="background-color: #00f2fe;" title="Cyber Cyan (#00f2fe)"></button>
+        <button type="button" class="agency-swatch" data-color="#ffbe0b" style="background-color: #ffbe0b;" title="Sunset Yellow (#ffbe0b)"></button>
+        <button type="button" class="agency-swatch" data-color="#06d6a0" style="background-color: #06d6a0;" title="Mint Green (#06d6a0)"></button>
+        <button type="button" class="agency-swatch" data-color="#ffffff" style="background-color: #ffffff;" title="Pure White (#ffffff)"></button>
+      </div>
+
+      <div class="agency-dock-separator"></div>
+
+      <!-- Brush Sliders -->
+      <div class="agency-dock-group agency-sliders-group">
+        <div class="agency-slider-item">
+          <span class="agency-slider-label">Width: <strong id="strokeWidthDisplay">4px</strong></span>
+          <input type="range" id="strokeWidthSlider" min="1" max="50" value="4" class="agency-range">
+        </div>
+        <div class="agency-slider-item">
+          <span class="agency-slider-label">Opacity: <strong id="opacityDisplay">100%</strong></span>
+          <input type="range" id="opacitySlider" min="5" max="100" value="100" class="agency-range">
+        </div>
+      </div>
+
+      <div class="agency-dock-separator"></div>
+
+      <!-- History Controls -->
+      <div class="agency-dock-group">
+        <button type="button" id="undoBtn" class="agency-tool-btn" title="Undo (Ctrl+Z)" disabled>↩️</button>
+        <button type="button" id="redoBtn" class="agency-tool-btn" title="Redo (Ctrl+Y)" disabled>↪️</button>
+        <button type="button" id="clearBtn" class="agency-tool-btn agency-btn-danger" title="Clear Canvas">🗑️</button>
+      </div>
+    </nav>
+
+    <!-- Canvas Surface -->
+    <div class="agency-canvas-wrap">
+      <canvas id="whiteboardCanvas" class="agency-drawing-surface"></canvas>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="agency-wb-status">
+      <div class="agency-status-item">
+        <span class="agency-dot"></span>
+        <span>Tool: <strong id="statusTool">PEN</strong></span>
+      </div>
+      <div class="agency-status-item">
+        <span>Strokes: <strong id="statusStrokes">0</strong></span>
+      </div>
+      <div class="agency-status-item">
+        <span>History: <strong id="statusHistory">0</strong></span>
+      </div>
+      <div class="agency-status-item" id="statusCoords">X: 0, Y: 0</div>
+    </footer>
+  </main>
+
+  <script type="module">
+    import { AgencyStudioWhiteboardCanvas, AGENCY_PALETTE } from './canvas-whiteboard.js';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const canvasEl = document.getElementById('whiteboardCanvas');
+      const whiteboard = new AgencyStudioWhiteboardCanvas({
+        canvas: canvasEl,
+        color: AGENCY_PALETTE.neonCoral,
+        strokeWidth: 4,
+        opacity: 1.0,
+        template: 'storyboard',
+      });
+
+      const toolButtons = document.querySelectorAll('.agency-tool-btn[data-tool]');
+      const colorSwatches = document.querySelectorAll('.agency-swatch');
+      const strokeSlider = document.getElementById('strokeWidthSlider');
+      const strokeDisplay = document.getElementById('strokeWidthDisplay');
+      const opacitySlider = document.getElementById('opacitySlider');
+      const opacityDisplay = document.getElementById('opacityDisplay');
+      const undoBtn = document.getElementById('undoBtn');
+      const redoBtn = document.getElementById('redoBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const statusTool = document.getElementById('statusTool');
+      const statusStrokes = document.getElementById('statusStrokes');
+      const statusHistory = document.getElementById('statusHistory');
+      const statusCoords = document.getElementById('statusCoords');
+      const templateSelect = document.getElementById('templateSelect');
+      const exportSvgBtn = document.getElementById('exportSvgBtn');
+      const exportPngBtn = document.getElementById('exportPngBtn');
+      const exportJsonBtn = document.getElementById('exportJsonBtn');
+      const importJsonBtn = document.getElementById('importJsonBtn');
+      const jsonFileInput = document.getElementById('jsonFileInput');
+
+      function updateStatus() {
+        statusTool.textContent = whiteboard.tool.toUpperCase();
+        statusStrokes.textContent = whiteboard.strokes.length;
+        statusHistory.textContent = whiteboard.historyDepth;
+        undoBtn.disabled = !whiteboard.canUndo();
+        redoBtn.disabled = !whiteboard.canRedo();
+      }
+
+      whiteboard.on('change', () => updateStatus());
+      whiteboard.on('tool:change', (data) => {
+        statusTool.textContent = data.tool.toUpperCase();
+        toolButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === data.tool));
+      });
+      whiteboard.on('color:change', (data) => {
+        colorSwatches.forEach(swatch => {
+          swatch.classList.toggle('active', swatch.dataset.color.toLowerCase() === data.color.toLowerCase());
+        });
+      });
+
+      toolButtons.forEach(btn => {
+        btn.addEventListener('click', () => whiteboard.setTool(btn.dataset.tool));
+      });
+
+      colorSwatches.forEach(swatch => {
+        swatch.addEventListener('click', () => whiteboard.setColor(swatch.dataset.color));
+      });
+
+      strokeSlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        whiteboard.setStrokeWidth(val);
+        strokeDisplay.textContent = `${val}px`;
+      });
+
+      opacitySlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        whiteboard.setOpacity(val / 100);
+        opacityDisplay.textContent = `${val}%`;
+      });
+
+      undoBtn.addEventListener('click', () => whiteboard.undo());
+      redoBtn.addEventListener('click', () => whiteboard.redo());
+      clearBtn.addEventListener('click', () => {
+        if (confirm('Clear the entire storyboard canvas?')) {
+          whiteboard.clear();
+        }
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) whiteboard.redo();
+          else whiteboard.undo();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          whiteboard.redo();
+        }
+      });
+
+      canvasEl.addEventListener('pointermove', (e) => {
+        const rect = canvasEl.getBoundingClientRect();
+        statusCoords.textContent = `X: ${Math.round(e.clientX - rect.left)}, Y: ${Math.round(e.clientY - rect.top)}`;
+      });
+
+      templateSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val === 'blank') whiteboard.clear();
+        else whiteboard.loadTemplate(val);
+      });
+
+      exportSvgBtn.addEventListener('click', () => {
+        const svg = whiteboard.exportSVG();
+        const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `agency-storyboard-${Date.now()}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      exportPngBtn.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = canvasEl.toDataURL('image/png');
+        a.download = `agency-storyboard-${Date.now()}.png`;
+        a.click();
+      });
+
+      exportJsonBtn.addEventListener('click', () => {
+        const json = whiteboard.exportJSON(true);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `agency-whiteboard-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      importJsonBtn.addEventListener('click', () => jsonFileInput.click());
+      jsonFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            whiteboard.loadJSON(event.target.result);
+            templateSelect.value = 'blank';
+          } catch (err) {
+            alert('Failed to load JSON: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+        jsonFileInput.value = '';
+      });
+
+      updateStatus();
+    });
+  </script>
+</body>
+</html>
