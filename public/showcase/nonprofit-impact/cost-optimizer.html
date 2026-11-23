@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TerraInitia — Nonprofit Impact Resource Allocation &amp; Dynamic Cost Optimizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cost-optimizer.css">
+  <script type="module" src="cost-optimizer.js"></script>
+</head>
+<body class="cost-optimizer-body">
+  <div class="optimizer-container">
+    <!-- Header -->
+    <header class="optimizer-header">
+      <a href="index.html" class="nav-back-link">
+        <span aria-hidden="true">←</span> Back to TerraInitia Overview
+      </a>
+      <div class="header-badge-row">
+        <span class="pill-badge">🌱 501(c)(3) CLIMATE INITIATIVE</span>
+        <span class="pill-badge status-badge">NSoC '26 LEVEL 3 ARCHITECTURE</span>
+      </div>
+      <h1 class="optimizer-title">Nonprofit Resource Allocation &amp; Dynamic Cost Optimizer</h1>
+      <p class="optimizer-subtitle">
+        Interactive sandbox modeling multi-tiered resource provisioning, 501(c)(3) philanthropic subsidies,
+        volume scale discounts, and grant allowance offsets tailored for high-impact environmental missions.
+      </p>
+    </header>
+
+    <!-- Presets Toolbar -->
+    <nav class="preset-bar" aria-label="Preset Allocation Scenarios">
+      <span class="preset-label">Mission Presets:</span>
+      <button type="button" class="preset-chip" data-preset="grassroots">🌱 Grassroots Seedling</button>
+      <button type="button" class="preset-chip" data-preset="community">🌿 Community Forest Alliance</button>
+      <button type="button" class="preset-chip" data-preset="regional">🌊 Regional Ocean Conservancies</button>
+      <button type="button" class="preset-chip" data-preset="disaster">🌍 Global Disaster Relief</button>
+    </nav>
+
+    <!-- Main Interactive Grid -->
+    <main class="optimizer-grid">
+      <!-- Left Column: Controls & Sliders -->
+      <section class="card-panel" aria-labelledby="allocation-heading">
+        <div class="card-title-group">
+          <div>
+            <h2 id="allocation-heading" class="card-heading">Provisioning &amp; Subsidies</h2>
+            <p class="card-heading-desc">Configure capacity requirements and philanthropic support</p>
+          </div>
+        </div>
+
+        <!-- Global Toggles -->
+        <div class="toggles-section">
+          <!-- Billing Frequency Toggle -->
+          <div class="toggle-card">
+            <div class="toggle-info">
+              <h4>Billing Commitment</h4>
+              <p id="billing-cycle-text">Monthly Billing</p>
+            </div>
+            <label class="switch" for="billing-toggle" aria-label="Toggle Annual Billing">
+              <input type="checkbox" id="billing-toggle">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <!-- 501(c)(3) Subsidy Toggle -->
+          <div class="toggle-card">
+            <div class="toggle-info">
+              <h4>501(c)(3) Tax-Exempt Status</h4>
+              <p><span class="saving-tag">✓ Verified Subsidy Active</span></p>
+            </div>
+            <label class="switch" for="subsidy-toggle" aria-label="Toggle 501(c)(3) Verified Subsidy">
+              <input type="checkbox" id="subsidy-toggle" checked>
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Resource Sliders -->
+        <div class="sliders-stack">
+          <!-- Slider 1: Donor CRM Capacity -->
+          <div class="slider-unit-group">
+            <div class="slider-meta-header">
+              <label for="slider-donors" class="slider-label">
+                <span class="resource-dot dot-donors" aria-hidden="true"></span>
+                Donor CRM Capacity
+              </label>
+              <span id="val-donors" class="slider-val-badge" aria-live="polite">1,200 profiles</span>
+            </div>
+            <p class="slider-subtext">Active donors, automated tax receipts &amp; recurring gift processing</p>
+            <input type="range" id="slider-donors" class="styled-slider" min="100" max="50000" step="100" value="1200" aria-label="Donor CRM Profiles">
+          </div>
+
+          <!-- Slider 2: Volunteer Coordinators -->
+          <div class="slider-unit-group">
+            <div class="slider-meta-header">
+              <label for="slider-volunteers" class="slider-label">
+                <span class="resource-dot dot-volunteers" aria-hidden="true"></span>
+                Volunteer Coordinator Accounts
+              </label>
+              <span id="val-volunteers" class="slider-val-badge" aria-live="polite">15 coordinators</span>
+            </div>
+            <p class="slider-subtext">Field mobilization leads, dispatch rosters &amp; security vetting</p>
+            <input type="range" id="slider-volunteers" class="styled-slider" min="1" max="500" step="1" value="15" aria-label="Volunteer Coordinator Seats">
+          </div>
+
+          <!-- Slider 3: Email & SMS Broadcasts -->
+          <div class="slider-unit-group">
+            <div class="slider-meta-header">
+              <label for="slider-notifications" class="slider-label">
+                <span class="resource-dot dot-notifications" aria-hidden="true"></span>
+                Email &amp; SMS Broadcast Credits
+              </label>
+              <span id="val-notifications" class="slider-val-badge" aria-live="polite">8,000 msgs/mo</span>
+            </div>
+            <p class="slider-subtext">Emergency field alerts, volunteer calls &amp; monthly newsletters</p>
+            <input type="range" id="slider-notifications" class="styled-slider" min="500" max="200000" step="500" value="8000" aria-label="Broadcast Messages">
+          </div>
+
+          <!-- Slider 4: Secure Storage -->
+          <div class="slider-unit-group">
+            <div class="slider-meta-header">
+              <label for="slider-storage" class="slider-label">
+                <span class="resource-dot dot-storage" aria-hidden="true"></span>
+                Secure Cloud &amp; Media Storage
+              </label>
+              <span id="val-storage" class="slider-val-badge" aria-live="polite">80 GB</span>
+            </div>
+            <p class="slider-subtext">Drone reforestation scans, legal grant archives &amp; audits</p>
+            <input type="range" id="slider-storage" class="styled-slider" min="10" max="2500" step="10" value="80" aria-label="Storage in Gigabytes">
+          </div>
+
+          <!-- Slider 5: Aid Telemetry Bandwidth -->
+          <div class="slider-unit-group">
+            <div class="slider-meta-header">
+              <label for="slider-telemetry" class="slider-label">
+                <span class="resource-dot dot-telemetry" aria-hidden="true"></span>
+                Aid Campaign Telemetry
+              </label>
+              <span id="val-telemetry" class="slider-val-badge" aria-live="polite">150 GB</span>
+            </div>
+            <p class="slider-subtext">Live IoT soil sensors, field drone video &amp; GPS dispatch</p>
+            <input type="range" id="slider-telemetry" class="styled-slider" min="20" max="5000" step="10" value="150" aria-label="Telemetry Bandwidth in Gigabytes">
+          </div>
+
+          <!-- Slider 6: Grant Allowance Credit Offset -->
+          <div class="slider-unit-group">
+            <div class="slider-meta-header">
+              <label for="slider-grant" class="slider-label">
+                <span class="resource-dot dot-grant" aria-hidden="true"></span>
+                Direct Philanthropic Grant Offset
+              </label>
+              <span id="val-grant" class="slider-val-badge" aria-live="polite">$0.00</span>
+            </div>
+            <p class="slider-subtext">Sponsor endowment credits and external grant stipends to offset expenses</p>
+            <input type="range" id="slider-grant" class="styled-slider" min="0" max="1500" step="25" value="0" aria-label="Grant Credit Offset">
+          </div>
+        </div>
+
+        <!-- Budget Auto-Optimizer Box -->
+        <div class="optimizer-tool-box">
+          <div class="optimizer-tool-header">
+            <span aria-hidden="true">⚡</span> Automated Target Budget Optimizer
+          </div>
+          <p class="optimizer-tool-desc">
+            Enter your approved monthly grant budget to automatically scale and balance resource allocations to maximum mission capacity.
+          </p>
+          <div class="budget-action-row">
+            <div class="budget-input-wrapper">
+              <span class="currency-prefix">$</span>
+              <input type="number" id="target-budget-input" class="budget-input" min="10" max="10000" step="10" value="150" aria-label="Target Monthly Budget">
+            </div>
+            <button type="button" id="btn-optimize-budget" class="btn-optimize">Auto-Optimize Allocation</button>
+          </div>
+          <div id="optimizer-result-box" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Right Column: Real-Time Projection & Breakdown -->
+      <aside class="quote-card" aria-labelledby="projection-heading">
+        <div class="tier-badge-container">
+          <h2 id="projection-heading" class="card-heading">Expense Projection</h2>
+          <span id="tier-badge" class="tier-badge tier-community" aria-live="polite">Tier 2 • Community</span>
+        </div>
+        <p id="tier-tagline" class="tier-tagline">Expanding regional conservancies with multi-district volunteer networks</p>
+
+        <!-- Dynamic Ticker -->
+        <div class="price-ticker-box">
+          <div class="price-label">Net Projected Investment</div>
+          <div class="price-amount-wrapper">
+            <span id="total-price-val" class="total-price-val" aria-live="polite">$0.00</span>
+            <span id="price-period-label" class="price-period-label">/ month</span>
+          </div>
+
+          <div class="price-summary-breakdown">
+            <div class="summary-row">
+              <span>Standard Baseline:</span>
+              <span id="base-price-val" class="summary-val">$0.00</span>
+            </div>
+            <div class="summary-row">
+              <span>Philanthropic Subsidies:</span>
+              <span id="discount-price-val" class="summary-val savings-val">-$0.00</span>
+            </div>
+            <div class="summary-row">
+              <span>Direct Grant Applied:</span>
+              <span id="grant-applied-val" class="summary-val savings-val">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grant Allowance Meter -->
+        <div class="grant-meter-box" aria-labelledby="grant-meter-heading">
+          <div class="grant-meter-header">
+            <span id="grant-meter-heading">Grant Coverage Meter</span>
+            <span id="grant-coverage-text">0% covered by grants</span>
+          </div>
+          <div class="meter-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="grant-meter-fill" class="meter-fill"></div>
+          </div>
+        </div>
+
+        <!-- Donut & Legend Breakdown -->
+        <div class="chart-breakdown-section">
+          <div class="donut-svg-wrapper">
+            <svg class="donut-chart-svg" viewBox="0 0 100 100" role="img" aria-label="Cost distribution chart">
+              <circle class="donut-bg" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-seg-donors" class="donut-seg seg-donors" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-seg-volunteers" class="donut-seg seg-volunteers" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-seg-notifications" class="donut-seg seg-notifications" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-seg-storage" class="donut-seg seg-storage" cx="50" cy="50" r="45"></circle>
+              <circle id="donut-seg-telemetry" class="donut-seg seg-telemetry" cx="50" cy="50" r="45"></circle>
+            </svg>
+            <div class="donut-center-label">Resource<br>Split</div>
+          </div>
+
+          <div class="breakdown-legend-list">
+            <div class="legend-item">
+              <span class="legend-name"><span class="resource-dot dot-donors" aria-hidden="true"></span> Donor CRM</span>
+              <span id="cost-donors" class="legend-cost">$0.00</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-name"><span class="resource-dot dot-volunteers" aria-hidden="true"></span> Coordinators</span>
+              <span id="cost-volunteers" class="legend-cost">$0.00</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-name"><span class="resource-dot dot-notifications" aria-hidden="true"></span> Broadcasts</span>
+              <span id="cost-notifications" class="legend-cost">$0.00</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-name"><span class="resource-dot dot-storage" aria-hidden="true"></span> Storage</span>
+              <span id="cost-storage" class="legend-cost">$0.00</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-name"><span class="resource-dot dot-telemetry" aria-hidden="true"></span> Telemetry</span>
+              <span id="cost-telemetry" class="legend-cost">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate Guaranteed Quote Button -->
+        <button type="button" id="btn-generate-quote" class="btn-generate-quote">
+          <span aria-hidden="true">📋</span> Generate Guaranteed Quote
+        </button>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Guaranteed Quote Sheet Modal -->
+  <div id="quote-modal" class="quote-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-title">Guaranteed Philanthropic Infrastructure Quote</h3>
+        <button type="button" id="quote-modal-close" class="modal-close-btn" aria-label="Close quote modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="quote-details-box"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="quote-modal-copy" class="btn-secondary">Copy Reference</button>
+        <button type="button" id="quote-modal-print" class="btn-primary-sm">Print / Save PDF</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
