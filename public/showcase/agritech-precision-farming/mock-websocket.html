@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Agritech Precision Farming - Stream Hub</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+</head>
+<body class="socket-body">
+  <div class="socket-container">
+    <h2>Agritech Precision Farming Socket Stream Hub</h2>
+    <div id="streamLog" class="stream-log"></div>
+  </div>
+  <script type="module">
+    import { AgritechPrecisionFarmingSocketEmulator } from './mock-websocket.js';
+    const s = new AgritechPrecisionFarmingSocketEmulator();
+    s.connect();
+    s.subscribe('telemetry/soil-irrigation', p => {
+      const d = document.createElement('div');
+      d.textContent = JSON.stringify(p);
+      document.getElementById('streamLog').prepend(d);
+    });
+  </script>
+</body>
+</html>
