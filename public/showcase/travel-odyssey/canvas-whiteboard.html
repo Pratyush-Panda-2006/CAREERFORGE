@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b132b">
+  <title>Travel Odyssey — Collaborative Expedition Whiteboard & Vector Sketchpad</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body class="odyssey-whiteboard-body">
+  <main class="whiteboard-app-container" data-travel-odyssey-whiteboard>
+    <!-- Top Navigation & Expedition Bar -->
+    <header class="app-header">
+      <div class="header-brand-group">
+        <a href="index.html" class="nav-back-link" title="Return to Travel Odyssey Showcase">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Odyssey</span>
+        </a>
+        <div class="header-divider"></div>
+        <div class="header-title-box">
+          <div class="badge-tag">EXPEDITION SKETCHPAD · NSOC '26</div>
+          <h1 class="main-title">Interactive Whiteboard & Itinerary Mapper</h1>
+        </div>
+      </div>
+
+      <div class="header-action-group">
+        <button type="button" class="action-btn" id="btn-export-svg" title="Export as Scalable Vector Graphics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Export SVG</span>
+        </button>
+        <button type="button" class="action-btn" id="btn-download-png" title="Download High-Res PNG Image">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <span>Download PNG</span>
+        </button>
+        <button type="button" class="action-btn" id="btn-export-json" title="Save Itinerary Vector Data as JSON">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>Save JSON</span>
+        </button>
+        <label class="action-btn upload-btn" title="Load Previously Saved Itinerary JSON">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Load JSON</span>
+          <input type="file" id="input-load-json" accept=".json" style="display: none;">
+        </label>
+      </div>
+    </header>
+
+    <!-- Canvas Workspace Viewport -->
+    <div class="canvas-viewport" id="canvas-viewport">
+      <canvas id="whiteboard-canvas" class="drawing-surface" data-active-tool="pen"></canvas>
+
+      <!-- Canvas Floating Overlay HUD -->
+      <div class="canvas-hud">
+        <div class="hud-pill" id="stroke-count-badge">0 strokes</div>
+        <div class="hud-pill live-coords" id="coords-badge">X: 0 | Y: 0</div>
+        <div class="hud-pill template-dropdown-wrap">
+          <span class="hud-label">Templates:</span>
+          <button type="button" class="hud-template-btn" id="btn-tmpl-mediterranean">Mediterranean</button>
+          <button type="button" class="hud-template-btn" id="btn-tmpl-patagonia">Patagonia Trek</button>
+        </div>
+      </div>
+
+      <!-- Floating Glassmorphic Tool Dock Palette -->
+      <aside class="floating-dock-palette" aria-label="Whiteboard Drawing Controls">
+        <!-- Tool Selection Group -->
+        <div class="dock-section tools-section" role="toolbar" aria-label="Drawing Tools">
+          <button type="button" class="dock-btn tool-btn active" data-tool="pen" title="Freehand Itinerary Pen (P)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+              <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+              <path d="M2 2l7.586 7.586"></path>
+              <circle cx="11" cy="11" r="2"></circle>
+            </svg>
+            <span class="dock-tooltip">Pen</span>
+          </button>
+
+          <button type="button" class="dock-btn tool-btn" data-tool="route" title="Voyage Route Line (R)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="6" cy="19" r="3"></circle>
+              <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path>
+              <circle cx="18" cy="5" r="3"></circle>
+            </svg>
+            <span class="dock-tooltip">Route Line</span>
+          </button>
+
+          <button type="button" class="dock-btn tool-btn" data-tool="waypoint" title="Waypoint Marker Pin (W)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span class="dock-tooltip">Waypoint</span>
+          </button>
+
+          <button type="button" class="dock-btn tool-btn" data-tool="rectangle" title="Expedition Geo Rectangle (G)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            </svg>
+            <span class="dock-tooltip">Geo Box</span>
+          </button>
+
+          <button type="button" class="dock-btn tool-btn" data-tool="circle" title="Perimeter Area Circle (C)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            <span class="dock-tooltip">Area Circle</span>
+          </button>
+
+          <button type="button" class="dock-btn tool-btn" data-tool="eraser" title="Stroke Eraser (E)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 20H7L3 16C2 15 2 13 3 12L13 2L22 11L20 20Z"></path>
+              <path d="M18 12L11 5"></path>
+            </svg>
+            <span class="dock-tooltip">Eraser</span>
+          </button>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Color Palette Preset Swatches & Custom Picker -->
+        <div class="dock-section colors-section" role="group" aria-label="Color Palette">
+          <button type="button" class="swatch-btn active" data-color="#f97316" style="--swatch-color: #f97316;" title="Sunset Orange"></button>
+          <button type="button" class="swatch-btn" data-color="#0284c7" style="--swatch-color: #0284c7;" title="Azure Ocean"></button>
+          <button type="button" class="swatch-btn" data-color="#f59e0b" style="--swatch-color: #f59e0b;" title="Amber"></button>
+          <button type="button" class="swatch-btn" data-color="#10b981" style="--swatch-color: #10b981;" title="Forest Green"></button>
+          <button type="button" class="swatch-btn" data-color="#f8fafc" style="--swatch-color: #f8fafc;" title="Mist White"></button>
+
+          <label class="custom-color-wrap" title="Custom Expedition Color">
+            <input type="color" id="custom-color" value="#f97316">
+            <span class="color-indicator-dot" id="active-color-indicator" style="background-color: #f97316;"></span>
+          </label>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Stroke Width Slider -->
+        <div class="dock-section slider-section" title="Stroke Width">
+          <span class="slider-label">Size</span>
+          <input type="range" id="stroke-width-slider" min="1" max="50" value="4" class="custom-slider">
+          <span class="slider-val" id="stroke-width-val">4px</span>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Opacity Slider -->
+        <div class="dock-section slider-section" title="Stroke Opacity">
+          <span class="slider-label">Alpha</span>
+          <input type="range" id="opacity-slider" min="0.1" max="1.0" step="0.05" value="1.0" class="custom-slider">
+          <span class="slider-val" id="opacity-val">100%</span>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Undo, Redo, Clear Controls -->
+        <div class="dock-section actions-section" role="group" aria-label="History and Actions">
+          <button type="button" class="dock-btn action-dock-btn" id="btn-undo" title="Undo (Ctrl+Z)" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 14 4 9 9 4"></polyline>
+              <path d="M20 20v-7a4 4 0 0 0-4-4H4"></path>
+            </svg>
+            <span class="dock-tooltip">Undo</span>
+          </button>
+
+          <button type="button" class="dock-btn action-dock-btn" id="btn-redo" title="Redo (Ctrl+Y)" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 14 20 9 15 4"></polyline>
+              <path d="M4 20v-7a4 4 0 0 1 4-4h12"></path>
+            </svg>
+            <span class="dock-tooltip">Redo</span>
+          </button>
+
+          <button type="button" class="dock-btn action-dock-btn danger" id="btn-clear" title="Clear Canvas">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span class="dock-tooltip">Clear</span>
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Quick Features & Shortcuts Card Strip -->
+    <footer class="app-footer">
+      <div class="feature-card">
+        <div class="feature-icon" style="color: #f97316;">✦</div>
+        <div class="feature-content">
+          <h4>Catmull-Rom Smoothing</h4>
+          <p>Continuous cubic spline interpolation eliminates jagged strokes during freehand drawing.</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="color: #0284c7;">⚓</div>
+        <div class="feature-content">
+          <h4>Itinerary & Waypoint Mapping</h4>
+          <p>Plot connecting route segments with start/end beacons and labeled geographic pins.</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="color: #10b981;">⚡</div>
+        <div class="feature-content">
+          <h4>Lossless SVG & Vector JSON</h4>
+          <p>Serialize your vector artwork directly to clean SVG markup or structured JSON data.</p>
+        </div>
+      </div>
+
+      <div class="feature-card keyboard-card">
+        <div class="feature-icon" style="color: #f59e0b;">⌨</div>
+        <div class="feature-content">
+          <h4>Keyboard Shortcuts</h4>
+          <p><kbd>P</kbd> Pen · <kbd>R</kbd> Route · <kbd>W</kbd> Pin · <kbd>G</kbd> Box · <kbd>C</kbd> Circle · <kbd>E</kbd> Eraser · <kbd>Ctrl+Z</kbd> Undo</p>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script type="module">
+    import { TravelOdysseyWhiteboardCanvas, mountWhiteboard } from './canvas-whiteboard.js';
+
+    const root = document.querySelector('[data-travel-odyssey-whiteboard]');
+    const engine = mountWhiteboard(root);
+
+    // Live coordinates tracker
+    const coordsBadge = document.querySelector('#coords-badge');
+    const canvas = document.querySelector('#whiteboard-canvas');
+    if (canvas && coordsBadge) {
+      canvas.addEventListener('pointermove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.round(e.clientX - rect.left);
+        const y = Math.round(e.clientY - rect.top);
+        coordsBadge.textContent = `X: ${x} | Y: ${y}`;
+      });
+      canvas.addEventListener('pointerleave', () => {
+        coordsBadge.textContent = 'X: -- | Y: --';
+      });
+    }
+
+    // Keyboard hotkeys for tools
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const key = e.key.toLowerCase();
+      if (key === 'p') engine.setTool('pen');
+      else if (key === 'r') engine.setTool('route');
+      else if (key === 'w') engine.setTool('waypoint');
+      else if (key === 'g') engine.setTool('rectangle');
+      else if (key === 'c' && !e.ctrlKey && !e.metaKey) engine.setTool('circle');
+      else if (key === 'e') engine.setTool('eraser');
+    });
+
+    // Sample Itinerary Templates
+    const btnMed = document.querySelector('#btn-tmpl-mediterranean');
+    if (btnMed) {
+      btnMed.addEventListener('click', () => {
+        engine.clear();
+        const w = engine.width;
+        const h = engine.height;
+
+        // Route line
+        engine.setTool('route');
+        engine.setColor('#0284c7');
+        engine.setStrokeWidth(5);
+        engine.startStroke(w * 0.15, h * 0.65);
+        engine.addPoint(w * 0.28, h * 0.45);
+        engine.addPoint(w * 0.48, h * 0.40);
+        engine.addPoint(w * 0.68, h * 0.55);
+        engine.addPoint(w * 0.85, h * 0.35);
+        engine.endStroke();
+
+        // Waypoints
+        engine.setTool('waypoint');
+        engine.setColor('#f97316');
+        engine.startStroke(w * 0.15, h * 0.65, { label: 'Barcelona Harbor' });
+        engine.endStroke();
+        engine.startStroke(w * 0.48, h * 0.40, { label: 'Nice & Monaco' });
+        engine.endStroke();
+        engine.startStroke(w * 0.85, h * 0.35, { label: 'Athens Gateway' });
+        engine.endStroke();
+
+        // Area circle around Monaco
+        engine.setTool('circle');
+        engine.setColor('#f59e0b');
+        engine.setStrokeWidth(2);
+        engine.startStroke(w * 0.48, h * 0.40);
+        engine.addPoint(w * 0.48 + 55, h * 0.40);
+        engine.endStroke();
+
+        engine.setTool('pen');
+        engine.setColor('#f97316');
+        engine.setStrokeWidth(4);
+      });
+    }
+
+    const btnPat = document.querySelector('#btn-tmpl-patagonia');
+    if (btnPat) {
+      btnPat.addEventListener('click', () => {
+        engine.clear();
+        const w = engine.width;
+        const h = engine.height;
+
+        // Geo perimeter
+        engine.setTool('rectangle');
+        engine.setColor('#10b981');
+        engine.setStrokeWidth(2);
+        engine.startStroke(w * 0.2, h * 0.2);
+        engine.addPoint(w * 0.8, h * 0.8);
+        engine.endStroke();
+
+        // Trek Route
+        engine.setTool('route');
+        engine.setColor('#f97316');
+        engine.setStrokeWidth(4);
+        engine.startStroke(w * 0.25, h * 0.75);
+        engine.addPoint(w * 0.35, h * 0.55);
+        engine.addPoint(w * 0.45, h * 0.60);
+        engine.addPoint(w * 0.55, h * 0.35);
+        engine.addPoint(w * 0.75, h * 0.28);
+        engine.endStroke();
+
+        // Waypoints
+        engine.setTool('waypoint');
+        engine.setColor('#0284c7');
+        engine.startStroke(w * 0.25, h * 0.75, { label: 'Laguna Amarga' });
+        engine.endStroke();
+        engine.startStroke(w * 0.55, h * 0.35, { label: 'Refugio Británico' });
+        engine.endStroke();
+        engine.startStroke(w * 0.75, h * 0.28, { label: 'Glacier Grey' });
+        engine.endStroke();
+
+        engine.setTool('pen');
+        engine.setColor('#f97316');
+        engine.setStrokeWidth(4);
+      });
+    }
+  </script>
+</body>
+</html>
