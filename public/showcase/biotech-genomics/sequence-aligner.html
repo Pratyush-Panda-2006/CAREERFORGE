@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biotech Genomics - Smith-Waterman Local Sequence Alignment Engine</title>
+  <link rel="stylesheet" href="sequence-aligner.css">
+</head>
+<body>
+  <div class="aligner-container">
+    <header class="aligner-header">
+      <div class="header-badge">BIOTECH GENOMICS BIOINFORMATICS WORKBENCH</div>
+      <h1>Smith-Waterman Dynamic Sequence Aligner</h1>
+      <p>Autonomous dynamic programming local nucleotide sequence alignment, affine gap scoring, and matrix traceback path visualization</p>
+    </header>
+
+    <section class="metrics-grid" aria-label="Alignment Metrics">
+      <div class="metric-card">
+        <span class="metric-label">Max Alignment Score</span>
+        <span id="align-score" class="metric-value">0</span>
+      </div>
+      <div class="metric-card highlight">
+        <span class="metric-label">Sequence Identity</span>
+        <span id="align-identity" class="metric-value">0.0%</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Matches / Aligned</span>
+        <span id="align-matches" class="metric-value">0 / 0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Gap Insertions</span>
+        <span id="align-gaps" class="metric-value">0</span>
+      </div>
+    </section>
+
+    <main class="workbench-grid">
+      <section class="workbench-panel">
+        <div class="panel-header">
+          <h3>Input Sequences (FASTA / Raw)</h3>
+          <button id="load-sample-btn" type="button" class="secondary-btn">Load CRISPR Sample</button>
+        </div>
+        <div class="input-group">
+          <label for="seq-a">Reference Target Sequence (A):</label>
+          <textarea id="seq-a" class="seq-textarea" placeholder="Enter Reference DNA/RNA sequence...">GGCCACTGTAGGTACTAGCTAGGATCGATCG</textarea>
+        </div>
+        <div class="input-group">
+          <label for="seq-b">Query / Guide Sequence (B):</label>
+          <textarea id="seq-b" class="seq-textarea" placeholder="Enter Query DNA/RNA sequence...">ACTGTAGGTACTAGATAGGATCG</textarea>
+        </div>
+        <button id="align-btn" type="button" class="primary-btn">Execute Local Alignment (Smith-Waterman)</button>
+      </section>
+
+      <section class="workbench-panel">
+        <div class="panel-header">
+          <h3>Optimal Aligned Sequence Alignment</h3>
+        </div>
+        <pre id="alignment-result" class="result-box">No alignment calculated.</pre>
+
+        <div class="panel-header">
+          <h3>Dynamic Programming Scoring Matrix (Sample)</h3>
+        </div>
+        <pre id="matrix-view" class="matrix-box">Matrix waiting for sequence input...</pre>
+      </section>
+    </main>
+
+    <footer class="aligner-footer">
+      <span>Bioinformatics Standard: Smith-Waterman O(mn) Algorithm • Affine Gap Penalty Supported</span>
+    </footer>
+  </div>
+
+  <script type="module" src="sequence-aligner.js"></script>
+</body>
+</html>
