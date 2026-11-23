@@ -1,0 +1,439 @@
+/**
+ * Fintech Vault Whiteboard Canvas - High-End Midnight Executive Styling
+ * Color Tokens: Midnight Navy (#081226), Emerald (#10b981), Amber (#f59e0b), Azure (#0284c7), Indigo (#6366f1), Rose (#ec4899)
+ */
+
+:root {
+  --vault-bg: #081226;
+  --vault-surface: #0b1739;
+  --vault-card: rgba(11, 23, 57, 0.85);
+  --vault-border: #1e293b;
+  --vault-border-focus: #3b82f6;
+  --vault-text-primary: #f8fafc;
+  --vault-text-secondary: #94a3b8;
+  --vault-text-muted: #64748b;
+  
+  --color-emerald: #10b981;
+  --color-amber: #f59e0b;
+  --color-azure: #0284c7;
+  --color-indigo: #6366f1;
+  --color-rose: #ec4899;
+  --color-white: #ffffff;
+  
+  --shadow-dock: 0 16px 36px -4px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.25);
+  --transition-fast: 0.15s ease-in-out;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--vault-bg);
+  color: var(--vault-text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header Navbar */
+.app-header {
+  height: 56px;
+  background: rgba(8, 18, 38, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--vault-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(2, 132, 199, 0.3));
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 8px;
+  font-size: 1.1rem;
+}
+
+.brand-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--vault-text-primary);
+}
+
+.brand-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--color-emerald);
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 4px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-nav {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--vault-text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--vault-border);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-nav:hover {
+  color: var(--vault-text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Main Workspace Viewport */
+.workspace-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, #0d1e3d 0%, #081226 100%);
+}
+
+#whiteboard-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+/* Floating Dock Toolbar */
+.floating-dock {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(8, 18, 38, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: var(--shadow-dock);
+  z-index: 40;
+  max-width: 95vw;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dock-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  position: relative;
+}
+
+.dock-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 0.2rem;
+}
+
+/* Tool Buttons */
+.tool-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--vault-text-secondary);
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.tool-btn .icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.tool-btn:hover {
+  color: var(--vault-text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tool-btn.active {
+  color: var(--vault-bg);
+  background: var(--color-emerald);
+  border-color: var(--color-emerald);
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+
+/* Color Swatches */
+.swatch-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.swatch-btn:hover {
+  transform: scale(1.15);
+}
+
+.swatch-btn.active {
+  transform: scale(1.2);
+  border-color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+/* Range Sliders */
+.slider-control {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  color: var(--vault-text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.slider-control input[type="range"] {
+  width: 70px;
+  height: 4px;
+  appearance: none;
+  background: #1e293b;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.slider-control input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-emerald);
+  cursor: pointer;
+  box-shadow: 0 0 6px var(--color-emerald);
+}
+
+.slider-val {
+  min-width: 28px;
+  text-align: right;
+  color: var(--vault-text-primary);
+}
+
+/* Template & Text Inputs */
+.select-input, .text-input {
+  background: rgba(11, 23, 57, 0.9);
+  border: 1px solid var(--vault-border);
+  color: var(--vault-text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.select-input:focus, .text-input:focus {
+  border-color: var(--color-azure);
+}
+
+.text-input {
+  width: 110px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Secondary Floating Side-Dock for Exports & Actions */
+.side-dock {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  background: rgba(8, 18, 38, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: var(--shadow-dock);
+  z-index: 40;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--vault-border);
+  color: var(--vault-text-secondary);
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all var(--transition-fast);
+}
+
+.action-btn:hover:not(:disabled) {
+  color: var(--vault-text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.action-btn.btn-export {
+  background: rgba(2, 132, 199, 0.15);
+  border-color: rgba(2, 132, 199, 0.35);
+  color: #38bdf8;
+}
+
+.action-btn.btn-export:hover:not(:disabled) {
+  background: rgba(2, 132, 199, 0.25);
+  border-color: var(--color-azure);
+  color: #ffffff;
+}
+
+.action-btn.btn-danger {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.action-btn.btn-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+/* File Input Hidden Trigger */
+#file-loader {
+  display: none;
+}
+
+/* Bottom Status Bar */
+.status-bar {
+  height: 32px;
+  background: rgba(8, 18, 38, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--vault-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--vault-text-muted);
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.status-left, .status-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.status-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-emerald);
+  box-shadow: 0 0 6px var(--color-emerald);
+}
+
+.status-badge {
+  color: var(--color-emerald);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+}
+
+/* Keyboard Hints Overlay */
+.shortcuts-hint {
+  font-size: 0.65rem;
+  color: var(--vault-text-muted);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .floating-dock {
+    top: auto;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95vw;
+    gap: 0.4rem;
+    padding: 0.4rem;
+  }
+  
+  .side-dock {
+    top: 0.5rem;
+    right: 0.5rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-width: 240px;
+  }
+
+  .status-bar {
+    display: none;
+  }
+}
