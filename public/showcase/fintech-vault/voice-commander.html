@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fintech Vault - Web Speech Voice Commander & Accessibility Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <div class="commander-container">
+    <!-- Top Header & Brand -->
+    <header class="commander-header">
+      <div class="header-badges">
+        <span class="badge-tag">Fintech Vault Security</span>
+        <span class="badge-tag tag-gold">Level 3 Autonomous AI</span>
+      </div>
+      <h1>Voice Commander &amp; Speech Dispatcher</h1>
+      <p class="header-desc">
+        Hands-free Web Speech API voice execution, biometric freeze enforcement, real-time auditory dispatch,
+        and WCAG AAA accessible financial action routing for secure institutional vaults.
+      </p>
+    </header>
+
+    <!-- Top HUD Status Strip -->
+    <section class="vault-hud-strip" aria-label="Vault Status Overview">
+      <div class="hud-item">
+        <span class="hud-label">Vault Balance</span>
+        <span class="hud-value balance-value" id="vaultBalanceDisplay">$1,450,250.75</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Vault Security Enclave</span>
+        <div class="hud-badge-wrap">
+          <span class="status-badge badge-success" id="vaultLockBadge">UNLOCKED</span>
+        </div>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Biometric Enclave</span>
+        <span class="hud-value text-emerald">Quantum Multi-Sig (3/5)</span>
+      </div>
+      <div class="hud-item hud-actions">
+        <button type="button" id="highContrastBtn" class="hud-btn" aria-label="Toggle High Contrast Mode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2a10 10 0 0 1 0 20Z" fill="currentColor" />
+          </svg>
+          <span>Contrast Mode</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Grid Layout -->
+    <main class="commander-grid">
+      <!-- Left Column: Voice Interaction & Audio Visualizer -->
+      <section class="card mic-card">
+        <div class="card-header">
+          <h2>Voice Command Enclave</h2>
+          <span class="status-indicator-pill status-idle" id="micStatusPill">IDLE</span>
+        </div>
+
+        <div class="mic-stage">
+          <!-- Multi-ring pulsing mic button -->
+          <div class="mic-button-wrapper">
+            <div class="mic-wave-ring ring-1"></div>
+            <div class="mic-wave-ring ring-2"></div>
+            <div class="mic-wave-ring ring-3"></div>
+            <button type="button" id="micBtn" class="mic-button" aria-label="Toggle Microphone Listening" aria-pressed="false">
+              <svg class="mic-icon" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" x2="12" y1="19" y2="22" />
+              </svg>
+            </button>
+          </div>
+          <p class="mic-instruction">Click the microphone to start listening, or test via prompt below.</p>
+        </div>
+
+        <!-- Audio Equalizer Visualizer -->
+        <div class="visualizer-container" id="audioVisualizer" aria-label="Audio Waveform Visualizer">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <!-- Quick Voice Chips -->
+        <div class="quick-commands">
+          <span class="quick-title">Quick Voice Presets:</span>
+          <div class="chips-container">
+            <button type="button" class="voice-chip" data-cmd="show balance">"Show balance"</button>
+            <button type="button" class="voice-chip" data-cmd="transfer 25000 to Switzerland Reserve">"Transfer $25,000 to Switzerland Reserve"</button>
+            <button type="button" class="voice-chip" data-cmd="lock vault">"Lock vault"</button>
+            <button type="button" class="voice-chip" data-cmd="unlock vault">"Unlock vault"</button>
+            <button type="button" class="voice-chip" data-cmd="show audit log">"Show audit log"</button>
+            <button type="button" class="voice-chip" data-cmd="toggle contrast">"Toggle contrast"</button>
+            <button type="button" class="voice-chip" data-cmd="help">"Help"</button>
+          </div>
+        </div>
+
+        <!-- Mock Speech Input Prompt (Headless & No-Mic Testing) -->
+        <div class="mock-input-section">
+          <label for="mockInput" class="mock-label">Simulate Speech Input (Mic Fallback):</label>
+          <div class="mock-input-row">
+            <input type="text" id="mockInput" placeholder="e.g. transfer 5000 to Alice or check balance" aria-label="Mock speech transcript input">
+            <button type="button" id="mockSubmitBtn" class="btn btn-primary">Dispatch</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Command History Feed & Grammar Reference -->
+      <section class="card history-card">
+        <div class="card-header">
+          <h2>Command Execution Stream</h2>
+          <button type="button" id="clearHistoryBtn" class="btn btn-secondary btn-sm" aria-label="Clear Execution History">Clear History</button>
+        </div>
+
+        <div class="command-history-stream" id="commandHistoryList" role="log" aria-live="polite">
+          <!-- Dynamic history stream populated by JS -->
+        </div>
+
+        <div class="grammar-reference">
+          <h3>Financial Voice Grammars</h3>
+          <ul class="grammar-list">
+            <li><span class="action-name">SHOW_VAULT_BALANCE</span>: <code>"show balance"</code>, <code>"check balance"</code>, <code>"view vault balance"</code></li>
+            <li><span class="action-name">TRANSFER_FUNDS</span>: <code>"transfer &lt;amount&gt; to &lt;recipient&gt;"</code>, <code>"send funds"</code>, <code>"wire money"</code></li>
+            <li><span class="action-name">LOCK_VAULT</span>: <code>"lock vault"</code>, <code>"freeze account"</code>, <code>"emergency freeze"</code></li>
+            <li><span class="action-name">UNLOCK_VAULT</span>: <code>"unlock vault"</code>, <code>"authenticate user"</code>, <code>"verify biometrics"</code></li>
+            <li><span class="action-name">VIEW_AUDIT_LOG</span>: <code>"show audit log"</code>, <code>"view transactions"</code>, <code>"compliance history"</code></li>
+            <li><span class="action-name">TOGGLE_HIGH_CONTRAST</span>: <code>"toggle contrast"</code>, <code>"high contrast mode"</code></li>
+            <li><span class="action-name">HELP</span>: <code>"help"</code>, <code>"list commands"</code>, <code>"what can I say"</code></li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
