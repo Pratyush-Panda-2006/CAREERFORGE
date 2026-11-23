@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad — Product Funnel & Architecture Whiteboard Canvas</title>
+  <meta name="description" content="Collaborative freehand vector sketchpad and SaaS product architecture canvas.">
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="saas-wb-body">
+  <!-- Header Bar -->
+  <header class="saas-wb-header">
+    <div class="saas-wb-brand">
+      <a href="index.html" class="saas-wb-back-link" title="Return to SaaS Launchpad">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>SaaS Launchpad</span>
+      </a>
+      <div class="saas-brand-divider"></div>
+      <h1 class="saas-wb-title">
+        Product Architecture Whiteboard
+        <span class="saas-badge">NSOC '26 LEVEL 3</span>
+      </h1>
+    </div>
+
+    <!-- Template Backdrop Switcher -->
+    <div class="saas-wb-header-center">
+      <div class="saas-template-box">
+        <label for="templateSelect">Template:</label>
+        <select id="templateSelect" class="saas-select" aria-label="Select Backdrop Template">
+          <option value="funnel" selected>Acquisition Funnel</option>
+          <option value="flywheel">PLG Flywheel</option>
+          <option value="cloud-arch">Cloud Architecture</option>
+          <option value="blank">Blank Slate</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Top Action Exports -->
+    <div class="saas-wb-header-actions">
+      <button type="button" id="importJsonBtn" class="saas-btn" title="Load JSON Diagram">
+        📂 Load JSON
+      </button>
+      <input type="file" id="jsonFileInput" accept=".json,application/json" style="display: none;">
+
+      <button type="button" id="exportJsonBtn" class="saas-btn" title="Download Diagram JSON">
+        💾 Save JSON
+      </button>
+      <button type="button" id="exportSvgBtn" class="saas-btn saas-btn-indigo" title="Export Vector SVG">
+        📐 Export SVG
+      </button>
+      <button type="button" id="exportPngBtn" class="saas-btn saas-btn-primary" title="Export PNG Image">
+        🖼️ Export PNG
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Canvas Workspace -->
+  <main class="saas-wb-workspace" id="workspaceContainer">
+    <!-- Floating Glassmorphism Dock -->
+    <nav class="saas-dock" role="toolbar" aria-label="Whiteboard Drawing Tools">
+      <div class="saas-dock-group" id="toolsGroup">
+        <button type="button" class="saas-tool-btn active" data-tool="pen" data-tooltip="Pen (Freehand Bezier Spline)">✏️</button>
+        <button type="button" class="saas-tool-btn" data-tool="eraser" data-tooltip="Eraser">🧹</button>
+        <button type="button" class="saas-tool-btn" data-tool="arrow" data-tooltip="User Flow Arrow">➡️</button>
+        <button type="button" class="saas-tool-btn" data-tool="component" data-tooltip="SaaS Service Node">📦</button>
+        <button type="button" class="saas-tool-btn" data-tool="rectangle" data-tooltip="Step Card (Rectangle)">⬜</button>
+        <button type="button" class="saas-tool-btn" data-tool="circle" data-tooltip="KPI Circle / Boundary">⚪</button>
+      </div>
+
+      <div class="saas-dock-separator"></div>
+
+      <!-- Color Swatches -->
+      <div class="saas-dock-group saas-color-swatches" id="colorSwatches">
+        <button type="button" class="saas-swatch active" data-color="#6366f1" style="background-color: #6366f1;" title="Indigo Primary (#6366f1)"></button>
+        <button type="button" class="saas-swatch" data-color="#8b5cf6" style="background-color: #8b5cf6;" title="Violet Accent (#8b5cf6)"></button>
+        <button type="button" class="saas-swatch" data-color="#10b981" style="background-color: #10b981;" title="Emerald Conversion (#10b981)"></button>
+        <button type="button" class="saas-swatch" data-color="#f59e0b" style="background-color: #f59e0b;" title="Amber Warning (#f59e0b)"></button>
+        <button type="button" class="saas-swatch" data-color="#f43f5e" style="background-color: #f43f5e;" title="Rose Churn (#f43f5e)"></button>
+        <button type="button" class="saas-swatch" data-color="#ffffff" style="background-color: #ffffff;" title="Pure White (#ffffff)"></button>
+      </div>
+
+      <div class="saas-dock-separator"></div>
+
+      <!-- Brush Sliders -->
+      <div class="saas-dock-group saas-sliders-group">
+        <div class="saas-slider-item">
+          <span class="saas-slider-label">Width: <strong id="strokeWidthDisplay">4px</strong></span>
+          <input type="range" id="strokeWidthSlider" min="1" max="50" value="4" class="saas-range">
+        </div>
+        <div class="saas-slider-item">
+          <span class="saas-slider-label">Opacity: <strong id="opacityDisplay">100%</strong></span>
+          <input type="range" id="opacitySlider" min="5" max="100" value="100" class="saas-range">
+        </div>
+      </div>
+
+      <div class="saas-dock-separator"></div>
+
+      <!-- History Controls -->
+      <div class="saas-dock-group">
+        <button type="button" id="undoBtn" class="saas-tool-btn" title="Undo (Ctrl+Z)" disabled>↩️</button>
+        <button type="button" id="redoBtn" class="saas-tool-btn" title="Redo (Ctrl+Y)" disabled>↪️</button>
+        <button type="button" id="clearBtn" class="saas-tool-btn saas-btn-danger" title="Clear Canvas">🗑️</button>
+      </div>
+    </nav>
+
+    <!-- Canvas Surface -->
+    <div class="saas-canvas-wrap">
+      <canvas id="whiteboardCanvas" class="saas-drawing-surface"></canvas>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="saas-wb-status">
+      <div class="saas-status-item">
+        <span class="saas-dot"></span>
+        <span>Tool: <strong id="statusTool">PEN</strong></span>
+      </div>
+      <div class="saas-status-item">
+        <span>Strokes: <strong id="statusStrokes">0</strong></span>
+      </div>
+      <div class="saas-status-item">
+        <span>History: <strong id="statusHistory">0</strong></span>
+      </div>
+      <div class="saas-status-item" id="statusCoords">X: 0, Y: 0</div>
+    </footer>
+  </main>
+
+  <script type="module">
+    import { SaaSLaunchpadWhiteboardCanvas, SAAS_PALETTE } from './canvas-whiteboard.js';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const canvasEl = document.getElementById('whiteboardCanvas');
+      const whiteboard = new SaaSLaunchpadWhiteboardCanvas({
+        canvas: canvasEl,
+        color: SAAS_PALETTE.indigoPrimary,
+        strokeWidth: 4,
+        opacity: 1.0,
+      });
+
+      const toolButtons = document.querySelectorAll('.saas-tool-btn[data-tool]');
+      const colorSwatches = document.querySelectorAll('.saas-swatch');
+      const strokeSlider = document.getElementById('strokeWidthSlider');
+      const strokeDisplay = document.getElementById('strokeWidthDisplay');
+      const opacitySlider = document.getElementById('opacitySlider');
+      const opacityDisplay = document.getElementById('opacityDisplay');
+      const undoBtn = document.getElementById('undoBtn');
+      const redoBtn = document.getElementById('redoBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const statusTool = document.getElementById('statusTool');
+      const statusStrokes = document.getElementById('statusStrokes');
+      const statusHistory = document.getElementById('statusHistory');
+      const statusCoords = document.getElementById('statusCoords');
+      const templateSelect = document.getElementById('templateSelect');
+      const exportSvgBtn = document.getElementById('exportSvgBtn');
+      const exportPngBtn = document.getElementById('exportPngBtn');
+      const exportJsonBtn = document.getElementById('exportJsonBtn');
+      const importJsonBtn = document.getElementById('importJsonBtn');
+      const jsonFileInput = document.getElementById('jsonFileInput');
+
+      function updateStatus() {
+        statusTool.textContent = whiteboard.tool.toUpperCase();
+        statusStrokes.textContent = whiteboard.strokes.length;
+        statusHistory.textContent = whiteboard.historyDepth;
+        undoBtn.disabled = !whiteboard.canUndo();
+        redoBtn.disabled = !whiteboard.canRedo();
+      }
+
+      whiteboard.on('change', () => updateStatus());
+      whiteboard.on('tool:change', (data) => {
+        statusTool.textContent = data.tool.toUpperCase();
+        toolButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === data.tool));
+      });
+      whiteboard.on('color:change', (data) => {
+        colorSwatches.forEach(swatch => {
+          swatch.classList.toggle('active', swatch.dataset.color.toLowerCase() === data.color.toLowerCase());
+        });
+      });
+
+      toolButtons.forEach(btn => {
+        btn.addEventListener('click', () => whiteboard.setTool(btn.dataset.tool));
+      });
+
+      colorSwatches.forEach(swatch => {
+        swatch.addEventListener('click', () => whiteboard.setColor(swatch.dataset.color));
+      });
+
+      strokeSlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        whiteboard.setStrokeWidth(val);
+        strokeDisplay.textContent = `${val}px`;
+      });
+
+      opacitySlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        whiteboard.setOpacity(val / 100);
+        opacityDisplay.textContent = `${val}%`;
+      });
+
+      undoBtn.addEventListener('click', () => whiteboard.undo());
+      redoBtn.addEventListener('click', () => whiteboard.redo());
+      clearBtn.addEventListener('click', () => {
+        if (confirm('Clear the entire whiteboard canvas?')) {
+          whiteboard.clear();
+        }
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) whiteboard.redo();
+          else whiteboard.undo();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          whiteboard.redo();
+        }
+      });
+
+      canvasEl.addEventListener('pointermove', (e) => {
+        const rect = canvasEl.getBoundingClientRect();
+        statusCoords.textContent = `X: ${Math.round(e.clientX - rect.left)}, Y: ${Math.round(e.clientY - rect.top)}`;
+      });
+
+      templateSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val === 'blank') whiteboard.clear();
+        else whiteboard.loadTemplate(val);
+      });
+
+      exportSvgBtn.addEventListener('click', () => {
+        const svg = whiteboard.exportSVG();
+        const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `saas-architecture-${Date.now()}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      exportPngBtn.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = canvasEl.toDataURL('image/png');
+        a.download = `saas-architecture-${Date.now()}.png`;
+        a.click();
+      });
+
+      exportJsonBtn.addEventListener('click', () => {
+        const json = whiteboard.exportJSON(true);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `saas-whiteboard-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      importJsonBtn.addEventListener('click', () => jsonFileInput.click());
+      jsonFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            whiteboard.loadJSON(event.target.result);
+            templateSelect.value = 'blank';
+          } catch (err) {
+            alert('Failed to load JSON: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+        jsonFileInput.value = '';
+      });
+
+      updateStatus();
+    });
+  </script>
+</body>
+</html>
