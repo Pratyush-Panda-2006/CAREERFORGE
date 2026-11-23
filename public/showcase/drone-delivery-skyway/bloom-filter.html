@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bloom filter lab | Drone Delivery Skyway</title><link rel="stylesheet" href="./bloom-filter.css"><script type="module" src="./bloom-filter.js"></script></head>
+<body><main data-bloom-lab>
+<header><a href="./index.html">DRONE DELIVERY SKYWAY</a><span>PROBABILISTIC SET LAB</span></header>
+<section class="intro"><p class="eyebrow">BITS / MEMBERSHIP</p><h1>A small memory, a careful answer.</h1><p>Insert exact, case-sensitive strings and inspect their shared bit positions. A Bloom filter can rule an item out; a positive answer needs confirmation.</p></section>
+<div class="workspace"><section aria-labelledby="controls-title"><h2 id="controls-title">Insert and probe</h2>
+<form id="insert-form" novalidate><label for="item">String to insert</label><input id="item" maxlength="128" value="drone-route-alpha"><button type="submit">Insert string</button></form>
+<form id="probe-form" novalidate><label for="probe">Membership query</label><input id="probe" maxlength="128" value="drone-route-alpha"><button type="submit">Probe membership</button></form>
+<p class="hint">Whitespace and case are preserved. At most 256 UTF-8 bytes per string.</p>
+<div class="buttons"><button id="sample" type="button">Insert sample set</button><button id="reset" type="button">Reset filter</button></div>
+<h3>Membership result</h3><output id="verdict">No probe yet</output><p id="status" role="status" aria-live="polite">Local demonstration. Nothing is stored or sent.</p></section>
+<section aria-labelledby="memory-title"><h2 id="memory-title">256 bits, four hash positions</h2>
+<dl><div><dt>Insertion attempts</dt><dd id="insertions">0</dd></div><div><dt>Bits set</dt><dd id="set-bits">0 / 256</dd></div><div><dt>Theoretical false-positive estimate</dt><dd id="probability">0.00%</dd></div><div><dt>Previously set positions in last insert</dt><dd id="collisions">0</dd></div></dl>
+<div id="grid" role="img" aria-label="Empty bit array"></div><p class="hint">Read cells left to right, starting at bit 0. Filled cells contain 1; outlined cells are selected; amber cells were already set.</p>
+<p class="positions">Selected positions: <output id="positions">None selected</output></p></section></div>
+<section class="model"><h2>What the estimate means</h2><p>The model is (1 - exp(-k × n / m))<sup>k</sup>, with m = 256 bits, k = 4 and n = insertion attempts. It assumes independent, uniformly distributed hashes. Repeated insertions inflate n, so this is an approximation, not a guaranteed bound on the next query.</p><p>The engine uses deterministic non-cryptographic double hashing over UTF-8 bytes and never removes individual bits. Inserted strings remain possible members until reset. The separate demo insertion list identifies false positives for illustration; it is not part of the Bloom engine. This is not a security or authorization check.</p></section>
+<footer>Session-only data. Reset or reload to clear this demonstration.</footer>
+</main></body></html>
