@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quantum Forge - Certificate & Receipt Exporter</title>
+  <link rel="stylesheet" href="export-receipt.css">
+</head>
+<body class="receipt-body">
+  <div class="receipt-container">
+    <h2>Quantum Forge Certificate Generator</h2>
+    <div class="canvas-wrapper">
+      <canvas id="receiptCanvas" width="640" height="840"></canvas>
+    </div>
+    <div class="action-toolbar">
+      <button id="btnDownload" class="btn btn-primary">Download PNG Receipt</button>
+    </div>
+  </div>
+  <script type="module">
+    import { QuantumForgeReceiptGenerator } from './export-receipt.js';
+    const gen = new QuantumForgeReceiptGenerator();
+    const canvas = document.getElementById('receiptCanvas');
+    gen.renderCanvas(canvas.getContext('2d'), { certId: 'QF-ENTANGLE-2026-CERT-1111' });
+    document.getElementById('btnDownload').addEventListener('click', () => {
+      gen.downloadBlob(canvas, 'quantum-forge-receipt.png');
+    });
+  </script>
+</body>
+</html>
