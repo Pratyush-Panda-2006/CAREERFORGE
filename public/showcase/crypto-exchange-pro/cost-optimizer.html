@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiered Resource Allocation & Dynamic Cost Optimizer Sandbox</title>
+  <link rel="stylesheet" href="cost-optimizer.css">
+</head>
+<body>
+  <div class="co-container">
+    <header class="co-header">
+      <div class="co-title">
+        <h1>⚡ Tiered Resource Allocation & Cost Optimizer</h1>
+        <p>Interactive resource provisioning sandbox with consumption pricing tiers, volume discounts, and expense forecasting.</p>
+      </div>
+      <div>
+        <span id="tierBadge" class="tier-badge tier-standard">Standard</span>
+      </div>
+    </header>
+
+    <div class="co-grid">
+      <!-- Left Column: Resource Controls -->
+      <div class="co-card">
+        <div class="co-card-header">
+          <h2>Provision Resources</h2>
+          <div class="billing-toggle">
+            <button type="button" id="freqMonthly" class="toggle-btn active">Monthly</button>
+            <button type="button" id="freqAnnual" class="toggle-btn">Annual <span class="save-badge">-20%</span></button>
+          </div>
+        </div>
+
+        <!-- Sliders -->
+        <div class="slider-group">
+          <div class="slider-label-row">
+            <span class="slider-title">🖥️ Compute Fleet (vCPU Hours)</span>
+            <span class="slider-value" id="computeVal">2,000 vCPU hrs</span>
+          </div>
+          <input type="range" id="computeSlider" class="range-slider" min="0" max="50000" step="500" value="2000">
+          <div class="slider-sub">High-throughput matching engines & orderbook depth processors ($0.05/hr)</div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label-row">
+            <span class="slider-title">💾 High-IOPS NVMe Storage (GB)</span>
+            <span class="slider-value" id="storageVal">1,000 GB</span>
+          </div>
+          <input type="range" id="storageSlider" class="range-slider" min="0" max="20000" step="250" value="1000">
+          <div class="slider-sub">Distributed trade ledgers & audit trails ($0.08/GB-mo)</div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label-row">
+            <span class="slider-title">🌐 Global Edge Bandwidth (GB)</span>
+            <span class="slider-value" id="bandwidthVal">3,000 GB</span>
+          </div>
+          <input type="range" id="bandwidthSlider" class="range-slider" min="0" max="50000" step="500" value="3000">
+          <div class="slider-sub">Low-latency WebSocket tickers & institutional feeds ($0.03/GB-mo)</div>
+        </div>
+
+        <button type="button" id="generateQuoteBtn" class="btn-quote">📋 Generate Institutional Quote</button>
+        <pre id="quoteOutput" class="quote-pre hidden"></pre>
+      </div>
+
+      <!-- Right Column: Cost Breakdown & Donut Card -->
+      <div class="co-card">
+        <div class="co-card-header">
+          <h2>Cost Projections & Breakdown</h2>
+        </div>
+
+        <div class="price-projection-card">
+          <div class="projection-label">Projected Billed Expense</div>
+          <div class="projection-price" id="totalCostDisplay">$0.00</div>
+          <div class="projection-cycle" id="billingCycleText">/ month</div>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-pill">
+            <div class="metric-pill-title">Volume Discount</div>
+            <div class="metric-pill-val" id="discountRateText">0%</div>
+          </div>
+          <div class="metric-pill">
+            <div class="metric-pill-title">Annual Savings</div>
+            <div class="metric-pill-val" id="annualSavingsText">$0.00</div>
+          </div>
+        </div>
+
+        <div class="donut-wrapper">
+          <svg class="donut-svg" id="donutSvg" viewBox="0 0 100 100">
+            <circle class="donut-circle" cx="50" cy="50" r="40" stroke="#1e293b" />
+            <circle class="donut-circle" id="donutSegment1" cx="50" cy="50" r="40" stroke="#38bdf8" />
+            <circle class="donut-circle" id="donutSegment2" cx="50" cy="50" r="40" stroke="#818cf8" />
+            <circle class="donut-circle" id="donutSegment3" cx="50" cy="50" r="40" stroke="#10b981" />
+          </svg>
+
+          <div class="donut-legend">
+            <div class="legend-item">
+              <span class="legend-dot legend-compute"></span>
+              <span>Compute (<span id="donutComputePct">0%</span>)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot legend-storage"></span>
+              <span>Storage (<span id="donutStoragePct">0%</span>)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot legend-bandwidth"></span>
+              <span>Bandwidth (<span id="donutBandwidthPct">0%</span>)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="cost-optimizer.js"></script>
+</body>
+</html>
