@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biotech Genomics - Formula Evaluator & Dynamic KPI Calculator</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+</head>
+<body>
+  <div class="formula-evaluator-container">
+    <header class="evaluator-header">
+      <div class="header-nav">
+        <a href="index.html" class="back-link" aria-label="Return to Biotech Genomics Showcase">← Return to Biotech Genomics Showcase</a>
+        <button id="theme-toggle" class="contrast-toggle-btn" type="button" aria-pressed="false">High Contrast Mode</button>
+      </div>
+      <div class="header-badge">BIOTECH GENOMICS BIOINFORMATICS WORKBENCH</div>
+      <h1>Genomic KPI Formula Evaluator & Parser</h1>
+      <p>Safe mathematical expression tokenizer, Shunting-yard RPN compiler, dynamic parameter injection, and precision bioinformatics metrics calculator.</p>
+    </header>
+
+    <!-- Error Alert Banner -->
+    <div id="error-banner" class="alert-banner hidden" role="alert" aria-live="polite"></div>
+
+    <!-- Calculated Result Callouts Grid -->
+    <section class="metrics-grid" aria-label="Dynamic Calculation Results">
+      <div class="metric-card primary-card">
+        <span class="metric-label">Calculated Metric Value</span>
+        <div class="metric-value-wrap">
+          <span id="kpi-result" class="metric-value">--</span>
+        </div>
+        <span id="calc-status" class="status-badge status-valid">AWAITING EVALUATION</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">Parser & Compiler Telemetry</span>
+        <span id="rpn-tokens" class="metric-subvalue">Ready for expression input</span>
+        <span class="metric-hint">Dijkstra Shunting-Yard RPN Engine</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">Bioinformatics Engine Standard</span>
+        <span class="metric-subvalue">BODMAS/PEMDAS • O(N)</span>
+        <span class="metric-hint">Scientific Notation & Functions Supported</span>
+      </div>
+    </section>
+
+    <!-- Main Workbench Grid -->
+    <main class="workbench-grid">
+      <!-- Left Panel: Formula Input & Syntax Helpers -->
+      <section class="workbench-panel">
+        <div class="panel-header">
+          <h3>Mathematical Expression</h3>
+          <div class="preset-wrap">
+            <label for="preset-select" class="sr-only">KPI Preset Formula</label>
+            <select id="preset-select" class="preset-dropdown">
+              <option value="" disabled selected>Load Genomic Preset...</option>
+              <option value="seq_depth * read_length / 1000">Sequencing Yield (Gb): seq_depth * read_length / 1000</option>
+              <option value="10 ^ (-q_score / 10)">Phred Base Error Rate: 10 ^ (-q_score / 10)</option>
+              <option value="1 - exp(-coverage)">Lander-Waterman Coverage Probability: 1 - exp(-coverage)</option>
+              <option value="seq_depth * (1 - abs(gc_content - 0.5))">GC-Bias Adjusted Depth: seq_depth * (1 - abs(gc_content - 0.5))</option>
+              <option value="(coverage * 100) + (q_score * 2) - (error_rate * 1000)">Composite Quality Index: (coverage * 100) + (q_score * 2) - (error_rate * 1000)</option>
+              <option value="sqrt(seq_depth) * round(read_length / 100)">Heuristic Assembly Metric: sqrt(seq_depth) * round(read_length / 100)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="formula-input">Equation Input:</label>
+          <textarea id="formula-input" class="formula-textarea" rows="3" placeholder="Enter mathematical formula, e.g. seq_depth * (1 - abs(gc_content - 0.5))">seq_depth * (1 - abs(gc_content - 0.5))</textarea>
+        </div>
+
+        <div class="syntax-pills-section">
+          <span class="pills-title">Biotech Variables:</span>
+          <div class="pills-group">
+            <button type="button" class="pill pill-var" data-insert="seq_depth">seq_depth</button>
+            <button type="button" class="pill pill-var" data-insert="gc_content">gc_content</button>
+            <button type="button" class="pill pill-var" data-insert="read_length">read_length</button>
+            <button type="button" class="pill pill-var" data-insert="q_score">q_score</button>
+            <button type="button" class="pill pill-var" data-insert="coverage">coverage</button>
+            <button type="button" class="pill pill-var" data-insert="error_rate">error_rate</button>
+          </div>
+
+          <span class="pills-title">Scientific Functions:</span>
+          <div class="pills-group">
+            <button type="button" class="pill pill-fn" data-insert="sqrt()">sqrt()</button>
+            <button type="button" class="pill pill-fn" data-insert="log()">log()</button>
+            <button type="button" class="pill pill-fn" data-insert="exp()">exp()</button>
+            <button type="button" class="pill pill-fn" data-insert="abs()">abs()</button>
+            <button type="button" class="pill pill-fn" data-insert="min(,)">min(,)</button>
+            <button type="button" class="pill pill-fn" data-insert="max(,)">max(,)</button>
+            <button type="button" class="pill pill-fn" data-insert="round()">round()</button>
+          </div>
+
+          <span class="pills-title">Operators & Parentheses:</span>
+          <div class="pills-group">
+            <button type="button" class="pill pill-op" data-insert=" + ">+</button>
+            <button type="button" class="pill pill-op" data-insert=" - ">-</button>
+            <button type="button" class="pill pill-op" data-insert=" * ">*</button>
+            <button type="button" class="pill pill-op" data-insert=" / ">/</button>
+            <button type="button" class="pill pill-op" data-insert=" ^ ">^</button>
+            <button type="button" class="pill pill-op" data-insert=" % ">%</button>
+            <button type="button" class="pill pill-op" data-insert="(">(</button>
+            <button type="button" class="pill pill-op" data-insert=")">)</button>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button id="evaluate-btn" type="button" class="primary-btn">Calculate Expression</button>
+        </div>
+      </section>
+
+      <!-- Right Panel: Variable Sliders & Definition Context -->
+      <section class="workbench-panel">
+        <div class="panel-header">
+          <h3>Parameter Definitions & Sliders</h3>
+        </div>
+
+        <div class="variables-grid">
+          <!-- seq_depth -->
+          <div class="variable-control">
+            <div class="slider-header">
+              <label for="slider-seq_depth">Sequencing Depth (<code>seq_depth</code>)</label>
+              <span class="slider-value"><span id="val-seq_depth">30</span>x</span>
+            </div>
+            <input type="range" id="slider-seq_depth" class="param-slider" min="5" max="200" step="1" value="30">
+            <span class="control-hint">Mean sequencing coverage depth across targeted regions</span>
+          </div>
+
+          <!-- gc_content -->
+          <div class="variable-control">
+            <div class="slider-header">
+              <label for="slider-gc_content">GC Content Fraction (<code>gc_content</code>)</label>
+              <span class="slider-value" id="val-gc_content">0.45</span>
+            </div>
+            <input type="range" id="slider-gc_content" class="param-slider" min="0.10" max="0.90" step="0.01" value="0.45">
+            <span class="control-hint">Proportion of guanine and cytosine bases in library</span>
+          </div>
+
+          <!-- read_length -->
+          <div class="variable-control">
+            <div class="slider-header">
+              <label for="slider-read_length">Read Length (<code>read_length</code>)</label>
+              <span class="slider-value"><span id="val-read_length">150</span> bp</span>
+            </div>
+            <input type="range" id="slider-read_length" class="param-slider" min="50" max="600" step="25" value="150">
+            <span class="control-hint">Sequence read length in base pairs (Illumina/PacBio)</span>
+          </div>
+
+          <!-- q_score -->
+          <div class="variable-control">
+            <div class="slider-header">
+              <label for="slider-q_score">Phred Quality Score (<code>q_score</code>)</label>
+              <span class="slider-value">Q<span id="val-q_score">30</span></span>
+            </div>
+            <input type="range" id="slider-q_score" class="param-slider" min="10" max="50" step="1" value="30">
+            <span class="control-hint">Logarithmic base call accuracy confidence indicator</span>
+          </div>
+
+          <!-- coverage -->
+          <div class="variable-control">
+            <div class="slider-header">
+              <label for="slider-coverage">Genome Coverage (<code>coverage</code>)</label>
+              <span class="slider-value" id="val-coverage">0.98</span>
+            </div>
+            <input type="range" id="slider-coverage" class="param-slider" min="0.10" max="1.00" step="0.01" value="0.98">
+            <span class="control-hint">Fraction of reference genome covered by aligned reads</span>
+          </div>
+
+          <!-- error_rate -->
+          <div class="variable-control">
+            <div class="slider-header">
+              <label for="slider-error_rate">Base Error Rate (<code>error_rate</code>)</label>
+              <span class="slider-value" id="val-error_rate">0.001</span>
+            </div>
+            <input type="range" id="slider-error_rate" class="param-slider" min="0.0001" max="0.05" step="0.0005" value="0.001">
+            <span class="control-hint">Probability of an erroneous nucleotide base call</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Calculation Audit History Section -->
+    <section class="history-section" aria-label="Calculation History Audit Log">
+      <div class="panel-header">
+        <h3>Calculation Audit Log</h3>
+        <button id="clear-history-btn" type="button" class="secondary-btn">Clear Audit History</button>
+      </div>
+      <ul id="history-list" class="history-list" role="feed">
+        <li class="history-empty">No calculations logged yet.</li>
+      </ul>
+    </section>
+
+    <footer class="evaluator-footer">
+      <span>Bioinformatics Standard: Shunting-Yard Infix to RPN Evaluator • WCAG AAA Accessible • NSoC '26 Certified</span>
+    </footer>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+  <script>
+    // Theme toggle helper
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('high-contrast');
+        const isHigh = document.body.classList.contains('high-contrast');
+        themeBtn.setAttribute('aria-pressed', isHigh ? 'true' : 'false');
+        themeBtn.textContent = isHigh ? 'Standard Dark Mode' : 'High Contrast Mode';
+      });
+    }
+  </script>
+</body>
+</html>
