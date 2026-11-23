@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Probabilistic Bloom Filter & Membership Query Visualizer</title>
+  <link rel="stylesheet" href="bloom-filter.css">
+</head>
+<body class="docs-bloom-view">
+  <main class="docs-bloom-container" data-docs-bloom-app>
+    <!-- Header Section -->
+    <header class="docs-header">
+      <div class="brand">
+        <a href="index.html" class="back-link">&larr; Back to Docs Portal</a>
+        <div class="brand-title-wrap">
+          <span class="badge-pill">Architecture // Probabilistic Data Structures</span>
+          <span class="badge-accent">Issue #2824</span>
+        </div>
+        <h1>Probabilistic Bloom Filter & Membership Query Visualizer</h1>
+        <p class="brand-desc">
+          High-throughput in-memory set membership testing using <strong>Kirsch-Mitzenmacher double-hashing</strong>
+          (MurmurHash3 32-bit + FNV-1a 32-bit). Built for API route caching and search keyword deduplication with
+          a <strong>guaranteed zero false-negative invariant</strong>.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="btn-batch-sample" class="btn btn-secondary">
+          <span class="btn-icon">⚡</span> Batch Insert API Corpus
+        </button>
+        <button type="button" id="btn-run-benchmark" class="btn btn-outline">
+          <span class="btn-icon">🔬</span> Monte Carlo FPR Test (1K)
+        </button>
+        <button type="button" id="btn-clear-filter" class="btn btn-danger">
+          <span class="btn-icon">↺</span> Reset Filter
+        </button>
+      </div>
+    </header>
+
+    <!-- Telemetry HUD Stats Bar -->
+    <section class="telemetry-hud" aria-label="Bloom Filter Telemetry Stats">
+      <div class="hud-card">
+        <span class="hud-label">Insertions (n)</span>
+        <span class="hud-value" id="stat-items-count">0</span>
+        <span class="hud-sub">Recorded items</span>
+      </div>
+      <div class="hud-card">
+        <span class="hud-label">Bit Array Size (m)</span>
+        <span class="hud-value">256 <small>bits</small></span>
+        <span class="hud-sub">32 bytes memory</span>
+      </div>
+      <div class="hud-card">
+        <span class="hud-label">Hash Functions (k)</span>
+        <span class="hud-value">4 <small>hashes</small></span>
+        <span class="hud-sub">Kirsch-Mitzenmacher</span>
+      </div>
+      <div class="hud-card">
+        <span class="hud-label">Bits Set</span>
+        <span class="hud-value" id="stat-bits-set">0 / 256</span>
+        <span class="hud-sub" id="stat-fill-ratio">0.0% fill ratio</span>
+      </div>
+      <div class="hud-card highlight">
+        <span class="hud-label">Theoretical FPR</span>
+        <span class="hud-value" id="stat-theoretical-fpr">0.000%</span>
+        <span class="hud-sub">p ≈ (1 - e<sup>-kn/m</sup>)<sup>k</sup></span>
+      </div>
+      <div class="hud-card">
+        <span class="hud-label">Last Collisions</span>
+        <span class="hud-value" id="stat-last-collisions">0</span>
+        <span class="hud-sub">Intersecting bits</span>
+      </div>
+    </section>
+
+    <!-- Main Workspace Layout: Controls + Query Diagnostics -->
+    <div class="workspace-grid">
+      <!-- Left Column: Insert Form & Preset Chips -->
+      <section class="card panel-insert" aria-labelledby="insert-title">
+        <div class="card-header">
+          <span class="panel-icon">📥</span>
+          <h2 id="insert-title">1. Insert Item / Route</h2>
+        </div>
+        <p class="panel-intro">
+          Maps the input string across $k=4$ deterministic bit coordinates using Kirsch-Mitzenmacher double-hashing.
+        </p>
+
+        <form id="docs-insert-form" class="bloom-form" novalidate>
+          <div class="input-group">
+            <span class="input-icon">🔑</span>
+            <input 
+              type="text" 
+              id="docs-item-input" 
+              class="text-input" 
+              placeholder="e.g. GET /api/v1/docs/auth or 'jwt-token'" 
+              autocomplete="off"
+              maxlength="256"
+            />
+            <button type="submit" class="btn btn-primary" id="btn-insert-item">
+              Insert Bitmask
+            </button>
+          </div>
+        </form>
+
+        <!-- Presets Bar -->
+        <div class="presets-section">
+          <span class="presets-label">Docs Portal API Presets:</span>
+          <div class="chips-container">
+            <button type="button" class="preset-chip" data-preset="GET /api/v1/docs/auth">GET /docs/auth</button>
+            <button type="button" class="preset-chip" data-preset="POST /api/v1/auth/tokens">POST /auth/tokens</button>
+            <button type="button" class="preset-chip" data-preset="GET /api/v2/docs/search">GET /docs/search</button>
+            <button type="button" class="preset-chip" data-preset="PUT /api/v1/docs/preferences">PUT /preferences</button>
+            <button type="button" class="preset-chip" data-preset="rate-limiter">rate-limiter</button>
+            <button type="button" class="preset-chip" data-preset="bloom-filter">bloom-filter</button>
+          </div>
+        </div>
+
+        <!-- Live Status Bar -->
+        <div id="docs-status-msg" class="status-msg neutral" role="status" aria-live="polite">
+          Ready. Filter bit array initialized with 256 clean slots.
+        </div>
+      </section>
+
+      <!-- Right Column: Membership Query Probe Form & Verdict -->
+      <section class="card panel-probe" aria-labelledby="probe-title">
+        <div class="card-header">
+          <span class="panel-icon">🔍</span>
+          <h2 id="probe-title">2. Membership Query Probe</h2>
+        </div>
+        <p class="panel-intro">
+          Computes all $k$ bit probes. If ANY probed bit is <code>0</code>, the item is <strong>definitely absent</strong>.
+        </p>
+
+        <form id="docs-probe-form" class="bloom-form" novalidate>
+          <div class="input-group">
+            <span class="input-icon">🎯</span>
+            <input 
+              type="text" 
+              id="docs-probe-input" 
+              class="text-input" 
+              placeholder="Query key to verify set membership..." 
+              autocomplete="off"
+              maxlength="256"
+            />
+            <button type="submit" class="btn btn-accent" id="btn-probe-item">
+              Probe Set
+            </button>
+          </div>
+        </form>
+
+        <!-- Probe Diagnostics Verdict Card -->
+        <div id="docs-verdict-card" class="verdict-card" style="display: none;">
+          <h3 id="docs-verdict-title" class="verdict-title">No query executed yet</h3>
+          <p id="docs-verdict-detail" class="verdict-detail"></p>
+          
+          <div class="probe-steps-container">
+            <span class="steps-heading">Kirsch-Mitzenmacher Probe Decomposition:</span>
+            <div id="docs-probe-steps" class="probe-steps-grid"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Animated Bit Array Memory Grid Section -->
+    <section class="card panel-grid" aria-labelledby="grid-title">
+      <div class="grid-header">
+        <div class="grid-title-group">
+          <span class="panel-icon">▦</span>
+          <h2 id="grid-title">256-Bit Memory Allocation Matrix (32 Bytes)</h2>
+        </div>
+        
+        <div class="grid-legend">
+          <span class="legend-item"><span class="legend-box bit-0"></span> Bit 0 (Unset)</span>
+          <span class="legend-item"><span class="legend-box bit-1"></span> Bit 1 (Set)</span>
+          <span class="legend-item"><span class="legend-box bit-probed"></span> Probed Bit</span>
+          <span class="legend-item"><span class="legend-box bit-collision"></span> Collision</span>
+        </div>
+      </div>
+
+      <p class="grid-caption">
+        Each cell represents a physical bit in the <code>Uint8Array(32)</code>.
+        Addressing is calculated in constant time $O(1)$ per hash via bitwise operations:
+        <code>byteIndex = bitIndex >> 3</code>, <code>bitMask = 1 &lt;&lt; (bitIndex &amp; 7)</code>.
+      </p>
+
+      <!-- The 256-Bit Grid -->
+      <div id="docs-bit-grid" class="bit-grid-container" role="img" aria-label="Bloom Filter Bit Grid"></div>
+    </section>
+
+    <!-- Mathematical Foundations & Architecture Reference -->
+    <section class="card panel-theory">
+      <div class="card-header">
+        <span class="panel-icon">📐</span>
+        <h2>Architectural Specifications & Mathematical Bounds</h2>
+      </div>
+
+      <div class="theory-columns">
+        <div class="theory-col">
+          <h3>Kirsch-Mitzenmacher Double Hashing</h3>
+          <p>
+            Kirsch and Mitzenmacher (2006) proved that only two independent hash functions
+            $h_1(x)$ and $h_2(x)$ are required to simulate $k$ hash functions with asymptotically
+            identical false-positive bounds:
+          </p>
+          <div class="formula-box">
+            <code>g<sub>i</sub>(x) = (h<sub>1</sub>(x) + i × h<sub>2</sub>(x)) mod m, &nbsp; for i ∈ [0, k-1]</code>
+          </div>
+          <p>
+            In our engine, $h_1$ is <strong>MurmurHash3 (32-bit x86)</strong> and $h_2$ is
+            <strong>FNV-1a (32-bit)</strong> with odd-step bit conditioning <code>(h2 | 1) >>> 0</code>
+            to guarantee full coprime traversal of the address space.
+          </p>
+        </div>
+
+        <div class="theory-col">
+          <h3>Zero False-Negative Guarantee</h3>
+          <p>
+            A Bloom filter is a <em>one-sided error</em> probabilistic data structure:
+          </p>
+          <ul class="theory-list">
+            <li><strong>Query Returns False (0):</strong> The item is guaranteed 100% to NOT be in the set. Zero false negatives.</li>
+            <li><strong>Query Returns True (1):</strong> The item is either in the set, or a hash collision occurred (false positive).</li>
+            <li><strong>FPR Upper Bound:</strong> $P(\text{FP}) \approx (1 - e^{-k n / m})^k$.</li>
+            <li><strong>Optimal Hashes:</strong> $k = \frac{m}{n} \ln 2 \approx 0.693 \times \frac{m}{n}$.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="docs-footer">
+      <p>Docs Portal Architecture Suite &bull; Nexus Spring of Code 2026 (NSoC '26) &bull; Zero Merge Conflicts</p>
+    </footer>
+  </main>
+
+  <script type="module" src="bloom-filter.js"></script>
+</body>
+</html>
