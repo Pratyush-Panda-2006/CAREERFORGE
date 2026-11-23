@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxury Realms - Vector Whiteboard & Sketchpad</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="whiteboard-container">
+    <header class="luxury-header">
+      <div class="brand">
+        <span class="gold-accent">✦</span>
+        <h1>LUXURY REALMS</h1>
+        <span class="badge">Collaborative Vector Canvas</span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-undo" class="btn-icon" title="Undo (Ctrl+Z)">↺</button>
+        <button id="btn-redo" class="btn-icon" title="Redo (Ctrl+Y)">↻</button>
+        <button id="btn-clear" class="btn-action">Clear Canvas</button>
+        <button id="btn-export-svg" class="btn-primary">Export SVG</button>
+      </div>
+    </header>
+
+    <div class="whiteboard-workspace">
+      <!-- Floating Toolbar Dock -->
+      <aside class="floating-toolbar" role="toolbar" aria-label="Whiteboard Drawing Palette">
+        <div class="tool-section">
+          <span class="section-title">Tools</span>
+          <div class="tool-buttons">
+            <button class="tool-btn active" data-tool="pen" title="Freehand Pen (P)">✏️</button>
+            <button class="tool-btn" data-tool="line" title="Straight Line (L)">╱</button>
+            <button class="tool-btn" data-tool="rectangle" title="Rectangle (R)">▢</button>
+            <button class="tool-btn" data-tool="eraser" title="Stroke Eraser (E)">🧹</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="tool-section">
+          <span class="section-title">Color Palette</span>
+          <div class="color-palette">
+            <button class="color-chip active" data-color="#D4AF37" style="--chip-color: #D4AF37;" title="Classic Gold"></button>
+            <button class="color-chip" data-color="#E5C158" style="--chip-color: #E5C158;" title="Champagne Gold"></button>
+            <button class="color-chip" data-color="#FFFFFF" style="--chip-color: #FFFFFF;" title="Pure Ivory White"></button>
+            <button class="color-chip" data-color="#38BDF8" style="--chip-color: #38BDF8;" title="Sapphire Glow"></button>
+            <button class="color-chip" data-color="#F43F5E" style="--chip-color: #F43F5E;" title="Ruby Red"></button>
+            <button class="color-chip" data-color="#10B981" style="--chip-color: #10B981;" title="Emerald Green"></button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="tool-section">
+          <span class="section-title">Brush Width: <span id="brush-size-display">4px</span></span>
+          <input type="range" id="brush-size-slider" min="1" max="32" value="4">
+        </div>
+      </aside>
+
+      <!-- Interactive Canvas -->
+      <main class="canvas-area">
+        <canvas id="whiteboard-canvas"></canvas>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { LuxuryRealmsWhiteboardCanvas } from './canvas-whiteboard.js';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const canvasEl = document.getElementById('whiteboard-canvas');
+      const whiteboard = new LuxuryRealmsWhiteboardCanvas(canvasEl);
+
+      // Tool buttons
+      document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          whiteboard.setTool(btn.dataset.tool);
+        });
+      });
+
+      // Color chips
+      document.querySelectorAll('.color-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          whiteboard.setColor(chip.dataset.color);
+        });
+      });
+
+      // Brush slider
+      const slider = document.getElementById('brush-size-slider');
+      const sliderVal = document.getElementById('brush-size-display');
+      slider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        sliderVal.textContent = `${val}px`;
+        whiteboard.setBrushWidth(val);
+      });
+
+      // Actions
+      document.getElementById('btn-undo').addEventListener('click', () => whiteboard.undo());
+      document.getElementById('btn-redo').addEventListener('click', () => whiteboard.redo());
+      document.getElementById('btn-clear').addEventListener('click', () => whiteboard.clear());
+      document.getElementById('btn-export-svg').addEventListener('click', () => {
+        const svgContent = whiteboard.exportSVG();
+        const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `luxury-realms-sketch-${Date.now()}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    });
+  </script>
+</body>
+</html>
