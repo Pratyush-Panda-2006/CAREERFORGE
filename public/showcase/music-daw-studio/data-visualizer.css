@@ -1,0 +1,44 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  line-height: 1.55;
+  background: #0e131b;
+  color: #edf4ff;
+  --muted: #a8b6c9;
+  --line: #39485b;
+  --mix: #5cf1cf;
+  --reference: #c8adff;
+}
+body { margin: 0; }
+.workspace { width: min(100% - 2rem, 68rem); margin: clamp(1.25rem, 4vw, 4rem) auto; }
+a { color: var(--mix); }
+h1 { margin: 0.65rem 0 0; font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.12; }
+p { margin: 0.65rem 0 1.25rem; color: var(--muted); }
+.dashboard { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 1rem; }
+.panel { min-width: 0; padding: clamp(0.85rem, 3vw, 1.5rem); border: 1px solid var(--line); border-radius: 1rem; background: #151f2c; }
+.chart fieldset { display: flex; flex-wrap: wrap; gap: 0.45rem 1.2rem; border: 0; padding: 0; margin: 0; }
+.chart legend { font-weight: 650; padding: 0; margin-bottom: 0.3rem; }
+.chart label { display: flex; align-items: center; gap: 0.3rem; }
+input { accent-color: var(--mix); }
+.key.mix { color: var(--mix); }
+.key.reference { color: var(--reference); }
+.chart svg { display: block; width: 100%; max-height: 29rem; }
+.axis-line, .grid-ring { fill: none; stroke: #45576e; stroke-width: 1; }
+.axis-label { fill: #e1edfa; font-size: 15px; }
+.series { fill-opacity: 0.17; stroke-width: 2.3; stroke-linejoin: round; }
+.series-reference { fill: var(--reference); stroke: var(--reference); }
+.series-mix { fill: var(--mix); stroke: var(--mix); }
+.vertex { stroke: #0e131b; stroke-width: 2; }
+.vertex:hover, .vertex:focus { stroke: white; stroke-width: 3; }
+.readout { min-height: 1.55em; margin: 0; }
+h2 { font-size: 1.25rem; margin: 0 0 0.85rem; }
+.metric { display: grid; grid-template-columns: minmax(6rem, 1fr) minmax(4rem, 1.5fr) 2.2rem; align-items: center; gap: 0.55rem; padding-block: 0.38rem; }
+.metric input { width: 100%; margin: 0; }
+.metric output, dd { text-align: right; font-variant-numeric: tabular-nums; }
+.coverage { display: grid; grid-template-columns: 1fr auto; gap: 0.4rem 0.75rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+.coverage dd { margin: 0; font-weight: 650; }
+small { color: var(--muted); }
+:focus-visible { outline: 2px solid #f4f7ff; outline-offset: 3px; }
+@media (max-width: 720px) {
+  .dashboard { grid-template-columns: minmax(0, 1fr); }
+}
