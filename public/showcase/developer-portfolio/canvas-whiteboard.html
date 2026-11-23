@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Portfolio — Vector Whiteboard & Architecture Sketchpad</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="whiteboard-header">
+    <div class="header-left">
+      <a href="index.html" class="back-link" title="Return to DevCraft Portfolio">
+        &larr; DevCraft
+      </a>
+      <div class="project-title">
+        <span>Vector Whiteboard & Architecture Sketchpad</span>
+        <span class="ide-badge">v2.4 IDE</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="template-selector">
+        <label for="template-select">Backdrop:</label>
+        <select id="template-select" class="template-dropdown" title="Select architecture diagram template">
+          <option value="blank">Blank Canvas</option>
+          <option value="microservices">Microservices Cluster</option>
+          <option value="erd">ERD Database Schema</option>
+          <option value="eventbus">Event Bus Pipeline</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Whiteboard Viewport -->
+  <main class="whiteboard-viewport" id="viewport">
+    <!-- Top Developer Dock: Tools, Colors, Sliders -->
+    <div class="developer-dock dock-top" role="toolbar" aria-label="Whiteboard Drawing Tools">
+      <!-- Tool Selection -->
+      <div class="dock-group" id="tool-group">
+        <button type="button" class="tool-btn active" data-tool="pen" title="Freehand Pen (P)">
+          <span>Pen</span>
+          <span class="key-badge">P</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="eraser" title="Eraser (E)">
+          <span>Eraser</span>
+          <span class="key-badge">E</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="arrow" title="Directed Vector Arrow (A)">
+          <span>Arrow</span>
+          <span class="key-badge">A</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="component" title="Architecture Microservice Node (C)">
+          <span>Component</span>
+          <span class="key-badge">C</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="rectangle" title="Rectangle Boundary (R)">
+          <span>Rect</span>
+          <span class="key-badge">R</span>
+        </button>
+        <button type="button" class="tool-btn" data-tool="circle" title="Circle Cluster (O)">
+          <span>Circle</span>
+          <span class="key-badge">O</span>
+        </button>
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Developer Syntax Palette Swatches -->
+      <div class="dock-group swatches-group" id="swatches-group">
+        <button type="button" class="color-swatch" data-color="#0d1117" title="IDE Background (#0d1117)" style="background-color: #0d1117;"></button>
+        <button type="button" class="color-swatch active" data-color="#38bdf8" title="React Cyan (#38bdf8)" style="background-color: #38bdf8;"></button>
+        <button type="button" class="color-swatch" data-color="#22c55e" title="Node Green (#22c55e)" style="background-color: #22c55e;"></button>
+        <button type="button" class="color-swatch" data-color="#ea580c" title="Rust Orange (#ea580c)" style="background-color: #ea580c;"></button>
+        <button type="button" class="color-swatch" data-color="#2563eb" title="TypeScript Blue (#2563eb)" style="background-color: #2563eb;"></button>
+        <button type="button" class="color-swatch" data-color="#f43f5e" title="Syntax Pink (#f43f5e)" style="background-color: #f43f5e;"></button>
+        <button type="button" class="color-swatch" data-color="#ffffff" title="Pure White (#ffffff)" style="background-color: #ffffff;"></button>
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Stroke Width Slider -->
+      <div class="dock-group slider-control">
+        <label for="stroke-slider">Width:</label>
+        <input type="range" id="stroke-slider" min="1" max="30" value="3" />
+        <span class="slider-val" id="stroke-val">3px</span>
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Opacity Slider -->
+      <div class="dock-group slider-control">
+        <label for="opacity-slider">Opacity:</label>
+        <input type="range" id="opacity-slider" min="10" max="100" value="100" />
+        <span class="slider-val" id="opacity-val">100%</span>
+      </div>
+    </div>
+
+    <!-- HTML5 Canvas Element -->
+    <canvas id="whiteboard-canvas"></canvas>
+
+    <!-- Bottom Action Dock: History, Clear, Export, File Import -->
+    <div class="developer-dock dock-bottom" role="toolbar" aria-label="Whiteboard Actions and Exports">
+      <!-- Undo / Redo / Clear -->
+      <div class="dock-group">
+        <button type="button" class="action-btn" id="btn-undo" title="Undo Last Action (Ctrl+Z)" disabled>
+          <span>Undo</span>
+        </button>
+        <button type="button" class="action-btn" id="btn-redo" title="Redo Action (Ctrl+Y)" disabled>
+          <span>Redo</span>
+        </button>
+        <button type="button" class="action-btn btn-danger" id="btn-clear" title="Clear Canvas">
+          <span>Clear</span>
+        </button>
+      </div>
+
+      <div class="dock-divider"></div>
+
+      <!-- Export / Import Operations -->
+      <div class="dock-group">
+        <button type="button" class="action-btn btn-cyan" id="btn-export-svg" title="Export Scalable Vector Graphics">
+          <span>Export SVG</span>
+        </button>
+        <button type="button" class="action-btn btn-cyan" id="btn-export-png" title="Export High-Resolution PNG">
+          <span>Export PNG</span>
+        </button>
+        <button type="button" class="action-btn btn-cyan" id="btn-export-json" title="Save Whiteboard JSON">
+          <span>Export JSON</span>
+        </button>
+        <button type="button" class="action-btn" id="btn-import-json" title="Load Whiteboard JSON File">
+          <span>Load JSON</span>
+        </button>
+        <input type="file" id="json-file-input" accept=".json,application/json" style="display: none;" />
+      </div>
+    </div>
+  </main>
+
+  <!-- Status Bar Footer -->
+  <footer class="status-bar">
+    <div class="status-left">
+      <div>
+        <span class="status-indicator"></span>
+        <span id="canvas-status">Ready &middot; Catmull-Rom Smoothing Active</span>
+      </div>
+      <div id="objects-count">0 objects</div>
+    </div>
+    <div class="status-right">
+      <div id="cursor-pos">X: 0, Y: 0</div>
+      <div>Microservices Architecture IDE</div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-notice" role="status" aria-live="polite"></div>
+
+  <!-- Whiteboard Bootstrap Script -->
+  <script type="module">
+    import { DeveloperPortfolioWhiteboardCanvas, THEME_PALETTE } from './canvas-whiteboard.js';
+
+    const canvas = document.getElementById('whiteboard-canvas');
+    const viewport = document.getElementById('viewport');
+
+    // Initialize dimensions to match viewport container
+    const rect = viewport.getBoundingClientRect();
+    const width = Math.max(800, Math.floor(rect.width));
+    const height = Math.max(500, Math.floor(rect.height));
+
+    const whiteboard = new DeveloperPortfolioWhiteboardCanvas(canvas, {
+      width,
+      height,
+      tool: 'pen',
+      color: THEME_PALETTE.reactCyan,
+      strokeWidth: 3,
+      opacity: 1.0,
+      maxHistory: 50
+    });
+
+    // Toast helper
+    const toastEl = document.getElementById('toast');
+    let toastTimeout;
+    function showToast(msg) {
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 2200);
+    }
+
+    // UI Elements
+    const btnUndo = document.getElementById('btn-undo');
+    const btnRedo = document.getElementById('btn-redo');
+    const btnClear = document.getElementById('btn-clear');
+    const objectsCountEl = document.getElementById('objects-count');
+    const cursorPosEl = document.getElementById('cursor-pos');
+    const strokeSlider = document.getElementById('stroke-slider');
+    const strokeVal = document.getElementById('stroke-val');
+    const opacitySlider = document.getElementById('opacity-slider');
+    const opacityVal = document.getElementById('opacity-val');
+    const templateSelect = document.getElementById('template-select');
+    const toolBtns = document.querySelectorAll('.tool-btn');
+    const swatches = document.querySelectorAll('.color-swatch');
+
+    function syncStateUI() {
+      btnUndo.disabled = !whiteboard.canUndo;
+      btnRedo.disabled = !whiteboard.canRedo;
+      objectsCountEl.textContent = `${whiteboard.strokes.length} object${whiteboard.strokes.length === 1 ? '' : 's'}`;
+    }
+
+    whiteboard.on('change', syncStateUI);
+
+    // Track Cursor Coordinates
+    canvas.addEventListener('pointermove', (e) => {
+      const crect = canvas.getBoundingClientRect();
+      const x = Math.round((e.clientX - crect.left) * (whiteboard.width / crect.width));
+      const y = Math.round((e.clientY - crect.top) * (whiteboard.height / crect.height));
+      cursorPosEl.textContent = `X: ${x}, Y: ${y}`;
+    });
+
+    // Tool Buttons Binding
+    toolBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tool = btn.dataset.tool;
+        whiteboard.setTool(tool);
+        toolBtns.forEach(b => b.classList.toggle('active', b === btn));
+
+        // Update cursor style
+        if (tool === 'eraser') {
+          canvas.style.cursor = 'cell';
+        } else if (tool === 'component') {
+          canvas.style.cursor = 'copy';
+        } else {
+          canvas.style.cursor = 'crosshair';
+        }
+      });
+    });
+
+    // Swatches Binding
+    swatches.forEach((swatch) => {
+      swatch.addEventListener('click', () => {
+        const color = swatch.dataset.color;
+        whiteboard.setColor(color);
+        swatches.forEach(s => s.classList.toggle('active', s === swatch));
+      });
+    });
+
+    // Sliders Binding
+    strokeSlider.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      whiteboard.setStrokeWidth(val);
+      strokeVal.textContent = `${val}px`;
+    });
+
+    opacitySlider.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      const dec = val / 100;
+      whiteboard.setOpacity(dec);
+      opacityVal.textContent = `${val}%`;
+    });
+
+    // Undo / Redo / Clear
+    btnUndo.addEventListener('click', () => {
+      whiteboard.undo();
+      showToast('Undone');
+    });
+
+    btnRedo.addEventListener('click', () => {
+      whiteboard.redo();
+      showToast('Redone');
+    });
+
+    btnClear.addEventListener('click', () => {
+      if (confirm('Clear all drawings and architecture components?')) {
+        whiteboard.clear();
+        showToast('Canvas cleared');
+      }
+    });
+
+    // Templates
+    templateSelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val === 'blank') {
+        whiteboard.clear();
+        showToast('Blank canvas loaded');
+      } else {
+        whiteboard.loadTemplate(val);
+        showToast(`Template "${val}" loaded`);
+      }
+    });
+
+    // Export SVG
+    document.getElementById('btn-export-svg').addEventListener('click', () => {
+      const svgXml = whiteboard.exportSVG({ title: 'Developer Architecture Diagram' });
+      const blob = new Blob([svgXml], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `architecture-sketch-${Date.now()}.svg`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('SVG exported successfully');
+    });
+
+    // Export PNG
+    document.getElementById('btn-export-png').addEventListener('click', () => {
+      const dataUrl = whiteboard.exportPNG();
+      if (!dataUrl) {
+        showToast('Unable to export PNG');
+        return;
+      }
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `architecture-sketch-${Date.now()}.png`;
+      link.click();
+      showToast('PNG exported successfully');
+    });
+
+    // Export JSON
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const json = whiteboard.exportJSON(true);
+      const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `whiteboard-data-${Date.now()}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Whiteboard JSON exported');
+    });
+
+    // Load JSON
+    const fileInput = document.getElementById('json-file-input');
+    document.getElementById('btn-import-json').addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          whiteboard.loadJSON(event.target.result);
+          showToast(`Loaded ${whiteboard.strokes.length} objects from file`);
+        } catch (err) {
+          alert(`Failed to load file: ${err.message}`);
+        }
+      };
+      reader.readAsText(file);
+      fileInput.value = '';
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          whiteboard.redo();
+        } else {
+          whiteboard.undo();
+        }
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+        e.preventDefault();
+        whiteboard.redo();
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+      if (key === 'p') {
+        const btn = document.querySelector('[data-tool="pen"]');
+        if (btn) btn.click();
+      } else if (key === 'e') {
+        const btn = document.querySelector('[data-tool="eraser"]');
+        if (btn) btn.click();
+      } else if (key === 'a') {
+        const btn = document.querySelector('[data-tool="arrow"]');
+        if (btn) btn.click();
+      } else if (key === 'c') {
+        const btn = document.querySelector('[data-tool="component"]');
+        if (btn) btn.click();
+      } else if (key === 'r') {
+        const btn = document.querySelector('[data-tool="rectangle"]');
+        if (btn) btn.click();
+      } else if (key === 'o') {
+        const btn = document.querySelector('[data-tool="circle"]');
+        if (btn) btn.click();
+      }
+    });
+
+    syncStateUI();
+  </script>
+</body>
+</html>
