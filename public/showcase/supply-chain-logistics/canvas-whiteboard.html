@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supply Chain Logistics Whiteboard & Vector Sketchpad</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <script type="module" src="canvas-whiteboard.js"></script>
+</head>
+<body>
+  <main data-logistics-board>
+    <header>
+      <a href="index.html">← Supply Chain Logistics</a>
+      <h1>Logistics Route & Facility Sketchpad</h1>
+      <p>Collaborative freehand vector canvas for plotting transit routes, distribution hub layouts, supply channels, and warehouse topologies.</p>
+    </header>
+
+    <div class="workbench">
+      <aside aria-label="Drawing tools">
+        <h2>Logistics Drawing Tools</h2>
+        <div class="tools" role="group" aria-label="Tool selection">
+          <button type="button" data-tool="pen" aria-pressed="true">Pen (Freehand)</button>
+          <button type="button" data-tool="line" aria-pressed="false">Transit Line</button>
+          <button type="button" data-tool="rectangle" aria-pressed="false">Facility Zone</button>
+          <button type="button" data-tool="eraser" aria-pressed="false">Erase Stroke</button>
+        </div>
+
+        <fieldset>
+          <legend>Channel & Fleet Color</legend>
+          <div class="colors">
+            <button type="button" data-color="#1e3a8a" aria-label="Ocean Freight Blue" aria-pressed="true" style="--swatch:#1e3a8a"></button>
+            <button type="button" data-color="#047857" aria-label="Eco Transit Green" aria-pressed="false" style="--swatch:#047857"></button>
+            <button type="button" data-color="#b45309" aria-label="Express Air Amber" aria-pressed="false" style="--swatch:#b45309"></button>
+            <button type="button" data-color="#b91c1c" aria-label="Critical Delay Red" aria-pressed="false" style="--swatch:#b91c1c"></button>
+            <button type="button" data-color="#1f2937" aria-label="Depot Hub Slate" aria-pressed="false" style="--swatch:#1f2937"></button>
+          </div>
+        </fieldset>
+
+        <label class="width" for="width">Stroke Width <output id="width-value" for="width">5</output>px</label>
+        <input id="width" type="range" min="1" max="24" value="5">
+        <p class="hint">Eraser removes entire strokes on contact according to stroke width.</p>
+
+        <div class="history-tools">
+          <button id="undo" type="button" disabled>Undo</button>
+          <button id="redo" type="button" disabled>Redo</button>
+        </div>
+        <button id="clear" type="button">Clear Board</button>
+        <button id="export" type="button" class="primary">Export Vector SVG</button>
+      </aside>
+
+      <section class="sheet" aria-label="Logistics sketch canvas area">
+        <div class="sheet-heading">
+          <h2>Vector Whiteboard Canvas</h2>
+          <span id="stroke-count">0 / 500 strokes</span>
+        </div>
+        <canvas id="board" width="1000" height="650" tabindex="0" aria-label="Logistics canvas" aria-describedby="keyboard-help cursor-position">Your browser does not support HTML5 Canvas.</canvas>
+        <p id="status" role="status" aria-live="polite">Select a tool and begin sketching logistics routes.</p>
+      </section>
+    </div>
+
+    <footer>
+      <p id="keyboard-help"><strong>Accessible Keyboard Navigation:</strong> Tab to focus canvas. Use Arrow keys to move cursor (Shift for fast move). Space/Enter toggles drawing mode. Escape cancels the current stroke.</p>
+      <p id="cursor-position">Keyboard cursor: 500, 325</p>
+      <p>In-browser vector whiteboard for supply chain topology mapping. Supports stroke smoothing, undo/redo stack, and standard vector SVG export.</p>
+    </footer>
+  </main>
+</body>
+</html>
