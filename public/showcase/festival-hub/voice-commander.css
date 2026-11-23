@@ -1,0 +1,717 @@
+/**
+ * Festival Hub - Voice Commander & Speech Dispatcher Styles
+ * Rave Neon Festival Aesthetic + WCAG AAA High-Contrast Mode
+ * Issue #2034 - NSoC '26
+ */
+
+:root {
+  --voice-bg: #0c0716;
+  --voice-card: #170d2b;
+  --voice-card-hover: #22143d;
+  --voice-border: #3f226b;
+  --voice-border-glow: #7c3aed;
+  --voice-text: #f9f5ff;
+  --voice-dim: #b8a6d4;
+  --voice-pink: #ec4899;
+  --voice-pink-glow: rgba(236, 72, 153, 0.45);
+  --voice-amber: #f59e0b;
+  --voice-amber-glow: rgba(245, 158, 11, 0.45);
+  --voice-violet: #8b5cf6;
+  --voice-cyan: #06b6d4;
+  --voice-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --radius-sm: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--voice-bg);
+  color: var(--voice-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.5;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.voice-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ==========================================
+   Header & Navigation
+   ========================================== */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--voice-dim);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+  color: var(--voice-amber);
+  transform: translateX(-3px);
+  outline: none;
+}
+
+.voice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--voice-border);
+}
+
+.header-meta {
+  flex: 1 1 600px;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid var(--voice-border-glow);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-family: var(--voice-mono);
+  font-weight: 600;
+  color: var(--voice-pink);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.voice-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 30%, var(--voice-pink) 70%, var(--voice-amber) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+}
+
+.voice-header p {
+  margin: 0;
+  color: var(--voice-dim);
+  font-size: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contrast-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--voice-border);
+  color: var(--voice-text);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.contrast-btn:hover {
+  background: var(--voice-card-hover);
+  border-color: var(--voice-amber);
+  color: var(--voice-amber);
+}
+
+/* ==========================================
+   Concierge Deck Main Card
+   ========================================== */
+
+.concierge-deck {
+  background: var(--voice-card);
+  border: 1px solid var(--voice-border);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 40px rgba(124, 58, 237, 0.1);
+}
+
+/* ==========================================
+   Microphone Stage & Ripple Waves
+   ========================================== */
+
+.mic-stage {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.mic-rings {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mic-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid var(--voice-pink);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.concierge-deck.listening .ring-1 {
+  animation: ripple 2s infinite cubic-bezier(0, 0.2, 0.8, 1);
+}
+
+.concierge-deck.listening .ring-2 {
+  animation: ripple 2s infinite cubic-bezier(0, 0.2, 0.8, 1) 0.6s;
+}
+
+.concierge-deck.listening .ring-3 {
+  animation: ripple 2s infinite cubic-bezier(0, 0.2, 0.8, 1) 1.2s;
+}
+
+@keyframes ripple {
+  0% {
+    width: 88px;
+    height: 88px;
+    opacity: 0.9;
+    border-color: var(--voice-amber);
+  }
+  50% {
+    border-color: var(--voice-pink);
+  }
+  100% {
+    width: 170px;
+    height: 170px;
+    opacity: 0;
+    border-color: var(--voice-violet);
+  }
+}
+
+.mic-button {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid var(--voice-border-glow);
+  background: linear-gradient(135deg, #3b1d6b, #1d0e38);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(139, 92, 246, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.mic-button:hover {
+  transform: scale(1.06);
+  border-color: var(--voice-pink);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6), 0 0 25px var(--voice-pink-glow);
+}
+
+.mic-button:active {
+  transform: scale(0.96);
+}
+
+.concierge-deck.listening .mic-button {
+  background: linear-gradient(135deg, #ec4899, #f59e0b);
+  border-color: #fff;
+  box-shadow: 0 0 30px var(--voice-pink-glow), 0 0 40px var(--voice-amber-glow);
+  animation: micPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes micPulse {
+  0%, 100% {
+    transform: scale(1.04);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+.mic-icon {
+  width: 36px;
+  height: 36px;
+  fill: currentColor;
+}
+
+.mic-label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--voice-text);
+  margin-bottom: 4px;
+}
+
+.mic-subtext {
+  font-size: 0.85rem;
+  color: var(--voice-dim);
+  margin-bottom: 20px;
+}
+
+/* ==========================================
+   Neon Frequency Equalizer Visualizer
+   ========================================== */
+
+.equalizer-visualizer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  height: 64px;
+  width: 100%;
+  max-width: 440px;
+  margin: 10px 0 24px 0;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--voice-border);
+  border-radius: var(--radius-md);
+}
+
+.eq-bar {
+  flex: 1;
+  background: var(--voice-border);
+  border-radius: 4px;
+  height: 6px;
+  min-height: 6px;
+  transition: height 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.concierge-deck.listening .eq-bar,
+.concierge-deck.speaking .eq-bar {
+  background: linear-gradient(to top, var(--voice-violet), var(--voice-pink), var(--voice-amber));
+  box-shadow: 0 0 10px var(--voice-pink-glow);
+  animation: eqRave 1s infinite ease-in-out alternate;
+}
+
+.concierge-deck.listening .eq-bar:nth-child(2n) {
+  animation-delay: 0.15s;
+}
+.concierge-deck.listening .eq-bar:nth-child(3n) {
+  animation-delay: 0.3s;
+}
+.concierge-deck.listening .eq-bar:nth-child(4n) {
+  animation-delay: 0.45s;
+}
+.concierge-deck.listening .eq-bar:nth-child(5n) {
+  animation-delay: 0.2s;
+}
+
+@keyframes eqRave {
+  0% {
+    height: 8px;
+  }
+  50% {
+    height: 48px;
+  }
+  100% {
+    height: 20px;
+  }
+}
+
+/* ==========================================
+   Confidence Meter
+   ========================================== */
+
+.confidence-section {
+  width: 100%;
+  max-width: 440px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.confidence-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-family: var(--voice-mono);
+  color: var(--voice-dim);
+}
+
+.confidence-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--voice-border);
+}
+
+.confidence-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--voice-violet), var(--voice-pink), var(--voice-amber));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* ==========================================
+   Transcript & Audio Feedback Display
+   ========================================== */
+
+.speech-display {
+  width: 100%;
+  max-width: 680px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--voice-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.display-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.meta-title {
+  font-size: 0.75rem;
+  font-family: var(--voice-mono);
+  color: var(--voice-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.intent-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-family: var(--voice-mono);
+  font-weight: 700;
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--voice-pink);
+  border: 1px solid var(--voice-pink);
+}
+
+.transcript-output {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--voice-text);
+  min-height: 28px;
+  word-break: break-word;
+}
+
+.feedback-output {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--voice-amber);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--voice-amber);
+}
+
+.speaker-icon {
+  font-size: 1rem;
+}
+
+/* ==========================================
+   Quick Command Chips
+   ========================================== */
+
+.chips-section {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.chips-heading {
+  font-size: 0.85rem;
+  font-family: var(--voice-mono);
+  color: var(--voice-dim);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.command-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--voice-border);
+  color: var(--voice-text);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.command-chip:hover {
+  background: var(--voice-card-hover);
+  border-color: var(--voice-pink);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.25);
+}
+
+.command-chip:active {
+  transform: translateY(0);
+}
+
+/* ==========================================
+   Festival HUD Status & History
+   ========================================== */
+
+.deck-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .deck-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card-panel {
+  background: var(--voice-card);
+  border: 1px solid var(--voice-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.panel-title {
+  margin: 0 0 16px 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--voice-border);
+  padding-bottom: 10px;
+}
+
+.state-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.state-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.state-key {
+  color: var(--voice-dim);
+}
+
+.state-val {
+  font-family: var(--voice-mono);
+  font-weight: 600;
+  color: var(--voice-amber);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+.history-transcript {
+  font-weight: 600;
+  color: var(--voice-text);
+}
+
+.history-tag {
+  font-family: var(--voice-mono);
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--voice-pink);
+}
+
+.clear-btn {
+  background: transparent;
+  border: 1px solid var(--voice-border);
+  color: var(--voice-dim);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* ==========================================
+   WCAG AAA High-Contrast Mode
+   ========================================== */
+
+body.high-contrast {
+  --voice-bg: #000000;
+  --voice-card: #000000;
+  --voice-card-hover: #1a1a1a;
+  --voice-border: #ffffff;
+  --voice-border-glow: #ffff00;
+  --voice-text: #ffffff;
+  --voice-dim: #ffffff;
+  --voice-pink: #ffff00;
+  --voice-amber: #ffff00;
+  --voice-violet: #00ffff;
+  --voice-cyan: #00ffff;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast * {
+  border-color: #ffffff !important;
+}
+
+body.high-contrast .voice-header h1 {
+  background: none;
+  -webkit-text-fill-color: #ffffff;
+  color: #ffffff;
+}
+
+body.high-contrast .back-link {
+  color: #00ffff !important;
+  text-decoration: underline;
+}
+
+body.high-contrast .concierge-deck,
+body.high-contrast .card-panel,
+body.high-contrast .speech-display,
+body.high-contrast .equalizer-visualizer {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.high-contrast .mic-button {
+  background: #000000 !important;
+  border: 3px solid #ffff00 !important;
+  color: #ffff00 !important;
+}
+
+body.high-contrast .concierge-deck.listening .mic-button {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+body.high-contrast .command-chip {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast .command-chip:hover,
+body.high-contrast .command-chip:focus-visible {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  border-color: #ffff00 !important;
+}
+
+body.high-contrast .contrast-btn {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.high-contrast .intent-badge {
+  background: #000000 !important;
+  color: #ffff00 !important;
+  border: 2px solid #ffff00 !important;
+}
+
+body.high-contrast .feedback-output {
+  background: #000000 !important;
+  color: #ffff00 !important;
+  border: 2px solid #ffff00 !important;
+}
+
+body.high-contrast .state-val {
+  color: #ffff00 !important;
+}
+
+body.high-contrast .confidence-fill {
+  background: #ffff00 !important;
+}
+
+body.high-contrast a:focus-visible,
+body.high-contrast button:focus-visible {
+  outline: 3px solid #ffff00 !important;
+  outline-offset: 3px !important;
+}
