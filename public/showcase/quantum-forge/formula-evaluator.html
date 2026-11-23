@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge — Dynamic KPI Formula Evaluator</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="quantum-formula-body">
+  <div class="evaluator-wrapper">
+    <!-- Header Navigation & Title -->
+    <header class="evaluator-header">
+      <div class="header-top-row">
+        <div class="header-badge">
+          <span class="pulsing-dot"></span>
+          <span>QUANTUM KPI PARSER v2.6 • NISQ SPEC</span>
+        </div>
+        <div class="header-actions">
+          <label class="toggle-contrast-wrap" title="Toggle WCAG AAA High Contrast mode">
+            <input type="checkbox" id="high-contrast-toggle" aria-label="Toggle WCAG AAA High Contrast Mode">
+            <span class="contrast-slider"></span>
+            <span class="contrast-label">High Contrast (AAA)</span>
+          </label>
+          <a href="index.html" class="back-link" aria-label="Return to Quantum Forge Showcase">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Return to Showcase</span>
+          </a>
+        </div>
+      </div>
+      <h1 class="header-title">⚛️ Mathematical Expression Parser & Dynamic KPI Calculator</h1>
+      <p class="header-desc">
+        Deterministic in-browser Shunting-Yard tokenizer and Reverse Polish Notation (RPN) evaluator
+        for quantum circuit metrics, noise thresholds, and fault-tolerant coherence KPIs.
+      </p>
+    </header>
+
+    <!-- Formula Preset Strip -->
+    <section class="presets-section" aria-label="Quantum KPI Formula Presets">
+      <div class="presets-header">
+        <span class="presets-title">Quantum Formula Presets:</span>
+      </div>
+      <div class="presets-pills-wrap">
+        <button type="button" class="formula-preset-pill" data-formula="qubit_fidelity ^ circuit_depth">
+          Fidelity Retention: <code>qubit_fidelity ^ circuit_depth</code>
+        </button>
+        <button type="button" class="formula-preset-pill" data-formula="1 - (1 - gate_error) ^ circuit_depth">
+          Error Accumulation: <code>1 - (1 - gate_error) ^ circuit_depth</code>
+        </button>
+        <button type="button" class="formula-preset-pill" data-formula="decoherence_t2 / coherence_time_t1">
+          Decoherence Ratio: <code>decoherence_t2 / coherence_time_t1</code>
+        </button>
+        <button type="button" class="formula-preset-pill" data-formula="exp(-entanglement_entropy)">
+          Entanglement Purity: <code>exp(-entanglement_entropy)</code>
+        </button>
+        <button type="button" class="formula-preset-pill" data-formula="exp(-(circuit_depth / coherence_time_t1))">
+          State Decay: <code>exp(-(circuit_depth / coherence_time_t1))</code>
+        </button>
+        <button type="button" class="formula-preset-pill" data-formula="round((coherence_time_t1 * (qubit_fidelity ^ 2)) / (circuit_depth * gate_error))">
+          Capacity Score: <code>round((coherence_time_t1 * (qubit_fidelity ^ 2)) / (circuit_depth * gate_error))</code>
+        </button>
+      </div>
+    </section>
+
+    <!-- Syntax Helper Bar -->
+    <section class="syntax-bar" aria-label="Supported Mathematical Syntax & Functions">
+      <span class="syntax-bar-title">Insert Syntax:</span>
+      <div class="syntax-pills-row">
+        <button type="button" class="syntax-helper-pill" data-insert=" + ">+ Add</button>
+        <button type="button" class="syntax-helper-pill" data-insert=" - ">- Sub</button>
+        <button type="button" class="syntax-helper-pill" data-insert=" * ">* Mult</button>
+        <button type="button" class="syntax-helper-pill" data-insert=" / ">/ Div</button>
+        <button type="button" class="syntax-helper-pill" data-insert=" ^ ">^ Pow</button>
+        <button type="button" class="syntax-helper-pill" data-insert=" % ">% Mod</button>
+        <button type="button" class="syntax-helper-pill" data-insert="(  )" data-offset="2">( ) Group</button>
+        <button type="button" class="syntax-helper-pill fn-pill" data-insert="sqrt()">sqrt()</button>
+        <button type="button" class="syntax-helper-pill fn-pill" data-insert="exp()">exp()</button>
+        <button type="button" class="syntax-helper-pill fn-pill" data-insert="ln()">ln()</button>
+        <button type="button" class="syntax-helper-pill fn-pill" data-insert="log()">log()</button>
+        <button type="button" class="syntax-helper-pill fn-pill" data-insert="abs()">abs()</button>
+        <button type="button" class="syntax-helper-pill fn-pill" data-insert="min(,)">min(,)</button>
+        <button type="button" class="syntax-helper-pill fn-pill" data-insert="max(,)">max(,)</button>
+        <button type="button" class="syntax-helper-pill fn-pill" data-insert="round()">round()</button>
+      </div>
+    </section>
+
+    <!-- Main Workspace Grid -->
+    <main class="evaluator-grid">
+      <!-- Left Column: Formula Editor & Quantum Variable Sliders -->
+      <section class="workspace-column left-col">
+        <!-- Formula Input Box -->
+        <div class="card editor-card">
+          <div class="card-header">
+            <h3>Quantum Expression Editor</h3>
+            <span class="card-tag">BODMAS/PEMDAS</span>
+          </div>
+          <div class="formula-field-wrap">
+            <label for="formula-input" class="field-label">Mathematical Formula Expression</label>
+            <div class="formula-input-container">
+              <span class="formula-prefix">f(x) =</span>
+              <input
+                type="text"
+                id="formula-input"
+                class="formula-input"
+                value="qubit_fidelity ^ circuit_depth"
+                placeholder="Enter quantum formula e.g. qubit_fidelity ^ circuit_depth"
+                aria-label="Quantum formula mathematical expression"
+                spellcheck="false"
+                autocomplete="off"
+              >
+            </div>
+          </div>
+
+          <div class="editor-buttons-row">
+            <button type="button" id="evaluate-btn" class="btn btn-primary" aria-label="Calculate KPI Result">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>Calculate KPI</span>
+            </button>
+            <button type="button" id="clear-btn" class="btn btn-secondary" aria-label="Clear expression">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              <span>Clear</span>
+            </button>
+          </div>
+
+          <!-- Real-time syntax / evaluation error alert -->
+          <div id="warning-banner" class="warning-banner" role="alert" style="display: none;"></div>
+        </div>
+
+        <!-- Quantum Parameter Variables Card -->
+        <div class="card variables-card">
+          <div class="card-header">
+            <h3>Quantum Hardware Parameter Variables</h3>
+            <span class="card-tag">Dynamic Injection</span>
+          </div>
+          <p class="section-subtext">
+            Adjust quantum processor calibration values. Any parameter change re-evaluates the active formula immediately.
+          </p>
+
+          <div class="variables-grid">
+            <!-- qubit_fidelity -->
+            <div class="var-control-group">
+              <div class="var-label-row">
+                <label for="var-qubit-fidelity">
+                  <span class="var-name">qubit_fidelity</span>
+                  <span class="var-desc">1-Qubit Gate Fidelity</span>
+                </label>
+                <input
+                  type="number"
+                  id="var-qubit-fidelity"
+                  class="var-number-input"
+                  value="0.9995"
+                  step="0.0001"
+                  min="0.9"
+                  max="1.0"
+                >
+              </div>
+              <input
+                type="range"
+                id="slider-qubit-fidelity"
+                class="var-slider"
+                value="0.9995"
+                step="0.0001"
+                min="0.9"
+                max="1.0"
+                aria-label="Qubit Fidelity Slider"
+              >
+            </div>
+
+            <!-- gate_error -->
+            <div class="var-control-group">
+              <div class="var-label-row">
+                <label for="var-gate-error">
+                  <span class="var-name">gate_error</span>
+                  <span class="var-desc">Average Physical Gate Error</span>
+                </label>
+                <input
+                  type="number"
+                  id="var-gate-error"
+                  class="var-number-input"
+                  value="0.0005"
+                  step="0.0001"
+                  min="0.00001"
+                  max="0.05"
+                >
+              </div>
+              <input
+                type="range"
+                id="slider-gate-error"
+                class="var-slider"
+                value="0.0005"
+                step="0.0001"
+                min="0.00001"
+                max="0.05"
+                aria-label="Gate Error Slider"
+              >
+            </div>
+
+            <!-- coherence_time_t1 -->
+            <div class="var-control-group">
+              <div class="var-label-row">
+                <label for="var-coherence-t1">
+                  <span class="var-name">coherence_time_t1</span>
+                  <span class="var-desc">Relaxation Time (μs)</span>
+                </label>
+                <input
+                  type="number"
+                  id="var-coherence-t1"
+                  class="var-number-input"
+                  value="120"
+                  step="1"
+                  min="1"
+                  max="500"
+                >
+              </div>
+              <input
+                type="range"
+                id="slider-coherence-t1"
+                class="var-slider"
+                value="120"
+                step="1"
+                min="1"
+                max="500"
+                aria-label="Coherence Time T1 Slider"
+              >
+            </div>
+
+            <!-- decoherence_t2 -->
+            <div class="var-control-group">
+              <div class="var-label-row">
+                <label for="var-decoherence-t2">
+                  <span class="var-name">decoherence_t2</span>
+                  <span class="var-desc">Dephasing Time (μs)</span>
+                </label>
+                <input
+                  type="number"
+                  id="var-decoherence-t2"
+                  class="var-number-input"
+                  value="85"
+                  step="1"
+                  min="1"
+                  max="500"
+                >
+              </div>
+              <input
+                type="range"
+                id="slider-decoherence-t2"
+                class="var-slider"
+                value="85"
+                step="1"
+                min="1"
+                max="500"
+                aria-label="Decoherence T2 Slider"
+              >
+            </div>
+
+            <!-- circuit_depth -->
+            <div class="var-control-group">
+              <div class="var-label-row">
+                <label for="var-circuit-depth">
+                  <span class="var-name">circuit_depth</span>
+                  <span class="var-desc">Gate Layers / Cycle Depth</span>
+                </label>
+                <input
+                  type="number"
+                  id="var-circuit-depth"
+                  class="var-number-input"
+                  value="64"
+                  step="1"
+                  min="1"
+                  max="256"
+                >
+              </div>
+              <input
+                type="range"
+                id="slider-circuit-depth"
+                class="var-slider"
+                value="64"
+                step="1"
+                min="1"
+                max="256"
+                aria-label="Circuit Depth Slider"
+              >
+            </div>
+
+            <!-- entanglement_entropy -->
+            <div class="var-control-group">
+              <div class="var-label-row">
+                <label for="var-entanglement-entropy">
+                  <span class="var-name">entanglement_entropy</span>
+                  <span class="var-desc">Bipartite Von Neumann Entropy</span>
+                </label>
+                <input
+                  type="number"
+                  id="var-entanglement-entropy"
+                  class="var-number-input"
+                  value="0.6931"
+                  step="0.001"
+                  min="0.0"
+                  max="3.0"
+                >
+              </div>
+              <input
+                type="range"
+                id="slider-entanglement-entropy"
+                class="var-slider"
+                value="0.6931"
+                step="0.001"
+                min="0.0"
+                max="3.0"
+                aria-label="Entanglement Entropy Slider"
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Computed KPI Callout, Internal Pipeline, and History -->
+      <section class="workspace-column right-col">
+        <!-- Glowing KPI Result Callout Card -->
+        <div class="card result-card" id="result-callout-card">
+          <div class="result-header">
+            <span class="result-badge">EVALUATED KPI OUTPUT</span>
+            <span class="status-indicator live">● CALC READY</span>
+          </div>
+          <div class="result-value-wrap">
+            <div id="result-display" class="result-value" aria-live="polite">0.968500</div>
+          </div>
+          <div class="result-footer">
+            <span class="result-caption">Quantum State Figure of Merit</span>
+            <span class="result-precision">IEEE 754 Floating-Point Precision</span>
+          </div>
+        </div>
+
+        <!-- Tokenized Parser Stream & RPN Compilation -->
+        <div class="card pipeline-card">
+          <div class="card-header">
+            <h3>Parser Diagnostic Pipelines</h3>
+            <span class="card-tag">AST / RPN</span>
+          </div>
+
+          <div class="pipeline-block">
+            <div class="pipeline-title-row">
+              <span class="pipeline-label">Tokenizer Token Stream:</span>
+            </div>
+            <div id="token-stream" class="code-stream" aria-label="Token stream representation"></div>
+          </div>
+
+          <div class="pipeline-block">
+            <div class="pipeline-title-row">
+              <span class="pipeline-label">Reverse Polish Notation (RPN Queue):</span>
+            </div>
+            <div id="rpn-stream" class="code-stream" aria-label="RPN stream representation"></div>
+          </div>
+        </div>
+
+        <!-- Calculation Audit History Log -->
+        <div class="card history-card">
+          <div class="card-header">
+            <h3>Calculation Audit Log</h3>
+            <button type="button" id="clear-history-btn" class="btn-text" aria-label="Clear history audit log">
+              Clear Audit Log
+            </button>
+          </div>
+          <p class="section-subtext">Recent dynamic calculations with timestamps and parameter states.</p>
+          <div id="history-list" class="history-feed" aria-live="polite">
+            <div class="history-empty">No calculations recorded yet.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer Note -->
+    <footer class="evaluator-footer">
+      <p>Quantum Forge NISQ Simulation Workbench • Issue #1264 Modular Mathematical Parser</p>
+    </footer>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
