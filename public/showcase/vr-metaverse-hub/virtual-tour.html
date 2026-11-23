@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VR Metaverse Hub - Feature Spotlight Onboarding Tour</title>
+  <link rel="stylesheet" href="./virtual-tour.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #tour-root {
+      max-width: 850px;
+      width: 100%;
+    }
+    .vr-metaverse-hub-mock-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      max-width: 850px;
+      width: 100%;
+    }
+    .mock-card {
+      padding: 1.5rem;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: #cbd5e1;
+    }
+    .mock-card h4 {
+      margin: 0 0 0.5rem 0;
+      color: #ec4899;
+      font-size: 1.1rem;
+    }
+    .mock-card p {
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div id="tour-root"></div>
+
+  <div class="vr-metaverse-hub-mock-grid">
+    <div id="viewport-card" class="mock-card">
+      <h4>Spatial Viewport</h4>
+      <p>Stereoscopic rendering and 6-DoF head-tracking canvas.</p>
+    </div>
+    <div id="avatar-card" class="mock-card">
+      <h4>Avatar Rigging</h4>
+      <p>Full-body skeletal inverse kinematics and gesture mapping.</p>
+    </div>
+    <div id="portal-card" class="mock-card">
+      <h4>Shard Portal</h4>
+      <p>Low-latency distributed metaverse teleportation bridge.</p>
+    </div>
+    <div id="audio-card" class="mock-card">
+      <h4>Binaural Audio</h4>
+      <p>Real-time HRTF soundfield propagation and spatial acoustics.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { VrMetaverseHubTourGuide } from './virtual-tour.js';
+
+    const root = document.getElementById('tour-root');
+    const guide = new VrMetaverseHubTourGuide();
+    guide.renderToDOM(root);
+  </script>
+</body>
+</html>
