@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Voice Commander & Accessibility Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <div class="docs-portal-layout" id="docContainer">
+    <!-- Header Section -->
+    <header class="commander-header">
+      <div class="header-top">
+        <div class="portal-badge">
+          <span class="badge-icon">📖</span>
+          <span>Docs Portal &bull; Web Speech API Dispatcher</span>
+        </div>
+        <div class="header-badges">
+          <div class="status-pill status-idle" id="statusPill" role="status" aria-live="polite">
+            <span class="status-dot"></span>
+            <span id="statusText">Idle</span>
+          </div>
+          <span class="badge-tag" id="contrastBadge">Standard Contrast</span>
+          <span class="badge-tag" id="zoomBadge">Font Zoom: 100%</span>
+        </div>
+      </div>
+      <h1 class="header-title">Docs Portal Voice Commander</h1>
+      <p class="header-desc">
+        Hands-free documentation search, section navigation, code snippet copying, and real-time speech accessibility assistant powered by the Web Speech API.
+      </p>
+    </header>
+
+    <!-- Main Workspace Grid -->
+    <main class="commander-grid">
+      <!-- Left Column: Voice Terminal & Controls -->
+      <section class="commander-column controls-column">
+        <!-- Voice Activation Card -->
+        <div class="card terminal-card" aria-labelledby="terminalHeading">
+          <div class="card-header">
+            <h2 id="terminalHeading" class="card-title">Voice Command Console</h2>
+            <span class="pill-indicator">Continuous Speech Audio</span>
+          </div>
+
+          <div class="mic-section">
+            <div class="mic-button-wrapper">
+              <button type="button" id="micBtn" class="mic-button" aria-label="Toggle voice listening mode" aria-pressed="false">
+                <span class="mic-pulse-ring"></span>
+                <span class="mic-pulse-ring delay"></span>
+                <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+            <div id="micLabel" class="mic-label">Activate Voice Mic</div>
+          </div>
+
+          <!-- Animated Sound Wave Visualizer -->
+          <div class="wave-visualizer" id="waveVisualizer" aria-hidden="true">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+
+          <!-- Mock Speech Input Prompt Box -->
+          <div class="mock-input-section">
+            <label for="mockInput" class="input-label">Mock Speech Input Simulator</label>
+            <div class="input-group">
+              <input
+                type="text"
+                id="mockInput"
+                class="mock-text-input"
+                placeholder="Type voice command (e.g., 'search docs for webhooks', 'go to api reference')..."
+                aria-label="Mock speech voice command prompt"
+              >
+              <button type="button" id="dispatchBtn" class="btn-primary dispatch-btn">Dispatch</button>
+            </div>
+          </div>
+
+          <!-- Quick Vocal Prompts Chips -->
+          <div class="vocal-chips-section">
+            <span class="chips-title">Suggested Vocal Commands:</span>
+            <div class="chips-group">
+              <button type="button" class="cmd-chip" data-voice-cmd="search docs for webhooks">"search docs for webhooks"</button>
+              <button type="button" class="cmd-chip" data-voice-cmd="go to api reference">"go to api reference"</button>
+              <button type="button" class="cmd-chip" data-voice-cmd="open guides">"open guides"</button>
+              <button type="button" class="cmd-chip" data-voice-cmd="navigate to tutorials">"navigate to tutorials"</button>
+              <button type="button" class="cmd-chip" data-voice-cmd="copy code snippet">"copy code snippet"</button>
+              <button type="button" class="cmd-chip" data-voice-cmd="read aloud">"read aloud"</button>
+              <button type="button" class="cmd-chip" data-voice-cmd="toggle contrast">"toggle contrast"</button>
+              <button type="button" class="cmd-chip" data-voice-cmd="increase font size">"increase font size"</button>
+              <button type="button" class="cmd-chip" data-voice-cmd="reset zoom">"reset zoom"</button>
+              <button type="button" class="cmd-chip" data-voice-cmd="help">"help"</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voice Grammar Reference Card -->
+        <div class="card reference-card">
+          <h3 class="card-title-sm">Documentation Voice Grammars</h3>
+          <div class="grammar-table-wrap">
+            <table class="grammar-table">
+              <thead>
+                <tr>
+                  <th>Action ID</th>
+                  <th>Spoken Grammar Syntax</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>SEARCH_DOCS</code></td>
+                  <td>"search docs for &lt;query&gt;", "find &lt;query&gt;", "search &lt;query&gt;"</td>
+                </tr>
+                <tr>
+                  <td><code>NAVIGATE_SECTION</code></td>
+                  <td>"go to api reference", "open guides", "navigate to tutorials", "jump to changelog"</td>
+                </tr>
+                <tr>
+                  <td><code>COPY_CODE</code></td>
+                  <td>"copy code snippet", "copy example", "copy block"</td>
+                </tr>
+                <tr>
+                  <td><code>READ_ARTICLE</code></td>
+                  <td>"read section", "read aloud", "speak summary"</td>
+                </tr>
+                <tr>
+                  <td><code>TOGGLE_HIGH_CONTRAST</code></td>
+                  <td>"toggle contrast", "high contrast mode", "accessibility mode"</td>
+                </tr>
+                <tr>
+                  <td><code>ZOOM_FONT</code></td>
+                  <td>"increase font size", "decrease font size", "reset zoom"</td>
+                </tr>
+                <tr>
+                  <td><code>HELP</code></td>
+                  <td>"help", "list commands", "what can I say"</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Live Documentation & Command History Feed -->
+      <section class="commander-column display-column">
+        <!-- Interactive Documentation Portal Canvas -->
+        <div class="card docs-card" aria-labelledby="docsHeading">
+          <div class="card-header">
+            <div class="section-breadcrumbs">
+              <span class="crumb-root">Documentation</span>
+              <span class="crumb-separator">/</span>
+              <span class="crumb-current" id="activeSectionName">Overview</span>
+            </div>
+            <div class="docs-section-tabs" role="tablist">
+              <button type="button" class="tab-btn" data-voice-cmd="go to overview">Overview</button>
+              <button type="button" class="tab-btn" data-voice-cmd="go to api reference">API Reference</button>
+              <button type="button" class="tab-btn" data-voice-cmd="open guides">Guides</button>
+              <button type="button" class="tab-btn" data-voice-cmd="navigate to tutorials">Tutorials</button>
+              <button type="button" class="tab-btn" data-voice-cmd="jump to changelog">Changelog</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Search Result Alert -->
+          <div class="search-banner" id="searchResultBanner" style="display: none;">
+            <div class="search-banner-inner">
+              <span class="search-icon">🔍</span>
+              <span>Search results matched for <strong id="searchQueryDisplay">""</strong></span>
+            </div>
+          </div>
+
+          <!-- Documentation Content Area -->
+          <div class="doc-body" id="activeSectionBody">
+            <h2 id="docsHeading" class="doc-headline">CareerForge Developer Documentation</h2>
+            <p class="doc-paragraph">
+              Welcome to the CareerForge Developer Platform. Build, integrate, and scale enterprise hiring intelligence tools, real-time automated assessment workflows, and role-based matching algorithms.
+            </p>
+
+            <div class="code-block-container">
+              <div class="code-header">
+                <span class="code-lang">javascript</span>
+                <button type="button" class="btn-copy-code" id="copyCodeBtn" aria-label="Copy code block">
+                  <span>📋</span> Copy Snippet
+                </button>
+              </div>
+              <pre class="code-pre"><code id="codeSnippetEl">import { DocsPortalClient } from "@careerforge/docs-portal";
+
+const client = new DocsPortalClient({
+  apiKey: process.env.CAREERFORGE_API_KEY,
+  environment: "production",
+  telemetry: true
+});
+
+// Initialize real-time voice speech dispatcher
+const session = await client.voiceCommander.startSession({
+  locale: "en-US",
+  continuousRecognition: true
+});</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Command History Feed -->
+        <div class="card history-card" aria-labelledby="historyHeading">
+          <div class="card-header">
+            <div class="header-with-count">
+              <h2 id="historyHeading" class="card-title">Recognized Command Feed</h2>
+            </div>
+            <button type="button" class="btn-secondary btn-sm" id="clearHistoryBtn">Clear History</button>
+          </div>
+
+          <div class="command-feed" id="commandHistory" role="log" aria-live="polite">
+            <div class="history-empty">No voice commands recorded yet. Speak or type a command above.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Speech Toast Announcement -->
+    <div class="speech-toast" id="speechToast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
