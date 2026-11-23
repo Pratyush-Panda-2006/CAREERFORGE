@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar // Tiered Resource Allocation & Dynamic Cost Optimizer Sandbox</title>
+  <link rel="stylesheet" href="cost-optimizer.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" src="cost-optimizer.js"></script>
+</head>
+<body>
+  <div class="optimizer-app">
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+      <div class="brand">
+        <a href="./index.html" class="back-link" title="Return to Hypercar Lab">‹ APEX LAB</a>
+        <span class="brand-divider">/</span>
+        <span class="brand-title">SCUDERIA ATELIER</span>
+        <span class="live-pill">LIVE OPTIMIZER</span>
+      </div>
+      <div class="header-status">
+        <span class="dot-indicator pulse"></span>
+        <span class="status-text">FACTORY ALLOCATION SERVER: ONLINE</span>
+      </div>
+    </header>
+
+    <!-- Hero Title Section -->
+    <section class="hero-section">
+      <div class="eyebrow">DYNAMIC RESOURCE ALLOCATION &amp; COST OPTIMIZER SANDBOX</div>
+      <h1 class="main-title">BESPOKE HYPERCAR BUILD CALCULATOR</h1>
+      <p class="subtitle">
+        Architect tailored chassis powertrains, Le Mans active aero packages, and track telemetry services.
+        Experience dynamic multi-tier volume incentives and upfront settlement savings in real time.
+      </p>
+    </section>
+
+    <!-- Main Workspace Grid -->
+    <main class="workspace-grid">
+      <!-- Left Column: Configurator & Allocation Controls -->
+      <section class="configurator-panel card-glass" aria-label="Hypercar Resource Allocation Controls">
+        <div class="panel-header">
+          <div class="header-icon">⚙</div>
+          <div>
+            <h2>Resource Allocation Controls</h2>
+            <p>Select tailored components &amp; powertrain specifications</p>
+          </div>
+        </div>
+
+        <form id="optimizer-form" class="config-form" onsubmit="return false;">
+          <!-- Powertrain & Chassis Tier -->
+          <div class="control-group">
+            <div class="group-label-row">
+              <label for="chassis-select" class="group-label">1. Powertrain &amp; Carbon Monocoque Tier</label>
+              <span class="badge-tag">MSRP BASE</span>
+            </div>
+            <select id="chassis-select" class="styled-select">
+              <option value="apex-v8" selected>Apex GT V8 Twin-Turbo (780 HP • 345 km/h) — $850,000</option>
+              <option value="valkyrie-v12">Valkyrie V12 Hybrid (1,160 HP • 395 km/h) — $2,200,000</option>
+              <option value="chiron-w16">Chiron W16 Quad-Turbo (1,600 HP • 442 km/h) — $3,800,000</option>
+              <option value="bolide-lm">Bolide LM Track Prototype (1,850 HP • 485 km/h) — $5,200,000</option>
+            </select>
+            <div class="control-caption">Carbon-composite tub with structural honeycomb and integrated crash boxes.</div>
+          </div>
+
+          <!-- Carbon Aero Package -->
+          <div class="control-group">
+            <div class="group-label-row">
+              <label for="aero-select" class="group-label">2. Aerodynamic Carbon-Fiber Package</label>
+              <span class="badge-tag">ACTIVE AERO</span>
+            </div>
+            <select id="aero-select" class="styled-select">
+              <option value="stage-1" selected>Stage 1 Active Aero (Active Rear Wing &amp; DRS) — $120,000</option>
+              <option value="stage-2">Stage 2 Carbon Ground Effect (Venturi Tunnels &amp; Diffuser) — $280,000</option>
+              <option value="stage-3">Stage 3 Le Mans Spec (Full High-Downforce LMP1 Aero) — $480,000</option>
+            </select>
+            <div class="control-caption">Provides up to 650 kg additional downforce with drag reduction system.</div>
+          </div>
+
+          <!-- Wheel & Tire Spec -->
+          <div class="control-group">
+            <div class="group-label-row">
+              <label for="wheel-select" class="group-label">3. Wheel &amp; Tire Specification</label>
+              <span class="badge-tag">UNSPRUNG MASS</span>
+            </div>
+            <select id="wheel-select" class="styled-select">
+              <option value="forged-aluminum" selected>Lightweight Forged Aluminum (Michelin Cup 2) — $45,000</option>
+              <option value="forged-magnesium">Center-Lock Forged Magnesium (-16kg • Aero Discs) — $120,000</option>
+              <option value="carbon-composite">Full Carbon-Fiber Barrel Wheels &amp; Trofeo RS Slicks — $210,000</option>
+            </select>
+            <div class="control-caption">Rotational inertia reduction improves 0-100 km/h acceleration by up to 0.10s.</div>
+          </div>
+
+          <!-- Brake Packages -->
+          <div class="control-group">
+            <div class="group-label-row">
+              <label for="brakes-select" class="group-label">4. Ceramic Brake System</label>
+              <span class="badge-tag">THERMAL COATING</span>
+            </div>
+            <select id="brakes-select" class="styled-select">
+              <option value="standard-ceramic" selected>Carbon-Silicon Carbide (CSiC) 400mm 6-Piston — $95,000</option>
+              <option value="extreme-ceramic">F1-Spec Monobloc Carbon-Carbon 420mm — $195,000</option>
+            </select>
+            <div class="control-caption">Fade-free track endurance tested to 1,200°C rotor temperatures.</div>
+          </div>
+
+          <!-- Titanium Exhaust -->
+          <div class="control-group">
+            <div class="group-label-row">
+              <label for="exhaust-select" class="group-label">5. Exhaust &amp; Acoustic Resonance</label>
+              <span class="badge-tag">POWER ADDER</span>
+            </div>
+            <select id="exhaust-select" class="styled-select">
+              <option value="inconel-sport" selected>Inconel 625 Dual Sport Exhaust (+15 HP) — $75,000</option>
+              <option value="titanium-f1">3D-Printed Titanium Race Exhaust (+35 HP • -20kg) — $150,000</option>
+            </select>
+            <div class="control-caption">Valved acoustics delivering resonant pitch up to 11,500 RPM.</div>
+          </div>
+
+          <!-- Telemetry & Pit-Crew -->
+          <div class="control-group">
+            <div class="group-label-row">
+              <label for="telemetry-select" class="group-label">6. Track Telemetry &amp; Pit-Crew Package</label>
+              <span class="badge-tag">FACTORY PIT</span>
+            </div>
+            <select id="telemetry-select" class="styled-select">
+              <option value="standard-telemetry" selected>Cloud Telemetry &amp; CAN-Bus Logging (128 Ch) — $60,000</option>
+              <option value="factory-trackside">Trackside Engineer Real-Time Uplink (512 Ch) — $160,000</option>
+              <option value="pit-crew-vip">Dedicated Factory Pit-Crew &amp; VIP Paddock (2048 Ch) — $360,000</option>
+            </select>
+            <div class="control-caption">High-bandwidth telemetry with live factory motorsport engineer analysis.</div>
+          </div>
+
+          <!-- Payment Terms Toggle -->
+          <div class="payment-terms-box">
+            <div class="terms-header">
+              <span class="terms-title">Payment Settlement Terms</span>
+              <span class="saving-badge">10% CASH SAVINGS INCENTIVE</span>
+            </div>
+            <div class="toggle-container">
+              <span class="toggle-option-label" id="label-financed">Financed (48 Mo)</span>
+              <label class="switch" for="payment-toggle">
+                <input type="checkbox" id="payment-toggle" checked aria-labelledby="label-cash">
+                <span class="slider round"></span>
+              </label>
+              <span class="toggle-option-label active" id="label-cash">Full Cash Settlement (10% Off)</span>
+            </div>
+            <p class="terms-footnote">Selecting full upfront cash settlement applies an extra 10% cash discount post volume tiers.</p>
+          </div>
+
+          <!-- Dynamic Budget Optimizer Sandbox -->
+          <div class="budget-optimizer-box">
+            <div class="box-title">
+              <span class="icon-sparkle">✦</span>
+              <span>Dynamic Budget Optimizer Sandbox</span>
+            </div>
+            <p class="box-desc">Enter your target allocation budget. The optimizer calculates the highest-performance hypercar package fitting your financial boundaries.</p>
+            <div class="optimizer-input-row">
+              <div class="currency-input-wrap">
+                <span class="currency-symbol">$</span>
+                <input type="number" id="budget-input" min="500000" max="10000000" step="50000" value="3000000" placeholder="e.g. 3,000,000">
+              </div>
+              <button type="button" id="optimize-btn" class="btn-optimize">Auto-Optimize Build</button>
+            </div>
+            <div id="optimizer-message" class="optimizer-status-msg" aria-live="polite"></div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Right Column: Live Price Ticker & Performance Gauges -->
+      <section class="metrics-panel" aria-label="Dynamic Cost Summary and Vehicle Performance Telemetry">
+        <!-- Live Investment Ticker Card -->
+        <div class="ticker-card card-glass">
+          <div class="ticker-header">
+            <div class="ticker-label">TOTAL BESPOKE INVESTMENT</div>
+            <div id="tier-badge" class="tier-badge tier-tier1">Tier 1 • Club Sport</div>
+          </div>
+          <div class="ticker-price-display">
+            <span class="total-amount" id="total-cost-val">$0</span>
+            <span class="currency-tag">USD NET</span>
+          </div>
+          <div class="msrp-row">
+            <span class="msrp-label">Base Configuration MSRP:</span>
+            <span class="msrp-val" id="base-msrp-val">$0</span>
+          </div>
+
+          <div class="incentives-table">
+            <div class="incentive-row">
+              <span class="inc-label">Volume Tier Incentive:</span>
+              <span class="inc-val green-text" id="volume-discount-val">-$0 (0%)</span>
+            </div>
+            <div class="incentive-row">
+              <span class="inc-label">Upfront Cash Settlement Saving:</span>
+              <span class="inc-val green-text" id="cash-discount-val">-$0 (10%)</span>
+            </div>
+            <div class="incentive-row total-discount-row">
+              <span class="inc-label">Total Applied Capital Savings:</span>
+              <span class="inc-val gold-text" id="total-savings-val">-$0 (0%)</span>
+            </div>
+            <div class="incentive-row finance-row">
+              <span class="inc-label">Financing Term Estimate:</span>
+              <span class="inc-val cyan-text" id="monthly-estimate-val">N/A</span>
+            </div>
+          </div>
+
+          <!-- Itemized Breakdown -->
+          <div class="breakdown-collapsible">
+            <div class="breakdown-title">Itemized Component Subtotal</div>
+            <div class="breakdown-grid">
+              <div class="item-row"><span>Chassis &amp; Powertrain:</span><strong id="cost-chassis">$0</strong></div>
+              <div class="item-row"><span>Carbon Aerodynamics:</span><strong id="cost-aero">$0</strong></div>
+              <div class="item-row"><span>Ceramic Brakes:</span><strong id="cost-brakes">$0</strong></div>
+              <div class="item-row"><span>Titanium Exhaust:</span><strong id="cost-exhaust">$0</strong></div>
+              <div class="item-row"><span>Forged Wheels &amp; Tires:</span><strong id="cost-wheels">$0</strong></div>
+              <div class="item-row"><span>Telemetry &amp; Pit-Crew:</span><strong id="cost-telemetry">$0</strong></div>
+            </div>
+          </div>
+
+          <button type="button" id="generate-quote-btn" class="btn-quote">
+            <span class="btn-text">Generate Official Factory Build Quote</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+
+        <!-- Performance Metric Badges Card -->
+        <div class="performance-card card-glass">
+          <div class="perf-header">
+            <h3>Estimated Vehicle Dynamics Telemetry</h3>
+            <span class="perf-tag">SIMULATED ATELIER SPECS</span>
+          </div>
+
+          <div class="gauges-grid">
+            <div class="gauge-tile">
+              <div class="gauge-title">Top Speed</div>
+              <div class="gauge-value cyan-val" id="perf-top-speed">0 km/h</div>
+              <div class="gauge-sub">Electronically Limited</div>
+            </div>
+
+            <div class="gauge-tile">
+              <div class="gauge-title">0–100 km/h</div>
+              <div class="gauge-value red-val" id="perf-0-100">0.0 s</div>
+              <div class="gauge-sub">All-Wheel Traction</div>
+            </div>
+
+            <div class="gauge-tile">
+              <div class="gauge-title">Downforce @ 250 km/h</div>
+              <div class="gauge-value amber-val" id="perf-downforce">0 kg</div>
+              <div class="gauge-sub">Active Aerodynamic Load</div>
+            </div>
+
+            <div class="gauge-tile">
+              <div class="gauge-title">Cornering Grip</div>
+              <div class="gauge-value green-val" id="perf-lateral-g">0.0 G</div>
+              <div class="gauge-sub">Peak Lateral Acceleration</div>
+            </div>
+
+            <div class="gauge-tile">
+              <div class="gauge-title">Power Output</div>
+              <div class="gauge-value gold-val" id="perf-horsepower">0 HP</div>
+              <div class="gauge-sub">Combined Crank Rating</div>
+            </div>
+
+            <div class="gauge-tile">
+              <div class="gauge-title">Power-to-Weight</div>
+              <div class="gauge-value cyan-val" id="perf-power-weight">0 HP/t</div>
+              <div class="gauge-sub">Dry Kerb Mass Ratio</div>
+            </div>
+          </div>
+
+          <div class="braking-bar">
+            <span>Estimated 100–0 km/h Braking Distance:</span>
+            <strong id="perf-braking">0 m</strong>
+          </div>
+        </div>
+
+        <!-- Volume Tier Explainer Card -->
+        <div class="tier-matrix-card card-glass">
+          <h4>Factory Volume Incentive Matrix</h4>
+          <div class="matrix-list">
+            <div class="matrix-item">
+              <span class="m-tier">Tier 1 ($500k – $1.5M)</span>
+              <span class="m-discount">0% Discount</span>
+              <span class="m-desc">Club Sport Bespoke Allocation</span>
+            </div>
+            <div class="matrix-item">
+              <span class="m-tier">Tier 2 ($1.5M – $3.0M)</span>
+              <span class="m-discount highlight-discount">5% Performance Incentive</span>
+              <span class="m-desc">Includes priority wind-tunnel validation</span>
+            </div>
+            <div class="matrix-item">
+              <span class="m-tier">Tier 3 ($3.0M – $5.0M)</span>
+              <span class="m-discount highlight-discount">10% VIP Paddock Package</span>
+              <span class="m-desc">Priority factory build slots &amp; VIP hospitality</span>
+            </div>
+            <div class="matrix-item">
+              <span class="m-tier">Tier 4 (&gt; $5.0M)</span>
+              <span class="m-discount highlight-discount">18% Factory Racing Team</span>
+              <span class="m-desc">Full factory Le Mans trackside engineering team</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Factory Build Quote Modal -->
+    <div id="quote-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+      <div class="modal-container card-glass">
+        <div class="modal-header">
+          <div class="modal-seal">APEX ATELIER // CERTIFIED BUILD QUOTE</div>
+          <button type="button" id="close-quote-btn" class="modal-close" aria-label="Close quote modal">×</button>
+        </div>
+
+        <div class="quote-sheet">
+          <div class="sheet-top-row">
+            <div>
+              <h2 id="modal-title">FACTORY BUILD ALLOCATION QUOTE</h2>
+              <p class="quote-id-tag">Reference: <strong id="modal-quote-id">HFQ-2026-000000</strong></p>
+            </div>
+            <div class="date-badge">
+              <span>Date:</span>
+              <strong id="modal-quote-date">Nov 22, 2026</strong>
+            </div>
+          </div>
+
+          <div class="vin-strip">
+            <span>ALLOCATED CHASSIS VIN:</span>
+            <code id="modal-quote-vin">APX-2026-X839B1</code>
+          </div>
+
+          <div class="quote-details-box">
+            <div class="detail-line">
+              <span>Delivery Slot:</span>
+              <strong id="modal-quote-delivery">Q2 2027 • Atelier Molsheim / Sant'Agata Bespoke Works</strong>
+            </div>
+            <div class="detail-line">
+              <span>Base MSRP:</span>
+              <strong id="modal-quote-base">$0</strong>
+            </div>
+            <div class="detail-line">
+              <span>Volume Tier Savings:</span>
+              <strong class="green-text" id="modal-quote-volume">-$0</strong>
+            </div>
+            <div class="detail-line">
+              <span>Upfront Settlement Savings:</span>
+              <strong class="green-text" id="modal-quote-cash">-$0</strong>
+            </div>
+            <div class="detail-line final-line">
+              <span>Net Total Allocation Investment:</span>
+              <strong class="gold-text" id="modal-quote-total">$0</strong>
+            </div>
+          </div>
+
+          <div class="modal-footer-actions">
+            <button type="button" id="print-quote-btn" class="btn-print">Print / Save Build PDF</button>
+            <p class="quote-legal">Certified valid for 30 days from generation date. Prices subject to currency hedging and custom bespoke tailoring additions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page Footer -->
+    <footer class="app-footer">
+      <p>© 2026 Scuderia Apex Dynamics. All hypercar telemetry &amp; performance metrics simulated for demonstration sandbox.</p>
+    </footer>
+  </div>
+</body>
+</html>
