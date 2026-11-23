@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arm pose receipt | Robotics Automata</title>
+  <link rel="stylesheet" href="export-receipt.css">
+  <script type="module" src="export-receipt.js"></script>
+</head>
+<body>
+  <main class="workspace">
+    <a href="index.html">← Robotics Automata</a>
+    <h1>Arm pose receipt</h1>
+    <p>Set the simulated arm angles and export a PNG of the pose.</p>
+    <div class="layout">
+      <section class="panel settings" aria-labelledby="settings-heading">
+        <h2 id="settings-heading">Pose settings</h2>
+        <label class="title-field" for="receipt-title">Receipt title</label>
+        <input id="receipt-title" type="text" maxlength="48" value="Arm pose record">
+        <div class="angle">
+          <label for="shoulder">Shoulder</label>
+          <output id="shoulder-value" for="shoulder"></output>
+          <input id="shoulder" type="range" min="-180" max="180" value="35">
+        </div>
+        <div class="angle">
+          <label for="elbow">Elbow</label>
+          <output id="elbow-value" for="elbow"></output>
+          <input id="elbow" type="range" min="-180" max="180" value="50">
+        </div>
+        <dl class="pose">
+          <dt>End position</dt><dd id="endpoint"></dd>
+          <dt>Pose code</dt><dd id="pose-code"></dd>
+        </dl>
+        <button id="download" type="button">Download PNG receipt</button>
+        <p id="download-status" role="status"></p>
+      </section>
+      <section class="panel preview" aria-labelledby="preview-heading">
+        <div class="preview-heading">
+          <h2 id="preview-heading">Preview</h2>
+          <label><input id="zoom" type="checkbox"> Actual-size preview</label>
+        </div>
+        <div id="frame" class="frame" role="region" aria-label="Scrollable receipt preview">
+          <canvas id="receipt" width="1520" height="960" role="img" aria-label="Simulated arm pose receipt">A summary of the simulated pose appears in Pose settings.</canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
