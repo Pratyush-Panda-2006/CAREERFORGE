@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter — Dynamic KPI Formula Evaluator & Expression Parser</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="formula-evaluator-body">
+  <!-- Top Navigation Bar -->
+  <header class="eval-navbar">
+    <div class="nav-left">
+      <a href="index.html" class="nav-back-link" title="Return to Orbiter-X Mission Control">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        <span>Back to Mission Hub</span>
+      </a>
+      <div class="nav-separator"></div>
+      <div class="nav-brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-title">ORBITER-X // Formula Evaluator</span>
+        <span class="badge-status">ONLINE</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <button id="contrast-toggle" class="btn-contrast-toggle" aria-label="Toggle High-Contrast Mode (WCAG AAA)" aria-pressed="false" title="Toggle WCAG AAA high contrast theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10V2z"/>
+        </svg>
+        <span>High Contrast (AAA)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="eval-main-container">
+    <!-- Header Banner -->
+    <section class="eval-hero-banner">
+      <div class="hero-tag">AEROSPACE TELEMETRY & TRAJECTORY MECHANICS ENGINE</div>
+      <h1>Dynamic KPI Formula Parser & Evaluator</h1>
+      <p class="hero-description">
+        Production-grade mathematical tokenizer and Shunting-yard RPN compiler with live orbital parameter injection,
+        sub-millisecond evaluation latency, and comprehensive audit history logging.
+      </p>
+    </section>
+
+    <!-- Error Warning Banner (ARIA Live Alert) -->
+    <section id="error-banner" class="eval-alert-banner" role="alert" aria-live="assertive" style="display: none;">
+      <div class="alert-icon">⚠</div>
+      <div class="alert-content">
+        <strong class="alert-title">Evaluation / Syntax Warning:</strong>
+        <span id="error-text">Syntax error encountered</span>
+      </div>
+    </section>
+
+    <!-- Primary 2-Column Responsive Dashboard -->
+    <div class="eval-dashboard-grid">
+      <!-- Left Column: Formula Expression Studio -->
+      <section class="eval-panel formula-studio-panel" aria-label="Formula Expression Console">
+        <div class="panel-header">
+          <div class="panel-title-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 17 10 11 4 5"/>
+              <line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+            <h2>Trajectory KPI Formula Console</h2>
+          </div>
+          <span id="syntax-status" class="syntax-status empty">Empty</span>
+        </div>
+
+        <!-- Preset Formula Selector -->
+        <div class="control-row">
+          <label for="preset-select" class="field-label">Aerospace KPI Preset Library:</label>
+          <select id="preset-select" class="styled-select" aria-label="Select aerospace trajectory formula preset">
+            <!-- Populated dynamically via JS -->
+          </select>
+        </div>
+
+        <!-- Formula Expression Input -->
+        <div class="control-row">
+          <div class="field-label-group">
+            <label for="formula-input" class="field-label">Mathematical Expression:</label>
+            <span class="field-hint">Supports ^, *, /, +, -, %, scientific functions, and orbital parameters</span>
+          </div>
+          <div class="formula-input-wrapper">
+            <input
+              type="text"
+              id="formula-input"
+              class="formula-input"
+              spellcheck="false"
+              autocomplete="off"
+              aria-label="Mathematical expression input"
+              placeholder="e.g. sqrt(398600.4418 / (6371 + orbital_altitude))"
+            >
+          </div>
+        </div>
+
+        <!-- Action Control Buttons -->
+        <div class="formula-actions-bar">
+          <button type="button" id="eval-btn" class="btn btn-primary" title="Execute evaluation with active variable parameters">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span>Evaluate Formula</span>
+          </button>
+          <button type="button" id="validate-btn" class="btn btn-secondary" title="Verify grammar & syntax balance">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Validate Syntax</span>
+          </button>
+          <button type="button" id="clear-btn" class="btn btn-ghost" title="Clear expression input">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            <span>Clear</span>
+          </button>
+        </div>
+
+        <!-- Syntax Helper Pills Dock -->
+        <div class="syntax-helper-dock" aria-label="Quick Syntax Token Injectors">
+          <div class="pills-category">
+            <span class="category-tag">Operators</span>
+            <div class="pills-group">
+              <button type="button" class="syntax-pill op" data-insert=" + " title="Addition">+</button>
+              <button type="button" class="syntax-pill op" data-insert=" - " title="Subtraction">-</button>
+              <button type="button" class="syntax-pill op" data-insert=" * " title="Multiplication">*</button>
+              <button type="button" class="syntax-pill op" data-insert=" / " title="Division">/</button>
+              <button type="button" class="syntax-pill op" data-insert=" ^ " title="Exponentiation (Power)">^</button>
+              <button type="button" class="syntax-pill op" data-insert=" % " title="Modulo">%</button>
+              <button type="button" class="syntax-pill paren" data-insert="(" title="Open parenthesis">(</button>
+              <button type="button" class="syntax-pill paren" data-insert=")" title="Close parenthesis">)</button>
+              <button type="button" class="syntax-pill comma" data-insert=", " title="Argument separator">,</button>
+            </div>
+          </div>
+
+          <div class="pills-category">
+            <span class="category-tag">Functions</span>
+            <div class="pills-group">
+              <button type="button" class="syntax-pill fn" data-insert="sqrt(" title="Square root">sqrt()</button>
+              <button type="button" class="syntax-pill fn" data-insert="log(" title="Base-10 Logarithm">log()</button>
+              <button type="button" class="syntax-pill fn" data-insert="ln(" title="Natural Logarithm (base e)">ln()</button>
+              <button type="button" class="syntax-pill fn" data-insert="exp(" title="Exponential function">exp()</button>
+              <button type="button" class="syntax-pill fn" data-insert="abs(" title="Absolute value">abs()</button>
+              <button type="button" class="syntax-pill fn" data-insert="round(" title="Round to nearest integer">round()</button>
+              <button type="button" class="syntax-pill fn" data-insert="min(" title="Minimum of two parameters">min(a, b)</button>
+              <button type="button" class="syntax-pill fn" data-insert="max(" title="Maximum of two parameters">max(a, b)</button>
+            </div>
+          </div>
+
+          <div class="pills-category">
+            <span class="category-tag">Orbital Parameters</span>
+            <div class="pills-group">
+              <button type="button" class="syntax-pill var" data-insert="orbital_altitude" title="Orbital altitude (km)">orbital_altitude</button>
+              <button type="button" class="syntax-pill var" data-insert="escape_velocity" title="Escape velocity (km/s)">escape_velocity</button>
+              <button type="button" class="syntax-pill var" data-insert="delta_v" title="Transfer delta-V (km/s)">delta_v</button>
+              <button type="button" class="syntax-pill var" data-insert="thrust_to_weight" title="Thrust to weight ratio">thrust_to_weight</button>
+              <button type="button" class="syntax-pill var" data-insert="specific_impulse" title="Specific impulse (s)">specific_impulse</button>
+              <button type="button" class="syntax-pill var" data-insert="apogee" title="Apogee altitude (km)">apogee</button>
+              <button type="button" class="syntax-pill var" data-insert="perigee" title="Perigee altitude (km)">perigee</button>
+              <button type="button" class="syntax-pill const" data-insert="pi" title="Pi constant">pi</button>
+              <button type="button" class="syntax-pill const" data-insert="e" title="Euler's number">e</button>
+              <button type="button" class="syntax-pill const" data-insert="g0" title="Standard gravity 9.80665 m/s²">g0</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculated Result Callout Card -->
+        <div class="calculated-result-card" aria-live="polite">
+          <div class="card-top-meta">
+            <span class="result-badge">DYNAMIC EVALUATION OUTPUT</span>
+            <span id="latency-value" class="latency-badge">0.00 ms</span>
+          </div>
+          <div class="result-display-wrapper">
+            <div id="result-value" class="result-number">---</div>
+            <div id="result-expr-echo" class="result-formula-echo">Awaiting expression...</div>
+          </div>
+          <div class="rpn-inspection-box">
+            <div class="rpn-title">Compiled Shunting-Yard RPN:</div>
+            <code id="rpn-display" class="rpn-code">---</code>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Variable Definition & Parameter Injection -->
+      <section class="eval-panel variable-injection-panel" aria-label="Orbital Variables Definition">
+        <div class="panel-header">
+          <div class="panel-title-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <h2>Orbital Parameter Injection</h2>
+          </div>
+          <button type="button" id="reset-vars-btn" class="btn-link" title="Reset all variables to standard Earth orbital baseline">Reset to Baseline</button>
+        </div>
+
+        <p class="panel-subtitle">Tune live telemetry parameters injected into algebraic and functional evaluations.</p>
+
+        <!-- Variable Sliders & Number Inputs -->
+        <div class="vars-list">
+          <!-- Orbital Altitude -->
+          <div class="var-control-card">
+            <div class="var-label-row">
+              <label for="input-orbital-altitude" class="var-name"><code>orbital_altitude</code></label>
+              <div class="var-input-group">
+                <input type="number" id="input-orbital-altitude" class="styled-num-input" min="100" max="2000" step="1" value="408">
+                <span class="var-unit">km</span>
+              </div>
+            </div>
+            <input type="range" id="slider-orbital-altitude" class="styled-slider" min="100" max="2000" step="1" value="408" aria-label="Orbital altitude slider">
+            <div class="slider-bounds"><span>100 km</span><span>2000 km</span></div>
+          </div>
+
+          <!-- Escape Velocity -->
+          <div class="var-control-card">
+            <div class="var-label-row">
+              <label for="input-escape-velocity" class="var-name"><code>escape_velocity</code></label>
+              <div class="var-input-group">
+                <input type="number" id="input-escape-velocity" class="styled-num-input" min="1" max="25" step="0.001" value="11.186">
+                <span class="var-unit">km/s</span>
+              </div>
+            </div>
+            <input type="range" id="slider-escape-velocity" class="styled-slider" min="1" max="25" step="0.01" value="11.186" aria-label="Escape velocity slider">
+            <div class="slider-bounds"><span>1.0 km/s</span><span>25.0 km/s</span></div>
+          </div>
+
+          <!-- Delta-V -->
+          <div class="var-control-card">
+            <div class="var-label-row">
+              <label for="input-delta-v" class="var-name"><code>delta_v</code></label>
+              <div class="var-input-group">
+                <input type="number" id="input-delta-v" class="styled-num-input" min="0.1" max="20" step="0.1" value="3.2">
+                <span class="var-unit">km/s</span>
+              </div>
+            </div>
+            <input type="range" id="slider-delta-v" class="styled-slider" min="0.1" max="20" step="0.1" value="3.2" aria-label="Delta-v slider">
+            <div class="slider-bounds"><span>0.1 km/s</span><span>20.0 km/s</span></div>
+          </div>
+
+          <!-- Thrust to Weight -->
+          <div class="var-control-card">
+            <div class="var-label-row">
+              <label for="input-thrust-to-weight" class="var-name"><code>thrust_to_weight</code></label>
+              <div class="var-input-group">
+                <input type="number" id="input-thrust-to-weight" class="styled-num-input" min="0.1" max="10" step="0.05" value="1.45">
+                <span class="var-unit">TWR</span>
+              </div>
+            </div>
+            <input type="range" id="slider-thrust-to-weight" class="styled-slider" min="0.1" max="10" step="0.05" value="1.45" aria-label="Thrust to weight ratio slider">
+            <div class="slider-bounds"><span>0.10</span><span>10.00</span></div>
+          </div>
+
+          <!-- Specific Impulse -->
+          <div class="var-control-card">
+            <div class="var-label-row">
+              <label for="input-specific-impulse" class="var-name"><code>specific_impulse</code></label>
+              <div class="var-input-group">
+                <input type="number" id="input-specific-impulse" class="styled-num-input" min="100" max="600" step="1" value="311">
+                <span class="var-unit">s</span>
+              </div>
+            </div>
+            <input type="range" id="slider-specific-impulse" class="styled-slider" min="100" max="600" step="1" value="311" aria-label="Specific impulse slider">
+            <div class="slider-bounds"><span>100 s</span><span>600 s</span></div>
+          </div>
+
+          <!-- Apogee & Perigee Combined Grid -->
+          <div class="var-split-grid">
+            <div class="var-control-card">
+              <div class="var-label-row">
+                <label for="input-apogee" class="var-name"><code>apogee</code></label>
+                <div class="var-input-group">
+                  <input type="number" id="input-apogee" class="styled-num-input compact" min="100" max="5000" step="5" value="420">
+                  <span class="var-unit">km</span>
+                </div>
+              </div>
+              <input type="range" id="slider-apogee" class="styled-slider" min="100" max="5000" step="5" value="420" aria-label="Apogee altitude slider">
+            </div>
+
+            <div class="var-control-card">
+              <div class="var-label-row">
+                <label for="input-perigee" class="var-name"><code>perigee</code></label>
+                <div class="var-input-group">
+                  <input type="number" id="input-perigee" class="styled-num-input compact" min="100" max="5000" step="5" value="400">
+                  <span class="var-unit">km</span>
+                </div>
+              </div>
+              <input type="range" id="slider-perigee" class="styled-slider" min="100" max="5000" step="5" value="400" aria-label="Perigee altitude slider">
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Calculation Audit Trail History Feed -->
+    <section class="eval-panel history-panel" aria-label="Calculation History Audit Trail">
+      <div class="panel-header">
+        <div class="panel-title-wrapper">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <h2>Calculation History Audit Log</h2>
+        </div>
+        <button type="button" id="clear-history-btn" class="btn-clear-history" title="Clear stored calculation history">
+          Clear Audit Log
+        </button>
+      </div>
+
+      <div id="history-feed" class="history-feed" aria-live="polite">
+        <div class="history-empty">No calculations logged yet. Evaluate a formula to populate audit trail.</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="eval-footer">
+    <p>ORBITER-X Aerospace Telemetry Core // NSoC '26 Showcase // WCAG AAA Compliant</p>
+  </footer>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
