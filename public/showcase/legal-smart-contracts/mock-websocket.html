@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Legal Smart Contracts - Stream Hub</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+</head>
+<body class="socket-body">
+  <div class="socket-container">
+    <h2>Legal Smart Contracts Socket Stream Hub</h2>
+    <div id="streamLog" class="stream-log"></div>
+  </div>
+  <script type="module">
+    import { LegalSmartContractsSocketEmulator } from './mock-websocket.js';
+    const s = new LegalSmartContractsSocketEmulator();
+    s.connect();
+    s.subscribe('telemetry/mempool-blocks', p => {
+      const d = document.createElement('div');
+      d.textContent = JSON.stringify(p);
+      document.getElementById('streamLog').prepend(d);
+    });
+  </script>
+</body>
+</html>
