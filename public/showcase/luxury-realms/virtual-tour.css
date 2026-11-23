@@ -1,0 +1,264 @@
+/**
+ * Luxury Realms - Interactive Feature Spotlight & Guided Tour Styling
+ */
+
+:root {
+  --robot-bg: #090a0f;
+  --robot-card: #12141f;
+  --robot-card-light: #1c2033;
+  --robot-border: #2b324b;
+  --robot-accent: #ef4444;
+  --robot-cyan: #38bdf8;
+  --robot-green: #10b981;
+  --robot-text: #f8fafc;
+  --robot-dim: #94a3b8;
+  --robot-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--robot-bg);
+  color: var(--robot-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  position: relative;
+  min-height: 100vh;
+}
+
+.tour-page-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tour-header {
+  border-bottom: 2px solid var(--robot-border);
+  padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-badge {
+  align-self: flex-start;
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--robot-accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--robot-font);
+  color: var(--robot-accent);
+  letter-spacing: 0.5px;
+}
+
+.tour-header h1 {
+  margin: 0;
+  color: var(--robot-accent);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.tour-header p {
+  margin: 0;
+  color: var(--robot-dim);
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  margin-top: 10px;
+}
+
+.showcase-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.feature-card {
+  background: var(--robot-card);
+  border: 1px solid var(--robot-border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.feature-card.spotlight-active {
+  z-index: 1001;
+  border-color: var(--robot-accent);
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.5), inset 0 0 12px rgba(239, 68, 68, 0.15);
+  animation: pulse-ring 2s infinite ease-in-out;
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    box-shadow: 0 0 24px rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(239, 68, 68, 0.85);
+  }
+}
+
+.card-icon {
+  font-size: 2rem;
+}
+
+.feature-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--robot-cyan);
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--robot-dim);
+  line-height: 1.45;
+  flex: 1;
+}
+
+.status-tag {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-family: var(--robot-font);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--robot-green);
+  border: 1px solid var(--robot-green);
+}
+
+/* Tour Scrim Overlay */
+.tour-scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(4, 5, 8, 0.82);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+/* Floating Tour Tooltip */
+.tour-tooltip {
+  position: absolute;
+  width: 320px;
+  background: #10121d;
+  border: 2px solid var(--robot-accent);
+  border-radius: 10px;
+  padding: 16px;
+  z-index: 1002;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 20px rgba(239, 68, 68, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.25s ease-out;
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.step-indicator {
+  font-size: 0.75rem;
+  font-family: var(--robot-font);
+  color: var(--robot-accent);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  color: var(--robot-dim);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.text-btn:hover {
+  color: var(--robot-text);
+}
+
+.tooltip-title {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--robot-cyan);
+}
+
+.tooltip-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--robot-dim);
+  line-height: 1.45;
+}
+
+.tooltip-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.step-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--robot-border);
+  transition: background 0.2s;
+}
+
+.step-dot.active {
+  background: var(--robot-accent);
+  box-shadow: 0 0 6px var(--robot-accent);
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.primary-btn {
+  background: var(--robot-accent);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+.secondary-btn {
+  background: var(--robot-card-light);
+  color: var(--robot-text);
+  border: 1px solid var(--robot-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.secondary-btn:hover {
+  background: #2b324b;
+}
