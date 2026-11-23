@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter — Tiered Resource Allocation & Dynamic Cost Optimizer</title>
+  <link rel="stylesheet" href="cost-optimizer.css">
+</head>
+<body class="cost-optimizer-body">
+  <main class="optimizer-container">
+    <header class="optimizer-header">
+      <div class="header-left">
+        <h1>Aerospace Orbiter Cost Optimizer</h1>
+        <p class="subtitle">Interactive tiered telemetry & mission resource provisioning sandbox</p>
+      </div>
+      <div class="header-right">
+        <span id="tier-badge" class="tier-badge" data-tier="explorer">Explorer Tier</span>
+        <span id="discount-badge" class="discount-badge" style="display: none;">0% Off</span>
+      </div>
+    </header>
+
+    <div class="optimizer-grid">
+      <!-- Left Column: Sliders and Controls -->
+      <section class="controls-panel" aria-label="Resource Configuration">
+        <!-- Compute Hours Slider -->
+        <div class="control-group">
+          <div class="slider-header">
+            <label for="compute-slider" class="slider-label">Compute Time (Core-Hours)</label>
+            <span id="compute-val" class="slider-value">120 hrs</span>
+          </div>
+          <input type="range" id="compute-slider" class="styled-slider" min="10" max="2500" step="10" value="120">
+          <span class="slider-hint">Simulations, orbital state vectors, and trajectory processing</span>
+        </div>
+
+        <!-- Storage GB Slider -->
+        <div class="control-group">
+          <div class="slider-header">
+            <label for="storage-slider" class="slider-label">Telemetry Storage</label>
+            <span id="storage-val" class="slider-value">500 GB</span>
+          </div>
+          <input type="range" id="storage-slider" class="styled-slider" min="50" max="5000" step="50" value="500">
+          <span class="slider-hint">Sensor logs, time-series telemetry snapshots, and mission data</span>
+        </div>
+
+        <!-- Bandwidth GB Slider -->
+        <div class="control-group">
+          <div class="slider-header">
+            <label for="bandwidth-slider" class="slider-label">Downlink Bandwidth</label>
+            <span id="bandwidth-val" class="slider-value">250 GB</span>
+          </div>
+          <input type="range" id="bandwidth-slider" class="styled-slider" min="20" max="2000" step="10" value="250">
+          <span class="slider-hint">Ground station ingress/egress and real-time streaming</span>
+        </div>
+
+        <!-- Billing Frequency Switcher -->
+        <div class="billing-switcher" role="radiogroup" aria-label="Billing Frequency">
+          <div class="switcher-option">
+            <input type="radio" id="freq-monthly" name="frequency" value="monthly" checked>
+            <label for="freq-monthly">Monthly</label>
+          </div>
+          <div class="switcher-option">
+            <input type="radio" id="freq-annual" name="frequency" value="annual">
+            <label for="freq-annual">
+              Annual <span class="save-pill">15% Off</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Summary & Breakdown Donut -->
+      <aside class="summary-card" aria-label="Cost Breakdown and Estimation">
+        <div class="total-pricing-block">
+          <span class="pricing-sublabel">Projected Total Cost</span>
+          <div id="total-ticker" class="price-ticker">$0.00</div>
+          <div id="billing-period-label" class="period-label">/ month</div>
+        </div>
+
+        <!-- Breakdown Donut Card -->
+        <div class="breakdown-card">
+          <div class="donut-wrapper">
+            <div id="donut-slice" class="donut-slice"></div>
+            <div class="donut-hole">Split</div>
+          </div>
+          <div class="breakdown-legend">
+            <div class="legend-item">
+              <span><span class="legend-indicator compute"></span>Compute</span>
+              <span id="breakdown-compute" class="legend-val">$0.00 (0%)</span>
+            </div>
+            <div class="legend-item">
+              <span><span class="legend-indicator storage"></span>Storage</span>
+              <span id="breakdown-storage" class="legend-val">$0.00 (0%)</span>
+            </div>
+            <div class="legend-item">
+              <span><span class="legend-indicator bandwidth"></span>Bandwidth</span>
+              <span id="breakdown-bandwidth" class="legend-val">$0.00 (0%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Savings -->
+        <div class="savings-row">
+          <span>Applied Savings:</span>
+          <span id="savings-amount" class="savings-val">$0.00</span>
+        </div>
+
+        <button type="button" id="generate-quote-btn" class="btn-quote">Generate Formal Quote</button>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Quote Output Modal -->
+  <div id="quote-modal" class="quote-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="quote-modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Orbiter Formal Resource Quote</h3>
+        <button type="button" id="close-modal" class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="quote-json-wrapper">
+        <pre><code id="quote-json"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="cost-optimizer.js"></script>
+</body>
+</html>
