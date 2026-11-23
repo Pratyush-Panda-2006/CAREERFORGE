@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adoption stream simulator | Pet Adoption Haven</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+  <script type="module" src="mock-websocket.js"></script>
+</head>
+<body>
+  <main class="workspace">
+    <a href="index.html">← Pet Adoption Haven</a>
+    <h1>Adoption stream simulator</h1>
+    <p>Follow sample intake and foster updates, then simulate a drop to watch the connection recover.</p>
+    <section class="panel" aria-labelledby="connection-heading">
+      <div class="section-top">
+        <h2 id="connection-heading">Connection</h2>
+        <span id="connection-state" role="status" data-state="disconnected">Disconnected</span>
+      </div>
+      <div class="actions">
+        <button id="connect" type="button">Connect</button>
+        <button id="drop" type="button" disabled>Simulate 6-second drop</button>
+        <button id="request" type="button" disabled>Request queue summary</button>
+      </div>
+      <dl class="metrics">
+        <div><dt>Heartbeat latency</dt><dd id="latency">—</dd></div>
+        <div><dt>Packet loss</dt><dd id="loss">0.0%</dd></div>
+        <div><dt>Dropped packets</dt><dd id="dropped">0</dd></div>
+        <div><dt>Reconnect attempts</dt><dd id="attempts">0</dd></div>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="activity-heading">
+      <h2 id="activity-heading">Activity</h2>
+      <fieldset>
+        <legend>Topic subscriptions</legend>
+        <label><input id="intake" type="checkbox" checked> Adoption intake</label>
+        <label><input id="foster" type="checkbox" checked> Foster updates</label>
+      </fieldset>
+      <ol id="activity" class="activity" aria-labelledby="activity-heading" tabindex="0"></ol>
+    </section>
+  </main>
+</body>
+</html>
