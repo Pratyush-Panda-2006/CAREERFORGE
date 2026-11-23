@@ -1,0 +1,256 @@
+/* Weather Radar Atlas - State Debugger Stylesheet */
+:root {
+  --bg-color: #070d18;
+  --card-bg: #0d1627;
+  --border-color: #1e293b;
+  --primary-accent: #38bdf8;
+  --secondary-accent: #60a5fa;
+  --success-color: #10b981;
+  --alert-color: #f43f5e;
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.debugger-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.debugger-container {
+  max-width: 1040px;
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+}
+
+.debugger-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.debugger-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.timeline-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: #040812;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.timeline-slider {
+  flex: 1;
+  accent-color: var(--primary-accent);
+  cursor: pointer;
+}
+
+.step-indicator {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  min-width: 90px;
+  text-align: right;
+  font-family: monospace;
+}
+
+.btn-ctrl {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: var(--text-primary);
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ctrl:hover {
+  background: #334155;
+}
+
+.debugger-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .debugger-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.history-panel {
+  background: #040812;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.history-panel h3 {
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.action-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #0a1120;
+  border: 1px solid #162032;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-family: monospace;
+  transition: all 0.15s ease;
+}
+
+.action-item:hover {
+  border-color: var(--primary-accent);
+}
+
+.action-item.active {
+  background: #132742;
+  border-color: var(--primary-accent);
+  color: #fff;
+}
+
+.action-idx {
+  color: var(--text-muted);
+}
+
+.inspector-panel {
+  background: #040812;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: var(--text-primary);
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #0284c7;
+  border-color: #38bdf8;
+}
+
+.btn-primary:hover {
+  background: #0369a1;
+}
+
+.diff-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: monospace;
+  font-size: 0.82rem;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.diff-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.diff-added {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+}
+
+.diff-modified {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+
+.diff-removed {
+  background: rgba(244, 63, 94, 0.12);
+  color: #fb7185;
+}
+
+.diff-tag {
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+
+.state-viewer {
+  background: #020409;
+  border: 1px solid #162032;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #7dd3fc;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.no-diff {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-style: italic;
+  padding: 8px;
+}
