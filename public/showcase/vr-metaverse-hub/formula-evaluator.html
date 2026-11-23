@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VR Metaverse Hub - Dynamic KPI Formula Calculator</title>
+  <link rel="stylesheet" href="./formula-evaluator.css">
+</head>
+<body>
+  <div class="evaluator-container">
+    <header class="evaluator-header">
+      <div class="header-badge">VRMETAVERSEHUB-CALC v2.4</div>
+      <h1>VR Metaverse Hub - KPI Formula Calculator</h1>
+      <p>Mathematical expression tokenizer, dynamic formula parser, and streaming KPI engine</p>
+    </header>
+
+    <div class="syntax-pills-bar">
+      <span class="pill-title">Supported Operators:</span>
+      <span class="syntax-pill">+ Add</span>
+      <span class="syntax-pill">- Subtract</span>
+      <span class="syntax-pill">* Multiply</span>
+      <span class="syntax-pill">/ Divide</span>
+      <span class="syntax-pill">% Modulo</span>
+      <span class="syntax-pill">^ Exponent</span>
+      <span class="syntax-pill">( ) Groups</span>
+    </div>
+
+    <main class="evaluator-grid">
+      <section class="config-panel">
+        <div class="panel-header">
+          <h3>KPI Equation Expression</h3>
+          <button id="load-sample-btn" class="secondary-btn">Load Default Preset</button>
+        </div>
+
+        <div class="form-group">
+          <label for="formula-input">Formula Expression:</label>
+          <input type="text" id="formula-input" class="formula-text-input" value="(render_resolution * refresh_rate * polygon_density) / (gpu_bandwidth * 1000)">
+        </div>
+
+        <div class="variables-section">
+          <div class="variables-header">
+            <h4>Live Variable Parameters</h4>
+          </div>
+          <div id="variables-list" class="variables-list">
+            <div class="var-item">
+              <label for="var-render_resolution">render_resolution (Mpx):</label>
+              <input type="number" id="var-render_resolution" class="var-input" data-var="render_resolution" value="4" step="0.5">
+            </div>
+            <div class="var-item">
+              <label for="var-refresh_rate">refresh_rate (Hz):</label>
+              <input type="number" id="var-refresh_rate" class="var-input" data-var="refresh_rate" value="90" step="10">
+            </div>
+            <div class="var-item">
+              <label for="var-polygon_density">polygon_density (kPoly):</label>
+              <input type="number" id="var-polygon_density" class="var-input" data-var="polygon_density" value="250" step="25">
+            </div>
+            <div class="var-item">
+              <label for="var-gpu_bandwidth">gpu_bandwidth (GB/s):</label>
+              <input type="number" id="var-gpu_bandwidth" class="var-input" data-var="gpu_bandwidth" value="12" step="1">
+            </div>
+          </div>
+        </div>
+
+        <div class="button-actions">
+          <button id="evaluate-btn" class="primary-btn">Calculate KPI Result</button>
+          <button id="clear-btn" class="secondary-btn">Reset</button>
+        </div>
+
+        <div id="warning-banner" class="warning-banner" style="display: none;"></div>
+      </section>
+
+      <section class="results-panel">
+        <div class="result-card">
+          <span class="result-label">Computed KPI Output</span>
+          <div id="result-display" class="result-value">--</div>
+          <span id="result-meta" class="result-sub">Spatial Frame Latency (ms)</span>
+        </div>
+
+        <div class="token-stream-box">
+          <div class="panel-header">
+            <h4>Tokenized Parser Stream</h4>
+          </div>
+          <div id="token-stream" class="token-view"></div>
+        </div>
+
+        <div class="rpn-box">
+          <div class="panel-header">
+            <h4>Reverse Polish Notation (RPN)</h4>
+          </div>
+          <div id="rpn-stream" class="rpn-view"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./formula-evaluator.js"></script>
+</body>
+</html>
