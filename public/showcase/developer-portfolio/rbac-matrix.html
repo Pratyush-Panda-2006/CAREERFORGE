@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Portfolio - Role-Based Access Control (RBAC) Matrix & Policy Guard</title>
+  <link rel="stylesheet" href="rbac-matrix.css">
+</head>
+<body>
+  <div class="rbac-container">
+    <header class="rbac-header">
+      <div class="header-nav">
+        <a href="index.html" class="nav-back">← Back to Portfolio</a>
+        <div class="badge-tag">Security &amp; Permissions Engine</div>
+      </div>
+      <h1>Role-Based Access Control (RBAC) Matrix &amp; Policy Guard</h1>
+      <p class="header-desc">
+        High-assurance bitmask permission matrix with multi-tier role inheritance (<code>Viewer ➔ Contributor ➔ Editor ➔ Admin ➔ Owner</code>)
+        and dynamic Attribute-Based Access Control (ABAC) policy guards.
+      </p>
+    </header>
+
+    <!-- Role Hierarchy Flow Banner -->
+    <section class="hierarchy-card" aria-label="Role Hierarchy and Bitmask Values">
+      <div class="hierarchy-title">Canonical Role Hierarchy &amp; Bitmasks</div>
+      <div class="hierarchy-flow">
+        <div class="hierarchy-node">
+          <span class="role-title">Viewer</span>
+          <span class="mask-badge">Mask: 3</span>
+          <span class="bits-desc">0b00000011</span>
+        </div>
+        <div class="hierarchy-arrow">➔</div>
+        <div class="hierarchy-node">
+          <span class="role-title">Contributor</span>
+          <span class="mask-badge">Mask: 7</span>
+          <span class="bits-desc">0b00000111</span>
+        </div>
+        <div class="hierarchy-arrow">➔</div>
+        <div class="hierarchy-node">
+          <span class="role-title">Editor</span>
+          <span class="mask-badge">Mask: 31</span>
+          <span class="bits-desc">0b00011111</span>
+        </div>
+        <div class="hierarchy-arrow">➔</div>
+        <div class="hierarchy-node">
+          <span class="role-title">Admin</span>
+          <span class="mask-badge">Mask: 127</span>
+          <span class="bits-desc">0b01111111</span>
+        </div>
+        <div class="hierarchy-arrow">➔</div>
+        <div class="hierarchy-node owner-node">
+          <span class="role-title">Owner</span>
+          <span class="mask-badge">Mask: 255</span>
+          <span class="bits-desc">0b11111111</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1: Permission Matrix Table -->
+    <section class="rbac-card matrix-section" aria-labelledby="matrix-heading">
+      <div class="card-header">
+        <div>
+          <h2 id="matrix-heading">Role-to-Permission Matrix</h2>
+          <p class="section-sub">Effective permissions across all canonical portfolio roles. Bitwise evaluated with inheritance.</p>
+        </div>
+        <div class="matrix-legend">
+          <span class="legend-item"><span class="perm-pill granted">Direct</span> Explicit grant</span>
+          <span class="legend-item"><span class="perm-pill granted" style="background: rgba(59, 130, 246, 0.15); color: #38bdf8; border-color: rgba(59, 130, 246, 0.3);">Inherited</span> Parent role</span>
+          <span class="legend-item"><span class="perm-pill granted" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.3);">Root</span> Owner override</span>
+          <span class="legend-item"><span class="perm-pill denied">Denied</span> No access</span>
+        </div>
+      </div>
+
+      <div class="table-responsive" tabindex="0" role="region" aria-label="Permission Matrix Table">
+        <table class="rbac-table">
+          <thead>
+            <tr>
+              <th scope="col" class="th-action">Permission Action</th>
+              <th scope="col">Viewer (3)</th>
+              <th scope="col">Contributor (7)</th>
+              <th scope="col">Editor (31)</th>
+              <th scope="col">Admin (127)</th>
+              <th scope="col">Owner (255)</th>
+            </tr>
+          </thead>
+          <tbody id="matrix-body">
+            <!-- Dynamically populated by rbac-matrix.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 2: Policy Simulator Sandbox & Dynamic ABAC -->
+    <section class="rbac-card simulator-section" aria-labelledby="simulator-heading">
+      <div class="card-header">
+        <div>
+          <h2 id="simulator-heading">Policy Simulator Sandbox</h2>
+          <p class="section-sub">Simulate requests against RBAC roles and dynamic ABAC rules (IP allowlist, rate limiting, draft status, author matching).</p>
+        </div>
+      </div>
+
+      <!-- Quick Test Scenarios -->
+      <div class="presets-bar">
+        <span class="presets-label">Quick Presets:</span>
+        <button type="button" class="preset-btn" data-preset="viewer-public">Viewer (Public Project)</button>
+        <button type="button" class="preset-btn" data-preset="viewer-draft-denied">Viewer (Draft Project - Denied)</button>
+        <button type="button" class="preset-btn" data-preset="author-draft-allowed">Author (Own Draft - Allowed)</button>
+        <button type="button" class="preset-btn" data-preset="contributor-own-edit">Contributor (Own Project Edit)</button>
+        <button type="button" class="preset-btn" data-preset="admin-bad-ip">Admin (Untrusted IP - Denied)</button>
+        <button type="button" class="preset-btn" data-preset="rate-limited">Rate-Limited Action</button>
+        <button type="button" class="preset-btn" data-preset="unverified-email">Unverified Email Contact</button>
+      </div>
+
+      <div class="simulator-grid">
+        <!-- Simulator Controls -->
+        <div class="sim-controls-panel">
+          <div class="panel-subtitle">Simulation Parameters</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sim-user">Subject User</label>
+              <select id="sim-user" class="form-select">
+                <option value="user-viewer">user-viewer (Viewer)</option>
+                <option value="user-contributor">user-contributor (Contributor)</option>
+                <option value="user-editor">user-editor (Editor)</option>
+                <option value="user-admin">user-admin (Admin)</option>
+                <option value="user-owner">user-owner (Owner)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sim-role">Assigned Role</label>
+              <select id="sim-role" class="form-select">
+                <option value="Viewer">Viewer</option>
+                <option value="Contributor">Contributor</option>
+                <option value="Editor">Editor</option>
+                <option value="Admin">Admin</option>
+                <option value="Owner">Owner</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sim-action">Requested Action</label>
+              <select id="sim-action" class="form-select">
+                <option value="READ_PROJECTS">READ_PROJECTS (1 &lt;&lt; 0)</option>
+                <option value="SUBMIT_CONTACT">SUBMIT_CONTACT (1 &lt;&lt; 1)</option>
+                <option value="COMMENT_BLOG">COMMENT_BLOG (1 &lt;&lt; 2)</option>
+                <option value="EDIT_PROJECTS">EDIT_PROJECTS (1 &lt;&lt; 3)</option>
+                <option value="MANAGE_ARTICLES">MANAGE_ARTICLES (1 &lt;&lt; 4)</option>
+                <option value="VIEW_ANALYTICS">VIEW_ANALYTICS (1 &lt;&lt; 5)</option>
+                <option value="MANAGE_SETTINGS">MANAGE_SETTINGS (1 &lt;&lt; 6)</option>
+                <option value="ADMIN_ALL">ADMIN_ALL (1 &lt;&lt; 7)</option>
+                <option value="projects:*">projects:* (Wildcard)</option>
+                <option value="*">* (Root Wildcard)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sim-ip">Client IP Address</label>
+              <input type="text" id="sim-ip" class="form-input" value="127.0.0.1" placeholder="e.g. 127.0.0.1">
+            </div>
+          </div>
+
+          <div class="panel-subtitle" style="margin-top: 1rem;">Dynamic ABAC Context Attributes</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sim-visibility">Resource Visibility</label>
+              <select id="sim-visibility" class="form-select">
+                <option value="public">Public (Visible to all authorized)</option>
+                <option value="draft">Draft / Private (Requires Editor or Author)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sim-authorid">Resource Author ID</label>
+              <input type="text" id="sim-authorid" class="form-input" value="dev-root" placeholder="e.g. dev-root">
+            </div>
+          </div>
+
+          <div class="form-row checkboxes-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="sim-emailverified" checked>
+              <span>Email Verified</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="sim-ratelimit">
+              <span>Rate Limited</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Evaluation Verdict Drawer / Result Panel -->
+        <div class="sim-verdict-panel">
+          <div class="panel-subtitle">Access Guard Evaluation</div>
+          
+          <div class="verdict-card">
+            <div id="result-badge" class="eval-badge badge-granted">ACCESS GRANTED</div>
+            <div id="result-reason" class="verdict-reason">
+              Granted: Role 'Viewer' possesses permission 'READ_PROJECTS'
+            </div>
+          </div>
+
+          <div class="details-list">
+            <div class="detail-item">
+              <span class="detail-label">Requested Mask:</span>
+              <span id="requested-mask" class="detail-val font-mono">0b00000001 (1)</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Role Bitmask:</span>
+              <span id="role-mask" class="detail-val font-mono">0b00000011 (3)</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Dynamic ABAC Rule:</span>
+              <span id="abac-rule-applied" class="detail-val">None (Standard RBAC)</span>
+            </div>
+          </div>
+
+          <!-- Bitmask Evaluation Tool -->
+          <div class="bitmask-tool">
+            <form id="mask-form" class="mask-form">
+              <label for="eval-mask-input">Evaluate Arbitrary Bitmask (0-255):</label>
+              <div class="input-inline">
+                <input type="number" id="eval-mask-input" class="form-input" min="0" max="255" value="3">
+                <button type="submit" class="btn-action">Check Mask</button>
+              </div>
+              <div id="mask-eval-result" class="mask-result text-granted"></div>
+            </form>
+          </div>
+
+          <!-- Dynamic Role Assignment Form -->
+          <div class="assign-tool">
+            <form id="assign-form" class="assign-form">
+              <div class="panel-subtitle" style="margin-bottom: 0.5rem;">Quick Role Assignment</div>
+              <div class="input-inline">
+                <input type="text" id="assign-user-input" class="form-input" placeholder="User ID" value="dev-custom">
+                <select id="assign-role-select" class="form-select">
+                  <option value="Viewer">Viewer</option>
+                  <option value="Contributor">Contributor</option>
+                  <option value="Editor" selected>Editor</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Owner">Owner</option>
+                </select>
+                <button type="submit" class="btn-primary">Assign</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Live Audit Trail Log -->
+    <section class="rbac-card audit-section" aria-labelledby="audit-heading">
+      <div class="card-header">
+        <div>
+          <h2 id="audit-heading">Live Security Audit Trail</h2>
+          <p class="section-sub">Immutable in-memory log capturing real-time authorization queries and ABAC policy outcomes.</p>
+        </div>
+        <button type="button" id="clear-audit-btn" class="btn-danger">Clear Audit Log</button>
+      </div>
+
+      <div class="table-responsive" tabindex="0" role="region" aria-label="Security Audit Trail">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th scope="col">Time</th>
+              <th scope="col">Subject</th>
+              <th scope="col">Role</th>
+              <th scope="col">Action</th>
+              <th scope="col">Status</th>
+              <th scope="col">Policy Guard Verdict</th>
+              <th scope="col">IP Address</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body">
+            <!-- Dynamic audit rows render here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="rbac-matrix.js"></script>
+</body>
+</html>
