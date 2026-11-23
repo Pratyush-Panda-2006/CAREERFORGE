@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Robot Arm Quest — Automata</title>
+  <link rel="stylesheet" href="./gamified-quest.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-content">
+      <span class="brand">AUTOMATA</span>
+      <a href="./index.html">← Simulator overview</a>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="intro">
+      <h1>Robot Arm Quest</h1>
+      <p>Match four target poses with the two-joint arm to earn your milestone badges.</p>
+    </div>
+    <noscript><p>Enable JavaScript to run poses and track progress.</p></noscript>
+
+    <div class="workbench">
+      <section class="panel simulator" aria-labelledby="simulator-title">
+        <div class="panel-heading">
+          <div>
+            <h2 id="simulator-title">Pose simulator</h2>
+            <p id="target-guide"></p>
+          </div>
+        </div>
+        <figure class="plot">
+          <canvas id="arm-plot" width="560" height="342" role="img" aria-label="Two-joint arm simulation"></canvas>
+          <figcaption>
+            <span id="pose-output" aria-live="off"></span>
+            <span><span class="target-key" aria-hidden="true"></span> Target</span>
+          </figcaption>
+        </figure>
+        <form id="pose-form">
+          <div class="joints">
+            <div>
+              <label for="joint-one">Base joint <output for="joint-one" id="joint-one-value">30°</output></label>
+              <input type="range" id="joint-one" min="-180" max="180" step="15" value="30">
+            </div>
+            <div>
+              <label for="joint-two">Elbow joint <output for="joint-two" id="joint-two-value">−30°</output></label>
+              <input type="range" id="joint-two" min="-180" max="180" step="15" value="-30">
+            </div>
+          </div>
+          <div class="run-row">
+            <button class="primary" type="submit">Check pose</button>
+            <p id="pose-feedback" role="status"></p>
+          </div>
+        </form>
+      </section>
+
+      <aside class="panel tracker" aria-labelledby="progress-heading">
+        <div class="panel-heading">
+          <h2 id="progress-heading">Milestone progress</h2>
+          <span class="level" id="level-value"></span>
+        </div>
+        <label class="xp-label" for="xp-meter">
+          <span>Experience</span><span id="xp-value"></span>
+        </label>
+        <progress id="xp-meter" max="400" value="0"></progress>
+        <p id="storage-feedback" class="storage-error" role="status"></p>
+        <h3>Pose objectives</h3>
+        <ul id="quest-list" class="checklist"></ul>
+        <h3>Badges</h3>
+        <ul id="badge-list" class="badge-grid"></ul>
+      </aside>
+    </div>
+  </main>
+
+  <dialog id="badge-dialog" aria-labelledby="badge-title" aria-describedby="badge-detail">
+    <form method="dialog">
+      <div class="celebration" aria-hidden="true">✦</div>
+      <h2 id="badge-title"></h2>
+      <p id="badge-detail"></p>
+      <button class="primary" value="continue" autofocus>Continue quest</button>
+    </form>
+  </dialog>
+  <script type="module" src="./gamified-quest.js"></script>
+</body>
+</html>
