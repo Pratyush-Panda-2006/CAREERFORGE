@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Legal Smart Contracts - Radar Visualizer</title>
+  <link rel="stylesheet" href="data-visualizer.css">
+</head>
+<body class="radar-body">
+  <div class="radar-container">
+    <h2>Legal Smart Contracts Telemetry Radar</h2>
+    <svg id="radarSvg" viewBox="0 0 460 460" width="460" height="460">
+      <polygon id="radarPolygon" class="radar-polygon" points=""></polygon>
+    </svg>
+  </div>
+  <script type="module">
+    import { LegalSmartContractsRadarChart } from './data-visualizer.js';
+    const chart = new LegalSmartContractsRadarChart();
+    document.getElementById('radarPolygon').setAttribute('points', chart.generatePolygonPoints());
+  </script>
+</body>
+</html>
