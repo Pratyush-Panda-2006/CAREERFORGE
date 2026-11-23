@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Sentinel - Tiered Cost Optimizer</title>
+  <link rel="stylesheet" href="cost-optimizer.css">
+</head>
+<body>
+  <div class="cost-optimizer">
+    <header class="co-header">
+      <div>
+        <h1>Cybersecurity Sentinel Cost Optimizer</h1>
+        <p class="co-subtitle">Tiered resource pricing &amp; dynamic expense projections</p>
+      </div>
+    </header>
+
+    <div class="co-controls">
+      <div class="co-slider-group">
+        <label>Compute <span id="valCompute">0</span> vCPU</label>
+        <input type="range" id="inpCompute" min="0" max="100" value="20">
+      </div>
+      <div class="co-slider-group">
+        <label>Storage <span id="valStorage">0</span> GB</label>
+        <input type="range" id="inpStorage" min="0" max="500" value="100">
+      </div>
+      <div class="co-slider-group">
+        <label>Bandwidth <span id="valBandwidth">0</span> GB</label>
+        <input type="range" id="inpBandwidth" min="0" max="1000" value="200">
+      </div>
+      <div class="co-cycle">
+        <label>Billing <span id="valCycle">Monthly</span></label>
+        <button class="co-toggle" id="btnCycle">Monthly</button>
+      </div>
+    </div>
+
+    <div class="co-breakdown">
+      <div class="co-ticker" id="ticker">$0.00 / month</div>
+      <div class="co-donut-card">
+        <svg class="co-donut" id="donut" viewBox="0 0 100 100">
+          <circle class="co-donut-track" cx="50" cy="50" r="40"></circle>
+          <circle class="co-donut-progress" id="donutProgress" cx="50" cy="50" r="40"></circle>
+        </svg>
+        <div class="co-donut-label">Total Spend</div>
+      </div>
+      <div class="co-badge" id="tierBadge">Tier: Starter</div>
+    </div>
+
+    <script type="module" src="cost-optimizer.js"></script>
+  </div>
+</body>
+</html>
