@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" data-contrast="normal">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b132b">
+  <title>Travel Odyssey - Expedition Voice Commander & Accessibility Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="voice-commander-deck" role="region" aria-label="Travel Odyssey Acoustic Voice Command Terminal">
+    <!-- Header & Navigation -->
+    <header class="deck-header">
+      <div class="header-brand">
+        <a href="index.html" class="nav-back-link" title="Return to Travel Odyssey Showcase" aria-label="Return to Travel Odyssey Showcase">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Odyssey Showcase</span>
+        </a>
+        <div class="brand-info">
+          <div class="badge-tag">VOICE COMMANDER · NSOC '26</div>
+          <h1 class="deck-title">Expedition Voice Commander & Speech Dispatcher</h1>
+          <p class="deck-subtitle">Web Speech API acoustic intent parser, audio feedback synthesizer & WCAG accessibility dispatcher</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <button type="button" id="contrast-toggle-btn" class="contrast-toggle-btn" aria-label="Toggle High Contrast Mode" aria-checked="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a10 10 0 0 1 0 20z"></path>
+          </svg>
+          <span>High Contrast Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="deck-grid">
+      <!-- Left Column: Acoustic Input & Controls -->
+      <section class="deck-card" aria-label="Voice Input Terminal">
+        <div class="card-title">
+          <span>Acoustic Flight & Expedition Command Deck</span>
+          <span class="badge-tag">WEB SPEECH API</span>
+        </div>
+
+        <!-- Microphone Activation Zone -->
+        <div class="mic-zone">
+          <div class="mic-button-wrapper">
+            <button type="button" id="mic-toggle-btn" class="mic-btn" aria-label="Toggle Acoustic Microphone" aria-pressed="false" title="Click to activate voice recognition">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+            <div class="mic-pulse-ring" aria-hidden="true"></div>
+          </div>
+          <div id="mic-status-text" class="mic-status-label" aria-live="polite">Microphone Standby (Click to Activate Voice Control)</div>
+        </div>
+
+        <!-- Equalizer Soundwave Visualizer -->
+        <div id="acoustic-visualizer" class="acoustic-visualizer" aria-hidden="true" title="Acoustic Signal Visualizer">
+          <div class="soundwave-bar"></div>
+          <div class="soundwave-bar"></div>
+          <div class="soundwave-bar"></div>
+          <div class="soundwave-bar"></div>
+          <div class="soundwave-bar"></div>
+          <div class="soundwave-bar"></div>
+          <div class="soundwave-bar"></div>
+          <div class="soundwave-bar"></div>
+        </div>
+
+        <!-- Audio Confidence Meter -->
+        <div class="confidence-meter-container">
+          <div class="confidence-header">
+            <span>Acoustic Confidence Meter</span>
+            <span id="confidence-val">100%</span>
+          </div>
+          <div class="confidence-track">
+            <div id="confidence-meter-bar" class="confidence-meter-bar" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- Live Speech Transcript Box -->
+        <div class="transcript-card">
+          <label for="live-transcript-text" class="chips-label">Acoustic Speech Transcript</label>
+          <div id="live-transcript-text" class="transcript-display" aria-live="polite">
+            Awaiting voice input or command simulation...
+          </div>
+          <div id="speech-feedback-text" class="speech-feedback-card" aria-live="polite">
+            Acoustic Dispatch: Synthesizer ready.
+          </div>
+        </div>
+
+        <!-- Verbal Simulation Input Fallback -->
+        <div class="transcript-card">
+          <label for="sim-command-input" class="chips-label">Manual Voice Command Simulation</label>
+          <div class="simulation-row">
+            <input type="text" id="sim-command-input" class="sim-input" placeholder="Type a voice command e.g. 'book flight to Tokyo'..." aria-label="Manual voice command simulation input">
+            <button type="button" id="sim-command-btn" class="sim-btn">Execute</button>
+          </div>
+        </div>
+
+        <!-- Quick Voice Command Chips -->
+        <div class="quick-chips-section">
+          <span class="chips-label">Quick Voice Command Chips (Click to dispatch):</span>
+          <div class="chips-cloud" role="group" aria-label="Predefined Voice Command Chips">
+            <button type="button" class="command-chip" data-command="navigate to flights">
+              <span>✈️ Navigate to Flights</span>
+            </button>
+            <button type="button" class="command-chip" data-command="navigate to accommodations">
+              <span>🏨 Open Accommodations</span>
+            </button>
+            <button type="button" class="command-chip" data-command="navigate to map">
+              <span>🗺️ Show Map</span>
+            </button>
+            <button type="button" class="command-chip" data-command="set destination to Reykjavik, Iceland">
+              <span>📍 Set Destination to Iceland</span>
+            </button>
+            <button type="button" class="command-chip" data-command="book flight to Tokyo">
+              <span>🎫 Book Flight to Tokyo</span>
+            </button>
+            <button type="button" class="command-chip" data-command="filter budget luxury">
+              <span>💎 Filter Budget Luxury</span>
+            </button>
+            <button type="button" class="command-chip" data-command="filter budget backpacker">
+              <span>🎒 Filter Budget Backpacker</span>
+            </button>
+            <button type="button" class="command-chip" data-command="toggle high contrast">
+              <span>👁️ Toggle High Contrast</span>
+            </button>
+            <button type="button" class="command-chip" data-command="export itinerary as pdf">
+              <span>📄 Export Itinerary (PDF)</span>
+            </button>
+            <button type="button" class="command-chip" data-command="help">
+              <span>❓ Help</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Expedition State & Dispatcher Audit Log -->
+      <section class="deck-card" aria-label="Expedition State and Dispatch Log">
+        <div class="card-title">
+          <span>Active Expedition State Deck</span>
+          <span class="badge-tag">REACTIVE TELEMETRY</span>
+        </div>
+
+        <!-- State Telemetry Boxes -->
+        <div class="state-deck" role="region" aria-label="Expedition State Values">
+          <div class="state-box">
+            <span class="state-label">Current Deck / Page</span>
+            <span id="state-page" class="state-val">itinerary</span>
+          </div>
+          <div class="state-box">
+            <span class="state-label">Target Destination</span>
+            <span id="state-destination" class="state-val">None</span>
+          </div>
+          <div class="state-box">
+            <span class="state-label">Expedition Budget</span>
+            <div style="margin-top: 4px;">
+              <span id="state-budget" class="badge-pill badge-moderate">MODERATE</span>
+            </div>
+          </div>
+          <div class="state-box">
+            <span class="state-label">Contrast Accessibility</span>
+            <div style="margin-top: 4px;">
+              <span id="state-contrast" class="badge-pill badge-contrast-off">STANDARD</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Command History Log -->
+        <div class="history-section">
+          <div class="history-header-row">
+            <span class="chips-label">Acoustic Dispatch Audit Log</span>
+            <button type="button" id="clear-history-btn" class="clear-btn" aria-label="Clear logged command history">Clear Log</button>
+          </div>
+          <ul id="command-history-list" class="command-history-list" aria-live="polite">
+            <li class="empty-history-item">No voice commands issued yet. Click the microphone or quick chips above.</li>
+          </ul>
+        </div>
+
+        <!-- Voice Grammar Reference -->
+        <div class="grammar-section">
+          <span class="chips-label">Grammar Registry Reference</span>
+          <div style="overflow-x: auto; margin-top: 8px;">
+            <table class="grammar-table" aria-label="Voice Grammar Reference Table">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Spoken Patterns</th>
+                  <th>Params</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>NAVIGATE_PAGE</code></td>
+                  <td>"navigate to [page]", "go to [deck]"</td>
+                  <td>page</td>
+                </tr>
+                <tr>
+                  <td><code>BOOK_FLIGHT</code></td>
+                  <td>"book flight to [city]", "reserve ticket"</td>
+                  <td>destination</td>
+                </tr>
+                <tr>
+                  <td><code>SEARCH_FLIGHTS</code></td>
+                  <td>"search flights to [city]", "find flights"</td>
+                  <td>destination</td>
+                </tr>
+                <tr>
+                  <td><code>SET_DESTINATION</code></td>
+                  <td>"set destination to [city]", "travel to [city]"</td>
+                  <td>destination</td>
+                </tr>
+                <tr>
+                  <td><code>FILTER_BUDGET</code></td>
+                  <td>"filter budget [luxury|moderate|backpacker]"</td>
+                  <td>tier</td>
+                </tr>
+                <tr>
+                  <td><code>TOGGLE_HIGH_CONTRAST</code></td>
+                  <td>"toggle high contrast", "enable contrast"</td>
+                  <td>enabled</td>
+                </tr>
+                <tr>
+                  <td><code>EXPORT_ITINERARY</code></td>
+                  <td>"export itinerary as [json|pdf|csv]"</td>
+                  <td>format</td>
+                </tr>
+                <tr>
+                  <td><code>HELP</code></td>
+                  <td>"help", "voice commands", "what can I say"</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="deck-footer">
+      <span>Travel Odyssey NSoC '26 Expedition Voice Commander Engine • Self-contained Modular Acoustic Dispatcher</span>
+    </footer>
+  </div>
+
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
