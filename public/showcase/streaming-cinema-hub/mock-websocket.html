@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming Cinema Hub - Real-Time Socket Stream Hub</title>
+  <link rel="stylesheet" href="mock-websocket.css">
+</head>
+<body class="socket-hub-body">
+  <div class="socket-hub-container">
+    <header class="hub-header">
+      <div class="header-status">
+        <h2>Streaming Cinema Hub Stream Hub</h2>
+        <span id="connectionBadge" class="status-badge disconnected">Disconnected</span>
+      </div>
+      <p class="hub-subtitle">Bi-directional WebSocket streaming emulator with pub/sub channel routing</p>
+    </header>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-title">Packets Sent</span>
+        <span id="metricSent" class="metric-num">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Packets Received</span>
+        <span id="metricRecv" class="metric-num">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Packets Dropped</span>
+        <span id="metricDrop" class="metric-num">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">RTT Latency</span>
+        <span id="metricLatency" class="metric-num">-- ms</span>
+      </div>
+    </div>
+
+    <div class="control-toolbar">
+      <div class="connection-actions">
+        <button id="btnConnect" class="btn btn-primary">Connect</button>
+        <button id="btnDisconnect" class="btn btn-secondary">Disconnect</button>
+        <button id="btnDropout" class="btn btn-warning">Simulate Drop</button>
+      </div>
+      <div class="channel-tabs">
+        <button class="channel-pill active" data-channel="telemetry/bitrate-stream"># telemetry/bitrate-stream</button>
+        <button class="channel-pill" data-channel="alerts/system"># alerts/system</button>
+      </div>
+    </div>
+
+    <div class="stream-console">
+      <div class="console-header">
+        <span>Live Packet Stream</span>
+        <button id="btnClear" class="btn-text">Clear</button>
+      </div>
+      <div id="packetStream" class="packet-stream"></div>
+      <div class="publish-bar">
+        <input type="text" id="inputPayload" placeholder='Enter JSON payload or text (e.g. {"status":"active"})...' />
+        <button id="btnSend" class="btn btn-primary">Broadcast</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { StreamingCinemaHubSocketEmulator } from './mock-websocket.js';
+
+    const socket = new StreamingCinemaHubSocketEmulator();
+    let currentChannel = 'telemetry/bitrate-stream';
+
+    const connectionBadge = document.getElementById('connectionBadge');
+    const metricSent = document.getElementById('metricSent');
+    const metricRecv = document.getElementById('metricRecv');
+    const metricDrop = document.getElementById('metricDrop');
+    const metricLatency = document.getElementById('metricLatency');
+    const packetStream = document.getElementById('packetStream');
+    const inputPayload = document.getElementById('inputPayload');
+
+    function updateUi() {
+      connectionBadge.textContent = socket.state;
+      connectionBadge.className = 'status-badge ' + socket.state.toLowerCase();
+
+      const m = socket.getMetrics();
+      metricSent.textContent = m.packetsSent.toLocaleString();
+      metricRecv.textContent = m.packetsReceived.toLocaleString();
+      metricDrop.textContent = m.packetsDropped.toLocaleString();
+      metricLatency.textContent = socket.state === 'CONNECTED' ? `${m.lastLatencyMs} ms` : '-- ms';
+    }
+
+    function appendPacket(pkt) {
+      const row = document.createElement('div');
+      row.className = 'packet-row';
+      row.innerHTML = `
+        <span class="pkt-time">${new Date(pkt.timestamp).toLocaleTimeString()}</span>
+        <span class="pkt-chan">${pkt.channel}</span>
+        <span class="pkt-body">${JSON.stringify(pkt.payload)}</span>
+      `;
+      packetStream.prepend(row);
+    }
+
+    // Subscribe to default channels
+    socket.subscribe('telemetry/bitrate-stream', (pkt) => {
+      appendPacket(pkt);
+      updateUi();
+    });
+
+    socket.subscribe('alerts/system', (pkt) => {
+      appendPacket(pkt);
+      updateUi();
+    });
+
+    document.getElementById('btnConnect').addEventListener('click', () => {
+      socket.connect();
+      updateUi();
+    });
+
+    document.getElementById('btnDisconnect').addEventListener('click', () => {
+      socket.disconnect();
+      updateUi();
+    });
+
+    document.getElementById('btnDropout').addEventListener('click', () => {
+      socket.simulateDropout(2500);
+      updateUi();
+      setTimeout(updateUi, 2600);
+    });
+
+    document.getElementById('btnClear').addEventListener('click', () => {
+      packetStream.innerHTML = '';
+    });
+
+    document.querySelectorAll('.channel-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.channel-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentChannel = btn.dataset.channel;
+      });
+    });
+
+    document.getElementById('btnSend').addEventListener('click', () => {
+      let val = inputPayload.value.trim() || '{"heartbeat":true}';
+      try { val = JSON.parse(val); } catch { val = { text: val }; }
+      socket.publish(currentChannel, val);
+      inputPayload.value = '';
+      updateUi();
+    });
+
+    updateUi();
+  </script>
+</body>
+</html>
