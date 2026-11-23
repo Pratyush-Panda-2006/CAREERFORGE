@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming Cinema Hub - Polar Metrics Radar Chart</title>
+  <link rel="stylesheet" href="data-visualizer.css">
+</head>
+<body class="radar-body">
+  <div class="radar-container">
+    <header class="radar-header">
+      <h2>Streaming Cinema Hub Telemetry Visualizer</h2>
+      <p class="radar-subtitle">Multi-axis polar coordinate radar chart & enclosed area computation</p>
+    </header>
+
+    <div class="radar-layout">
+      <div class="chart-wrapper">
+        <svg id="radarSvg" class="radar-svg" viewBox="0 0 460 460" width="460" height="460">
+          <defs>
+            <radialGradient id="radarGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.05"/>
+            </radialGradient>
+          </defs>
+          <g id="webGridGroup" class="web-grid-group"></g>
+          <g id="spokeAxesGroup" class="spoke-axes-group"></g>
+          <polygon id="radarPolygon" class="radar-polygon" fill="url(#radarGlow)" points=""></polygon>
+          <g id="vertexHandlesGroup" class="vertex-handles-group"></g>
+          <g id="labelsGroup" class="labels-group"></g>
+        </svg>
+      </div>
+
+      <div class="controls-panel">
+        <h3>Adjust Telemetry Metrics</h3>
+        <div class="slider-control">
+          <label for="range-bitrate">Adaptive Bitrate Delivery: <span id="val-bitrate">97%</span></label>
+          <input type="range" id="range-bitrate" data-key="bitrate" min="0" max="100" value="97">
+        </div>
+        <div class="slider-control">
+          <label for="range-buffer">Playback Buffer Health: <span id="val-buffer">94%</span></label>
+          <input type="range" id="range-buffer" data-key="buffer" min="0" max="100" value="94">
+        </div>
+        <div class="slider-control">
+          <label for="range-pacing">Frame Pacing & VSync: <span id="val-pacing">98%</span></label>
+          <input type="range" id="range-pacing" data-key="pacing" min="0" max="100" value="98">
+        </div>
+        <div class="slider-control">
+          <label for="range-audioFidelity">Spatial Audio Fidelity: <span id="val-audioFidelity">92%</span></label>
+          <input type="range" id="range-audioFidelity" data-key="audioFidelity" min="0" max="100" value="92">
+        </div>
+        <div class="slider-control">
+          <label for="range-cdnLatency">Edge CDN TTFB Latency: <span id="val-cdnLatency">95%</span></label>
+          <input type="range" id="range-cdnLatency" data-key="cdnLatency" min="0" max="100" value="95">
+        </div>
+        <div class="slider-control">
+          <label for="range-dynamicRange">HDR Tone Mapping Accuracy: <span id="val-dynamicRange">93%</span></label>
+          <input type="range" id="range-dynamicRange" data-key="dynamicRange" min="0" max="100" value="93">
+        </div>
+        <div class="summary-card">
+          <h4>Enclosed Area Index</h4>
+          <div class="stat-value" id="enclosedAreaDisplay">0.00</div>
+          <p class="stat-meta">Area computed via Gauss Shoelace algorithm</p>
+          <button id="resetMetricsBtn" class="btn-reset">Reset Telemetry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { StreamingCinemaHubRadarChart } from './data-visualizer.js';
+
+    const chart = new StreamingCinemaHubRadarChart();
+    const radarPolygon = document.getElementById('radarPolygon');
+    const webGridGroup = document.getElementById('webGridGroup');
+    const spokeAxesGroup = document.getElementById('spokeAxesGroup');
+    const vertexHandlesGroup = document.getElementById('vertexHandlesGroup');
+    const labelsGroup = document.getElementById('labelsGroup');
+    const areaDisplay = document.getElementById('enclosedAreaDisplay');
+
+    function renderStaticGrid() {
+      // Concentric rings
+      const webGrid = chart.generateWebGrid(5);
+      webGridGroup.innerHTML = webGrid.map((pts, i) => `
+        <polygon class="web-ring" points="${pts}" />
+      `).join('');
+
+      // Radial spoke lines
+      const spokes = chart.getSpokeCoordinates();
+      spokeAxesGroup.innerHTML = spokes.map(s => `
+        <line class="spoke-line" x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" />
+      `).join('');
+
+      labelsGroup.innerHTML = spokes.map(s => `
+        <text class="axis-label" x="${s.labelX}" y="${s.labelY}" text-anchor="middle">${s.name}</text>
+      `).join('');
+    }
+
+    function renderChart() {
+      radarPolygon.setAttribute('points', chart.generatePolygonPoints());
+      const vertices = chart.getVertexCoordinates();
+      vertexHandlesGroup.innerHTML = vertices.map(v => `
+        <circle class="vertex-dot" cx="${v.x}" cy="${v.y}" r="4.5" />
+      `).join('');
+      areaDisplay.textContent = chart.computeEnclosedArea().toLocaleString();
+    }
+
+    renderStaticGrid();
+    renderChart();
+
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const key = e.target.dataset.key;
+        const val = Number(e.target.value) / 100;
+        chart.updateMetric(key, val);
+        document.getElementById(`val-${key}`).textContent = `${e.target.value}%`;
+        renderChart();
+      });
+    });
+
+    document.getElementById('resetMetricsBtn').addEventListener('click', () => {
+      chart.resetMetrics();
+      chart.metrics.forEach(m => {
+        const input = document.getElementById(`range-${m.key}`);
+        if (input) input.value = Math.round(m.value * 100);
+        const valSpan = document.getElementById(`val-${m.key}`);
+        if (valSpan) valSpan.textContent = `${Math.round(m.value * 100)}%`;
+      });
+      renderChart();
+    });
+  </script>
+</body>
+</html>
