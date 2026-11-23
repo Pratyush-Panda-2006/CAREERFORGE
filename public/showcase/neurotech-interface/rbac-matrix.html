@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neurotech Interface — RBAC Permission Matrix & Policy Guard</title>
+  <link rel="stylesheet" href="rbac-matrix.css">
+</head>
+<body class="rbac-body">
+  <div class="rbac-container">
+    <header class="rbac-header">
+      <span class="badge">NEURAL BCI SECURITY GATEWAY</span>
+      <h1>🛡️ Neurotech Interface RBAC Permission Matrix & Policy Guard</h1>
+      <p>Hierarchical role-based access control, cryptographic bitmask policy evaluation, real-time privilege simulation, and safety override guarding for neural interfaces.</p>
+    </header>
+
+    <!-- Interactive Simulation & Policy Guard Section -->
+    <div class="rbac-card">
+      <div class="card-title-bar">
+        <h2>⚡ Active Simulation & Policy Guard Evaluator</h2>
+        <div class="btn-group">
+          <button type="button" id="openDrawerBtn" class="btn btn-secondary">⚙️ Policy Customizer Drawer</button>
+          <button type="button" id="resetMatrixBtn" class="btn">↺ Reset to Defaults</button>
+        </div>
+      </div>
+
+      <div class="simulation-panel">
+        <div class="simulation-control-group">
+          <label for="simulationSubjectSelect">Subject Role / Operator</label>
+          <select id="simulationSubjectSelect" class="select-control">
+            <option value="ROLE:OBSERVER">Role: Observer</option>
+            <option value="ROLE:TECHNICIAN">Role: Technician</option>
+            <option value="ROLE:RESEARCHER">Role: Researcher</option>
+            <option value="ROLE:SAFETY_OFFICER">Role: Safety Officer</option>
+            <option value="ROLE:CHIEF_ENGINEER">Role: Chief Engineer</option>
+            <option value="USER:dr_morales">User: dr_morales (Chief Engineer)</option>
+            <option value="USER:guest_technician">User: guest_technician (Technician)</option>
+          </select>
+        </div>
+
+        <div class="simulation-control-group">
+          <label for="simulationActionSelect">Action Target</label>
+          <select id="simulationActionSelect" class="select-control">
+            <option value="telemetry:read">telemetry:read (Stream EEG Data)</option>
+            <option value="calibration:write">calibration:write (Recalibrate Electrodes)</option>
+            <option value="neural:stimulate">neural:stimulate (Trigger Neurostimulation)</option>
+            <option value="audit:export">audit:export (Export Audit Chain)</option>
+            <option value="device:sync">device:sync (Pair Neurotech Hardware)</option>
+            <option value="safety:override">safety:override (Safety Threshold Override)</option>
+            <option value="users:admin">users:admin (Modify Access Policies)</option>
+            <option value="debug:core">debug:core (DSP Firmware Debugger)</option>
+            <option value="telemetry:*">telemetry:* (Wildcard Telemetry Access)</option>
+            <option value="*">* (Global Superuser Wildcard)</option>
+          </select>
+        </div>
+
+        <div class="simulation-control-group">
+          <label>Policy Evaluation Verdict</label>
+          <div class="action-eval-bar">
+            <div id="accessEvaluationBadge" class="access-evaluation-badge pill-access-granted">
+              <span id="accessEvaluationIcon">✓</span>
+              <span id="accessEvaluationText">ACCESS GRANTED</span>
+            </div>
+            <button type="button" id="grantTempAccessBtn" class="btn btn-primary" title="Grant 30s temporary privilege">
+              ⏱️ Grant Temp
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bitmask & Security Stats -->
+      <div class="bitmask-stats-row">
+        <div class="stat-box">
+          <span class="stat-label">Calculated Bitmask</span>
+          <span id="effectiveBitmaskVal" class="stat-val">0b00000001 (0x01)</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Inheritance Depth</span>
+          <span id="inheritanceDepthVal" class="stat-val">0 parent levels</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Safety Override Protected</span>
+          <span id="safetyGuardStatusVal" class="stat-val">Guarded (Denied)</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Active Permissions</span>
+          <span id="activePermissionsCountVal" class="stat-val">1 / 8 active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role-to-Permission Matrix Grid -->
+    <div class="rbac-card">
+      <div class="card-title-bar">
+        <h2>📊 Role-to-Permission Access Control Matrix Grid</h2>
+        <span class="role-tag">Bitmask & Inherited Hierarchy</span>
+      </div>
+
+      <div class="matrix-grid-wrapper">
+        <table class="rbac-matrix-table" id="matrixTable">
+          <thead>
+            <tr>
+              <th>Role / Capability</th>
+              <th>READ_TELEMETRY (0x01)</th>
+              <th>WRITE_CALIBRATION (0x02)</th>
+              <th>STIMULATE_NEURAL (0x04)</th>
+              <th>EXPORT_AUDIT_LOGS (0x08)</th>
+              <th>MANAGE_DEVICE_SYNC (0x10)</th>
+              <th>OVERRIDE_SAFETY (0x20)</th>
+              <th>ADMINISTER_USERS (0x40)</th>
+              <th>DEBUG_SYSTEM_CORE (0x80)</th>
+              <th>Inherits From</th>
+            </tr>
+          </thead>
+          <tbody id="matrixTableBody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Policy Customization Drawer -->
+    <div id="policyDrawer" class="policy-drawer">
+      <div class="drawer-header">
+        <h3>Policy Customizer</h3>
+        <button type="button" id="closeDrawerBtn" class="btn">✕</button>
+      </div>
+      <div class="drawer-body">
+        <p style="color: var(--text-muted); font-size: 0.875rem;">
+          Configure dynamic access grants or create custom role inheritance policies directly on the neural control plane.
+        </p>
+
+        <div class="simulation-control-group">
+          <label for="customRoleNameInput">Custom Role Identifier</label>
+          <input type="text" id="customRoleNameInput" class="input-control" placeholder="e.g. CLINICAL_AUDITOR" />
+        </div>
+
+        <div class="simulation-control-group">
+          <label for="customRoleInheritSelect">Inherit Base Role</label>
+          <select id="customRoleInheritSelect" class="select-control">
+            <option value="">None (Standalone)</option>
+            <option value="OBSERVER">OBSERVER</option>
+            <option value="TECHNICIAN">TECHNICIAN</option>
+            <option value="RESEARCHER">RESEARCHER</option>
+            <option value="SAFETY_OFFICER">SAFETY_OFFICER</option>
+          </select>
+        </div>
+
+        <button type="button" id="createRoleBtn" class="btn btn-primary" style="margin-top: 0.5rem;">
+          ➕ Register Custom Role
+        </button>
+
+        <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 0.5rem 0;" />
+
+        <div class="simulation-control-group">
+          <label>Temporary Privilege Grants</label>
+          <div id="activeGrantsContainer" style="font-size: 0.85rem; color: var(--text-muted);">
+            No active temporary grants.
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button type="button" id="drawerCloseFooterBtn" class="btn">Close</button>
+      </div>
+    </div>
+
+    <nav>
+      <a href="index.html" class="back-link">← Return to Neurotech Interface Showcase</a>
+    </nav>
+  </div>
+
+  <script type="module" src="rbac-matrix.js"></script>
+</body>
+</html>
