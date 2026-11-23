@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter - Vector Whiteboard & Mission Sketchpad</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+</head>
+<body>
+  <main class="ao-whiteboard-container">
+    <header class="ao-whiteboard-header">
+      <div>
+        <h1>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+            <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+          </svg>
+          Orbital Vector Sketchpad & Whiteboard
+        </h1>
+        <p>Collaborative mission diagramming, orbital trajectory plotting, and schematic sketchpad with vector SVG export.</p>
+      </div>
+    </header>
+
+    <!-- Floating Toolbar Dock -->
+    <section class="ao-whiteboard-dock" aria-label="Orbiter whiteboard toolbar">
+      <!-- Drawing Tools -->
+      <div class="ao-toolbar-group">
+        <span class="ao-toolbar-label">Tools</span>
+        <button class="ao-tool-btn active" data-tool="pen" title="Pen (P)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+          Pen
+        </button>
+        <button class="ao-tool-btn" data-tool="line" title="Line (L)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/></svg>
+          Line
+        </button>
+        <button class="ao-tool-btn" data-tool="rectangle" title="Rectangle (R)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          Rect
+        </button>
+        <button class="ao-tool-btn" data-tool="circle" title="Circle (C)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+          Circle
+        </button>
+        <button class="ao-tool-btn" data-tool="eraser" title="Eraser (E)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+          Eraser
+        </button>
+      </div>
+
+      <!-- Color Palette Chips -->
+      <div class="ao-toolbar-group">
+        <span class="ao-toolbar-label">Color</span>
+        <div class="ao-color-chips">
+          <button class="ao-color-chip active" style="background: #38bdf8;" data-color="#38bdf8" title="Orbital Cyan"></button>
+          <button class="ao-color-chip" style="background: #818cf8;" data-color="#818cf8" title="Deep Space Indigo"></button>
+          <button class="ao-color-chip" style="background: #34d399;" data-color="#34d399" title="Telemetry Green"></button>
+          <button class="ao-color-chip" style="background: #fbbf24;" data-color="#fbbf24" title="Solar Flare Gold"></button>
+          <button class="ao-color-chip" style="background: #f87171;" data-color="#f87171" title="Thruster Crimson"></button>
+          <button class="ao-color-chip" style="background: #ffffff;" data-color="#ffffff" title="Starlight White"></button>
+        </div>
+      </div>
+
+      <!-- Width Slider -->
+      <div class="ao-toolbar-group">
+        <span class="ao-toolbar-label">Width</span>
+        <div class="ao-width-picker">
+          <input type="range" id="brush-width" class="ao-width-slider" min="1" max="20" value="3">
+          <span id="brush-width-display" style="font-size: 0.8rem; font-weight: bold; width: 20px;">3</span>
+        </div>
+      </div>
+
+      <!-- Actions (Undo, Redo, Clear, Export) -->
+      <div class="ao-toolbar-group">
+        <button id="btn-undo" class="ao-action-btn" title="Undo (Ctrl+Z)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+          Undo
+        </button>
+        <button id="btn-redo" class="ao-action-btn" title="Redo (Ctrl+Y)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+          Redo
+        </button>
+        <button id="btn-clear" class="ao-action-btn danger" title="Clear Canvas">
+          Clear
+        </button>
+        <button id="btn-export-svg" class="ao-action-btn primary" title="Export as SVG">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export SVG
+        </button>
+      </div>
+    </section>
+
+    <!-- Canvas Card -->
+    <section class="ao-canvas-card">
+      <canvas id="whiteboard-canvas" class="ao-whiteboard-canvas"></canvas>
+      <div class="ao-whiteboard-status">
+        <div class="ao-telemetry-badge">
+          <span class="dot"></span>
+          <span id="canvas-status-text">Orbital Vector Canvas Ready &bull; 0 strokes recorded</span>
+        </div>
+        <div id="canvas-tool-indicator">Tool: PEN &bull; Color: #38bdf8 &bull; Width: 3px</div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { AerospaceOrbiterWhiteboardCanvas } from './canvas-whiteboard.js';
+
+    const canvasEl = document.getElementById('whiteboard-canvas');
+    const widthSlider = document.getElementById('brush-width');
+    const widthDisplay = document.getElementById('brush-width-display');
+    const statusText = document.getElementById('canvas-status-text');
+    const toolIndicator = document.getElementById('canvas-tool-indicator');
+
+    const whiteboard = new AerospaceOrbiterWhiteboardCanvas(canvasEl);
+
+    function updateStatus() {
+      const metrics = whiteboard.getMetrics();
+      statusText.textContent = `Orbital Vector Canvas Ready • ${metrics.totalStrokes} strokes recorded`;
+      toolIndicator.textContent = `Tool: ${metrics.currentTool.toUpperCase()} • Color: ${metrics.currentColor} • Width: ${metrics.currentWidth}px`;
+    }
+
+    // Tool selection
+    const toolButtons = document.querySelectorAll('.ao-tool-btn');
+    toolButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        toolButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tool = btn.dataset.tool;
+        whiteboard.currentTool = tool;
+        canvasEl.className = `ao-whiteboard-canvas cursor-${tool}`;
+        updateStatus();
+      });
+    });
+
+    // Color picking
+    const colorChips = document.querySelectorAll('.ao-color-chip');
+    colorChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        colorChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        whiteboard.currentColor = chip.dataset.color;
+        updateStatus();
+      });
+    });
+
+    // Brush width
+    widthSlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      widthDisplay.textContent = val;
+      whiteboard.currentWidth = val;
+      updateStatus();
+    });
+
+    // Undo / Redo / Clear / Export
+    document.getElementById('btn-undo').addEventListener('click', () => {
+      whiteboard.undo();
+      updateStatus();
+    });
+
+    document.getElementById('btn-redo').addEventListener('click', () => {
+      whiteboard.redo();
+      updateStatus();
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      if (confirm('Clear the entire orbital sketchpad?')) {
+        whiteboard.clear();
+        updateStatus();
+      }
+    });
+
+    document.getElementById('btn-export-svg').addEventListener('click', () => {
+      whiteboard.downloadSVG();
+    });
+
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        whiteboard.undo();
+        updateStatus();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) {
+        e.preventDefault();
+        whiteboard.redo();
+        updateStatus();
+      }
+    });
+
+    // Window resize observer
+    window.addEventListener('resize', () => {
+      whiteboard.resize();
+    });
+
+    // Update status on stroke completion
+    canvasEl.addEventListener('mouseup', updateStatus);
+    canvasEl.addEventListener('touchend', updateStatus);
+    updateStatus();
+  </script>
+</body>
+</html>

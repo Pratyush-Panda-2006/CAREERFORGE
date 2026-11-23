@@ -1,0 +1,292 @@
+/* AerospaceOrbiterWhiteboardCanvas Styles */
+:root {
+  --ao-bg: #090a0f;
+  --ao-card-bg: rgba(255, 255, 255, 0.04);
+  --ao-card-border: rgba(255, 255, 255, 0.1);
+  --ao-accent: #38bdf8;
+  --ao-accent-glow: rgba(56, 189, 248, 0.25);
+  --ao-text-main: #f8fafc;
+  --ao-text-muted: #94a3b8;
+  --ao-dock-bg: #0d121f;
+  --ao-dock-border: #1e293b;
+}
+
+body {
+  background-color: var(--ao-bg);
+  color: var(--ao-text-main);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+  padding: 1.5rem;
+  margin: 0;
+  box-sizing: border-box;
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.15), transparent),
+    radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.03), transparent);
+}
+
+.ao-whiteboard-container {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ao-whiteboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ao-whiteboard-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ao-text-main);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ao-whiteboard-header p {
+  color: var(--ao-text-muted);
+  font-size: 0.875rem;
+  margin: 0.35rem 0 0 0;
+}
+
+/* Floating Toolbar Dock */
+.ao-whiteboard-dock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--ao-dock-bg);
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--ao-dock-border);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+.ao-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ao-toolbar-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-right: 0.25rem;
+}
+
+/* Tool Buttons */
+.ao-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: #161f30;
+  color: var(--ao-text-muted);
+  border: 1px solid #27354a;
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+}
+
+.ao-tool-btn:hover {
+  background: #202d42;
+  color: var(--ao-text-main);
+  border-color: #3b4d66;
+}
+
+.ao-tool-btn.active {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--ao-accent);
+  border-color: var(--ao-accent);
+  box-shadow: 0 0 12px var(--ao-accent-glow);
+}
+
+/* Action Buttons */
+.ao-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: #161f30;
+  color: var(--ao-text-main);
+  border: 1px solid #27354a;
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.ao-action-btn:hover {
+  background: #202d42;
+  color: #fff;
+}
+
+.ao-action-btn.primary {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+.ao-action-btn.primary:hover {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+.ao-action-btn.danger {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.ao-action-btn.danger:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+}
+
+/* Color Chips */
+.ao-color-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ao-color-chip {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  padding: 0;
+  outline: none;
+}
+
+.ao-color-chip:hover {
+  transform: scale(1.15);
+}
+
+.ao-color-chip.active {
+  border-color: #ffffff;
+  transform: scale(1.2);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Stroke Width Slider */
+.ao-width-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ao-width-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 6px;
+  background: #27354a;
+  border-radius: 3px;
+  outline: none;
+}
+
+.ao-width-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ao-accent);
+  cursor: pointer;
+}
+
+/* Canvas Wrapper & Smooth Cursor */
+.ao-canvas-card {
+  position: relative;
+  background: var(--ao-bg);
+  border: 1px solid var(--ao-card-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4), 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.ao-whiteboard-canvas {
+  display: block;
+  width: 100%;
+  height: 560px;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.ao-whiteboard-canvas.cursor-pen {
+  cursor: crosshair;
+}
+
+.ao-whiteboard-canvas.cursor-eraser {
+  cursor: cell;
+}
+
+.ao-whiteboard-canvas.cursor-line {
+  cursor: crosshair;
+}
+
+.ao-whiteboard-canvas.cursor-rectangle {
+  cursor: crosshair;
+}
+
+.ao-whiteboard-canvas.cursor-circle {
+  cursor: crosshair;
+}
+
+/* Status Bar */
+.ao-whiteboard-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 1rem;
+  background: #05070c;
+  border-top: 1px solid var(--ao-dock-border);
+  font-size: 0.8rem;
+  color: var(--ao-text-muted);
+}
+
+.ao-telemetry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ao-telemetry-badge span.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  display: inline-block;
+  box-shadow: 0 0 6px #10b981;
+}
+
+@media (max-width: 768px) {
+  .ao-whiteboard-dock {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ao-toolbar-group {
+    justify-content: space-between;
+  }
+}
