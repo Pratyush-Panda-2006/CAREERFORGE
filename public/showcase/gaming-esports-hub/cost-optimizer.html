@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiered Resource Allocation &amp; Dynamic Cost Optimizer | Vortex Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./cost-optimizer.css">
+  <script type="module" src="./cost-optimizer.js"></script>
+</head>
+<body>
+  <div class="co-main-container" data-cost-optimizer>
+    <!-- Top Header Navigation -->
+    <header class="co-header">
+      <div class="co-brand">
+        <div class="co-brand-icon">⚡</div>
+        <span>VORTEX // INFRA-OPT</span>
+      </div>
+      <a href="./index.html" class="co-nav-link">
+        <span>&larr; Return to Vortex Arena</span>
+      </a>
+    </header>
+
+    <!-- Hero Introduction -->
+    <section class="co-hero">
+      <div class="co-badge-eyebrow">Level 3 Engine // Cloud Compute Sandbox</div>
+      <h1>Tiered Resource Allocation &amp; Cost Optimizer</h1>
+      <p>
+        Model and provision competitive esports infrastructure. Dynamically balance dedicated matchmaking server instances, 128Hz high-fidelity tick rates, anti-cheat kernel telemetry nodes, and multi-region broadcast relays with esports publisher subsidies.
+      </p>
+    </section>
+
+    <!-- Main Workspace Grid -->
+    <div class="co-workspace">
+      <!-- Left Column: Resource Allocation Sliders -->
+      <section class="co-card" aria-labelledby="co-allocation-title">
+        <div class="co-card-header">
+          <h2 id="co-allocation-title" class="co-card-title">
+            <span>⚙️</span> Resource Provisioning Controls
+          </h2>
+          <span class="co-control-hint">Real-time dynamic recalculation</span>
+        </div>
+
+        <!-- Annual Season League Pass Toggle -->
+        <div class="co-billing-wrapper">
+          <div>
+            <div class="co-billing-label">Multi-Tournament Season Pass</div>
+            <div class="co-control-hint">Annual franchise commitment</div>
+          </div>
+          <div class="co-switch-container">
+            <span class="co-switch-text">Monthly</span>
+            <label class="co-switch" for="co-billing-toggle">
+              <input type="checkbox" id="co-billing-toggle" checked aria-label="Toggle annual billing cycle">
+              <span class="co-slider"></span>
+            </label>
+            <span class="co-switch-text active">Annual</span>
+            <span class="co-save-pill">Save 20%</span>
+          </div>
+        </div>
+
+        <!-- Slider 1: Dedicated Servers -->
+        <div class="co-control-group">
+          <div class="co-control-label-row">
+            <label for="co-servers" class="co-control-label">
+              <span>🖥️</span> Dedicated Matchmaking Servers
+            </label>
+            <span class="co-val-chip" id="co-servers-val">8</span>
+          </div>
+          <input type="range" id="co-servers" min="1" max="100" step="1" value="8" aria-label="Dedicated servers count">
+          <div class="co-control-hint">High-performance instances handling active tournament match lobbies ($45 / mo baseline).</div>
+        </div>
+
+        <!-- Radio Buttons: Tick-Rate Allocation -->
+        <div class="co-control-group">
+          <div class="co-control-label-row">
+            <span class="co-control-label">
+              <span>🎯</span> Match Engine Tick-Rate
+            </span>
+          </div>
+          <div class="co-tick-selector">
+            <label class="co-tick-option">
+              <input type="radio" name="co-tick" id="co-tick-64" value="64">
+              <div class="co-tick-box">
+                <span class="co-tick-title">64 Hz Standard</span>
+                <span class="co-tick-desc">Baseline simulation fidelity (1.0x compute multiplier)</span>
+              </div>
+            </label>
+            <label class="co-tick-option">
+              <input type="radio" name="co-tick" id="co-tick-128" value="128" checked>
+              <div class="co-tick-box">
+                <span class="co-tick-title">128 Hz Competitive</span>
+                <span class="co-tick-desc">Pro tournament sub-millisecond precision (1.65x multiplier)</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Slider 2: Anti-Cheat Telemetry Nodes -->
+        <div class="co-control-group">
+          <div class="co-control-label-row">
+            <label for="co-anticheat" class="co-control-label">
+              <span>🛡️</span> Anti-Cheat Telemetry Nodes
+            </label>
+            <span class="co-val-chip" id="co-anticheat-val">4</span>
+          </div>
+          <input type="range" id="co-anticheat" min="0" max="30" step="1" value="4" aria-label="Anti-cheat nodes count">
+          <div class="co-control-hint">Dedicated neural heuristics &amp; real-time memory integrity validation ($85 / node / mo).</div>
+        </div>
+
+        <!-- Slider 3: Tournament Live Stream Relay -->
+        <div class="co-control-group">
+          <div class="co-control-label-row">
+            <label for="co-stream" class="co-control-label">
+              <span>📡</span> Live Stream Broadcast Relay
+            </label>
+            <span class="co-val-chip" id="co-stream-val">1,500 Mbps</span>
+          </div>
+          <input type="range" id="co-stream" min="0" max="10000" step="100" value="1500" aria-label="Stream relay bandwidth in Mbps">
+          <div class="co-control-hint">Global edge RTMP/SRT video transit for tournament spectators ($0.12 / Mbps / mo).</div>
+        </div>
+
+        <!-- Slider 4: Match VOD & Replay Storage -->
+        <div class="co-control-group">
+          <div class="co-control-label-row">
+            <label for="co-vod" class="co-control-label">
+              <span>💾</span> Match Replay &amp; VOD Storage
+            </label>
+            <span class="co-val-chip" id="co-vod-val">10 TB</span>
+          </div>
+          <input type="range" id="co-vod" min="1" max="100" step="1" value="10" aria-label="Replay VOD storage in TB">
+          <div class="co-control-hint">Hot NVMe demo archive and cold video backup storage ($18 / TB / mo).</div>
+        </div>
+
+        <!-- Slider 5: Estimated Monthly Tournament Matches -->
+        <div class="co-control-group">
+          <div class="co-control-label-row">
+            <label for="co-matches" class="co-control-label">
+              <span>🏆</span> Projected Monthly Matches
+            </label>
+            <span class="co-val-chip" id="co-matches-val">2,000</span>
+          </div>
+          <input type="range" id="co-matches" min="100" max="25000" step="100" value="2000" aria-label="Estimated matches per month">
+          <div class="co-control-hint">Used for calculating unit cost efficiency per tournament match.</div>
+        </div>
+      </section>
+
+      <!-- Right Column: Real-Time Dynamic Pricing Breakdown -->
+      <section class="co-card" aria-labelledby="co-summary-title">
+        <div class="co-card-header">
+          <h2 id="co-summary-title" class="co-card-title">
+            <span>📊</span> Cost &amp; Tier Analysis
+          </h2>
+          <span class="co-control-hint">USD Currency</span>
+        </div>
+
+        <!-- Tier Header Badge -->
+        <div class="co-tier-header-card">
+          <div>
+            <div class="co-control-hint">Active Esports League Tier</div>
+            <div style="font-weight: 700; font-size: 1.05rem; margin-top: 2px;">Publisher Partnership Level</div>
+          </div>
+          <div class="co-tier-badge" id="co-tier-badge" data-tier-id="challenger">CHALLENGER LEAGUE</div>
+        </div>
+
+        <!-- Itemized Breakdown -->
+        <ul class="co-breakdown-list">
+          <li class="co-breakdown-item">
+            <span class="co-item-name">Dedicated Game Servers:</span>
+            <span class="co-item-val" id="co-out-server-cost">$594.00</span>
+          </li>
+          <li class="co-breakdown-item">
+            <span class="co-item-name">Anti-Cheat Telemetry Nodes:</span>
+            <span class="co-item-val" id="co-out-anticheat-cost">$340.00</span>
+          </li>
+          <li class="co-breakdown-item">
+            <span class="co-item-name">Stream Broadcast Bandwidth:</span>
+            <span class="co-item-val" id="co-out-stream-cost">$180.00</span>
+          </li>
+          <li class="co-breakdown-item">
+            <span class="co-item-name">Match VOD &amp; Replay Archive:</span>
+            <span class="co-item-val" id="co-out-vod-cost">$180.00</span>
+          </li>
+          <li class="co-breakdown-item" style="border-top: 1px solid var(--co-border); margin-top: 6px;">
+            <span class="co-item-name" style="font-weight: 600; color: var(--co-text);">Gross Baseline Compute:</span>
+            <span class="co-item-val" id="co-out-raw-subtotal">$1,294.00</span>
+          </li>
+        </ul>
+
+        <!-- Volume Discounts & Subsidies -->
+        <div class="co-discount-box">
+          <div class="co-discount-row">
+            <span>Tier Volume Discount:</span>
+            <span class="co-discount-val" id="co-out-discount-val">-$129.40 (10% Volume)</span>
+          </div>
+          <div class="co-discount-row">
+            <span>Publisher Ecosystem Subsidy:</span>
+            <span class="co-discount-val" id="co-out-subsidy-val">-$50.00 (League Grant)</span>
+          </div>
+          <div class="co-discount-row" id="co-annual-savings-badge" style="display: flex;">
+            <span>Annual Season Discount (20%):</span>
+            <span class="co-discount-val" id="co-annual-savings-amount">-$222.92 / mo</span>
+          </div>
+        </div>
+
+        <!-- Grand Total Display -->
+        <div class="co-total-panel">
+          <div class="co-total-label">Effective Monthly Cost</div>
+          <div class="co-total-price" id="co-out-monthly-total">$891.68</div>
+          <div class="co-annual-total-subtext">
+            Billed annually at <strong id="co-out-annual-total" style="color: var(--co-text);">$10,700.16 / year</strong>
+          </div>
+        </div>
+
+        <!-- Unit Efficiency KPI -->
+        <div class="co-kpi-tile">
+          <div>
+            <div class="co-kpi-title">Unit Cost Efficiency</div>
+            <div class="co-control-hint">Infrastructure cost per tournament match</div>
+          </div>
+          <div class="co-kpi-val" id="co-out-cost-per-match">$0.4458</div>
+        </div>
+
+        <!-- Actions -->
+        <button type="button" class="co-btn co-btn-primary" id="co-btn-open-quote">
+          <span>📜</span> Generate Official League Quote
+        </button>
+      </section>
+    </div>
+
+    <!-- Autonomous Budget Optimizer Sandbox -->
+    <section class="co-optimizer-section" aria-labelledby="co-opt-title">
+      <div class="co-optimizer-box">
+        <div class="co-card-header">
+          <h2 id="co-opt-title" class="co-card-title">
+            <span>🧠</span> Autonomous Budget Optimizer Sandbox
+          </h2>
+          <span class="co-control-hint">Algorithmic Resource Solver</span>
+        </div>
+        <p style="color: var(--co-text-muted); font-size: 0.95rem;">
+          Specify your tournament's target monthly cloud budget. The optimizer solver algorithm will maximize tick-rate, anti-cheat security, and spectator streaming throughput while ensuring complete budget feasibility.
+        </p>
+
+        <div class="co-optimizer-input-row">
+          <div class="co-budget-input-wrapper">
+            <span class="co-currency-symbol">$</span>
+            <input type="number" id="co-target-budget" class="co-budget-input" min="100" max="50000" step="50" value="1500" placeholder="Target Monthly Budget">
+          </div>
+          <div class="co-opt-btn-wrapper">
+            <button type="button" class="co-btn co-btn-primary" id="co-btn-optimize">
+              <span>⚡</span> Optimize Allocation
+            </button>
+          </div>
+        </div>
+
+        <div id="co-optimizer-results" class="co-optimizer-results">
+          <div class="co-control-hint">Enter target monthly budget above and click "Optimize Allocation" to run the algorithmic solver.</div>
+        </div>
+
+        <button type="button" class="co-btn co-btn-secondary" id="co-btn-apply-optimization" style="display: none; margin-top: 14px;">
+          <span>✓</span> Apply Recommended Allocation to Sliders
+        </button>
+      </div>
+    </section>
+
+    <!-- Esports League Tiers & Subsidies Reference Grid -->
+    <section class="co-card co-tiers-table-section" aria-labelledby="co-tiers-title">
+      <div class="co-card-header">
+        <h2 id="co-tiers-title" class="co-card-title">
+          <span>🏆</span> Esports League Subsidies &amp; Volume Discount Matrix
+        </h2>
+      </div>
+      <div class="co-table-wrapper">
+        <table class="co-table">
+          <thead>
+            <tr>
+              <th>Tier Level</th>
+              <th>Monthly Spend Threshold</th>
+              <th>Volume Discount</th>
+              <th>Publisher Subsidy</th>
+              <th>Target Audience &amp; Scope</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color: #9ca3af;">Indie Community</strong></td>
+              <td>$0 – $499</td>
+              <td>0%</td>
+              <td>$0</td>
+              <td>Grassroots tournaments, community scrims &amp; amateur clans</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--co-cyan);">Challenger League</strong></td>
+              <td>$500 – $1,999</td>
+              <td>10%</td>
+              <td>$50 / month</td>
+              <td>Regional open qualifiers, collegiate circuits &amp; semi-pro divisions</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--co-purple);">Pro Championship</strong></td>
+              <td>$2,000 – $4,999</td>
+              <td>18%</td>
+              <td>$200 / month</td>
+              <td>Franchised premier leagues, broadcast studio playoffs</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--co-gold);">Global Major Invitational</strong></td>
+              <td>$5,000+</td>
+              <td>25%</td>
+              <td>$500 / month</td>
+              <td>World championships, tier-1 international arena stadium spectacles</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Official Quote Generator Modal Dialog -->
+    <div class="co-modal-backdrop" id="co-quote-modal" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="co-modal-dialog">
+        <div class="co-modal-header">
+          <h3 class="co-modal-title">Official Esports Infrastructure Quote</h3>
+          <button type="button" class="co-modal-close" id="co-btn-close-quote" aria-label="Close dialog">&times;</button>
+        </div>
+        <p style="color: var(--co-text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+          This generated quote guarantees provisioning capacity and 99.99% matchmaking uptime SLA with high-fidelity 128Hz tick-rate compute.
+        </p>
+        <pre class="co-quote-json-view" id="co-quote-json"></pre>
+        <div class="co-modal-actions">
+          <button type="button" class="co-btn co-btn-secondary" id="co-btn-copy-quote">Copy JSON Quote</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
