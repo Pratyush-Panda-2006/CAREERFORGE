@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mix Profile Radar | Music DAW Studio</title>
+  <link rel="stylesheet" href="data-visualizer.css">
+  <script type="module" src="data-visualizer.js"></script>
+</head>
+<body>
+  <main class="workspace">
+    <a href="index.html">← Music DAW Studio</a>
+    <header>
+      <h1>Mix profile radar</h1>
+      <p>Compare six normalized mix ratings from 0 to 100 against a reference profile.</p>
+    </header>
+    <div class="dashboard">
+      <section class="panel chart" aria-label="Mix profile chart">
+        <fieldset>
+          <legend>Visible profiles</legend>
+          <label><input type="checkbox" id="show-mix" checked> <span class="key mix">Your mix</span></label>
+          <label><input type="checkbox" id="show-reference" checked> <span class="key reference">Reference</span></label>
+        </fieldset>
+        <svg viewBox="0 0 420 360" role="group" aria-labelledby="radar-title radar-description">
+          <title id="radar-title">Six-axis mix radar</title>
+          <desc id="radar-description">Each vertex is a rating from 0 at the center to 100 at the outer grid.</desc>
+          <g id="chart-grid" aria-hidden="true"></g>
+          <g id="chart-series"></g>
+        </svg>
+        <p id="vertex-value" class="readout" aria-live="polite">Focus or hover over a point to read its value.</p>
+      </section>
+      <section class="panel controls" aria-labelledby="mix-heading">
+        <h2 id="mix-heading">Your mix</h2>
+        <div id="mix-controls"></div>
+        <dl class="coverage">
+          <dt>Your mix coverage</dt><dd id="mix-coverage"></dd>
+          <dt>Reference coverage</dt><dd id="reference-coverage"></dd>
+        </dl>
+        <small>Coverage is the polygon area as a percentage of the full grid.</small>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
