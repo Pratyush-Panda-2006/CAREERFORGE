@@ -1,0 +1,300 @@
+/* Apex Zero Hypercar - Voice Commander & Speech Dispatcher Styles */
+
+:root {
+  --vc-bg: #050505;
+  --vc-card: #0b0b10;
+  --vc-border: rgba(239, 68, 68, 0.25);
+  --vc-accent: #ef4444;
+  --vc-text: #f8fafc;
+  --vc-muted: #94a3b8;
+  --vc-wave: #38bdf8;
+}
+
+body.hypercar-voice-theme {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--vc-bg);
+  color: var(--vc-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.voice-commander-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.commander-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--vc-card);
+  border: 1px solid var(--vc-border);
+  border-radius: 10px;
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-group h2 {
+  margin: 0;
+  font-family: 'Orbitron', 'Inter', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--vc-accent);
+}
+
+.status-badge {
+  padding: 5px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.status-badge.ready {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--vc-accent);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.status-badge.listening {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  border: 1px solid #eab308;
+  animation: vcPulseBadge 1s infinite alternate;
+}
+
+.status-badge.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--vc-accent);
+  border: 1px solid var(--vc-accent);
+}
+
+@keyframes vcPulseBadge {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+.mic-control-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 20px;
+  background: var(--vc-card);
+  border: 1px solid var(--vc-border);
+  border-radius: 10px;
+}
+
+.mic-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: 9999px;
+  border: none;
+  background: var(--vc-accent);
+  color: #050505;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
+  transition: all 0.2s ease;
+}
+
+.mic-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+}
+
+.mic-action-btn.recording {
+  background: #b91c1c;
+  color: #fff;
+  animation: vcRecordingGlow 1.5s infinite;
+}
+
+@keyframes vcRecordingGlow {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+  70% { box-shadow: 0 0 0 16px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.audio-wave-visualizer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 5px;
+  width: 220px;
+  height: 44px;
+  padding: 6px;
+  background: rgba(15, 15, 20, 0.6);
+  border: 1px dashed var(--vc-border);
+  border-radius: 8px;
+}
+
+.wave-bar {
+  width: 6px;
+  background: var(--vc-wave);
+  border-radius: 3px;
+  animation: vcWave 1.2s infinite ease-in-out;
+  opacity: 0.35;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.wave-bar:nth-child(5) { animation-delay: 0.6s; }
+.wave-bar:nth-child(6) { animation-delay: 0.75s; }
+.wave-bar:nth-child(7) { animation-delay: 0.9s; }
+.wave-bar:nth-child(8) { animation-delay: 1.05s; }
+
+@keyframes vcWave {
+  0%, 100% { height: 30%; opacity: 0.35; }
+  50% { height: 90%; opacity: 1; }
+}
+
+.wave-bar.active {
+  animation: none;
+  height: 90%;
+  opacity: 1;
+}
+
+.simulated-commands-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--vc-muted);
+}
+
+.sim-label {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.voice-chip {
+  padding: 6px 14px;
+  border-radius: 16px;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--vc-text);
+  border: 1px solid var(--vc-border);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.15s ease;
+}
+
+.voice-chip:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--vc-accent);
+}
+
+.command-history-panel {
+  background: var(--vc-card);
+  border: 1px solid var(--vc-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--vc-border);
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--vc-muted);
+}
+
+.history-stream-log {
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.voice-cmd-entry {
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #0a0a0f;
+  border-left: 4px solid var(--vc-accent);
+}
+
+.voice-cmd-entry.fallback {
+  border-left-color: #eab308;
+}
+
+.cmd-row-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.cmd-action {
+  font-weight: 700;
+  color: var(--vc-accent);
+}
+
+.voice-cmd-entry.fallback .cmd-action {
+  color: #eab308;
+}
+
+.cmd-time {
+  color: var(--vc-muted);
+}
+
+.cmd-transcript {
+  font-size: 0.9rem;
+  color: var(--vc-text);
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.cmd-response {
+  font-size: 0.8rem;
+  color: var(--vc-muted);
+}
+
+.speech-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: #0b0b10;
+  border: 1px solid var(--vc-accent);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(239, 68, 68, 0.35);
+  z-index: 9999;
+  transform: translateY(120px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+}
+
+.speech-toast.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 640px) {
+  .voice-commander-container { padding: 0; }
+  .commander-header, .mic-control-card, .panel-header { padding: 14px 16px; }
+  .audio-wave-visualizer { width: 160px; }
+}
