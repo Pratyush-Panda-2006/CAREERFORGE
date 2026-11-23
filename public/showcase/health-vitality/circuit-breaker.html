@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health & Vitality - Fault-Tolerant Circuit Breaker & API Resilience Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="circuit-breaker.css">
+</head>
+<body>
+  <div class="breaker-container" data-health-vitality-circuit-breaker>
+    <!-- Brand Header -->
+    <header class="breaker-header">
+      <div class="brand-badge">Health &amp; Vitality • Clinical Resilience Sentinel</div>
+      <h1>Biometric &amp; Telehealth <span>Circuit Breaker</span></h1>
+      <p>Mission-critical fault-tolerant tri-state resilience simulator protecting hospital EHR integrations, continuous ECG streams, smart infusion pump telemetry, and telehealth clinical gateways against cascade service failures.</p>
+    </header>
+
+    <!-- Tri-State Lamp Status Cockpit -->
+    <section class="cockpit-panel" aria-label="Circuit Breaker Status Cockpit">
+      <div class="cockpit-header">
+        <h2 class="cockpit-title">Resilience Sentinel Status Cockpit</h2>
+        
+        <!-- Physical Lamps with Teal / Amber / Coral theme -->
+        <div class="lamp-cluster">
+          <div class="lamp-unit">
+            <div id="lampClosed" class="lamp lamp-closed active" title="CLOSED: Normal Biometric Traffic Admitted"></div>
+            <span class="lamp-label">Closed</span>
+          </div>
+          <div class="lamp-unit">
+            <div id="lampHalfOpen" class="lamp lamp-half-open" title="HALF_OPEN: Canary Recovery Trial Active"></div>
+            <span class="lamp-label">Half-Open</span>
+          </div>
+          <div class="lamp-unit">
+            <div id="lampOpen" class="lamp lamp-open" title="OPEN: Circuit Tripped &amp; Protecting Clinical Systems"></div>
+            <span class="lamp-label">Open</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cockpit-body">
+        <div class="cockpit-info">
+          <div class="status-row">
+            <span class="status-pill pill-closed" id="stateBadge">CLOSED</span>
+            <span class="cooldown-timer" id="cooldownTimer" style="display: none;">⏳ Canary probe in 3.5s</span>
+          </div>
+          <p class="state-desc" id="stateDescription">All clinical endpoints operating normally. Real-time patient telemetry admitted without impediment.</p>
+        </div>
+
+        <div class="cockpit-gauges">
+          <div class="gauge-block">
+            <div class="gauge-header">
+              <span>Failure Threshold Monitor</span>
+              <span id="failureMeterText">0 / 3 Failures</span>
+            </div>
+            <div class="meter-track">
+              <div id="failureMeterBar" class="meter-fill fill-coral" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="gauge-block">
+            <div class="gauge-header">
+              <span>Canary Recovery Passes</span>
+              <span id="canaryMeterText">0 / 2 Passes</span>
+            </div>
+            <div class="meter-track">
+              <div id="canaryMeterBar" class="meter-fill fill-teal" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Telemetry Metrics Grid -->
+    <section class="metrics-grid" aria-label="Telemetry Metrics">
+      <div class="metric-card">
+        <div class="metric-label">Total Sync Requests</div>
+        <div class="metric-value" id="metricTotal">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Successful Syncs (200 OK)</div>
+        <div class="metric-value success" id="metricSuccess">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Clinical Failures (503/500)</div>
+        <div class="metric-value danger" id="metricFailed">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Blocked (Tripped)</div>
+        <div class="metric-value danger" id="metricRejected">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Cached Fallbacks Served</div>
+        <div class="metric-value warning" id="metricFallback">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Circuit Trips</div>
+        <div class="metric-value" id="metricTrips">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Clinical Health Rate</div>
+        <div class="metric-value success" id="metricRate">100%</div>
+      </div>
+    </section>
+
+    <!-- Interactive Simulator Controls & Live Timeline -->
+    <main class="dashboard-grid">
+      <!-- Simulator Dispatcher Panel -->
+      <section class="panel-card" aria-label="Biometric &amp; EHR API Dispatcher">
+        <h2>Clinical EHR &amp; Sensor API Dispatcher</h2>
+        
+        <div class="endpoint-selector">
+          <label for="apiEndpointSelect">Target Medical Microservice</label>
+          <select id="apiEndpointSelect" class="vitality-select">
+            <option value="🫀 Continuous ECG Telemetry Ingestion (Arrhythmia Sentinel)">🫀 Continuous ECG Telemetry Ingestion (Arrhythmia Sentinel)</option>
+            <option value="🩺 FHIR/HL7 Hospital EHR Patient Sync (Epic / Cerner Gateway)">🩺 FHIR/HL7 Hospital EHR Patient Sync (Epic / Cerner Gateway)</option>
+            <option value="🩸 Real-time Continuous Glucose Monitor (CGM Cloud Sync)">🩸 Real-time Continuous Glucose Monitor (CGM Cloud Sync)</option>
+            <option value="📡 Telehealth WebRTC HD Video Clinical Dispatcher">📡 Telehealth WebRTC HD Video Clinical Dispatcher</option>
+            <option value="💊 Automated Smart Infusion Pump Telemetry Gateway">💊 Automated Smart Infusion Pump Telemetry Gateway</option>
+          </select>
+        </div>
+
+        <div class="action-buttons">
+          <button type="button" id="btnSimulateSuccess" class="btn-action btn-success">
+            ✨ Simulate 200 OK Telemetry Sync
+          </button>
+          <button type="button" id="btnSimulateFailure" class="btn-action btn-danger">
+            ⚠️ Simulate 503 Clinical Outage
+          </button>
+          <button type="button" id="btnSimulateTimeout" class="btn-action btn-warning">
+            ⏱️ Simulate 504 Gateway Timeout
+          </button>
+          <button type="button" id="btnSimulateFlaky" class="btn-action">
+            🎲 Simulate Flaky Sensor Stream
+          </button>
+          <button type="button" id="btnSimulateSpike" class="btn-action btn-teal btn-full">
+            ⚡ Simulate Biometric Traffic Surge (5x Concurrent)
+          </button>
+          <button type="button" id="btnTripCircuit" class="btn-action btn-danger">
+            🛑 Emergency Force Trip (Lockout)
+          </button>
+          <button type="button" id="btnResetCircuit" class="btn-action btn-success">
+            🔄 Reset Circuit (CLOSED)
+          </button>
+        </div>
+
+        <!-- Dynamic Clinical Fallback Notice Box -->
+        <div id="fallbackNotice" class="fallback-notice">
+          <div class="fallback-header">
+            <span>🛡️ Graceful Biometric Fallback Engaged (Local Clinical Cache)</span>
+          </div>
+          <pre id="fallbackDetails" class="fallback-details"></pre>
+        </div>
+      </section>
+
+      <!-- Live Event Timeline Feed -->
+      <section class="panel-card timeline-card" aria-label="Live Telemetry Audit Stream">
+        <h2>
+          <span>Live Telemetry Audit Stream</span>
+          <button type="button" id="btnClearTimeline" class="btn-action pill-sm" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">Clear Stream</button>
+        </h2>
+        <div id="timelineStream" class="timeline-stream">
+          <!-- Dynamic event logs injected here -->
+        </div>
+      </section>
+    </main>
+
+    <footer class="breaker-footer">
+      <a href="index.html" class="back-link">← Return to Health &amp; Vitality Master Showcase</a>
+    </footer>
+  </div>
+
+  <script type="module" src="circuit-breaker.js"></script>
+</body>
+</html>
