@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Portfolio - Web Speech API Voice Commander</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <div id="developer-portfolio-voice-app" class="voice-app-container">
+    <!-- Header with System Telemetry -->
+    <header class="voice-header">
+      <div class="header-meta">
+        <div class="header-badge">
+          <span>SPEECH_API_V2.4</span>
+          <span>//</span>
+          <span>A11Y_DISPATCHER</span>
+        </div>
+        <h1>Voice Commander & Speech Dispatcher</h1>
+        <p>Natural speech navigation, technology stack query filtering, and accessibility speech dispatcher.</p>
+      </div>
+
+      <div id="commander-status-pill" class="status-pill" data-status="idle" role="status" aria-live="polite">
+        <span id="commander-status-dot" class="status-dot"></span>
+        <span id="commander-status-text">IDLE</span>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="commander-grid">
+      <!-- Left Column: Audio Activation & Visualizer Deck -->
+      <section class="commander-card" aria-label="Microphone Voice Activation Deck">
+        <div class="card-title">
+          <span>// MIC AUDIO INTERFACE</span>
+          <span style="font-size:0.75rem; color:var(--voice-green);">READY</span>
+        </div>
+
+        <div class="mic-control-center">
+          <div class="mic-wrapper">
+            <button
+              id="mic-activation-btn"
+              class="mic-btn"
+              type="button"
+              aria-label="Toggle Microphone Voice Commander"
+              aria-pressed="false"
+            >
+              <svg class="mic-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+              </svg>
+            </button>
+            <div class="mic-ring ring-1"></div>
+            <div class="mic-ring ring-2"></div>
+            <div class="mic-ring ring-3"></div>
+          </div>
+          <span class="mic-hint">Click microphone or use Space to toggle voice recognition</span>
+        </div>
+
+        <!-- 16-Bar Audio Wave Visualizer -->
+        <div
+          id="commander-audio-visualizer"
+          class="audio-visualizer-container"
+          aria-hidden="true"
+        >
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <!-- Speech Synthesizer Output Box -->
+        <div class="speech-monitor-box">
+          <svg class="speech-speaker-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          <div>
+            <div style="font-size:0.75rem; color:var(--voice-cyan); margin-bottom:2px;">DISPATCHER AUDIO OUTPUT:</div>
+            <div id="synth-speech-display">Awaiting voice command input...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Simulated Portfolio State Monitor -->
+      <section class="commander-card" aria-label="Simulated Developer Portfolio Sandbox">
+        <div class="card-title">
+          <span>// PORTFOLIO STATE SANDBOX</span>
+          <span style="font-size:0.75rem; color:var(--voice-cyan);">LIVE SYNC</span>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; color:var(--voice-text-dim); margin-bottom:8px;">SECTIONS:</div>
+          <div class="portfolio-preview-grid">
+            <div class="portfolio-section-card is-active-section" data-section="home">01. HOME</div>
+            <div class="portfolio-section-card" data-section="about">02. ABOUT</div>
+            <div class="portfolio-section-card" data-section="skills">03. SKILLS</div>
+            <div class="portfolio-section-card" data-section="projects">04. PROJECTS</div>
+            <div class="portfolio-section-card" data-section="experience">05. EXPERIENCE</div>
+            <div class="portfolio-section-card" data-section="contact">06. CONTACT</div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; color:var(--voice-text-dim); margin-bottom:8px;">TECH STACK FILTER:</div>
+          <div class="tech-tag-group">
+            <span class="tech-stack-tag" data-tech="react">React</span>
+            <span class="tech-stack-tag" data-tech="python">Python</span>
+            <span class="tech-stack-tag" data-tech="typescript">TypeScript</span>
+            <span class="tech-stack-tag" data-tech="node.js">Node.js</span>
+            <span class="tech-stack-tag" data-tech="go">Go</span>
+            <span class="tech-stack-tag" data-tech="docker">Docker</span>
+          </div>
+        </div>
+
+        <div class="state-indicators-row">
+          <div class="state-indicator-item">
+            ACTIVE SECTION: <span id="active-section-display" class="state-val">HOME</span>
+          </div>
+          <div class="state-indicator-item">
+            ACTIVE TECH: <span id="active-tech-display" class="state-val">ALL</span>
+          </div>
+          <div class="state-indicator-item">
+            A11Y CONTRAST: <span id="active-contrast-display" class="state-val">STANDARD</span>
+          </div>
+          <div class="state-indicator-item">
+            THEME: <span id="active-theme-display" class="state-val">DARK</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Quick Grammar Command Chips -->
+    <section class="commander-card" aria-label="Voice Grammar Cheatsheet">
+      <div class="card-title">
+        <span>// GRAMMAR CHEATSHEET & QUICK SIMULATION PILLS</span>
+        <span style="font-size:0.75rem; color:var(--voice-text-dim);">CLICK TO TRIGGER</span>
+      </div>
+
+      <div class="grammar-chips-container">
+        <button type="button" class="voice-chip" data-command="go to projects">"go to projects"</button>
+        <button type="button" class="voice-chip" data-command="show about me">"show about me"</button>
+        <button type="button" class="voice-chip" data-command="open experience">"open experience"</button>
+        <button type="button" class="voice-chip" data-command="view contact">"view contact"</button>
+        <button type="button" class="voice-chip" data-command="jump to skills">"jump to skills"</button>
+        <button type="button" class="voice-chip" data-command="filter by react">"filter by react"</button>
+        <button type="button" class="voice-chip" data-command="show python projects">"show python projects"</button>
+        <button type="button" class="voice-chip" data-command="filter typescript">"filter typescript"</button>
+        <button type="button" class="voice-chip" data-command="clear tech filter">"clear tech filter"</button>
+        <button type="button" class="voice-chip" data-command="download resume">"download resume"</button>
+        <button type="button" class="voice-chip" data-command="read bio">"read bio"</button>
+        <button type="button" class="voice-chip" data-command="toggle contrast">"toggle contrast"</button>
+        <button type="button" class="voice-chip" data-command="switch theme">"switch theme"</button>
+        <button type="button" class="voice-chip" data-command="help">"help"</button>
+      </div>
+    </section>
+
+    <!-- Mock Speech Terminal Input Console -->
+    <section class="commander-card" aria-label="Mock Speech Input Console">
+      <div class="card-title">
+        <span>// HEADLESS SPEECH SIMULATION PROMPT</span>
+        <span style="font-size:0.75rem; color:var(--voice-green);">TERMINAL SIMULATOR</span>
+      </div>
+
+      <div class="mock-input-row">
+        <div class="mock-terminal-wrapper">
+          <span class="mock-prompt-symbol">$</span>
+          <input
+            type="text"
+            id="mock-voice-input"
+            class="mock-voice-input"
+            placeholder="Type a voice command (e.g. 'go to projects', 'filter by react', 'download resume')..."
+            aria-label="Simulated Voice Input"
+          >
+        </div>
+        <button id="mock-voice-submit" class="btn btn-primary" type="button">Execute</button>
+      </div>
+    </section>
+
+    <!-- Command History Feed -->
+    <section class="commander-card" aria-label="Recognized Command History Feed">
+      <div class="card-title">
+        <span>// COMMAND AUDIT STREAM</span>
+        <button id="clear-history-btn" class="btn btn-secondary" type="button" style="padding:4px 10px; font-size:0.75rem;">Clear History</button>
+      </div>
+
+      <div id="commander-history-list" class="history-feed-container" aria-live="polite">
+        <div class="history-empty">
+          <span class="terminal-dim">// No voice commands recorded yet. Speak or simulate a command above.</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="voice-footer">
+      <div>DEVELOPER PORTFOLIO // ACCESSIBILITY SPEECH DISPATCHER v2.4 // LEVEL 3 FEATURE</div>
+    </footer>
+  </div>
+
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
