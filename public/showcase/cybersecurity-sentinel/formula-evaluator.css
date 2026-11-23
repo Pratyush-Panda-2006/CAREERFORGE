@@ -1,0 +1,307 @@
+/**
+ * Cybersecurity Sentinel - Dynamic KPI Formula Calculator Styling
+ */
+
+:root {
+  --robot-bg: #090a0f;
+  --robot-card: #12141f;
+  --robot-card-light: #1c2033;
+  --robot-border: #2b324b;
+  --robot-accent: #ef4444;
+  --robot-accent-glow: rgba(239, 68, 68, 0.25);
+  --robot-cyan: #38bdf8;
+  --robot-amber: #f59e0b;
+  --robot-green: #10b981;
+  --robot-text: #f8fafc;
+  --robot-dim: #94a3b8;
+  --robot-font: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--robot-bg);
+  color: var(--robot-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.evaluator-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.evaluator-header {
+  border-bottom: 2px solid var(--robot-border);
+  padding-bottom: 16px;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--robot-accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--robot-font);
+  color: var(--robot-accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.evaluator-header h1 {
+  margin: 0 0 8px 0;
+  color: var(--robot-accent);
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.evaluator-header p {
+  margin: 0;
+  color: var(--robot-dim);
+  font-size: 0.95rem;
+}
+
+.syntax-pills-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--robot-card);
+  border: 1px solid var(--robot-border);
+  border-radius: 8px;
+}
+
+.pill-title {
+  font-size: 0.8rem;
+  color: var(--robot-dim);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.syntax-pill {
+  background: var(--robot-card-light);
+  border: 1px solid var(--robot-border);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-family: var(--robot-font);
+  color: var(--robot-cyan);
+}
+
+.evaluator-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .evaluator-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.config-panel,
+.results-panel {
+  background: var(--robot-card);
+  border: 1px solid var(--robot-border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3,
+.panel-header h4 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--robot-cyan);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.84rem;
+  color: var(--robot-dim);
+}
+
+.formula-text-input {
+  background: #06070a;
+  border: 1px solid var(--robot-border);
+  border-radius: 6px;
+  padding: 12px;
+  color: var(--robot-text);
+  font-family: var(--robot-font);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.formula-text-input:focus {
+  border-color: var(--robot-accent);
+  box-shadow: 0 0 0 2px var(--robot-accent-glow);
+}
+
+.variables-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px dashed var(--robot-border);
+}
+
+.variables-header h4 {
+  font-size: 0.88rem;
+  color: var(--robot-dim);
+}
+
+.variables-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.var-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.var-item label {
+  font-size: 0.8rem;
+  font-family: var(--robot-font);
+  color: var(--robot-text);
+  flex: 1;
+}
+
+.var-input {
+  width: 110px;
+  background: #06070a;
+  border: 1px solid var(--robot-border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: var(--robot-cyan);
+  font-family: var(--robot-font);
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.var-input:focus {
+  border-color: var(--robot-cyan);
+  outline: none;
+}
+
+.button-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.primary-btn {
+  background: var(--robot-accent);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.secondary-btn {
+  background: var(--robot-card-light);
+  color: var(--robot-text);
+  border: 1px solid var(--robot-border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.secondary-btn:hover {
+  background: #2b324b;
+}
+
+.warning-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--robot-accent);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #fca5a5;
+  font-size: 0.82rem;
+  font-family: var(--robot-font);
+}
+
+/* Results Display */
+.result-card {
+  background: linear-gradient(135deg, #181d2f, #0d0f17);
+  border: 1px solid var(--robot-accent);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 0 20px var(--robot-accent-glow);
+}
+
+.result-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--robot-dim);
+}
+
+.result-value {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--robot-accent);
+  font-family: var(--robot-font);
+  margin: 10px 0 6px 0;
+}
+
+.result-sub {
+  font-size: 0.8rem;
+  color: var(--robot-cyan);
+}
+
+.token-stream-box,
+.rpn-box {
+  background: #06070a;
+  border: 1px solid var(--robot-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.token-view,
+.rpn-view {
+  font-family: var(--robot-font);
+  font-size: 0.8rem;
+  color: #a5b4fc;
+  min-height: 40px;
+  line-height: 1.4;
+  word-break: break-all;
+}
