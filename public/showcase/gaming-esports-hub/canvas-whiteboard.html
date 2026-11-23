@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Esports Hub - Tactical Vector Whiteboard & Strategy Canvas</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+</head>
+<body>
+  <div class="tactical-whiteboard-app">
+    <!-- Header with Breadcrumb and Hub Navigation -->
+    <header class="whiteboard-header">
+      <div class="header-brand">
+        <div class="brand-badge-row">
+          <span class="cyber-badge">TACTICAL SUITE v3.0</span>
+          <span class="cyber-badge" style="color: var(--amber-gold); border-color: rgba(255, 170, 0, 0.4); background: rgba(255, 170, 0, 0.1);">VECTOR SKETCHPAD</span>
+        </div>
+        <h1 class="title-with-icon">
+          <svg class="title-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          Esports Strategy Whiteboard & Canvas
+        </h1>
+        <p class="header-subtitle">Collaborative vector sketchpad, tactical map playbook & team strategy drawing engine with Catmull-Rom spline smoothing.</p>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="hub-nav-btn" title="Return to Gaming Esports Hub">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          Back to Esports Hub
+        </a>
+      </div>
+    </header>
+
+    <!-- Floating Tactical Toolbar Dock -->
+    <section class="tactical-dock" aria-label="Tactical drawing toolbar">
+      <!-- Tool Selection -->
+      <div class="dock-group">
+        <span class="dock-label">Tools</span>
+        <div class="dock-button-row">
+          <button class="tool-btn active" data-tool="pen" title="Freehand Pen (P)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            Pen
+          </button>
+          <button class="tool-btn" data-tool="route" title="Tactical Movement Route (R)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="10 5 19 5 19 14"/></svg>
+            Route
+          </button>
+          <button class="tool-btn" data-tool="ping" title="Tactical Beacon Ping (B)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+            Ping
+          </button>
+          <button class="tool-btn" data-tool="rectangle" title="Tactical Zone / Site (Z)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            Rect
+          </button>
+          <button class="tool-btn" data-tool="circle" title="AoE / Vision Radius (C)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            Circle
+          </button>
+          <button class="tool-btn" data-tool="eraser" title="Eraser (E)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+            Eraser
+          </button>
+        </div>
+      </div>
+
+      <!-- Color Swatches (Theme Palette) -->
+      <div class="dock-group">
+        <span class="dock-label">Neon Palette</span>
+        <div class="color-swatches">
+          <button class="color-swatch active" style="background: #00ffcc; color: #00ffcc;" data-color="#00ffcc" title="Neon Cyan"></button>
+          <button class="color-swatch" style="background: #ff0055; color: #ff0055;" data-color="#ff0055" title="Electric Pink"></button>
+          <button class="color-swatch" style="background: #ffaa00; color: #ffaa00;" data-color="#ffaa00" title="Amber Gold"></button>
+          <button class="color-swatch" style="background: #8b5cf6; color: #8b5cf6;" data-color="#8b5cf6" title="Plasma Purple"></button>
+          <button class="color-swatch" style="background: #10b981; color: #10b981;" data-color="#10b981" title="Matrix Green"></button>
+          <button class="color-swatch" style="background: #ffffff; color: #ffffff;" data-color="#ffffff" title="Tactical White"></button>
+        </div>
+      </div>
+
+      <!-- Stroke Width Slider -->
+      <div class="dock-group">
+        <span class="dock-label">Stroke Width</span>
+        <div class="slider-control">
+          <input type="range" id="stroke-width-slider" class="tactical-range" min="1" max="30" value="3" aria-label="Stroke width slider">
+          <span id="stroke-width-val" class="slider-val">3px</span>
+        </div>
+      </div>
+
+      <!-- Opacity Slider -->
+      <div class="dock-group">
+        <span class="dock-label">Opacity</span>
+        <div class="slider-control">
+          <input type="range" id="opacity-slider" class="tactical-range" min="10" max="100" value="100" aria-label="Stroke opacity slider">
+          <span id="opacity-val" class="slider-val">100%</span>
+        </div>
+      </div>
+
+      <!-- Ping Badge Selector -->
+      <div class="dock-group">
+        <span class="dock-label">Ping Badge</span>
+        <select id="ping-label-select" class="tactical-select" aria-label="Tactical ping label">
+          <option value="PING">PING</option>
+          <option value="DEFEND A">DEFEND A</option>
+          <option value="DEFEND B">DEFEND B</option>
+          <option value="ATTACK">ATTACK</option>
+          <option value="DANGER">DANGER</option>
+          <option value="SMOKE">SMOKE</option>
+          <option value="WARD">WARD</option>
+        </select>
+      </div>
+
+      <!-- Tactical Backdrop Switcher -->
+      <div class="dock-group">
+        <span class="dock-label">Map Template</span>
+        <select id="backdrop-select" class="tactical-select" aria-label="Tactical map backdrop template">
+          <option value="grid">Tactical Grid</option>
+          <option value="moba">MOBA 3-Lane Map</option>
+          <option value="defusal">Bomb Defusal Site</option>
+          <option value="blank">Blank Tactical Arena</option>
+        </select>
+      </div>
+
+      <!-- Undo, Redo, Clear Actions -->
+      <div class="dock-group">
+        <span class="dock-label">History</span>
+        <div class="dock-button-row">
+          <button id="btn-undo" class="action-btn" title="Undo (Ctrl+Z)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+            Undo
+          </button>
+          <button id="btn-redo" class="action-btn" title="Redo (Ctrl+Y)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+            Redo
+          </button>
+          <button id="btn-clear" class="action-btn danger" title="Clear Canvas">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Serialization & Exports -->
+      <div class="dock-group">
+        <span class="dock-label">Export & Load</span>
+        <div class="dock-button-row">
+          <button id="btn-export-svg" class="action-btn primary" title="Export Vector SVG">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            SVG
+          </button>
+          <button id="btn-export-png" class="action-btn" title="Export High-Res PNG">
+            PNG
+          </button>
+          <button id="btn-export-json" class="action-btn" title="Save Strategy JSON">
+            Save JSON
+          </button>
+          <button id="btn-load-json" class="action-btn" title="Load Strategy JSON">
+            Load JSON
+          </button>
+          <input type="file" id="json-file-input" class="hidden-file-input" accept=".json,application/json">
+        </div>
+      </div>
+    </section>
+
+    <!-- Canvas Card Viewport -->
+    <section class="canvas-card">
+      <div class="canvas-viewport-wrap">
+        <canvas id="whiteboard-canvas" class="whiteboard-canvas cursor-pen"></canvas>
+      </div>
+
+      <!-- Realtime Telemetry and Status Bar -->
+      <footer class="status-bar">
+        <div class="telemetry-node">
+          <span class="pulse-dot"></span>
+          <span id="system-status">TACTICAL VECTOR ENGINE ONLINE &bull; 0 strokes</span>
+        </div>
+        <div class="telemetry-metrics">
+          <span class="metric-pill">Tool: <span id="telemetry-tool" class="metric-val">PEN</span></span>
+          <span class="metric-pill">Color: <span id="telemetry-color" class="metric-val">#00ffcc</span></span>
+          <span class="metric-pill">Width: <span id="telemetry-width" class="metric-val">3px</span></span>
+          <span class="metric-pill">Coords: <span id="telemetry-coords" class="metric-val">X: 0 Y: 0</span></span>
+        </div>
+      </footer>
+    </section>
+
+    <!-- Quick Shortcuts & Tactical Legend -->
+    <div class="tactical-legend">
+      <div class="legend-item"><span class="legend-key">P</span> Pen</div>
+      <div class="legend-item"><span class="legend-key">R</span> Route Arrow</div>
+      <div class="legend-item"><span class="legend-key">B</span> Tactical Ping</div>
+      <div class="legend-item"><span class="legend-key">Z</span> Zone Rect</div>
+      <div class="legend-item"><span class="legend-key">C</span> AoE Circle</div>
+      <div class="legend-item"><span class="legend-key">E</span> Eraser</div>
+      <div class="legend-item"><span class="legend-key">Ctrl+Z</span> Undo</div>
+      <div class="legend-item"><span class="legend-key">Ctrl+Y</span> Redo</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { GamingEsportsWhiteboardCanvas } from './canvas-whiteboard.js';
+
+    const canvasEl = document.getElementById('whiteboard-canvas');
+    const toolBtns = document.querySelectorAll('.tool-btn');
+    const colorSwatches = document.querySelectorAll('.color-swatch');
+    const strokeWidthSlider = document.getElementById('stroke-width-slider');
+    const strokeWidthVal = document.getElementById('stroke-width-val');
+    const opacitySlider = document.getElementById('opacity-slider');
+    const opacityVal = document.getElementById('opacity-val');
+    const pingSelect = document.getElementById('ping-label-select');
+    const backdropSelect = document.getElementById('backdrop-select');
+    const btnUndo = document.getElementById('btn-undo');
+    const btnRedo = document.getElementById('btn-redo');
+    const btnClear = document.getElementById('btn-clear');
+    const btnExportSVG = document.getElementById('btn-export-svg');
+    const btnExportPNG = document.getElementById('btn-export-png');
+    const btnExportJSON = document.getElementById('btn-export-json');
+    const btnLoadJSON = document.getElementById('btn-load-json');
+    const jsonFileInput = document.getElementById('json-file-input');
+
+    const statusSystem = document.getElementById('system-status');
+    const telTool = document.getElementById('telemetry-tool');
+    const telColor = document.getElementById('telemetry-color');
+    const telWidth = document.getElementById('telemetry-width');
+    const telCoords = document.getElementById('telemetry-coords');
+
+    // Instantiate whiteboard engine
+    const whiteboard = new GamingEsportsWhiteboardCanvas(canvasEl);
+
+    function updateTelemetry() {
+      const metrics = whiteboard.getMetrics();
+      statusSystem.textContent = `TACTICAL VECTOR ENGINE ONLINE • ${metrics.totalStrokes} strokes recorded`;
+      telTool.textContent = metrics.currentTool.toUpperCase();
+      telColor.textContent = metrics.currentColor;
+      telWidth.textContent = `${metrics.strokeWidth}px`;
+    }
+
+    // Tool switching
+    toolBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        toolBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tool = btn.dataset.tool;
+        whiteboard.setTool(tool);
+        canvasEl.className = `whiteboard-canvas cursor-${tool}`;
+        updateTelemetry();
+      });
+    });
+
+    // Color swatches
+    colorSwatches.forEach(swatch => {
+      swatch.addEventListener('click', () => {
+        colorSwatches.forEach(s => s.classList.remove('active'));
+        swatch.classList.add('active');
+        whiteboard.setColor(swatch.dataset.color);
+        updateTelemetry();
+      });
+    });
+
+    // Stroke width slider
+    strokeWidthSlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      strokeWidthVal.textContent = `${val}px`;
+      whiteboard.setStrokeWidth(val);
+      updateTelemetry();
+    });
+
+    // Opacity slider
+    opacitySlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      opacityVal.textContent = `${val}%`;
+      whiteboard.setOpacity(val / 100);
+    });
+
+    // Ping label selector
+    pingSelect.addEventListener('change', (e) => {
+      whiteboard.setPingLabel(e.target.value);
+    });
+
+    // Backdrop switcher
+    backdropSelect.addEventListener('change', (e) => {
+      whiteboard.setBackdrop(e.target.value);
+    });
+
+    // Undo / Redo / Clear
+    btnUndo.addEventListener('click', () => {
+      whiteboard.undo();
+      updateTelemetry();
+    });
+
+    btnRedo.addEventListener('click', () => {
+      whiteboard.redo();
+      updateTelemetry();
+    });
+
+    btnClear.addEventListener('click', () => {
+      if (confirm('Clear the tactical whiteboard canvas?')) {
+        whiteboard.clear();
+        updateTelemetry();
+      }
+    });
+
+    // Exports
+    btnExportSVG.addEventListener('click', () => {
+      whiteboard.downloadSVG();
+    });
+
+    btnExportPNG.addEventListener('click', () => {
+      whiteboard.downloadPNG();
+    });
+
+    btnExportJSON.addEventListener('click', () => {
+      whiteboard.downloadJSON();
+    });
+
+    // File loader for JSON
+    btnLoadJSON.addEventListener('click', () => {
+      jsonFileInput.click();
+    });
+
+    jsonFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          whiteboard.loadJSON(event.target.result);
+          if (whiteboard.backdrop) {
+            backdropSelect.value = whiteboard.backdrop;
+          }
+          updateTelemetry();
+        } catch (err) {
+          alert(`Failed to load JSON strategy: ${err.message}`);
+        }
+      };
+      reader.readAsText(file);
+      jsonFileInput.value = '';
+    });
+
+    // Mouse coordinates tracker
+    canvasEl.addEventListener('mousemove', (e) => {
+      const rect = canvasEl.getBoundingClientRect();
+      const x = Math.round(e.clientX - rect.left);
+      const y = Math.round(e.clientY - rect.top);
+      telCoords.textContent = `X: ${x} Y: ${y}`;
+    });
+
+    // Listen to whiteboard events
+    whiteboard.on('stroke:end', updateTelemetry);
+    whiteboard.on('undo', updateTelemetry);
+    whiteboard.on('redo', updateTelemetry);
+    whiteboard.on('clear', updateTelemetry);
+
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        whiteboard.undo();
+        updateTelemetry();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toUpperCase() === 'Z'))) {
+        e.preventDefault();
+        whiteboard.redo();
+        updateTelemetry();
+      } else {
+        const key = e.key.toLowerCase();
+        if (key === 'p') {
+          document.querySelector('[data-tool="pen"]')?.click();
+        } else if (key === 'r') {
+          document.querySelector('[data-tool="route"]')?.click();
+        } else if (key === 'b') {
+          document.querySelector('[data-tool="ping"]')?.click();
+        } else if (key === 'z') {
+          document.querySelector('[data-tool="rectangle"]')?.click();
+        } else if (key === 'c') {
+          document.querySelector('[data-tool="circle"]')?.click();
+        } else if (key === 'e') {
+          document.querySelector('[data-tool="eraser"]')?.click();
+        }
+      }
+    });
+
+    updateTelemetry();
+  </script>
+</body>
+</html>

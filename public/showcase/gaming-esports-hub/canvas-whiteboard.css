@@ -1,0 +1,490 @@
+/**
+ * Gaming Esports Hub - Vector Whiteboard & Esports Strategy Canvas Stylesheet
+ * Cyberpunk / Neon Esports Aesthetic (#0a0e17 background, neon cyan, electric pink, amber gold, plasma purple)
+ * Features glassmorphism dock, cybernetic glowing borders, tactical badges, and responsive UI layout.
+ */
+
+:root {
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-panel: rgba(16, 24, 39, 0.85);
+  --bg-glass: rgba(10, 14, 23, 0.75);
+  --border-neon: rgba(0, 255, 204, 0.25);
+  --border-active: #00ffcc;
+  --border-glow: rgba(0, 255, 204, 0.4);
+
+  /* Tactical Theme Palette */
+  --neon-cyan: #00ffcc;
+  --electric-pink: #ff0055;
+  --amber-gold: #ffaa00;
+  --plasma-purple: #8b5cf6;
+  --matrix-green: #10b981;
+  --tactical-dark: #0a0e17;
+
+  --text-primary: #e6edf3;
+  --text-muted: #8b949e;
+  --text-dim: rgba(255, 255, 255, 0.5);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  padding: 1.5rem;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(0, 255, 204, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.04) 0%, transparent 45%);
+}
+
+.tactical-whiteboard-app {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Header & Navigation */
+.whiteboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-neon);
+}
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.brand-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cyber-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  background: rgba(0, 255, 204, 0.12);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  text-transform: uppercase;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+}
+
+.title-icon {
+  color: var(--neon-cyan);
+}
+
+.header-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hub-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.hub-nav-btn:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+}
+
+/* Floating Tactical Dock */
+.tactical-dock {
+  background: var(--bg-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-neon);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.dock-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dock-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.dock-button-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Tool Buttons */
+.tool-btn {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.18s ease;
+}
+
+.tool-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 255, 204, 0.4);
+  color: var(--neon-cyan);
+}
+
+.tool-btn.active {
+  background: rgba(0, 255, 204, 0.15);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.35);
+}
+
+/* Color Swatches */
+.color-swatches {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.color-swatch:hover {
+  transform: scale(1.15);
+}
+
+.color-swatch.active {
+  border-color: #ffffff;
+  transform: scale(1.22);
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* Sliders */
+.slider-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tactical-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 90px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  outline: none;
+}
+
+.tactical-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--neon-cyan);
+}
+
+.tactical-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--neon-cyan);
+  border: none;
+}
+
+.slider-val {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--neon-cyan);
+  min-width: 28px;
+  font-weight: 700;
+}
+
+/* Dropdown Selectors */
+.tactical-select {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 0.38rem 0.55rem;
+  font-size: 0.78rem;
+  outline: none;
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+.tactical-select:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
+}
+
+/* Action Buttons */
+.action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.42rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.18s ease;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.action-btn.primary {
+  background: rgba(0, 255, 204, 0.12);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+
+.action-btn.primary:hover {
+  background: rgba(0, 255, 204, 0.25);
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.35);
+}
+
+.action-btn.danger {
+  background: rgba(255, 0, 85, 0.1);
+  border-color: rgba(255, 0, 85, 0.4);
+  color: #ff3366;
+}
+
+.action-btn.danger:hover {
+  background: rgba(255, 0, 85, 0.25);
+  border-color: #ff0055;
+  box-shadow: 0 0 12px rgba(255, 0, 85, 0.35);
+}
+
+/* Canvas Area Container */
+.canvas-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-neon);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-viewport-wrap {
+  width: 100%;
+  height: 580px;
+  position: relative;
+  background-color: var(--tactical-dark);
+}
+
+.whiteboard-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* Canvas Cursors */
+.whiteboard-canvas.cursor-pen { cursor: crosshair; }
+.whiteboard-canvas.cursor-eraser { cursor: cell; }
+.whiteboard-canvas.cursor-ping { cursor: pointer; }
+.whiteboard-canvas.cursor-route { cursor: crosshair; }
+.whiteboard-canvas.cursor-rectangle { cursor: crosshair; }
+.whiteboard-canvas.cursor-circle { cursor: crosshair; }
+
+/* Status & Telemetry Bar */
+.status-bar {
+  background: rgba(10, 14, 23, 0.95);
+  border-top: 1px solid rgba(0, 255, 204, 0.15);
+  padding: 0.6rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.telemetry-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--neon-cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--neon-cyan);
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+.telemetry-metrics {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.metric-pill {
+  color: var(--text-primary);
+}
+
+.metric-val {
+  color: var(--neon-cyan);
+  font-weight: 700;
+}
+
+/* File Loader input hidden */
+.hidden-file-input {
+  display: none;
+}
+
+/* Tactical Strategy Presets Banner */
+.tactical-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend-key {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--neon-cyan);
+  padding: 0.1rem 0.35rem;
+  background: rgba(0, 255, 204, 0.08);
+  border: 1px solid rgba(0, 255, 204, 0.2);
+  border-radius: 3px;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 900px) {
+  body {
+    padding: 1rem;
+  }
+  .canvas-viewport-wrap {
+    height: 440px;
+  }
+  .tactical-dock {
+    gap: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .whiteboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .canvas-viewport-wrap {
+    height: 360px;
+  }
+  .tactical-dock {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dock-button-row {
+    flex-wrap: wrap;
+  }
+}
