@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Estimate annual operational savings and break-even time for your fitness team.">
+  <title>Fitness CrossFit Pro | ROI & Savings Forecaster</title>
+  <link rel="stylesheet" href="roi-calculator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script type="module" src="roi-calculator.js"></script>
+</head>
+<body>
+  <main class="roi-shell">
+    <header class="page-header">
+      <span class="eyebrow"><span class="eyebrow-dot"></span> FITNESS CROSSFIT PRO · BUSINESS TOOLS</span>
+      <h1>Make every hour <span>count.</span></h1>
+      <p>Model the value of time saved across your gym team. Adjust the assumptions to see projected savings and how quickly your investment can pay for itself.</p>
+    </header>
+
+    <section class="summary-banner" aria-labelledby="summary-title" aria-live="polite">
+      <div class="summary-copy">
+        <span class="summary-label" id="summary-title">YOUR PROJECTED ANNUAL SAVINGS</span>
+        <strong id="annualSavings" class="summary-value">$87,360</strong>
+        <span class="summary-footnote">Based on your current team and time-saving assumptions</span>
+      </div>
+      <div class="summary-icon" aria-hidden="true">↗</div>
+      <div class="summary-side">
+        <span>Estimated monthly value</span>
+        <strong id="bannerMonthlySavings">$7,280</strong>
+        <span id="annualComparison">12-month projection</span>
+      </div>
+    </section>
+
+    <div class="calculator-grid">
+      <section class="panel assumptions-panel" aria-labelledby="assumptions-title">
+        <div class="panel-heading">
+          <div>
+            <span class="section-kicker">01 / YOUR INPUTS</span>
+            <h2 id="assumptions-title">Set your assumptions</h2>
+          </div>
+          <span class="live-tag"><span></span> LIVE MODEL</span>
+        </div>
+
+        <div class="field-group">
+          <div class="field-heading">
+            <label for="teamSize">Team members</label>
+            <output id="teamSizeValue" for="teamSize">12 people</output>
+          </div>
+          <input id="teamSize" type="range" min="1" max="100" step="1" value="12">
+          <div class="range-limits"><span>1 member</span><span>100 members</span></div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-heading">
+            <label for="hoursSaved">Hours saved per person / week</label>
+            <output id="hoursSavedValue" for="hoursSaved">4 hours</output>
+          </div>
+          <input id="hoursSaved" type="range" min="0" max="20" step="0.5" value="4">
+          <div class="range-limits"><span>0 hours</span><span>20 hours</span></div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-heading">
+            <label for="hourlyCost">Average hourly team cost</label>
+            <output id="hourlyCostValue" for="hourlyCost">$35</output>
+          </div>
+          <input id="hourlyCost" type="range" min="10" max="250" step="5" value="35">
+          <div class="range-limits"><span>$10 / hr</span><span>$250 / hr</span></div>
+        </div>
+
+        <div class="field-group investment-field">
+          <div class="field-heading">
+            <label for="investment">Initial investment</label>
+            <output id="investmentValue" for="investment">$5,000</output>
+          </div>
+          <input id="investment" type="range" min="0" max="100000" step="500" value="5000">
+          <div class="range-limits"><span>$0</span><span>$100,000</span></div>
+        </div>
+
+        <p class="assumption-note">Estimates use 52 weeks per year and assume the selected hours are saved consistently across the team.</p>
+      </section>
+
+      <section class="panel results-panel" aria-labelledby="results-title">
+        <div class="panel-heading">
+          <div>
+            <span class="section-kicker">02 / THE OUTLOOK</span>
+            <h2 id="results-title">Your savings breakdown</h2>
+          </div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card">
+            <span class="metric-label">Weekly savings</span>
+            <strong id="weeklySavings">$1,680</strong>
+            <span class="metric-caption">Value recovered each week</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Monthly savings</span>
+            <strong id="monthlySavings">$7,280</strong>
+            <span class="metric-caption">Average monthly value</span>
+          </article>
+        </div>
+
+        <div class="break-even-card">
+          <div class="break-even-top">
+            <div>
+              <span class="metric-label">BREAK-EVEN TIMELINE</span>
+              <strong id="breakEvenMonths" class="break-even-value">0.7 months</strong>
+            </div>
+            <span class="break-even-icon" aria-hidden="true">⌁</span>
+          </div>
+          <p id="breakEvenMessage">Your projected savings can cover the initial investment in less than a month.</p>
+          <div class="progress-track" role="progressbar" aria-label="Investment recovery progress over twelve months" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="recoveryProgress">
+            <span id="recoveryProgressFill"></span>
+          </div>
+          <div class="progress-labels"><span>Investment recovered</span><strong id="recoveryProgressLabel">100% in 12 months</strong></div>
+        </div>
+
+        <div class="projection-row">
+          <div>
+            <span class="metric-label">Annual value generated</span>
+            <strong id="annualBreakdown">$87,360</strong>
+          </div>
+          <div class="projection-badge">52 weeks / year</div>
+        </div>
+        <p class="disclaimer">This calculator provides an illustrative estimate, not a guarantee of financial results. Actual savings depend on adoption, utilization, and operating conditions.</p>
+      </section>
+    </div>
+
+    <footer class="page-footer">
+      <span>FITNESS CROSSFIT PRO</span>
+      <span>ROI & COST-SAVINGS FORECASTER</span>
+    </footer>
+  </main>
+</body>
+</html>
