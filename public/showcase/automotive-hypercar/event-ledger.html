@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar — Telemetry Event Sourcing Ledger & Replay Engine</title>
+  <link rel="stylesheet" href="event-ledger.css">
+</head>
+<body>
+  <div class="cockpit-container">
+    <!-- Header -->
+    <header class="cockpit-header">
+      <div class="brand-wrap">
+        <div class="brand-icon">🏎️</div>
+        <div class="title-wrap">
+          <h1>Automotive Hypercar // Telemetry Ledger</h1>
+          <p>Temporal State Replay Engine &amp; Cryptographic Audit Verification • NSoC '26</p>
+        </div>
+      </div>
+      <div class="badge-group">
+        <button type="button" id="exportAuditBtn" class="btn-cyber">📥 Export Audit Trail</button>
+        <button type="button" id="reconstructBtn" class="btn-cyber btn-cyber-primary">🛡️ Reconstruct &amp; Seal</button>
+      </div>
+    </header>
+
+    <!-- Cryptographic Verification Banner -->
+    <section id="integrityBanner" class="integrity-banner status-valid">
+      <div class="integrity-status-pill" id="integrityPill">
+        <span>✓</span> <span id="integrityText">Ledger Cryptographically Verified [Valid]</span>
+      </div>
+      <div class="hash-details">
+        <div class="hash-item">Events: <span class="hash-value" id="totalEventsCount">0</span></div>
+        <div class="hash-item">Verified Blocks: <span class="hash-value" id="verifiedBlocksCount">0/0</span></div>
+        <div class="hash-item">Root Hash: <span class="hash-value" id="rootHashText">00000000...</span></div>
+        <div class="hash-item">Replay State: <span class="hash-value" id="replayStateMode">LIVE</span></div>
+      </div>
+    </section>
+
+    <!-- Cockpit Main Grid -->
+    <div class="cockpit-grid">
+      <!-- Digital HUD Cockpit -->
+      <section class="cyber-card">
+        <div class="card-title">
+          <span>Digital Telemetry Cockpit HUD</span>
+          <span class="subtitle" id="telemetryTimestamp">T: +00:00.000</span>
+        </div>
+
+        <div class="hud-cluster">
+          <!-- Speedometer -->
+          <div class="speed-gauge-wrap">
+            <div class="speed-number" id="speedDisplay">0</div>
+            <div class="speed-unit">KM / H</div>
+            <div class="gear-mode-bar">
+              <div class="gear-indicator" id="gearDisplay">GEAR N</div>
+              <div class="mode-badge" id="modeDisplay">TRACK</div>
+            </div>
+          </div>
+
+          <!-- RPM & Pedals -->
+          <div class="rpm-gauge-wrap">
+            <div class="rpm-number-wrap">
+              <span class="rpm-number" id="rpmDisplay">0</span>
+              <span class="rpm-max">/ 20,000 RPM</span>
+            </div>
+            <div class="rpm-bar-container">
+              <div class="rpm-bar-fill" id="rpmBarFill"></div>
+            </div>
+
+            <div class="throttle-brake-wrap">
+              <div>
+                <div class="bar-label-group">
+                  <span>THROTTLE</span>
+                  <span id="throttleText">0%</span>
+                </div>
+                <div class="linear-meter">
+                  <div class="throttle-fill" id="throttleFill"></div>
+                </div>
+              </div>
+              <div>
+                <div class="bar-label-group">
+                  <span>BRAKE</span>
+                  <span id="brakeText">0%</span>
+                </div>
+                <div class="linear-meter">
+                  <div class="brake-fill" id="brakeFill"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics Grid -->
+        <div class="telemetry-metrics-grid">
+          <div class="metric-tile">
+            <div class="metric-label">Battery SoC</div>
+            <div class="metric-value" id="socDisplay">100.0%</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">HV Battery Temp</div>
+            <div class="metric-value" id="batteryTempDisplay">32.0°C</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">Motor Core Temp</div>
+            <div class="metric-value" id="motorTempDisplay">38.0°C</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">Lap Split / Time</div>
+            <div class="metric-value" id="lapDisplay">L0 / 0.000s</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">Energy Consumed</div>
+            <div class="metric-value" id="energyDisplay">0.000 kWh</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">Odometer</div>
+            <div class="metric-value" id="odometerDisplay">0.000 km</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">Active Anomalies</div>
+            <div class="metric-value" id="anomaliesCountDisplay">0</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">Ledger Event #</div>
+            <div class="metric-value" id="eventNumberDisplay">#0</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active Anomalies & Fault Alert Deck -->
+      <section class="cyber-card">
+        <div class="card-title">
+          <span>Active Faults &amp; Alerts</span>
+          <span class="subtitle">Real-time Diagnostic Channel</span>
+        </div>
+        <div id="anomaliesContainer" class="anomalies-list">
+          <div style="color: var(--text-muted); font-size: 0.8rem; font-family: var(--font-mono); padding: 12px 0;">
+            ✓ All vehicle powertrain systems operating within normal parameters.
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Temporal Playback Scrubber Deck -->
+    <section class="cyber-card scrubber-controls-card">
+      <div class="scrubber-header">
+        <div class="card-title" style="margin: 0; padding: 0; border: none;">
+          <span>Temporal Playback Scrubber &amp; State Replay</span>
+        </div>
+        <div class="scrubber-info">
+          Scrubber Playhead: <strong id="playheadInfo">LIVE (Latest Event)</strong>
+        </div>
+      </div>
+
+      <div class="scrubber-slider-wrap">
+        <input type="range" id="temporalScrubber" class="scrubber-slider" min="0" max="0" value="0">
+      </div>
+
+      <div class="scrubber-buttons-bar">
+        <button type="button" id="stepBackBtn" class="btn-cyber">⏮ Step Back</button>
+        <button type="button" id="playReplayBtn" class="btn-cyber btn-cyber-primary">▶ Play Replay</button>
+        <button type="button" id="stepForwardBtn" class="btn-cyber">⏭ Step Forward</button>
+        <button type="button" id="jumpLiveBtn" class="btn-cyber">⚡ Jump to Live</button>
+        
+        <select id="playbackSpeedSelect" class="filter-select" style="margin-left: 8px;">
+          <option value="1">Speed: 1x</option>
+          <option value="2">Speed: 2x</option>
+          <option value="5">Speed: 5x</option>
+        </select>
+
+        <button type="button" id="snapshotBtn" class="btn-cyber" style="margin-left: auto;">📸 Snapshot State</button>
+      </div>
+    </section>
+
+    <!-- Race Event Dispatcher Deck -->
+    <section class="cyber-card" style="margin-bottom: 24px;">
+      <div class="card-title">
+        <span>Race Telemetry Event Dispatcher</span>
+        <span class="subtitle">Append Deterministic Telemetry Mutations</span>
+      </div>
+      <div class="dispatcher-grid">
+        <button type="button" id="emitFrameBtn" class="btn-cyber">⚡ Accelerate (Frame)</button>
+        <button type="button" id="emitBrakeBtn" class="btn-cyber">🛑 Hard Braking (Frame)</button>
+        <button type="button" id="emitLapBtn" class="btn-cyber">⏱️ Log Lap Split</button>
+        <button type="button" id="emitModeBtn" class="btn-cyber">🔄 Switch Mode</button>
+        <button type="button" id="emitThermalSpikeBtn" class="btn-cyber btn-cyber-warning">🔥 Thermal Spike</button>
+        <button type="button" id="emitAnomalyBtn" class="btn-cyber btn-cyber-warning">⚠️ Inject Anomaly</button>
+        <button type="button" id="tamperTestBtn" class="btn-cyber btn-cyber-danger">💥 Tamper Event (Test)</button>
+        <button type="button" id="resetLedgerBtn" class="btn-cyber">🔄 Reset Ledger</button>
+      </div>
+    </section>
+
+    <!-- Event Sourcing Ledger Stream Table -->
+    <section class="cyber-card">
+      <div class="stream-filters-bar">
+        <div class="card-title" style="margin: 0; padding: 0; border: none;">
+          <span>Telemetry Event Sourcing Stream</span>
+        </div>
+        <select id="eventTypeFilter" class="filter-select">
+          <option value="ALL">All Event Types</option>
+          <option value="telemetry_frame">telemetry_frame</option>
+          <option value="telemetry_anomaly">telemetry_anomaly</option>
+          <option value="lap_split">lap_split</option>
+          <option value="mode_switch">mode_switch</option>
+          <option value="battery_thermal_spike">battery_thermal_spike</option>
+        </select>
+      </div>
+
+      <div class="ledger-table-wrap">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Payload Summary</th>
+              <th>Previous Hash</th>
+              <th>Block Hash</th>
+              <th>Integrity</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerTableBody">
+            <!-- Event rows populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="cockpit-footer">
+      <div>Automotive Hypercar Event Sourcing Ledger • NSoC 2026 Issue #2854</div>
+      <a href="index.html" class="back-link">← Return to Automotive Hypercar Showcase</a>
+    </footer>
+  </div>
+
+  <script type="module">
+    import {
+      AutomotiveHypercarTelemetryLedger,
+      GENESIS_PREVIOUS_HASH
+    } from './event-ledger.js';
+
+    // Initialize Ledger Instance
+    const ledger = new AutomotiveHypercarTelemetryLedger({ autoPersist: false });
+
+    // UI Elements Cache
+    const integrityBanner = document.getElementById('integrityBanner');
+    const integrityText = document.getElementById('integrityText');
+    const totalEventsCount = document.getElementById('totalEventsCount');
+    const verifiedBlocksCount = document.getElementById('verifiedBlocksCount');
+    const rootHashText = document.getElementById('rootHashText');
+    const replayStateMode = document.getElementById('replayStateMode');
+
+    const speedDisplay = document.getElementById('speedDisplay');
+    const gearDisplay = document.getElementById('gearDisplay');
+    const modeDisplay = document.getElementById('modeDisplay');
+    const rpmDisplay = document.getElementById('rpmDisplay');
+    const rpmBarFill = document.getElementById('rpmBarFill');
+    const throttleFill = document.getElementById('throttleFill');
+    const throttleText = document.getElementById('throttleText');
+    const brakeFill = document.getElementById('brakeFill');
+    const brakeText = document.getElementById('brakeText');
+    const socDisplay = document.getElementById('socDisplay');
+    const batteryTempDisplay = document.getElementById('batteryTempDisplay');
+    const motorTempDisplay = document.getElementById('motorTempDisplay');
+    const lapDisplay = document.getElementById('lapDisplay');
+    const energyDisplay = document.getElementById('energyDisplay');
+    const odometerDisplay = document.getElementById('odometerDisplay');
+    const anomaliesCountDisplay = document.getElementById('anomaliesCountDisplay');
+    const eventNumberDisplay = document.getElementById('eventNumberDisplay');
+    const telemetryTimestamp = document.getElementById('telemetryTimestamp');
+    const anomaliesContainer = document.getElementById('anomaliesContainer');
+
+    const temporalScrubber = document.getElementById('temporalScrubber');
+    const playheadInfo = document.getElementById('playheadInfo');
+    const stepBackBtn = document.getElementById('stepBackBtn');
+    const playReplayBtn = document.getElementById('playReplayBtn');
+    const stepForwardBtn = document.getElementById('stepForwardBtn');
+    const jumpLiveBtn = document.getElementById('jumpLiveBtn');
+    const playbackSpeedSelect = document.getElementById('playbackSpeedSelect');
+    const snapshotBtn = document.getElementById('snapshotBtn');
+
+    const emitFrameBtn = document.getElementById('emitFrameBtn');
+    const emitBrakeBtn = document.getElementById('emitBrakeBtn');
+    const emitLapBtn = document.getElementById('emitLapBtn');
+    const emitModeBtn = document.getElementById('emitModeBtn');
+    const emitThermalSpikeBtn = document.getElementById('emitThermalSpikeBtn');
+    const emitAnomalyBtn = document.getElementById('emitAnomalyBtn');
+    const tamperTestBtn = document.getElementById('tamperTestBtn');
+    const resetLedgerBtn = document.getElementById('resetLedgerBtn');
+    const exportAuditBtn = document.getElementById('exportAuditBtn');
+    const reconstructBtn = document.getElementById('reconstructBtn');
+
+    const eventTypeFilter = document.getElementById('eventTypeFilter');
+    const ledgerTableBody = document.getElementById('ledgerTableBody');
+
+    let currentScrubIndex = -1; // -1 means live head
+    let isReplaying = false;
+    let replayInterval = null;
+    let baseTime = Date.now() - 30000;
+
+    // Seed realistic hypercar racetrack telemetry events
+    function seedInitialRaceData() {
+      ledger.clear();
+      baseTime = Date.now() - 45000;
+
+      // Event 0: Grid Idle
+      ledger.appendEvent('telemetry_frame', {
+        speed: 0, rpm: 950, gear: 0, throttle: 0, brake: 100,
+        batteryTemp: 32.5, motorTemp: 36.0, batterySoC: 99.8, energyDelta: 0.05, distanceDelta: 0
+      }, baseTime);
+
+      // Event 1: Mode Switch Qualifying
+      ledger.appendEvent('mode_switch', {
+        mode: 'QUALIFYING', reason: 'Launch mode activated on start-finish straight'
+      }, baseTime + 2000);
+
+      // Event 2: Launch Acceleration (Gear 1)
+      ledger.appendEvent('telemetry_frame', {
+        speed: 78.4, rpm: 9800, gear: 1, throttle: 100, brake: 0,
+        batteryTemp: 34.0, motorTemp: 41.2, batterySoC: 99.1, energyDelta: 0.42, distanceDelta: 0.06
+      }, baseTime + 4500);
+
+      // Event 3: Gear 2 acceleration
+      ledger.appendEvent('telemetry_frame', {
+        speed: 142.1, rpm: 12400, gear: 2, throttle: 100, brake: 0,
+        batteryTemp: 36.8, motorTemp: 47.5, batterySoC: 98.2, energyDelta: 0.65, distanceDelta: 0.15
+      }, baseTime + 7500);
+
+      // Event 4: Gear 4 high-speed run
+      ledger.appendEvent('telemetry_frame', {
+        speed: 236.7, rpm: 13800, gear: 4, throttle: 98, brake: 0,
+        batteryTemp: 41.2, motorTemp: 55.4, batterySoC: 96.8, energyDelta: 0.95, distanceDelta: 0.38
+      }, baseTime + 12000);
+
+      // Event 5: Mode Switch Track
+      ledger.appendEvent('mode_switch', {
+        mode: 'TRACK', reason: 'High-downforce aero cornering configuration'
+      }, baseTime + 16000);
+
+      // Event 6: Heavy braking into Turn 1 chicane
+      ledger.appendEvent('telemetry_frame', {
+        speed: 112.5, rpm: 7400, gear: 2, throttle: 0, brake: 95,
+        batteryTemp: 43.1, motorTemp: 57.2, batterySoC: 97.4, energyDelta: 0.1, distanceDelta: 0.22
+      }, baseTime + 19500);
+
+      // Event 7: Lap 1 split
+      ledger.appendEvent('lap_split', {
+        lap: 1, splitTime: 79.428, sector1: 23.410, sector2: 28.118, sector3: 27.900
+      }, baseTime + 28000);
+
+      // Event 8: Telemetry Anomaly
+      ledger.appendEvent('telemetry_anomaly', {
+        code: 'WARN_FRONT_DIFF_TEMP', severity: 'WARNING',
+        message: 'Front electronic limited-slip differential fluid temp elevated (+12%)',
+        component: 'TorqueVectoring'
+      }, baseTime + 32000);
+
+      // Event 9: High-speed back straight gear 6
+      ledger.appendEvent('telemetry_frame', {
+        speed: 312.8, rpm: 14500, gear: 6, throttle: 100, brake: 0,
+        batteryTemp: 48.6, motorTemp: 64.1, batterySoC: 93.4, energyDelta: 1.84, distanceDelta: 0.92
+      }, baseTime + 38000);
+
+      currentScrubIndex = ledger.getEvents().length - 1;
+    }
+
+    // Render Digital HUD from Telemetry State
+    function renderHUD(state, eventIndex = -1) {
+      if (!state) return;
+
+      speedDisplay.textContent = Math.round(state.speed);
+      gearDisplay.textContent = state.gear === 0 ? 'GEAR N' : `GEAR ${state.gear}`;
+      modeDisplay.textContent = state.driveMode || 'TRACK';
+
+      rpmDisplay.textContent = Number(state.rpm).toLocaleString();
+      const rpmPercent = Math.min(100, (state.rpm / 18000) * 100);
+      rpmBarFill.style.width = `${rpmPercent}%`;
+
+      throttleText.textContent = `${Math.round(state.throttle)}%`;
+      throttleFill.style.width = `${state.throttle}%`;
+
+      brakeText.textContent = `${Math.round(state.brake)}%`;
+      brakeFill.style.width = `${state.brake}%`;
+
+      socDisplay.textContent = `${Number(state.batterySoC).toFixed(1)}%`;
+      
+      batteryTempDisplay.textContent = `${Number(state.batteryTemp).toFixed(1)}°C`;
+      if (state.thermalWarning || state.batteryTemp > 65) {
+        batteryTempDisplay.classList.add('thermal-alert');
+      } else {
+        batteryTempDisplay.classList.remove('thermal-alert');
+      }
+
+      motorTempDisplay.textContent = `${Number(state.motorTemp).toFixed(1)}°C`;
+      lapDisplay.textContent = `L${state.lapCount} / ${Number(state.currentLapTime).toFixed(3)}s`;
+      energyDisplay.textContent = `${Number(state.totalEnergyConsumed).toFixed(3)} kWh`;
+      odometerDisplay.textContent = `${Number(state.odometer).toFixed(3)} km`;
+      anomaliesCountDisplay.textContent = state.activeAnomalies ? state.activeAnomalies.length : 0;
+      eventNumberDisplay.textContent = eventIndex >= 0 ? `#${eventIndex}` : `#${ledger.getEvents().length - 1}`;
+
+      const elapsedMs = Math.max(0, state.timestamp - baseTime);
+      const secs = (elapsedMs / 1000).toFixed(3);
+      telemetryTimestamp.textContent = `T: +${secs}s`;
+
+      renderAnomalies(state.activeAnomalies || []);
+    }
+
+    // Render Active Anomalies List
+    function renderAnomalies(anomalies) {
+      anomaliesContainer.innerHTML = '';
+      if (!anomalies || anomalies.length === 0) {
+        anomaliesContainer.innerHTML = `
+          <div style="color: var(--neon-green); font-size: 0.8rem; font-family: var(--font-mono); padding: 12px 0;">
+            ✓ All vehicle powertrain systems operating within normal parameters.
+          </div>
+        `;
+        return;
+      }
+
+      anomalies.forEach((a) => {
+        const item = document.createElement('div');
+        item.className = `anomaly-item ${a.severity === 'CRITICAL' ? 'critical' : ''}`;
+        item.innerHTML = `
+          <div>
+            <div class="anomaly-code">[${a.severity}] ${a.code}</div>
+            <div class="anomaly-msg">${a.message} (${a.component || 'System'})</div>
+          </div>
+          <button type="button" class="btn-cyber" style="padding: 4px 10px; font-size: 0.7rem;" data-resolve="${a.code}">
+            Resolve
+          </button>
+        `;
+        item.querySelector('[data-resolve]').addEventListener('click', () => {
+          ledger.appendEvent('telemetry_anomaly', { code: a.code, resolved: true });
+          updateFullUI();
+        });
+        anomaliesContainer.appendChild(item);
+      });
+    }
+
+    // Render Cryptographic Verification Banner
+    function renderVerification() {
+      const integrity = ledger.verifyCryptographicIntegrity();
+      const events = ledger.getEvents();
+
+      totalEventsCount.textContent = events.length;
+      verifiedBlocksCount.textContent = integrity.isValid
+        ? `${events.length}/${events.length}`
+        : `${integrity.checkedCount}/${events.length}`;
+
+      const rootHash = ledger.getLatestHash();
+      rootHashText.textContent = rootHash.length > 16 ? `${rootHash.slice(0, 16)}...` : rootHash;
+
+      if (integrity.isValid) {
+        integrityBanner.className = 'integrity-banner status-valid';
+        integrityText.textContent = 'Ledger Cryptographically Verified [Valid]';
+      } else {
+        integrityBanner.className = 'integrity-banner status-tampered';
+        integrityText.textContent = `Tamper Detected: ${integrity.reason || 'Cryptographic Chain Broken'}`;
+      }
+    }
+
+    // Render Event Stream Table
+    function renderTable() {
+      const events = ledger.getEvents();
+      const selectedType = eventTypeFilter.value;
+      ledgerTableBody.innerHTML = '';
+
+      events.forEach((ev) => {
+        if (selectedType !== 'ALL' && ev.type !== selectedType) return;
+
+        const row = document.createElement('tr');
+        if (ev.index === currentScrubIndex) {
+          row.classList.add('active-scrub');
+        }
+
+        let summary = '';
+        const p = ev.payload || {};
+        if (ev.type === 'telemetry_frame') {
+          summary = `Spd: ${Math.round(p.speed ?? 0)}km/h | RPM: ${p.rpm ?? 0} | G${p.gear ?? 0} | SoC: ${p.batterySoC ?? 0}%`;
+        } else if (ev.type === 'telemetry_anomaly') {
+          summary = p.resolved ? `Resolved anomaly: ${p.code}` : `[${p.severity}] ${p.code}: ${p.message}`;
+        } else if (ev.type === 'lap_split') {
+          summary = `Lap ${p.lap} Split: ${p.splitTime}s (S1: ${p.sector1}s, S2: ${p.sector2}s, S3: ${p.sector3}s)`;
+        } else if (ev.type === 'mode_switch') {
+          summary = `Drive Mode switched to ${p.mode} (${p.reason || 'manual'})`;
+        } else if (ev.type === 'battery_thermal_spike') {
+          summary = `THERMAL SPIKE: ${p.peakTemp}°C (Cell: ${p.cellIndex ?? 'CORE'})`;
+        } else {
+          summary = JSON.stringify(p);
+        }
+
+        let typeClass = 'type-frame';
+        if (ev.type === 'telemetry_anomaly') typeClass = 'type-anomaly';
+        else if (ev.type === 'lap_split') typeClass = 'type-lap';
+        else if (ev.type === 'mode_switch') typeClass = 'type-mode';
+        else if (ev.type === 'battery_thermal_spike') typeClass = 'type-thermal';
+
+        const prevShort = ev.previousHash ? `${ev.previousHash.slice(0, 8)}...` : '00000000...';
+        const hashShort = ev.hash ? `${ev.hash.slice(0, 8)}...` : '';
+
+        row.innerHTML = `
+          <td>#${ev.index}</td>
+          <td>+${((ev.timestamp - baseTime) / 1000).toFixed(2)}s</td>
+          <td><span class="type-badge ${typeClass}">${ev.type}</span></td>
+          <td style="max-width: 380px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${summary}">
+            ${summary}
+          </td>
+          <td class="hash-mono" title="${ev.previousHash}">${prevShort}</td>
+          <td class="hash-mono" title="${ev.hash}">${hashShort}</td>
+          <td style="color: var(--neon-green); font-weight: 800;">✓</td>
+        `;
+
+        row.addEventListener('click', () => {
+          scrubToIndex(ev.index);
+        });
+
+        ledgerTableBody.appendChild(row);
+      });
+    }
+
+    // Scrub Temporal Playhead to Index
+    function scrubToIndex(index) {
+      const events = ledger.getEvents();
+      if (events.length === 0) return;
+
+      currentScrubIndex = Math.max(0, Math.min(events.length - 1, index));
+      temporalScrubber.value = currentScrubIndex;
+
+      const targetEvent = events[currentScrubIndex];
+      const state = ledger.replayEvents(targetEvent.timestamp);
+
+      if (currentScrubIndex === events.length - 1) {
+        replayStateMode.textContent = 'LIVE';
+        playheadInfo.textContent = `LIVE (Event #${currentScrubIndex})`;
+      } else {
+        replayStateMode.textContent = `REPLAY #${currentScrubIndex}`;
+        playheadInfo.textContent = `Historical Replay: Event #${currentScrubIndex} (T: +${((targetEvent.timestamp - baseTime)/1000).toFixed(2)}s)`;
+      }
+
+      renderHUD(state, currentScrubIndex);
+      renderTable();
+    }
+
+    // Full UI Refresh
+    function updateFullUI() {
+      const events = ledger.getEvents();
+      temporalScrubber.max = Math.max(0, events.length - 1);
+
+      if (currentScrubIndex === -1 || currentScrubIndex >= events.length - 1) {
+        currentScrubIndex = events.length - 1;
+        temporalScrubber.value = currentScrubIndex;
+        renderHUD(ledger.getCurrentState(), currentScrubIndex);
+        replayStateMode.textContent = 'LIVE';
+        playheadInfo.textContent = `LIVE (Event #${currentScrubIndex})`;
+      } else {
+        scrubToIndex(currentScrubIndex);
+      }
+
+      renderVerification();
+      renderTable();
+    }
+
+    // Replay Loop Animation
+    function toggleReplay() {
+      if (isReplaying) {
+        stopReplay();
+      } else {
+        startReplay();
+      }
+    }
+
+    function startReplay() {
+      const events = ledger.getEvents();
+      if (events.length === 0) return;
+
+      isReplaying = true;
+      playReplayBtn.textContent = '⏸ Pause Replay';
+      playReplayBtn.classList.remove('btn-cyber-primary');
+      playReplayBtn.classList.add('btn-cyber-warning');
+
+      if (currentScrubIndex >= events.length - 1) {
+        currentScrubIndex = 0;
+      }
+
+      const speedMultiplier = Number(playbackSpeedSelect.value) || 1;
+      const intervalMs = Math.max(150, 800 / speedMultiplier);
+
+      replayInterval = setInterval(() => {
+        if (currentScrubIndex < events.length - 1) {
+          scrubToIndex(currentScrubIndex + 1);
+        } else {
+          stopReplay();
+        }
+      }, intervalMs);
+    }
+
+    function stopReplay() {
+      isReplaying = false;
+      if (replayInterval) {
+        clearInterval(replayInterval);
+        replayInterval = null;
+      }
+      playReplayBtn.textContent = '▶ Play Replay';
+      playReplayBtn.classList.add('btn-cyber-primary');
+      playReplayBtn.classList.remove('btn-cyber-warning');
+    }
+
+    // Setup Event Listeners
+    temporalScrubber.addEventListener('input', (e) => {
+      stopReplay();
+      scrubToIndex(Number(e.target.value));
+    });
+
+    stepBackBtn.addEventListener('click', () => {
+      stopReplay();
+      scrubToIndex(currentScrubIndex - 1);
+    });
+
+    stepForwardBtn.addEventListener('click', () => {
+      stopReplay();
+      scrubToIndex(currentScrubIndex + 1);
+    });
+
+    jumpLiveBtn.addEventListener('click', () => {
+      stopReplay();
+      const events = ledger.getEvents();
+      currentScrubIndex = events.length - 1;
+      updateFullUI();
+    });
+
+    playReplayBtn.addEventListener('click', toggleReplay);
+
+    snapshotBtn.addEventListener('click', () => {
+      const snap = ledger.snapshotState(`Snapshot at #${currentScrubIndex}`);
+      alert(`📸 State Snapshot Captured!\n\nID: ${snap.id}\nEvent Index: #${snap.eventIndex}\nLast Hash: ${snap.lastEventHash.slice(0, 16)}...\nSpeed: ${snap.state.speed} km/h | Mode: ${snap.state.driveMode}`);
+    });
+
+    eventTypeFilter.addEventListener('change', renderTable);
+
+    // Dispatcher Actions
+    emitFrameBtn.addEventListener('click', () => {
+      const cur = ledger.getCurrentState();
+      const newSpeed = Math.min(420, cur.speed + 25);
+      const newGear = Math.min(8, Math.max(1, Math.floor(newSpeed / 50)));
+      const newRpm = Math.min(17500, Math.round(5000 + (newSpeed % 50) * 250));
+      ledger.appendEvent('telemetry_frame', {
+        speed: newSpeed, rpm: newRpm, gear: newGear, throttle: 100, brake: 0,
+        batteryTemp: cur.batteryTemp + 0.6, motorTemp: cur.motorTemp + 1.2,
+        batterySoC: Math.max(0, cur.batterySoC - 0.4), energyDelta: 0.8, distanceDelta: 0.35
+      });
+      currentScrubIndex = ledger.getEvents().length - 1;
+      updateFullUI();
+    });
+
+    emitBrakeBtn.addEventListener('click', () => {
+      const cur = ledger.getCurrentState();
+      const newSpeed = Math.max(0, cur.speed - 45);
+      const newGear = Math.max(0, Math.floor(newSpeed / 50));
+      const newRpm = Math.max(900, Math.round(cur.rpm * 0.6));
+      ledger.appendEvent('telemetry_frame', {
+        speed: newSpeed, rpm: newRpm, gear: newGear, throttle: 0, brake: 100,
+        batteryTemp: cur.batteryTemp + 0.2, motorTemp: cur.motorTemp - 0.5,
+        batterySoC: Math.min(100, cur.batterySoC + 0.1), energyDelta: 0, distanceDelta: 0.15
+      });
+      currentScrubIndex = ledger.getEvents().length - 1;
+      updateFullUI();
+    });
+
+    emitLapBtn.addEventListener('click', () => {
+      const cur = ledger.getCurrentState();
+      const lapNum = cur.lapCount + 1;
+      const s1 = Number((22.5 + Math.random() * 2).toFixed(3));
+      const s2 = Number((27.8 + Math.random() * 2).toFixed(3));
+      const s3 = Number((27.1 + Math.random() * 2).toFixed(3));
+      const splitTime = Number((s1 + s2 + s3).toFixed(3));
+      ledger.appendEvent('lap_split', {
+        lap: lapNum, splitTime, sector1: s1, sector2: s2, sector3: s3
+      });
+      currentScrubIndex = ledger.getEvents().length - 1;
+      updateFullUI();
+    });
+
+    emitModeBtn.addEventListener('click', () => {
+      const cur = ledger.getCurrentState();
+      const modes = ['TRACK', 'QUALIFYING', 'LUDICROUS', 'ECO', 'STEALTH'];
+      const nextMode = modes[(modes.indexOf(cur.driveMode) + 1) % modes.length];
+      ledger.appendEvent('mode_switch', {
+        mode: nextMode, reason: 'Driver cockpit control toggle'
+      });
+      currentScrubIndex = ledger.getEvents().length - 1;
+      updateFullUI();
+    });
+
+    emitThermalSpikeBtn.addEventListener('click', () => {
+      ledger.appendEvent('battery_thermal_spike', {
+        peakTemp: 79.5, deltaT: 28.0, cellIndex: 'CELL_MODULE_5'
+      });
+      currentScrubIndex = ledger.getEvents().length - 1;
+      updateFullUI();
+    });
+
+    emitAnomalyBtn.addEventListener('click', () => {
+      const anomaliesPool = [
+        { code: 'ERR_INVERTER_GATE_OVERHEAT', severity: 'CRITICAL', msg: 'IGBT Junction temperature limit exceeded (>150°C)', comp: 'RearInverter' },
+        { code: 'WARN_AERO_ACTUATOR_STALL', severity: 'WARNING', msg: 'Active front splitter actuator drawing excess current', comp: 'Aerodynamics' },
+        { code: 'WARN_COOLANT_PRESSURE_LOW', severity: 'WARNING', msg: 'HV coolant loop B pressure dropped below 1.8 bar', comp: 'CoolingSystem' }
+      ];
+      const pick = anomaliesPool[Math.floor(Math.random() * anomaliesPool.length)];
+      ledger.appendEvent('telemetry_anomaly', {
+        code: pick.code, severity: pick.severity, message: pick.msg, component: pick.comp
+      });
+      currentScrubIndex = ledger.getEvents().length - 1;
+      updateFullUI();
+    });
+
+    tamperTestBtn.addEventListener('click', () => {
+      const events = ledger.getEvents();
+      if (events.length === 0) return;
+      const targetIdx = Math.floor(events.length / 2);
+      ledger.tamperEvent(targetIdx, { speed: 9999, tampered: true });
+      alert(`💥 Injected deliberate payload tamper into event #${targetIdx}!\nNotice how the Cryptographic Hash Verification immediately catches the mismatch!`);
+      updateFullUI();
+    });
+
+    reconstructBtn.addEventListener('click', () => {
+      ledger.reconstructLedger();
+      alert('🛡️ Ledger reconstructed and all cryptographic hash links re-sealed successfully!');
+      updateFullUI();
+    });
+
+    resetLedgerBtn.addEventListener('click', () => {
+      seedInitialRaceData();
+      updateFullUI();
+    });
+
+    exportAuditBtn.addEventListener('click', () => {
+      const audit = ledger.exportAuditTrail();
+      const blob = new Blob([JSON.stringify(audit, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `automotive_hypercar_audit_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Boot cockpit
+    seedInitialRaceData();
+    updateFullUI();
+  </script>
+</body>
+</html>
