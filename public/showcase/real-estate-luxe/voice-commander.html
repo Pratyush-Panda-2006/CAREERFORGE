@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Estate Luxe - Web Speech API Voice Commander & Speech Dispatcher</title>
+  <link rel="stylesheet" href="voice-commander.css">
+</head>
+<body>
+  <div class="commander-container">
+    <!-- Header with Live Status and Accessibility Mode -->
+    <header class="commander-header">
+      <div class="header-left">
+        <div class="header-badge">
+          <span>🎙️</span>
+          <span>Real Estate Luxe • Voice Concierge</span>
+        </div>
+        <h1>Voice Commander & Speech Dispatcher</h1>
+        <p>
+          Hands-free luxury property search, VIP viewing concierge, mortgage estimations,
+          and WCAG accessibility speech dispatching powered by Web Speech API.
+        </p>
+      </div>
+      <div class="header-actions">
+        <div id="statusBadge" class="status-badge status-idle">
+          <span class="status-dot"></span>
+          <span id="statusText">IDLE</span>
+        </div>
+        <button id="contrastToggleBtn" class="luxe-btn btn-secondary" aria-pressed="false" aria-label="Toggle High Contrast Mode">
+          High Contrast
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Commander Grid -->
+    <main class="commander-grid">
+      <!-- Column Left: Voice Controls & Simulator -->
+      <section class="column-left">
+        <!-- Mic Activation & Audio Wave Visualizer Card -->
+        <div class="luxe-card mic-activation-card">
+          <div class="mic-wrapper">
+            <button id="micToggleBtn" class="mic-btn" aria-label="Toggle voice listening" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+              </svg>
+            </button>
+            <div class="mic-pulse-ring"></div>
+            <div class="mic-pulse-ring"></div>
+            <div class="mic-pulse-ring"></div>
+          </div>
+          <div id="micStatusText" class="mic-caption">Click microphone or press [Space] to speak</div>
+          <div class="keyboard-hint">ProTip: Use keyboard shortcut <kbd>Space</kbd> to toggle microphone</div>
+
+          <!-- Animated Audio Wave Visualizer -->
+          <div id="waveVisualizer" class="wave-visualizer" aria-label="Audio frequency visualizer" role="img">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+        </div>
+
+        <!-- Mock Speech Simulator Box -->
+        <div class="luxe-card">
+          <h2 class="card-title">Speech Input Simulator</h2>
+          <p class="card-subtitle">Test luxury voice grammars without microphone access or in headless environments:</p>
+
+          <div class="simulator-box">
+            <input 
+              type="text" 
+              id="mockInput" 
+              class="luxe-input" 
+              placeholder='e.g., "search properties in Aspen" or "book private tour"' 
+              aria-label="Simulate voice command input"
+            >
+            <button id="mockSubmitBtn" class="luxe-btn btn-primary">Simulate Voice</button>
+          </div>
+
+          <div class="chips-label">Quick Luxury Voice Grammars:</div>
+          <div class="command-chips">
+            <button type="button" class="command-chip" data-command="search properties in Aspen">"search properties in Aspen"</button>
+            <button type="button" class="command-chip" data-command="find penthouses">"find penthouses"</button>
+            <button type="button" class="command-chip" data-command="show villas in Aspen">"show villas in Aspen"</button>
+            <button type="button" class="command-chip" data-command="search luxury estates">"search luxury estates"</button>
+            <button type="button" class="command-chip" data-command="filter price above $5M">"filter price above $5M"</button>
+            <button type="button" class="command-chip" data-command="budget under $10M">"budget under $10M"</button>
+            <button type="button" class="command-chip" data-command="price between $2M and $5M">"price between $2M and $5M"</button>
+            <button type="button" class="command-chip" data-command="minimum 4 beds">"minimum 4 beds"</button>
+            <button type="button" class="command-chip" data-command="schedule viewing for Villa Azure">"schedule viewing for Villa Azure"</button>
+            <button type="button" class="command-chip" data-command="book private tour">"book private tour"</button>
+            <button type="button" class="command-chip" data-command="request VIP showing">"request VIP showing"</button>
+            <button type="button" class="command-chip" data-command="calculate mortgage">"calculate mortgage"</button>
+            <button type="button" class="command-chip" data-command="toggle contrast">"toggle contrast"</button>
+            <button type="button" class="command-chip" data-command="help">"help"</button>
+          </div>
+        </div>
+
+        <!-- Active Filter State & Concierge Speech Response -->
+        <div class="luxe-card">
+          <!-- Latest Concierge Response Banner -->
+          <div id="responseBanner" class="response-banner" role="status" aria-live="polite">
+            <div class="response-icon">🔔</div>
+            <div class="response-content">
+              <h4>Concierge Audio Feedback</h4>
+              <p id="responseText">Ready for voice instructions. Say "help" for a list of commands.</p>
+            </div>
+          </div>
+
+          <h2 class="card-title">Active Portfolio Filters</h2>
+          <p class="card-subtitle">Real-time parameters parsed from voice commands:</p>
+
+          <div class="filters-summary">
+            <div class="filter-pill">
+              <span class="filter-label">Target City</span>
+              <span id="filterCity" class="filter-value">Any City</span>
+            </div>
+            <div class="filter-pill">
+              <span class="filter-label">Property Type</span>
+              <span id="filterType" class="filter-value">All Types</span>
+            </div>
+            <div class="filter-pill">
+              <span class="filter-label">Price Bracket</span>
+              <span id="filterPrice" class="filter-value">Any Budget</span>
+            </div>
+            <div class="filter-pill">
+              <span class="filter-label">Bedrooms</span>
+              <span id="filterBeds" class="filter-value">Any Beds</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Column Right: Command Stream & History -->
+      <section class="column-right">
+        <div class="luxe-card history-card">
+          <div class="card-title">
+            <span>Command History Feed</span>
+            <button id="clearHistoryBtn" class="luxe-btn btn-sm btn-ghost" aria-label="Clear voice command history">
+              Clear History
+            </button>
+          </div>
+          <p class="card-subtitle">Recognized transcripts with extracted routing actions and status badges:</p>
+
+          <div id="historyList" class="history-list" aria-live="polite">
+            <div class="empty-history">
+              <div class="empty-icon">🎙️</div>
+              <p>No voice commands recorded yet. Speak into the microphone or click a prompt above.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="voice-commander.js"></script>
+</body>
+</html>
