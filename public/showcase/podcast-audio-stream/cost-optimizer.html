@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resource Cost Planner · Waveform</title>
+  <link rel="stylesheet" href="cost-optimizer.css">
+  <script type="module" src="cost-optimizer.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <a href="./index.html">← Waveform</a>
+      <h1>Resource cost planner</h1>
+      <p>Estimate editing compute, archive storage, and bandwidth for your podcast network.</p>
+    </header>
+
+    <div class="columns">
+      <form id="resources" class="card" aria-labelledby="usage-heading">
+        <h2 id="usage-heading">Monthly usage</h2>
+        <label class="resource" for="compute"><span>Editing compute</span><span><output id="compute-units" for="compute">80</output> h</span></label>
+        <input id="compute" name="compute" type="range" value="80" min="0" max="1000" step="1">
+        <small class="band" id="compute-band"></small>
+        <label class="resource" for="storage"><span>Archive storage</span><span><output id="storage-units" for="storage">300</output> GB</span></label>
+        <input id="storage" name="storage" type="range" value="300" min="0" max="5000" step="1">
+        <small class="band" id="storage-band"></small>
+        <label class="resource" for="bandwidth"><span>Listener delivery</span><span><output id="bandwidth-units" for="bandwidth">900</output> GB</span></label>
+        <input id="bandwidth" name="bandwidth" type="range" value="900" min="0" max="10000" step="1">
+        <small class="band" id="bandwidth-band"></small>
+        <fieldset>
+          <legend>Billing period</legend>
+          <label><input name="billing" value="monthly" type="radio" checked> Monthly</label>
+          <label><input name="billing" value="annual" type="radio"> Annual</label>
+        </fieldset>
+      </form>
+
+      <section class="card quote" aria-labelledby="quote-heading">
+        <h2 id="quote-heading">Estimated quote</h2>
+        <div class="quote-total" aria-live="polite"><strong id="total">$0.00</strong> <span id="period">per month</span></div>
+        <div class="breakdown">
+          <div id="chart" class="chart" aria-hidden="true"></div>
+          <dl class="legend">
+            <div><dt class="compute">Editing compute</dt><dd id="compute-cost">$0.00</dd></div>
+            <div><dt class="storage">Archive storage</dt><dd id="storage-cost">$0.00</dd></div>
+            <div><dt class="bandwidth">Listener delivery</dt><dd id="bandwidth-cost">$0.00</dd></div>
+          </dl>
+        </div>
+        <dl class="adjustments">
+          <div><dt>Resource subtotal</dt><dd id="subtotal">$0.00</dd></div>
+          <div><dt>Volume discount</dt><dd id="volume">−$0.00</dd></div>
+          <div><dt>Annual discount</dt><dd id="annual">−$0.00</dd></div>
+        </dl>
+      </section>
+    </div>
+
+    <details>
+      <summary>How this estimate is calculated</summary>
+      <p>Demo rates in USD. Each rate applies only to usage within its band. The monthly subtotal receives 5% off from $90 and 10% from $180. Annual billing takes another 15% off the discounted yearly subtotal.</p>
+      <table>
+        <thead><tr><th scope="col">Resource</th><th scope="col">First band</th><th scope="col">Second band</th><th scope="col">Beyond</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Compute per hour</th><td>Through 100 · $0.45</td><td>Through 400 · $0.32</td><td>$0.22</td></tr>
+          <tr><th scope="row">Storage per GB</th><td>Through 250 · $0.12</td><td>Through 1,500 · $0.08</td><td>$0.05</td></tr>
+          <tr><th scope="row">Delivery per GB</th><td>Through 500 · $0.09</td><td>Through 2,500 · $0.06</td><td>$0.04</td></tr>
+        </tbody>
+      </table>
+    </details>
+  </main>
+</body>
+</html>
