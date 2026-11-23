@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edtech Academy - Collaborative Vector Sketchpad & Whiteboard</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="whiteboard-app">
+    <!-- Header Navigation -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-badge">EDTECH ACADEMY • ISSUE #2075</div>
+        <h1 class="brand-title">Collaborative Vector Whiteboard & Sketchpad</h1>
+        <p class="brand-subtitle">High-fidelity vector canvas with Catmull-Rom & Bezier stroke smoothing, undo/redo history stacks, and SVG/JSON export.</p>
+      </div>
+      <div class="header-actions">
+        <button id="btn-export-svg" class="action-btn primary" title="Export as valid SVG vector graphic">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export SVG
+        </button>
+        <button id="btn-export-png" class="action-btn secondary" title="Download raster PNG snapshot">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          PNG
+        </button>
+        <button id="btn-export-json" class="action-btn secondary" title="Export raw vector stroke JSON">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          JSON
+        </button>
+        <button id="btn-import-json" class="action-btn secondary" title="Load saved vector stroke JSON">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Load
+        </button>
+        <input type="file" id="json-file-input" accept=".json" style="display: none;">
+      </div>
+    </header>
+
+    <!-- Floating Tool Dock Toolbar -->
+    <div class="dock-container">
+      <nav class="toolbar-dock" aria-label="Whiteboard Drawing Palette">
+        <!-- Tool Selection Group -->
+        <div class="dock-group tool-selection-group">
+          <button class="tool-btn active" data-tool="pen" title="Pen (Smooth Vector Freehand)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            <span class="tool-label">Pen</span>
+          </button>
+          <button class="tool-btn" data-tool="eraser" title="Eraser (Erase to Background)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+            <span class="tool-label">Eraser</span>
+          </button>
+          <button class="tool-btn" data-tool="line" title="Line (Straight Segment)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/></svg>
+            <span class="tool-label">Line</span>
+          </button>
+          <button class="tool-btn" data-tool="rectangle" title="Rectangle (Geometric Box)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+            <span class="tool-label">Rect</span>
+          </button>
+          <button class="tool-btn" data-tool="ellipse" title="Circle & Ellipse">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            <span class="tool-label">Circle</span>
+          </button>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Color Palette Swatches -->
+        <div class="dock-group color-swatches-group">
+          <div class="swatches-container">
+            <button class="color-chip active" data-color="#4f46e5" style="--chip-color: #4f46e5;" title="Indigo"></button>
+            <button class="color-chip" data-color="#7c3aed" style="--chip-color: #7c3aed;" title="Violet"></button>
+            <button class="color-chip" data-color="#06b6d4" style="--chip-color: #06b6d4;" title="Cyan"></button>
+            <button class="color-chip" data-color="#10b981" style="--chip-color: #10b981;" title="Emerald"></button>
+            <button class="color-chip" data-color="#f59e0b" style="--chip-color: #f59e0b;" title="Amber"></button>
+            <button class="color-chip" data-color="#ef4444" style="--chip-color: #ef4444;" title="Rose"></button>
+            <button class="color-chip" data-color="#ffffff" style="--chip-color: #ffffff;" title="White"></button>
+            <button class="color-chip" data-color="#64748b" style="--chip-color: #64748b;" title="Slate"></button>
+          </div>
+          <label class="custom-color-wrapper" title="Custom Color Picker">
+            <input type="color" id="custom-color-picker" value="#4f46e5">
+            <span class="color-indicator"></span>
+          </label>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Stroke Width & Opacity Controls -->
+        <div class="dock-group brush-controls-group">
+          <div class="control-row">
+            <span class="control-name">Size</span>
+            <input type="range" id="stroke-width-slider" min="1" max="50" value="4" class="range-slider">
+            <span id="stroke-width-label" class="control-val">4px</span>
+          </div>
+          <div class="control-row">
+            <span class="control-name">Alpha</span>
+            <input type="range" id="opacity-slider" min="10" max="100" value="100" class="range-slider">
+            <span id="opacity-label" class="control-val">100%</span>
+          </div>
+          <div class="brush-preview-box" title="Active Brush Preview">
+            <div id="brush-preview-dot"></div>
+          </div>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- History & Grid Actions -->
+        <div class="dock-group history-group">
+          <button id="btn-undo" class="dock-action-btn" title="Undo (Ctrl+Z)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            <span>Undo</span>
+          </button>
+          <button id="btn-redo" class="dock-action-btn" title="Redo (Ctrl+Y)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span>Redo</span>
+          </button>
+          <button id="btn-grid-toggle" class="dock-action-btn active" title="Toggle Coordinate Grid">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+            <span>Grid</span>
+          </button>
+          <button id="btn-clear" class="dock-action-btn danger" title="Clear Canvas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            <span>Clear</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Main Canvas Viewport -->
+    <main class="canvas-workspace">
+      <div class="canvas-viewport-wrapper">
+        <canvas id="whiteboard-canvas" width="1200" height="720"></canvas>
+      </div>
+    </main>
+
+    <!-- Live Status Footer Banner -->
+    <footer class="app-footer">
+      <div class="status-indicator">
+        <span class="status-pill status-ready"></span>
+        <span class="status-text">Vector Engine Ready</span>
+      </div>
+      <div class="status-metrics">
+        <span class="metric-item">Tool: <strong id="status-tool">PEN</strong></span>
+        <span class="metric-item">Strokes: <strong id="status-strokes">0 strokes</strong></span>
+        <span class="metric-item">History: <strong id="status-history">Undo: 0 | Redo: 0</strong></span>
+        <span class="metric-item">Coords: <strong id="status-coords">X: 0, Y: 0</strong></span>
+        <span class="metric-item badge-hidpi">Retina HiDPI</span>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="canvas-whiteboard.js"></script>
+</body>
+</html>
