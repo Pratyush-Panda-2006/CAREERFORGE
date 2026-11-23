@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Forge - Polar Metrics Radar Chart</title>
+  <link rel="stylesheet" href="data-visualizer.css">
+</head>
+<body class="radar-body">
+  <div class="radar-container">
+    <header class="radar-header">
+      <h2>Quantum Forge Telemetry Visualizer</h2>
+      <p class="radar-subtitle">Multi-axis polar coordinate radar chart & enclosed area computation</p>
+    </header>
+
+    <div class="radar-layout">
+      <div class="chart-wrapper">
+        <svg id="radarSvg" class="radar-svg" viewBox="0 0 460 460" width="460" height="460">
+          <defs>
+            <radialGradient id="radarGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.05"/>
+            </radialGradient>
+          </defs>
+          <g id="webGridGroup" class="web-grid-group"></g>
+          <g id="spokeAxesGroup" class="spoke-axes-group"></g>
+          <polygon id="radarPolygon" class="radar-polygon" fill="url(#radarGlow)" points=""></polygon>
+          <g id="vertexHandlesGroup" class="vertex-handles-group"></g>
+          <g id="labelsGroup" class="labels-group"></g>
+        </svg>
+      </div>
+
+      <div class="controls-panel">
+        <h3>Adjust Telemetry Metrics</h3>
+        <div class="slider-control">
+          <label for="range-coherence">Qubit Coherence Time: <span id="val-coherence">96%</span></label>
+          <input type="range" id="range-coherence" data-key="coherence" min="0" max="100" value="96">
+        </div>
+        <div class="slider-control">
+          <label for="range-entanglement">Entanglement Rate: <span id="val-entanglement">92%</span></label>
+          <input type="range" id="range-entanglement" data-key="entanglement" min="0" max="100" value="92">
+        </div>
+        <div class="slider-control">
+          <label for="range-fidelity">Quantum Gate Fidelity: <span id="val-fidelity">99%</span></label>
+          <input type="range" id="range-fidelity" data-key="fidelity" min="0" max="100" value="99">
+        </div>
+        <div class="slider-control">
+          <label for="range-errorCorrection">Error Correction Factor: <span id="val-errorCorrection">89%</span></label>
+          <input type="range" id="range-errorCorrection" data-key="errorCorrection" min="0" max="100" value="89">
+        </div>
+        <div class="slider-control">
+          <label for="range-stability">Cryogenic Stability: <span id="val-stability">95%</span></label>
+          <input type="range" id="range-stability" data-key="stability" min="0" max="100" value="95">
+        </div>
+        <div class="slider-control">
+          <label for="range-quantumVolume">Quantum Volume Index: <span id="val-quantumVolume">93%</span></label>
+          <input type="range" id="range-quantumVolume" data-key="quantumVolume" min="0" max="100" value="93">
+        </div>
+        <div class="summary-card">
+          <h4>Enclosed Area Index</h4>
+          <div class="stat-value" id="enclosedAreaDisplay">0.00</div>
+          <p class="stat-meta">Area computed via Gauss Shoelace algorithm</p>
+          <button id="resetMetricsBtn" class="btn-reset">Reset Telemetry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { QuantumForgeRadarChart } from './data-visualizer.js';
+
+    const chart = new QuantumForgeRadarChart();
+    const radarPolygon = document.getElementById('radarPolygon');
+    const webGridGroup = document.getElementById('webGridGroup');
+    const spokeAxesGroup = document.getElementById('spokeAxesGroup');
+    const vertexHandlesGroup = document.getElementById('vertexHandlesGroup');
+    const labelsGroup = document.getElementById('labelsGroup');
+    const areaDisplay = document.getElementById('enclosedAreaDisplay');
+
+    function renderStaticGrid() {
+      // Concentric rings
+      const webGrid = chart.generateWebGrid(5);
+      webGridGroup.innerHTML = webGrid.map((pts, i) => `
+        <polygon class="web-ring" points="${pts}" />
+      `).join('');
+
+      // Radial spoke lines
+      const spokes = chart.getSpokeCoordinates();
+      spokeAxesGroup.innerHTML = spokes.map(s => `
+        <line class="spoke-line" x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" />
+      `).join('');
+
+      labelsGroup.innerHTML = spokes.map(s => `
+        <text class="axis-label" x="${s.labelX}" y="${s.labelY}" text-anchor="middle">${s.name}</text>
+      `).join('');
+    }
+
+    function renderChart() {
+      radarPolygon.setAttribute('points', chart.generatePolygonPoints());
+      const vertices = chart.getVertexCoordinates();
+      vertexHandlesGroup.innerHTML = vertices.map(v => `
+        <circle class="vertex-dot" cx="${v.x}" cy="${v.y}" r="4.5" />
+      `).join('');
+      areaDisplay.textContent = chart.computeEnclosedArea().toLocaleString();
+    }
+
+    renderStaticGrid();
+    renderChart();
+
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const key = e.target.dataset.key;
+        const val = Number(e.target.value) / 100;
+        chart.updateMetric(key, val);
+        document.getElementById(`val-${key}`).textContent = `${e.target.value}%`;
+        renderChart();
+      });
+    });
+
+    document.getElementById('resetMetricsBtn').addEventListener('click', () => {
+      chart.resetMetrics();
+      chart.metrics.forEach(m => {
+        const input = document.getElementById(`range-${m.key}`);
+        if (input) input.value = Math.round(m.value * 100);
+        const valSpan = document.getElementById(`val-${m.key}`);
+        if (valSpan) valSpan.textContent = `${Math.round(m.value * 100)}%`;
+      });
+      renderChart();
+    });
+  </script>
+</body>
+</html>
