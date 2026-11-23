@@ -1,0 +1,44 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  line-height: 1.55;
+  color: #192b23;
+  background: #f0f4eb;
+  --green: #256448;
+  --muted: #536b5e;
+  --line: #becdc0;
+}
+body { margin: 0; }
+.workspace { width: min(100% - 2rem, 58rem); margin: clamp(1.25rem, 4vw, 3.75rem) auto; }
+a { color: var(--green); }
+h1 { margin: 0.5rem 0; font-size: clamp(1.85rem, 4.6vw, 3.15rem); line-height: 1.15; }
+p { color: var(--muted); margin: 0 0 1.2rem; }
+.panel { padding: clamp(0.85rem, 3vw, 1.6rem); border: 1px solid var(--line); border-radius: 1rem; background: #fff; margin-top: 1rem; }
+.section-top, .actions, fieldset { display: flex; align-items: center; flex-wrap: wrap; gap: 0.55rem 0.8rem; }
+.section-top { justify-content: space-between; margin-bottom: 0.85rem; }
+h2 { margin: 0; font-size: 1.2rem; }
+#connection-state { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 650; color: var(--muted); }
+#connection-state::before { content: ""; width: 0.6rem; height: 0.6rem; background: currentColor; border-radius: 50%; }
+#connection-state[data-state="connected"] { color: var(--green); }
+#connection-state[data-state="reconnecting"] { color: #92510d; }
+#connection-state[data-state="reconnecting"]::before { animation: pulse 1.2s ease-out infinite; }
+@keyframes pulse {
+  from { box-shadow: 0 0 0 0 rgb(146 81 13 / 0.55); }
+  to { box-shadow: 0 0 0 0.42rem rgb(146 81 13 / 0); }
+}
+button { min-height: 2.65rem; padding: 0.4rem 0.85rem; border: 1px solid var(--green); border-radius: 0.5rem; color: var(--green); background: #fff; font: inherit; cursor: pointer; }
+button#connect { color: #fff; background: var(--green); }
+button:disabled { color: var(--muted); border-color: var(--line); cursor: default; opacity: 0.7; }
+:focus-visible { outline: 2px solid #17583a; outline-offset: 3px; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 0.6rem; margin: 1rem 0 0; }
+.metrics div { border: 1px solid var(--line); background: #f6f9f5; padding: 0.6rem 0.75rem; border-radius: 0.55rem; }
+dt { font-size: 0.85rem; color: var(--muted); }
+dd { margin: 0.2rem 0 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+fieldset { border: 0; padding: 0; margin: 0.85rem 0; }
+legend { padding: 0; font-size: 0.9rem; margin-bottom: 0.3rem; }
+input { accent-color: var(--green); }
+.activity { min-height: 5rem; max-height: 17rem; overflow: auto; margin: 0; padding: 0 0 0 2rem; border: 1px solid var(--line); border-radius: 0.55rem; background: #eef4ee; font: 0.86rem/1.55 ui-monospace, monospace; }
+.activity li { padding: 0.4rem 0.65rem 0.4rem 0; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) {
+  #connection-state[data-state="reconnecting"]::before { animation: none; }
+}
