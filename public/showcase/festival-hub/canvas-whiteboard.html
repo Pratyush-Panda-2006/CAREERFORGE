@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Hub — Collaborative Vector Whiteboard & Sketchpad</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+</head>
+<body>
+  <div class="whiteboard-layout">
+    <header class="whiteboard-header">
+      <h1>🎨 Festival Hub Vector Sketchpad <span class="tag">Collaborative Whiteboard</span></h1>
+      <div class="header-actions">
+        <button type="button" id="undoBtn" class="action-btn" title="Undo (Ctrl+Z)">↩ Undo</button>
+        <button type="button" id="redoBtn" class="action-btn" title="Redo (Ctrl+Y)">↪ Redo</button>
+        <button type="button" id="clearBtn" class="action-btn" title="Clear Canvas">🗑 Clear</button>
+        <button type="button" id="exportSvgBtn" class="action-btn primary" title="Export Vector SVG">📥 Export SVG</button>
+      </div>
+    </header>
+
+    <!-- Floating Toolbar Dock -->
+    <div class="toolbar-dock">
+      <div class="tool-group">
+        <button type="button" class="tool-btn active" data-tool="pen" title="Freehand Pen">✏️</button>
+        <button type="button" class="tool-btn" data-tool="line" title="Straight Line">📏</button>
+        <button type="button" class="tool-btn" data-tool="rectangle" title="Rectangle">▭</button>
+        <button type="button" class="tool-btn" data-tool="eraser" title="Eraser">🧹</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Color Picker Chips -->
+      <div class="color-picker-chips">
+        <div class="color-chip active" data-color="#ff4081" style="background: #ff4081;" title="Festival Pink"></div>
+        <div class="color-chip" data-color="#00e5ff" style="background: #00e5ff;" title="Cyan Glow"></div>
+        <div class="color-chip" data-color="#ffea00" style="background: #ffea00;" title="Stage Amber"></div>
+        <div class="color-chip" data-color="#00e676" style="background: #00e676;" title="Neon Green"></div>
+        <div class="color-chip" data-color="#ffffff" style="background: #ffffff;" title="Pure White"></div>
+        <input type="color" id="customColorPicker" class="custom-color-input" value="#ff4081" title="Custom Color">
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Brush Width Controls -->
+      <div class="brush-size-picker">
+        <label for="brushWidthSlider">Width:</label>
+        <input type="range" id="brushWidthSlider" min="1" max="40" value="4">
+        <span id="brushWidthVal">4px</span>
+      </div>
+    </div>
+
+    <!-- Drawing Canvas -->
+    <main class="canvas-wrapper">
+      <canvas id="whiteboardCanvas" width="1000" height="600"></canvas>
+    </main>
+  </div>
+
+  <script type="module" src="canvas-whiteboard.js"></script>
+</body>
+</html>
