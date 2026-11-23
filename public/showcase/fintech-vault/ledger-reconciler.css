@@ -1,0 +1,324 @@
+/**
+ * Fintech Vault - General Ledger Reconciler & Anomaly Detector Styles
+ * Institutional dark fintech aesthetics matching --bg: #070a13 and --emerald: #10b981
+ */
+
+:root {
+  --ft-bg: #070a13;
+  --ft-card: rgba(14, 24, 48, 0.75);
+  --ft-border: rgba(16, 185, 129, 0.25);
+  --ft-border-glow: rgba(16, 185, 129, 0.45);
+  --ft-emerald: #10b981;
+  --ft-emerald-light: #34d399;
+  --ft-cyan: #06b6d4;
+  --ft-red: #ef4444;
+  --ft-text: #f3f4f6;
+  --ft-muted: #9ca3af;
+  --font-mono: 'SF Mono', Consolas, Monaco, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--ft-bg);
+  color: var(--ft-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  padding: 24px;
+  background-image: radial-gradient(circle at 50% -10%, #0e1e3e 0%, #070a13 70%);
+}
+
+.reconciler-container {
+  max-width: 1060px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reconciler-header {
+  border-bottom: 1px solid var(--ft-border);
+  padding-bottom: 16px;
+}
+
+.header-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--ft-border);
+  color: var(--ft-emerald);
+  margin-bottom: 10px;
+}
+
+.reconciler-header h1 {
+  font-size: 1.85rem;
+  color: var(--ft-text);
+  margin-bottom: 6px;
+}
+
+.reconciler-header p {
+  color: var(--ft-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.anomaly-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #fca5a5;
+  font-size: 0.9rem;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.metric-card {
+  background: var(--ft-card);
+  border: 1px solid var(--ft-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  backdrop-filter: blur(12px);
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: var(--ft-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metric-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.metric-value.debit {
+  color: var(--ft-emerald-light);
+}
+
+.metric-value.credit {
+  color: var(--ft-cyan);
+}
+
+.metric-value.alert {
+  color: var(--ft-red);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+.status-balanced {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid var(--ft-emerald);
+  color: var(--ft-emerald-light);
+}
+
+.status-unbalanced {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid var(--ft-red);
+  color: #fca5a5;
+}
+
+.workbench-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+  gap: 20px;
+}
+
+.workbench-panel {
+  background: var(--ft-card);
+  border: 1px solid var(--ft-border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  backdrop-filter: blur(12px);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel-header h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 0.78rem;
+  color: var(--ft-muted);
+}
+
+.form-input {
+  background: rgba(7, 10, 19, 0.8);
+  border: 1px solid var(--ft-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--ft-text);
+  font-size: 0.88rem;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--ft-emerald);
+}
+
+.primary-btn {
+  background: var(--ft-emerald);
+  color: #04120c;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.primary-btn:hover {
+  background: var(--ft-emerald-light);
+  transform: translateY(-1px);
+}
+
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ft-text);
+  border: 1px solid var(--ft-border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.secondary-btn:hover {
+  border-color: var(--ft-emerald);
+  color: var(--ft-emerald);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--ft-border);
+  border-radius: 6px;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.ledger-table th {
+  background: rgba(16, 185, 129, 0.1);
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--ft-border);
+}
+
+.ledger-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ledger-table td.num {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.ledger-table td.debit {
+  color: var(--ft-emerald-light);
+}
+
+.ledger-table td.credit {
+  color: var(--ft-cyan);
+}
+
+.entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.entry-card {
+  background: rgba(7, 10, 19, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+}
+
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.entry-meta {
+  display: flex;
+  gap: 16px;
+  color: var(--ft-muted);
+}
+
+.entry-hash {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.reconciler-footer {
+  border-top: 1px solid var(--ft-border);
+  padding-top: 14px;
+  font-size: 0.8rem;
+  color: var(--ft-muted);
+  font-family: var(--font-mono);
+}
