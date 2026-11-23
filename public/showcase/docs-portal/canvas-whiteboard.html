@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal - Technical Whiteboard &amp; Architecture Diagrammer</title>
+  <meta name="description" content="Collaborative freehand vector sketchpad and technical architecture diagrammer for Docs Portal.">
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="wb-header">
+    <div class="wb-brand">
+      <a href="index.html" class="wb-back-link" title="Return to Docs Portal">
+        <span>&larr;</span> Docs Portal
+      </a>
+      <h1 class="wb-title">
+        Vector Whiteboard
+        <span class="desc" style="font-weight: 400; color: #94a3b8; font-size: 13px;">| Architecture Sketchpad</span>
+      </h1>
+      <span class="wb-badge">v1.2.0 Vector Engine</span>
+    </div>
+
+    <!-- Template Backdrop Switcher -->
+    <div class="wb-header-center">
+      <div class="wb-template-selector">
+        <label for="templateSelect">Template:</label>
+        <select id="templateSelect" class="wb-select" aria-label="Select Architecture Template">
+          <option value="blank">Blank Technical Canvas</option>
+          <option value="api-flow" selected>API Gateway Flow</option>
+          <option value="architecture">Microservice Architecture</option>
+          <option value="markdown-flow">Markdown AST Pipeline</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Top Action Exports -->
+    <div class="wb-header-actions">
+      <button id="importJsonBtn" class="wb-btn" data-tooltip="Load whiteboard JSON diagram">
+        📂 Load JSON
+      </button>
+      <input type="file" id="jsonFileInput" accept=".json,application/json" style="display: none;">
+
+      <button id="exportJsonBtn" class="wb-btn" data-tooltip="Download diagram as JSON structure">
+        💾 Export JSON
+      </button>
+      <button id="exportSvgBtn" class="wb-btn" data-tooltip="Export crisp vector SVG for technical docs">
+        📐 Export SVG
+      </button>
+      <button id="exportPngBtn" class="wb-btn wb-btn-primary" data-tooltip="Save snapshot as high-res PNG">
+        🖼️ Export PNG
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Canvas Workspace -->
+  <main class="wb-workspace" id="workspaceContainer">
+    <!-- Floating Glassmorphism Technical Dock -->
+    <nav class="wb-dock" role="toolbar" aria-label="Whiteboard Drawing Tools">
+      <!-- Drawing Tools Group -->
+      <div class="wb-dock-group" id="toolsGroup">
+        <button type="button" class="wb-tool-btn active" data-tool="pen" data-tooltip="Pen (Freehand Spline)" aria-label="Pen tool">
+          ✏️
+        </button>
+        <button type="button" class="wb-tool-btn" data-tool="eraser" data-tooltip="Eraser" aria-label="Eraser tool">
+          🧹
+        </button>
+        <button type="button" class="wb-tool-btn" data-tool="connector" data-tooltip="Arrow Connector" aria-label="Connector line tool">
+          ➡️
+        </button>
+        <button type="button" class="wb-tool-btn" data-tool="rectangle" data-tooltip="Architecture Box (Rectangle)" aria-label="Rectangle box tool">
+          ⬜
+        </button>
+        <button type="button" class="wb-tool-btn" data-tool="circle" data-tooltip="Cluster Node (Circle)" aria-label="Circle node tool">
+          ⚪
+        </button>
+        <button type="button" class="wb-tool-btn" data-tool="note" data-tooltip="Sticky Note Card" aria-label="Sticky note tool">
+          📝
+        </button>
+      </div>
+
+      <div class="wb-dock-separator"></div>
+
+      <!-- Color Swatches Group -->
+      <div class="wb-dock-group wb-color-swatches" id="colorSwatches">
+        <button type="button" class="wb-swatch active" data-color="#3b82f6" style="background-color: #3b82f6;" data-tooltip="Doc Blue (#3b82f6)" aria-label="Doc Blue"></button>
+        <button type="button" class="wb-swatch" data-color="#10b981" style="background-color: #10b981;" data-tooltip="Mint Green (#10b981)" aria-label="Mint Green"></button>
+        <button type="button" class="wb-swatch" data-color="#f59e0b" style="background-color: #f59e0b;" data-tooltip="Amber Warning (#f59e0b)" aria-label="Amber Warning"></button>
+        <button type="button" class="wb-swatch" data-color="#a855f7" style="background-color: #a855f7;" data-tooltip="Purple Syntax (#a855f7)" aria-label="Purple Syntax"></button>
+        <button type="button" class="wb-swatch" data-color="#f8fafc" style="background-color: #f8fafc;" data-tooltip="Canvas White (#f8fafc)" aria-label="Canvas White"></button>
+        <button type="button" class="wb-swatch" data-color="#334155" style="background-color: #334155;" data-tooltip="Slate Border (#334155)" aria-label="Slate Border"></button>
+        <button type="button" class="wb-swatch" data-color="#090d16" style="background-color: #090d16; border: 1px solid #475569;" data-tooltip="Terminal Dark (#090d16)" aria-label="Terminal Dark"></button>
+      </div>
+
+      <div class="wb-dock-separator"></div>
+
+      <!-- Brush Slider Settings -->
+      <div class="wb-dock-group">
+        <div class="wb-slider-control">
+          <div class="wb-slider-label">
+            <span>STROKE</span>
+            <span id="strokeWidthDisplay">3px</span>
+          </div>
+          <input type="range" id="strokeWidthSlider" min="1" max="32" value="3" aria-label="Stroke Width Slider">
+        </div>
+      </div>
+
+      <div class="wb-dock-group">
+        <div class="wb-slider-control">
+          <div class="wb-slider-label">
+            <span>OPACITY</span>
+            <span id="opacityDisplay">100%</span>
+          </div>
+          <input type="range" id="opacitySlider" min="10" max="100" value="100" aria-label="Opacity Slider">
+        </div>
+      </div>
+
+      <div class="wb-dock-separator"></div>
+
+      <!-- History Group -->
+      <div class="wb-dock-group">
+        <button type="button" id="undoBtn" class="wb-tool-btn" data-tooltip="Undo (Ctrl+Z)" aria-label="Undo" disabled>
+          ↩️
+        </button>
+        <button type="button" id="redoBtn" class="wb-tool-btn" data-tooltip="Redo (Ctrl+Y)" aria-label="Redo" disabled>
+          ↪️
+        </button>
+        <button type="button" id="clearBtn" class="wb-tool-btn" data-tooltip="Clear Canvas" aria-label="Clear Canvas">
+          🗑️
+        </button>
+      </div>
+    </nav>
+
+    <!-- Canvas Surface -->
+    <canvas id="whiteboardCanvas" aria-label="Technical architecture whiteboard canvas"></canvas>
+  </main>
+
+  <!-- Sticky Note Input Dialog Modal -->
+  <div class="wb-modal-overlay" id="noteModal">
+    <div class="wb-modal">
+      <h3>Add Sticky Note</h3>
+      <textarea id="noteInput" placeholder="Enter architecture documentation note..." maxlength="120"></textarea>
+      <div class="wb-modal-actions">
+        <button type="button" id="cancelNoteBtn" class="wb-btn">Cancel</button>
+        <button type="button" id="saveNoteBtn" class="wb-btn wb-btn-primary">Place Note</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Bar Footer -->
+  <footer class="wb-status-bar">
+    <div class="wb-status-group">
+      <div class="wb-status-item">
+        <span class="wb-status-dot"></span>
+        <span>ENGINE: READY</span>
+      </div>
+      <div class="wb-status-item">
+        <span>TOOL:</span>
+        <strong id="statusTool" style="color: #60a5fa;">PEN</strong>
+      </div>
+      <div class="wb-status-item">
+        <span>ELEMENTS:</span>
+        <span id="statusStrokesCount">0</span>
+      </div>
+      <div class="wb-status-item">
+        <span>HISTORY:</span>
+        <span id="statusHistoryDepth">0</span>
+      </div>
+    </div>
+
+    <div class="wb-status-group">
+      <div class="wb-status-item">
+        <span>COORDINATES:</span>
+        <span id="statusCoords">X: 0, Y: 0</span>
+      </div>
+      <div class="wb-status-item">
+        <span>VIEWPORT:</span>
+        <span id="statusViewport">1200 &times; 800</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Initialization Module Script -->
+  <script type="module">
+    import { DocsPortalWhiteboardCanvas, WHITEBOARD_PALETTE } from './canvas-whiteboard.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const canvasEl = document.getElementById('whiteboardCanvas');
+      const container = document.getElementById('workspaceContainer');
+
+      // Initialize Whiteboard Engine
+      const whiteboard = new DocsPortalWhiteboardCanvas({
+        canvas: canvasEl,
+        color: WHITEBOARD_PALETTE.docBlue,
+        strokeWidth: 3,
+        opacity: 1.0,
+        maxHistory: 50
+      });
+
+      // Load initial template
+      whiteboard.loadTemplate('api-flow');
+
+      // DOM UI Elements
+      const toolButtons = document.querySelectorAll('[data-tool]');
+      const colorSwatches = document.querySelectorAll('[data-color]');
+      const strokeSlider = document.getElementById('strokeWidthSlider');
+      const strokeDisplay = document.getElementById('strokeWidthDisplay');
+      const opacitySlider = document.getElementById('opacitySlider');
+      const opacityDisplay = document.getElementById('opacityDisplay');
+      const undoBtn = document.getElementById('undoBtn');
+      const redoBtn = document.getElementById('redoBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const templateSelect = document.getElementById('templateSelect');
+      const exportSvgBtn = document.getElementById('exportSvgBtn');
+      const exportPngBtn = document.getElementById('exportPngBtn');
+      const exportJsonBtn = document.getElementById('exportJsonBtn');
+      const importJsonBtn = document.getElementById('importJsonBtn');
+      const jsonFileInput = document.getElementById('jsonFileInput');
+
+      // Status Bar Elements
+      const statusTool = document.getElementById('statusTool');
+      const statusStrokesCount = document.getElementById('statusStrokesCount');
+      const statusHistoryDepth = document.getElementById('statusHistoryDepth');
+      const statusCoords = document.getElementById('statusCoords');
+      const statusViewport = document.getElementById('statusViewport');
+
+      // Note Modal
+      const noteModal = document.getElementById('noteModal');
+      const noteInput = document.getElementById('noteInput');
+      const cancelNoteBtn = document.getElementById('cancelNoteBtn');
+      const saveNoteBtn = document.getElementById('saveNoteBtn');
+      let pendingNoteCoord = null;
+
+      function updateStatus() {
+        statusTool.textContent = whiteboard.tool.toUpperCase();
+        statusStrokesCount.textContent = whiteboard.strokes.length;
+        statusHistoryDepth.textContent = whiteboard.historyLength;
+        undoBtn.disabled = !whiteboard.canUndo();
+        redoBtn.disabled = !whiteboard.canRedo();
+        statusViewport.textContent = `${Math.round(whiteboard.width)} × ${Math.round(whiteboard.height)}`;
+      }
+
+      whiteboard.on('change', () => updateStatus());
+      whiteboard.on('tool:change', (data) => {
+        statusTool.textContent = data.tool.toUpperCase();
+        toolButtons.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tool === data.tool);
+        });
+      });
+      whiteboard.on('color:change', (data) => {
+        colorSwatches.forEach(swatch => {
+          swatch.classList.toggle('active', swatch.dataset.color.toLowerCase() === data.color.toLowerCase());
+        });
+      });
+
+      // Tool Switching
+      toolButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tool = btn.dataset.tool;
+          whiteboard.setTool(tool);
+        });
+      });
+
+      // Color Swatches
+      colorSwatches.forEach(swatch => {
+        swatch.addEventListener('click', () => {
+          const color = swatch.dataset.color;
+          whiteboard.setColor(color);
+        });
+      });
+
+      // Stroke Width Slider
+      strokeSlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        whiteboard.setStrokeWidth(val);
+        strokeDisplay.textContent = `${val}px`;
+      });
+
+      // Opacity Slider
+      opacitySlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        whiteboard.setOpacity(val / 100);
+        opacityDisplay.textContent = `${val}%`;
+      });
+
+      // History Controls
+      undoBtn.addEventListener('click', () => whiteboard.undo());
+      redoBtn.addEventListener('click', () => whiteboard.redo());
+      clearBtn.addEventListener('click', () => {
+        if (confirm('Clear the entire whiteboard canvas?')) {
+          whiteboard.clear();
+        }
+      });
+
+      // Keyboard Shortcuts (Ctrl+Z, Ctrl+Y)
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            whiteboard.redo();
+          } else {
+            whiteboard.undo();
+          }
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          whiteboard.redo();
+        }
+      });
+
+      // Coordinate tracking
+      canvasEl.addEventListener('pointermove', (e) => {
+        const rect = canvasEl.getBoundingClientRect();
+        const x = Math.round(e.clientX - rect.left);
+        const y = Math.round(e.clientY - rect.top);
+        statusCoords.textContent = `X: ${x}, Y: ${y}`;
+      });
+
+      // Template Switcher
+      templateSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val === 'blank') {
+          whiteboard.clear();
+        } else {
+          whiteboard.loadTemplate(val);
+        }
+      });
+
+      // Export SVG
+      exportSvgBtn.addEventListener('click', () => {
+        const svgString = whiteboard.exportSVG();
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `docs-architecture-${Date.now()}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Export PNG
+      exportPngBtn.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = canvasEl.toDataURL('image/png');
+        a.download = `docs-architecture-${Date.now()}.png`;
+        a.click();
+      });
+
+      // Export JSON
+      exportJsonBtn.addEventListener('click', () => {
+        const json = whiteboard.exportJSON(true);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `docs-whiteboard-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Import JSON
+      importJsonBtn.addEventListener('click', () => {
+        jsonFileInput.click();
+      });
+
+      jsonFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            whiteboard.loadJSON(event.target.result);
+            templateSelect.value = 'blank';
+          } catch (err) {
+            alert('Failed to load JSON: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+        jsonFileInput.value = '';
+      });
+
+      updateStatus();
+    });
+  </script>
+</body>
+</html>
