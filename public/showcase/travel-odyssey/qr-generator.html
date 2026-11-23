@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Travel Odyssey - QR Generator</title>
+  <link rel="stylesheet" href="qr-generator.css">
+</head>
+<body class="qr-body">
+  <div class="qr-container">
+    <h2>Travel Odyssey QR Code Generator</h2>
+    <div id="qrStage"></div>
+  </div>
+  <script type="module">
+    import { TravelOdysseyQrGenerator } from './qr-generator.js';
+    const gen = new TravelOdysseyQrGenerator();
+    const m = gen.generateQrMatrix();
+    document.getElementById('qrStage').innerHTML = gen.renderSVG(m);
+  </script>
+</body>
+</html>
