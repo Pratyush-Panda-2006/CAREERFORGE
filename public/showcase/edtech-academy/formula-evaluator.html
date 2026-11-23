@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EdTech Academy - Mathematical Expression Parser & Dynamic KPI Calculator</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="formula-evaluator-container">
+    <!-- Top Navigation -->
+    <header class="evaluator-header">
+      <div class="header-nav">
+        <a href="index.html" class="back-link" aria-label="Return to EdTech Academy Showcase">← Return to EdTech Academy Showcase</a>
+        <button id="contrast-toggle" class="contrast-toggle-btn" type="button" aria-pressed="false">WCAG AAA High Contrast</button>
+      </div>
+      <div class="header-badge">// EDTECH ACADEMY ANALYTICS WORKBENCH</div>
+      <h1>Dynamic KPI Formula Calculator &amp; Expression Parser</h1>
+      <p>Modular mathematical expression tokenizer, Dijkstra Shunting-Yard RPN engine, real-time parameter tuning workbench, and institutional KPI audit evaluator.</p>
+    </header>
+
+    <!-- Error Alert Banner -->
+    <div id="error-banner" class="alert-banner hidden" role="alert" aria-live="polite"></div>
+
+    <!-- Calculated Result Callout Cards Grid -->
+    <section class="metrics-grid" aria-label="Dynamic Calculation Results">
+      <!-- Card 1: Formatted Result -->
+      <div class="metric-card primary-card">
+        <span class="metric-label">Formatted Result</span>
+        <div class="metric-value-wrap">
+          <span id="kpi-formatted-result" class="metric-value">--</span>
+        </div>
+        <span id="calc-status" class="status-badge status-valid">AWAITING EVALUATION</span>
+      </div>
+
+      <!-- Card 2: Raw Value -->
+      <div class="metric-card">
+        <span class="metric-label">Raw Scalar Value</span>
+        <div class="metric-value-wrap">
+          <span id="kpi-raw-result" class="metric-subvalue">--</span>
+        </div>
+        <span class="metric-hint">Unrounded IEEE-754 precision scalar</span>
+      </div>
+
+      <!-- Card 3: Token Count -->
+      <div class="metric-card">
+        <span class="metric-label">Token Telemetry</span>
+        <div class="metric-value-wrap">
+          <span id="kpi-token-count" class="metric-subvalue">0 tokens</span>
+        </div>
+        <span class="metric-hint">Shunting-Yard RPN compiled stack</span>
+      </div>
+
+      <!-- Card 4: Evaluation Latency -->
+      <div class="metric-card">
+        <span class="metric-label">Compute Latency</span>
+        <div class="metric-value-wrap">
+          <span id="kpi-latency" class="metric-subvalue">0.00 ms</span>
+        </div>
+        <span class="metric-hint">O(N) single-pass tokenization &amp; stack eval</span>
+      </div>
+    </section>
+
+    <!-- KPI Preset Selection Bar -->
+    <section class="presets-section" aria-label="Academic KPI Presets">
+      <div class="presets-header">
+        <span class="presets-label">Preset KPI Formulas:</span>
+        <div class="preset-dropdown-wrap">
+          <label for="preset-select" class="sr-only">Select Preset KPI Formula</label>
+          <select id="preset-select" class="preset-dropdown">
+            <option value="" disabled selected>Load EdTech KPI Preset...</option>
+            <option value="course_price * total_enrolled">Gross Course Revenue: course_price * total_enrolled</option>
+            <option value="(course_price * total_enrolled * (1 - instructor_royalty_rate)) - marketing_spend - (total_enrolled * student_support_cost_per_head)">Net Academy Margin: (course_price * total_enrolled * (1 - instructor_royalty_rate)) - marketing_spend - (total_enrolled * student_support_cost_per_head)</option>
+            <option value="marketing_spend / total_enrolled">Customer Acquisition Cost (CAC): marketing_spend / total_enrolled</option>
+            <option value="total_enrolled * completion_rate">Course Completion Count: total_enrolled * completion_rate</option>
+            <option value="(course_price * total_enrolled) / marketing_spend">Return on Ad Spend (ROAS): (course_price * total_enrolled) / marketing_spend</option>
+            <option value="average_watch_hours * quiz_pass_rate * 10">Student Engagement Metric: average_watch_hours * quiz_pass_rate * 10</option>
+          </select>
+        </div>
+      </div>
+      <div class="preset-pills-bar">
+        <button type="button" class="preset-pill" data-formula="course_price * total_enrolled">📈 Gross Revenue</button>
+        <button type="button" class="preset-pill" data-formula="(course_price * total_enrolled * (1 - instructor_royalty_rate)) - marketing_spend - (total_enrolled * student_support_cost_per_head)">💰 Net Margin</button>
+        <button type="button" class="preset-pill" data-formula="marketing_spend / total_enrolled">🎯 CAC</button>
+        <button type="button" class="preset-pill" data-formula="total_enrolled * completion_rate">🎓 Completion Count</button>
+        <button type="button" class="preset-pill" data-formula="(course_price * total_enrolled) / marketing_spend">📊 ROAS</button>
+        <button type="button" class="preset-pill" data-formula="average_watch_hours * quiz_pass_rate * 10">⚡ Engagement Index</button>
+      </div>
+    </section>
+
+    <!-- Main Workbench Grid -->
+    <main class="workbench-grid">
+      <!-- Left Column: Formula Editor -->
+      <section class="workbench-panel" aria-label="Formula Editor">
+        <div class="panel-header">
+          <h3>Formula Expression</h3>
+          <span id="syntax-badge" class="status-badge status-neutral">Valid Syntax</span>
+        </div>
+
+        <div class="input-group">
+          <label for="formula-input" class="sr-only">Formula Expression Input</label>
+          <textarea id="formula-input" class="formula-textarea" rows="3" placeholder="Enter mathematical expression, e.g. (course_price * total_enrolled * (1 - instructor_royalty_rate)) - marketing_spend - (total_enrolled * student_support_cost_per_head)">course_price * total_enrolled</textarea>
+        </div>
+
+        <!-- Quick Insertion Pills -->
+        <div class="syntax-pills-section">
+          <!-- Variables -->
+          <div class="pills-category">
+            <span class="pills-title">EdTech Variables:</span>
+            <div class="pills-group">
+              <button type="button" class="pill pill-var" data-insert="course_price" title="Insert course_price">course_price</button>
+              <button type="button" class="pill pill-var" data-insert="total_enrolled" title="Insert total_enrolled">total_enrolled</button>
+              <button type="button" class="pill pill-var" data-insert="completion_rate" title="Insert completion_rate">completion_rate</button>
+              <button type="button" class="pill pill-var" data-insert="instructor_royalty_rate" title="Insert instructor_royalty_rate">instructor_royalty_rate</button>
+              <button type="button" class="pill pill-var" data-insert="marketing_spend" title="Insert marketing_spend">marketing_spend</button>
+              <button type="button" class="pill pill-var" data-insert="student_support_cost_per_head" title="Insert student_support_cost_per_head">student_support_cost_per_head</button>
+              <button type="button" class="pill pill-var" data-insert="quiz_pass_rate" title="Insert quiz_pass_rate">quiz_pass_rate</button>
+              <button type="button" class="pill pill-var" data-insert="average_watch_hours" title="Insert average_watch_hours">average_watch_hours</button>
+            </div>
+          </div>
+
+          <!-- Functions -->
+          <div class="pills-category">
+            <span class="pills-title">Functions:</span>
+            <div class="pills-group">
+              <button type="button" class="pill pill-fn" data-insert="sqrt()" title="Square root">sqrt()</button>
+              <button type="button" class="pill pill-fn" data-insert="pow(, )" title="Power base exponent">pow(, )</button>
+              <button type="button" class="pill pill-fn" data-insert="abs()" title="Absolute value">abs()</button>
+              <button type="button" class="pill pill-fn" data-insert="log()" title="Natural log">log()</button>
+              <button type="button" class="pill pill-fn" data-insert="ln()" title="Natural log">ln()</button>
+              <button type="button" class="pill pill-fn" data-insert="exp()" title="Exponential">exp()</button>
+              <button type="button" class="pill pill-fn" data-insert="min(, )" title="Minimum value">min(, )</button>
+              <button type="button" class="pill pill-fn" data-insert="max(, )" title="Maximum value">max(, )</button>
+              <button type="button" class="pill pill-fn" data-insert="round()" title="Round to nearest integer">round()</button>
+              <button type="button" class="pill pill-fn" data-insert="floor()" title="Floor integer">floor()</button>
+              <button type="button" class="pill pill-fn" data-insert="ceil()" title="Ceiling integer">ceil()</button>
+            </div>
+          </div>
+
+          <!-- Operators -->
+          <div class="pills-category">
+            <span class="pills-title">Operators &amp; Grouping:</span>
+            <div class="pills-group">
+              <button type="button" class="pill pill-op" data-insert=" + ">+</button>
+              <button type="button" class="pill pill-op" data-insert=" - ">-</button>
+              <button type="button" class="pill pill-op" data-insert=" * ">*</button>
+              <button type="button" class="pill pill-op" data-insert=" / ">/</button>
+              <button type="button" class="pill pill-op" data-insert=" ^ ">^</button>
+              <button type="button" class="pill pill-op" data-insert=" % ">%</button>
+              <button type="button" class="pill pill-op" data-insert="(">(</button>
+              <button type="button" class="pill pill-op" data-insert=")">)</button>
+              <button type="button" class="pill pill-op" data-insert=", ">comma</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="action-row">
+          <button id="evaluate-btn" type="button" class="btn-primary">Evaluate Formula</button>
+          <button id="clear-formula-btn" type="button" class="btn-secondary">Clear Expression</button>
+        </div>
+      </section>
+
+      <!-- Right Column: Variable Tuning Workbench -->
+      <section class="workbench-panel" aria-label="Variable Tuning Workbench">
+        <div class="panel-header">
+          <h3>Variable Tuning Workbench</h3>
+          <span class="panel-subtitle">Synchronized Sliders &amp; Numeric Inputs</span>
+        </div>
+
+        <div class="variables-list">
+          <!-- 1. course_price -->
+          <div class="variable-row">
+            <div class="variable-info">
+              <label for="slider-course_price" class="variable-name">Course Price (<code>course_price</code>)</label>
+              <span class="variable-desc">Base enrollment price per student ($)</span>
+            </div>
+            <div class="control-sync">
+              <input type="range" id="slider-course_price" class="param-slider" min="10" max="2000" step="1" value="199">
+              <input type="number" id="input-course_price" class="param-number-input" min="0" max="100000" step="1" value="199" aria-label="Course price value">
+            </div>
+          </div>
+
+          <!-- 2. total_enrolled -->
+          <div class="variable-row">
+            <div class="variable-info">
+              <label for="slider-total_enrolled" class="variable-name">Total Enrolled (<code>total_enrolled</code>)</label>
+              <span class="variable-desc">Active cohort enrollment volume</span>
+            </div>
+            <div class="control-sync">
+              <input type="range" id="slider-total_enrolled" class="param-slider" min="10" max="20000" step="10" value="1250">
+              <input type="number" id="input-total_enrolled" class="param-number-input" min="0" max="1000000" step="10" value="1250" aria-label="Total enrolled value">
+            </div>
+          </div>
+
+          <!-- 3. completion_rate -->
+          <div class="variable-row">
+            <div class="variable-info">
+              <label for="slider-completion_rate" class="variable-name">Completion Rate (<code>completion_rate</code>)</label>
+              <span class="variable-desc">Proportion completing all syllabus milestones (0.0 to 1.0)</span>
+            </div>
+            <div class="control-sync">
+              <input type="range" id="slider-completion_rate" class="param-slider" min="0.01" max="1.00" step="0.01" value="0.68">
+              <input type="number" id="input-completion_rate" class="param-number-input" min="0" max="1" step="0.01" value="0.68" aria-label="Completion rate value">
+            </div>
+          </div>
+
+          <!-- 4. instructor_royalty_rate -->
+          <div class="variable-row">
+            <div class="variable-info">
+              <label for="slider-instructor_royalty_rate" class="variable-name">Instructor Royalty (<code>instructor_royalty_rate</code>)</label>
+              <span class="variable-desc">Educator revenue share fraction (0.0 to 1.0)</span>
+            </div>
+            <div class="control-sync">
+              <input type="range" id="slider-instructor_royalty_rate" class="param-slider" min="0.00" max="0.90" step="0.01" value="0.30">
+              <input type="number" id="input-instructor_royalty_rate" class="param-number-input" min="0" max="1" step="0.01" value="0.30" aria-label="Instructor royalty rate value">
+            </div>
+          </div>
+
+          <!-- 5. marketing_spend -->
+          <div class="variable-row">
+            <div class="variable-info">
+              <label for="slider-marketing_spend" class="variable-name">Marketing Spend (<code>marketing_spend</code>)</label>
+              <span class="variable-desc">Paid marketing and advertising acquisition capital ($)</span>
+            </div>
+            <div class="control-sync">
+              <input type="range" id="slider-marketing_spend" class="param-slider" min="500" max="100000" step="500" value="15000">
+              <input type="number" id="input-marketing_spend" class="param-number-input" min="0" max="10000000" step="500" value="15000" aria-label="Marketing spend value">
+            </div>
+          </div>
+
+          <!-- 6. student_support_cost_per_head -->
+          <div class="variable-row">
+            <div class="variable-info">
+              <label for="slider-student_support_cost_per_head" class="variable-name">Support Cost / Head (<code>student_support_cost_per_head</code>)</label>
+              <span class="variable-desc">Direct teaching assistant &amp; mentoring cost per student ($)</span>
+            </div>
+            <div class="control-sync">
+              <input type="range" id="slider-student_support_cost_per_head" class="param-slider" min="1" max="150" step="1" value="12">
+              <input type="number" id="input-student_support_cost_per_head" class="param-number-input" min="0" max="5000" step="1" value="12" aria-label="Student support cost value">
+            </div>
+          </div>
+
+          <!-- 7. quiz_pass_rate -->
+          <div class="variable-row">
+            <div class="variable-info">
+              <label for="slider-quiz_pass_rate" class="variable-name">Quiz Pass Rate (<code>quiz_pass_rate</code>)</label>
+              <span class="variable-desc">Average assessment test pass ratio (0.0 to 1.0)</span>
+            </div>
+            <div class="control-sync">
+              <input type="range" id="slider-quiz_pass_rate" class="param-slider" min="0.05" max="1.00" step="0.01" value="0.82">
+              <input type="number" id="input-quiz_pass_rate" class="param-number-input" min="0" max="1" step="0.01" value="0.82" aria-label="Quiz pass rate value">
+            </div>
+          </div>
+
+          <!-- 8. average_watch_hours -->
+          <div class="variable-row">
+            <div class="variable-info">
+              <label for="slider-average_watch_hours" class="variable-name">Watch Hours (<code>average_watch_hours</code>)</label>
+              <span class="variable-desc">Mean lecture video consumption duration per student (hrs)</span>
+            </div>
+            <div class="control-sync">
+              <input type="range" id="slider-average_watch_hours" class="param-slider" min="1" max="80" step="0.5" value="14.5">
+              <input type="number" id="input-average_watch_hours" class="param-number-input" min="0" max="1000" step="0.5" value="14.5" aria-label="Average watch hours value">
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Calculation History Log Section -->
+    <section class="history-section" aria-label="Calculation Audit History">
+      <div class="history-header">
+        <div class="history-title-wrap">
+          <h3>Calculation Audit History Log</h3>
+          <span class="history-subtitle">Immutable audit trail with execution replay capability</span>
+        </div>
+        <button id="clear-history-btn" type="button" class="btn-secondary">Clear Audit History</button>
+      </div>
+      <ul id="history-list" class="history-list" role="feed">
+        <li class="history-empty">No calculations recorded in audit history.</li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer class="evaluator-footer">
+      <span>EdTech Academy Standard: Modular Shunting-Yard RPN Evaluator • WCAG AAA Accessible • Issue #1227 Certified</span>
+    </footer>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
