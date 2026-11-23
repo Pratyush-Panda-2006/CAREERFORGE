@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency Studio — Dynamic KPI Formula Evaluator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./formula-evaluator.css">
+</head>
+<body>
+  <div class="evaluator-container">
+    <!-- Navigation & Utility Header -->
+    <div class="top-nav-bar">
+      <a href="./index.html" class="back-link" title="Return to Agency Studio Showcase">
+        <span class="nav-arrow">←</span> Back to Agency Studio
+      </a>
+      <div class="nav-actions">
+        <button id="high-contrast-toggle" class="contrast-toggle-btn" type="button" aria-pressed="false" aria-label="Toggle WCAG AAA High Contrast Mode">
+          <span class="contrast-icon">✦</span> WCAG AAA Contrast
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="evaluator-header">
+      <div class="header-badge">AGENCY-STUDIO KPI ENGINE v2.4</div>
+      <h1>Agency Studio — KPI Formula Calculator</h1>
+      <p>Mathematical expression tokenizer, dynamic formula parser, and agency financial parameter workbench</p>
+    </header>
+
+    <!-- Supported Syntax Bar -->
+    <div class="syntax-pills-bar" aria-label="Supported Mathematical Operations">
+      <span class="pill-title">Operators:</span>
+      <span class="syntax-pill">+ Add</span>
+      <span class="syntax-pill">- Sub</span>
+      <span class="syntax-pill">* Mul</span>
+      <span class="syntax-pill">/ Div</span>
+      <span class="syntax-pill">% Mod</span>
+      <span class="syntax-pill">^ Pow</span>
+      <span class="syntax-pill">( ) Groups</span>
+      <span class="pill-title function-label">Functions:</span>
+      <span class="syntax-pill fn-pill">sqrt</span>
+      <span class="syntax-pill fn-pill">log</span>
+      <span class="syntax-pill fn-pill">ln</span>
+      <span class="syntax-pill fn-pill">exp</span>
+      <span class="syntax-pill fn-pill">abs</span>
+      <span class="syntax-pill fn-pill">min(a,b)</span>
+      <span class="syntax-pill fn-pill">max(a,b)</span>
+      <span class="syntax-pill fn-pill">round</span>
+      <span class="syntax-pill fn-pill">floor</span>
+      <span class="syntax-pill fn-pill">ceil</span>
+      <span class="syntax-pill fn-pill">pow(a,b)</span>
+    </div>
+
+    <!-- KPI Preset Selector Bar -->
+    <section class="preset-section" aria-labelledby="preset-heading">
+      <div class="preset-header">
+        <label id="preset-heading" for="preset-select" class="preset-label">KPI Equation Preset:</label>
+        <div class="select-wrapper">
+          <select id="preset-select" class="preset-select">
+            <option value="gross_revenue" selected>Gross Agency Revenue</option>
+            <option value="net_profit">Net Agency Profit</option>
+            <option value="profit_margin_ratio">Profit Margin Ratio (%)</option>
+            <option value="client_roi">Client ROI Multiplier</option>
+            <option value="campaign_yield">Campaign Yield</option>
+            <option value="effective_hourly_yield">Effective Hourly Yield</option>
+          </select>
+        </div>
+      </div>
+      <p id="preset-description" class="preset-desc">
+        Gross Agency Revenue: Total revenue generated from active billable team hours and utilization rate.
+      </p>
+    </section>
+
+    <!-- Main Grid Layout -->
+    <main class="evaluator-grid">
+      <!-- Left Column: Input and Variable Tuning -->
+      <section class="config-panel" aria-labelledby="formula-input-title">
+        <div class="panel-header">
+          <h2 id="formula-input-title">Formula Expression</h2>
+          <span id="syntax-badge" class="syntax-badge valid" role="status">Valid Syntax</span>
+        </div>
+
+        <div class="form-group">
+          <label for="formula-input" class="sr-only">Mathematical Formula Expression</label>
+          <input
+            type="text"
+            id="formula-input"
+            class="formula-text-input"
+            value="hourly_rate * billable_hours * team_utilization_rate"
+            spellcheck="false"
+            autocomplete="off"
+            aria-describedby="warning-banner"
+          >
+        </div>
+
+        <div class="button-actions">
+          <button id="evaluate-btn" class="primary-btn" type="button">Calculate KPI Result</button>
+          <button id="clear-btn" class="secondary-btn" type="button">Reset</button>
+        </div>
+
+        <div id="warning-banner" class="warning-banner" style="display: none;" role="alert" aria-live="assertive"></div>
+
+        <!-- Variable Tuning Workbench -->
+        <div class="variables-section" aria-labelledby="variables-title">
+          <div class="variables-header">
+            <h3 id="variables-title">Agency Parameter Tuning Workbench</h3>
+            <span class="variables-sub">Sliders &amp; Inputs Live-Synchronized</span>
+          </div>
+
+          <div class="variables-grid" id="variables-list">
+            <!-- hourly_rate -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-hourly_rate" class="var-label">hourly_rate ($/hr)</label>
+                <input type="number" id="input-hourly_rate" class="var-input" data-var="hourly_rate" value="125" step="5" min="25" max="500">
+              </div>
+              <input type="range" class="var-slider" data-var="hourly_rate" value="125" step="5" min="25" max="500" aria-label="hourly_rate slider">
+            </div>
+
+            <!-- billable_hours -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-billable_hours" class="var-label">billable_hours (hrs)</label>
+                <input type="number" id="input-billable_hours" class="var-input" data-var="billable_hours" value="160" step="5" min="10" max="400">
+              </div>
+              <input type="range" class="var-slider" data-var="billable_hours" value="160" step="5" min="10" max="400" aria-label="billable_hours slider">
+            </div>
+
+            <!-- overhead_cost -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-overhead_cost" class="var-label">overhead_cost ($)</label>
+                <input type="number" id="input-overhead_cost" class="var-input" data-var="overhead_cost" value="4500" step="250" min="500" max="30000">
+              </div>
+              <input type="range" class="var-slider" data-var="overhead_cost" value="4500" step="250" min="500" max="30000" aria-label="overhead_cost slider">
+            </div>
+
+            <!-- project_retainer -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-project_retainer" class="var-label">project_retainer ($)</label>
+                <input type="number" id="input-project_retainer" class="var-input" data-var="project_retainer" value="25000" step="1000" min="2000" max="100000">
+              </div>
+              <input type="range" class="var-slider" data-var="project_retainer" value="25000" step="1000" min="2000" max="100000" aria-label="project_retainer slider">
+            </div>
+
+            <!-- team_utilization_rate -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-team_utilization_rate" class="var-label">team_utilization_rate</label>
+                <input type="number" id="input-team_utilization_rate" class="var-input" data-var="team_utilization_rate" value="0.85" step="0.05" min="0.1" max="1.0">
+              </div>
+              <input type="range" class="var-slider" data-var="team_utilization_rate" value="0.85" step="0.05" min="0.1" max="1.0" aria-label="team_utilization_rate slider">
+            </div>
+
+            <!-- client_acquisition_cost -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-client_acquisition_cost" class="var-label">client_acquisition_cost ($)</label>
+                <input type="number" id="input-client_acquisition_cost" class="var-input" data-var="client_acquisition_cost" value="1200" step="50" min="100" max="10000">
+              </div>
+              <input type="range" class="var-slider" data-var="client_acquisition_cost" value="1200" step="50" min="100" max="10000" aria-label="client_acquisition_cost slider">
+            </div>
+
+            <!-- project_margin_rate -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-project_margin_rate" class="var-label">project_margin_rate</label>
+                <input type="number" id="input-project_margin_rate" class="var-input" data-var="project_margin_rate" value="0.35" step="0.05" min="0.05" max="0.95">
+              </div>
+              <input type="range" class="var-slider" data-var="project_margin_rate" value="0.35" step="0.05" min="0.05" max="0.95" aria-label="project_margin_rate slider">
+            </div>
+
+            <!-- contract_value -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-contract_value" class="var-label">contract_value ($)</label>
+                <input type="number" id="input-contract_value" class="var-input" data-var="contract_value" value="50000" step="2500" min="5000" max="250000">
+              </div>
+              <input type="range" class="var-slider" data-var="contract_value" value="50000" step="2500" min="5000" max="250000" aria-label="contract_value slider">
+            </div>
+
+            <!-- campaign_budget -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-campaign_budget" class="var-label">campaign_budget ($)</label>
+                <input type="number" id="input-campaign_budget" class="var-input" data-var="campaign_budget" value="15000" step="1000" min="1000" max="100000">
+              </div>
+              <input type="range" class="var-slider" data-var="campaign_budget" value="15000" step="1000" min="1000" max="100000" aria-label="campaign_budget slider">
+            </div>
+
+            <!-- roas -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-roas" class="var-label">roas (Multiplier)</label>
+                <input type="number" id="input-roas" class="var-input" data-var="roas" value="4.2" step="0.1" min="0.5" max="15.0">
+              </div>
+              <input type="range" class="var-slider" data-var="roas" value="4.2" step="0.1" min="0.5" max="15.0" aria-label="roas slider">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Results, Streams & Audit History -->
+      <section class="results-panel" aria-labelledby="results-title">
+        <h2 id="results-title" class="sr-only">Evaluation Results and Metrics</h2>
+
+        <!-- Result Callout Cards -->
+        <div class="result-cards-wrapper">
+          <div class="result-card primary-card">
+            <span class="result-label">Computed KPI Output</span>
+            <div id="result-display" class="result-value" aria-live="polite">17,000.00</div>
+            <span id="result-meta" class="result-sub">Normalized Value</span>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Raw Float Value</span>
+              <span id="raw-result-display" class="metric-val">17000</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Tokens Parsed</span>
+              <span id="token-count-display" class="metric-val">5 tokens</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Calculation Latency</span>
+              <span id="eval-latency-display" class="metric-val">0.12 ms</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tokenized Parser Stream -->
+        <div class="token-stream-box">
+          <div class="panel-header">
+            <h3>Tokenized Parser Stream</h3>
+          </div>
+          <div id="token-stream" class="token-view" aria-label="Tokens"></div>
+        </div>
+
+        <!-- RPN Output Stream -->
+        <div class="rpn-box">
+          <div class="panel-header">
+            <h3>Reverse Polish Notation (RPN)</h3>
+          </div>
+          <div id="rpn-stream" class="rpn-view" aria-label="RPN Queue"></div>
+        </div>
+
+        <!-- Calculation Audit History Log -->
+        <div class="history-box" aria-labelledby="history-heading">
+          <div class="panel-header">
+            <h3 id="history-heading">Calculation Audit History</h3>
+            <button id="clear-history-btn" class="tertiary-btn" type="button">Clear History</button>
+          </div>
+          <div id="history-list" class="history-list" role="feed" aria-busy="false"></div>
+          <div id="history-empty" class="history-empty">No calculations recorded yet.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./formula-evaluator.js"></script>
+</body>
+</html>
