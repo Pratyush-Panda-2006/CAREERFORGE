@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VortexDEX — Quantitative Formula Evaluator & KPI Engine</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="evaluator-container">
+    <!-- Header Navigation -->
+    <header class="evaluator-header">
+      <div class="header-left">
+        <a href="index.html" class="nav-back">← Back to VortexDEX Exchange</a>
+        <h1 class="evaluator-title">
+          <span>⚡ Formula Evaluator &amp; KPI Engine</span>
+          <span class="title-badge">Quant Terminal</span>
+        </h1>
+        <p class="evaluator-subtitle">
+          Dynamic mathematical expression tokenizer, Shunting-yard RPN compiler, and real-time crypto derivatives calculator.
+        </p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="contrastToggle" class="btn-contrast-toggle" aria-pressed="false">High Contrast: OFF</button>
+      </div>
+    </header>
+
+    <!-- Error Warning Banner -->
+    <div id="errorWarningBanner" class="error-warning-banner hidden" role="alert">
+      <span class="error-icon">⚠</span>
+      <div>
+        <strong>Calculation Error:</strong>
+        <span id="errorMessageText">Evaluation failed.</span>
+      </div>
+    </div>
+
+    <!-- Main Grid: Formula Editor & Variable Workbench -->
+    <div class="main-grid">
+      <!-- Left Column: Formula Editor & Pills -->
+      <section class="card" aria-labelledby="formula-card-title">
+        <div class="card-header">
+          <h2 id="formula-card-title" class="card-title">📐 KPI Mathematical Expression</h2>
+          <div id="syntaxBanner" class="syntax-banner syntax-valid">
+            <span id="syntaxBannerText">✓ Syntax Valid</span>
+          </div>
+        </div>
+
+        <div class="formula-input-wrapper">
+          <label for="formulaInput" class="formula-label">Expression Input</label>
+          <div class="input-action-row">
+            <input
+              type="text"
+              id="formulaInput"
+              class="formula-input"
+              value="(order_size * bid_price) / leverage_ratio"
+              placeholder="e.g. bid_price * (1 - (1 / leverage_ratio))"
+              spellcheck="false"
+              autocomplete="off"
+            />
+            <button type="button" id="evaluateBtn" class="btn-primary">▶ Evaluate</button>
+            <button type="button" id="clearBtn" class="btn-secondary">Clear</button>
+          </div>
+        </div>
+
+        <!-- Quantitative KPI Preset Pills -->
+        <div class="pills-group">
+          <div class="pills-label">Quantitative KPI Presets</div>
+          <div class="pills-row">
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="(order_size * bid_price) / leverage_ratio">
+              ⚡ Initial Margin
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="bid_price * (1 - (1 / leverage_ratio) + liquidation_threshold * 0.01)">
+              🛡️ Liquidation Price
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="order_size * bid_price * slippage_rate">
+              📉 Slippage Cost
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="order_size * bid_price * maker_fee">
+              🏷️ Maker Fee Total
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="abs(ask_price - bid_price)">
+              ↔️ Bid-Ask Spread
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="order_size * bid_price">
+              📊 Notional Value
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="(ask_price - bid_price) * order_size - (order_size * bid_price * maker_fee)">
+              💰 Expected Net PnL
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="round(sqrt(order_size * 100) * log(bid_price), 2)">
+              📈 Volatility Scaled
+            </button>
+          </div>
+        </div>
+
+        <!-- Syntax Helper Snippet Pills -->
+        <div class="pills-group">
+          <div class="pills-label">Functions &amp; Operators Quick-Insert</div>
+          <div class="pills-row">
+            <button type="button" class="pill-btn" data-insert-snippet="sqrt()">sqrt()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="log()">log()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="ln()">ln()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="exp()">exp()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="abs()">abs()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="round(, 2)">round()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="min(, )">min()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="max(, )">max()</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" ^ ">^ (pow)</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" % ">% (mod)</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" * ">*</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" / ">/</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" + ">+</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" - ">-</button>
+          </div>
+        </div>
+
+        <!-- Variable Name Pills -->
+        <div class="pills-group">
+          <div class="pills-label">Insert Parameter Tokens</div>
+          <div class="pills-row">
+            <button type="button" class="pill-btn" data-insert-snippet="order_size">order_size</button>
+            <button type="button" class="pill-btn" data-insert-snippet="bid_price">bid_price</button>
+            <button type="button" class="pill-btn" data-insert-snippet="ask_price">ask_price</button>
+            <button type="button" class="pill-btn" data-insert-snippet="slippage_rate">slippage_rate</button>
+            <button type="button" class="pill-btn" data-insert-snippet="leverage_ratio">leverage_ratio</button>
+            <button type="button" class="pill-btn" data-insert-snippet="liquidation_threshold">liquidation_threshold</button>
+            <button type="button" class="pill-btn" data-insert-snippet="maker_fee">maker_fee</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Quantitative Variables Workbench -->
+      <section class="card" aria-labelledby="vars-card-title">
+        <div class="card-header">
+          <h2 id="vars-card-title" class="card-title">🎛️ Trading Variables Workbench</h2>
+          <label class="auto-calc-wrapper">
+            <input type="checkbox" id="autoCalcToggle" class="toggle-checkbox" checked>
+            <span>Live Auto-Calculate</span>
+          </label>
+        </div>
+
+        <div class="var-list">
+          <!-- order_size -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">order_size</span>
+              <span class="var-desc">Contract size (BTC)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_order_size" class="range-slider" min="0.1" max="50" step="0.1" value="1.5">
+              <input type="number" id="var_order_size" class="var-num-input" min="0.001" max="1000" step="0.1" value="1.5">
+            </div>
+          </div>
+
+          <!-- bid_price -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">bid_price</span>
+              <span class="var-desc">Best bid quote (USD)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_bid_price" class="range-slider" min="1000" max="120000" step="100" value="64250">
+              <input type="number" id="var_bid_price" class="var-num-input" min="1" max="500000" step="1" value="64250">
+            </div>
+          </div>
+
+          <!-- ask_price -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">ask_price</span>
+              <span class="var-desc">Best ask quote (USD)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_ask_price" class="range-slider" min="1000" max="120000" step="100" value="64255.50">
+              <input type="number" id="var_ask_price" class="var-num-input" min="1" max="500000" step="0.5" value="64255.50">
+            </div>
+          </div>
+
+          <!-- leverage_ratio -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">leverage_ratio</span>
+              <span class="var-desc">Account position leverage (x)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_leverage_ratio" class="range-slider" min="1" max="100" step="1" value="10">
+              <input type="number" id="var_leverage_ratio" class="var-num-input" min="1" max="125" step="1" value="10">
+            </div>
+          </div>
+
+          <!-- slippage_rate -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">slippage_rate</span>
+              <span class="var-desc">Expected impact (decimal %)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_slippage_rate" class="range-slider" min="0.0001" max="0.05" step="0.0005" value="0.0015">
+              <input type="number" id="var_slippage_rate" class="var-num-input" min="0" max="1" step="0.0001" value="0.0015">
+            </div>
+          </div>
+
+          <!-- liquidation_threshold -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">liquidation_threshold</span>
+              <span class="var-desc">Maintenance ratio</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_liquidation_threshold" class="range-slider" min="0.1" max="1.0" step="0.05" value="0.85">
+              <input type="number" id="var_liquidation_threshold" class="var-num-input" min="0.01" max="1.0" step="0.01" value="0.85">
+            </div>
+          </div>
+
+          <!-- maker_fee -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">maker_fee</span>
+              <span class="var-desc">Tiered protocol rebate (decimal)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_maker_fee" class="range-slider" min="0.0001" max="0.005" step="0.0001" value="0.0002">
+              <input type="number" id="var_maker_fee" class="var-num-input" min="0" max="0.1" step="0.0001" value="0.0002">
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Calculated Result Callout Cards -->
+    <section class="results-grid" aria-label="Calculation Results">
+      <div class="callout-card callout-card-primary">
+        <span class="callout-label">Evaluated KPI Result</span>
+        <div id="resultFormatted" class="callout-value-main">9,637.5000</div>
+        <span class="callout-meta">Computed via Shunting-yard RPN compiler</span>
+      </div>
+
+      <div class="callout-card">
+        <span class="callout-label">Raw Value</span>
+        <div id="resultRaw" class="callout-value-secondary">9637.5</div>
+        <span class="callout-meta">High-precision numerical</span>
+      </div>
+
+      <div class="callout-card">
+        <span class="callout-label">Compiled RPN Stack</span>
+        <div id="resultRPN" class="callout-rpn">order_size bid_price * leverage_ratio /</div>
+        <span class="callout-meta">Postfix stack execution</span>
+      </div>
+
+      <div class="callout-card">
+        <span class="callout-label">Engine Latency</span>
+        <div id="resultExecTime" class="callout-value-secondary">&lt; 1 ms</div>
+        <span class="callout-meta">Microsecond tokenization</span>
+      </div>
+    </section>
+
+    <!-- Calculation Audit Log & History -->
+    <section class="card history-section" aria-labelledby="history-card-title">
+      <div class="card-header">
+        <h2 id="history-card-title" class="card-title">📜 Calculation History Audit Log</h2>
+        <button type="button" id="clearHistoryBtn" class="btn-secondary">Clear History</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Time</th>
+              <th>Formula Expression</th>
+              <th>Evaluated Result</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
