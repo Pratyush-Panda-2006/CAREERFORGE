@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playback Replay · Cinema Hub</title>
+  <link rel="stylesheet" href="./state-debugger.css">
+  <script type="module" src="./state-debugger.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <a href="./index.html">Cinema Hub</a>
+      <h1>Playback Replay</h1>
+      <p>Run the sample playback, scrub recorded steps, and inspect what changed.</p>
+    </header>
+    <section aria-labelledby="playback-heading" class="panel">
+      <h2 id="playback-heading">Sample playback</h2>
+      <p id="live-state"></p>
+      <div id="playback-actions" class="actions"></div>
+    </section>
+    <section aria-labelledby="timeline-heading" class="panel timeline">
+      <div class="tools">
+        <h2 id="timeline-heading">Replay timeline</h2>
+        <div class="actions">
+          <button type="button" id="export">Export JSON</button>
+          <button type="button" id="new-session">Start new recording</button>
+        </div>
+      </div>
+      <label for="import">Import replay JSON (up to 256 KB)</label>
+      <input type="file" id="import" accept=".json,application/json">
+      <label for="step" id="step-label">Recorded step</label>
+      <input type="range" id="step" min="0" max="0" value="0">
+      <div class="actions">
+        <button type="button" id="previous">Previous</button>
+        <button type="button" id="next">Next</button>
+      </div>
+      <p id="status" role="status"></p>
+    </section>
+    <div class="details">
+      <section aria-labelledby="history-heading" class="panel">
+        <h2 id="history-heading">Action history</h2>
+        <table>
+          <thead><tr><th scope="col">Step</th><th scope="col">Action</th></tr></thead>
+          <tbody id="history"></tbody>
+        </table>
+      </section>
+      <section aria-labelledby="diff-heading" class="panel">
+        <h2 id="diff-heading">Changes from previous step</h2>
+        <ul id="diff"></ul>
+        <h3 id="snapshot-heading">Selected snapshot</h3>
+        <pre id="snapshot" aria-labelledby="snapshot-heading"></pre>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
