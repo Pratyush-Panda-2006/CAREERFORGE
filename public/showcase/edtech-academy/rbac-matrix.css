@@ -1,0 +1,530 @@
+/* ==========================================================================
+   EdTech Academy RBAC Matrix & Policy Guard Stylesheet
+   Modern educational academy theme with indigo and emerald accents
+   ========================================================================== */
+
+:root {
+  --ed-bg-main: #0b1120;
+  --ed-bg-card: rgba(15, 23, 42, 0.85);
+  --ed-bg-card-alt: #1e293b;
+  --ed-border: rgba(99, 102, 241, 0.25);
+  --ed-border-hover: rgba(99, 102, 241, 0.5);
+  --ed-indigo-main: #6366f1;
+  --ed-indigo-dark: #4f46e5;
+  --ed-indigo-glow: rgba(99, 102, 241, 0.35);
+  --ed-emerald-main: #10b981;
+  --ed-emerald-dark: #059669;
+  --ed-emerald-glow: rgba(16, 185, 129, 0.25);
+  --ed-rose-main: #ef4444;
+  --ed-rose-glow: rgba(239, 68, 68, 0.25);
+  --ed-amber-main: #f59e0b;
+  --ed-text-main: #f8fafc;
+  --ed-text-muted: #94a3b8;
+  --ed-radius: 12px;
+  --ed-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--ed-bg-main);
+  color: var(--ed-text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ed-page-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  box-sizing: border-box;
+}
+
+/* Header & Banner */
+.ed-hero-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.ed-academy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid var(--ed-border);
+  color: #a5b4fc;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.ed-hero-header h1 {
+  margin: 0 0 10px;
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 80%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ed-hero-header p {
+  margin: 0;
+  color: var(--ed-text-muted);
+  font-size: 1.05rem;
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Stats Bar */
+.ed-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.ed-stat-card {
+  background: var(--ed-bg-card);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: var(--ed-transition);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ed-stat-card:hover {
+  border-color: var(--ed-indigo-main);
+  box-shadow: 0 6px 20px var(--ed-indigo-glow);
+  transform: translateY(-2px);
+}
+
+.ed-stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ed-text-muted);
+  font-weight: 600;
+}
+
+.ed-stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+/* Sections */
+.ed-matrix-section,
+.ed-tester-section,
+.ed-audit-section {
+  background: var(--ed-bg-card);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius);
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.ed-section-header {
+  margin-bottom: 20px;
+}
+
+.ed-section-header h3 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.ed-section-header p {
+  margin: 0;
+  color: var(--ed-text-muted);
+  font-size: 0.92rem;
+}
+
+/* Matrix Table */
+.ed-table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.ed-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.ed-matrix-table thead th {
+  background: rgba(30, 41, 59, 0.95);
+  color: #e2e8f0;
+  padding: 14px 16px;
+  font-weight: 700;
+  border-bottom: 2px solid var(--ed-border);
+  position: sticky;
+  top: 0;
+}
+
+.ed-matrix-table thead th:first-child {
+  min-width: 200px;
+}
+
+.ed-matrix-table tbody tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  transition: background 0.15s ease;
+}
+
+.ed-matrix-table tbody tr:hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.ed-matrix-table tbody td {
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+
+.ed-perm-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.ed-cell-empty {
+  color: #475569;
+  font-weight: 600;
+  padding-left: 6px;
+}
+
+/* Badges */
+.ed-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.ed-badge-direct {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.ed-badge-inherited {
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+.ed-badge-wildcard {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+/* Form Controls & Tester */
+.ed-tester-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  align-items: flex-end;
+}
+
+.ed-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ed-form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ed-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ed-select,
+.ed-input {
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: var(--ed-transition);
+}
+
+.ed-select:focus,
+.ed-input:focus {
+  border-color: var(--ed-indigo-main);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+.ed-btn-wrap {
+  align-self: flex-end;
+}
+
+.ed-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: var(--ed-transition);
+}
+
+.ed-btn-primary {
+  background: linear-gradient(135deg, var(--ed-indigo-main), var(--ed-indigo-dark));
+  color: #ffffff;
+  box-shadow: 0 4px 14px var(--ed-indigo-glow);
+}
+
+.ed-btn-primary:hover {
+  background: linear-gradient(135deg, #7c3aed, var(--ed-indigo-dark));
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4);
+  transform: translateY(-1px);
+}
+
+.ed-btn-secondary {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.ed-btn-secondary:hover {
+  background: rgba(16, 185, 129, 0.3);
+  border-color: var(--ed-emerald-main);
+}
+
+.ed-btn-outline {
+  background: transparent;
+  color: var(--ed-text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.ed-btn-outline:hover {
+  color: #ffffff;
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Evaluation Result Card */
+.ed-eval-result-card {
+  margin-top: 24px;
+  border-radius: 10px;
+  padding: 18px 20px;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ed-eval-pass {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 20px var(--ed-emerald-glow);
+}
+
+.ed-eval-deny {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 20px var(--ed-rose-glow);
+}
+
+.ed-eval-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.ed-eval-status-badge {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.status-pass {
+  background: #059669;
+  color: #ffffff;
+}
+
+.status-deny {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.ed-eval-time {
+  font-size: 0.8rem;
+  color: var(--ed-text-muted);
+}
+
+.ed-eval-reason {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #f8fafc;
+}
+
+.ed-eval-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: var(--ed-text-muted);
+}
+
+.ed-eval-meta code {
+  color: #a5b4fc;
+}
+
+/* Audit Stream */
+.ed-audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ed-audit-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.ed-audit-stream-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ed-audit-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  transition: var(--ed-transition);
+}
+
+.ed-audit-row:hover {
+  background: rgba(30, 41, 59, 0.7);
+}
+
+.ed-audit-tag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.tag-pass {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.tag-deny {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.ed-audit-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ed-audit-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+
+.ed-audit-user {
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.ed-audit-action code {
+  color: #38bdf8;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.ed-audit-resource {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.ed-audit-timestamp {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.ed-audit-reason {
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.ed-audit-empty {
+  padding: 32px;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ed-page-wrapper {
+    padding: 24px 16px 60px;
+  }
+  .ed-hero-header h1 {
+    font-size: 1.8rem;
+  }
+  .ed-tester-grid {
+    grid-template-columns: 1fr;
+  }
+  .ed-audit-timestamp {
+    margin-left: 0;
+  }
+}
