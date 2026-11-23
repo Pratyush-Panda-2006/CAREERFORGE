@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxury Realms — Sovereign Estate Formula Evaluator & Dynamic KPI Calculator</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="evaluator-app-container">
+    <!-- Top Navigation / Breadcrumbs -->
+    <nav class="top-nav" aria-label="Breadcrumb navigation">
+      <a href="index.html" class="nav-back-link">← Return to Luxury Realms Concierge</a>
+      <div class="nav-status-group">
+        <div class="nav-status-badge">
+          <span class="status-indicator"></span>
+          Dynamic KPI Engine Active
+        </div>
+        <button type="button" id="contrastToggle" class="btn-contrast-toggle" aria-pressed="false">High Contrast: OFF</button>
+      </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="evaluator-header">
+      <div class="badge-tag">Sovereign Estate Financial Modeling</div>
+      <h1 class="evaluator-title">Mathematical Expression Parser &amp; KPI Formula Calculator</h1>
+      <p class="evaluator-subtitle">
+        High-precision Shunting-yard RPN evaluation engine modeled for ultra-high-net-worth estate stewardship,
+        charter yield optimization, sovereign holding cost ratios, and bespoke private asset prestige scoring.
+      </p>
+    </header>
+
+    <!-- Error Warning Banner -->
+    <div id="errorWarningBanner" class="error-warning-banner hidden" role="alert" aria-live="assertive">
+      <span class="error-icon" aria-hidden="true">⚠</span>
+      <div class="error-content">
+        <strong>Calculation Error:</strong>
+        <span id="errorMessageText">Evaluation failed.</span>
+      </div>
+    </div>
+
+    <!-- Main Grid: Formula Editor & Variable Workbench -->
+    <main class="main-grid">
+      <!-- Left Column: Formula Editor & Presets -->
+      <section class="card formula-section" aria-labelledby="formula-editor-title">
+        <div class="card-header">
+          <div class="header-title-wrap">
+            <span class="card-icon" aria-hidden="true">📐</span>
+            <h2 id="formula-editor-title" class="card-title">Mathematical Formula Editor</h2>
+          </div>
+          <div id="syntaxBadge" class="syntax-badge syntax-valid" aria-live="polite">
+            <span id="syntaxBadgeText">✓ Syntax Valid</span>
+          </div>
+        </div>
+
+        <div class="formula-input-wrapper">
+          <div class="input-header-row">
+            <label for="formulaInput" class="formula-label">Expression Input (Infix Mathematical Notation)</label>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="autoCalcToggle" checked />
+              <label for="autoCalcToggle" class="toggle-label">Auto Calculate</label>
+            </div>
+          </div>
+          <div class="input-action-row">
+            <input
+              type="text"
+              id="formulaInput"
+              class="formula-input"
+              value="(estate_listing_price * estate_tax_rate) + concierge_service_annual + private_security_annual + annual_maintenance_reserve"
+              placeholder="e.g. (estate_listing_price * estate_tax_rate) + annual_maintenance_reserve"
+              spellcheck="false"
+              autocomplete="off"
+              aria-label="Mathematical expression input"
+            />
+            <button type="button" id="evaluateBtn" class="btn-primary" aria-label="Evaluate Expression">▶ Evaluate</button>
+            <button type="button" id="clearBtn" class="btn-secondary" aria-label="Clear Expression">Clear</button>
+          </div>
+        </div>
+
+        <!-- 6 KPI Presets -->
+        <div class="pills-group" aria-labelledby="presets-label">
+          <div id="presets-label" class="pills-label">Luxury KPI Formula Presets</div>
+          <div class="pills-row">
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="(estate_listing_price * estate_tax_rate) + concierge_service_annual + private_security_annual + annual_maintenance_reserve"
+              title="Comprehensive annual holding cost covering estate taxes, concierge, security, and maintenance reserves."
+            >
+              🏰 Total Annual Holding Cost
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="seasonal_charter_yield - ((estate_listing_price * estate_tax_rate) + concierge_service_annual + private_security_annual + annual_maintenance_reserve)"
+              title="Net seasonal charter revenue remaining after deducting total annual estate holding expenses."
+            >
+              🛥️ Net Charter Cashflow
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="(((estate_listing_price * estate_tax_rate) + concierge_service_annual + private_security_annual + annual_maintenance_reserve) / estate_listing_price) * 100"
+              title="Percentage ratio of total annual carrying expenditure relative to asset listing valuation."
+            >
+              📊 Luxury Holding Cost Ratio (%)
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="(seasonal_charter_yield / estate_listing_price) * 100"
+              title="Gross annual rental/charter yield percentage return generated against estate capital value."
+            >
+              📈 Charter Yield Return (%)
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="round((luxury_amenity_score * 10) + (seasonal_charter_yield / 50000))"
+              title="Composite luxury estate rating derived from bespoke amenity scoring and charter liquidity performance."
+            >
+              👑 Asset Prestige Index
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="annual_maintenance_reserve / (concierge_service_annual + private_security_annual)"
+              title="Solvency buffer measuring capital reserve depth against core operational services overhead."
+            >
+              🛡️ Reserve Coverage Factor
+            </button>
+          </div>
+        </div>
+
+        <!-- Syntax Helper Snippet Pills -->
+        <div class="pills-group" aria-labelledby="syntax-helpers-label">
+          <div id="syntax-helpers-label" class="pills-label">Mathematical Functions &amp; Operators</div>
+          <div class="pills-row">
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="sqrt()">sqrt(x)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="pow(,)">pow(x, y)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="log()">log10(x)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="ln()">ln(x)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="exp()">exp(x)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="abs()">abs(x)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="min(,)">min(a, b)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="max(,)">max(a, b)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="round()">round(x)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="floor()">floor(x)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet="ceil()">ceil(x)</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet=" ^ ">x ^ y</button>
+            <button type="button" class="pill-btn pill-snippet" data-insert-snippet=" % ">x % y</button>
+          </div>
+        </div>
+
+        <!-- RPN Debug View -->
+        <div class="rpn-debug-panel">
+          <span class="rpn-label">Compiled Reverse Polish Notation (RPN):</span>
+          <code id="resultRPN" class="rpn-code">None</code>
+        </div>
+      </section>
+
+      <!-- Right Column: Variable Tuning Workbench -->
+      <section class="card workbench-section" aria-labelledby="workbench-title">
+        <div class="card-header">
+          <div class="header-title-wrap">
+            <span class="card-icon" aria-hidden="true">⚙️</span>
+            <h2 id="workbench-title" class="card-title">Estate Variable Workbench</h2>
+          </div>
+          <button type="button" id="resetVarsBtn" class="btn-text-gold" aria-label="Reset variables to default values">Reset Defaults</button>
+        </div>
+        <p class="section-desc">Tune sovereign estate valuation parameters to observe dynamic KPI responsiveness in real time.</p>
+
+        <div class="variables-grid">
+          <!-- 1. estate_listing_price -->
+          <div class="var-card">
+            <div class="var-header">
+              <label for="var_estate_listing_price" class="var-title">
+                <span class="var-icon">🏷️</span>
+                <span>estate_listing_price</span>
+              </label>
+              <div class="input-with-unit">
+                <span class="currency-symbol">$</span>
+                <input type="number" id="var_estate_listing_price" class="num-input" value="8500000" step="50000" min="500000" max="100000000" />
+              </div>
+            </div>
+            <input type="range" id="slider_estate_listing_price" class="slider-input" min="1000000" max="50000000" step="100000" value="8500000" aria-label="Estate Listing Price Slider" />
+            <div class="slider-range-labels">
+              <span>$1.0M</span>
+              <span>$50.0M</span>
+            </div>
+          </div>
+
+          <!-- 2. concierge_service_annual -->
+          <div class="var-card">
+            <div class="var-header">
+              <label for="var_concierge_service_annual" class="var-title">
+                <span class="var-icon">🛎️</span>
+                <span>concierge_service_annual</span>
+              </label>
+              <div class="input-with-unit">
+                <span class="currency-symbol">$</span>
+                <input type="number" id="var_concierge_service_annual" class="num-input" value="45000" step="1000" min="5000" max="500000" />
+              </div>
+            </div>
+            <input type="range" id="slider_concierge_service_annual" class="slider-input" min="10000" max="200000" step="1000" value="45000" aria-label="Concierge Service Annual Slider" />
+            <div class="slider-range-labels">
+              <span>$10k</span>
+              <span>$200k</span>
+            </div>
+          </div>
+
+          <!-- 3. private_security_annual -->
+          <div class="var-card">
+            <div class="var-header">
+              <label for="var_private_security_annual" class="var-title">
+                <span class="var-icon">🛡️</span>
+                <span>private_security_annual</span>
+              </label>
+              <div class="input-with-unit">
+                <span class="currency-symbol">$</span>
+                <input type="number" id="var_private_security_annual" class="num-input" value="60000" step="1000" min="10000" max="500000" />
+              </div>
+            </div>
+            <input type="range" id="slider_private_security_annual" class="slider-input" min="10000" max="250000" step="1000" value="60000" aria-label="Private Security Annual Slider" />
+            <div class="slider-range-labels">
+              <span>$10k</span>
+              <span>$250k</span>
+            </div>
+          </div>
+
+          <!-- 4. estate_tax_rate -->
+          <div class="var-card">
+            <div class="var-header">
+              <label for="var_estate_tax_rate" class="var-title">
+                <span class="var-icon">📜</span>
+                <span>estate_tax_rate</span>
+              </label>
+              <div class="input-with-unit">
+                <input type="number" id="var_estate_tax_rate" class="num-input" value="0.018" step="0.001" min="0.001" max="0.10" />
+                <span class="rate-symbol">(1.8%)</span>
+              </div>
+            </div>
+            <input type="range" id="slider_estate_tax_rate" class="slider-input" min="0.005" max="0.05" step="0.001" value="0.018" aria-label="Estate Tax Rate Slider" />
+            <div class="slider-range-labels">
+              <span>0.5%</span>
+              <span>5.0%</span>
+            </div>
+          </div>
+
+          <!-- 5. seasonal_charter_yield -->
+          <div class="var-card">
+            <div class="var-header">
+              <label for="var_seasonal_charter_yield" class="var-title">
+                <span class="var-icon">🛥️</span>
+                <span>seasonal_charter_yield</span>
+              </label>
+              <div class="input-with-unit">
+                <span class="currency-symbol">$</span>
+                <input type="number" id="var_seasonal_charter_yield" class="num-input" value="420000" step="5000" min="0" max="5000000" />
+              </div>
+            </div>
+            <input type="range" id="slider_seasonal_charter_yield" class="slider-input" min="0" max="2000000" step="10000" value="420000" aria-label="Seasonal Charter Yield Slider" />
+            <div class="slider-range-labels">
+              <span>$0</span>
+              <span>$2.0M</span>
+            </div>
+          </div>
+
+          <!-- 6. annual_maintenance_reserve -->
+          <div class="var-card">
+            <div class="var-header">
+              <label for="var_annual_maintenance_reserve" class="var-title">
+                <span class="var-icon">🔧</span>
+                <span>annual_maintenance_reserve</span>
+              </label>
+              <div class="input-with-unit">
+                <span class="currency-symbol">$</span>
+                <input type="number" id="var_annual_maintenance_reserve" class="num-input" value="85000" step="2500" min="5000" max="1000000" />
+              </div>
+            </div>
+            <input type="range" id="slider_annual_maintenance_reserve" class="slider-input" min="10000" max="500000" step="5000" value="85000" aria-label="Annual Maintenance Reserve Slider" />
+            <div class="slider-range-labels">
+              <span>$10k</span>
+              <span>$500k</span>
+            </div>
+          </div>
+
+          <!-- 7. luxury_amenity_score -->
+          <div class="var-card">
+            <div class="var-header">
+              <label for="var_luxury_amenity_score" class="var-title">
+                <span class="var-icon">⭐</span>
+                <span>luxury_amenity_score</span>
+              </label>
+              <div class="input-with-unit">
+                <input type="number" id="var_luxury_amenity_score" class="num-input" value="9.4" step="0.1" min="1.0" max="10.0" />
+                <span class="rate-symbol">/ 10</span>
+              </div>
+            </div>
+            <input type="range" id="slider_luxury_amenity_score" class="slider-input" min="1.0" max="10.0" step="0.1" value="9.4" aria-label="Luxury Amenity Score Slider" />
+            <div class="slider-range-labels">
+              <span>1.0</span>
+              <span>10.0</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Result Callout Cards -->
+    <section class="results-grid" aria-label="Evaluation metrics and results">
+      <div class="result-card primary-result">
+        <span class="result-label">Formatted Result</span>
+        <div id="resultFormatted" class="result-value" aria-live="polite">343,000.00</div>
+        <span class="result-subtext">Precision stabilized numerical outcome</span>
+      </div>
+
+      <div class="result-card">
+        <span class="result-label">Raw Exact Value</span>
+        <div id="resultRaw" class="result-value-sub" aria-live="polite">343000</div>
+        <span class="result-subtext">IEEE 754 floating point magnitude</span>
+      </div>
+
+      <div class="result-card">
+        <span class="result-label">Token Count</span>
+        <div id="resultTokens" class="result-value-sub" aria-live="polite">15 tokens</div>
+        <span class="result-subtext">Lexical tokens processed</span>
+      </div>
+
+      <div class="result-card">
+        <span class="result-label">Evaluation Latency</span>
+        <div id="resultExecTime" class="result-value-sub" aria-live="polite">&lt; 1 ms</div>
+        <span class="result-subtext">Compiler &amp; execution execution time</span>
+      </div>
+    </section>
+
+    <!-- Calculation Audit History Log -->
+    <section class="card history-section" aria-labelledby="history-title">
+      <div class="card-header">
+        <div class="header-title-wrap">
+          <span class="card-icon" aria-hidden="true">📜</span>
+          <h2 id="history-title" class="card-title">Calculation Audit History Log</h2>
+        </div>
+        <button type="button" id="clearHistoryBtn" class="btn-secondary" aria-label="Clear calculation history">Clear History</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th scope="col">Audit ID</th>
+              <th scope="col">Timestamp</th>
+              <th scope="col">Expression</th>
+              <th scope="col">Computed Result</th>
+              <th scope="col">Latency</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="6" class="history-empty">No luxury KPI calculations recorded yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
