@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Commerce Store • Mathematical Expression Parser & Dynamic KPI Calculator</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+</head>
+<body>
+  <div class="evaluator-container">
+    <header class="evaluator-header">
+      <div class="header-top">
+        <a href="index.html" class="back-link" aria-label="Return to store homepage">← Back to Store</a>
+        <button id="high-contrast-toggle" class="contrast-btn" type="button" aria-pressed="false" aria-label="Toggle WCAG AAA High Contrast Mode">High Contrast: Off</button>
+      </div>
+      <div class="header-badge">E-COMMERCE FINANCIAL & METRICS MODELING</div>
+      <h1>Dynamic KPI Formula Parser & Calculator</h1>
+      <p>In-browser safe mathematical expression parser featuring BODMAS/PEMDAS Shunting-Yard compilation, dynamic variable tuning, and financial KPI analytics.</p>
+    </header>
+
+    <!-- Error Banner -->
+    <div id="error-banner" class="error-banner hidden" role="alert"></div>
+
+    <!-- Presets Section -->
+    <section class="card preset-section" aria-labelledby="preset-heading">
+      <div class="card-header">
+        <h2 id="preset-heading" class="card-title">E-Commerce KPI Presets</h2>
+        <span class="badge">6 Financial Formulas</span>
+      </div>
+      <div class="preset-grid">
+        <button type="button" class="preset-btn active" data-preset="order_total">
+          <span class="preset-name">Order Total</span>
+          <span class="preset-formula">(product_price * quantity * (1 - discount_rate) * (1 + tax_rate)) + shipping_fee</span>
+        </button>
+        <button type="button" class="preset-btn" data-preset="clv">
+          <span class="preset-name">Customer Lifetime Value (CLV)</span>
+          <span class="preset-formula">(average_order_value * gross_margin_rate) / churn_rate</span>
+        </button>
+        <button type="button" class="preset-btn" data-preset="breakeven_roas">
+          <span class="preset-name">Break-Even ROAS</span>
+          <span class="preset-formula">average_order_value / customer_acquisition_cost</span>
+        </button>
+        <button type="button" class="preset-btn" data-preset="gross_profit">
+          <span class="preset-name">Gross Profit</span>
+          <span class="preset-formula">(product_price * quantity * (1 - discount_rate)) * gross_margin_rate</span>
+        </button>
+        <button type="button" class="preset-btn" data-preset="revenue_per_visitor">
+          <span class="preset-name">Revenue Per Visitor</span>
+          <span class="preset-formula">conversion_rate * average_order_value</span>
+        </button>
+        <button type="button" class="preset-btn" data-preset="discount_savings">
+          <span class="preset-name">Discount Savings</span>
+          <span class="preset-formula">product_price * quantity * discount_rate</span>
+        </button>
+      </div>
+      <div id="preset-description" class="preset-description">
+        Order Total: Calculates the final checkout total including product price, quantity, discounts, sales tax, and shipping fee.
+      </div>
+    </section>
+
+    <!-- Formula Editor & Validation -->
+    <section class="card editor-section" aria-labelledby="editor-heading">
+      <div class="card-header">
+        <h2 id="editor-heading" class="card-title">Formula Workbench</h2>
+        <span id="syntax-badge" class="syntax-badge valid">Syntax Valid</span>
+      </div>
+
+      <div class="formula-input-wrapper">
+        <label for="formula-input" class="sr-only">Mathematical Formula Expression</label>
+        <input
+          type="text"
+          id="formula-input"
+          class="formula-input"
+          value="(product_price * quantity * (1 - discount_rate) * (1 + tax_rate)) + shipping_fee"
+          placeholder="Enter formula e.g. (average_order_value * gross_margin_rate) / churn_rate"
+          spellcheck="false"
+        >
+        <div class="editor-actions">
+          <button id="evaluate-btn" class="btn-primary" type="button">Evaluate</button>
+          <button id="clear-btn" class="btn-secondary" type="button">Clear</button>
+        </div>
+      </div>
+
+      <!-- Quick Token Insertion Helpers -->
+      <div class="token-helper-group">
+        <span class="helper-label">Insert Variables:</span>
+        <div class="token-pills-row">
+          <button type="button" class="token-pill var-pill" data-insert="product_price">product_price</button>
+          <button type="button" class="token-pill var-pill" data-insert="quantity">quantity</button>
+          <button type="button" class="token-pill var-pill" data-insert="discount_rate">discount_rate</button>
+          <button type="button" class="token-pill var-pill" data-insert="tax_rate">tax_rate</button>
+          <button type="button" class="token-pill var-pill" data-insert="shipping_fee">shipping_fee</button>
+          <button type="button" class="token-pill var-pill" data-insert="customer_acquisition_cost">customer_acquisition_cost</button>
+          <button type="button" class="token-pill var-pill" data-insert="average_order_value">average_order_value</button>
+          <button type="button" class="token-pill var-pill" data-insert="conversion_rate">conversion_rate</button>
+          <button type="button" class="token-pill var-pill" data-insert="gross_margin_rate">gross_margin_rate</button>
+          <button type="button" class="token-pill var-pill" data-insert="churn_rate">churn_rate</button>
+        </div>
+      </div>
+
+      <div class="token-helper-group">
+        <span class="helper-label">Insert Functions & Operators:</span>
+        <div class="token-pills-row">
+          <button type="button" class="token-pill op-pill" data-insert=" + ">+</button>
+          <button type="button" class="token-pill op-pill" data-insert=" - ">-</button>
+          <button type="button" class="token-pill op-pill" data-insert=" * ">*</button>
+          <button type="button" class="token-pill op-pill" data-insert=" / ">/</button>
+          <button type="button" class="token-pill op-pill" data-insert=" ^ ">^</button>
+          <button type="button" class="token-pill op-pill" data-insert=" % ">%</button>
+          <button type="button" class="token-pill op-pill" data-insert="(">(</button>
+          <button type="button" class="token-pill op-pill" data-insert=")">)</button>
+          <button type="button" class="token-pill fn-pill" data-insert="sqrt(">sqrt(x)</button>
+          <button type="button" class="token-pill fn-pill" data-insert="pow(">pow(x,y)</button>
+          <button type="button" class="token-pill fn-pill" data-insert="min(">min(a,b)</button>
+          <button type="button" class="token-pill fn-pill" data-insert="max(">max(a,b)</button>
+          <button type="button" class="token-pill fn-pill" data-insert="round(">round(x)</button>
+          <button type="button" class="token-pill fn-pill" data-insert="abs(">abs(x)</button>
+          <button type="button" class="token-pill fn-pill" data-insert="log(">log(x)</button>
+          <button type="button" class="token-pill fn-pill" data-insert="ln(">ln(x)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result Callout Cards -->
+    <section class="results-grid" aria-label="Calculation Results">
+      <div class="result-card primary-card">
+        <span class="callout-label">Formatted Result</span>
+        <div id="result-formatted" class="callout-val">143.66</div>
+        <span class="callout-sub">Stabilized Decimal Value</span>
+      </div>
+      <div class="result-card">
+        <span class="callout-label">Raw Evaluation</span>
+        <div id="result-raw" class="callout-val raw-mono">143.66246</div>
+        <span class="callout-sub">Full Floating-Point Precision</span>
+      </div>
+      <div class="result-card">
+        <span class="callout-label">Parsed Token Count</span>
+        <div id="result-tokens" class="callout-val">23 Tokens</div>
+        <span class="callout-sub">Lexed Infix Elements</span>
+      </div>
+      <div class="result-card">
+        <span class="callout-label">Execution Latency</span>
+        <div id="result-latency" class="callout-val">0.12 ms</div>
+        <span class="callout-sub">Shunting-Yard & Stack Evaluation</span>
+      </div>
+    </section>
+
+    <!-- Variable Tuning Workbench -->
+    <section class="card workbench-section" aria-labelledby="workbench-heading">
+      <div class="card-header">
+        <div>
+          <h2 id="workbench-heading" class="card-title">Variable Parameter Workbench</h2>
+          <p class="card-subtitle">Adjust live sliders or type exact values to recalculate KPIs dynamically.</p>
+        </div>
+        <button id="reset-vars-btn" class="btn-secondary" type="button">Reset to Defaults</button>
+      </div>
+
+      <div class="variables-grid">
+        <!-- Variable 1: product_price -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">product_price ($)</span>
+            <input type="number" class="var-number-input" data-variable="product_price" value="49.99" min="0" max="5000" step="0.01">
+          </div>
+          <input type="range" class="var-slider" data-variable="product_price" value="49.99" min="0" max="500" step="0.5">
+          <div class="slider-limits"><span>$0</span><span>$500</span></div>
+        </div>
+
+        <!-- Variable 2: discount_rate -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">discount_rate (0-1)</span>
+            <input type="number" class="var-number-input" data-variable="discount_rate" value="0.15" min="0" max="1" step="0.01">
+          </div>
+          <input type="range" class="var-slider" data-variable="discount_rate" value="0.15" min="0" max="1" step="0.01">
+          <div class="slider-limits"><span>0%</span><span>100%</span></div>
+        </div>
+
+        <!-- Variable 3: tax_rate -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">tax_rate (0-0.3)</span>
+            <input type="number" class="var-number-input" data-variable="tax_rate" value="0.08" min="0" max="0.5" step="0.005">
+          </div>
+          <input type="range" class="var-slider" data-variable="tax_rate" value="0.08" min="0" max="0.3" step="0.005">
+          <div class="slider-limits"><span>0%</span><span>30%</span></div>
+        </div>
+
+        <!-- Variable 4: shipping_fee -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">shipping_fee ($)</span>
+            <input type="number" class="var-number-input" data-variable="shipping_fee" value="5.99" min="0" max="100" step="0.1">
+          </div>
+          <input type="range" class="var-slider" data-variable="shipping_fee" value="5.99" min="0" max="50" step="0.5">
+          <div class="slider-limits"><span>$0</span><span>$50</span></div>
+        </div>
+
+        <!-- Variable 5: quantity -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">quantity (units)</span>
+            <input type="number" class="var-number-input" data-variable="quantity" value="3" min="1" max="1000" step="1">
+          </div>
+          <input type="range" class="var-slider" data-variable="quantity" value="3" min="1" max="50" step="1">
+          <div class="slider-limits"><span>1</span><span>50</span></div>
+        </div>
+
+        <!-- Variable 6: customer_acquisition_cost -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">customer_acquisition_cost ($)</span>
+            <input type="number" class="var-number-input" data-variable="customer_acquisition_cost" value="18.50" min="0.1" max="1000" step="0.5">
+          </div>
+          <input type="range" class="var-slider" data-variable="customer_acquisition_cost" value="18.50" min="1" max="100" step="0.5">
+          <div class="slider-limits"><span>$1</span><span>$100</span></div>
+        </div>
+
+        <!-- Variable 7: average_order_value -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">average_order_value ($)</span>
+            <input type="number" class="var-number-input" data-variable="average_order_value" value="85.00" min="1" max="5000" step="1">
+          </div>
+          <input type="range" class="var-slider" data-variable="average_order_value" value="85.00" min="10" max="500" step="5">
+          <div class="slider-limits"><span>$10</span><span>$500</span></div>
+        </div>
+
+        <!-- Variable 8: conversion_rate -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">conversion_rate (0-0.2)</span>
+            <input type="number" class="var-number-input" data-variable="conversion_rate" value="0.035" min="0.001" max="1" step="0.001">
+          </div>
+          <input type="range" class="var-slider" data-variable="conversion_rate" value="0.035" min="0.005" max="0.2" step="0.001">
+          <div class="slider-limits"><span>0.5%</span><span>20%</span></div>
+        </div>
+
+        <!-- Variable 9: gross_margin_rate -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">gross_margin_rate (0-1)</span>
+            <input type="number" class="var-number-input" data-variable="gross_margin_rate" value="0.42" min="0.01" max="1" step="0.01">
+          </div>
+          <input type="range" class="var-slider" data-variable="gross_margin_rate" value="0.42" min="0.05" max="0.9" step="0.01">
+          <div class="slider-limits"><span>5%</span><span>90%</span></div>
+        </div>
+
+        <!-- Variable 10: churn_rate -->
+        <div class="var-card">
+          <div class="var-header">
+            <span class="var-name">churn_rate (0-0.5)</span>
+            <input type="number" class="var-number-input" data-variable="churn_rate" value="0.05" min="0.001" max="1" step="0.005">
+          </div>
+          <input type="range" class="var-slider" data-variable="churn_rate" value="0.05" min="0.01" max="0.3" step="0.005">
+          <div class="slider-limits"><span>1%</span><span>30%</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Calculation Audit History Log -->
+    <section class="card history-section" aria-labelledby="history-heading">
+      <div class="card-header">
+        <div>
+          <h2 id="history-heading" class="card-title">Calculation Audit History</h2>
+          <p class="card-subtitle">Real-time log of evaluated equations with latency timestamps and recall capabilities.</p>
+        </div>
+        <button id="clear-history-btn" class="btn-danger-outline" type="button">Clear History</button>
+      </div>
+
+      <div class="history-table-container">
+        <div class="history-header-row">
+          <div class="history-col-time">Time</div>
+          <div class="history-col-expr">Expression</div>
+          <div class="history-col-val">Value</div>
+          <div class="history-col-latency">Latency</div>
+          <div class="history-col-act">Action</div>
+        </div>
+        <div id="history-list" class="history-list">
+          <div class="history-empty">No calculations recorded in audit history.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="evaluator-footer">
+      <span>E-Commerce Engine • In-Memory Shunting-Yard Mathematical Parser • WCAG AAA Accessible</span>
+    </footer>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
