@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Hypercar - Collaborative Vector Whiteboard &amp; Sketchpad</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+</head>
+<body>
+  <div class="whiteboard-container">
+    <!-- Floating Toolbar Dock -->
+    <header class="toolbar-dock" role="toolbar" aria-label="Hypercar Vector Sketchpad Toolbar">
+      <div class="dock-brand">
+        <span class="dock-badge">HYPERCAR</span>
+        <span class="dock-title">Vector Sketchpad</span>
+      </div>
+
+      <!-- Drawing Tools Palette -->
+      <div class="tool-group" role="radiogroup" aria-label="Drawing Tools">
+        <button type="button" class="tool-btn active" data-tool="pen" title="Freehand Pen" aria-label="Freehand Pen">
+          <span>✏️</span> Pen
+        </button>
+        <button type="button" class="tool-btn" data-tool="eraser" title="Eraser" aria-label="Eraser">
+          <span>🧹</span> Eraser
+        </button>
+        <button type="button" class="tool-btn" data-tool="line" title="Straight Vector Line" aria-label="Straight Line">
+          <span>📏</span> Line
+        </button>
+        <button type="button" class="tool-btn" data-tool="rectangle" title="Rectangle Box" aria-label="Rectangle Box">
+          <span>⬛</span> Rect
+        </button>
+      </div>
+
+      <!-- Color Picker Chips -->
+      <div class="color-picker-group" aria-label="Brush Colors">
+        <button type="button" class="color-swatch active" data-color="#ef4444" style="background-color: #ef4444;" title="Apex Red" aria-label="Red"></button>
+        <button type="button" class="color-swatch" data-color="#38bdf8" style="background-color: #38bdf8;" title="Aero Cyan" aria-label="Cyan"></button>
+        <button type="button" class="color-swatch" data-color="#22c55e" style="background-color: #22c55e;" title="Track Green" aria-label="Green"></button>
+        <button type="button" class="color-swatch" data-color="#eab308" style="background-color: #eab308;" title="Telemetry Gold" aria-label="Yellow"></button>
+        <button type="button" class="color-swatch" data-color="#ffffff" style="background-color: #ffffff;" title="Monochrome White" aria-label="White"></button>
+        <input type="color" id="customColorPicker" class="custom-color-input" value="#ef4444" title="Custom Color Picker" aria-label="Custom Color">
+      </div>
+
+      <!-- Stroke Width -->
+      <div class="stroke-width-group">
+        <label for="strokeWidthSlider">Width:</label>
+        <input type="range" id="strokeWidthSlider" min="1" max="32" value="4" aria-label="Stroke Width Slider">
+        <span id="strokeWidthVal">4px</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-group">
+        <button type="button" class="action-btn" id="undoBtn" title="Undo Last Stroke" aria-label="Undo">↶ Undo</button>
+        <button type="button" class="action-btn" id="redoBtn" title="Redo Stroke" aria-label="Redo">↷ Redo</button>
+        <button type="button" class="action-btn" id="clearBtn" title="Clear Canvas" aria-label="Clear Canvas">🗑️ Clear</button>
+        <button type="button" class="action-btn export-btn" id="exportSvgBtn" title="Export Vector SVG" aria-label="Export Vector SVG">📥 Export SVG</button>
+      </div>
+    </header>
+
+    <!-- Canvas Area -->
+    <main class="canvas-wrapper">
+      <canvas id="whiteboardCanvas" width="1600" height="900"></canvas>
+    </main>
+  </div>
+
+  <script type="module" src="canvas-whiteboard.js"></script>
+</body>
+</html>
