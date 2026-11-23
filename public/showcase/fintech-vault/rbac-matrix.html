@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fintech Vault - Role-Based Access Control (RBAC) Permission Matrix & Policy Guard</title>
+  <link rel="stylesheet" href="rbac-matrix.css">
+</head>
+<body>
+  <div class="rbac-container">
+    <header class="rbac-header">
+      <div class="badge-tag">Fintech Vault Authorization Engine</div>
+      <h1>Role-Based Access Control Matrix & Policy Guard</h1>
+      <p>High-security permission evaluation engine utilizing bitmask calculations, transitive role inheritance hierarchies, and wild-card action matching for institutional fintech vault operations.</p>
+    </header>
+
+    <div class="rbac-grid">
+      <!-- Active Simulation & Action Policy Guard Card -->
+      <section class="rbac-card">
+        <div class="card-header-row">
+          <div>
+            <h2>Access Policy Evaluation & Simulator</h2>
+            <div class="card-subtext">Evaluate real-time access grants and inspect role bitmask states</div>
+          </div>
+          <button type="button" class="btn-secondary" id="openDrawerBtn">Edit Role Policies</button>
+        </div>
+
+        <div class="simulation-bar">
+          <div class="control-item">
+            <label for="simulationUserSelect">Simulated User Profile</label>
+            <select id="simulationUserSelect" class="form-select">
+              <option value="sumit.lead">sumit.lead (Vault Administrator)</option>
+              <option value="elena.compliance">elena.compliance (Compliance & Risk Lead)</option>
+              <option value="marcus.settlement">marcus.settlement (Settlement Officer)</option>
+              <option value="sophia.analyst">sophia.analyst (Financial Analyst)</option>
+              <option value="alex.intern">alex.intern (Auditor Intern / Viewer)</option>
+            </select>
+          </div>
+
+          <div class="control-item">
+            <label for="simulationRoleSelect">Active Inspection Role</label>
+            <select id="simulationRoleSelect" class="form-select">
+              <option value="vault_admin" selected>Vault Administrator (vault_admin)</option>
+              <option value="compliance_lead">Compliance & Risk Officer (compliance_lead)</option>
+              <option value="settlement_officer">Settlement Officer (settlement_officer)</option>
+              <option value="operator">Vault Operator (operator)</option>
+              <option value="analyst">Financial Analyst (analyst)</option>
+              <option value="viewer">Viewer / Auditor Intern (viewer)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="simulation-panel">
+          <!-- Bitmask & Hierarchy Info -->
+          <div class="inspector-section">
+            <div class="inspector-title">Hierarchical Inheritance & Bitmask</div>
+            <div class="bitmask-stat-box">
+              <span class="stat-label">Combined Bitmask (Hex / Int):</span>
+              <span class="stat-val" id="bitmaskDisplay">0x00 (0)</span>
+              <span class="stat-label">8-bit Binary Register:</span>
+              <span class="stat-val binary-val" id="binaryDisplay">00000000</span>
+            </div>
+            <div class="stat-label">Inherited Roles Chain:</div>
+            <div class="hierarchy-pills" id="roleHierarchyList">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Live Action Policy Evaluation -->
+          <div class="inspector-section eval-section">
+            <div class="inspector-title">Target Policy / Action Verification</div>
+            <div class="test-action-bar">
+              <input type="text" id="testActionInput" class="form-input" value="transfers:execute" placeholder="e.g. transfers:execute, vault:freeze, READ">
+              <button type="button" class="btn-primary" id="evaluateActionBtn">Evaluate Guard</button>
+            </div>
+            
+            <div class="quick-chips-row">
+              <span class="stat-label">Quick test:</span>
+              <button type="button" class="action-chip" data-action="transfers:execute">transfers:execute</button>
+              <button type="button" class="action-chip" data-action="vault:freeze">vault:freeze</button>
+              <button type="button" class="action-chip" data-action="reports:export:csv">reports:export:csv</button>
+              <button type="button" class="action-chip" data-action="READ">READ</button>
+              <button type="button" class="action-chip" data-action="SUPER_ADMIN">SUPER_ADMIN</button>
+            </div>
+
+            <div id="evaluationBadge" class="eval-badge eval-pass">ACCESS GRANTED</div>
+            <div id="evaluationDetail" class="eval-detail">
+              Role satisfies policy guard requirements for target action.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Role-to-Permission Matrix Grid -->
+      <section class="rbac-card">
+        <div class="card-header-row">
+          <div>
+            <h2>Role-to-Permission Bitmask Matrix</h2>
+            <div class="card-subtext">Toggle direct permission bits per role; inherited permissions from parent roles are highlighted</div>
+          </div>
+        </div>
+
+        <div class="matrix-wrapper">
+          <table class="rbac-matrix-table" id="rbacMatrixTable">
+            <thead>
+              <tr>
+                <th>Security Role</th>
+                <th class="perm-th"><span class="perm-title">READ</span><span class="perm-bit">1 &lt;&lt; 0 (1)</span></th>
+                <th class="perm-th"><span class="perm-title">WRITE</span><span class="perm-bit">1 &lt;&lt; 1 (2)</span></th>
+                <th class="perm-th"><span class="perm-title">EXECUTE</span><span class="perm-bit">1 &lt;&lt; 2 (4)</span></th>
+                <th class="perm-th"><span class="perm-title">APPROVE</span><span class="perm-bit">1 &lt;&lt; 3 (8)</span></th>
+                <th class="perm-th"><span class="perm-title">AUDIT</span><span class="perm-bit">1 &lt;&lt; 4 (16)</span></th>
+                <th class="perm-th"><span class="perm-title">MANAGE</span><span class="perm-bit">1 &lt;&lt; 5 (32)</span></th>
+                <th class="perm-th"><span class="perm-title">FREEZE</span><span class="perm-bit">1 &lt;&lt; 6 (64)</span></th>
+                <th class="perm-th"><span class="perm-title">SUPER</span><span class="perm-bit">1 &lt;&lt; 7 (128)</span></th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="matrixTbody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="matrix-legend">
+          <div class="legend-item">
+            <span class="legend-box legend-direct"></span>
+            <span>Directly Assigned (Green)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-box legend-inherited"></span>
+            <span>Inherited via Hierarchy (Cyan)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-box legend-none"></span>
+            <span>No Privilege</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Policy Editor Drawer -->
+    <aside class="policy-drawer" id="policyEditorDrawer">
+      <div class="drawer-header">
+        <h3>Policy Rules Editor</h3>
+        <button type="button" class="btn-close" id="closeDrawerBtn" aria-label="Close drawer">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="control-item">
+          <label for="editRoleSelect">Target Role</label>
+          <select id="editRoleSelect" class="form-select">
+            <option value="vault_admin">vault_admin</option>
+            <option value="compliance_lead">compliance_lead</option>
+            <option value="settlement_officer">settlement_officer</option>
+            <option value="operator">operator</option>
+            <option value="analyst">analyst</option>
+            <option value="viewer">viewer</option>
+          </select>
+        </div>
+
+        <div class="control-item">
+          <label for="rolePoliciesInput">Granular Policy String Rules (Comma-separated)</label>
+          <textarea id="rolePoliciesInput" class="drawer-textarea" placeholder="e.g. transfers:*, audit:read, reports:*"></textarea>
+          <span class="policy-help">Supports wildcards like <code>*</code>, <code>transfers:*</code>, or exact matches like <code>vault:freeze</code>.</span>
+        </div>
+
+        <button type="button" class="btn-primary" id="saveRolePolicyBtn">Save Policies</button>
+      </div>
+    </aside>
+  </div>
+
+  <script type="module" src="rbac-matrix.js"></script>
+</body>
+</html>
