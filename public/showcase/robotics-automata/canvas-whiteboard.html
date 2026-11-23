@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotics Automata - Canvas Whiteboard</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css">
+</head>
+<body>
+  <div class="cw-container">
+    <header class="cw-header">
+      <div>
+        <h1>Vector Whiteboard</h1>
+        <p class="cw-subtitle">Freehand sketchpad &amp; SVG export</p>
+      </div>
+      <div class="cw-status" id="cwStatus">Ready</div>
+    </header>
+
+    <div class="cw-toolbar">
+      <div class="cw-tool-group">
+        <button class="cw-tool-btn active" data-tool="pen" aria-label="Pen">&#9998;</button>
+        <button class="cw-tool-btn" data-tool="eraser" aria-label="Eraser">&#10060;</button>
+        <button class="cw-tool-btn" data-tool="line" aria-label="Line">&#9873;</button>
+        <button class="cw-tool-btn" data-tool="rect" aria-label="Rectangle">&#9633;</button>
+      </div>
+      <div class="cw-color-group">
+        <label class="cw-color-label">Color</label>
+        <div class="cw-color-chips">
+          <button class="cw-color-chip active" data-color="#000000"></button>
+          <button class="cw-color-chip" data-color="#ff4d4d"></button>
+          <button class="cw-color-chip" data-color="#4dff4d"></button>
+          <button class="cw-color-chip" data-color="#4d4dff"></button>
+          <button class="cw-color-chip" data-color="#ffd700"></button>
+          <button class="cw-color-chip" data-color="#ffffff"></button>
+        </div>
+      </div>
+      <div class="cw-width-group">
+        <label class="cw-width-label">Width</label>
+        <input type="range" id="cwWidth" min="1" max="20" value="4">
+        <span id="cwWidthVal">4</span>
+      </div>
+      <div class="cw-action-group">
+        <button class="cw-btn cw-btn-undo" id="cwUndo">Undo</button>
+        <button class="cw-btn cw-btn-redo" id="cwRedo">Redo</button>
+        <button class="cw-btn cw-btn-clear" id="cwClear">Clear</button>
+        <button class="cw-btn cw-btn-export" id="cwExport">Export SVG</button>
+      </div>
+    </div>
+
+    <div class="cw-canvas-wrap">
+      <canvas id="cwCanvas" class="cw-canvas"></canvas>
+    </div>
+
+    <script type="module" src="canvas-whiteboard.js"></script>
+  </div>
+</body>
+</html>
