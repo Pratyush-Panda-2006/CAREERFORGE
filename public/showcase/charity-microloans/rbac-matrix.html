@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charity Microloans — RBAC Permission Matrix & Policy Guard</title>
+  <link rel="stylesheet" href="rbac-matrix.css">
+</head>
+<body>
+  <div class="rbac-shell">
+    <header class="rbac-header">
+      <div class="rbac-title-wrap">
+        <h1>🛡️ RBAC Permission Matrix</h1>
+        <p>Role-based access control engine with bitmask permissions, role inheritance, and dynamic policy evaluation for Charity Microloans.</p>
+      </div>
+      <div id="rbacAccessBadge" class="rbac-badge rbac-badge-deny">ACCESS DENIED</div>
+    </header>
+
+    <section class="rbac-panel rbac-panel-sim">
+      <div class="rbac-panel-header">
+        <h2>⚡ Access Simulation</h2>
+      </div>
+      <div class="rbac-sim-grid">
+        <div class="rbac-field">
+          <label for="rbacRoleSelect">Role</label>
+          <select id="rbacRoleSelect" class="rbac-select"></select>
+        </div>
+        <div class="rbac-field">
+          <label for="rbacActionSelect">Action</label>
+          <select id="rbacActionSelect" class="rbac-select"></select>
+        </div>
+        <div class="rbac-field rbac-field-full">
+          <button type="button" id="rbacCheckBtn" class="rbac-btn rbac-btn-primary">🔍 Evaluate Access</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="rbac-panel rbac-panel-matrix">
+      <div class="rbac-panel-header">
+        <h2>📊 Role-to-Permission Matrix</h2>
+      </div>
+      <div class="rbac-matrix-wrap">
+        <table id="rbacMatrixBody" class="rbac-matrix-table"></table>
+      </div>
+    </section>
+
+    <section class="rbac-panel rbac-panel-assign">
+      <div class="rbac-panel-header">
+        <h2>👥 Role Assignment</h2>
+      </div>
+      <div class="rbac-assign-grid">
+        <div class="rbac-field">
+          <label for="rbacAssignUser">User ID</label>
+          <input type="text" id="rbacAssignUser" class="rbac-input" placeholder="e.g. alice" />
+        </div>
+        <div class="rbac-field">
+          <label for="rbacAssignRole">Role</label>
+          <select id="rbacAssignRole" class="rbac-select"></select>
+        </div>
+        <div class="rbac-field rbac-field-full">
+          <button type="button" id="rbacAssignBtn" class="rbac-btn rbac-btn-primary">➕ Assign Role</button>
+        </div>
+        <div class="rbac-field rbac-field-full">
+          <label>Assigned Users</label>
+          <div id="rbacUsersList" class="rbac-users-list">No users assigned.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rbac-panel rbac-panel-policy">
+      <div class="rbac-panel-header">
+        <h2>📜 Policy Editor & Bitmask Guard</h2>
+      </div>
+      <div class="rbac-policy-grid">
+        <div class="rbac-field">
+          <label for="rbacMaskInput">Bitmask (e.g. 0x000000FF)</label>
+          <input type="text" id="rbacMaskInput" class="rbac-input" placeholder="0x00000001" />
+          <button type="button" id="rbacEvalMaskBtn" class="rbac-btn rbac-btn-outline">Evaluate</button>
+        </div>
+        <div class="rbac-field rbac-field-full">
+          <div id="rbacMaskResult" class="rbac-result-box">Enter a bitmask to evaluate granted permissions.</div>
+        </div>
+        <div class="rbac-field">
+          <label for="rbacPolicyId">Policy ID</label>
+          <input type="text" id="rbacPolicyId" class="rbac-input" placeholder="e.g. POLICY-001" />
+        </div>
+        <div class="rbac-field">
+          <label for="rbacPolicyMask">Policy Mask</label>
+          <input type="text" id="rbacPolicyMask" class="rbac-input" placeholder="0x00000001" />
+        </div>
+        <div class="rbac-field rbac-field-full">
+          <button type="button" id="rbacAddPolicyBtn" class="rbac-btn rbac-btn-outline">Add Custom Policy</button>
+        </div>
+        <div class="rbac-field">
+          <label for="rbacPolicyAction">Action to Check</label>
+          <select id="rbacPolicyAction" class="rbac-select"></select>
+        </div>
+        <div class="rbac-field rbac-field-full">
+          <button type="button" id="rbacCheckPolicyBtn" class="rbac-btn rbac-btn-primary">🔍 Evaluate Policy</button>
+          <div id="rbacPolicyResult" class="rbac-result-box"></div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="rbac-nav">
+      <a href="index.html" class="rbac-back-link">← Return to Charity Microloans Dashboard</a>
+    </nav>
+  </div>
+
+  <script type="module" src="rbac-matrix.js"></script>
+</body>
+</html>
