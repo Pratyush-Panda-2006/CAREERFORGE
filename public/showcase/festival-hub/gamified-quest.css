@@ -1,0 +1,37 @@
+:root { background: #151326; color: #fbf7ff; font-family: system-ui, sans-serif; line-height: 1.55; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { width: min(100% - 2rem, 68rem); margin-inline: auto; padding: 2rem 0; }
+header a { color: #f3b4ea; font-weight: 700; text-underline-offset: .2em; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: clamp(2.35rem, 6vw, 4.4rem); line-height: 1.08; margin-block: .6rem; }
+h2 { font-size: 1.25rem; margin-bottom: .6rem; }
+header p, .objective, .badge-meta, #next-level { color: #d8cee8; }
+.summary, .quest, .badge { border: 1px solid #71658c; background: #211c37; border-radius: .8rem; padding: 1rem; }
+.summary { display: grid; grid-template-columns: 1fr minmax(0, 1fr); gap: .65rem 1.5rem; margin: 1.75rem 0 1.2rem; align-items: center; }
+.summary h2 { margin-bottom: 0; }
+#xp-summary { font-size: 1.4rem; font-weight: 750; }
+progress { display: block; width: 100%; height: .8rem; margin-top: .3rem; accent-color: #f3b4ea; }
+progress::-webkit-progress-value { transition: width .18s ease-out; }
+.quests { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.quest h3 { font-size: 1.05rem; }
+.quest ul { list-style: none; margin: .6rem 0; padding: 0; }
+.objective { display: block; margin-top: .4rem; }
+.objective input { accent-color: #f3b4ea; margin-right: .45rem; width: 1.1rem; height: 1.1rem; vertical-align: middle; }
+.objective.is-complete { color: #f3b4ea; }
+#badge-title { margin-top: 1.4rem; }
+.badges { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0; gap: .6rem; margin: 0; }
+.badge { border-top: 3px solid var(--tier-color); }
+.badge[data-unlocked="true"] { box-shadow: 0 0 14px color-mix(in srgb, var(--tier-color), transparent 70%); }
+.badge h3 { color: var(--tier-color); font-size: 1.1rem; }
+.badge-meta { margin-top: .25rem; }
+.status { min-height: 1.5em; margin-top: .5rem; color: #f3b4ea; }
+dialog { color: #fbf7ff; background: #28203e; border: 1px solid #f3b4ea; border-radius: .8rem; max-width: calc(100% - 2rem); width: 22rem; padding: 1.3rem; }
+dialog::backdrop { background: rgb(18 13 34 / .8); }
+dialog[open] { animation: appear .2s ease-out; }
+dialog button { border-radius: .45rem; border: 1px solid #f3b4ea; padding: .55rem .85rem; margin-top: 1rem; background: #f3b4ea; color: #211c37; font: inherit; font-weight: 700; cursor: pointer; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #f3b4ea; outline-offset: 3px; }
+@keyframes appear { from { opacity: 0; transform: translateY(.4rem); } }
+@media (prefers-reduced-motion: reduce) { dialog[open] { animation: none; } progress::-webkit-progress-value { transition: none; } }
+@media (max-width: 48rem) { .quests, .badges { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 34rem) { .summary, .quests { grid-template-columns: 1fr; } }
