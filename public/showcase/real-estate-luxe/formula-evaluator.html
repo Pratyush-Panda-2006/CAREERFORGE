@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Estate Luxe — KPI Formula Evaluator & Expression Parser</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="formula-evaluator-container">
+    <header class="evaluator-header">
+      <div class="header-nav">
+        <a href="index.html" class="back-link" aria-label="Return to Real Estate Luxe Showcase">← Return to Real Estate Luxe Showcase</a>
+        <button id="contrast-toggle" class="contrast-toggle-btn" type="button" aria-pressed="false">High Contrast Mode</button>
+      </div>
+      <div class="brand-badge">VANGUARD LUXE ESTATES • FINANCIAL MODELING</div>
+      <h1>Dynamic KPI Formula Evaluator &amp; Real Estate Metrics Parser</h1>
+      <p>Safe mathematical expression tokenizer, Shunting-Yard RPN compiler, dynamic variable parameter injection, and precision luxury property metrics calculator.</p>
+    </header>
+
+    <!-- Error Alert Banner -->
+    <div id="error-banner" class="alert-banner hidden" role="alert" aria-live="polite"></div>
+
+    <!-- Calculated Result Callouts Grid -->
+    <section class="metrics-grid" aria-label="Dynamic Calculation Results">
+      <div class="metric-card primary-card">
+        <span class="metric-label">Formatted Investment KPI</span>
+        <div class="metric-value-wrap">
+          <span id="formatted-result" class="metric-value">--</span>
+        </div>
+        <span id="syntax-badge" class="status-badge status-idle">AWAITING FORMULA</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">Raw Computed Value</span>
+        <span id="raw-value" class="metric-subvalue">--</span>
+        <span class="metric-hint">Double-Precision Floating Point</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">Token Stream &amp; AST</span>
+        <span id="token-count" class="metric-subvalue">0 tokens</span>
+        <span class="metric-hint">Dijkstra Shunting-Yard RPN Engine</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">Evaluation Latency</span>
+        <span id="calc-latency" class="metric-subvalue">0.00 ms</span>
+        <span class="metric-hint">In-Memory Engine Telemetry</span>
+      </div>
+    </section>
+
+    <!-- Main Workbench Grid -->
+    <main class="workbench-grid">
+      <!-- Left Panel: Formula Editor & Presets -->
+      <section class="workbench-panel" aria-labelledby="formula-editor-title">
+        <div class="panel-header">
+          <h2 id="formula-editor-title">Mathematical Formula Editor</h2>
+          <div class="preset-dropdown-wrap">
+            <label for="preset-select" class="sr-only">Choose KPI Preset Formula</label>
+            <select id="preset-select" class="preset-dropdown">
+              <option value="" disabled>Load KPI Preset...</option>
+              <option value="((monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses) / property_price) * 100" selected>
+                Capitalization Rate (%): ((monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses) / property_price) * 100
+              </option>
+              <option value="((monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses - annual_mortgage_debt) / (down_payment + closing_costs)) * 100">
+                Cash-on-Cash Return (%): ((monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses - annual_mortgage_debt) / (down_payment + closing_costs)) * 100
+              </option>
+              <option value="monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses">
+                Net Operating Income (NOI): monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses
+              </option>
+              <option value="property_price / (monthly_rental_income * 12)">
+                Gross Rent Multiplier (GRM): property_price / (monthly_rental_income * 12)
+              </option>
+              <option value="(monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses) / annual_mortgage_debt">
+                Debt Service Coverage Ratio (DSCR): (monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses) / annual_mortgage_debt
+              </option>
+              <option value="down_payment + (property_price * property_appreciation_rate)">
+                Projected Property Equity (Year 1): down_payment + (property_price * property_appreciation_rate)
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Preset Pills for Rapid Selection -->
+        <div class="preset-pills-row" aria-label="Quick Select KPI Presets">
+          <button type="button" class="preset-pill" data-formula="((monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses) / property_price) * 100">Cap Rate (%)</button>
+          <button type="button" class="preset-pill" data-formula="((monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses - annual_mortgage_debt) / (down_payment + closing_costs)) * 100">Cash-on-Cash</button>
+          <button type="button" class="preset-pill" data-formula="monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses">NOI ($)</button>
+          <button type="button" class="preset-pill" data-formula="property_price / (monthly_rental_income * 12)">GRM (x)</button>
+          <button type="button" class="preset-pill" data-formula="(monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses) / annual_mortgage_debt">DSCR (x)</button>
+          <button type="button" class="preset-pill" data-formula="down_payment + (property_price * property_appreciation_rate)">Year 1 Equity</button>
+        </div>
+
+        <div class="input-group">
+          <label for="formula-input" class="input-label">Formula Equation Input</label>
+          <textarea id="formula-input" class="formula-textarea" rows="3" placeholder="Enter mathematical formula, e.g. ((monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses) / property_price) * 100">((monthly_rental_income * 12 * (1 - vacancy_rate) - annual_operating_expenses) / property_price) * 100</textarea>
+        </div>
+
+        <div class="editor-buttons-row">
+          <button id="evaluate-btn" type="button" class="btn-primary">Evaluate Formula</button>
+          <button id="clear-formula-btn" type="button" class="btn-secondary">Clear Input</button>
+        </div>
+
+        <!-- Syntax Helper Pills -->
+        <div class="syntax-helpers-container">
+          <div class="pills-category">
+            <span class="pills-title">Real Estate Variables:</span>
+            <div class="pills-group">
+              <button type="button" class="syntax-pill pill-var" data-insert="property_price">property_price</button>
+              <button type="button" class="syntax-pill pill-var" data-insert="monthly_rental_income">monthly_rental_income</button>
+              <button type="button" class="syntax-pill pill-var" data-insert="annual_operating_expenses">annual_operating_expenses</button>
+              <button type="button" class="syntax-pill pill-var" data-insert="down_payment">down_payment</button>
+              <button type="button" class="syntax-pill pill-var" data-insert="annual_mortgage_debt">annual_mortgage_debt</button>
+              <button type="button" class="syntax-pill pill-var" data-insert="property_appreciation_rate">property_appreciation_rate</button>
+              <button type="button" class="syntax-pill pill-var" data-insert="closing_costs">closing_costs</button>
+              <button type="button" class="syntax-pill pill-var" data-insert="vacancy_rate">vacancy_rate</button>
+            </div>
+          </div>
+
+          <div class="pills-category">
+            <span class="pills-title">Financial &amp; Math Functions:</span>
+            <div class="pills-group">
+              <button type="button" class="syntax-pill pill-fn" data-insert="sqrt()">sqrt()</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="log()">log()</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="ln()">ln()</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="exp()">exp()</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="abs()">abs()</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="min(,)">min(,)</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="max(,)">max(,)</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="round()">round()</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="floor()">floor()</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="ceil()">ceil()</button>
+              <button type="button" class="syntax-pill pill-fn" data-insert="pow(,)">pow(,)</button>
+            </div>
+          </div>
+
+          <div class="pills-category">
+            <span class="pills-title">Operators &amp; Enclosures:</span>
+            <div class="pills-group">
+              <button type="button" class="syntax-pill pill-op" data-insert=" + ">+</button>
+              <button type="button" class="syntax-pill pill-op" data-insert=" - ">-</button>
+              <button type="button" class="syntax-pill pill-op" data-insert=" * ">*</button>
+              <button type="button" class="syntax-pill pill-op" data-insert=" / ">/</button>
+              <button type="button" class="syntax-pill pill-op" data-insert=" ^ ">^</button>
+              <button type="button" class="syntax-pill pill-op" data-insert=" % ">%</button>
+              <button type="button" class="syntax-pill pill-op" data-insert="(">(</button>
+              <button type="button" class="syntax-pill pill-op" data-insert=")">)</button>
+              <button type="button" class="syntax-pill pill-op" data-insert=",">,</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Variable Tuning Workbench -->
+      <section class="workbench-panel" aria-labelledby="workbench-title">
+        <div class="panel-header">
+          <h2 id="workbench-title">Variable Tuning Workbench</h2>
+        </div>
+        <p class="panel-subtitle">Fine-tune luxury portfolio valuation inputs. Range sliders and numeric fields remain continuously synchronized.</p>
+
+        <div class="variables-grid">
+          <!-- property_price -->
+          <div class="variable-card">
+            <div class="variable-top">
+              <label for="input-property_price">Property Acquisition Price (<code>property_price</code>)</label>
+              <span class="formatted-val" id="val-property_price">$1,250,000.00</span>
+            </div>
+            <div class="variable-controls">
+              <input type="range" id="slider-property_price" class="param-slider" min="100000" max="25000000" step="25000" value="1250000">
+              <input type="number" id="input-property_price" class="param-number" min="100000" max="25000000" step="25000" value="1250000">
+            </div>
+            <span class="control-hint">Total agreed luxury estate purchase price</span>
+          </div>
+
+          <!-- monthly_rental_income -->
+          <div class="variable-card">
+            <div class="variable-top">
+              <label for="input-monthly_rental_income">Monthly Rental Income (<code>monthly_rental_income</code>)</label>
+              <span class="formatted-val" id="val-monthly_rental_income">$6,500.00</span>
+            </div>
+            <div class="variable-controls">
+              <input type="range" id="slider-monthly_rental_income" class="param-slider" min="500" max="100000" step="100" value="6500">
+              <input type="number" id="input-monthly_rental_income" class="param-number" min="500" max="100000" step="100" value="6500">
+            </div>
+            <span class="control-hint">Gross scheduled monthly lease and tenancy revenue</span>
+          </div>
+
+          <!-- annual_operating_expenses -->
+          <div class="variable-card">
+            <div class="variable-top">
+              <label for="input-annual_operating_expenses">Annual Operating Expenses (<code>annual_operating_expenses</code>)</label>
+              <span class="formatted-val" id="val-annual_operating_expenses">$18,500.00</span>
+            </div>
+            <div class="variable-controls">
+              <input type="range" id="slider-annual_operating_expenses" class="param-slider" min="1000" max="250000" step="500" value="18500">
+              <input type="number" id="input-annual_operating_expenses" class="param-number" min="1000" max="250000" step="500" value="18500">
+            </div>
+            <span class="control-hint">Insurance, luxury HOA, property tax, and ongoing upkeep</span>
+          </div>
+
+          <!-- down_payment -->
+          <div class="variable-card">
+            <div class="variable-top">
+              <label for="input-down_payment">Down Payment Equity (<code>down_payment</code>)</label>
+              <span class="formatted-val" id="val-down_payment">$250,000.00</span>
+            </div>
+            <div class="variable-controls">
+              <input type="range" id="slider-down_payment" class="param-slider" min="0" max="10000000" step="10000" value="250000">
+              <input type="number" id="input-down_payment" class="param-number" min="0" max="10000000" step="10000" value="250000">
+            </div>
+            <span class="control-hint">Initial out-of-pocket cash equity paid upon closing</span>
+          </div>
+
+          <!-- annual_mortgage_debt -->
+          <div class="variable-card">
+            <div class="variable-top">
+              <label for="input-annual_mortgage_debt">Annual Mortgage Debt Service (<code>annual_mortgage_debt</code>)</label>
+              <span class="formatted-val" id="val-annual_mortgage_debt">$48,000.00</span>
+            </div>
+            <div class="variable-controls">
+              <input type="range" id="slider-annual_mortgage_debt" class="param-slider" min="0" max="500000" step="1000" value="48000">
+              <input type="number" id="input-annual_mortgage_debt" class="param-number" min="0" max="500000" step="1000" value="48000">
+            </div>
+            <span class="control-hint">Annual principal and interest amortization payments</span>
+          </div>
+
+          <!-- property_appreciation_rate -->
+          <div class="variable-card">
+            <div class="variable-top">
+              <label for="input-property_appreciation_rate">Annual Appreciation Rate (<code>property_appreciation_rate</code>)</label>
+              <span class="formatted-val" id="val-property_appreciation_rate">4.5%</span>
+            </div>
+            <div class="variable-controls">
+              <input type="range" id="slider-property_appreciation_rate" class="param-slider" min="0.00" max="0.20" step="0.005" value="0.045">
+              <input type="number" id="input-property_appreciation_rate" class="param-number" min="0.00" max="0.20" step="0.005" value="0.045">
+            </div>
+            <span class="control-hint">Projected luxury market annual capital appreciation</span>
+          </div>
+
+          <!-- closing_costs -->
+          <div class="variable-card">
+            <div class="variable-top">
+              <label for="input-closing_costs">Closing Costs &amp; Fees (<code>closing_costs</code>)</label>
+              <span class="formatted-val" id="val-closing_costs">$25,000.00</span>
+            </div>
+            <div class="variable-controls">
+              <input type="range" id="slider-closing_costs" class="param-slider" min="0" max="250000" step="1000" value="25000">
+              <input type="number" id="input-closing_costs" class="param-number" min="0" max="250000" step="1000" value="25000">
+            </div>
+            <span class="control-hint">Escrow, legal advisory, title insurance, and loan origination</span>
+          </div>
+
+          <!-- vacancy_rate -->
+          <div class="variable-card">
+            <div class="variable-top">
+              <label for="input-vacancy_rate">Vacancy &amp; Credit Loss Rate (<code>vacancy_rate</code>)</label>
+              <span class="formatted-val" id="val-vacancy_rate">5.0%</span>
+            </div>
+            <div class="variable-controls">
+              <input type="range" id="slider-vacancy_rate" class="param-slider" min="0.00" max="0.30" step="0.01" value="0.05">
+              <input type="number" id="input-vacancy_rate" class="param-number" min="0.00" max="0.30" step="0.01" value="0.05">
+            </div>
+            <span class="control-hint">Expected annual tenant turnover and uncollected rent allowance</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Calculation Audit History Section -->
+    <section class="history-section" aria-labelledby="history-title">
+      <div class="panel-header">
+        <h2 id="history-title">Calculation Audit Trail</h2>
+        <button id="clear-history-btn" type="button" class="btn-secondary">Clear Audit History</button>
+      </div>
+      <ul id="history-list" class="history-list" role="feed">
+        <li class="history-empty">No calculations recorded in audit trail yet.</li>
+      </ul>
+    </section>
+
+    <footer class="evaluator-footer">
+      <div class="footer-content">
+        <span>Vanguard Real Estate Luxe • Shunting-Yard Formula Evaluator Engine • WCAG AAA Accessible</span>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+  <script>
+    // WCAG AAA high contrast mode toggle
+    const contrastBtn = document.getElementById('contrast-toggle');
+    if (contrastBtn) {
+      contrastBtn.addEventListener('click', () => {
+        document.body.classList.toggle('wcag-high-contrast');
+        const isHigh = document.body.classList.contains('wcag-high-contrast');
+        contrastBtn.setAttribute('aria-pressed', isHigh ? 'true' : 'false');
+        contrastBtn.textContent = isHigh ? 'Standard Luxe Mode' : 'High Contrast Mode';
+      });
+    }
+  </script>
+</body>
+</html>
