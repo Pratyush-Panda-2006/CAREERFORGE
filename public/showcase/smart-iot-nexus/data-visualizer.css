@@ -1,0 +1,189 @@
+/* Smart IoT Nexus - Polar Metrics Radar Chart Styles */
+:root {
+  --bg-color: #070d18;
+  --card-bg: #0e1726;
+  --border-color: #1e293b;
+  --primary-accent: #38bdf8;
+  --secondary-accent: #818cf8;
+  --success-color: #10b981;
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.radar-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.radar-container {
+  max-width: 980px;
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+.radar-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.radar-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+.radar-layout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 36px;
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .radar-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-wrapper {
+  background: #040812;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #162032;
+  display: flex;
+  justify-content: center;
+}
+
+.radar-svg {
+  overflow: visible;
+}
+
+.web-ring {
+  fill: none;
+  stroke: #1e293b;
+  stroke-width: 1;
+}
+
+.spoke-line {
+  stroke: #1e293b;
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.axis-label {
+  fill: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.radar-polygon {
+  stroke: var(--primary-accent);
+  stroke-width: 2.2;
+  transition: all 0.2s ease-out;
+}
+
+.vertex-dot {
+  fill: var(--primary-accent);
+  stroke: #ffffff;
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.vertex-dot:hover {
+  transform: scale(1.35);
+}
+
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.controls-panel h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.slider-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slider-control label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.slider-control input[type="range"] {
+  accent-color: var(--primary-accent);
+  cursor: pointer;
+}
+
+.summary-card {
+  margin-top: 12px;
+  padding: 18px;
+  background: #060b14;
+  border: 1px solid #1b263b;
+  border-radius: 10px;
+}
+
+.summary-card h4 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-accent);
+}
+
+.stat-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.btn-reset {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset:hover {
+  background: var(--border-color);
+  color: #fff;
+}
