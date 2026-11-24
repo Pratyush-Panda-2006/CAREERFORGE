@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Hypercar — Dynamic KPI Formula Evaluator & Mathematical Expression Parser</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="formula-evaluator-body">
+  <!-- Top Navigation Header -->
+  <header class="eval-navbar">
+    <div class="nav-left">
+      <a href="index.html" class="nav-back-link" title="Return to Apex Hypercar Main Showcase">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        <span>Back to Apex Zero Hub</span>
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-brand">
+        <span class="brand-badge">TELEMETRY // MATH KERNEL</span>
+        <span class="brand-title">APEX DYNAMICS // KPI FORMULA CALCULATOR</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <button type="button" id="contrast-toggle" class="btn-contrast-toggle" aria-pressed="false" title="Toggle WCAG AAA high contrast theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10V2z"/>
+        </svg>
+        <span>High Contrast (AAA)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="eval-main-container">
+    <!-- Hero Banner -->
+    <section class="eval-hero-banner">
+      <div class="hero-tag">POWERTRAIN &amp; AERODYNAMIC TELEMETRY COMPUTATION</div>
+      <h1>Dynamic KPI Formula Parser &amp; Mathematical Evaluator</h1>
+      <p class="hero-desc">
+        Deterministic mathematical expression tokenizer and Shunting-Yard RPN engine with live hypercar parameter injection,
+        sub-millisecond calculation latency, and complete audit history recording.
+      </p>
+    </section>
+
+    <!-- Error Warning Banner (ARIA Live Alert) -->
+    <section id="error-banner" class="eval-alert-banner" role="alert" aria-live="assertive" style="display: none;">
+      <div class="alert-icon">⚠</div>
+      <div class="alert-content">
+        <strong class="alert-title">Evaluation / Syntax Warning:</strong>
+        <span id="error-text">Syntax error encountered</span>
+      </div>
+    </section>
+
+    <!-- Primary Grid Dashboard -->
+    <div class="eval-dashboard-grid">
+      <!-- Left Column: Formula Expression Studio -->
+      <section class="eval-panel formula-panel" aria-labelledby="formula-console-title">
+        <div class="panel-header">
+          <div class="panel-title-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 17 10 11 4 5"/>
+              <line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+            <h2 id="formula-console-title">KPI Formula Console</h2>
+          </div>
+          <span id="syntax-badge" class="syntax-badge empty">Ready</span>
+        </div>
+
+        <!-- Preset Formula Selector -->
+        <div class="control-group">
+          <label for="preset-select" class="field-label">Hypercar KPI Preset Library:</label>
+          <select id="preset-select" class="styled-select" aria-label="Select hypercar KPI formula preset">
+            <!-- Populated dynamically via JS -->
+          </select>
+        </div>
+
+        <!-- Preset Pills Row -->
+        <div class="control-group">
+          <span class="field-label-small">Quick KPI Presets:</span>
+          <div class="preset-pills-wrap">
+            <button type="button" class="preset-pill" data-preset-formula="(engine_power_hp / curb_weight_kg) * 1000" title="Power to Weight Ratio (hp/ton)">
+              ⚡ Power to Weight
+            </button>
+            <button type="button" class="preset-pill" data-preset-formula="0.5 * 1.225 * drag_coefficient * frontal_area_m2 * (100 ^ 2)" title="Aerodynamic Drag Force Index">
+              💨 Aero Drag Index
+            </button>
+            <button type="button" class="preset-pill" data-preset-formula="tire_friction_coeff * 0.98" title="Maximum Cornering G-Force">
+              🎯 Cornering G
+            </button>
+            <button type="button" class="preset-pill" data-preset-formula="battery_capacity_kwh * brake_regen_efficiency" title="Usable Regenerative Energy (kWh)">
+              🔋 Usable Regen
+            </button>
+            <button type="button" class="preset-pill" data-preset-formula="(engine_power_hp * tire_friction_coeff) / curb_weight_kg" title="Hypercar Acceleration Index">
+              🏎️ Accel Index
+            </button>
+            <button type="button" class="preset-pill" data-preset-formula="0.5 * curb_weight_kg * ((350 / 3.6) ^ 2) / 1000000" title="Kinetic Energy at Top Speed (MJ)">
+              💥 Kinetic Energy
+            </button>
+          </div>
+        </div>
+
+        <!-- Formula Expression Input -->
+        <div class="control-group">
+          <div class="field-label-row">
+            <label for="formula-input" class="field-label">Mathematical Expression:</label>
+            <span class="field-hint">Supports ^, *, /, +, -, %, scientific functions, and hypercar variables</span>
+          </div>
+          <div class="formula-input-wrapper">
+            <input
+              type="text"
+              id="formula-input"
+              class="formula-input"
+              spellcheck="false"
+              autocomplete="off"
+              aria-label="Mathematical formula expression input"
+              placeholder="e.g. (engine_power_hp / curb_weight_kg) * 1000"
+            />
+          </div>
+        </div>
+
+        <!-- Action Control Buttons -->
+        <div class="formula-actions-bar">
+          <button type="button" id="eval-btn" class="btn btn-primary" title="Execute evaluation with active variable parameters">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span>Evaluate Formula</span>
+          </button>
+          <button type="button" id="validate-btn" class="btn btn-secondary" title="Verify grammar & syntax balance">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Validate Syntax</span>
+          </button>
+          <button type="button" id="clear-btn" class="btn btn-ghost" title="Clear expression input">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            <span>Clear</span>
+          </button>
+        </div>
+
+        <!-- Syntax Helper Injector Pills -->
+        <div class="syntax-helper-dock" aria-label="Quick Syntax Token Injectors">
+          <div class="pills-category">
+            <span class="category-tag">Operators</span>
+            <div class="pills-group">
+              <button type="button" class="syntax-pill op" data-insert=" + " title="Addition">+</button>
+              <button type="button" class="syntax-pill op" data-insert=" - " title="Subtraction">-</button>
+              <button type="button" class="syntax-pill op" data-insert=" * " title="Multiplication">*</button>
+              <button type="button" class="syntax-pill op" data-insert=" / " title="Division">/</button>
+              <button type="button" class="syntax-pill op" data-insert=" ^ " title="Power / Exponentiation">^</button>
+              <button type="button" class="syntax-pill op" data-insert=" % " title="Modulo remainder">%</button>
+              <button type="button" class="syntax-pill paren" data-insert="(" title="Open parenthesis">(</button>
+              <button type="button" class="syntax-pill paren" data-insert=")" title="Close parenthesis">)</button>
+              <button type="button" class="syntax-pill comma" data-insert=", " title="Argument separator">,</button>
+            </div>
+          </div>
+
+          <div class="pills-category">
+            <span class="category-tag">Functions</span>
+            <div class="pills-group">
+              <button type="button" class="syntax-pill fn" data-insert="sqrt()" title="Square root">sqrt()</button>
+              <button type="button" class="syntax-pill fn" data-insert="log()" title="Base-10 logarithm">log()</button>
+              <button type="button" class="syntax-pill fn" data-insert="ln()" title="Natural logarithm">ln()</button>
+              <button type="button" class="syntax-pill fn" data-insert="exp()" title="Exponential e^x">exp()</button>
+              <button type="button" class="syntax-pill fn" data-insert="abs()" title="Absolute value">abs()</button>
+              <button type="button" class="syntax-pill fn" data-insert="pow(, )" title="Power function">pow()</button>
+              <button type="button" class="syntax-pill fn" data-insert="min(, )" title="Minimum of values">min()</button>
+              <button type="button" class="syntax-pill fn" data-insert="max(, )" title="Maximum of values">max()</button>
+              <button type="button" class="syntax-pill fn" data-insert="round()" title="Round to integer or decimals">round()</button>
+              <button type="button" class="syntax-pill fn" data-insert="floor()" title="Floor">floor()</button>
+              <button type="button" class="syntax-pill fn" data-insert="ceil()" title="Ceiling">ceil()</button>
+            </div>
+          </div>
+
+          <div class="pills-category">
+            <span class="category-tag">Variables</span>
+            <div class="pills-group">
+              <button type="button" class="syntax-pill var" data-insert="engine_power_hp" title="Engine Power (hp)">engine_power_hp</button>
+              <button type="button" class="syntax-pill var" data-insert="curb_weight_kg" title="Curb Weight (kg)">curb_weight_kg</button>
+              <button type="button" class="syntax-pill var" data-insert="drag_coefficient" title="Drag Coefficient">drag_coefficient</button>
+              <button type="button" class="syntax-pill var" data-insert="frontal_area_m2" title="Frontal Area (m²)">frontal_area_m2</button>
+              <button type="button" class="syntax-pill var" data-insert="battery_capacity_kwh" title="Battery Capacity (kWh)">battery_capacity_kwh</button>
+              <button type="button" class="syntax-pill var" data-insert="brake_regen_efficiency" title="Brake Regen Efficiency">brake_regen_efficiency</button>
+              <button type="button" class="syntax-pill var" data-insert="tire_friction_coeff" title="Tire Friction Coefficient">tire_friction_coeff</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Variable Tuning Workbench -->
+      <section class="eval-panel variables-panel" aria-labelledby="variables-workbench-title">
+        <div class="panel-header">
+          <div class="panel-title-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <h2 id="variables-workbench-title">Variable Tuning Workbench</h2>
+          </div>
+          <button type="button" id="reset-vars-btn" class="btn btn-xs btn-outline" title="Reset variables to stock hypercar defaults">
+            Reset Defaults
+          </button>
+        </div>
+
+        <div class="variables-controls-list">
+          <!-- 1. Engine Power (hp) -->
+          <div class="var-control-item">
+            <div class="var-meta">
+              <label for="slider-engine-power-hp" class="var-name">engine_power_hp</label>
+              <span class="var-unit">hp (Horsepower)</span>
+            </div>
+            <div class="var-inputs-row">
+              <input type="range" id="slider-engine-power-hp" class="styled-slider" min="500" max="2500" step="10" value="980" aria-label="Engine power slider">
+              <input type="number" id="input-engine-power-hp" class="styled-number-input" min="100" max="5000" step="10" value="980" aria-label="Engine power number input">
+            </div>
+          </div>
+
+          <!-- 2. Curb Weight (kg) -->
+          <div class="var-control-item">
+            <div class="var-meta">
+              <label for="slider-curb-weight-kg" class="var-name">curb_weight_kg</label>
+              <span class="var-unit">kg (Vehicle Mass)</span>
+            </div>
+            <div class="var-inputs-row">
+              <input type="range" id="slider-curb-weight-kg" class="styled-slider" min="800" max="3000" step="10" value="1420" aria-label="Curb weight slider">
+              <input type="number" id="input-curb-weight-kg" class="styled-number-input" min="500" max="5000" step="10" value="1420" aria-label="Curb weight number input">
+            </div>
+          </div>
+
+          <!-- 3. Drag Coefficient -->
+          <div class="var-control-item">
+            <div class="var-meta">
+              <label for="slider-drag-coefficient" class="var-name">drag_coefficient</label>
+              <span class="var-unit">Cd (Aero factor)</span>
+            </div>
+            <div class="var-inputs-row">
+              <input type="range" id="slider-drag-coefficient" class="styled-slider" min="0.15" max="0.60" step="0.01" value="0.32" aria-label="Drag coefficient slider">
+              <input type="number" id="input-drag-coefficient" class="styled-number-input" min="0.05" max="1.50" step="0.01" value="0.32" aria-label="Drag coefficient number input">
+            </div>
+          </div>
+
+          <!-- 4. Frontal Area (m²) -->
+          <div class="var-control-item">
+            <div class="var-meta">
+              <label for="slider-frontal-area-m2" class="var-name">frontal_area_m2</label>
+              <span class="var-unit">m² (Surface area)</span>
+            </div>
+            <div class="var-inputs-row">
+              <input type="range" id="slider-frontal-area-m2" class="styled-slider" min="1.40" max="3.50" step="0.05" value="2.05" aria-label="Frontal area slider">
+              <input type="number" id="input-frontal-area-m2" class="styled-number-input" min="0.50" max="5.00" step="0.05" value="2.05" aria-label="Frontal area number input">
+            </div>
+          </div>
+
+          <!-- 5. Battery Capacity (kWh) -->
+          <div class="var-control-item">
+            <div class="var-meta">
+              <label for="slider-battery-capacity-kwh" class="var-name">battery_capacity_kwh</label>
+              <span class="var-unit">kWh (Energy Pack)</span>
+            </div>
+            <div class="var-inputs-row">
+              <input type="range" id="slider-battery-capacity-kwh" class="styled-slider" min="30" max="200" step="1" value="85" aria-label="Battery capacity slider">
+              <input type="number" id="input-battery-capacity-kwh" class="styled-number-input" min="10" max="500" step="1" value="85.0" aria-label="Battery capacity number input">
+            </div>
+          </div>
+
+          <!-- 6. Brake Regen Efficiency -->
+          <div class="var-control-item">
+            <div class="var-meta">
+              <label for="slider-brake-regen-efficiency" class="var-name">brake_regen_efficiency</label>
+              <span class="var-unit">Ratio [0 - 1]</span>
+            </div>
+            <div class="var-inputs-row">
+              <input type="range" id="slider-brake-regen-efficiency" class="styled-slider" min="0.20" max="0.99" step="0.01" value="0.72" aria-label="Brake regen efficiency slider">
+              <input type="number" id="input-brake-regen-efficiency" class="styled-number-input" min="0.01" max="1.00" step="0.01" value="0.72" aria-label="Brake regen efficiency number input">
+            </div>
+          </div>
+
+          <!-- 7. Tire Friction Coefficient -->
+          <div class="var-control-item">
+            <div class="var-meta">
+              <label for="slider-tire-friction-coeff" class="var-name">tire_friction_coeff</label>
+              <span class="var-unit">µ (Tire grip coefficient)</span>
+            </div>
+            <div class="var-inputs-row">
+              <input type="range" id="slider-tire-friction-coeff" class="styled-slider" min="0.70" max="2.50" step="0.05" value="1.25" aria-label="Tire friction coefficient slider">
+              <input type="number" id="input-tire-friction-coeff" class="styled-number-input" min="0.10" max="4.00" step="0.05" value="1.25" aria-label="Tire friction coefficient number input">
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Result Callout Cards Section -->
+    <section class="results-section" aria-labelledby="results-heading">
+      <h2 id="results-heading" class="sr-only">KPI Computation Telemetry Results</h2>
+      <div class="results-cards-grid">
+        <!-- 1. Formatted Result Card -->
+        <div class="result-card primary-result-card">
+          <div class="card-eyebrow">COMPUTED KPI RESULT</div>
+          <div class="result-value-display" id="result-formatted">0.00</div>
+          <div class="result-subtext">Precision stabilized numerical outcome</div>
+        </div>
+
+        <!-- 2. Raw Numerical Value -->
+        <div class="result-card">
+          <div class="card-eyebrow">RAW FLOATING POINT</div>
+          <div class="result-mono-display" id="result-raw">0</div>
+          <div class="result-subtext">Unformatted IEEE 754 value</div>
+        </div>
+
+        <!-- 3. Token Count -->
+        <div class="result-card">
+          <div class="card-eyebrow">LEXICAL TOKENS</div>
+          <div class="result-mono-display" id="result-token-count">0 tokens</div>
+          <div class="result-subtext">Lexical items in expression</div>
+        </div>
+
+        <!-- 4. Latency Performance -->
+        <div class="result-card">
+          <div class="card-eyebrow">EVALUATION LATENCY</div>
+          <div class="result-mono-display" id="result-latency">&lt; 0.5 ms</div>
+          <div class="result-subtext">Compiler &amp; execution runtime</div>
+        </div>
+      </div>
+
+      <!-- Compiled RPN Callout -->
+      <div class="rpn-panel">
+        <div class="rpn-header">
+          <span class="rpn-title">SHUNTING-YARD COMPILED RPN (REVERSE POLISH NOTATION)</span>
+        </div>
+        <div class="rpn-content" id="result-rpn">None</div>
+      </div>
+    </section>
+
+    <!-- Calculation Audit Trail History -->
+    <section class="eval-panel history-panel" aria-labelledby="history-heading">
+      <div class="panel-header">
+        <div class="panel-title-wrapper">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <h2 id="history-heading">Calculation Audit Trail History</h2>
+        </div>
+        <button type="button" id="clear-history-btn" class="btn btn-xs btn-ghost" title="Clear all recorded history entries">
+          Clear History
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="history-table" aria-label="Calculation audit trail history table">
+          <thead>
+            <tr>
+              <th scope="col">Calculation ID</th>
+              <th scope="col">Timestamp</th>
+              <th scope="col">Mathematical Formula</th>
+              <th scope="col">Outcome Result</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body">
+            <!-- Populated dynamically via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="eval-footer">
+    <div class="footer-content">
+      <span>APEX ZERO HYPERCAR // ADVANCED TELEMETRY SYSTEMS</span>
+      <span class="footer-sep">•</span>
+      <a href="index.html">Main Cockpit Showcase</a>
+      <span class="footer-sep">•</span>
+      <span>WCAG AAA Compliant</span>
+    </div>
+  </footer>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
