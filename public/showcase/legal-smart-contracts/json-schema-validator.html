@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>JSON Schema Validator | Legal Smart Contracts</title>
+  <link rel="stylesheet" href="./json-schema-validator.css">
+  <script type="module" src="./json-schema-validator.js"></script>
+</head>
+<body>
+  <main data-validator-lab>
+    <header>
+      <a href="./index.html">LEGAL SMART CONTRACTS</a>
+      <span>PAYLOAD SCHEMA LINTER</span>
+    </header>
+
+    <section class="intro">
+      <p class="eyebrow">STRUCTURE / TYPES / CONSTRAINTS</p>
+      <h1>Validate smart contract payloads before dispatch.</h1>
+      <p>Audit payload JSON trees against strict schemas in real time, inspecting nested types, required parameters, range limits, and enum states.</p>
+    </section>
+
+    <section class="controls-bar">
+      <label for="template-select">Schema Template:
+        <select id="template-select">
+          <option value="contract">Smart Contract Payload Schema</option>
+          <option value="oracle">Oracle Feed Price Attestation</option>
+        </select>
+      </label>
+      <div class="actions">
+        <button id="validate-btn" type="button">Run Validation</button>
+        <span id="status-badge" class="badge">EVALUATING</span>
+      </div>
+    </section>
+
+    <div class="split-pane">
+      <section class="editor-pane">
+        <label for="schema-input">JSON Schema (Definition)</label>
+        <textarea id="schema-input" spellcheck="false"></textarea>
+      </section>
+
+      <section class="editor-pane">
+        <label for="payload-input">JSON Payload (Data to Test)</label>
+        <textarea id="payload-input" spellcheck="false"></textarea>
+      </section>
+    </div>
+
+    <section class="report-section">
+      <h2>Validation Report &amp; Linter Diagnostics</h2>
+      <pre id="report" class="report-box"></pre>
+    </section>
+
+    <footer>
+      Client-side JSON schema inspection engine. No remote server or external parser dependencies.
+    </footer>
+  </main>
+</body>
+</html>
