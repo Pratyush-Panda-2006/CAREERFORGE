@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning workspace tour · Edtech Academy</title>
+  <link rel="stylesheet" href="./virtual-tour.css">
+  <script type="module" src="./virtual-tour.js"></script>
+</head>
+<body>
+  <main>
+    <header class="header">
+      <a href="./index.html">Edtech Academy</a>
+      <button type="button" id="start-tour">Start guided tour</button>
+    </header>
+    <section class="intro">
+      <h1>Learning workspace</h1>
+      <p>Find a course, see what comes next, and check your progress.</p>
+    </section>
+    <section class="panel" id="learning-paths" aria-labelledby="paths-heading">
+      <h2 id="paths-heading">Learning paths</h2>
+      <ul class="paths">
+        <li><strong>LLM inference architecture</strong><span>Advanced · 12 weeks</span></li>
+        <li><strong>Distributed systems</strong><span>Intermediate · 8 weeks</span></li>
+      </ul>
+    </section>
+    <section class="panel" id="syllabus-roadmap" aria-labelledby="roadmap-heading">
+      <h2 id="roadmap-heading">Syllabus and roadmap</h2>
+      <ol>
+        <li>Learn the foundations</li>
+        <li>Work through a practical example</li>
+        <li>Build and review a capstone</li>
+      </ol>
+    </section>
+    <section class="panel" id="course-progress" aria-labelledby="progress-heading">
+      <h2 id="progress-heading">Example course progress</h2>
+      <label for="progress">LLM inference architecture · 68%</label>
+      <progress id="progress" max="100" value="68">68%</progress>
+    </section>
+    <p id="tour-status" role="status"></p>
+  </main>
+
+  <div id="spotlight" aria-hidden="true" hidden></div>
+  <dialog id="tour" aria-labelledby="tour-title" aria-describedby="tour-description">
+    <p id="tour-step" aria-live="polite" aria-atomic="true"></p>
+    <h2 id="tour-title" tabindex="-1"></h2>
+    <p id="tour-description"></p>
+    <div id="tour-dots" role="group" aria-label="Go to a tour step"></div>
+    <div class="actions">
+      <button type="button" id="skip-tour">Skip tour</button>
+      <button type="button" id="previous-step">Previous</button>
+      <button type="button" id="next-step">Next</button>
+    </div>
+  </dialog>
+</body>
+</html>
