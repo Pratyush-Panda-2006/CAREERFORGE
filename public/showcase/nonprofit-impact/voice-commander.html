@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nonprofit Impact - Voice Commander & Accessibility Speech Dispatcher</title>
+  <link rel="stylesheet" href="./voice-commander.css">
+</head>
+<body class="nonprofit-voice-theme">
+  <div class="voice-commander-container">
+    <header class="voice-header">
+      <div class="branding-group">
+        <span class="mic-glyph" aria-hidden="true">🎙️</span>
+        <div class="title-meta">
+          <h2>Nonprofit Impact Voice Commander</h2>
+          <p class="subtitle">Speech Recognition & Accessibility Speech Dispatcher</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <span id="commanderStatusBadge" class="status-badge status-idle">IDLE</span>
+      </div>
+    </header>
+
+    <main class="commander-dashboard">
+      <section class="mic-stage-card" aria-label="Microphone Control Area">
+        <div class="visualizer-wrapper">
+          <div id="waveVisualizer" class="wave-rings" aria-hidden="true">
+            <span class="ring ring-1"></span>
+            <span class="ring ring-2"></span>
+            <span class="ring ring-3"></span>
+          </div>
+          <button id="btnMicToggle" class="mic-main-button" aria-label="Toggle Voice Input Recording" title="Activate Speech Recognition">
+            <svg class="mic-svg" viewBox="0 0 24 24" width="36" height="36" fill="currentColor">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+          </button>
+        </div>
+        <p class="mic-helper-text">Click the microphone or say commands like <em>"view metrics"</em>, <em>"open overview"</em>, <em>"export report as pdf"</em>, or <em>"toggle contrast"</em>.</p>
+      </section>
+
+      <section class="command-feed-panel" aria-label="Recognized Command Stream">
+        <div class="feed-header">
+          <h3>Recognized Action Stream</h3>
+          <button id="btnClearFeed" class="btn-clear-feed" type="button">Clear Log</button>
+        </div>
+        <div id="commandFeed" class="command-feed-console" role="log" aria-live="polite">
+          <div class="empty-feed-placeholder">Awaiting voice command input... Say "help" or click microphone.</div>
+        </div>
+      </section>
+    </main>
+
+    <div id="speechToast" class="speech-toast" role="alert" aria-live="assertive"></div>
+  </div>
+
+  <script type="module" src="./voice-commander.js"></script>
+</body>
+</html>
