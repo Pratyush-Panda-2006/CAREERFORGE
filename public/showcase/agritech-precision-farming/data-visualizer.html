@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compare field profiles · Agritech Precision Farming</title>
+  <link rel="stylesheet" href="./data-visualizer.css">
+  <script type="module" src="./data-visualizer.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <a href="./index.html">Agritech Precision Farming</a>
+      <h1>Compare field profiles</h1>
+      <p>Adjust the sample field scores to compare their shape with the baseline. Each axis uses the same 0–100 scale.</p>
+    </header>
+    <div class="layout">
+      <section aria-labelledby="plot-heading" class="panel plot">
+        <h2 id="plot-heading">Field comparison</h2>
+        <svg id="radar" viewBox="0 0 360 340" role="group" aria-labelledby="chart-title chart-desc">
+          <title id="chart-title">Field profile radar chart</title>
+          <desc id="chart-desc">Use the points on the chart or view the scores in the table below.</desc>
+          <g id="grid" aria-hidden="true"></g>
+          <polygon id="baseline" aria-hidden="true"></polygon>
+          <polygon id="sample" aria-hidden="true"></polygon>
+          <g id="vertices"></g>
+        </svg>
+        <p id="detail" class="detail">Focus or point to a vertex to read its score.</p>
+        <p>Sample area <strong id="area">0%</strong> of the full chart.</p>
+      </section>
+      <section class="panel" aria-labelledby="controls-heading">
+        <h2 id="controls-heading">Sample scores</h2>
+        <div id="sliders"></div>
+        <label class="toggle"><input type="checkbox" id="show-baseline" checked> Show baseline overlay</label>
+        <table>
+          <caption>Field scores by metric</caption>
+          <thead><tr><th scope="col">Metric</th><th scope="col">Sample</th><th scope="col">Baseline</th></tr></thead>
+          <tbody id="scores"></tbody>
+        </table>
+      </section>
+    </div>
+    <noscript><p>Enable JavaScript to adjust scores and render the chart.</p></noscript>
+  </main>
+</body>
+</html>
