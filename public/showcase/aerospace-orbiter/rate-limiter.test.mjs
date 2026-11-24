@@ -1,0 +1,59 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { AerospaceOrbiterTokenBucketRateLimiter } from './rate-limiter.js';
+
+function fixture(options = {}) {
+  let time = 0;
+  return {
+    limiter: new AerospaceOrbiterTokenBucketRateLimiter({ clock: () => time, ...options }),
+    set: value => { time = value; }
+  };
+}
+
+test('AerospaceOrbiterTokenBucketRateLimiter - initial burst exhausts exactly and never goes negative', () => {
+  const { limiter: l } = fixture();
+  for (let i = 0; i < 10; i++) assert.equal(l.tryConsume(), true);
+  assert.equal(l.tryConsume(), false);
+  assert.equal(l.getAvailableTokens(), 0);
+});
+
+test('AerospaceOrbiterTokenBucketRateLimiter - fractional elapsed refill and idle clamp conserve capacity', () => {
+  const { limiter: l, set } = fixture();
+  l.tryConsume(10);
+  set(125);
+  assert.equal(l.getAvailableTokens(), 0.25);
+  assert.equal(l.tryConsume(0.25), true);
+  set(625);
+  assert.equal(l.getAvailableTokens(), 1);
+  set(100000);
+  assert.equal(l.getAvailableTokens(), 10);
+});
+
+test('AerospaceOrbiterTokenBucketRateLimiter - configuration rejects invalid and unbounded values', () => {
+  for (const capacity of [0, -1, NaN, Infinity, 1001]) assert.throws(() => new AerospaceOrbiterTokenBucketRateLimiter({ capacity }));
+  for (const refillPerSecond of [0, -1, NaN, Infinity, 1001]) assert.throws(() => new AerospaceOrbiterTokenBucketRateLimiter({ refillPerSecond }));
+  for (const maxConcurrent of [0, 1.5, 21, NaN]) assert.throws(() => new AerospaceOrbiterTokenBucketRateLimiter({ maxConcurrent }));
+  for (const maxQueue of [0, 1.5, 101]) assert.throws(() => new AerospaceOrbiterTokenBucketRateLimiter({ maxQueue }));
+});
+
+test('AerospaceOrbiterTokenBucketRateLimiter - priority wins and FIFO breaks ties with concurrency bounded', () => {
+  const { limiter: l } = fixture({ maxConcurrent: 2 });
+  l.enqueue({ id: 'telemetry' });
+  l.enqueue({ id: 'burn1', priority: 9 });
+  l.enqueue({ id: 'burn2', priority: 9 });
+  assert.deepEqual(l.tick().started.map(x => x.id), ['burn1', 'burn2']);
+  assert.equal(l.snapshot().active.length, 2);
+  assert.deepEqual(l.snapshot().queue.map(x => x.id), ['telemetry']);
+  assert.equal(l.tick().started.length, 0);
+});
+
+test('AerospaceOrbiterTokenBucketRateLimiter - token exhaustion waits for sufficient refill before admission', () => {
+  const { limiter: l, set } = fixture({ capacity: 1, refillPerSecond: 1 });
+  l.enqueue({ id: 'cmd-1', durationMs: 0 });
+  l.enqueue({ id: 'cmd-2' });
+  assert.equal(l.tick().started.length, 1);
+  set(999);
+  assert.equal(l.tick().started.length, 0);
+  set(1000);
+  assert.deepEqual(l.tick().started.map(x => x.id), ['cmd-2']);
+});
