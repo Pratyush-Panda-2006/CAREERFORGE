@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantum Forge — Vector Sketchpad & Whiteboard Canvas</title>
+  <link rel="stylesheet" href="canvas-whiteboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+</head>
+<body class="qf-wb-body">
+  <header class="qf-wb-header">
+    <div class="qf-wb-brand">
+      <a href="index.html" class="qf-wb-back-link" title="Return to Quantum Forge">⬅ Quantum Forge</a>
+      <h1 class="qf-wb-title">Vector Whiteboard <span class="qf-badge">NSOC '26</span></h1>
+    </div>
+    <div class="qf-wb-actions">
+      <button type="button" id="exportSvgBtn" class="qf-btn" title="Export Vector SVG">📐 Export SVG</button>
+      <button type="button" id="clearBtn" class="qf-btn qf-btn-danger" title="Clear Canvas">🗑️ Clear</button>
+    </div>
+  </header>
+
+  <main class="qf-wb-workspace">
+    <nav class="qf-dock" role="toolbar" aria-label="Quantum Forge Drawing Tools">
+      <div class="qf-dock-group" id="toolsGroup">
+        <button type="button" class="qf-tool-btn active" data-tool="pen" title="Pen (Freehand)">✏️ Pen</button>
+        <button type="button" class="qf-tool-btn" data-tool="eraser" title="Eraser">🧹 Eraser</button>
+        <button type="button" class="qf-tool-btn" data-tool="line" title="Line">➖ Line</button>
+        <button type="button" class="qf-tool-btn" data-tool="rectangle" title="Rectangle">⬜ Rectangle</button>
+      </div>
+      <div class="qf-dock-separator"></div>
+      <div class="qf-dock-group qf-color-swatches" id="colorSwatches">
+        <button type="button" class="qf-swatch active" data-color="#00f2fe" style="background-color:#00f2fe;" title="Quantum Cyan"></button>
+        <button type="button" class="qf-swatch" data-color="#7928ca" style="background-color:#7928ca;" title="Electric Violet"></button>
+        <button type="button" class="qf-swatch" data-color="#06d6a0" style="background-color:#06d6a0;" title="Neon Mint"></button>
+        <button type="button" class="qf-swatch" data-color="#ff4d6d" style="background-color:#ff4d6d;" title="Plasma Coral"></button>
+        <button type="button" class="qf-swatch" data-color="#ffffff" style="background-color:#ffffff;" title="White"></button>
+      </div>
+      <div class="qf-dock-separator"></div>
+      <div class="qf-dock-group">
+        <button type="button" id="undoBtn" class="qf-tool-btn" title="Undo" disabled>↩️</button>
+        <button type="button" id="redoBtn" class="qf-tool-btn" title="Redo" disabled>↪️</button>
+      </div>
+    </nav>
+
+    <div class="qf-canvas-wrap">
+      <canvas id="whiteboardCanvas" class="qf-drawing-surface"></canvas>
+    </div>
+
+    <footer class="qf-wb-status">
+      <span class="qf-dot"></span>
+      <span id="statusTool">TOOL: PEN</span>
+      <span id="statusStrokes">STROKES: 0</span>
+    </footer>
+  </main>
+
+  <script type="module">
+    import { QuantumForgeWhiteboardCanvas } from './canvas-whiteboard.js';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const canvasEl = document.getElementById('whiteboardCanvas');
+      const whiteboard = new QuantumForgeWhiteboardCanvas({ canvas: canvasEl });
+
+      const toolButtons = document.querySelectorAll('.qf-tool-btn[data-tool]');
+      const colorSwatches = document.querySelectorAll('.qf-swatch');
+      const undoBtn = document.getElementById('undoBtn');
+      const redoBtn = document.getElementById('redoBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const exportSvgBtn = document.getElementById('exportSvgBtn');
+      const statusTool = document.getElementById('statusTool');
+      const statusStrokes = document.getElementById('statusStrokes');
+
+      function updateStatus() {
+        statusTool.textContent = `TOOL: ${whiteboard.tool.toUpperCase()}`;
+        statusStrokes.textContent = `STROKES: ${whiteboard.strokes.length}`;
+        undoBtn.disabled = !whiteboard.canUndo();
+        redoBtn.disabled = !whiteboard.canRedo();
+      }
+
+      whiteboard.on('change', updateStatus);
+      whiteboard.on('tool:change', (data) => {
+        statusTool.textContent = `TOOL: ${data.tool.toUpperCase()}`;
+        toolButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === data.tool));
+      });
+      whiteboard.on('color:change', (data) => {
+        colorSwatches.forEach(s => s.classList.toggle('active', s.dataset.color.toLowerCase() === data.color.toLowerCase()));
+      });
+
+      toolButtons.forEach(btn => btn.addEventListener('click', () => whiteboard.setTool(btn.dataset.tool)));
+      colorSwatches.forEach(swatch => swatch.addEventListener('click', () => whiteboard.setColor(swatch.dataset.color)));
+      undoBtn.addEventListener('click', () => whiteboard.undo());
+      redoBtn.addEventListener('click', () => whiteboard.redo());
+      clearBtn.addEventListener('click', () => whiteboard.clear());
+
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          e.shiftKey ? whiteboard.redo() : whiteboard.undo();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          whiteboard.redo();
+        }
+      });
+
+      canvasEl.addEventListener('pointermove', (e) => {
+        const rect = canvasEl.getBoundingClientRect();
+        window.statusCoords = `X: ${Math.round(e.clientX - rect.left)}, Y: ${Math.round(e.clientY - rect.top)}`;
+      });
+
+      exportSvgBtn.addEventListener('click', () => {
+        const svg = whiteboard.exportSVG();
+        const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `quantum-forge-whiteboard-${Date.now()}.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      updateStatus();
+    });
+  </script>
+</body>
+</html>
