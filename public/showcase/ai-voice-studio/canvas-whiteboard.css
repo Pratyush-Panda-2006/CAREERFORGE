@@ -1,0 +1,121 @@
+/**
+ * Sonora AI Voice Studio - Vector Whiteboard & Freehand Sketchpad Styles
+ * Theme: Voice Studio Dark (#0a0f1a) & Cyber Cyan (#00f2fe)
+ */
+
+:root {
+  --avs-bg: #0a0f1a;
+  --avs-surface: #12192b;
+  --avs-surface-elevated: rgba(18, 25, 43, 0.9);
+  --avs-border: #233045;
+  --avs-border-focus: #00f2fe;
+  --avs-text-main: #e8eef7;
+  --avs-text-muted: #7d8da0;
+  --avs-cyan: #00f2fe;
+  --avs-coral: #ff4d6d;
+  --avs-violet: #7928ca;
+  --avs-mint: #06d6a0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body.avs-wb-body {
+  background-color: var(--avs-bg);
+  color: var(--avs-text-main);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+}
+
+.avs-wb-header {
+  height: 56px;
+  background: var(--avs-surface);
+  border-bottom: 1px solid var(--avs-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 30;
+}
+
+.avs-wb-brand { display: flex; align-items: center; gap: 12px; }
+
+.avs-wb-back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--avs-cyan); text-decoration: none; font-size: 13px;
+  font-weight: 600; padding: 6px 10px; border-radius: 6px;
+  background: rgba(0, 242, 254, 0.1); transition: all 0.15s ease;
+}
+.avs-wb-back-link:hover { background: rgba(0, 242, 254, 0.2); }
+
+.avs-wb-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.avs-badge {
+  font-size: 10px; font-weight: 700; color: var(--avs-cyan);
+  background: rgba(0, 242, 254, 0.15); border: 1px solid rgba(0, 242, 254, 0.3);
+  padding: 2px 6px; border-radius: 4px;
+}
+
+.avs-wb-actions { display: flex; align-items: center; gap: 8px; }
+
+.avs-btn {
+  background: var(--avs-surface); color: var(--avs-text-main);
+  border: 1px solid var(--avs-border); padding: 6px 12px; border-radius: 6px;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+}
+.avs-btn:hover { background: #1c263b; border-color: var(--avs-border-focus); }
+
+.avs-btn-danger {
+  background: rgba(255, 77, 109, 0.1); border-color: var(--avs-coral); color: #ff758f;
+}
+.avs-btn-danger:hover { background: rgba(255, 77, 109, 0.25); color: #ff758f; }
+
+.avs-wb-workspace { flex: 1; position: relative; display: flex; flex-direction: column; }
+
+.avs-dock {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  background: var(--avs-surface-elevated);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border-radius: 12px;
+  display: flex; align-items: center; gap: 10px; padding: 8px 14px; z-index: 20;
+}
+
+.avs-dock-group { display: flex; align-items: center; gap: 6px; }
+.avs-dock-separator { width: 1px; height: 24px; background: rgba(255, 255, 255, 0.15); }
+
+.avs-tool-btn {
+  background: transparent; border: 1px solid transparent; color: var(--avs-text-main);
+  padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;
+  transition: all 0.15s ease;
+}
+.avs-tool-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
+.avs-tool-btn.active {
+  background: rgba(0, 242, 254, 0.25); border-color: var(--avs-cyan); color: #6fe3ff;
+}
+.avs-tool-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.avs-swatch {
+  width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent;
+  cursor: pointer; transition: transform 0.15s ease;
+}
+.avs-swatch:hover { transform: scale(1.15); }
+.avs-swatch.active {
+  border-color: #ffffff; transform: scale(1.15);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.avs-canvas-wrap { flex: 1; position: relative; width: 100%; height: calc(100vh - 86px); }
+
+.avs-drawing-surface {
+  width: 100%; height: 100%; display: block; cursor: crosshair;
+}
+
+.avs-wb-status {
+  height: 30px; background: var(--avs-surface); border-top: 1px solid var(--avs-border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+  font-size: 11px; color: var(--avs-text-muted); font-family: 'JetBrains Mono', monospace;
+}
+.avs-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--avs-cyan); }
