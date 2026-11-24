@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agritech Precision Farming - Cron Expression Builder & Next-Run Visualizer</title>
+  <link rel="stylesheet" href="cron-parser.css">
+</head>
+<body>
+  <div class="cron-container" data-cron-lab>
+    <header class="header">
+      <h1>Automated Agricultural Task Scheduler</h1>
+      <p class="subtitle">Translate 5-part cron syntax to natural language and forecast execution timelines</p>
+    </header>
+
+    <main class="grid-layout">
+      <!-- 5-Part Cron Input Card -->
+      <section class="card input-card">
+        <h2>5-Part Cron Syntax Builder</h2>
+        <div class="fields-row">
+          <div class="cron-field">
+            <label for="cron-min">Minute (0-59)</label>
+            <input type="text" id="cron-min" value="0">
+          </div>
+          <div class="cron-field">
+            <label for="cron-hour">Hour (0-23)</label>
+            <input type="text" id="cron-hour" value="6">
+          </div>
+          <div class="cron-field">
+            <label for="cron-dom">Day of Month (1-31)</label>
+            <input type="text" id="cron-dom" value="*">
+          </div>
+          <div class="cron-field">
+            <label for="cron-mon">Month (1-12)</label>
+            <input type="text" id="cron-mon" value="*">
+          </div>
+          <div class="cron-field">
+            <label for="cron-dow">Day of Week (0-6)</label>
+            <input type="text" id="cron-dow" value="*">
+          </div>
+        </div>
+
+        <div class="cron-raw-badge">
+          <span>Expression:</span> <code id="raw-expression">0 6 * * *</code>
+        </div>
+
+        <div id="error-banner" class="error-banner" style="display: none;"></div>
+
+        <div class="preset-section">
+          <h3>Agritech Presets</h3>
+          <div class="preset-buttons">
+            <button id="preset-irrigation" class="btn btn-preset">Dawn Irrigation (06:00)</button>
+            <button id="preset-drone-patrol" class="btn btn-preset">Workday Drone (Every 30m, 8-18 M-F)</button>
+            <button id="preset-sensor-mesh" class="btn btn-preset">Telemetry Sync (Every 15m)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Human Readable Explanation Card -->
+      <section class="card explanation-card">
+        <h2>Schedule Explanation</h2>
+        <div class="explanation-box">
+          <div class="quote-icon">“</div>
+          <p id="human-readable-desc" class="explanation-text">At 06:00 every day</p>
+        </div>
+      </section>
+
+      <!-- Next-Runs Schedule Visualizer -->
+      <section class="card next-runs-card">
+        <h2>Upcoming Scheduled Executions</h2>
+        <div id="next-runs-list" class="next-runs-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="cron-parser.js"></script>
+</body>
+</html>
