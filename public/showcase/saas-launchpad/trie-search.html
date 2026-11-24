@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore a local observability lexicon with prefix lookup, edit-distance suggestions and an interactive trie.">
+  <link rel="icon" href="data:,">
+  <title>Lexicon Lab · SaaS Launchpad</title>
+  <link rel="stylesheet" href="trie-search.css">
+</head>
+<body>
+  <main>
+    <header><a href="index.html">← SaaS Launchpad</a><span>LOCAL ALGORITHM LAB</span></header>
+    <section class="intro" aria-labelledby="title">
+      <p class="eyebrow">SaaS Launchpad / Search systems</p>
+      <h1 id="title">Follow the prefix.</h1>
+      <p>Look up an observability term, inspect its branches, or recover a misspelling. Every lookup runs locally in a prefix tree.</p>
+    </section>
+    <div class="workspace">
+      <section class="search-panel" aria-labelledby="search-heading">
+        <div class="section-heading"><h2 id="search-heading">01 / Find a term</h2><span><strong id="word-count">22</strong> terms</span></div>
+        <label for="term-search">Observability term or prefix</label>
+        <input id="term-search" type="text" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false" aria-describedby="search-help" autocomplete="off" spellcheck="false" maxlength="128" placeholder="Try log, alert, or lg">
+        <p id="search-help" class="help">Use ↑ / ↓ and Enter to select; Escape closes suggestions.</p>
+        <ul id="suggestions" role="listbox" aria-label="Search suggestions" hidden></ul>
+        <label for="edit-distance">Maximum spelling distance</label>
+        <select id="edit-distance"><option value="0">0 — no typo correction</option><option value="1">1 edit</option><option value="2" selected>2 edits</option><option value="3">3 edits</option></select>
+        <p class="help">Prefix matches take priority. Otherwise, suggestions use code-point Levenshtein distance: one insertion, deletion or substitution is one edit.</p>
+        <form id="add-term">
+          <h3>Add to the local lexicon</h3>
+          <label for="new-term">New term</label>
+          <div class="add-row"><input id="new-term" type="text" maxlength="128" required placeholder="e.g. Custom signal"><button type="submit">Add term</button></div>
+          <p class="help">Up to 1,000 terms, 64 characters each. Duplicate terms are case-insensitive. Nothing is saved or uploaded; reload resets the lexicon.</p>
+        </form>
+        <p id="search-status" role="status" aria-live="polite"></p>
+      </section>
+      <section class="tree-panel" aria-labelledby="tree-heading">
+        <div class="section-heading"><h2 id="tree-heading">02 / Inspect the trie</h2><span>LIVE PREFIX VIEW</span></div>
+        <p class="help">Each edge is one character; ␠ means a space. Complete terms appear after →. Expand or collapse a branch to explore. Preview is limited to 120 nodes.</p>
+        <ul id="trie-tree" class="tree" aria-label="Prefix subtree"></ul>
+      </section>
+    </div>
+    <footer>A data-structure demonstration using a sample vocabulary. No account data, production logs, metric ingestion or monitoring connection.</footer>
+  </main>
+  <script type="module" src="trie-search.js"></script>
+</body>
+</html>
