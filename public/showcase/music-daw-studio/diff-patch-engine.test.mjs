@@ -52,3 +52,29 @@ test('all short binary line sequences match independent edit-distance oracle', (
     const {diff}=roundtrip(a,b);assert.equal(diff.filter(x=>x.type!=='context').length,dp[left.length][right.length]);
   }
 });
+
+test('music-daw-studio track manifest patch roundtrip and chunk boundaries (#3804)', () => {
+  const originalManifest = [
+    'project: Ambient Soundscape',
+    'bpm: 110',
+    'track: Pad A (Reverb 40%)',
+    'track: Bass Drone (Sub 50Hz)',
+    'masterGain: -3dB',
+    ''
+  ].join('\n');
+
+  const modifiedManifest = [
+    'project: Ambient Soundscape',
+    'bpm: 115',
+    'track: Pad A (Reverb 45%)',
+    'track: Lead Arp (Analog Pluck)',
+    'track: Bass Drone (Sub 50Hz)',
+    'masterGain: -2dB',
+    ''
+  ].join('\n');
+
+  const { diff, patch } = roundtrip(originalManifest, modifiedManifest);
+  assert.ok(patch.length > 0);
+  assert.equal(engine.applyPatch(originalManifest, patch), modifiedManifest);
+});
+
