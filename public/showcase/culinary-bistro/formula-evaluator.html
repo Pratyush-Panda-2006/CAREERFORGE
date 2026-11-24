@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumière Bistro — Mathematical Expression Parser & Dynamic KPI Formula Calculator</title>
+  <meta name="description" content="Production-grade mathematical expression parser and dynamic culinary KPI calculator for Lumière Bistro with live parameter tuning and audit history.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./formula-evaluator.css">
+</head>
+<body class="formula-evaluator-body">
+  <div class="eval-app-container">
+    <!-- Top Navigation Bar -->
+    <header class="eval-navbar">
+      <div class="nav-left">
+        <a href="./index.html" class="nav-back-link" title="Return to Lumière Bistro Showcase">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+          <span>Back to Lumière Bistro Hub</span>
+        </a>
+        <div class="nav-separator" aria-hidden="true"></div>
+        <div class="nav-brand">
+          <span class="brand-glyph" aria-hidden="true">🍷</span>
+          <span class="brand-title">Lumière Bistro // KPI Engine</span>
+          <span class="badge-status">ONLINE</span>
+        </div>
+      </div>
+      <div class="nav-right">
+        <button id="contrast-toggle" class="btn-contrast-toggle" type="button" aria-pressed="false" aria-label="Toggle WCAG AAA High Contrast Mode" title="Toggle WCAG AAA high contrast theme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10V2z"/>
+          </svg>
+          <span>High Contrast (AAA)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero / Headline Section -->
+    <section class="eval-hero-banner" aria-labelledby="hero-title">
+      <div class="hero-badge">EXECUTIVE CHEF &amp; FINANCIAL OPERATIONS CONSOLE</div>
+      <h1 id="hero-title">Mathematical Expression Parser &amp; Dynamic KPI Calculator</h1>
+      <p class="hero-description">
+        Precision Shunting-Yard RPN engine for real-time culinary profitability modeling, kitchen prime cost auditing,
+        and seat revenue optimization with instant parameter synchronization.
+      </p>
+    </section>
+
+    <!-- Error Warning Banner (ARIA Live Alert) -->
+    <section id="error-banner" class="eval-alert-banner" role="alert" aria-live="assertive" style="display: none;">
+      <div class="alert-icon" aria-hidden="true">⚠</div>
+      <div class="alert-content">
+        <strong class="alert-title">Evaluation / Syntax Warning:</strong>
+        <span id="error-text">Syntax error encountered</span>
+      </div>
+    </section>
+
+    <!-- Quick Preset Buttons Bar -->
+    <section class="preset-pills-bar" aria-label="Quick Select KPI Presets">
+      <span class="pills-title">KPI Quick Presets:</span>
+      <div class="preset-pill-group">
+        <button type="button" class="preset-pill-btn" data-preset-id="food_cost_percentage">Food Cost %</button>
+        <button type="button" class="preset-pill-btn" data-preset-id="prime_cost_ratio">Prime Cost Ratio</button>
+        <button type="button" class="preset-pill-btn" data-preset-id="gross_contribution_margin">Contribution Margin</button>
+        <button type="button" class="preset-pill-btn" data-preset-id="daily_net_profit">Daily Net Profit</button>
+        <button type="button" class="preset-pill-btn" data-preset-id="revpash">RevPASH</button>
+        <button type="button" class="preset-pill-btn" data-preset-id="beverage_margin_ratio">Beverage Margin</button>
+      </div>
+    </section>
+
+    <!-- Main Two-Column Layout -->
+    <main class="eval-dashboard-grid">
+      <!-- Left Column: Formula Editor & Variable Tuning Workbench -->
+      <section class="eval-panel config-panel" aria-label="Formula Editor and Parameters">
+        <div class="panel-header">
+          <div class="panel-title-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="4 17 10 11 4 5"/>
+              <line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+            <h2>Culinary Formula Console</h2>
+          </div>
+          <span id="syntax-badge" class="syntax-badge valid" role="status">Valid Syntax</span>
+        </div>
+
+        <!-- Preset Formula Dropdown -->
+        <div class="control-row">
+          <label for="preset-select" class="field-label">Select Standard KPI Preset:</label>
+          <div class="select-wrapper">
+            <select id="preset-select" class="styled-select" aria-label="Select culinary formula preset">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <p id="preset-description" class="field-hint">
+            Food Cost Percentage: Calculates what percentage of menu price is allocated to raw ingredients.
+          </p>
+        </div>
+
+        <!-- Formula Expression Input -->
+        <div class="control-row">
+          <div class="field-label-group">
+            <label for="formula-input" class="field-label">Mathematical Expression:</label>
+            <span class="field-sub-hint">Supports ^, *, /, +, -, %, scientific functions, and culinary variables</span>
+          </div>
+          <div class="formula-input-wrapper">
+            <input
+              type="text"
+              id="formula-input"
+              class="formula-input"
+              value="(food_cost / menu_price) * 100"
+              spellcheck="false"
+              autocomplete="off"
+              aria-label="Mathematical expression input"
+              placeholder="e.g. (food_cost / menu_price) * 100"
+            >
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons-row">
+          <button id="eval-btn" class="btn-primary" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span>Evaluate Expression</span>
+          </button>
+          <button id="clear-btn" class="btn-secondary" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18"/>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
+            <span>Clear</span>
+          </button>
+        </div>
+
+        <!-- Supported Operators & Functions Quick Insert Pills -->
+        <div class="syntax-pills-container" aria-label="Operator & Function Quick-Insert">
+          <div class="pills-category">
+            <span class="pills-cat-title">Operators:</span>
+            <button type="button" class="syntax-pill" data-insert=" + ">+ Add</button>
+            <button type="button" class="syntax-pill" data-insert=" - ">- Sub</button>
+            <button type="button" class="syntax-pill" data-insert=" * ">* Mul</button>
+            <button type="button" class="syntax-pill" data-insert=" / ">/ Div</button>
+            <button type="button" class="syntax-pill" data-insert=" % ">% Mod</button>
+            <button type="button" class="syntax-pill" data-insert=" ^ ">^ Pow</button>
+            <button type="button" class="syntax-pill" data-insert="(">(</button>
+            <button type="button" class="syntax-pill" data-insert=")">)</button>
+          </div>
+          <div class="pills-category">
+            <span class="pills-cat-title">Functions:</span>
+            <button type="button" class="syntax-pill fn-pill" data-insert="sqrt()">sqrt</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="log()">log</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="ln()">ln</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="exp()">exp</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="abs()">abs</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="min(, )">min</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="max(, )">max</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="round()">round</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="floor()">floor</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="ceil()">ceil</button>
+            <button type="button" class="syntax-pill fn-pill" data-insert="pow(, )">pow</button>
+          </div>
+        </div>
+
+        <!-- Variable Tuning Workbench -->
+        <div class="workbench-section" aria-labelledby="workbench-title">
+          <div class="workbench-header">
+            <div>
+              <h3 id="workbench-title">Bistro Variable Tuning Workbench</h3>
+              <p class="workbench-sub">Live synchronized number inputs and dual-state range sliders</p>
+            </div>
+            <button id="reset-vars-btn" class="btn-tertiary" type="button" title="Reset all variables to default culinary numbers">
+              Reset Defaults
+            </button>
+          </div>
+
+          <div class="variables-grid">
+            <!-- 1. food_cost -->
+            <div class="var-card">
+              <div class="var-card-header">
+                <label for="input-food_cost" class="var-label">
+                  <span class="var-name">food_cost</span>
+                  <span class="var-unit">($/dish)</span>
+                </label>
+                <input
+                  type="number"
+                  id="input-food_cost"
+                  class="var-input"
+                  data-var="food_cost"
+                  value="12.50"
+                  step="0.25"
+                  min="0.5"
+                  max="150"
+                  aria-label="food_cost numerical value"
+                >
+              </div>
+              <input
+                type="range"
+                class="var-slider"
+                data-var="food_cost"
+                value="12.50"
+                step="0.25"
+                min="0.5"
+                max="150"
+                aria-label="food_cost slider"
+              >
+            </div>
+
+            <!-- 2. menu_price -->
+            <div class="var-card">
+              <div class="var-card-header">
+                <label for="input-menu_price" class="var-label">
+                  <span class="var-name">menu_price</span>
+                  <span class="var-unit">($/dish)</span>
+                </label>
+                <input
+                  type="number"
+                  id="input-menu_price"
+                  class="var-input"
+                  data-var="menu_price"
+                  value="45.00"
+                  step="0.50"
+                  min="1"
+                  max="250"
+                  aria-label="menu_price numerical value"
+                >
+              </div>
+              <input
+                type="range"
+                class="var-slider"
+                data-var="menu_price"
+                value="45.00"
+                step="0.50"
+                min="1"
+                max="250"
+                aria-label="menu_price slider"
+              >
+            </div>
+
+            <!-- 3. labor_hours -->
+            <div class="var-card">
+              <div class="var-card-header">
+                <label for="input-labor_hours" class="var-label">
+                  <span class="var-name">labor_hours</span>
+                  <span class="var-unit">(hrs/cover)</span>
+                </label>
+                <input
+                  type="number"
+                  id="input-labor_hours"
+                  class="var-input"
+                  data-var="labor_hours"
+                  value="1.2"
+                  step="0.05"
+                  min="0.1"
+                  max="10"
+                  aria-label="labor_hours numerical value"
+                >
+              </div>
+              <input
+                type="range"
+                class="var-slider"
+                data-var="labor_hours"
+                value="1.2"
+                step="0.05"
+                min="0.1"
+                max="10"
+                aria-label="labor_hours slider"
+              >
+            </div>
+
+            <!-- 4. hourly_wage -->
+            <div class="var-card">
+              <div class="var-card-header">
+                <label for="input-hourly_wage" class="var-label">
+                  <span class="var-name">hourly_wage</span>
+                  <span class="var-unit">($/hr)</span>
+                </label>
+                <input
+                  type="number"
+                  id="input-hourly_wage"
+                  class="var-input"
+                  data-var="hourly_wage"
+                  value="18.00"
+                  step="0.50"
+                  min="10"
+                  max="60"
+                  aria-label="hourly_wage numerical value"
+                >
+              </div>
+              <input
+                type="range"
+                class="var-slider"
+                data-var="hourly_wage"
+                value="18.00"
+                step="0.50"
+                min="10"
+                max="60"
+                aria-label="hourly_wage slider"
+              >
+            </div>
+
+            <!-- 5. daily_covers -->
+            <div class="var-card">
+              <div class="var-card-header">
+                <label for="input-daily_covers" class="var-label">
+                  <span class="var-name">daily_covers</span>
+                  <span class="var-unit">(guests/day)</span>
+                </label>
+                <input
+                  type="number"
+                  id="input-daily_covers"
+                  class="var-input"
+                  data-var="daily_covers"
+                  value="180"
+                  step="5"
+                  min="10"
+                  max="1000"
+                  aria-label="daily_covers numerical value"
+                >
+              </div>
+              <input
+                type="range"
+                class="var-slider"
+                data-var="daily_covers"
+                value="180"
+                step="5"
+                min="10"
+                max="1000"
+                aria-label="daily_covers slider"
+              >
+            </div>
+
+            <!-- 6. beverage_cost -->
+            <div class="var-card">
+              <div class="var-card-header">
+                <label for="input-beverage_cost" class="var-label">
+                  <span class="var-name">beverage_cost</span>
+                  <span class="var-unit">($/drink)</span>
+                </label>
+                <input
+                  type="number"
+                  id="input-beverage_cost"
+                  class="var-input"
+                  data-var="beverage_cost"
+                  value="3.20"
+                  step="0.10"
+                  min="0.25"
+                  max="50"
+                  aria-label="beverage_cost numerical value"
+                >
+              </div>
+              <input
+                type="range"
+                class="var-slider"
+                data-var="beverage_cost"
+                value="3.20"
+                step="0.10"
+                min="0.25"
+                max="50"
+                aria-label="beverage_cost slider"
+              >
+            </div>
+
+            <!-- 7. beverage_price -->
+            <div class="var-card">
+              <div class="var-card-header">
+                <label for="input-beverage_price" class="var-label">
+                  <span class="var-name">beverage_price</span>
+                  <span class="var-unit">($/drink)</span>
+                </label>
+                <input
+                  type="number"
+                  id="input-beverage_price"
+                  class="var-input"
+                  data-var="beverage_price"
+                  value="14.00"
+                  step="0.25"
+                  min="1"
+                  max="100"
+                  aria-label="beverage_price numerical value"
+                >
+              </div>
+              <input
+                type="range"
+                class="var-slider"
+                data-var="beverage_price"
+                value="14.00"
+                step="0.25"
+                min="1"
+                max="100"
+                aria-label="beverage_price slider"
+              >
+            </div>
+
+            <!-- 8. overhead_daily -->
+            <div class="var-card">
+              <div class="var-card-header">
+                <label for="input-overhead_daily" class="var-label">
+                  <span class="var-name">overhead_daily</span>
+                  <span class="var-unit">($/day)</span>
+                </label>
+                <input
+                  type="number"
+                  id="input-overhead_daily"
+                  class="var-input"
+                  data-var="overhead_daily"
+                  value="650.00"
+                  step="25"
+                  min="50"
+                  max="5000"
+                  aria-label="overhead_daily numerical value"
+                >
+              </div>
+              <input
+                type="range"
+                class="var-slider"
+                data-var="overhead_daily"
+                value="650.00"
+                step="25"
+                min="50"
+                max="5000"
+                aria-label="overhead_daily slider"
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Results, Streams & Audit History -->
+      <section class="eval-panel results-panel" aria-label="Evaluation Results and Diagnostics">
+        <!-- Result Callout Cards -->
+        <div class="primary-result-box">
+          <span class="result-badge-label">Calculated Bistro KPI Result</span>
+          <div id="result-display" class="result-value" aria-live="polite">27.78</div>
+          <span class="result-sub-note">High Precision Float Normalized</span>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Raw Exact Value</span>
+            <span id="raw-result-display" class="metric-val">27.777777777778</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Parsed Tokens</span>
+            <span id="token-count-display" class="metric-val">7 tokens</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Latency</span>
+            <span id="eval-latency-display" class="metric-val">0.08 ms</span>
+          </div>
+        </div>
+
+        <!-- Tokenized Parser Stream -->
+        <div class="diagnostic-box">
+          <div class="diagnostic-header">
+            <h3>Tokenized Parser Stream</h3>
+            <span class="stream-badge">Lexer Queue</span>
+          </div>
+          <div id="token-stream" class="token-view" aria-label="Tokenized Stream Output"></div>
+        </div>
+
+        <!-- Reverse Polish Notation (RPN) Stream -->
+        <div class="diagnostic-box">
+          <div class="diagnostic-header">
+            <h3>Reverse Polish Notation (RPN)</h3>
+            <span class="stream-badge">Shunting-Yard Stack</span>
+          </div>
+          <div id="rpn-stream" class="rpn-view" aria-label="Reverse Polish Notation Output"></div>
+        </div>
+
+        <!-- Calculation Audit History Log -->
+        <div class="history-container" aria-labelledby="history-heading">
+          <div class="history-header">
+            <div class="history-title-group">
+              <h3 id="history-heading">Calculation Audit History</h3>
+              <span class="history-sub-badge">Live Session</span>
+            </div>
+            <button id="clear-history-btn" class="btn-clear-history" type="button">Clear Audit Trail</button>
+          </div>
+          <div id="history-list" class="history-feed" role="feed" aria-busy="false"></div>
+          <div id="history-empty" class="history-empty">No calculations logged in this session yet.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./formula-evaluator.js"></script>
+</body>
+</html>
