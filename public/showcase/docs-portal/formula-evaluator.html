@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs Portal — Mathematical Formula Evaluator & Dynamic KPI Calculator</title>
+  <meta name="description" content="Safe mathematical tokenizer, Shunting-yard RPN compiler, dynamic documentation KPI parameter injection, and calculation audit trail history logger.">
+  <link rel="stylesheet" href="formula-evaluator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="docs-portal-evaluator-container">
+    <!-- Header Navigation Bar -->
+    <header class="evaluator-header">
+      <div class="header-nav">
+        <a href="index.html" class="back-link" aria-label="Return to Prisma Docs Portal">
+          <span class="back-arrow" aria-hidden="true">←</span>
+          <span>Return to Prisma Docs Portal</span>
+        </a>
+        <div class="header-actions">
+          <button type="button" id="contrastToggle" class="btn-contrast-toggle" aria-pressed="false" aria-label="Toggle WCAG AAA high contrast mode">
+            High Contrast: OFF
+          </button>
+        </div>
+      </div>
+
+      <div class="header-main">
+        <div class="portal-badge">
+          <span class="badge-icon" aria-hidden="true">📖</span>
+          <span>PRISMA DOCS ANALYTICS WORKBENCH</span>
+        </div>
+        <h1 class="header-title">KPI Formula Evaluator &amp; Math Parser</h1>
+        <p class="header-description">
+          Evaluate custom documentation metrics, test content health algorithms, and compute support deflection KPIs using our safe mathematical expression tokenizer and Dijkstra Shunting-Yard RPN engine.
+        </p>
+      </div>
+    </header>
+
+    <!-- Error Warning Alert Banner -->
+    <div id="errorBanner" class="alert-banner hidden" role="alert" aria-live="polite">
+      <span class="alert-icon" aria-hidden="true">⚠</span>
+      <div class="alert-content">
+        <strong class="alert-title">Calculation Alert:</strong>
+        <span id="errorMessageText">Evaluation failed.</span>
+      </div>
+    </div>
+
+    <!-- Result Callout Cards Grid -->
+    <section class="results-grid" aria-label="Live Formula Calculation Results">
+      <!-- 1. Formatted Result -->
+      <div class="callout-card primary-card">
+        <span class="callout-label">Formatted Result</span>
+        <div class="callout-value-wrapper">
+          <span id="resultFormatted" class="callout-value">92.31%</span>
+        </div>
+        <span class="callout-subtext">Computed via BODMAS / PEMDAS Postfix Stack</span>
+      </div>
+
+      <!-- 2. Raw Numerical Value -->
+      <div class="callout-card">
+        <span class="callout-label">Raw Numerical Value</span>
+        <div class="callout-value-wrapper">
+          <span id="resultRaw" class="callout-subvalue">92.3076923076923</span>
+        </div>
+        <span class="callout-subtext">Double precision floating-point output</span>
+      </div>
+
+      <!-- 3. Token Count & RPN Stats -->
+      <div class="callout-card">
+        <span class="callout-label">Token Count &amp; AST Depth</span>
+        <div class="callout-value-wrapper">
+          <span id="tokenCount" class="callout-subvalue">11 tokens (7 RPN ops)</span>
+        </div>
+        <span class="callout-subtext">O(N) Tokenizer &amp; Shunting-Yard Compiler</span>
+      </div>
+
+      <!-- 4. Latency -->
+      <div class="callout-card">
+        <span class="callout-label">Evaluation Engine Latency</span>
+        <div class="callout-value-wrapper">
+          <span id="execLatency" class="callout-subvalue">&lt; 1 ms</span>
+        </div>
+        <span class="callout-subtext">Microsecond parsing &amp; evaluation cycle</span>
+      </div>
+    </section>
+
+    <!-- Main Two-Column Workbench Grid -->
+    <main class="workbench-grid">
+      <!-- Left Column: Formula Editor & Presets -->
+      <section class="workbench-panel editor-panel" aria-labelledby="formula-editor-heading">
+        <div class="panel-header">
+          <h2 id="formula-editor-heading" class="panel-title">
+            <span class="panel-icon" aria-hidden="true">📐</span>
+            <span>Mathematical Formula Expression</span>
+          </h2>
+          <div id="syntaxBadge" class="syntax-badge syntax-valid" role="status" aria-live="polite">
+            <span id="syntaxBadgeText">✓ Syntax Valid</span>
+          </div>
+        </div>
+
+        <div class="formula-input-wrapper">
+          <label for="formulaInput" class="input-label">Expression Input Formula</label>
+          <div class="input-action-row">
+            <textarea
+              id="formulaInput"
+              class="formula-textarea"
+              rows="3"
+              placeholder="Enter formula, e.g. (helpful_votes / (helpful_votes + unhelpful_votes)) * 100"
+              spellcheck="false"
+              autocomplete="off"
+            >(helpful_votes / (helpful_votes + unhelpful_votes)) * 100</textarea>
+          </div>
+          <div class="editor-buttons-row">
+            <button type="button" id="evaluateBtn" class="btn btn-primary" aria-label="Calculate mathematical expression">
+              <span class="btn-icon" aria-hidden="true">▶</span>
+              <span>Evaluate Expression</span>
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-secondary" aria-label="Clear expression input">
+              <span>Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Compiled RPN Postfix Display -->
+        <div class="rpn-display-card">
+          <div class="rpn-label">Compiled Reverse Polish Notation (RPN Postfix Stack):</div>
+          <div id="resultRPN" class="rpn-tokens-code" aria-label="RPN tokens stack">
+            helpful_votes helpful_votes unhelpful_votes + / 100 *
+          </div>
+        </div>
+
+        <!-- 6 KPI Preset Pills Selection -->
+        <div class="pills-group" aria-label="Documentation KPI Formula Presets">
+          <div class="pills-header">
+            <span class="pills-title">Documentation KPI Presets:</span>
+            <div class="preset-dropdown-wrap">
+              <label for="presetSelect" class="sr-only">Preset Dropdown</label>
+              <select id="presetSelect" class="preset-dropdown">
+                <option value="" disabled>Or choose preset dropdown...</option>
+                <option value="(helpful_votes / (helpful_votes + unhelpful_votes)) * 100" selected>Content Helpfulness Ratio (%)</option>
+                <option value="((search_queries - zero_result_searches) / search_queries) * 100">Search Success Rate (%)</option>
+                <option value="(1 - escalation_rate) * 100">Documentation Deflection Efficiency</option>
+                <option value="monthly_pageviews / total_articles">Pageview Per Article Density</option>
+                <option value="(search_queries / monthly_pageviews) * 100">Search To Pageview Ratio</option>
+                <option value="round((((helpful_votes / (helpful_votes + unhelpful_votes)) * 100) + ((1 - escalation_rate) * 100)) / 2)">Docs Health Score</option>
+              </select>
+            </div>
+          </div>
+          <div class="pills-row">
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="(helpful_votes / (helpful_votes + unhelpful_votes)) * 100">
+              👍 Helpfulness Ratio (%)
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="((search_queries - zero_result_searches) / search_queries) * 100">
+              🔍 Search Success Rate (%)
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="(1 - escalation_rate) * 100">
+              🛡️ Deflection Efficiency
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="monthly_pageviews / total_articles">
+              📄 Pageview Density
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="(search_queries / monthly_pageviews) * 100">
+              ⚡ Search-to-View Ratio
+            </button>
+            <button type="button" class="pill-btn pill-preset" data-preset-formula="round((((helpful_votes / (helpful_votes + unhelpful_votes)) * 100) + ((1 - escalation_rate) * 100)) / 2)">
+              🌟 Docs Health Score
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Insert Variables -->
+        <div class="pills-group" aria-label="Documentation Parameter Tokens Quick-Insert">
+          <span class="pills-title">Documentation Variable Tokens:</span>
+          <div class="pills-row">
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="total_articles">total_articles</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="monthly_pageviews">monthly_pageviews</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="helpful_votes">helpful_votes</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="unhelpful_votes">unhelpful_votes</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="search_queries">search_queries</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="zero_result_searches">zero_result_searches</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="average_time_on_page_sec">average_time_on_page_sec</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="escalation_rate">escalation_rate</button>
+          </div>
+        </div>
+
+        <!-- Quick Insert Functions & Operators -->
+        <div class="pills-group" aria-label="Mathematical Functions and Operators Quick-Insert">
+          <span class="pills-title">Functions &amp; Operators:</span>
+          <div class="pills-row">
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="sqrt()">sqrt()</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="log()">log()</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="ln()">ln()</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="exp()">exp()</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="abs()">abs()</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="min(, )">min(,)</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="max(, )">max(,)</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="round()">round()</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="floor()">floor()</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="ceil()">ceil()</button>
+            <button type="button" class="pill-btn pill-fn" data-insert-snippet="pow(, )">pow(,)</button>
+            <button type="button" class="pill-btn pill-op" data-insert-snippet=" + ">+</button>
+            <button type="button" class="pill-btn pill-op" data-insert-snippet=" - ">-</button>
+            <button type="button" class="pill-btn pill-op" data-insert-snippet=" * ">*</button>
+            <button type="button" class="pill-btn pill-op" data-insert-snippet=" / ">/</button>
+            <button type="button" class="pill-btn pill-op" data-insert-snippet=" ^ ">^ (pow)</button>
+            <button type="button" class="pill-btn pill-op" data-insert-snippet=" % ">% (mod)</button>
+            <button type="button" class="pill-btn pill-op" data-insert-snippet="(">(</button>
+            <button type="button" class="pill-btn pill-op" data-insert-snippet=")">)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Variable Tuning Workbench -->
+      <section class="workbench-panel variables-panel" aria-labelledby="variables-heading">
+        <div class="panel-header">
+          <h2 id="variables-heading" class="panel-title">
+            <span class="panel-icon" aria-hidden="true">🎛️</span>
+            <span>Variable Tuning Workbench</span>
+          </h2>
+          <span class="workbench-live-badge">Live Synchronized</span>
+        </div>
+
+        <div class="variables-list">
+          <!-- 1. total_articles -->
+          <div class="variable-item">
+            <div class="variable-info">
+              <label for="slider_total_articles" class="variable-title"><code>total_articles</code></label>
+              <span class="variable-desc">Total published documentation articles in portal</span>
+            </div>
+            <div class="variable-inputs">
+              <input type="range" id="slider_total_articles" class="range-slider" min="10" max="1000" step="1" value="120" aria-label="Total articles range slider">
+              <input type="number" id="input_total_articles" class="number-input" min="1" max="10000" step="1" value="120" aria-label="Total articles numeric value">
+            </div>
+          </div>
+
+          <!-- 2. monthly_pageviews -->
+          <div class="variable-item">
+            <div class="variable-info">
+              <label for="slider_monthly_pageviews" class="variable-title"><code>monthly_pageviews</code></label>
+              <span class="variable-desc">Aggregate monthly article impressions</span>
+            </div>
+            <div class="variable-inputs">
+              <input type="range" id="slider_monthly_pageviews" class="range-slider" min="1000" max="1000000" step="1000" value="85000" aria-label="Monthly pageviews range slider">
+              <input type="number" id="input_monthly_pageviews" class="number-input" min="100" max="10000000" step="1000" value="85000" aria-label="Monthly pageviews numeric value">
+            </div>
+          </div>
+
+          <!-- 3. helpful_votes -->
+          <div class="variable-item">
+            <div class="variable-info">
+              <label for="slider_helpful_votes" class="variable-title"><code>helpful_votes</code></label>
+              <span class="variable-desc">Positive user ratings ("Was this page helpful? Yes")</span>
+            </div>
+            <div class="variable-inputs">
+              <input type="range" id="slider_helpful_votes" class="range-slider" min="0" max="50000" step="50" value="4200" aria-label="Helpful votes range slider">
+              <input type="number" id="input_helpful_votes" class="number-input" min="0" max="1000000" step="10" value="4200" aria-label="Helpful votes numeric value">
+            </div>
+          </div>
+
+          <!-- 4. unhelpful_votes -->
+          <div class="variable-item">
+            <div class="variable-info">
+              <label for="slider_unhelpful_votes" class="variable-title"><code>unhelpful_votes</code></label>
+              <span class="variable-desc">Negative feedback ratings ("Was this page helpful? No")</span>
+            </div>
+            <div class="variable-inputs">
+              <input type="range" id="slider_unhelpful_votes" class="range-slider" min="0" max="10000" step="10" value="350" aria-label="Unhelpful votes range slider">
+              <input type="number" id="input_unhelpful_votes" class="number-input" min="0" max="500000" step="5" value="350" aria-label="Unhelpful votes numeric value">
+            </div>
+          </div>
+
+          <!-- 5. search_queries -->
+          <div class="variable-item">
+            <div class="variable-info">
+              <label for="slider_search_queries" class="variable-title"><code>search_queries</code></label>
+              <span class="variable-desc">Total internal documentation search submissions</span>
+            </div>
+            <div class="variable-inputs">
+              <input type="range" id="slider_search_queries" class="range-slider" min="100" max="500000" step="500" value="28000" aria-label="Search queries range slider">
+              <input type="number" id="input_search_queries" class="number-input" min="10" max="1000000" step="100" value="28000" aria-label="Search queries numeric value">
+            </div>
+          </div>
+
+          <!-- 6. zero_result_searches -->
+          <div class="variable-item">
+            <div class="variable-info">
+              <label for="slider_zero_result_searches" class="variable-title"><code>zero_result_searches</code></label>
+              <span class="variable-desc">Search queries that returned zero matched content</span>
+            </div>
+            <div class="variable-inputs">
+              <input type="range" id="slider_zero_result_searches" class="range-slider" min="0" max="50000" step="50" value="1400" aria-label="Zero result searches range slider">
+              <input type="number" id="input_zero_result_searches" class="number-input" min="0" max="500000" step="10" value="1400" aria-label="Zero result searches numeric value">
+            </div>
+          </div>
+
+          <!-- 7. average_time_on_page_sec -->
+          <div class="variable-item">
+            <div class="variable-info">
+              <label for="slider_average_time_on_page_sec" class="variable-title"><code>average_time_on_page_sec</code></label>
+              <span class="variable-desc">Mean user dwell reading time per page in seconds</span>
+            </div>
+            <div class="variable-inputs">
+              <input type="range" id="slider_average_time_on_page_sec" class="range-slider" min="10" max="900" step="5" value="165" aria-label="Average dwell time range slider">
+              <input type="number" id="input_average_time_on_page_sec" class="number-input" min="1" max="3600" step="1" value="165" aria-label="Average dwell time numeric value">
+            </div>
+          </div>
+
+          <!-- 8. escalation_rate -->
+          <div class="variable-item">
+            <div class="variable-info">
+              <label for="slider_escalation_rate" class="variable-title"><code>escalation_rate</code></label>
+              <span class="variable-desc">Proportion of docs visitors opening support tickets (0.045 = 4.5%)</span>
+            </div>
+            <div class="variable-inputs">
+              <input type="range" id="slider_escalation_rate" class="range-slider" min="0.001" max="0.5" step="0.001" value="0.045" aria-label="Escalation rate range slider">
+              <input type="number" id="input_escalation_rate" class="number-input" min="0.0001" max="1.0" step="0.001" value="0.045" aria-label="Escalation rate numeric value">
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Calculation Audit Trail History Log Section -->
+    <section class="history-section" aria-labelledby="history-heading">
+      <div class="history-header">
+        <div class="history-title-wrap">
+          <h2 id="history-heading" class="history-title">
+            <span class="history-icon" aria-hidden="true">📜</span>
+            <span>Calculation Audit Trail History Log</span>
+          </h2>
+          <span class="history-desc">Session audit records with parameter contexts, execution latency, and replay capabilities.</span>
+        </div>
+        <button type="button" id="clearHistoryBtn" class="btn btn-secondary btn-sm" aria-label="Clear calculation history">
+          Clear History
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="history-table" aria-label="Calculation history records">
+          <thead>
+            <tr>
+              <th scope="col">Record ID</th>
+              <th scope="col">Time</th>
+              <th scope="col">Expression Formula</th>
+              <th scope="col">Evaluated Result</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <!-- Dynamically populated by DocsPortalFormulaParser -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="evaluator-footer">
+      <div class="footer-links">
+        <a href="index.html">Prisma API Reference</a>
+        <span>&bull;</span>
+        <a href="canvas-whiteboard.html">Architecture Whiteboard</a>
+        <span>&bull;</span>
+        <a href="voice-commander.html">Voice Commander</a>
+      </div>
+      <p class="footer-copy">Docs Portal KPI Formula Calculator &copy; 2026. Certified WCAG AAA Compliance.</p>
+    </footer>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
