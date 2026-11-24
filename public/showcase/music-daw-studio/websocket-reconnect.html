@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music DAW Studio - Resilient WebSocket Reconnection Engine</title>
+  <link rel="stylesheet" href="websocket-reconnect.css">
+</head>
+<body>
+  <div class="ws-container" data-websocket-lab>
+    <header class="header">
+      <h1>Music DAW Studio Resilient MIDI WebSocket Sync</h1>
+      <p class="subtitle">Exponential backoff reconnection, jitter calculation, offline MIDI packet queue, and transport recovery</p>
+    </header>
+
+    <main class="grid-layout">
+      <!-- Connection Status Card -->
+      <section class="card status-card">
+        <h2>DAW Telemetry & Session Socket</h2>
+        <div class="status-indicator-box">
+          <span class="socket-url">wss://daw-sync.musicstudio.local/session-stream</span>
+          <div id="connection-status-pill" class="status-pill pill-disconnected">DISCONNECTED</div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-label">Reconnect Attempts</span>
+            <span id="attempts-count" class="metric-val">0 / 5</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Offline MIDI Queue</span>
+            <span id="queue-count" class="metric-val">0 buffered</span>
+          </div>
+        </div>
+
+        <div class="control-actions">
+          <button id="connect-btn" class="btn btn-connect">Connect Session</button>
+          <button id="disconnect-btn" class="btn btn-disconnect">Disconnect</button>
+          <button id="drop-btn" class="btn btn-drop">Simulate Connection Drop</button>
+        </div>
+      </section>
+
+      <!-- Message Transmitter Card -->
+      <section class="card transmit-card">
+        <h2>MIDI & Automation Dispatcher</h2>
+        <p class="card-desc">Real-time musical events dispatched during network drops are buffered safely and flushed automatically on recovery.</p>
+        <div class="transmit-row">
+          <input type="text" id="msg-input" placeholder="Event Payload (e.g. { type: 'noteOn', note: 60, velocity: 110 })">
+          <button id="send-msg-btn" class="btn btn-send">Send MIDI Event</button>
+        </div>
+      </section>
+
+      <!-- Live Stream Log Card -->
+      <section class="card stream-card">
+        <h2>DAW Session Transmission Stream</h2>
+        <div id="messages-stream" class="messages-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="websocket-reconnect.js"></script>
+</body>
+</html>
