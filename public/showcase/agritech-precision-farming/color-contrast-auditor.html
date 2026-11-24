@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agritech Precision Farming - WCAG Color Contrast Matrix & Palette Verifier</title>
+  <link rel="stylesheet" href="color-contrast-auditor.css">
+</head>
+<body>
+  <div class="contrast-container" data-contrast-lab>
+    <header class="header">
+      <h1>WCAG 2.1 Color Contrast Matrix</h1>
+      <p class="subtitle">Auditing relative luminance and accessibility compliance for agricultural dashboards</p>
+    </header>
+
+    <main class="grid-layout">
+      <!-- Color Pickers Card -->
+      <section class="card pickers-card">
+        <h2>Palette Color Selectors</h2>
+        <div class="picker-group">
+          <label>Foreground / Text Color</label>
+          <div class="color-row">
+            <input type="color" id="fg-color" value="#4ade80">
+            <input type="text" id="fg-hex-input" value="#4ADE80" maxlength="7">
+          </div>
+        </div>
+
+        <div class="picker-group">
+          <label>Background Color</label>
+          <div class="color-row">
+            <input type="color" id="bg-color" value="#0b130e">
+            <input type="text" id="bg-hex-input" value="#0B130E" maxlength="7">
+          </div>
+        </div>
+
+        <div class="presets-section">
+          <h3>Quick Agritech Presets</h3>
+          <div class="preset-buttons">
+            <button id="preset-high-contrast" class="btn btn-preset">Hi-Contrast Neon</button>
+            <button id="preset-muted-contrast" class="btn btn-preset">Subtle Foliage</button>
+            <button id="preset-failing-contrast" class="btn btn-preset">Low Contrast (Warn)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contrast Ratio & Compliance -->
+      <section class="card compliance-card">
+        <h2>Contrast Evaluation</h2>
+        <div class="ratio-gauge">
+          <span class="gauge-label">Contrast Ratio</span>
+          <span id="ratio-display" class="gauge-value">11.42 : 1</span>
+        </div>
+
+        <div class="compliance-matrix">
+          <div class="compliance-row">
+            <span>Normal Text (AA &ge; 4.5:1)</span>
+            <span id="tag-normal-aa" class="status-chip chip-pass">PASS</span>
+          </div>
+          <div class="compliance-row">
+            <span>Normal Text (AAA &ge; 7.0:1)</span>
+            <span id="tag-normal-aaa" class="status-chip chip-pass">PASS</span>
+          </div>
+          <div class="compliance-row">
+            <span>Large Text (AA &ge; 3.0:1)</span>
+            <span id="tag-large-aa" class="status-chip chip-pass">PASS</span>
+          </div>
+          <div class="compliance-row">
+            <span>Large Text (AAA &ge; 4.5:1)</span>
+            <span id="tag-large-aaa" class="status-chip chip-pass">PASS</span>
+          </div>
+          <div class="compliance-row">
+            <span>UI Components & Icons (&ge; 3.0:1)</span>
+            <span id="tag-ui" class="status-chip chip-pass">PASS</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Text Preview Frame -->
+      <section class="card preview-card">
+        <h2>Live Agricultural Dashboard Preview</h2>
+        <div id="preview-frame" class="preview-box">
+          <h3 class="preview-heading">Crop Field #14 - Automated Drip Zone</h3>
+          <p class="preview-body">
+            Soil moisture calibrated at 68.4% RH. Nitrogen sensor reading optimal. Drone flight inspection scheduled for 06:00 UTC tomorrow.
+          </p>
+          <div class="preview-badges">
+            <span class="preview-tag">Sensors: Active</span>
+            <span class="preview-tag">Battery: 94%</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="color-contrast-auditor.js"></script>
+</body>
+</html>
