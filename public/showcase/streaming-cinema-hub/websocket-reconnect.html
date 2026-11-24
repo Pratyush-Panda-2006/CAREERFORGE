@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agritech Precision Farming - Resilient WebSocket Reconnection Engine</title>
+  <link rel="stylesheet" href="websocket-reconnect.css">
+</head>
+<body>
+  <div class="ws-container" data-streaming-cinema-hub-websocket-lab>
+    <header class="header">
+      <h1>Resilient IoT WebSocket Heartbeat Manager</h1>
+      <p class="subtitle">Exponential backoff reconnection, offline message buffering, and state recovery</p>
+    </header>
+
+    <main class="grid-layout">
+      <!-- Connection Status Card -->
+      <section class="card status-card">
+        <h2>Telemetry Socket Status</h2>
+        <div class="status-indicator-box">
+          <span class="socket-url">wss://telemetry.agritech.local/crops</span>
+          <div id="connection-status-pill" class="status-pill pill-disconnected">DISCONNECTED</div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-label">Reconnect Attempts</span>
+            <span id="attempts-count" class="metric-val">0 / 4</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Offline Queue</span>
+            <span id="queue-count" class="metric-val">0 buffered</span>
+          </div>
+        </div>
+
+        <div class="control-actions">
+          <button id="connect-btn" class="btn btn-connect">Connect</button>
+          <button id="disconnect-btn" class="btn btn-disconnect">Disconnect</button>
+          <button id="drop-btn" class="btn btn-drop">Simulate Network Drop</button>
+        </div>
+      </section>
+
+      <!-- Message Transmitter Card -->
+      <section class="card transmit-card">
+        <h2>Message Dispatch & Offline Buffer</h2>
+        <p class="card-desc">Messages sent while disconnected are buffered into memory and flushed automatically upon reconnection.</p>
+        <div class="transmit-row">
+          <input type="text" id="msg-input" placeholder="Payload (e.g. { moisture: 42.1, zone: 4 })">
+          <button id="send-msg-btn" class="btn btn-send">Dispatch</button>
+        </div>
+      </section>
+
+      <!-- Live Stream Log Card -->
+      <section class="card stream-card">
+        <h2>WebSocket Telemetry Stream</h2>
+        <div id="messages-stream" class="messages-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="websocket-reconnect.js"></script>
+</body>
+</html>
