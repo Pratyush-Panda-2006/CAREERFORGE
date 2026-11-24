@@ -1,0 +1,274 @@
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f1f5f9;
+  background: #0c0f17;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+}
+
+header, main, footer {
+  max-width: 1160px;
+  margin: auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #263047;
+  padding-bottom: 16px;
+  font-size: 0.85rem;
+}
+
+header a {
+  color: #fbbf24;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+header span, .eyebrow {
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  color: #f59e0b;
+}
+
+.intro {
+  padding: 32px 0 24px;
+  max-width: 760px;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  margin: 12px 0 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 0 0 16px;
+  color: #fde68a;
+}
+
+p {
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+.panel {
+  border: 1px solid #263047;
+  background: #151a27;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.fields {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+label {
+  display: flex;
+  flex: 1;
+  min-width: 140px;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+input, select, button {
+  font: inherit;
+  border-radius: 6px;
+  min-height: 40px;
+}
+
+input, select {
+  border: 1px solid #334155;
+  background: #090c13;
+  color: #f8fafc;
+  padding: 8px 12px;
+  width: 100%;
+}
+
+button {
+  border: 1px solid #d97706;
+  background: #d97706;
+  color: white;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.83rem;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: #b45309;
+}
+
+.secondary {
+  background: transparent;
+  border: 1px solid #475569;
+  color: #cbd5e1;
+}
+
+.secondary:hover {
+  background: #1e293b;
+}
+
+.hint {
+  font-size: 0.77rem;
+  color: #64748b;
+  margin-top: 8px;
+}
+
+.workbench {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.bucket {
+  display: grid;
+  grid-template-columns: 1fr 110px;
+  gap: 20px;
+}
+
+.reservoir {
+  position: relative;
+  min-height: 180px;
+  border: 1px solid #b45309;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1e1b14;
+  display: grid;
+  place-items: center;
+}
+
+.reservoir span {
+  position: relative;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  font-weight: 700;
+  color: #fde68a;
+  z-index: 1;
+}
+
+#reservoir-fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: #f59e0b;
+  transition: height 0.2s linear;
+}
+
+progress {
+  width: 100%;
+  height: 12px;
+  accent-color: #f59e0b;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#status {
+  font-size: 0.82rem;
+  min-height: 2.2em;
+  color: #fbbf24;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid #263047;
+  border-radius: 12px;
+  background: #10141f;
+  margin: 0 0 20px;
+}
+
+.metrics div {
+  padding: 16px;
+}
+
+dt {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+dd {
+  font-size: 1.8rem;
+  margin: 6px 0 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+ol {
+  padding: 0;
+  list-style: none;
+  margin: 12px 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+li {
+  font-size: 0.78rem;
+  border-bottom: 1px solid #263047;
+  padding: 8px 0;
+}
+
+#queue li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.accepted, .completed {
+  color: #34d399;
+}
+
+.throttled {
+  color: #f87171;
+}
+
+.cancelled {
+  color: #fbbf24;
+}
+
+@media (max-width: 768px) {
+  .workbench {
+    grid-template-columns: 1fr;
+  }
+  .metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
