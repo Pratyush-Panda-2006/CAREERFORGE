@@ -83,7 +83,7 @@ function mount() {
       const id = key(), value = get('value').value;
       if (value.length > 256) throw new Error('Values are limited to 256 characters.');
       const evicted = cache.put(id, value); get('status').textContent = evicted ? `Stored ${id}; evicted ${evicted.key}.` : `Stored ${id} at the head.`; render();
-    } catch (error) { get('status').textContent = error.message; }
+    } catch (error) {{ get('status').textContent = error.message; }}
   });
   get('read').addEventListener('click', () => {
     try { const id = key(), found = cache.has(id), value = cache.get(id); get('status').textContent = found ? `Hit: ${id} = ${value}. Moved to the head.` : `Miss: ${id} is not cached.`; render(); }
