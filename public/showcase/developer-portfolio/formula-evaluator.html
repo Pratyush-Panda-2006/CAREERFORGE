@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Portfolio — Mathematical Expression Parser & Dynamic KPI Formula Calculator</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="evaluator-container">
+    <!-- Header Navigation -->
+    <header class="evaluator-header">
+      <div class="header-left">
+        <a href="index.html" class="nav-back" aria-label="Return to Developer Portfolio Showcase">← Back to Developer Portfolio</a>
+        <div class="header-title-row">
+          <h1 class="evaluator-title">
+            <span class="title-icon">⚡</span> Developer KPI Formula Calculator
+          </h1>
+          <span class="title-badge">ENGINEERING TELEMETRY</span>
+        </div>
+        <p class="evaluator-subtitle">
+          Mathematical expression parser, Shunting-yard RPN compiler, dynamic developer metric injector, and real-time performance KPI evaluator.
+        </p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="contrastToggle" class="btn-contrast-toggle" aria-pressed="false">High Contrast: OFF</button>
+      </div>
+    </header>
+
+    <!-- Error Alert Banner -->
+    <div id="errorBanner" class="error-banner hidden" role="alert" aria-live="polite">
+      <span class="error-icon" aria-hidden="true">⚠</span>
+      <div class="error-content">
+        <strong>Calculation Error:</strong>
+        <span id="errorBannerText">Evaluation failed.</span>
+      </div>
+    </div>
+
+    <!-- Main Grid: Formula Editor & Variable Workbench -->
+    <div class="main-grid">
+      <!-- Left Column: Formula Editor & Presets -->
+      <section class="card" aria-labelledby="formula-card-title">
+        <div class="card-header">
+          <h2 id="formula-card-title" class="card-title">
+            <span class="card-icon">📐</span> Mathematical Expression Editor
+          </h2>
+          <div id="syntaxBadge" class="syntax-badge syntax-valid">
+            <span id="syntaxBadgeText">✓ Syntax Valid</span>
+          </div>
+        </div>
+
+        <!-- Formula Input Controls -->
+        <div class="formula-input-wrapper">
+          <div class="formula-label-row">
+            <label for="formulaInput" class="formula-label">Expression Input</label>
+            <div class="preset-select-wrapper">
+              <label for="presetSelect" class="sr-only">Choose KPI Preset Formula</label>
+              <select id="presetSelect" class="preset-dropdown">
+                <option value="" disabled>Load KPI Preset...</option>
+                <option value="(total_commits * 0.2) + (pull_requests_merged * 1.5) + (open_source_contributions * 2.0)" selected>
+                  Contributor Velocity Index
+                </option>
+                <option value="(test_coverage_rate * 100) * (code_review_score / 5.0)">
+                  Code Quality Metric
+                </option>
+                <option value="((lines_of_code_shipped / 1000) * test_coverage_rate) / bug_resolution_hours">
+                  Engineering Productivity Score
+                </option>
+                <option value="uptime_sla_rate * 100">
+                  Reliability Factor
+                </option>
+                <option value="pull_requests_merged / (total_commits / 10)">
+                  Pull Request Impact Ratio
+                </option>
+                <option value="round(((test_coverage_rate * 100) + (code_review_score * 20)) / 2)">
+                  Portfolio Composite Rating
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-action-row">
+            <input
+              type="text"
+              id="formulaInput"
+              class="formula-input"
+              value="(total_commits * 0.2) + (pull_requests_merged * 1.5) + (open_source_contributions * 2.0)"
+              placeholder="e.g. (total_commits * 0.2) + (pull_requests_merged * 1.5)"
+              spellcheck="false"
+              autocomplete="off"
+            />
+            <button type="button" id="evaluateBtn" class="btn-primary">▶ Evaluate</button>
+            <button type="button" id="clearBtn" class="btn-secondary">Clear</button>
+          </div>
+        </div>
+
+        <!-- 6 KPI Preset Pills -->
+        <div class="pills-group">
+          <div class="pills-label">Developer KPI Presets</div>
+          <div class="pills-row">
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="(total_commits * 0.2) + (pull_requests_merged * 1.5) + (open_source_contributions * 2.0)"
+              title="(total_commits * 0.2) + (pull_requests_merged * 1.5) + (open_source_contributions * 2.0)"
+            >
+              🚀 Contributor Velocity
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="(test_coverage_rate * 100) * (code_review_score / 5.0)"
+              title="(test_coverage_rate * 100) * (code_review_score / 5.0)"
+            >
+              ✨ Code Quality Metric
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="((lines_of_code_shipped / 1000) * test_coverage_rate) / bug_resolution_hours"
+              title="((lines_of_code_shipped / 1000) * test_coverage_rate) / bug_resolution_hours"
+            >
+              ⚡ Productivity Score
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="uptime_sla_rate * 100"
+              title="uptime_sla_rate * 100"
+            >
+              🛡️ Reliability Factor
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="pull_requests_merged / (total_commits / 10)"
+              title="pull_requests_merged / (total_commits / 10)"
+            >
+              🔄 PR Impact Ratio
+            </button>
+            <button
+              type="button"
+              class="pill-btn pill-preset"
+              data-preset-formula="round(((test_coverage_rate * 100) + (code_review_score * 20)) / 2)"
+              title="round(((test_coverage_rate * 100) + (code_review_score * 20)) / 2)"
+            >
+              🏆 Portfolio Composite
+            </button>
+          </div>
+        </div>
+
+        <!-- Built-in Functions & Operators Quick-Insert Pills -->
+        <div class="pills-group">
+          <div class="pills-label">Functions &amp; Operators Quick-Insert</div>
+          <div class="pills-row">
+            <button type="button" class="pill-btn" data-insert-snippet="sqrt()">sqrt()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="log()">log()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="ln()">ln()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="exp()">exp()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="abs()">abs()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="round()">round()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="floor()">floor()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="ceil()">ceil()</button>
+            <button type="button" class="pill-btn" data-insert-snippet="pow(,)">pow(,)</button>
+            <button type="button" class="pill-btn" data-insert-snippet="min(,)">min(,)</button>
+            <button type="button" class="pill-btn" data-insert-snippet="max(,)">max(,)</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" ^ ">^</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" % ">%</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" * ">*</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" / ">/</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" + ">+</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=" - ">-</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet="(">(</button>
+            <button type="button" class="pill-btn pill-operator" data-insert-snippet=")">)</button>
+          </div>
+        </div>
+
+        <!-- Developer Variable Tokens Quick-Insert Pills -->
+        <div class="pills-group">
+          <div class="pills-label">Developer Variable Tokens</div>
+          <div class="pills-row">
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="total_commits">total_commits</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="pull_requests_merged">pull_requests_merged</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="code_review_score">code_review_score</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="lines_of_code_shipped">lines_of_code_shipped</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="test_coverage_rate">test_coverage_rate</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="open_source_contributions">open_source_contributions</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="bug_resolution_hours">bug_resolution_hours</button>
+            <button type="button" class="pill-btn pill-var" data-insert-snippet="uptime_sla_rate">uptime_sla_rate</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Variable Tuning Workbench -->
+      <section class="card" aria-labelledby="vars-card-title">
+        <div class="card-header">
+          <h2 id="vars-card-title" class="card-title">
+            <span class="card-icon">🎛️</span> Developer Metrics Workbench
+          </h2>
+          <label class="auto-calc-wrapper">
+            <input type="checkbox" id="autoCalcToggle" class="toggle-checkbox" checked>
+            <span>Live Auto-Calculate</span>
+          </label>
+        </div>
+
+        <div class="var-list">
+          <!-- total_commits -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">total_commits</span>
+              <span class="var-desc">Total repository commits</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_total_commits" class="range-slider" min="0" max="3000" step="10" value="850">
+              <input type="number" id="var_total_commits" class="var-num-input" min="0" max="50000" step="1" value="850">
+            </div>
+          </div>
+
+          <!-- pull_requests_merged -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">pull_requests_merged</span>
+              <span class="var-desc">Merged PR count</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_pull_requests_merged" class="range-slider" min="0" max="300" step="1" value="65">
+              <input type="number" id="var_pull_requests_merged" class="var-num-input" min="0" max="5000" step="1" value="65">
+            </div>
+          </div>
+
+          <!-- code_review_score -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">code_review_score</span>
+              <span class="var-desc">Peer review rating (1.0 - 5.0)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_code_review_score" class="range-slider" min="1.0" max="5.0" step="0.1" value="4.8">
+              <input type="number" id="var_code_review_score" class="var-num-input" min="0.0" max="5.0" step="0.1" value="4.8">
+            </div>
+          </div>
+
+          <!-- lines_of_code_shipped -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">lines_of_code_shipped</span>
+              <span class="var-desc">Production code volume (LOC)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_lines_of_code_shipped" class="range-slider" min="1000" max="150000" step="1000" value="45000">
+              <input type="number" id="var_lines_of_code_shipped" class="var-num-input" min="0" max="1000000" step="500" value="45000">
+            </div>
+          </div>
+
+          <!-- test_coverage_rate -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">test_coverage_rate</span>
+              <span class="var-desc">Automated test coverage (0.0 - 1.0)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_test_coverage_rate" class="range-slider" min="0.0" max="1.0" step="0.01" value="0.92">
+              <input type="number" id="var_test_coverage_rate" class="var-num-input" min="0.0" max="1.0" step="0.01" value="0.92">
+            </div>
+          </div>
+
+          <!-- open_source_contributions -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">open_source_contributions</span>
+              <span class="var-desc">External OSS contributions</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_open_source_contributions" class="range-slider" min="0" max="150" step="1" value="35">
+              <input type="number" id="var_open_source_contributions" class="var-num-input" min="0" max="2000" step="1" value="35">
+            </div>
+          </div>
+
+          <!-- bug_resolution_hours -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">bug_resolution_hours</span>
+              <span class="var-desc">Mean time to fix bug (hours)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_bug_resolution_hours" class="range-slider" min="0.5" max="24.0" step="0.1" value="3.5">
+              <input type="number" id="var_bug_resolution_hours" class="var-num-input" min="0.1" max="168.0" step="0.1" value="3.5">
+            </div>
+          </div>
+
+          <!-- uptime_sla_rate -->
+          <div class="var-item">
+            <div class="var-header-row">
+              <span class="var-name">uptime_sla_rate</span>
+              <span class="var-desc">Production uptime ratio (SLA)</span>
+            </div>
+            <div class="var-controls-row">
+              <input type="range" id="slider_uptime_sla_rate" class="range-slider" min="0.900" max="1.000" step="0.001" value="0.999">
+              <input type="number" id="var_uptime_sla_rate" class="var-num-input" min="0.0" max="1.0" step="0.001" value="0.999">
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Calculated Result Callout Cards -->
+    <section class="results-grid" aria-label="Dynamic Calculation Results">
+      <div class="callout-card callout-card-primary">
+        <span class="callout-label">Formatted KPI Result</span>
+        <div id="resultFormatted" class="callout-value-main">337.50</div>
+        <span class="callout-meta">Dijkstra Shunting-Yard RPN Engine</span>
+      </div>
+
+      <div class="callout-card">
+        <span class="callout-label">Raw Numerical Value</span>
+        <div id="resultRaw" class="callout-value-secondary">337.5</div>
+        <span class="callout-meta">High-precision float</span>
+      </div>
+
+      <div class="callout-card">
+        <span class="callout-label">Token Telemetry &amp; RPN</span>
+        <div id="resultTokens" class="callout-rpn">Compiled RPN Stack</div>
+        <span class="callout-meta">Postfix stack execution</span>
+      </div>
+
+      <div class="callout-card">
+        <span class="callout-label">Engine Latency</span>
+        <div id="resultLatency" class="callout-value-secondary">&lt; 1 ms</div>
+        <span class="callout-meta">Sub-millisecond execution</span>
+      </div>
+    </section>
+
+    <!-- Calculation Audit Log & History -->
+    <section class="card history-section" aria-labelledby="history-card-title">
+      <div class="card-header">
+        <h2 id="history-card-title" class="card-title">
+          <span class="card-icon">📜</span> Calculation Audit Log &amp; History
+        </h2>
+        <button type="button" id="clearHistoryBtn" class="btn-secondary">Clear History</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Time</th>
+              <th scope="col">Formula Expression</th>
+              <th scope="col">Evaluated Result</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <!-- Dynamically populated by DeveloperPortfolioFormulaParser -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
