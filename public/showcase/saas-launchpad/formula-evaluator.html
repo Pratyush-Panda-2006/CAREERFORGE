@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - Mathematical Expression Parser & Dynamic KPI Formula Calculator</title>
+  <link rel="stylesheet" href="formula-evaluator.css">
+</head>
+<body>
+  <div class="evaluator-container">
+    <!-- Top Navigation & Header -->
+    <header class="evaluator-header">
+      <div class="header-nav">
+        <a href="index.html" class="back-link" aria-label="Return to SaaS Launchpad Showcase">
+          &larr; Return to SaaS Launchpad
+        </a>
+        <button id="contrast-toggle" class="contrast-toggle-btn" type="button" aria-pressed="false" aria-label="Toggle WCAG AAA High Contrast Mode">
+          WCAG AAA High Contrast
+        </button>
+      </div>
+
+      <div class="header-badge">SAAS METRICS WORKBENCH &bull; ISSUE #1190</div>
+      <h1>Dynamic KPI Formula Calculator &amp; Math Parser</h1>
+      <p class="header-description">
+        Modular safe mathematical expression tokenizer, Shunting-Yard RPN compiler, variable injection workbench, and real-time SaaS unit economics financial calculator.
+      </p>
+    </header>
+
+    <!-- Error Alert Banner -->
+    <div id="error-banner" class="alert-banner hidden" role="alert" aria-live="polite"></div>
+
+    <!-- Result Callout Cards Grid -->
+    <section class="results-grid" aria-label="Calculation Telemetry and Results">
+      <div class="result-card primary-card">
+        <span class="card-label">Formatted Result</span>
+        <div class="result-value-wrap">
+          <span id="formatted-result" class="result-value" aria-live="polite">--</span>
+        </div>
+        <span class="card-caption">SaaS Unit Economic Output</span>
+      </div>
+
+      <div class="result-card">
+        <span class="card-label">Raw Value</span>
+        <div class="result-value-wrap">
+          <span id="raw-result" class="result-subvalue" aria-live="polite">--</span>
+        </div>
+        <span class="card-caption">Unrounded IEEE-754 Precision</span>
+      </div>
+
+      <div class="result-card">
+        <span class="card-label">Token Count</span>
+        <div class="result-value-wrap">
+          <span id="token-count" class="result-subvalue">--</span>
+        </div>
+        <span class="card-caption">Lexical Tokens In Stream</span>
+      </div>
+
+      <div class="result-card">
+        <span class="card-label">Calculation Latency</span>
+        <div class="result-value-wrap">
+          <span id="latency-metric" class="result-subvalue">--</span>
+        </div>
+        <span class="card-caption">Tokenizer + RPN + Eval Stack</span>
+      </div>
+    </section>
+
+    <!-- Main Workbench Split Screen -->
+    <main class="workbench-grid">
+      <!-- Left Column: Formula Editor, Presets & Math Token Palette -->
+      <section class="panel editor-panel" aria-labelledby="editor-heading">
+        <div class="panel-header">
+          <h2 id="editor-heading">Formula Expression Editor</h2>
+          <span id="syntax-badge" class="status-badge status-idle">Ready</span>
+        </div>
+
+        <!-- Formula Text Input Area -->
+        <div class="input-wrap">
+          <label for="formula-input" class="input-label">Mathematical Expression</label>
+          <textarea
+            id="formula-input"
+            class="formula-textarea"
+            rows="3"
+            placeholder="e.g. (average_revenue_per_user * gross_margin_rate) / churn_rate"
+            aria-describedby="syntax-badge"
+            spellcheck="false"
+          ></textarea>
+        </div>
+
+        <div class="editor-actions">
+          <button id="evaluate-btn" type="button" class="btn btn-primary" aria-label="Evaluate formula">
+            Calculate Expression
+          </button>
+          <button id="clear-formula-btn" type="button" class="btn btn-secondary" aria-label="Clear expression editor">
+            Clear
+          </button>
+        </div>
+
+        <!-- KPI Presets Section -->
+        <div class="presets-section">
+          <h3 class="section-title">Standard SaaS KPI Presets</h3>
+          <div class="presets-grid" role="group" aria-label="KPI Preset Formulas">
+            <button
+              type="button"
+              class="preset-pill"
+              data-preset="ltv"
+              aria-label="Load Customer Lifetime Value preset"
+            >
+              <span class="preset-name">Customer Lifetime Value (LTV)</span>
+              <span class="preset-code">(ARPU &times; Margin) / Churn</span>
+            </button>
+
+            <button
+              type="button"
+              class="preset-pill"
+              data-preset="ltv_cac_ratio"
+              aria-label="Load LTV to CAC Ratio preset"
+            >
+              <span class="preset-name">LTV to CAC Ratio</span>
+              <span class="preset-code">LTV / CAC</span>
+            </button>
+
+            <button
+              type="button"
+              class="preset-pill"
+              data-preset="net_mrr_growth"
+              aria-label="Load Net MRR Growth preset"
+            >
+              <span class="preset-name">Net MRR Growth</span>
+              <span class="preset-code">MRR + Expansion &minus; Churn</span>
+            </button>
+
+            <button
+              type="button"
+              class="preset-pill"
+              data-preset="net_monthly_profit"
+              aria-label="Load Net Monthly Profit preset"
+            >
+              <span class="preset-name">Net Monthly Profit</span>
+              <span class="preset-code">(MRR + Expansion) &minus; OpEx</span>
+            </button>
+
+            <button
+              type="button"
+              class="preset-pill"
+              data-preset="cac_payback_period"
+              aria-label="Load CAC Payback Period preset"
+            >
+              <span class="preset-name">CAC Payback Period</span>
+              <span class="preset-code">CAC / (ARPU &times; Margin)</span>
+            </button>
+
+            <button
+              type="button"
+              class="preset-pill"
+              data-preset="arr"
+              aria-label="Load Annual Run Rate preset"
+            >
+              <span class="preset-name">Annual Run Rate (ARR)</span>
+              <span class="preset-code">(MRR + Expansion) &times; 12</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick-Insert Palette -->
+        <div class="palette-section">
+          <h3 class="section-title">Quick-Insert Tokens</h3>
+
+          <!-- SaaS Variables -->
+          <div class="token-group">
+            <span class="token-group-label">SaaS Variables:</span>
+            <div class="token-pills">
+              <button type="button" class="insert-pill pill-var" data-insert="monthly_recurring_revenue">monthly_recurring_revenue</button>
+              <button type="button" class="insert-pill pill-var" data-insert="churn_rate">churn_rate</button>
+              <button type="button" class="insert-pill pill-var" data-insert="customer_acquisition_cost">customer_acquisition_cost</button>
+              <button type="button" class="insert-pill pill-var" data-insert="average_revenue_per_user">average_revenue_per_user</button>
+              <button type="button" class="insert-pill pill-var" data-insert="gross_margin_rate">gross_margin_rate</button>
+              <button type="button" class="insert-pill pill-var" data-insert="active_subscribers">active_subscribers</button>
+              <button type="button" class="insert-pill pill-var" data-insert="expansion_revenue">expansion_revenue</button>
+              <button type="button" class="insert-pill pill-var" data-insert="operating_expenses">operating_expenses</button>
+            </div>
+          </div>
+
+          <!-- Functions -->
+          <div class="token-group">
+            <span class="token-group-label">Mathematical Functions:</span>
+            <div class="token-pills">
+              <button type="button" class="insert-pill pill-fn" data-insert="sqrt()">sqrt()</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="log()">log()</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="ln()">ln()</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="exp()">exp()</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="abs()">abs()</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="min(,)">min(,)</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="max(,)">max(,)</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="round()">round()</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="floor()">floor()</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="ceil()">ceil()</button>
+              <button type="button" class="insert-pill pill-fn" data-insert="pow(,)">pow(,)</button>
+            </div>
+          </div>
+
+          <!-- Operators -->
+          <div class="token-group">
+            <span class="token-group-label">Operators &amp; Delimiters:</span>
+            <div class="token-pills">
+              <button type="button" class="insert-pill pill-op" data-insert=" + ">+</button>
+              <button type="button" class="insert-pill pill-op" data-insert=" - ">&minus;</button>
+              <button type="button" class="insert-pill pill-op" data-insert=" * ">&times;</button>
+              <button type="button" class="insert-pill pill-op" data-insert=" / ">/</button>
+              <button type="button" class="insert-pill pill-op" data-insert=" ^ ">^</button>
+              <button type="button" class="insert-pill pill-op" data-insert=" % ">%</button>
+              <button type="button" class="insert-pill pill-op" data-insert="(">(</button>
+              <button type="button" class="insert-pill pill-op" data-insert=")">)</button>
+              <button type="button" class="insert-pill pill-op" data-insert=", ">comma</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Variable Tuning Workbench -->
+      <section class="panel workbench-panel" aria-labelledby="workbench-heading">
+        <div class="panel-header">
+          <h2 id="workbench-heading">Variable Tuning Workbench</h2>
+          <button id="reset-vars-btn" type="button" class="btn btn-secondary btn-sm" aria-label="Reset variables to defaults">
+            Reset to Defaults
+          </button>
+        </div>
+
+        <p class="panel-description">
+          Adjust the SaaS parameter controls below. Sliders and numeric inputs are synchronized in real-time.
+        </p>
+
+        <div class="variables-grid">
+          <!-- monthly_recurring_revenue -->
+          <div class="variable-card">
+            <div class="var-card-header">
+              <label for="input-monthly_recurring_revenue" class="var-label">
+                Monthly Recurring Revenue (<code>MRR</code>)
+              </label>
+              <span id="val-monthly_recurring_revenue" class="var-badge">$15,000</span>
+            </div>
+            <div class="var-control-row">
+              <input
+                type="range"
+                id="slider-monthly_recurring_revenue"
+                class="param-slider"
+                min="1000"
+                max="100000"
+                step="500"
+                value="15000"
+                aria-label="MRR slider"
+              >
+              <input
+                type="number"
+                id="input-monthly_recurring_revenue"
+                class="param-input"
+                min="0"
+                max="500000"
+                step="100"
+                value="15000"
+                aria-label="MRR number input"
+              >
+            </div>
+            <span class="var-hint">Base recurring subscription revenue per month</span>
+          </div>
+
+          <!-- churn_rate -->
+          <div class="variable-card">
+            <div class="var-card-header">
+              <label for="input-churn_rate" class="var-label">
+                Monthly Churn Rate (<code>churn_rate</code>)
+              </label>
+              <span id="val-churn_rate" class="var-badge">4.0%</span>
+            </div>
+            <div class="var-control-row">
+              <input
+                type="range"
+                id="slider-churn_rate"
+                class="param-slider"
+                min="0.001"
+                max="0.30"
+                step="0.005"
+                value="0.04"
+                aria-label="Churn rate slider"
+              >
+              <input
+                type="number"
+                id="input-churn_rate"
+                class="param-input"
+                min="0.001"
+                max="1.0"
+                step="0.005"
+                value="0.04"
+                aria-label="Churn rate number input"
+              >
+            </div>
+            <span class="var-hint">Fraction of subscriber base canceling per month</span>
+          </div>
+
+          <!-- customer_acquisition_cost -->
+          <div class="variable-card">
+            <div class="var-card-header">
+              <label for="input-customer_acquisition_cost" class="var-label">
+                Customer Acquisition Cost (<code>CAC</code>)
+              </label>
+              <span id="val-customer_acquisition_cost" class="var-badge">$250</span>
+            </div>
+            <div class="var-control-row">
+              <input
+                type="range"
+                id="slider-customer_acquisition_cost"
+                class="param-slider"
+                min="10"
+                max="2000"
+                step="10"
+                value="250"
+                aria-label="CAC slider"
+              >
+              <input
+                type="number"
+                id="input-customer_acquisition_cost"
+                class="param-input"
+                min="0"
+                max="10000"
+                step="10"
+                value="250"
+                aria-label="CAC number input"
+              >
+            </div>
+            <span class="var-hint">Blended sales and marketing spend per acquired customer</span>
+          </div>
+
+          <!-- average_revenue_per_user -->
+          <div class="variable-card">
+            <div class="var-card-header">
+              <label for="input-average_revenue_per_user" class="var-label">
+                Avg Revenue Per User (<code>ARPU</code>)
+              </label>
+              <span id="val-average_revenue_per_user" class="var-badge">$75</span>
+            </div>
+            <div class="var-control-row">
+              <input
+                type="range"
+                id="slider-average_revenue_per_user"
+                class="param-slider"
+                min="5"
+                max="1000"
+                step="5"
+                value="75"
+                aria-label="ARPU slider"
+              >
+              <input
+                type="number"
+                id="input-average_revenue_per_user"
+                class="param-input"
+                min="0"
+                max="5000"
+                step="5"
+                value="75"
+                aria-label="ARPU number input"
+              >
+            </div>
+            <span class="var-hint">Average monthly revenue generated per paying user</span>
+          </div>
+
+          <!-- gross_margin_rate -->
+          <div class="variable-card">
+            <div class="var-card-header">
+              <label for="input-gross_margin_rate" class="var-label">
+                Gross Margin Rate (<code>gross_margin_rate</code>)
+              </label>
+              <span id="val-gross_margin_rate" class="var-badge">80%</span>
+            </div>
+            <div class="var-control-row">
+              <input
+                type="range"
+                id="slider-gross_margin_rate"
+                class="param-slider"
+                min="0.10"
+                max="1.00"
+                step="0.01"
+                value="0.80"
+                aria-label="Gross margin slider"
+              >
+              <input
+                type="number"
+                id="input-gross_margin_rate"
+                class="param-input"
+                min="0.01"
+                max="1.00"
+                step="0.01"
+                value="0.80"
+                aria-label="Gross margin number input"
+              >
+            </div>
+            <span class="var-hint">Gross profit percentage after hosting/infrastructure COGS</span>
+          </div>
+
+          <!-- active_subscribers -->
+          <div class="variable-card">
+            <div class="var-card-header">
+              <label for="input-active_subscribers" class="var-label">
+                Active Subscribers (<code>active_subscribers</code>)
+              </label>
+              <span id="val-active_subscribers" class="var-badge">200 users</span>
+            </div>
+            <div class="var-control-row">
+              <input
+                type="range"
+                id="slider-active_subscribers"
+                class="param-slider"
+                min="10"
+                max="5000"
+                step="10"
+                value="200"
+                aria-label="Active subscribers slider"
+              >
+              <input
+                type="number"
+                id="input-active_subscribers"
+                class="param-input"
+                min="0"
+                max="50000"
+                step="10"
+                value="200"
+                aria-label="Active subscribers number input"
+              >
+            </div>
+            <span class="var-hint">Total count of currently paying customer accounts</span>
+          </div>
+
+          <!-- expansion_revenue -->
+          <div class="variable-card">
+            <div class="var-card-header">
+              <label for="input-expansion_revenue" class="var-label">
+                Expansion Revenue (<code>expansion_revenue</code>)
+              </label>
+              <span id="val-expansion_revenue" class="var-badge">$1,200</span>
+            </div>
+            <div class="var-control-row">
+              <input
+                type="range"
+                id="slider-expansion_revenue"
+                class="param-slider"
+                min="0"
+                max="20000"
+                step="100"
+                value="1200"
+                aria-label="Expansion revenue slider"
+              >
+              <input
+                type="number"
+                id="input-expansion_revenue"
+                class="param-input"
+                min="0"
+                max="100000"
+                step="100"
+                value="1200"
+                aria-label="Expansion revenue number input"
+              >
+            </div>
+            <span class="var-hint">Monthly account expansion, upsells, and feature tier-ups</span>
+          </div>
+
+          <!-- operating_expenses -->
+          <div class="variable-card">
+            <div class="var-card-header">
+              <label for="input-operating_expenses" class="var-label">
+                Operating Expenses (<code>OpEx</code>)
+              </label>
+              <span id="val-operating_expenses" class="var-badge">$8,000</span>
+            </div>
+            <div class="var-control-row">
+              <input
+                type="range"
+                id="slider-operating_expenses"
+                class="param-slider"
+                min="1000"
+                max="50000"
+                step="500"
+                value="8000"
+                aria-label="OpEx slider"
+              >
+              <input
+                type="number"
+                id="input-operating_expenses"
+                class="param-input"
+                min="0"
+                max="200000"
+                step="500"
+                value="8000"
+                aria-label="OpEx number input"
+              >
+            </div>
+            <span class="var-hint">Payroll, general overhead, and administrative operating expenses</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Calculation Audit History Log Section -->
+    <section class="panel history-section" aria-labelledby="history-heading">
+      <div class="panel-header">
+        <h2 id="history-heading">Calculation Audit History Log</h2>
+        <button id="clear-history-btn" type="button" class="btn btn-secondary btn-sm" aria-label="Clear calculation history">
+          Clear Audit Feed
+        </button>
+      </div>
+
+      <ul id="history-list" class="history-list" role="feed" aria-label="Calculation history feed">
+        <li class="history-empty">No calculations logged in audit history yet.</li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer class="evaluator-footer">
+      <span>SaaS Launchpad Analytics Platform &bull; Shunting-Yard RPN Math Engine &bull; WCAG AAA Certified</span>
+    </footer>
+  </div>
+
+  <script type="module" src="formula-evaluator.js"></script>
+</body>
+</html>
