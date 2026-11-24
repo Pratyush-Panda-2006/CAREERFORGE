@@ -1,0 +1,231 @@
+:root {
+  --bg-color: #0b0f19;
+  --card-bg: #111827;
+  --border-color: #1f2937;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --accent-cyan: #38bdf8;
+  --accent-green: #10b981;
+  --accent-purple: #8b5cf6;
+  --accent-rose: #f43f5e;
+}
+
+body {
+  margin: 0;
+  padding: 2rem;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+}
+
+.lru-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+  color: var(--accent-cyan);
+}
+
+.subtitle {
+  margin: 0 0 2rem 0;
+  color: var(--text-muted);
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.card h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.15rem;
+}
+
+/* Capacity Card */
+.capacity-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.capacity-control input[type="range"] {
+  accent-color: var(--accent-cyan);
+  cursor: pointer;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  transition: width 0.3s ease;
+}
+
+.occupancy-status {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Operations Card */
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.form-row input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  color: var(--text-main);
+  font-family: monospace;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary { background: #0284c7; color: white; }
+.btn-secondary { background: #6366f1; color: white; }
+.btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
+
+.lookup-output {
+  margin-top: 1rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.lookup-hit {
+  color: var(--accent-green);
+}
+
+.lookup-miss {
+  color: var(--accent-rose);
+}
+
+/* Chain Card */
+.chain-card {
+  grid-column: span 2;
+}
+
+.node-chain-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 1rem 0;
+}
+
+.cache-node {
+  min-width: 160px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.node-badge {
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.badge-mru {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.badge-lru {
+  background: rgba(244, 63, 94, 0.2);
+  color: #fb7185;
+}
+
+.node-key {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #38bdf8;
+}
+
+.node-val {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chain-arrow {
+  color: #64748b;
+  font-size: 1.2rem;
+  user-select: none;
+}
+
+.empty-chain-text, .empty-log-text {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* Eviction Card */
+.eviction-card {
+  grid-column: span 2;
+}
+
+.eviction-log-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 180px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.eviction-item {
+  background: rgba(244, 63, 94, 0.1);
+  border-left: 3px solid var(--accent-rose);
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  color: #fca5a5;
+}
