@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A reusable syntax-highlighted code block with line numbers and one-click copy."
+    />
+    <title>Pet Adoption Haven - Copy Code Block</title>
+    <link rel="stylesheet" href="./copy-code-block.css" />
+  </head>
+  <body>
+    <main class="demo-container">
+      <header class="demo-header">
+        <p class="demo-eyebrow">PET ADOPTION HAVEN</p>
+        <h1>Code Snippet</h1>
+        <p class="demo-description">
+          Syntax-highlighted code with line numbers and one-click copying.
+        </p>
+      </header>
+
+      <section class="demo-section" aria-label="Code snippet demonstration">
+        <div id="code-block-container"></div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { PetAdoptionHavenCodeBlockWidget } from "./copy-code-block.js";
+
+      const sampleCode = [
+        "const findAvailablePets = async () => {",
+        "  try {",
+        '    const response = await fetch("/api/pets");',
+        "    const pets = await response.json();",
+        "",
+        "    return pets.filter((pet) => pet.available);",
+        "  } catch (error) {",
+        '    console.error("Unable to load pets:", error);',
+        "    return [];",
+        "  }",
+        "};",
+        "",
+        "findAvailablePets();",
+      ].join("\n");
+
+      const widget = new PetAdoptionHavenCodeBlockWidget({
+        language: "javascript",
+      });
+
+      const container = document.getElementById("code-block-container");
+
+      widget.renderToDOM(container, sampleCode, "javascript");
+    </script>
+  </body>
+</html>

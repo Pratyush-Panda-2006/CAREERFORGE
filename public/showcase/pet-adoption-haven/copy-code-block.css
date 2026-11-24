@@ -1,0 +1,263 @@
+/* ----------------------------------
+   Demo page
+---------------------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 48px 20px;
+  background: #f5f7fb;
+  color: #172033;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.demo-container {
+  width: min(100%, 900px);
+  margin: 0 auto;
+}
+
+.demo-header {
+  margin-bottom: 32px;
+}
+
+.demo-eyebrow {
+  margin: 0 0 10px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.demo-header h1 {
+  margin: 0;
+  font-size: clamp(28px, 5vw, 38px);
+  font-weight: 750;
+  letter-spacing: -1px;
+}
+
+.demo-description {
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.demo-section {
+  width: 100%;
+}
+
+/* ----------------------------------
+   Code widget
+---------------------------------- */
+
+.code-widget {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #303746;
+  border-radius: 12px;
+  background: #111827;
+  box-shadow: 0 12px 30px rgb(15 23 42 / 10%);
+  color: #e5e7eb;
+}
+
+/* Header */
+
+.code-widget-header {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #303746;
+  background: #1b2433;
+}
+
+.code-language-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  background: #273449;
+  color: #93c5fd;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+}
+
+.code-copy-button {
+  margin-left: auto;
+  padding: 7px 12px;
+  border: 1px solid #46546a;
+  border-radius: 6px;
+  background: #273449;
+  color: #e5e7eb;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.code-copy-button:hover {
+  border-color: #60a5fa;
+  background: #34445c;
+}
+
+.code-copy-button:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 3px;
+}
+
+.code-copy-button.is-copied {
+  border-color: #15803d;
+  background: #14532d;
+  color: #bbf7d0;
+}
+
+.code-copy-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Code area */
+
+.code-widget-body {
+  display: flex;
+  max-width: 100%;
+  overflow: auto;
+  background: #111827;
+}
+
+.code-line-numbers,
+.code-content {
+  margin: 0;
+  padding-top: 18px;
+  padding-bottom: 18px;
+  font-family: "Fira Code", "Cascadia Code", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  tab-size: 2;
+}
+
+.code-line-numbers {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  flex: 0 0 auto;
+  min-width: 48px;
+  padding-right: 14px;
+  padding-left: 12px;
+  border-right: 1px solid #283447;
+  background: #172131;
+  color: #64748b;
+  text-align: right;
+  user-select: none;
+}
+
+.code-content {
+  flex: 1 0 max-content;
+  min-width: 0;
+  padding-right: 24px;
+  padding-left: 18px;
+  color: #e5e7eb;
+  white-space: pre;
+}
+
+.code-content code {
+  font: inherit;
+}
+
+/* ----------------------------------
+   Syntax highlighting
+---------------------------------- */
+
+.token-keyword {
+  color: #c084fc;
+}
+
+.token-string {
+  color: #86efac;
+}
+
+.token-number {
+  color: #fca5a5;
+}
+
+.token-comment {
+  color: #8292a8;
+  font-style: italic;
+}
+
+.token-literal {
+  color: #f9a8d4;
+}
+
+.token-property {
+  color: #93c5fd;
+}
+
+.token-tag {
+  color: #fca5a5;
+}
+
+.token-attribute {
+  color: #fcd34d;
+}
+
+.token-punctuation {
+  color: #94a3b8;
+}
+
+/* ----------------------------------
+   Responsive layout
+---------------------------------- */
+
+@media (max-width: 600px) {
+  body {
+    padding: 32px 14px;
+  }
+
+  .code-widget-header {
+    padding: 9px 12px;
+  }
+
+  .code-line-numbers,
+  .code-content {
+    font-size: 12px;
+  }
+
+  .code-line-numbers {
+    min-width: 40px;
+    padding-right: 10px;
+    padding-left: 8px;
+  }
+
+  .code-content {
+    padding-right: 16px;
+    padding-left: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code-copy-button {
+    transition: none;
+  }
+}
