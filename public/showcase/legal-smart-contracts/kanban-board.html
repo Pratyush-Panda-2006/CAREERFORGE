@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Task Kanban Board | Legal Smart Contracts</title>
+  <link rel="stylesheet" href="./kanban-board.css">
+  <script type="module" src="./kanban-board.js"></script>
+</head>
+<body>
+  <main data-kanban-lab>
+    <header>
+      <a href="./index.html">LEGAL SMART CONTRACTS</a>
+      <span>SMART CONTRACT TASK KANBAN</span>
+    </header>
+
+    <section class="intro">
+      <p class="eyebrow">WORKFLOW / AUDIT PIPELINE / STAGES</p>
+      <h1>Track contract lifecycles from draft to on-chain execution.</h1>
+      <p>Drag and drop auditing tasks across multi-column workflow lanes, manage priority levels, and synchronize board state locally.</p>
+    </section>
+
+    <section class="create-bar">
+      <form id="add-task-form">
+        <input id="task-title" type="text" placeholder="Enter new contract task..." required maxlength="120">
+        <select id="task-priority">
+          <option value="low">Low Priority</option>
+          <option value="medium" selected>Medium Priority</option>
+          <option value="high">High Priority</option>
+          <option value="critical">Critical</option>
+        </select>
+        <select id="task-column">
+          <option value="backlog">Backlog</option>
+          <option value="in-progress">In Progress</option>
+          <option value="review">Review</option>
+          <option value="done">Done</option>
+        </select>
+        <button type="submit">Create Task</button>
+        <button id="reset-btn" type="button" class="btn-secondary">Clear Board</button>
+      </form>
+    </section>
+
+    <div class="kanban-grid">
+      <section class="kanban-column" data-column="backlog">
+        <div class="column-header">
+          <h2>Backlog</h2>
+          <span id="count-backlog" class="badge">0</span>
+        </div>
+        <div id="col-backlog" class="card-list"></div>
+      </section>
+
+      <section class="kanban-column" data-column="in-progress">
+        <div class="column-header">
+          <h2>In Progress</h2>
+          <span id="count-in-progress" class="badge">0</span>
+        </div>
+        <div id="col-in-progress" class="card-list"></div>
+      </section>
+
+      <section class="kanban-column" data-column="review">
+        <div class="column-header">
+          <h2>Review &amp; Audit</h2>
+          <span id="count-review" class="badge">0</span>
+        </div>
+        <div id="col-review" class="card-list"></div>
+      </section>
+
+      <section class="kanban-column" data-column="done">
+        <div class="column-header">
+          <h2>Executed / Done</h2>
+          <span id="count-done" class="badge">0</span>
+        </div>
+        <div id="col-done" class="card-list"></div>
+      </section>
+    </div>
+
+    <footer>
+      Client-side HTML5 drag-and-drop workflow visualizer. Board state persisted in local session storage.
+    </footer>
+  </main>
+</body>
+</html>
