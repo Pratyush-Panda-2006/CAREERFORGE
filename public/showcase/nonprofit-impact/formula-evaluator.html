@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nonprofit Impact — Dynamic KPI Formula Evaluator &amp; Parser</title>
+  <meta name="description" content="Production-grade mathematical expression parser, Shunting-Yard RPN evaluator, and dynamic KPI formula calculator for nonprofit philanthropy and social return metrics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./formula-evaluator.css">
+</head>
+<body>
+  <div class="evaluator-container">
+    <!-- Top Navigation & Utility Header -->
+    <nav class="top-nav-bar" aria-label="Showcase Navigation">
+      <a href="./index.html" class="back-link" title="Return to TerraInitia Nonprofit Impact Showcase">
+        <span class="nav-arrow" aria-hidden="true">←</span> Back to Nonprofit Impact
+      </a>
+      <div class="nav-actions">
+        <button id="high-contrast-toggle" class="contrast-toggle-btn" type="button" aria-pressed="false" aria-label="Toggle WCAG AAA High Contrast Mode">
+          <span class="contrast-icon" aria-hidden="true">✦</span> WCAG AAA Contrast
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Header -->
+    <header class="evaluator-header">
+      <div class="header-badge">🌱 501(c)(3) PHILANTHROPY KPI ENGINE v2.4</div>
+      <h1>Nonprofit Impact — KPI Formula Calculator</h1>
+      <p>Mathematical expression tokenizer, dynamic formula parser, and philanthropy finance parameter workbench for social return optimization</p>
+    </header>
+
+    <!-- Supported Syntax & Operator Helper Bar -->
+    <div class="syntax-pills-bar" aria-label="Clickable Mathematical Syntax and Variables">
+      <span class="pill-title">Variables:</span>
+      <button type="button" class="syntax-pill var-pill" data-insert="total_donations" title="Insert total_donations">total_donations</button>
+      <button type="button" class="syntax-pill var-pill" data-insert="program_expenses" title="Insert program_expenses">program_expenses</button>
+      <button type="button" class="syntax-pill var-pill" data-insert="fundraising_expenses" title="Insert fundraising_expenses">fundraising_expenses</button>
+      <button type="button" class="syntax-pill var-pill" data-insert="administrative_expenses" title="Insert administrative_expenses">administrative_expenses</button>
+      <button type="button" class="syntax-pill var-pill" data-insert="beneficiaries_served" title="Insert beneficiaries_served">beneficiaries_served</button>
+      <button type="button" class="syntax-pill var-pill" data-insert="volunteer_hours" title="Insert volunteer_hours">volunteer_hours</button>
+      <button type="button" class="syntax-pill var-pill" data-insert="volunteer_value_per_hour" title="Insert volunteer_value_per_hour">volunteer_value_per_hour</button>
+
+      <span class="pill-title function-label">Functions:</span>
+      <button type="button" class="syntax-pill fn-pill" data-insert="sqrt()" title="Square root">sqrt</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="log()" title="Base-10 logarithm">log</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="ln()" title="Natural logarithm">ln</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="exp()" title="Exponential">exp</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="abs()" title="Absolute value">abs</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="min(, )" title="Minimum of two values">min</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="max(, )" title="Maximum of two values">max</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="round()" title="Round to nearest integer">round</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="floor()" title="Floor">floor</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="ceil()" title="Ceiling">ceil</button>
+      <button type="button" class="syntax-pill fn-pill" data-insert="pow(, )" title="Power function">pow</button>
+
+      <span class="pill-title">Operators:</span>
+      <button type="button" class="syntax-pill op-pill" data-insert=" + " title="Addition">+</button>
+      <button type="button" class="syntax-pill op-pill" data-insert=" - " title="Subtraction">-</button>
+      <button type="button" class="syntax-pill op-pill" data-insert=" * " title="Multiplication">*</button>
+      <button type="button" class="syntax-pill op-pill" data-insert=" / " title="Division">/</button>
+      <button type="button" class="syntax-pill op-pill" data-insert=" % " title="Modulo">%</button>
+      <button type="button" class="syntax-pill op-pill" data-insert=" ^ " title="Power (Right-Associative)">^</button>
+      <button type="button" class="syntax-pill op-pill" data-insert="(" title="Open parenthesis">(</button>
+      <button type="button" class="syntax-pill op-pill" data-insert=")" title="Close parenthesis">)</button>
+    </div>
+
+    <!-- KPI Preset Selector Bar -->
+    <section class="preset-section" aria-labelledby="preset-heading">
+      <div class="preset-header">
+        <label id="preset-heading" for="preset-select" class="preset-label">Nonprofit KPI Preset:</label>
+        <div class="select-wrapper">
+          <select id="preset-select" class="preset-select">
+            <option value="program_efficiency" selected>Program Efficiency Ratio (%)</option>
+            <option value="fundraising_efficiency">Fundraising Efficiency Ratio (%)</option>
+            <option value="cost_per_beneficiary">Cost Per Beneficiary Served</option>
+            <option value="social_return_value">Total Social Return Value</option>
+            <option value="overhead_burden">Overhead Burden Ratio (%)</option>
+            <option value="sroi">Social Return on Investment (SROI)</option>
+          </select>
+        </div>
+      </div>
+      <p id="preset-description" class="preset-desc">
+        Program Efficiency Ratio (%): Measures the proportion of total donations directly allocated to program operations and mission execution.
+      </p>
+    </section>
+
+    <!-- Main Grid Layout -->
+    <main class="evaluator-grid">
+      <!-- Left Column: Input and Variable Tuning -->
+      <section class="config-panel" aria-labelledby="formula-input-title">
+        <div class="panel-header">
+          <h2 id="formula-input-title">Mathematical Formula Expression</h2>
+          <span id="syntax-badge" class="syntax-badge valid" role="status">Valid Syntax</span>
+        </div>
+
+        <div class="form-group">
+          <label for="formula-input" class="sr-only">Formula Expression Input</label>
+          <input
+            type="text"
+            id="formula-input"
+            class="formula-text-input"
+            value="(program_expenses / total_donations) * 100"
+            spellcheck="false"
+            autocomplete="off"
+            aria-describedby="warning-banner"
+          >
+        </div>
+
+        <div class="button-actions">
+          <button id="evaluate-btn" class="primary-btn" type="button">Calculate KPI Result</button>
+          <button id="clear-btn" class="secondary-btn" type="button">Reset</button>
+        </div>
+
+        <div id="warning-banner" class="warning-banner" style="display: none;" role="alert" aria-live="assertive"></div>
+
+        <!-- Variable Tuning Workbench -->
+        <div class="variables-section" aria-labelledby="variables-title">
+          <div class="variables-header">
+            <h3 id="variables-title">Impact Parameter Tuning Workbench</h3>
+            <span class="variables-sub">Sliders &amp; Inputs Live-Synchronized</span>
+          </div>
+
+          <div class="variables-grid" id="variables-list">
+            <!-- total_donations -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-total_donations" class="var-label">total_donations ($)</label>
+                <input type="number" id="input-total_donations" class="var-input" data-var="total_donations" value="250000" step="5000" min="10000" max="2000000">
+              </div>
+              <input type="range" class="var-slider" data-var="total_donations" value="250000" step="5000" min="10000" max="2000000" aria-label="total_donations slider">
+            </div>
+
+            <!-- program_expenses -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-program_expenses" class="var-label">program_expenses ($)</label>
+                <input type="number" id="input-program_expenses" class="var-input" data-var="program_expenses" value="210000" step="5000" min="5000" max="1500000">
+              </div>
+              <input type="range" class="var-slider" data-var="program_expenses" value="210000" step="5000" min="5000" max="1500000" aria-label="program_expenses slider">
+            </div>
+
+            <!-- fundraising_expenses -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-fundraising_expenses" class="var-label">fundraising_expenses ($)</label>
+                <input type="number" id="input-fundraising_expenses" class="var-input" data-var="fundraising_expenses" value="25000" step="1000" min="1000" max="200000">
+              </div>
+              <input type="range" class="var-slider" data-var="fundraising_expenses" value="25000" step="1000" min="1000" max="200000" aria-label="fundraising_expenses slider">
+            </div>
+
+            <!-- administrative_expenses -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-administrative_expenses" class="var-label">administrative_expenses ($)</label>
+                <input type="number" id="input-administrative_expenses" class="var-input" data-var="administrative_expenses" value="15000" step="1000" min="1000" max="150000">
+              </div>
+              <input type="range" class="var-slider" data-var="administrative_expenses" value="15000" step="1000" min="1000" max="150000" aria-label="administrative_expenses slider">
+            </div>
+
+            <!-- beneficiaries_served -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-beneficiaries_served" class="var-label">beneficiaries_served (People/Acres)</label>
+                <input type="number" id="input-beneficiaries_served" class="var-input" data-var="beneficiaries_served" value="4500" step="100" min="100" max="50000">
+              </div>
+              <input type="range" class="var-slider" data-var="beneficiaries_served" value="4500" step="100" min="100" max="50000" aria-label="beneficiaries_served slider">
+            </div>
+
+            <!-- volunteer_hours -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-volunteer_hours" class="var-label">volunteer_hours (Hours)</label>
+                <input type="number" id="input-volunteer_hours" class="var-input" data-var="volunteer_hours" value="1200" step="50" min="50" max="20000">
+              </div>
+              <input type="range" class="var-slider" data-var="volunteer_hours" value="1200" step="50" min="50" max="20000" aria-label="volunteer_hours slider">
+            </div>
+
+            <!-- volunteer_value_per_hour -->
+            <div class="var-card">
+              <div class="var-title-row">
+                <label for="input-volunteer_value_per_hour" class="var-label">volunteer_value_per_hour ($/hr)</label>
+                <input type="number" id="input-volunteer_value_per_hour" class="var-input" data-var="volunteer_value_per_hour" value="28.50" step="0.50" min="10" max="100">
+              </div>
+              <input type="range" class="var-slider" data-var="volunteer_value_per_hour" value="28.50" step="0.50" min="10" max="100" aria-label="volunteer_value_per_hour slider">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Results, Streams & Audit History -->
+      <section class="results-panel" aria-labelledby="results-title">
+        <h2 id="results-title" class="sr-only">Evaluation Results and Metrics</h2>
+
+        <!-- Result Callout Cards -->
+        <div class="result-cards-wrapper">
+          <div class="result-card primary-card">
+            <span class="result-label">Computed KPI Output</span>
+            <div id="result-display" class="result-value" aria-live="polite">84.00</div>
+            <span id="result-meta" class="result-sub">Program Efficiency Ratio (%)</span>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-title">Raw Float Value</span>
+              <span id="raw-result-display" class="metric-val">84</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Tokens Parsed</span>
+              <span id="token-count-display" class="metric-val">7 tokens</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-title">Calculation Latency</span>
+              <span id="eval-latency-display" class="metric-val">0.12 ms</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tokenized Parser Stream -->
+        <div class="token-stream-box">
+          <div class="panel-header">
+            <h3>Tokenized Parser Stream</h3>
+          </div>
+          <div id="token-stream" class="token-view" aria-label="Tokenized Stream"></div>
+        </div>
+
+        <!-- RPN Output Stream -->
+        <div class="rpn-box">
+          <div class="panel-header">
+            <h3>Reverse Polish Notation (RPN)</h3>
+          </div>
+          <div id="rpn-stream" class="rpn-view" aria-label="RPN Queue"></div>
+        </div>
+
+        <!-- Calculation Audit History Log -->
+        <div class="history-box" aria-labelledby="history-heading">
+          <div class="panel-header">
+            <h3 id="history-heading">Calculation Audit History</h3>
+            <button id="clear-history-btn" class="tertiary-btn" type="button">Clear History</button>
+          </div>
+          <div id="history-list" class="history-list" role="feed" aria-busy="false"></div>
+          <div id="history-empty" class="history-empty">No calculations recorded yet.</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="evaluator-footer">
+      <p>TerraInitia 501(c)(3) Climate Alliance • Mathematical Expression Parser &amp; SROI Calculator • WCAG AAA High Contrast Compliant</p>
+    </footer>
+  </div>
+
+  <script type="module" src="./formula-evaluator.js"></script>
+</body>
+</html>
