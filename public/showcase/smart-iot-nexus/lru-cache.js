@@ -64,6 +64,7 @@ function mount() {
       read.addEventListener('click', () => { get('key').value = entry.key; cache.get(entry.key); get('status').textContent = `${entry.key} moved to the head.`; render(); });
       li.append(badge, label, value, read); return li;
     }));
+    get('chain').scrollLeft = 0;
     if (!entries.length) { const li = document.createElement('li'); li.textContent = 'Empty cache. Insert your first key and value.'; get('chain').append(li); }
     get('eviction-log').replaceChildren(...cache.getEvictedEntries().reverse().map(entry => {
       const li = document.createElement('li'); li.textContent = `${entry.key} → ${entry.value} · ${entry.reason === 'resize' ? 'capacity reduced' : 'least recently used'}`; return li;
