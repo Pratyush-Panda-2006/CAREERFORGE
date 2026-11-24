@@ -28,3 +28,24 @@ test('mixed operations agree with a separate simple reference model',()=>{
   assert.deepEqual(c.entries(),[...model].reverse().map(([key,value])=>({key,value})));check(c);
  }
 });
+
+test('pet-adoption-haven pet profile caching and LRU eviction (#3810)', () => {
+  const cache = new Cache(3);
+  cache.put('pet:101', { name: 'Luna', species: 'Cat', age: 2 });
+  cache.put('pet:102', { name: 'Milo', species: 'Dog', age: 4 });
+  cache.put('pet:103', { name: 'Bella', species: 'Rabbit', age: 1 });
+
+  // Access Luna (101) to make Luna MRU
+  const luna = cache.get('pet:101');
+  assert.equal(luna.name, 'Luna');
+
+  // Insert Oliver (104) -> Milo (102, which is LRU) must be evicted!
+  const eviction = cache.put('pet:104', { name: 'Oliver', species: 'Cat', age: 3 });
+  assert.equal(eviction.key, 'pet:102');
+  assert.equal(cache.get('pet:102'), undefined);
+
+  // Remaining entries should be Oliver (MRU), Luna, Bella
+  assert.deepEqual(keys(cache), ['pet:104', 'pet:101', 'pet:103']);
+  check(cache);
+});
+
