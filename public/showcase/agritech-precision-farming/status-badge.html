@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agritech Precision Farming - System Health Status Pill & Service Ping Indicator</title>
+  <link rel="stylesheet" href="status-badge.css">
+</head>
+<body>
+  <div class="status-badge-container" data-status-badge-lab>
+    <header class="header">
+      <h1>Agritech IoT & Irrigation Mesh Health</h1>
+      <p class="subtitle">Real-time telemetry heartbeat with latency ping tracking and uptime statistics</p>
+    </header>
+
+    <main class="grid-layout">
+      <!-- Status Pill Display Card -->
+      <section class="card display-card">
+        <h2>Service Heartbeat</h2>
+        <div class="service-meta">
+          <span class="service-title">Soil Sensor Mesh & Drone Gateway</span>
+          <div id="status-pill" class="status-pill status-operational">
+            <span class="status-dot dot-operational"></span>
+            <span class="status-label">Operational</span>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-num" id="uptime-val">100.0%</span>
+            <span class="metric-name">Uptime SLA</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-num" id="avg-ping-val">24.7 ms</span>
+            <span class="metric-name">Avg Latency</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-num" id="total-pings-val">3</span>
+            <span class="metric-name">Pings Recorded</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Simulation Controls -->
+      <section class="card controls-card">
+        <h2>Health State Controls</h2>
+        <p class="card-desc">Simulate service degradation, maintenance windows, and manual sensor pings.</p>
+        <div class="action-buttons">
+          <button id="btn-operational" class="btn btn-operational">Set Operational</button>
+          <button id="btn-degraded" class="btn btn-degraded">Set Degraded</button>
+          <button id="btn-maintenance" class="btn btn-maintenance">Set Maintenance</button>
+          <button id="btn-ping" class="btn btn-ping">Send Ping Now</button>
+        </div>
+      </section>
+
+      <!-- Ping History Stream -->
+      <section class="card stream-card">
+        <h2>Heartbeat Ping Log</h2>
+        <div id="ping-log" class="ping-log-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="status-badge.js"></script>
+</body>
+</html>
