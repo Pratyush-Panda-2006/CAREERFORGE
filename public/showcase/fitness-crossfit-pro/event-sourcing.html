@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Sourcing Ledger & Temporal State Replay — Fitness CrossFit Pro</title>
+  <link rel="stylesheet" href="event-sourcing.css">
+</head>
+<body>
+  <div class="es-shell">
+    <header class="es-header">
+      <div class="es-title-wrap">
+        <h1>⚡ Event Sourcing Ledger</h1>
+        <p>Immutable append-only event store with temporal state replay for Fitness CrossFit Pro WOD tracking.</p>
+      </div>
+      <div id="esStatusBadge" class="es-status es-status-valid">IDLE</div>
+    </header>
+
+    <section class="es-panel es-panel-controls">
+      <div class="es-form-grid">
+        <div class="es-field">
+          <label for="esEventType">Event Type</label>
+          <select id="esEventType" class="es-select">
+            <option value="WORKOUT_STARTED">WORKOUT_STARTED</option>
+            <option value="WORKOUT_ENDED">WORKOUT_ENDED</option>
+            <option value="EXERCISE_LOGGED">EXERCISE_LOGGED</option>
+            <option value="WEIGHT_UPDATED">WEIGHT_UPDATED</option>
+            <option value="PR_SET">PR_SET</option>
+          </select>
+        </div>
+        <div class="es-field">
+          <label for="esPayloadName">Name</label>
+          <input type="text" id="esPayloadName" class="es-input" placeholder="e.g. Murph / Fran" />
+        </div>
+        <div class="es-field">
+          <label for="esPayloadSets">Sets</label>
+          <input type="number" id="esPayloadSets" class="es-input" placeholder="0" />
+        </div>
+        <div class="es-field">
+          <label for="esPayloadReps">Reps</label>
+          <input type="number" id="esPayloadReps" class="es-input" placeholder="0" />
+        </div>
+        <div class="es-field">
+          <label for="esPayloadWeight">Weight (kg)</label>
+          <input type="number" id="esPayloadWeight" class="es-input" placeholder="0" />
+        </div>
+        <div class="es-field">
+          <label for="esPayloadWorkoutId">Workout ID</label>
+          <input type="text" id="esPayloadWorkoutId" class="es-input" placeholder="optional" />
+        </div>
+        <div class="es-field es-field-full">
+          <button type="button" id="esSubmitBtn" class="es-btn es-btn-primary">➕ Append Event</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="es-panel es-panel-ledger">
+      <div class="es-panel-header">
+        <h2>📜 Immutable Append-Only Ledger</h2>
+        <button type="button" id="esBtnReset" class="es-btn es-btn-outline">🔄 Reset Ledger</button>
+      </div>
+      <div class="es-table-wrap">
+        <table id="esLedgerTable" class="es-ledger-table">
+          <thead>
+            <tr>
+              <th>Seq</th>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Event ID</th>
+              <th>Payload</th>
+              <th>Sealed</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="es-panel es-panel-timeline">
+      <div class="es-panel-header">
+        <h2>⏱️ Temporal Timeline Scrub</h2>
+        <div class="es-scrub-controls">
+          <button type="button" id="esBtnStepBack" class="es-btn es-btn-icon">⏪ Step Back</button>
+          <button type="button" id="esBtnPlay" class="es-btn es-btn-primary">▶ Play</button>
+          <button type="button" id="esBtnPause" class="es-btn es-btn-outline">⏸ Pause</button>
+          <button type="button" id="esBtnStepForward" class="es-btn es-btn-icon">Step Forward ⏩</button>
+        </div>
+      </div>
+      <div class="es-scrub-wrap">
+        <input type="range" id="esTimelineScrub" class="es-range" min="0" max="100" value="0">
+        <span id="esScrubVal" class="es-scrub-label">0 ms</span>
+      </div>
+      <p class="es-hint">Drag the scrub bar to replay state at any historical timestamp.</p>
+    </section>
+
+    <section class="es-panel es-panel-snapshots">
+      <div class="es-snapshot-grid">
+        <div class="es-snapshot-card">
+          <div class="es-snapshot-header">📊 Current Materialized State</div>
+          <pre id="esCurrentState" class="es-state-pre">...</pre>
+        </div>
+        <div class="es-snapshot-card">
+          <div class="es-snapshot-header">🕰️ Historical State at Scrub Time</div>
+          <pre id="esHistoricalState" class="es-state-pre">...</pre>
+        </div>
+      </div>
+    </section>
+
+    <nav class="es-nav">
+      <a href="index.html" class="es-back-link">← Return to PULSE-WOD Dashboard</a>
+    </nav>
+  </div>
+
+  <script type="module" src="event-sourcing.js"></script>
+</body>
+</html>
