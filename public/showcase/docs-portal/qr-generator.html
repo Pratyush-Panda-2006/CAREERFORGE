@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Docs Portal - QR Generator</title>
+  <link rel="stylesheet" href="qr-generator.css">
+</head>
+<body class="qr-body">
+  <div class="qr-container">
+    <h2>Docs Portal QR Code Generator</h2>
+    <div id="qrStage"></div>
+  </div>
+  <script type="module">
+    import { DocsPortalQrGenerator } from './qr-generator.js';
+    const gen = new DocsPortalQrGenerator();
+    const m = gen.generateQrMatrix();
+    document.getElementById('qrStage').innerHTML = gen.renderSVG(m);
+  </script>
+</body>
+</html>
