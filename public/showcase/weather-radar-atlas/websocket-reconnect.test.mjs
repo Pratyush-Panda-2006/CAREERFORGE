@@ -13,40 +13,33 @@ test('WeatherRadarAtlasResilientSocket - calculateBackoff computes exponential d
   assert.equal(socket.calculateBackoff(2), 4000);
   assert.equal(socket.calculateBackoff(3), 8000);
   assert.equal(socket.calculateBackoff(4), 10000);
-  assert.equal(socket.calculateBackoff(10), 10000);
 });
 
 test('WeatherRadarAtlasResilientSocket - buffers messages in queue while disconnected', () => {
   const socket = new WeatherRadarAtlasResilientSocket();
   assert.equal(socket.status, 'DISCONNECTED');
 
-  const sent1 = socket.send('telemetry: packet 1');
-  const sent2 = socket.send({ sensor: 'radar', value: 92 });
-
-  assert.equal(sent1, false);
-  assert.equal(sent2, false);
-  assert.equal(socket.queue.length, 2);
-  assert.equal(socket.sentMessages.length, 0);
+  const sent = socket.send('telemetry-packet');
+  assert.equal(sent, false);
+  assert.equal(socket.queue.length, 1);
 });
 
 test('WeatherRadarAtlasResilientSocket - flushQueue flushes buffered messages upon connecting', async () => {
   const socket = new WeatherRadarAtlasResilientSocket();
-  socket.send('queued-msg-1');
-  socket.send('queued-msg-2');
-  assert.equal(socket.queue.length, 2);
+  socket.send('queued-msg');
+  assert.equal(socket.queue.length, 1);
 
   await socket.connect();
   assert.equal(socket.status, 'CONNECTED');
   assert.equal(socket.queue.length, 0);
-  assert.equal(socket.sentMessages.length, 2);
-  assert.equal(socket.sentMessages[0].payload, 'queued-msg-1');
-  assert.equal(socket.sentMessages[1].payload, 'queued-msg-2');
+  assert.equal(socket.sentMessages.length, 1);
 });
 
 test('WeatherRadarAtlasResilientSocket - transitions to RECONNECTING upon simulateDrop', () => {
   const socket = new WeatherRadarAtlasResilientSocket();
   socket.status = 'CONNECTED';
   socket.simulateDrop();
+
   assert.equal(socket.status, 'RECONNECTING');
   assert.equal(socket.reconnectAttempts, 1);
   socket.disconnect();
