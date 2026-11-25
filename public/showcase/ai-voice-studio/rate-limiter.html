@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - TTS Rate Limiter & Concurrency Throttler</title>
+  <link rel="stylesheet" href="rate-limiter.css">
+</head>
+<body>
+  <div class="rate-limiter-container" data-rate-limiter-lab>
+    <header class="header">
+      <h1>Voice Synthesis API Rate Limiter</h1>
+      <p class="subtitle">Token Bucket algorithm throttling TTS voice generation and acoustic neural models</p>
+    </header>
+
+    <main class="grid-layout">
+      <!-- Reservoir Visualizer -->
+      <section class="card reservoir-card">
+        <h2>Audio Inference Reservoir</h2>
+        <div class="bucket-outer">
+          <div id="bucket-fill" class="bucket-fill" style="height: 100%;">
+            <div class="liquid-wave"></div>
+          </div>
+          <div class="bucket-overlay">
+            <span id="available-tokens" class="tokens-value">10.0</span>
+            <span class="tokens-unit">/ <span id="max-capacity">10</span> tokens</span>
+          </div>
+        </div>
+        <p class="refill-rate-label">Replenishing at +2.0 tokens / sec</p>
+      </section>
+
+      <!-- Control Panel -->
+      <section class="card controls-card">
+        <h2>Voice Generation Simulator</h2>
+        <p class="card-desc">Simulate inbound text-to-speech voice generation and neural timbre modulation calls.</p>
+        <div class="button-group">
+          <button id="send-1-btn" class="btn btn-primary">Synthesize 1 Phrase</button>
+          <button id="burst-3-btn" class="btn btn-secondary">Burst 3 Clips</button>
+          <button id="flood-8-btn" class="btn btn-warning">Flood 8 Tracks</button>
+          <button id="reset-btn" class="btn btn-outline">Reset Tokens</button>
+        </div>
+
+        <div class="telemetry-bar">
+          <h3>Inference Telemetry</h3>
+          <div id="stats-display" class="stats-text">Total Syntheses: 0 | Accepted: 0 | Throttled: 0 (0.0%)</div>
+        </div>
+      </section>
+
+      <!-- Event Stream -->
+      <section class="card stream-card">
+        <h2>TTS Concurrency Stream</h2>
+        <div id="event-log" class="event-log-container">
+          <div class="log-placeholder">Ready for voice generation calls. Click a simulation button above.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="rate-limiter.js"></script>
+</body>
+</html>
