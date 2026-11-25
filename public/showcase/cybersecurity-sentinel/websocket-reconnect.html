@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Sentinel - Resilient SIEM WebSocket Stream</title>
+  <link rel="stylesheet" href="websocket-reconnect.css">
+</head>
+<body>
+  <div class="ws-container" data-websocket-lab>
+    <header class="header">
+      <h1>SIEM Threat Intelligence WebSocket Stream</h1>
+      <p class="subtitle">Resilient telemetry manager with exponential backoff and offline incident log buffering</p>
+    </header>
+
+    <main class="grid-layout">
+      <!-- Connection Status Card -->
+      <section class="card status-card">
+        <h2>SOC Gateway Connection</h2>
+        <div class="status-indicator-box">
+          <span class="socket-url">wss://siem.cybersecurity-sentinel.net/threats</span>
+          <div id="connection-status-pill" class="status-pill pill-disconnected">DISCONNECTED</div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-label">Reconnect Attempts</span>
+            <span id="attempts-count" class="metric-val">0 / 4</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Offline Threat Buffer</span>
+            <span id="queue-count" class="metric-val">0 buffered</span>
+          </div>
+        </div>
+
+        <div class="control-actions">
+          <button id="connect-btn" class="btn btn-connect">Establish Link</button>
+          <button id="disconnect-btn" class="btn btn-disconnect">Sever Link</button>
+          <button id="drop-btn" class="btn btn-drop">Simulate Drop</button>
+        </div>
+      </section>
+
+      <!-- Message Transmitter Card -->
+      <section class="card transmit-card">
+        <h2>Incident Signal Dispatcher</h2>
+        <p class="card-desc">Threat events detected offline are securely held in memory and streamed upon link recovery.</p>
+        <div class="transmit-row">
+          <input type="text" id="msg-input" placeholder="Signal (e.g. CVE-2026-4412 Exploit Attempt Blocked)">
+          <button id="send-msg-btn" class="btn btn-send">Dispatch Alert</button>
+        </div>
+      </section>
+
+      <!-- Live Stream Log Card -->
+      <section class="card stream-card">
+        <h2>Real-Time SOC Event Stream</h2>
+        <div id="messages-stream" class="messages-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="websocket-reconnect.js"></script>
+</body>
+</html>
