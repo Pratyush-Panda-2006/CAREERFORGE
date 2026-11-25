@@ -1,103 +1,15 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
-  <title>Aerospace Orbiter - Token Bucket Rate Limiter & Concurrency Throttler</title>
+  <meta charset="UTF-8">
+  <title>AerospaceOrbiter - Token Bucket Rate Limiter</title>
   <link rel="stylesheet" href="rate-limiter.css">
 </head>
 <body>
-  <header>
-    <a href="index.html">Aerospace Orbiter ↗</a>
-    <span>FLIGHT AVIONICS LAB / RATE LIMITER</span>
-  </header>
-  <main id="main">
-    <section class="intro">
-      <p class="eyebrow">MISSION CONTROL TELEMETRY & COMMAND THROTTLER</p>
-      <h1>Orbiter Telemetry & Thruster Command Rate Limiter</h1>
-      <p>Autonomous client-side Token Bucket rate limiter and concurrency queue throttler for orbital trajectory calculations, satellite ground-station uplinks, and spacecraft telemetry broadcasts.</p>
-    </section>
-
-    <form id="limiter-config" class="panel">
-      <h2>Configure Flight Computer Token Bucket Parameters</h2>
-      <div class="fields">
-        <label>Burst Capacity (Tokens)
-          <input id="capacity" type="number" min="1" max="1000" step="1" value="10" required>
-        </label>
-        <label>Refill Tokens / Second
-          <input id="refill" type="number" min="0.1" max="1000" step="0.1" value="2" required>
-        </label>
-        <label>Max Concurrent Telemetry Channels
-          <input id="concurrency" type="number" min="1" max="20" step="1" value="3" required>
-        </label>
-      </div>
-      <button type="submit">Apply & Reset Avionics Limiter</button>
-      <p class="hint">Reset flushes running flight tasks, the downlink queue, and all mission counters.</p>
-    </form>
-
-    <div class="workbench">
-      <section class="panel bucket">
-        <div>
-          <p class="eyebrow">AVAILABLE AVIONICS TOKENS</p>
-          <h2 id="bucket-amount">10 / 10 tokens</h2>
-          <progress id="bucket-meter" max="10" value="10" aria-label="Available tokens"></progress>
-          <p>Monotonic spacecraft clock replenishment maintains steady bandwidth for mission command execution without exceeding satellite payload power.</p>
-        </div>
-        <div class="reservoir" aria-hidden="true">
-          <div id="reservoir-fill"></div>
-          <span>AVIONICS<br>RESERVOIR</span>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h2>Dispatch Orbital Telemetry Burst</h2>
-        <div class="fields">
-          <label>Command Priority
-            <select id="priority">
-              <option value="0">Housekeeping Telemetry · 0</option>
-              <option value="5">Payload Experiment · 5</option>
-              <option value="9">Attitude & Thruster Burn · 9</option>
-            </select>
-          </label>
-          <label>Command Token Cost
-            <input id="cost" type="number" min="1" max="10" step="1" value="1" required>
-          </label>
-        </div>
-        <div class="actions">
-          <button id="send-one" type="button">Send 1 Command</button>
-          <button id="send-flood" type="button">Flood 12 Commands</button>
-          <button id="fill-queue" class="secondary" type="button">Stress with 120 Commands</button>
-        </div>
-        <p id="status" role="status">Ready for flight avionics command dispatch.</p>
-      </section>
-    </div>
-
-    <dl class="metrics">
-      <div><dt>Accepted Commands</dt><dd id="accepted">0</dd></div>
-      <div><dt>Executed / Completed</dt><dd id="completed">0</dd></div>
-      <div><dt>Bandwidth Throttled</dt><dd id="throttled">0</dd></div>
-      <div><dt>Aborted / Cancelled</dt><dd id="cancelled">0</dd></div>
-    </dl>
-
-    <div class="workbench">
-      <section class="panel">
-        <h2>In Flight Avionics Tasks <span id="active-count">0 / 3</span></h2>
-        <p id="running">No active spacecraft tasks executing</p>
-        <div class="section-title">
-          <h2>Uplink Waiting Queue <span id="queue-count">0 / 100</span></h2>
-          <button id="clear-queue" class="secondary" type="button">Flush Waiting Commands</button>
-        </div>
-        <ol id="queue" aria-label="Queued command requests"></ol>
-      </section>
-
-      <section class="panel">
-        <h2>Flight Computer Event Log</h2>
-        <p class="hint">Newest first · last 100 flight events</p>
-        <ol id="event-log" aria-label="Flight events"></ol>
-      </section>
-    </div>
-  </main>
+  <div class="limiter-container">
+    <h1>AerospaceOrbiter Rate Limiter</h1>
+    <p>Token Bucket concurrency & burst throttling engine</p>
+  </div>
   <script type="module" src="rate-limiter.js"></script>
 </body>
 </html>
