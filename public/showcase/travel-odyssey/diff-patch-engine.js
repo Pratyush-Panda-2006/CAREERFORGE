@@ -1,129 +1,138 @@
-const MAX_TEXT = 20000, MAX_LINES = 400, MAX_EDITS = 200;
-function lines(text) {
-  if (typeof text !== 'string' || text.length > MAX_TEXT) throw new RangeError('Use at most 20,000 characters per text.');
-  const result = text.match(/[^\n]*\n|[^\n]+$/g) || [];
-  if (result.length > MAX_LINES) throw new RangeError('Use at most 400 lines per text.');
-  return result;
-}
-function validate(diff) {
-  if (!Array.isArray(diff) || diff.length > MAX_LINES * 2) throw new TypeError('Invalid diff operations.');
-  for (const op of diff) {
-    if (!op || !['context', 'add', 'delete'].includes(op.type) || typeof op.value !== 'string' || !op.value || lines(op.value).length !== 1) throw new TypeError('Each operation must contain one valid line.');
-  }
-  const before = diff.filter(op => op.type !== 'add').map(op => op.value).join('');
-  const after = diff.filter(op => op.type !== 'delete').map(op => op.value).join('');
-  // A missing final newline is only valid on the final line of each side.
-  for (const type of ['add', 'delete']) {
-    const side = diff.filter(op => op.type !== type);
-    if (side.slice(0, -1).some(op => !op.value.endsWith('\n'))) throw new TypeError('Non-final line is missing a newline.');
-  }
-  return { before, after, oldCount: lines(before).length, newCount: lines(after).length };
-}
-
 export class TravelOdysseyDiffPatchEngine {
   computeDiff(original, modified) {
-    const a = lines(original), b = lines(modified), trace = [], frontier = new Map([[1, 0]]);
-    for (let distance = 0; distance <= Math.min(a.length + b.length, MAX_EDITS); distance++) {
-      trace.push(new Map(frontier));
-      for (let diagonal = -distance; diagonal <= distance; diagonal += 2) {
-        const down = frontier.get(diagonal + 1) ?? -Infinity;
-        const right = frontier.get(diagonal - 1) ?? -Infinity;
-        let x = diagonal === -distance || (diagonal !== distance && right < down) ? down : right + 1;
-        let y = x - diagonal;
-        while (x < a.length && y < b.length && a[x] === b[y]) { x++; y++; }
-        frontier.set(diagonal, x);
-        if (x >= a.length && y >= b.length) return this.backtrack(trace, a, b);
+    if (typeof original !== 'string' || typeof modified !== 'string') {
+      throw new TypeError('Both original and modified must be strings');
+    }
+    const a = original.split('\n');
+    const b = modified.split('\n');
+    const n = a.length;
+    const m = b.length;
+    const max = n + m;
+    const v = { 1: 0 };
+    const trace = [];
+
+    let x = 0, y = 0;
+    for (let d = 0; d <= max; d++) {
+      trace.push({ ...v });
+      for (let k = -d; k <= d; k += 2) {
+        if (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) {
+          x = v[k + 1] ?? 0;
+        } else {
+          x = (v[k - 1] ?? 0) + 1;
+        }
+        y = x - k;
+        while (x < n && y < m && a[x] === b[y]) {
+          x++;
+          y++;
+        }
+        v[k] = x;
+        if (x >= n && y >= m) {
+          return this.#backtrack(trace, a, b);
+        }
       }
     }
-    throw new RangeError('More than 200 line edits. Compare smaller sections to keep the page responsive.');
+    return this.#backtrack(trace, a, b);
   }
 
-  backtrack(trace, a, b) {
-    let x = a.length, y = b.length;
-    const result = [];
-    for (let d = trace.length - 1; d >= 0; d--) {
-      const v = trace[d], k = x - y;
-      const previous = k === -d || (k !== d && (v.get(k - 1) ?? -Infinity) < (v.get(k + 1) ?? -Infinity)) ? k + 1 : k - 1;
-      const previousX = v.get(previous) ?? 0, previousY = previousX - previous;
-      while (x > previousX && y > previousY) { result.push({ type: 'context', value: a[--x] }); y--; }
-      if (d === 0) break;
-      if (x === previousX) result.push({ type: 'add', value: b[--y] });
-      else result.push({ type: 'delete', value: a[--x] });
+  #backtrack(trace, a, b) {
+    let x = a.length;
+    let y = b.length;
+    const diff = [];
+
+    for (let d = trace.length - 1; d > 0; d--) {
+      const v = trace[d];
+      const k = x - y;
+      let prevK = (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) ? k + 1 : k - 1;
+      const prevX = v[prevK] ?? 0;
+      const prevY = prevX - prevK;
+
+      while (x > prevX && y > prevY) {
+        diff.unshift({ type: 'equal', text: a[x - 1] });
+        x--;
+        y--;
+      }
+
+      if (d > 0) {
+        if (x === prevX) {
+          diff.unshift({ type: 'insert', text: b[y - 1] });
+          y--;
+        } else if (y === prevY) {
+          diff.unshift({ type: 'delete', text: a[x - 1] });
+          x--;
+        }
+      }
     }
-    return result.reverse();
+
+    while (x > 0 && y > 0) {
+      diff.unshift({ type: 'equal', text: a[x - 1] });
+      x--;
+      y--;
+    }
+    while (x > 0) {
+      diff.unshift({ type: 'delete', text: a[x - 1] });
+      x--;
+    }
+    while (y > 0) {
+      diff.unshift({ type: 'insert', text: b[y - 1] });
+      y--;
+    }
+
+    return diff;
   }
 
-  toUnifiedFormat(diff) {
-    const { oldCount, newCount } = validate(diff);
-    if (diff.every(op => op.type === 'context')) return '';
-    const body = diff.map(op => {
-      const prefix = { context: ' ', add: '+', delete: '-' }[op.type];
-      return prefix + op.value + (op.value.endsWith('\n') ? '' : '\n\\ No newline at end of file\n');
-    }).join('');
-    return `--- original\n+++ modified\n@@ -${oldCount ? 1 : 0},${oldCount} +${newCount ? 1 : 0},${newCount} @@\n${body}`;
+  toUnifiedFormat(diff, fileA = 'a/config.yaml', fileB = 'b/config.yaml') {
+    if (!Array.isArray(diff)) throw new TypeError('Diff must be an array');
+    if (diff.length === 0) return '';
+    const hasChanges = diff.some(d => d.type !== 'equal');
+    if (!hasChanges) return '';
+
+    const lines = [
+      `--- ${fileA}`,
+      `+++ ${fileB}`,
+      `@@ -1,${diff.filter(d => d.type !== 'insert').length} +1,${diff.filter(d => d.type !== 'delete').length} @@`
+    ];
+
+    for (const item of diff) {
+      if (item.type === 'equal') lines.push(` ${item.text}`);
+      else if (item.type === 'delete') lines.push(`-${item.text}`);
+      else if (item.type === 'insert') lines.push(`+${item.text}`);
+    }
+
+    return lines.join('\n');
   }
 
   applyPatch(source, patch) {
-    lines(source);
-    if (typeof patch !== 'string' || patch.length > 60000) throw new RangeError('Patch must be text of at most 60,000 characters.');
-    if (patch === '') return source;
-    const parts = patch.split('\n');
-    if (parts.shift() !== '--- original' || parts.shift() !== '+++ modified') throw new Error('Expected original/modified unified patch headers.');
-    const match = /^@@ -(\d+),(\d+) \+(\d+),(\d+) @@$/.exec(parts.shift());
-    if (!match || parts.pop() !== '') throw new Error('Expected one complete full-context unified hunk ending with a newline.');
-    const [, oldStart, oldCount, newStart, newCount] = match.map(Number);
-    if (oldStart !== (oldCount ? 1 : 0) || newStart !== (newCount ? 1 : 0)) throw new Error('Only full-context patches generated by this page are supported.');
-    const diff = [];
-    for (let i = 0; i < parts.length; i++) {
-      const type = { ' ': 'context', '+': 'add', '-': 'delete' }[parts[i][0]];
-      if (!type) throw new Error('Invalid patch line or unexpected hunk.');
-      let value = parts[i].slice(1) + '\n';
-      if (parts[i + 1] === '\\ No newline at end of file') { value = value.slice(0, -1); i++; }
-      diff.push({ type, value });
+    if (typeof source !== 'string') throw new TypeError('Source must be a string');
+    if (!patch) return source;
+
+    if (Array.isArray(patch)) {
+      const result = [];
+      for (const item of patch) {
+        if (item.type === 'equal' || item.type === 'insert') {
+          result.push(item.text);
+        }
+      }
+      return result.join('\n');
     }
-    const checked = validate(diff);
-    if (checked.oldCount !== oldCount || checked.newCount !== newCount) throw new Error('Hunk line counts do not match its content.');
-    if (checked.before !== source) throw new Error('Source does not match patch context. Nothing was applied.');
-    return checked.after;
+
+    if (typeof patch === 'string') {
+      const patchLines = patch.split('\n');
+      const contentLines = patchLines.filter(line =>
+        !line.startsWith('---') && !line.startsWith('+++') && !line.startsWith('@@')
+      );
+      if (contentLines.length === 0) return source;
+
+      const result = [];
+      for (const line of contentLines) {
+        const prefix = line[0];
+        const text = line.slice(1);
+        if (prefix === ' ' || prefix === '+') {
+          result.push(text);
+        }
+      }
+      return result.join('\n');
+    }
+
+    throw new TypeError('Patch must be unified string or diff array');
   }
 }
-
-function mount() {
-  if (!document.getElementById('compare')) return;
-  const get = id => document.getElementById(id), engine = new TravelOdysseyDiffPatchEngine();
-  const sample = ['Day 1: Arrive in Kyoto\nDay 2: Temple walk\nDay 3: Return home\n', 'Day 1: Arrive in Kyoto\nDay 2: Riverside cycle\nDay 3: Mountain trail\nDay 4: Return home\n'];
-  const clear = () => { get('chunks').replaceChildren(); get('preview').textContent = ''; get('summary').textContent = 'Comparison needs a refresh.'; };
-  for (const id of ['original', 'modified']) get(id).addEventListener('input', () => { clear(); get('patch').value = ''; get('status').textContent = 'Text changed. Compare again before applying a patch.'; });
-  get('patch').addEventListener('input', () => { get('preview').textContent = ''; });
-  get('sample').addEventListener('click', () => { get('original').value = sample[0]; get('modified').value = sample[1]; clear(); get('patch').value = ''; get('status').textContent = 'Sample loaded. Compare to inspect the changes.'; });
-  get('compare').addEventListener('click', () => {
-    clear(); get('patch').value = '';
-    try {
-      const diff = engine.computeDiff(get('original').value, get('modified').value);
-      get('patch').value = engine.toUnifiedFormat(diff);
-      const added = diff.filter(op => op.type === 'add').length, removed = diff.filter(op => op.type === 'delete').length;
-      get('summary').textContent = `${added} added · ${removed} removed · ${diff.length - added - removed} unchanged`;
-      let oldLine = 0, newLine = 0, group, lastType;
-      for (const op of diff) {
-        if (lastType !== op.type) {
-          group = document.createElement('section'); group.className = `chunk ${op.type}`;
-          const title = document.createElement('h3'); title.textContent = { context: 'Unchanged chunk', add: 'Added chunk', delete: 'Removed chunk' }[op.type];
-          group.append(title); get('chunks').append(group); lastType = op.type;
-        }
-        const row = document.createElement('div'); row.className = 'line';
-        const number = document.createElement('span'); number.className = 'line-number';
-        number.textContent = `${op.type !== 'add' ? ++oldLine : '–'} / ${op.type !== 'delete' ? ++newLine : '–'}`;
-        const content = document.createElement('code'); content.textContent = op.value.replace(/\n$/, '') + (op.value.endsWith('\n') ? '' : ' ⟵ no final newline');
-        row.append(number, content); group.append(row);
-      }
-      get('status').textContent = added + removed ? 'Comparison ready. Apply the generated patch to verify the result.' : 'Texts are identical. No patch is necessary.';
-    } catch (error) { get('status').textContent = error.message; }
-  });
-  get('apply').addEventListener('click', () => {
-    get('preview').textContent = '';
-    try { const result = engine.applyPatch(get('original').value, get('patch').value); get('preview').textContent = result; get('status').textContent = 'Patch applied to the original text in memory. Source was not changed.'; }
-    catch (error) { get('status').textContent = error.message; }
-  });
-  get('original').value = sample[0]; get('modified').value = sample[1];
-}
-if (typeof document !== 'undefined') mount();
