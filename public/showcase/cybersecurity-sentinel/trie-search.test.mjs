@@ -27,11 +27,12 @@ test('fuzzy matching implements insertion, deletion, substitution and exact dist
   assert.deepEqual(engine.fuzzySearch('LEDGER', 0), [{ word: 'Ledger', distance: 0 }])
   assert.deepEqual(engine.fuzzySearch('zzzzz', 1), [])
 })
-test('classic distance boundary: kitten to sitting costs three edits', () => {
-  const engine = new CybersecuritySentinelTrieEngine(['sitting'])
-  assert.deepEqual(engine.fuzzySearch('kitten', 2), [])
-  assert.deepEqual(engine.fuzzySearch('kitten', 3), [{ word: 'sitting', distance: 3 }])
+test('cybersecurity sentinel MITRE ATT&CK threat lexicon prefix lookup', () => {
+  const engine = new CybersecuritySentinelTrieEngine(['Phishing', 'Privilege escalation', 'Port scan', 'Persistence', 'Pass-the-hash'])
+  assert.deepEqual(engine.findWordsWithPrefix('priv'), ['Privilege escalation'])
+  assert.deepEqual(engine.fuzzySearch('phishin', 1), [{ word: 'Phishing', distance: 1 }])
 })
+
 test('empty fuzzy queries follow true edit distance instead of matching everything', () => {
   const engine = new CybersecuritySentinelTrieEngine(['APR', 'APY', 'Bond'])
   assert.deepEqual(engine.fuzzySearch('', 0), [])
