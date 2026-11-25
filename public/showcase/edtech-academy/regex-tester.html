@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EdTech Academy - Regex Tester Sandbox</title>
+  <link rel="stylesheet" href="regex-tester.css">
+</head>
+<body class="regex-body">
+  <div class="regex-container">
+    <h2>EdTech Academy - Regex Sandbox</h2>
+    <div class="input-group">
+      <input type="text" id="pattern" placeholder="Regex pattern (e.g. [a-z]+)" value="\\w+">
+      <input type="text" id="flags" placeholder="Flags" value="g">
+    </div>
+    <textarea id="testText" rows="4">Quick brown fox jumps over lazy dog</textarea>
+    <div id="highlightedOutput" class="highlighted-output"></div>
+  </div>
+  <script type="module">
+    import { EdtechAcademyRegexTester } from './regex-tester.js';
+    const tester = new EdtechAcademyRegexTester();
+    const out = tester.highlightMatches('\\w+', 'g', 'Quick brown fox jumps over lazy dog');
+    document.getElementById('highlightedOutput').innerHTML = out;
+  </script>
+</body>
+</html>
