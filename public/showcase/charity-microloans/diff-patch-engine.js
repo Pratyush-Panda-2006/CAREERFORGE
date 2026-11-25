@@ -42,12 +42,7 @@ export class CharityMicroloansDiffPatchEngine {
     for (let d = trace.length - 1; d > 0; d--) {
       const v = trace[d];
       const k = x - y;
-      let prevK;
-      if (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) {
-        prevK = k + 1;
-      } else {
-        prevK = k - 1;
-      }
+      let prevK = (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) ? k + 1 : k - 1;
       const prevX = v[prevK] ?? 0;
       const prevY = prevX - prevK;
 
@@ -85,7 +80,7 @@ export class CharityMicroloansDiffPatchEngine {
     return diff;
   }
 
-  toUnifiedFormat(diff, fileA = 'a/charity-microloans-config.yaml', fileB = 'b/charity-microloans-config.yaml') {
+  toUnifiedFormat(diff, fileA = 'a/config.yaml', fileB = 'b/config.yaml') {
     if (!Array.isArray(diff)) throw new TypeError('Diff must be an array');
     if (diff.length === 0) return '';
     const hasChanges = diff.some(d => d.type !== 'equal');
@@ -141,65 +136,3 @@ export class CharityMicroloansDiffPatchEngine {
     throw new TypeError('Patch must be unified string or diff array');
   }
 }
-
-function mount() {
-  const root = document.querySelector('[data-charity-microloans-diff-lab]');
-  if (!root) return;
-
-  const engine = new CharityMicroloansDiffPatchEngine();
-  const get = id => root.querySelector(`#${id}`);
-
-  function update() {
-    const orig = get('original-text').value;
-    const mod = get('modified-text').value;
-    const diff = engine.computeDiff(orig, mod);
-
-    const unified = engine.toUnifiedFormat(diff);
-    get('unified-view').textContent = unified || '(No changes detected between revisions)';
-
-    const preview = get('diff-preview');
-    preview.replaceChildren();
-
-    diff.forEach((item, idx) => {
-      const row = document.createElement('div');
-      row.className = `diff-line diff-${item.type}`;
-
-      const num = document.createElement('span');
-      num.className = 'line-num';
-      num.textContent = String(idx + 1);
-
-      const sign = document.createElement('span');
-      sign.className = 'line-sign';
-      sign.textContent = item.type === 'insert' ? '+' : item.type === 'delete' ? '-' : ' ';
-
-      const content = document.createElement('span');
-      content.className = 'line-text';
-      content.textContent = item.text || ' ';
-
-      row.append(num, sign, content);
-      preview.appendChild(row);
-    });
-
-    const stats = {
-      insert: diff.filter(d => d.type === 'insert').length,
-      delete: diff.filter(d => d.type === 'delete').length,
-      equal: diff.filter(d => d.type === 'equal').length
-    };
-    get('stats').textContent = `+${stats.insert} additions, -${stats.delete} deletions, ${stats.equal} unchanged`;
-
-    const patched = engine.applyPatch(orig, unified);
-    get('applied-preview').value = patched;
-  }
-
-  get('compute-btn')?.addEventListener('click', update);
-  get('original-text')?.addEventListener('input', update);
-  get('modified-text')?.addEventListener('input', update);
-
-  // Defaults
-  get('original-text').value = `# Microloan Proposal Allocation v1.0\nborrower: artisan-collective\ngrant_amount: $1500\nstatus: under_review\nrepayment_weeks: 24`;
-  get('modified-text').value = `# Microloan Proposal Allocation v1.1\nborrower: artisan-collective\ngrant_amount: $2000\nstatus: approved\nrepayment_weeks: 20\nguarantor_vouch: verified`;
-
-  update();
-}
-
-if (typeof document !== 'undefined') mount();
