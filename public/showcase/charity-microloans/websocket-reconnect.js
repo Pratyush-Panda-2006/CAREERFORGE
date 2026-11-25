@@ -1,18 +1,17 @@
 export class CharityMicroloansResilientSocket {
-  constructor(url = 'wss://charity-microloans.local/donations', options = {}) {
+  constructor(url = 'wss://live.charity-microloans.io/stream', options = {}) {
     this.url = url;
     this.baseBackoffMs = options.baseBackoffMs ?? 1000;
     this.maxBackoffMs = options.maxBackoffMs ?? 30000;
     this.maxAttempts = options.maxAttempts ?? 5;
     this.jitter = options.jitter ?? false;
 
-    this.status = 'DISCONNECTED'; // DISCONNECTED | CONNECTING | CONNECTED | RECONNECTING | FAILED
+    this.status = 'DISCONNECTED';
     this.reconnectAttempts = 0;
     this.queue = [];
     this.sentMessages = [];
     this.reconnectTimer = null;
     this.onStateChange = null;
-    this.onMessage = null;
   }
 
   calculateBackoff(attempt) {
@@ -46,7 +45,6 @@ export class CharityMicroloansResilientSocket {
 
     this.#setStatus('CONNECTING');
 
-    // Simulated successful handshake
     return new Promise((resolve) => {
       setTimeout(() => {
         this.#setStatus('CONNECTED');
@@ -75,7 +73,7 @@ export class CharityMicroloansResilientSocket {
       } else {
         this.#setStatus('FAILED');
       }
-    }, Math.min(delay, 200)); // cap delay in testing/simulation for snappy responsiveness
+    }, Math.min(delay, 200));
   }
 
   disconnect() {
@@ -99,14 +97,7 @@ export class CharityMicroloansResilientSocket {
       return true;
     }
 
-    // Offline message queuing
     this.queue.push({ payload, timestamp: Date.now(), status: 'QUEUED' });
-    if (typeof this.onStateChange === 'function') {
-      this.onStateChange(this.status, {
-        attempts: this.reconnectAttempts,
-        queueSize: this.queue.length
-      });
-    }
     return false;
   }
 
@@ -126,79 +117,3 @@ export class CharityMicroloansResilientSocket {
     return flushed;
   }
 }
-
-function mount() {
-  const root = document.querySelector('[data-charity-microloans-websocket-lab]');
-  if (!root) return;
-
-  const socket = new CharityMicroloansResilientSocket('wss://charity-microloans.local/donations', {
-    baseBackoffMs: 800,
-    maxBackoffMs: 15000,
-    maxAttempts: 4
-  });
-
-  const get = id => root.querySelector(`#${id}`);
-
-  function updateDisplay(status, meta = {}) {
-    const pill = get('connection-status-pill');
-    if (pill) {
-      pill.className = `status-pill pill-${status.toLowerCase()}`;
-      pill.textContent = status;
-    }
-
-    const attemptsCount = get('attempts-count');
-    if (attemptsCount) {
-      attemptsCount.textContent = `${meta.attempts || socket.reconnectAttempts} / ${socket.maxAttempts}`;
-    }
-
-    const queueCount = get('queue-count');
-    if (queueCount) {
-      queueCount.textContent = `${meta.queueSize ?? socket.queue.length} buffered`;
-    }
-
-    // Render message log
-    const logList = get('messages-stream');
-    if (logList) {
-      const all = [...socket.queue, ...socket.sentMessages].slice(-15);
-      logList.replaceChildren();
-      all.forEach(m => {
-        const row = document.createElement('div');
-        row.className = `msg-item msg-${m.status.toLowerCase()}`;
-        const time = new Date(m.timestamp).toLocaleTimeString();
-        row.textContent = `[${time}] [${m.status}] ${m.payload}`;
-        logList.prepend(row);
-      });
-    }
-  }
-
-  socket.onStateChange = (status, meta) => {
-    updateDisplay(status, meta);
-  };
-
-  get('connect-btn')?.addEventListener('click', async () => {
-    await socket.connect();
-    updateDisplay(socket.status);
-  });
-
-  get('disconnect-btn')?.addEventListener('click', () => {
-    socket.disconnect();
-    updateDisplay(socket.status);
-  });
-
-  get('drop-btn')?.addEventListener('click', () => {
-    socket.simulateDrop();
-  });
-
-  get('send-msg-btn')?.addEventListener('click', () => {
-    const input = get('msg-input');
-    const text = input?.value.trim() || `Telemetry ping: ${Date.now()}`;
-    socket.send(text);
-    if (input) input.value = '';
-    updateDisplay(socket.status);
-  });
-
-  // Initial connect
-  socket.connect();
-}
-
-if (typeof document !== 'undefined') mount();
