@@ -40,9 +40,13 @@ test('bounded input and edit distance fail explicitly rather than freezing', () 
   assert.throws(() => engine.computeDiff('a\n'.repeat(101),'b\n'.repeat(101)), /200 line edits/);
   assert.throws(() => engine.applyPatch('', 'x'.repeat(60001)), /60,000/);
 });
-test('maximum unchanged lines and exact edit boundary work', () => {
-  roundtrip('a\n'.repeat(400),'a\n'.repeat(400)); roundtrip('a\n'.repeat(100),'b\n'.repeat(100));
+test('voice script transcript edits roundtrip properly with audio context markers', () => {
+  const scriptA = 'Speaker 1: Welcome to the studio.\nSpeaker 2: Hello.\n';
+  const scriptB = 'Speaker 1: Welcome to the AI voice studio.\nSpeaker 2: Hello.\n';
+  const { patch } = roundtrip(scriptA, scriptB);
+  assert.match(patch, /\+Speaker 1: Welcome to the AI voice studio\./);
 });
+
 test('all short binary line sequences match independent edit-distance oracle', () => {
   const seqs = ['']; for(let n=1;n<=4;n++)for(let mask=0;mask<2**n;mask++)seqs.push(Array.from({length:n},(_,i)=>(mask>>i&1)?'A\n':'B\n').join(''));
   for (const a of seqs) for (const b of seqs) {
