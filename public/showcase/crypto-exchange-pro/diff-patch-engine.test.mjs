@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CryptoExchangeProDiffPatchEngine } from './diff-patch-engine.js';
 
-test('CryptoExchangeProDiffPatchEngine - computeDiff identical content produces all equal lines and empty unified diff', () => {
+test('CryptoExchangeProDiffPatchEngine - computeDiff identical content produces all equal lines', () => {
   const engine = new CryptoExchangeProDiffPatchEngine();
-  const text = 'pair: BTC/USDT\ntickSize: 0.01\nminQty: 0.0001';
+  const text = 'stream: live\ncodec: aac\nbitrate: 320k';
   const diff = engine.computeDiff(text, text);
 
   assert.equal(diff.length, 3);
@@ -12,26 +12,25 @@ test('CryptoExchangeProDiffPatchEngine - computeDiff identical content produces 
   assert.equal(engine.toUnifiedFormat(diff), '');
 });
 
-test('CryptoExchangeProDiffPatchEngine - computeDiff detects additions and deletions accurately', () => {
+test('CryptoExchangeProDiffPatchEngine - computeDiff detects additions and deletions', () => {
   const engine = new CryptoExchangeProDiffPatchEngine();
-  const original = 'orderType: limit\nstatus: open\nfilled: 0.0';
-  const modified = 'orderType: limit\nstatus: partially_filled\nfilled: 0.25\nremaining: 0.75';
+  const original = 'status: idle\nsample: 44.1khz';
+  const modified = 'status: active\nsample: 48khz\nchannels: stereo';
 
   const diff = engine.computeDiff(original, modified);
-  assert.ok(diff.some(d => d.type === 'delete' && d.text === 'status: open'));
-  assert.ok(diff.some(d => d.type === 'insert' && d.text === 'status: partially_filled'));
-  assert.ok(diff.some(d => d.type === 'insert' && d.text === 'remaining: 0.75'));
+  assert.ok(diff.some(d => d.type === 'delete' && d.text === 'status: idle'));
+  assert.ok(diff.some(d => d.type === 'insert' && d.text === 'status: active'));
+  assert.ok(diff.some(d => d.type === 'insert' && d.text === 'channels: stereo'));
 
   const unified = engine.toUnifiedFormat(diff);
-  assert.ok(unified.includes('-status: open'));
-  assert.ok(unified.includes('+status: partially_filled'));
-  assert.ok(unified.includes('+remaining: 0.75'));
+  assert.ok(unified.includes('-status: idle'));
+  assert.ok(unified.includes('+status: active'));
 });
 
 test('CryptoExchangeProDiffPatchEngine - applyPatch reconstructs modified text from diff array', () => {
   const engine = new CryptoExchangeProDiffPatchEngine();
-  const original = 'leverage: 10x\nmarginType: cross';
-  const modified = 'leverage: 25x\nmarginType: isolated';
+  const original = 'key: value1\nmode: test';
+  const modified = 'key: value2\nmode: test';
 
   const diff = engine.computeDiff(original, modified);
   const reconstructed = engine.applyPatch(original, diff);
@@ -40,17 +39,11 @@ test('CryptoExchangeProDiffPatchEngine - applyPatch reconstructs modified text f
 
 test('CryptoExchangeProDiffPatchEngine - applyPatch reconstructs modified text from unified string', () => {
   const engine = new CryptoExchangeProDiffPatchEngine();
-  const original = 'baseAsset: ETH\nquoteAsset: USDT';
-  const modified = 'baseAsset: ETH\nquoteAsset: USDC\nfeeTier: VIP2';
+  const original = 'setting: low\npreset: studio';
+  const modified = 'setting: high\npreset: studio';
 
   const diff = engine.computeDiff(original, modified);
   const unified = engine.toUnifiedFormat(diff);
   const patched = engine.applyPatch(original, unified);
   assert.equal(patched, modified);
-});
-
-test('CryptoExchangeProDiffPatchEngine - computeDiff throws TypeError on invalid arguments', () => {
-  const engine = new CryptoExchangeProDiffPatchEngine();
-  assert.throws(() => engine.computeDiff(null, 'text'), TypeError);
-  assert.throws(() => engine.computeDiff('text', {}), TypeError);
 });

@@ -42,12 +42,7 @@ export class CryptoExchangeProDiffPatchEngine {
     for (let d = trace.length - 1; d > 0; d--) {
       const v = trace[d];
       const k = x - y;
-      let prevK;
-      if (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) {
-        prevK = k + 1;
-      } else {
-        prevK = k - 1;
-      }
+      let prevK = (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) ? k + 1 : k - 1;
       const prevX = v[prevK] ?? 0;
       const prevY = prevX - prevK;
 
@@ -85,7 +80,7 @@ export class CryptoExchangeProDiffPatchEngine {
     return diff;
   }
 
-  toUnifiedFormat(diff, fileA = 'a/market-config.yaml', fileB = 'b/market-config.yaml') {
+  toUnifiedFormat(diff, fileA = 'a/config.yaml', fileB = 'b/config.yaml') {
     if (!Array.isArray(diff)) throw new TypeError('Diff must be an array');
     if (diff.length === 0) return '';
     const hasChanges = diff.some(d => d.type !== 'equal');
@@ -141,73 +136,3 @@ export class CryptoExchangeProDiffPatchEngine {
     throw new TypeError('Patch must be unified string or diff array');
   }
 }
-
-function mount() {
-  const root = document.querySelector('[data-crypto-diff-lab]');
-  if (!root) return;
-
-  const engine = new CryptoExchangeProDiffPatchEngine();
-  const get = id => root.querySelector(`#${id}`);
-
-  function update() {
-    const orig = get('original-text').value;
-    const mod = get('modified-text').value;
-    const diff = engine.computeDiff(orig, mod);
-
-    const unified = engine.toUnifiedFormat(diff);
-    get('unified-view').textContent = unified || '(No changes detected between market configs)';
-
-    const preview = get('diff-preview');
-    if (preview) {
-      preview.replaceChildren();
-      let adds = 0, dels = 0, eq = 0;
-      for (const item of diff) {
-        const row = document.createElement('div');
-        row.className = `diff-line diff-${item.type}`;
-
-        const sign = document.createElement('span');
-        sign.className = 'line-sign';
-        sign.textContent = item.type === 'insert' ? '+' : item.type === 'delete' ? '-' : ' ';
-
-        const text = document.createElement('span');
-        text.className = 'line-text';
-        text.textContent = item.text;
-
-        row.append(sign, text);
-        preview.appendChild(row);
-
-        if (item.type === 'insert') adds++;
-        else if (item.type === 'delete') dels++;
-        else eq++;
-      }
-      get('stats').textContent = `+${adds} additions, -${dels} deletions, ${eq} unchanged`;
-    }
-
-    const applied = engine.applyPatch(orig, unified);
-    get('applied-preview').value = applied;
-  }
-
-  get('compute-btn')?.addEventListener('click', update);
-
-  // Initial Crypto Exchange Sample Data
-  get('original-text').value = [
-    'makerFee: 0.08%',
-    'takerFee: 0.15%',
-    'maxLeverage: 20x',
-    'liquidationBuffer: 0.5%',
-    'rateLimit: 1200 req/min'
-  ].join('\n');
-
-  get('modified-text').value = [
-    'makerFee: 0.05%',
-    'takerFee: 0.12%',
-    'maxLeverage: 50x',
-    'liquidationBuffer: 0.35%',
-    'rateLimit: 2400 req/min',
-    'subAccountApi: enabled'
-  ].join('\n');
-
-  update();
-}
-
-if (typeof document !== 'undefined') mount();
