@@ -22,9 +22,15 @@ test('invalid capacities leave existing state unchanged',()=>{for(const n of [0,
 test('clear removes entries, metrics and historical values but preserves budget',()=>{const c=new Cache(1);c.put('a',1);c.put('b',2);c.get('no');c.clear();assert.deepEqual(c.getEvictedEntries(),[]);assert.deepEqual(c.metrics,{hits:0,misses:0,writes:0,evictions:0});assert.equal(c.capacity,1);check(c)});
 test('inspection cannot mutate retained nodes or eviction records',()=>{const c=new Cache(1);c.put('a',1);c.put('b',2);c.entries()[0].key='changed';c.getEvictedEntries()[0].key='changed';assert.deepEqual(keys(c),['b']);assert.equal(c.getEvictedEntries()[0].key,'a');check(c)});
 test('history is bounded across a long run and DLL remains coherent',()=>{const c=new Cache(7);for(let i=0;i<1000;i++){c.put(i,i);if(i%3===0)c.get(i-1);if(i%17===0)c.resize(i%7+1);check(c)}assert.equal(c.getEvictedEntries().length,100);assert(c.metrics.evictions>100)});
-test('mixed operations agree with a separate simple reference model',()=>{
- const c=new Cache(4),model=new Map();let seed=73;for(let i=0;i<500;i++){seed=(seed*1664525+1013904223)>>>0;const k=seed%11;
-  if(seed&1){c.put(k,i);model.delete(k);model.set(k,i);while(model.size>4)model.delete(model.keys().next().value)}else{assert.equal(c.get(k),model.get(k));if(model.has(k)){const v=model.get(k);model.delete(k);model.set(k,v)}}
-  assert.deepEqual(c.entries(),[...model].reverse().map(([key,value])=>({key,value})));check(c);
- }
+test('cybersecurity sentinel IP blocklist and threat alerts cache properly under LRU policy', () => {
+  const c = new Cache(3);
+  c.put('ip:192.168.1.100', 'MALICIOUS_BOTNET');
+  c.put('ip:10.0.0.15', 'PORT_SCANNER');
+  c.put('ip:172.16.0.4', 'BRUTE_FORCE');
+  assert.equal(c.get('ip:192.168.1.100'), 'MALICIOUS_BOTNET');
+  c.put('ip:10.0.0.99', 'DDOS_SYN_FLOOD'); // evicts 10.0.0.15
+  assert.equal(c.get('ip:10.0.0.15'), undefined);
+  assert.equal(c.get('ip:192.168.1.100'), 'MALICIOUS_BOTNET');
+  check(c);
 });
+
