@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charity Microloans - Time-Travel State Debugger</title>
+  <link rel="stylesheet" href="state-debugger.css">
+</head>
+<body class="debugger-body">
+  <div class="debugger-container">
+    <header class="debugger-header">
+      <h2>Charity Microloans State Time-Machine</h2>
+      <p class="debugger-subtitle">Live action recording, immutable snapshots, and recursive diff inspector</p>
+    </header>
+
+    <div class="timeline-controls">
+      <button id="btnPrev" class="btn-ctrl">◀ Step Back</button>
+      <input type="range" id="timelineScrubber" min="0" max="0" value="0" class="timeline-slider">
+      <button id="btnNext" class="btn-ctrl">Step Forward ▶</button>
+      <span id="stepIndicator" class="step-indicator">Step 0 / 0</span>
+    </div>
+
+    <div class="debugger-grid">
+      <div class="history-panel">
+        <h3>Action Timeline</h3>
+        <ul id="actionList" class="action-list"></ul>
+      </div>
+
+      <div class="inspector-panel">
+        <div class="panel-header">
+          <h3>State Snapshot Diff</h3>
+          <div class="header-actions">
+            <button id="btnExport" class="btn-sm">Export Replay</button>
+            <button id="btnDispatch" class="btn-sm btn-primary">Simulate Action</button>
+          </div>
+        </div>
+        <div id="diffViewer" class="diff-viewer"></div>
+        <pre id="stateViewer" class="state-viewer"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { CharityMicroloansStateDebugger } from './state-debugger.js';
+
+    const dbg = new CharityMicroloansStateDebugger({
+      module: 'charity-microloans',
+      status: 'idle',
+      counter: 0,
+      records: []
+    });
+
+    const scrubber = document.getElementById('timelineScrubber');
+    const stepIndicator = document.getElementById('stepIndicator');
+    const actionList = document.getElementById('actionList');
+    const diffViewer = document.getElementById('diffViewer');
+    const stateViewer = document.getElementById('stateViewer');
+
+    function updateUi() {
+      const history = dbg.getHistory();
+      const currIdx = dbg.currentIndex;
+
+      scrubber.max = Math.max(0, history.length - 1);
+      scrubber.value = Math.max(0, currIdx);
+      stepIndicator.textContent = `Step ${currIdx + 1} / ${history.length}`;
+
+      actionList.innerHTML = history.map((snap, i) => `
+        <li class="action-item ${i === currIdx ? 'active' : ''}" data-idx="${i}">
+          <span class="action-idx">#${i + 1}</span>
+          <span class="action-type">${snap.action.type}</span>
+        </li>
+      `).join('');
+
+      const currState = dbg.getCurrentState();
+      stateViewer.textContent = JSON.stringify(currState, null, 2);
+
+      const prevState = currIdx > 0 ? history[currIdx - 1].state : {};
+      const diff = dbg.computeDiff(prevState, currState);
+
+      if (diff.changes.length === 0) {
+        diffViewer.innerHTML = '<div class="no-diff">No structural changes from previous step.</div>';
+      } else {
+        diffViewer.innerHTML = diff.changes.map(c => `
+          <div class="diff-row diff-${c.kind.toLowerCase()}">
+            <span class="diff-tag">${c.kind}</span>
+            <span class="diff-key">${c.key}:</span>
+            <span class="diff-val">${JSON.stringify(c.current ?? c.prev)}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    document.getElementById('btnPrev').addEventListener('click', () => {
+      dbg.stepBackward();
+      updateUi();
+    });
+
+    document.getElementById('btnNext').addEventListener('click', () => {
+      dbg.stepForward();
+      updateUi();
+    });
+
+    scrubber.addEventListener('input', (e) => {
+      dbg.jumpToStep(Number(e.target.value));
+      updateUi();
+    });
+
+    actionList.addEventListener('click', (e) => {
+      const item = e.target.closest('.action-item');
+      if (item) {
+        dbg.jumpToStep(Number(item.dataset.idx));
+        updateUi();
+      }
+    });
+
+    let actionCount = 1;
+    document.getElementById('btnDispatch').addEventListener('click', () => {
+      const curr = dbg.getCurrentState() || {};
+      const next = {
+        ...curr,
+        counter: (curr.counter || 0) + 1,
+        status: actionCount % 2 === 0 ? 'processing' : 'ready',
+        records: [...(curr.records || []), `rec_${actionCount}`]
+      };
+      dbg.recordSnapshot({ type: `ACTION_EVENT_${actionCount++}` }, next);
+      updateUi();
+    });
+
+    document.getElementById('btnExport').addEventListener('click', () => {
+      const data = dbg.exportReplay();
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `charity-microloans-replay.json`;
+      a.click();
+    });
+
+    updateUi();
+  </script>
+</body>
+</html>
