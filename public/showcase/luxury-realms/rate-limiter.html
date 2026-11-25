@@ -1,103 +1,15 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
-  <title>Luxury Realms - Token Bucket Rate Limiter & Concurrency Throttler</title>
+  <meta charset="UTF-8">
+  <title>LuxuryRealms - Token Bucket Rate Limiter</title>
   <link rel="stylesheet" href="rate-limiter.css">
 </head>
 <body>
-  <header>
-    <a href="index.html">Luxury Realms ↗</a>
-    <span>CONCIERGE LAB / RATE LIMITER</span>
-  </header>
-  <main id="main">
-    <section class="intro">
-      <p class="eyebrow">VIP ESTATE CONCIERGE & BOOKING THROTTLER</p>
-      <h1>Private Showing & Estate Rate Limiter</h1>
-      <p>Autonomous client-side Token Bucket rate limiter and concurrency queue throttler for high-net-worth estate viewings, bespoke yacht charters, and VIP auction bids.</p>
-    </section>
-
-    <form id="limiter-config" class="panel">
-      <h2>Configure Concierge Token Bucket Parameters</h2>
-      <div class="fields">
-        <label>Burst Capacity (Tokens)
-          <input id="capacity" type="number" min="1" max="1000" step="1" value="10" required>
-        </label>
-        <label>Refill Tokens / Second
-          <input id="refill" type="number" min="0.1" max="1000" step="0.1" value="2" required>
-        </label>
-        <label>Max Concurrent Viewings
-          <input id="concurrency" type="number" min="1" max="20" step="1" value="3" required>
-        </label>
-      </div>
-      <button type="submit">Apply & Reset Concierge Limiter</button>
-      <p class="hint">Reset flushes running showings, the waitlist queue, and all metrics.</p>
-    </form>
-
-    <div class="workbench">
-      <section class="panel bucket">
-        <div>
-          <p class="eyebrow">AVAILABLE TOKEN CAPACITY</p>
-          <h2 id="bucket-amount">10 / 10 tokens</h2>
-          <progress id="bucket-meter" max="10" value="10" aria-label="Available tokens"></progress>
-          <p>Monotonic time replenishment ensures VIP reservations spend exact token credits without exceeding capacity bounds.</p>
-        </div>
-        <div class="reservoir" aria-hidden="true">
-          <div id="reservoir-fill"></div>
-          <span>CONCIERGE<br>RESERVOIR</span>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h2>Dispatch Viewing & Concierge Requests</h2>
-        <div class="fields">
-          <label>VIP Priority
-            <select id="priority">
-              <option value="0">General Buyer · 0</option>
-              <option value="5">Private Client · 5</option>
-              <option value="9">Ultra-HNW Principal · 9</option>
-            </select>
-          </label>
-          <label>Viewing Token Cost
-            <input id="cost" type="number" min="1" max="10" step="1" value="1" required>
-          </label>
-        </div>
-        <div class="actions">
-          <button id="send-one" type="button">Book 1 Viewing</button>
-          <button id="send-flood" type="button">Flood 12 Viewings</button>
-          <button id="fill-queue" class="secondary" type="button">Stress with 120 Viewings</button>
-        </div>
-        <p id="status" role="status">Ready for concierge booking requests.</p>
-      </section>
-    </div>
-
-    <dl class="metrics">
-      <div><dt>Accepted Bookings</dt><dd id="accepted">0</dd></div>
-      <div><dt>Completed Viewings</dt><dd id="completed">0</dd></div>
-      <div><dt>Waitlist Throttled</dt><dd id="throttled">0</dd></div>
-      <div><dt>Cancelled</dt><dd id="cancelled">0</dd></div>
-    </dl>
-
-    <div class="workbench">
-      <section class="panel">
-        <h2>In Flight Viewings <span id="active-count">0 / 3</span></h2>
-        <p id="running">No viewings currently active</p>
-        <div class="section-title">
-          <h2>Waiting List Queue <span id="queue-count">0 / 100</span></h2>
-          <button id="clear-queue" class="secondary" type="button">Cancel Waiting List</button>
-        </div>
-        <ol id="queue" aria-label="Queued booking requests"></ol>
-      </section>
-
-      <section class="panel">
-        <h2>Concierge Activity Telemetry Stream</h2>
-        <p class="hint">Newest first · last 100 events</p>
-        <ol id="event-log" aria-label="Request events"></ol>
-      </section>
-    </div>
-  </main>
+  <div class="limiter-container">
+    <h1>LuxuryRealms Rate Limiter</h1>
+    <p>Token Bucket concurrency & burst throttling engine</p>
+  </div>
   <script type="module" src="rate-limiter.js"></script>
 </body>
 </html>
