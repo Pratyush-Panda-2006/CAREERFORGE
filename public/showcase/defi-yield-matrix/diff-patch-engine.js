@@ -42,12 +42,7 @@ export class DefiYieldMatrixDiffPatchEngine {
     for (let d = trace.length - 1; d > 0; d--) {
       const v = trace[d];
       const k = x - y;
-      let prevK;
-      if (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) {
-        prevK = k + 1;
-      } else {
-        prevK = k - 1;
-      }
+      let prevK = (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) ? k + 1 : k - 1;
       const prevX = v[prevK] ?? 0;
       const prevY = prevX - prevK;
 
@@ -85,7 +80,7 @@ export class DefiYieldMatrixDiffPatchEngine {
     return diff;
   }
 
-  toUnifiedFormat(diff, fileA = 'a/defi-yield-matrix-config.yaml', fileB = 'b/defi-yield-matrix-config.yaml') {
+  toUnifiedFormat(diff, fileA = 'a/config.yaml', fileB = 'b/config.yaml') {
     if (!Array.isArray(diff)) throw new TypeError('Diff must be an array');
     if (diff.length === 0) return '';
     const hasChanges = diff.some(d => d.type !== 'equal');
@@ -141,65 +136,3 @@ export class DefiYieldMatrixDiffPatchEngine {
     throw new TypeError('Patch must be unified string or diff array');
   }
 }
-
-function mount() {
-  const root = document.querySelector('[data-defi-yield-matrix-diff-lab]');
-  if (!root) return;
-
-  const engine = new DefiYieldMatrixDiffPatchEngine();
-  const get = id => root.querySelector(`#${id}`);
-
-  function update() {
-    const orig = get('original-text').value;
-    const mod = get('modified-text').value;
-    const diff = engine.computeDiff(orig, mod);
-
-    const unified = engine.toUnifiedFormat(diff);
-    get('unified-view').textContent = unified || '(No changes detected between revisions)';
-
-    const preview = get('diff-preview');
-    preview.replaceChildren();
-
-    diff.forEach((item, idx) => {
-      const row = document.createElement('div');
-      row.className = `diff-line diff-${item.type}`;
-
-      const num = document.createElement('span');
-      num.className = 'line-num';
-      num.textContent = String(idx + 1);
-
-      const sign = document.createElement('span');
-      sign.className = 'line-sign';
-      sign.textContent = item.type === 'insert' ? '+' : item.type === 'delete' ? '-' : ' ';
-
-      const content = document.createElement('span');
-      content.className = 'line-text';
-      content.textContent = item.text || ' ';
-
-      row.append(num, sign, content);
-      preview.appendChild(row);
-    });
-
-    const stats = {
-      insert: diff.filter(d => d.type === 'insert').length,
-      delete: diff.filter(d => d.type === 'delete').length,
-      equal: diff.filter(d => d.type === 'equal').length
-    };
-    get('stats').textContent = `+${stats.insert} additions, -${stats.delete} deletions, ${stats.equal} unchanged`;
-
-    const patched = engine.applyPatch(orig, unified);
-    get('applied-preview').value = patched;
-  }
-
-  get('compute-btn')?.addEventListener('click', update);
-  get('original-text')?.addEventListener('input', update);
-  get('modified-text')?.addEventListener('input', update);
-
-  // Defaults
-  get('original-text').value = `# DeFi Yield Strategy v1.0\npool: usdc-eth-lp\ntarget_apy: 12.5%\nrebalance_threshold: 5%\nleverage: 1.0x`;
-  get('modified-text').value = `# DeFi Yield Strategy v1.1\npool: usdc-eth-lp\ntarget_apy: 14.8%\nrebalance_threshold: 3%\nleverage: 1.5x\nsafety_hedge: on`;
-
-  update();
-}
-
-if (typeof document !== 'undefined') mount();
