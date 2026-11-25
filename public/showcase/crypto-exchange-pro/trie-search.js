@@ -1,239 +1,80 @@
-class TrieNode {
-  constructor() {
-    this.children = new Map();
-    this.isEndOfWord = false;
-    this.word = null;
+const LIMITS = { words: 1000, characters: 64, treeNodes: 120 };
+const normalized = (value) => {
+  if (typeof value !== 'string') throw new TypeError('Enter text, not another data type.');
+  const text = value.trim().normalize('NFC');
+  const characters = Array.from(text);
+  if (characters.length > LIMITS.characters || characters.some(character => {
+    const code = character.codePointAt(0);
+    return code < 32 || code === 127;
+  })) {
+    throw new RangeError('Use at most 64 characters without control characters.');
   }
-}
+  return text.toLowerCase();
+};
+const children = (node) => [...node.children].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0);
+const node = () => ({ children: new Map(), word: null });
 
 export class CryptoExchangeProTrieEngine {
-  constructor() {
-    this.root = new TrieNode();
-    this.wordCount = 0;
+  constructor(words = []) {
+    if (!Array.isArray(words)) throw new TypeError('Initial terms must be an array.');
+    this.root = node();
+    this.keys = new Set();
+    for (const word of words) this.insert(word);
   }
-
+  get size() { return this.keys.size; }
   insert(word) {
-    if (typeof word !== 'string' || word.trim().length === 0) {
-      return false;
-    }
-    const normalized = word.trim().toUpperCase();
+    const key = normalized(word);
+    if (!key) throw new RangeError('A term cannot be empty.');
+    if (this.keys.has(key)) return false;
+    if (this.size >= LIMITS.words) throw new RangeError('The local lexicon holds up to 1,000 terms.');
     let current = this.root;
-
-    for (const char of normalized) {
-      if (!current.children.has(char)) {
-        current.children.set(char, new TrieNode());
-      }
-      current = current.children.get(char);
+    for (const character of key) {
+      if (!current.children.has(character)) current.children.set(character, node());
+      current = current.children.get(character);
     }
-
-    if (!current.isEndOfWord) {
-      current.isEndOfWord = true;
-      current.word = normalized;
-      this.wordCount++;
-      return true;
-    }
-    return false;
+    current.word = word.trim().normalize('NFC');
+    this.keys.add(key);
+    return true;
   }
-
-  findWordsWithPrefix(prefix) {
-    if (typeof prefix !== 'string') {
-      throw new TypeError('Prefix must be a string');
-    }
-    const normalized = prefix.trim().toUpperCase();
+  locate(prefix) {
     let current = this.root;
-
-    for (const char of normalized) {
-      if (!current.children.has(char)) {
-        return [];
-      }
-      current = current.children.get(char);
+    for (const character of normalized(prefix)) {
+      current = current.children.get(character);
+      if (!current) return null;
     }
-
+    return current;
+  }
+  findWordsWithPrefix(prefix) {
+    const start = this.locate(prefix);
+    const words = [];
+    const visit = (current) => {
+      if (current.word !== null) words.push(current.word);
+      for (const [, child] of children(current)) visit(child);
+    };
+    if (start) visit(start);
+    return words;
+  }
+  fuzzySearch(query, maxDistance = 2) {
+    const letters = Array.from(normalized(query));
+    if (!Number.isInteger(maxDistance) || maxDistance < 0 || maxDistance > 3) {
+      throw new RangeError('Edit distance must be an integer from 0 to 3.');
+    }
     const results = [];
-    const dfs = (node) => {
-      if (node.isEndOfWord && node.word) {
-        results.push(node.word);
+    const visit = (current, character, previous) => {
+      const row = [previous[0] + 1];
+      for (let i = 1; i <= letters.length; i++) {
+        row[i] = Math.min(row[i - 1] + 1, previous[i] + 1,
+          previous[i - 1] + (letters[i - 1] === character ? 0 : 1));
       }
-      for (const child of node.children.values()) {
-        dfs(child);
+      if (current.word !== null && row[letters.length] <= maxDistance) {
+        results.push({ word: current.word, distance: row[letters.length] });
+      }
+      if (Math.min(...row) <= maxDistance) {
+        for (const [letter, child] of children(current)) visit(child, letter, row);
       }
     };
-
-    dfs(current);
-    return results.sort();
-  }
-
-  static levenshteinDistance(s1, s2) {
-    const m = s1.length;
-    const n = s2.length;
-    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-
-    for (let i = 0; i <= m; i++) dp[i][0] = i;
-    for (let j = 0; j <= n; j++) dp[0][j] = j;
-
-    for (let i = 1; i <= m; i++) {
-      for (let j = 1; j <= n; j++) {
-        if (s1[i - 1] === s2[j - 1]) {
-          dp[i][j] = dp[i - 1][j - 1];
-        } else {
-          dp[i][j] = 1 + Math.min(
-            dp[i - 1][j],    // deletion
-            dp[i][j - 1],    // insertion
-            dp[i - 1][j - 1] // substitution
-          );
-        }
-      }
-    }
-
-    return dp[m][n];
-  }
-
-  fuzzySearch(query, maxDistance = 2) {
-    if (typeof query !== 'string') {
-      throw new TypeError('Query must be a string');
-    }
-    const normalized = query.trim().toUpperCase();
-    const allWords = this.findWordsWithPrefix('');
-    const matches = [];
-
-    for (const word of allWords) {
-      const distance = CryptoExchangeProTrieEngine.levenshteinDistance(normalized, word);
-      if (distance <= maxDistance) {
-        matches.push({ word, distance });
-      }
-    }
-
-    return matches.sort((a, b) => a.distance - b.distance || a.word.localeCompare(b.word));
-  }
-
-  getAllWords() {
-    return this.findWordsWithPrefix('');
+    const first = Array.from({ length: letters.length + 1 }, (_, i) => i);
+    for (const [letter, child] of children(this.root)) visit(child, letter, first);
+    return results.sort((a, b) => a.distance - b.distance || normalized(a.word).localeCompare(normalized(b.word), 'en'));
   }
 }
-
-function mount() {
-  const root = document.querySelector('[data-trie-lab]');
-  if (!root) return;
-
-  const engine = new CryptoExchangeProTrieEngine();
-  const get = id => root.querySelector(`#${id}`);
-
-  // Seed sample crypto trading pairs
-  const initialPairs = [
-    'BTC/USDT',
-    'BTC/USDC',
-    'ETH/USDT',
-    'ETH/BTC',
-    'SOL/USDT',
-    'SOL/USDC',
-    'XRP/USDT',
-    'ADA/USDT',
-    'AVAX/USDT',
-    'DOT/USDT',
-    'LINK/USDT',
-    'DOGE/USDT',
-    'BNB/USDT',
-    'MATIC/USDT'
-  ];
-  for (const p of initialPairs) engine.insert(p);
-
-  function renderTree(prefix = '') {
-    const container = get('tree-viewer');
-    if (!container) return;
-
-    const words = engine.findWordsWithPrefix(prefix);
-    if (words.length === 0) {
-      container.textContent = `(No market pairs matching prefix "${prefix.toUpperCase()}")`;
-      return;
-    }
-
-    const lines = [];
-    lines.push(`Root Trie ["${prefix.toUpperCase() || '*'}"] (${words.length} pairs indexed):`);
-    for (const w of words.slice(0, 15)) {
-      lines.push(`  └── ${w}`);
-    }
-    if (words.length > 15) {
-      lines.push(`  ... and ${words.length - 15} more pairs`);
-    }
-    container.textContent = lines.join('\n');
-  }
-
-  function handleSearch() {
-    const input = get('search-input');
-    const val = input?.value.trim().toUpperCase() || '';
-
-    const dropdown = get('suggestions-list');
-    if (dropdown) {
-      dropdown.replaceChildren();
-      if (val) {
-        const matches = engine.findWordsWithPrefix(val);
-        for (const m of matches) {
-          const li = document.createElement('li');
-          li.textContent = m;
-          li.addEventListener('click', () => {
-            input.value = m;
-            dropdown.replaceChildren();
-            renderTree(m);
-          });
-          dropdown.appendChild(li);
-        }
-      }
-    }
-
-    const fuzzyContainer = get('fuzzy-list');
-    if (fuzzyContainer) {
-      fuzzyContainer.replaceChildren();
-      if (val.length >= 2) {
-        const fuzzy = engine.fuzzySearch(val, 2);
-        if (fuzzy.length === 0) {
-          const empty = document.createElement('span');
-          empty.className = 'empty-fuzzy-text';
-          empty.textContent = 'No close ticker suggestions found.';
-          fuzzyContainer.appendChild(empty);
-        } else {
-          for (const item of fuzzy.slice(0, 6)) {
-            const chip = document.createElement('div');
-            chip.className = 'fuzzy-chip';
-            chip.textContent = item.word;
-
-            const badge = document.createElement('span');
-            badge.className = 'dist-badge';
-            badge.textContent = `d=${item.distance}`;
-            chip.appendChild(badge);
-
-            chip.addEventListener('click', () => {
-              input.value = item.word;
-              handleSearch();
-            });
-            fuzzyContainer.appendChild(chip);
-          }
-        }
-      } else {
-        const empty = document.createElement('span');
-        empty.className = 'empty-fuzzy-text';
-        empty.textContent = 'Start typing above to see ticker corrections.';
-        fuzzyContainer.appendChild(empty);
-      }
-    }
-
-    renderTree(val);
-  }
-
-  get('search-input')?.addEventListener('input', handleSearch);
-
-  get('add-word-btn')?.addEventListener('click', () => {
-    const input = get('new-word-input');
-    const val = input?.value.trim();
-    if (val) {
-      const added = engine.insert(val);
-      if (added) {
-        input.value = '';
-        handleSearch();
-      }
-    }
-  });
-
-  renderTree('');
-}
-
-if (typeof document !== 'undefined') mount();
