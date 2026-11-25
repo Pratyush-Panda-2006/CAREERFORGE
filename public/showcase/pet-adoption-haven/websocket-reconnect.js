@@ -1,18 +1,17 @@
 export class PetAdoptionHavenResilientSocket {
-  constructor(url = 'wss://shelter-stream.petadoption.local/adoptions', options = {}) {
+  constructor(url = 'wss://live.pet-adoption-haven.io/stream', options = {}) {
     this.url = url;
     this.baseBackoffMs = options.baseBackoffMs ?? 1000;
     this.maxBackoffMs = options.maxBackoffMs ?? 30000;
     this.maxAttempts = options.maxAttempts ?? 5;
     this.jitter = options.jitter ?? false;
 
-    this.status = 'DISCONNECTED'; // DISCONNECTED | CONNECTING | CONNECTED | RECONNECTING | FAILED
+    this.status = 'DISCONNECTED';
     this.reconnectAttempts = 0;
     this.queue = [];
     this.sentMessages = [];
     this.reconnectTimer = null;
     this.onStateChange = null;
-    this.onMessage = null;
   }
 
   calculateBackoff(attempt) {
@@ -98,14 +97,7 @@ export class PetAdoptionHavenResilientSocket {
       return true;
     }
 
-    // Offline message queuing
     this.queue.push({ payload, timestamp: Date.now(), status: 'QUEUED' });
-    if (typeof this.onStateChange === 'function') {
-      this.onStateChange(this.status, {
-        attempts: this.reconnectAttempts,
-        queueSize: this.queue.length
-      });
-    }
     return false;
   }
 
@@ -118,95 +110,10 @@ export class PetAdoptionHavenResilientSocket {
     while (this.queue.length > 0) {
       const item = this.queue.shift();
       item.status = 'DELIVERED';
+      item.deliveredAt = Date.now();
       this.sentMessages.push(item);
       flushed.push(item);
     }
-
-    if (typeof this.onStateChange === 'function') {
-      this.onStateChange(this.status, {
-        attempts: this.reconnectAttempts,
-        queueSize: this.queue.length
-      });
-    }
-
     return flushed;
   }
 }
-
-function mount() {
-  const root = document.querySelector('[data-websocket-lab]');
-  if (!root) return;
-
-  const socket = new PetAdoptionHavenResilientSocket();
-  const get = id => root.querySelector(`#${id}`);
-
-  function updateStatus(status, meta) {
-    const pill = get('connection-status-pill');
-    if (pill) {
-      pill.textContent = status;
-      pill.className = `status-pill pill-${status.toLowerCase()}`;
-    }
-
-    const attempts = get('attempts-count');
-    if (attempts) {
-      attempts.textContent = `${meta.attempts} / ${socket.maxAttempts}`;
-    }
-
-    const queueEl = get('queue-count');
-    if (queueEl) {
-      queueEl.textContent = `${meta.queueSize} buffered`;
-    }
-
-    renderStream();
-  }
-
-  function renderStream() {
-    const container = get('messages-stream');
-    if (!container) return;
-
-    container.replaceChildren();
-
-    const all = [
-      ...socket.sentMessages.map(m => ({ ...m, type: 'SENT' })),
-      ...socket.queue.map(m => ({ ...m, type: 'QUEUED' }))
-    ].sort((a, b) => b.timestamp - a.timestamp);
-
-    if (all.length === 0) {
-      const empty = document.createElement('div');
-      empty.textContent = '// No shelter broadcast events recorded yet';
-      empty.style.color = '#94a3b8';
-      container.appendChild(empty);
-      return;
-    }
-
-    for (const msg of all) {
-      const row = document.createElement('div');
-      row.className = `msg-item ${msg.status === 'DELIVERED' ? 'msg-delivered' : 'msg-queued'}`;
-      const time = new Date(msg.timestamp).toLocaleTimeString();
-      row.textContent = `[${time}] [${msg.status}] ${msg.payload}`;
-      container.appendChild(row);
-    }
-  }
-
-  socket.onStateChange = (status, meta) => updateStatus(status, meta);
-
-  get('connect-btn')?.addEventListener('click', () => socket.connect());
-  get('disconnect-btn')?.addEventListener('click', () => socket.disconnect());
-  get('drop-btn')?.addEventListener('click', () => socket.simulateDrop());
-
-  get('send-msg-btn')?.addEventListener('click', () => {
-    const input = get('msg-input');
-    const val = input?.value.trim();
-    if (val) {
-      socket.send(val);
-      input.value = '';
-      renderStream();
-    }
-  });
-
-  // Pre-seed sample shelter inquiry event
-  socket.send(JSON.stringify({ event: 'adoptionInquiry', petId: 'dog-410', name: 'Max' }));
-  updateStatus(socket.status, { attempts: 0, queueSize: socket.queue.length });
-}
-
-if (typeof document !== 'undefined') mount();
