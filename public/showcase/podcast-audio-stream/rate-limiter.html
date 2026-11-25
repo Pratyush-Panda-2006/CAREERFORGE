@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Podcast Audio Stream - Token Bucket Rate Limiter</title>
+  <link rel="stylesheet" href="rate-limiter.css">
+</head>
+<body>
+  <div class="limiter-container" data-rate-limiter-lab>
+    <header class="header">
+      <h1>Podcast Audio Stream Bitrate & API Limiter</h1>
+      <p class="subtitle">Autonomous Token Bucket rate limiter & concurrency throttler for real-time audio chunking and live listener bandwidth</p>
+    </header>
+
+    <main class="grid-layout">
+      <!-- Token Bucket Status Card -->
+      <section class="card bucket-card">
+        <h2>Audio Stream Token Reservoir</h2>
+        <div class="bucket-box">
+          <div id="bucket-amount" class="bucket-amount">10.0 / 10 tokens</div>
+          <progress id="bucket-meter" max="10" value="10"></progress>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-pill">
+            <span class="metric-label">Stream Chunks Delivered</span>
+            <span id="metric-accepted" class="metric-value">0</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-label">Bandwidth Throttled</span>
+            <span id="metric-throttled" class="metric-value">0</span>
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <button id="consume-1-btn" class="btn btn-primary">Consume Audio Chunk (1 Token)</button>
+          <button id="flood-btn" class="btn btn-flood">Simulate Listener Surge (5 Tokens)</button>
+        </div>
+      </section>
+
+      <!-- Architecture Card -->
+      <section class="card info-card">
+        <h2>Algorithm Overview</h2>
+        <p style="font-size: 0.9rem; line-height: 1.5; color: #a78bfa; margin-bottom: 12px;">
+          The Token Bucket algorithm regulates bursty audio stream requests by accumulating tokens at a fixed replenishment rate up to a configured maximum burst capacity.
+        </p>
+        <p style="font-size: 0.85rem; color: #9ca3af;">
+          Burst Capacity: 10 Tokens · Refill Rate: 2.0 Tokens/sec · Strict O(1) admission evaluation with microsecond clock synchronization.
+        </p>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="rate-limiter.js"></script>
+</body>
+</html>
