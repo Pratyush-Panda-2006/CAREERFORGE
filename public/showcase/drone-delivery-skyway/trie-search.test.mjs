@@ -78,3 +78,37 @@ test('pruned trie matching agrees with known exhaustive short-string distances',
   const engine = new DroneDeliverySkywayTrieEngine(['a', 'ab', 'abc', 'b', 'ba', 'bb'])
   assert.deepEqual(engine.fuzzySearch('ab', 1).map(result => [result.word, result.distance]), [['ab', 0], ['a', 1], ['abc', 1], ['b', 1], ['bb', 1]])
 })
+
+test('drone-delivery-skyway domain vocabulary and prefix typeahead navigation (#3798)', () => {
+  const flightTerms = [
+    'Skyway Alpha',
+    'Skyway Beta',
+    'Skyway Charlie',
+    'Waypoint Hub 1',
+    'Waypoint Hub 2',
+    'Landing Zone North',
+    'Landing Zone South',
+    'Altitude',
+    'Telemetry',
+    'Battery Failsafe'
+  ]
+  const engine = new DroneDeliverySkywayTrieEngine(flightTerms)
+
+  // Prefix matching
+  const skywayMatches = engine.findWordsWithPrefix('skyway')
+  assert.equal(skywayMatches.length, 3)
+  assert.deepEqual(skywayMatches, ['Skyway Alpha', 'Skyway Beta', 'Skyway Charlie'])
+
+  const waypointMatches = engine.findWordsWithPrefix('waypoint')
+  assert.equal(waypointMatches.length, 2)
+
+  // Fuzzy search on typos (edit distance <= 2)
+  const fuzzyAltitude = engine.fuzzySearch('Altidude', 2)
+  assert.ok(fuzzyAltitude.length >= 1)
+  assert.equal(fuzzyAltitude[0].word, 'Altitude')
+
+  const fuzzyTelemetry = engine.fuzzySearch('Telemetri', 2)
+  assert.ok(fuzzyTelemetry.length >= 1)
+  assert.equal(fuzzyTelemetry[0].word, 'Telemetry')
+})
+
