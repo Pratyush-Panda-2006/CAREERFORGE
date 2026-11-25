@@ -1,0 +1,271 @@
+/* Biotech Genomics - Socket Hub Stylesheet */
+:root {
+  --bg-color: #070d18;
+  --card-bg: #0c1524;
+  --border-color: #1a283e;
+  --primary-accent: #38bdf8;
+  --secondary-accent: #818cf8;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --alert-color: #f43f5e;
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.socket-hub-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.socket-hub-container {
+  max-width: 980px;
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+.hub-header {
+  margin-bottom: 24px;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-status h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.status-badge.connected {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid #10b981;
+}
+
+.status-badge.connecting, .status-badge.reconnecting {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid #f59e0b;
+}
+
+.status-badge.disconnected {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+  border: 1px solid #f43f5e;
+}
+
+.hub-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: #040812;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-title {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.metric-num {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-accent);
+  margin-top: 4px;
+}
+
+.control-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 14px 18px;
+  background: #040812;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.connection-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #0284c7;
+  color: #fff;
+  border-color: #38bdf8;
+}
+
+.btn-primary:hover {
+  background: #0369a1;
+}
+
+.btn-secondary {
+  background: #1e293b;
+  color: var(--text-primary);
+  border-color: #334155;
+}
+
+.btn-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: #f59e0b;
+}
+
+.channel-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.channel-pill {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.channel-pill.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--primary-accent);
+  color: var(--primary-accent);
+}
+
+.stream-console {
+  background: #040812;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.packet-stream {
+  height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: monospace;
+  font-size: 0.82rem;
+  border: 1px solid #141e2e;
+  border-radius: 6px;
+  padding: 8px;
+  background: #020409;
+}
+
+.packet-row {
+  display: flex;
+  gap: 12px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: #080f1c;
+}
+
+.pkt-time {
+  color: var(--text-muted);
+}
+
+.pkt-chan {
+  color: var(--secondary-accent);
+  font-weight: 600;
+}
+
+.pkt-body {
+  color: #7dd3fc;
+  word-break: break-all;
+}
+
+.publish-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.publish-bar input {
+  flex: 1;
+  background: #020409;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #fff;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.publish-bar input:focus {
+  outline: none;
+  border-color: var(--primary-accent);
+}
