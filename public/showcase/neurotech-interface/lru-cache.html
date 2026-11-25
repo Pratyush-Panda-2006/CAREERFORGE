@@ -1,1 +1,15 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Neurotech Interface · Cache memory desk</title><link rel="icon" href="data:,"><link rel="stylesheet" href="lru-cache.css"><script type="module" src="lru-cache.js"></script></head><body><a class="skip" href="#main">Skip to cache desk</a><header><a href="index.html">Neurotech Interface ↗</a><span>MEMORY LAB / LRU</span></header><main id="main"><section class="intro"><p class="eyebrow">KEEP WHAT YOU REACH FOR</p><h1>A small memory.<br>A clear order.</h1><p>Read or write a key to move it to the front. When the cache fills, the least recently used entry leaves from the tail.</p><p class="hint">Local in-memory demonstration. No live sensor feed, persistence or network calls. Reload resets everything.</p></section><div class="split"><form id="cache-form" class="panel"><h2>Insert or update</h2><label>Key<input id="key" maxlength="64" placeholder="entry-01" required></label><label>Value<input id="value" maxlength="256" placeholder="sample value"></label><div class="actions"><button type="submit">Store entry</button><button id="read" type="button" class="secondary">Read key</button></div><p class="hint">Keys are exact and case-sensitive. Updating an existing key keeps the cache size unchanged. Reads of missing keys leave the order unchanged.</p></form><section class="panel"><h2>Memory budget</h2><label for="capacity">Capacity: <output id="capacity-value">4</output></label><input id="capacity" type="range" min="1" max="50" value="4"><p id="occupancy-text">0 / 4 entries</p><progress id="occupancy" max="4" value="0" aria-label="Cache occupancy"></progress><p class="hint">Reducing capacity evicts entries from the tail immediately. Clear resets entries, counters and history while keeping capacity.</p><button id="clear" type="button" class="secondary">Clear cache</button></section></div><p id="status" role="status">Ready for the first entry.</p><dl class="metrics"><div><dt>Cache hits</dt><dd id="hits">0</dd></div><div><dt>Cache misses</dt><dd id="misses">0</dd></div><div><dt>Writes</dt><dd id="writes">0</dd></div><div><dt>Evictions</dt><dd id="evictions">0</dd></div></dl><section class="panel"><h2>Recency chain</h2><p class="hint">Head → most recent. Tail → next eviction. Scroll the chain to inspect a large cache.</p><div id="eviction-flash" aria-hidden="true"></div><ol id="chain" aria-label="Cache entries from most to least recent"></ol></section><section class="panel"><h2>Eviction history</h2><p class="hint">Newest first · last 100 evictions · no retained history after Clear or reload</p><ol id="eviction-log" aria-label="Evicted entries"></ol></section></main><footer>Neurotech Interface / Cache memory desk<span>Hash map + doubly linked list.</span></footer></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NeurotechInterface - LRU In-Memory Cache</title>
+  <link rel="stylesheet" href="lru-cache.css">
+</head>
+<body>
+  <div class="lru-container">
+    <h1>NeurotechInterface LRU In-Memory Cache</h1>
+    <p>O(1) Hash-Map and Doubly-Linked-List backed cache with live eviction tracking</p>
+  </div>
+  <script type="module" src="lru-cache.js"></script>
+</body>
+</html>
