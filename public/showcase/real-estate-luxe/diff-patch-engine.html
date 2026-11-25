@@ -1,7 +1,36 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Listing revision desk · Real Estate Luxe</title><link rel="icon" href="data:,"><link rel="stylesheet" href="diff-patch-engine.css"><script type="module" src="diff-patch-engine.js"></script></head>
-<body><a class="skip" href="#main">Skip to revision desk</a><header><a href="index.html">Real Estate Luxe ↗</a><span>LISTING NOTES / REVISION DESK</span></header><main id="main"><section class="intro"><p class="eyebrow">EVERY LISTING CHANGE, CLEARLY MARKED</p><h1>See how the<br>listing changes.</h1><p>Compare two versions of a listing draft, inspect each changed chunk, then apply a context-checked patch to preview the result.</p><p class="hint">Everything stays in this tab. No upload, storage or network service. Reload clears your edits.</p></section>
-<div class="split"><label>Original text<textarea id="original" spellcheck="false" maxlength="20000" rows="10"></textarea></label><label>Modified text<textarea id="modified" spellcheck="false" maxlength="20000" rows="10"></textarea></label></div><div class="actions"><button id="compare" type="button">Compare texts</button><button id="sample" class="secondary" type="button">Load sample</button></div><p id="status" role="status">Sample notes are ready to compare.</p><p class="hint">Limits: 20,000 characters and 400 lines per side; at most 200 line insertions/deletions. Line endings and missing final newlines are preserved exactly.</p>
-<section class="panel"><div class="section-title"><h2>Change map</h2><p id="summary">Compare to see changed chunks.</p></div><p class="hint">Gutter: original line / modified line. Labels distinguish additions and removals as well as color.</p><div id="chunks" aria-label="Compared line chunks"></div></section>
-<section class="panel"><h2>Unified patch</h2><label class="hint" for="patch">Generated patch · editable for validation</label><textarea id="patch" rows="10" maxlength="60000" spellcheck="false" placeholder="Compare texts to generate a patch."></textarea><p class="hint">This engine writes one full-context unified hunk with original/modified headers. Applying requires the exact original text; arbitrary multi-hunk patches are not supported. An empty patch leaves the source unchanged.</p><button id="apply" type="button">Apply patch to original</button></section>
-<section class="panel"><h2>Applied preview</h2><pre id="preview" aria-label="Applied patch result"></pre></section></main><footer>Real Estate Luxe / Local revision desk<span>Every change has a place.</span></footer></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RealEstateLuxe - Myers Diff & Patch Engine</title>
+  <link rel="stylesheet" href="diff-patch-engine.css">
+</head>
+<body>
+  <div class="diff-container" data-diff-lab>
+    <header class="header">
+      <h1>RealEstateLuxe Myers Diff & Patch Engine</h1>
+      <p class="subtitle">O(ND) difference computation, chunk boundary visualizer, and unified patch application</p>
+    </header>
+    <main class="grid-layout">
+      <section class="card input-card">
+        <h2>Original Configuration (v1.0)</h2>
+        <textarea id="original-text" rows="8">stream: standard\nbitrate: 128k\nchannels: stereo</textarea>
+      </section>
+      <section class="card input-card">
+        <h2>Modified Configuration (v1.1)</h2>
+        <textarea id="modified-text" rows="8">stream: master\nbitrate: 320k\nchannels: spatial\ncodec: opus</textarea>
+      </section>
+      <section class="card diff-preview-card">
+        <h2>Chunk Boundary Visual Diff</h2>
+        <div id="diff-preview" class="diff-preview-box"></div>
+      </section>
+      <section class="card unified-card">
+        <h2>Unified Diff Format</h2>
+        <pre id="unified-view" class="unified-box"></pre>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="diff-patch-engine.js"></script>
+</body>
+</html>
