@@ -1,5 +1,5 @@
 export class WeatherRadarAtlasResilientSocket {
-  constructor(url = 'wss://telemetry.local/feed', options = {}) {
+  constructor(url = 'wss://live.weather-radar-atlas.io/stream', options = {}) {
     this.url = url;
     this.baseBackoffMs = options.baseBackoffMs ?? 1000;
     this.maxBackoffMs = options.maxBackoffMs ?? 30000;
@@ -12,7 +12,6 @@ export class WeatherRadarAtlasResilientSocket {
     this.sentMessages = [];
     this.reconnectTimer = null;
     this.onStateChange = null;
-    this.onMessage = null;
   }
 
   calculateBackoff(attempt) {
@@ -56,14 +55,6 @@ export class WeatherRadarAtlasResilientSocket {
     });
   }
 
-  disconnect() {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
-    }
-    this.#setStatus('DISCONNECTED');
-  }
-
   simulateDrop() {
     if (this.status !== 'CONNECTED' && this.status !== 'CONNECTING') return;
 
@@ -77,69 +68,52 @@ export class WeatherRadarAtlasResilientSocket {
     this.reconnectAttempts++;
 
     this.reconnectTimer = setTimeout(() => {
-      this.connect();
+      if (this.reconnectAttempts <= this.maxAttempts) {
+        this.connect();
+      } else {
+        this.#setStatus('FAILED');
+      }
     }, Math.min(delay, 200));
   }
 
-  send(message) {
-    const payload = typeof message === 'string' ? message : JSON.stringify(message);
-    if (this.status === 'CONNECTED') {
-      this.sentMessages.push({ payload, timestamp: Date.now() });
-      return true;
-    } else {
-      this.queue.push({ payload, timestamp: Date.now() });
-      return false;
+  disconnect() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
     }
+    this.reconnectAttempts = 0;
+    this.#setStatus('DISCONNECTED');
+  }
+
+  send(message) {
+    if (message === undefined || message === null) {
+      throw new TypeError('Message cannot be null or undefined');
+    }
+
+    const payload = typeof message === 'string' ? message : JSON.stringify(message);
+
+    if (this.status === 'CONNECTED') {
+      this.sentMessages.push({ payload, timestamp: Date.now(), status: 'DELIVERED' });
+      return true;
+    }
+
+    this.queue.push({ payload, timestamp: Date.now(), status: 'QUEUED' });
+    return false;
   }
 
   flushQueue() {
+    if (this.status !== 'CONNECTED') {
+      return [];
+    }
+
     const flushed = [];
     while (this.queue.length > 0) {
-      const msg = this.queue.shift();
-      this.sentMessages.push(msg);
-      flushed.push(msg);
+      const item = this.queue.shift();
+      item.status = 'DELIVERED';
+      item.deliveredAt = Date.now();
+      this.sentMessages.push(item);
+      flushed.push(item);
     }
     return flushed;
   }
 }
-
-function mount() {
-  const toggleBtn = document.getElementById('toggle-conn'); if (!toggleBtn) return;
-  const socket = new WeatherRadarAtlasResilientSocket();
-  const get = id => document.getElementById(id);
-
-  socket.onStateChange = (st, details) => {
-    get('status-pill').textContent = st;
-    get('status-pill').className = `pill status-${st.toLowerCase()}`;
-    get('attempts').textContent = details.attempts;
-    get('queue-count').textContent = details.queueSize;
-    get('backoff-delay').textContent = `${socket.calculateBackoff(details.attempts)} ms`;
-  };
-
-  toggleBtn.addEventListener('click', () => {
-    if (socket.status === 'CONNECTED') {
-      socket.disconnect();
-      toggleBtn.textContent = 'Connect';
-    } else {
-      socket.connect().then(() => { toggleBtn.textContent = 'Disconnect'; });
-    }
-  });
-
-  get('drop-conn').addEventListener('click', () => {
-    socket.simulateDrop();
-  });
-
-  get('send-msg').addEventListener('click', () => {
-    const txt = get('msg-input').value;
-    if (txt) {
-      socket.send(txt);
-      get('sent-log').replaceChildren(...socket.sentMessages.slice(-10).map(m => {
-        const li = document.createElement('li');
-        li.textContent = `Sent: ${m.payload} (${new Date(m.timestamp).toLocaleTimeString()})`;
-        return li;
-      }));
-      get('queue-count').textContent = socket.queue.length;
-    }
-  });
-}
-if (typeof document !== 'undefined') mount();
