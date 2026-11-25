@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pet Adoption Haven - State Debugger</title>
+  <link rel="stylesheet" href="state-debugger.css">
+</head>
+<body class="debugger-body">
+  <div class="debugger-container">
+    <h2>Pet Adoption Haven State Time-Machine</h2>
+    <div id="diffViewer"></div>
+    <pre id="stateViewer"></pre>
+  </div>
+  <script type="module">
+    import { PetAdoptionHavenStateDebugger } from './state-debugger.js';
+    const dbg = new PetAdoptionHavenStateDebugger({ active: true, count: 1 });
+    document.getElementById('stateViewer').textContent = JSON.stringify(dbg.getCurrentState(), null, 2);
+  </script>
+</body>
+</html>
