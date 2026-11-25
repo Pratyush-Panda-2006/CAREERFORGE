@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Studio - Resilient Audio WebSocket Stream</title>
+  <link rel="stylesheet" href="websocket-reconnect.css">
+</head>
+<body>
+  <div class="ws-container" data-websocket-lab>
+    <header class="header">
+      <h1>AI Voice Studio - Low-Latency Audio Stream</h1>
+      <p class="subtitle">Resilient WebSocket connection manager with exponential backoff and audio chunk buffer</p>
+    </header>
+
+    <main class="grid-layout">
+      <!-- Connection Status Card -->
+      <section class="card status-card">
+        <h2>Voice Stream Socket Status</h2>
+        <div class="status-indicator-box">
+          <span class="socket-url">wss://stream.ai-voice-studio.io/audio</span>
+          <div id="connection-status-pill" class="status-pill pill-disconnected">DISCONNECTED</div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-label">Reconnect Attempts</span>
+            <span id="attempts-count" class="metric-val">0 / 4</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Audio Chunk Buffer</span>
+            <span id="queue-count" class="metric-val">0 chunks buffered</span>
+          </div>
+        </div>
+
+        <div class="control-actions">
+          <button id="connect-btn" class="btn btn-connect">Connect</button>
+          <button id="disconnect-btn" class="btn btn-disconnect">Disconnect</button>
+          <button id="drop-btn" class="btn btn-drop">Simulate Drop</button>
+        </div>
+      </section>
+
+      <!-- Message Transmitter Card -->
+      <section class="card transmit-card">
+        <h2>Audio Packet Stream Dispatcher</h2>
+        <p class="card-desc">Audio buffers queued during connection drops are automatically flushed once reconnected.</p>
+        <div class="transmit-row">
+          <input type="text" id="msg-input" placeholder="Audio packet (e.g. PCM 24-bit 48kHz Chunk #104)">
+          <button id="send-msg-btn" class="btn btn-send">Stream Chunk</button>
+        </div>
+      </section>
+
+      <!-- Live Stream Log Card -->
+      <section class="card stream-card">
+        <h2>Live Audio Stream Log</h2>
+        <div id="messages-stream" class="messages-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="websocket-reconnect.js"></script>
+</body>
+</html>
