@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore Edtech Academy courses with fast prefix lookup, typo-tolerant edit distance suggestions, and an interactive trie view.">
+  <title>Curriculum Lexicon Lab · Edtech Academy</title>
+  <link rel="stylesheet" href="trie-search.css">
+</head>
+<body>
+  <main>
+    <header><a href="index.html">← Edtech Academy</a><span>ACADEMIC TRIE ENGINE</span></header>
+    <section class="intro" aria-labelledby="title">
+      <p class="eyebrow">Edtech Academy / Course Search Engine</p>
+      <h1 id="title">Curriculum Typeahead Trie</h1>
+      <p>Instant prefix autocomplete and Levenshtein distance spell-correction for academic courses and modules.</p>
+    </section>
+    <div class="workspace">
+      <section class="search-panel" aria-labelledby="search-heading">
+        <div class="section-heading"><h2 id="search-heading">01 / Search Course Catalog</h2><span><strong id="word-count">19</strong> courses</span></div>
+        <label for="term-search">Course title or prefix</label>
+        <input id="term-search" type="text" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false" aria-describedby="search-help" autocomplete="off" spellcheck="false" maxlength="128" placeholder="Try algo, machine, or comput">
+        <p id="search-help" class="help">Type to search. Suggestions rank exact prefix matches first, followed by typo corrections.</p>
+        <ul id="suggestions" role="listbox" aria-label="Course suggestions" hidden></ul>
+        <label for="edit-distance">Max Typo Tolerance (Levenshtein Distance)</label>
+        <select id="edit-distance"><option value="0">0 — Exact prefix only</option><option value="1">1 edit</option><option value="2" selected>2 edits</option><option value="3">3 edits</option></select>
+        <p id="search-status" role="status" aria-live="polite"></p>
+      </section>
+      <section class="tree-panel" aria-labelledby="tree-heading">
+        <div class="section-heading"><h2 id="tree-heading">02 / Trie Hierarchy Visualization</h2><span>PREFIX SUBTREE</span></div>
+        <p class="help">Each edge represents one character code point; terminal nodes show completed course titles.</p>
+        <ul id="trie-tree" class="tree" aria-label="Course Prefix Tree"></ul>
+      </section>
+    </div>
+    <footer>Edtech Academy Demonstration Engine. Complete curriculum data structure lab.</footer>
+  </main>
+  <script type="module" src="trie-search.js"></script>
+</body>
+</html>
