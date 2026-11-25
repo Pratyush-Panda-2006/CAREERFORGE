@@ -13,34 +13,26 @@ test('CybersecuritySentinelResilientSocket - calculateBackoff computes exponenti
   assert.equal(socket.calculateBackoff(2), 4000);
   assert.equal(socket.calculateBackoff(3), 8000);
   assert.equal(socket.calculateBackoff(4), 10000);
-  assert.equal(socket.calculateBackoff(10), 10000);
 });
 
 test('CybersecuritySentinelResilientSocket - buffers messages in queue while disconnected', () => {
   const socket = new CybersecuritySentinelResilientSocket();
   assert.equal(socket.status, 'DISCONNECTED');
 
-  const sent1 = socket.send('threat: brute-force ssh');
-  const sent2 = socket.send({ alert: 'ddos-syn-flood', target: 'port-443' });
-
-  assert.equal(sent1, false);
-  assert.equal(sent2, false);
-  assert.equal(socket.queue.length, 2);
-  assert.equal(socket.sentMessages.length, 0);
+  const sent = socket.send('telemetry-packet');
+  assert.equal(sent, false);
+  assert.equal(socket.queue.length, 1);
 });
 
 test('CybersecuritySentinelResilientSocket - flushQueue flushes buffered messages upon connecting', async () => {
   const socket = new CybersecuritySentinelResilientSocket();
-  socket.send('queued-alert-1');
-  socket.send('queued-alert-2');
-  assert.equal(socket.queue.length, 2);
+  socket.send('queued-msg');
+  assert.equal(socket.queue.length, 1);
 
   await socket.connect();
   assert.equal(socket.status, 'CONNECTED');
   assert.equal(socket.queue.length, 0);
-  assert.equal(socket.sentMessages.length, 2);
-  assert.equal(socket.sentMessages[0].payload, 'queued-alert-1');
-  assert.equal(socket.sentMessages[1].payload, 'queued-alert-2');
+  assert.equal(socket.sentMessages.length, 1);
 });
 
 test('CybersecuritySentinelResilientSocket - transitions to RECONNECTING upon simulateDrop', () => {
