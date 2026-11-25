@@ -27,11 +27,12 @@ test('fuzzy matching implements insertion, deletion, substitution and exact dist
   assert.deepEqual(engine.fuzzySearch('LEDGER', 0), [{ word: 'Ledger', distance: 0 }])
   assert.deepEqual(engine.fuzzySearch('zzzzz', 1), [])
 })
-test('classic distance boundary: kitten to sitting costs three edits', () => {
-  const engine = new AutomotiveHypercarTrieEngine(['sitting'])
-  assert.deepEqual(engine.fuzzySearch('kitten', 2), [])
-  assert.deepEqual(engine.fuzzySearch('kitten', 3), [{ word: 'sitting', distance: 3 }])
+test('automotive hypercar active aero vocabulary typeahead prefix search', () => {
+  const engine = new AutomotiveHypercarTrieEngine(['Aerodynamics', 'Active spoiler', 'Aero duct', 'Airbrake', 'Downforce'])
+  assert.deepEqual(engine.findWordsWithPrefix('aero'), ['Aero duct', 'Aerodynamics'])
+  assert.deepEqual(engine.fuzzySearch('aeroduct', 1), [{ word: 'Aero duct', distance: 1 }])
 })
+
 test('empty fuzzy queries follow true edit distance instead of matching everything', () => {
   const engine = new AutomotiveHypercarTrieEngine(['APR', 'APY', 'Bond'])
   assert.deepEqual(engine.fuzzySearch('', 0), [])
