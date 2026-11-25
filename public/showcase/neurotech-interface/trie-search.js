@@ -70,59 +70,11 @@ export class NeurotechInterfaceTrieEngine {
         results.push({ word: current.word, distance: row[letters.length] });
       }
       if (Math.min(...row) <= maxDistance) {
-        for (const [nextChar, child] of children(current)) {
-          visit(child, nextChar, row);
-        }
+        for (const [letter, child] of children(current)) visit(child, letter, row);
       }
     };
-    const initialRow = Array.from({ length: letters.length + 1 }, (_, i) => i);
-    if (this.root.word !== null && initialRow[letters.length] <= maxDistance) {
-      results.push({ word: this.root.word, distance: initialRow[letters.length] });
-    }
-    for (const [char, child] of children(this.root)) {
-      visit(child, char, initialRow);
-    }
-    results.sort((a, b) => a.distance - b.distance || a.word.localeCompare(b.word));
-    return results;
+    const first = Array.from({ length: letters.length + 1 }, (_, i) => i);
+    for (const [letter, child] of children(this.root)) visit(child, letter, first);
+    return results.sort((a, b) => a.distance - b.distance || normalized(a.word).localeCompare(normalized(b.word), 'en'));
   }
 }
-
-function mount() {
-  const input = document.getElementById('typeahead-input'); if (!input) return;
-  const initial = ['Synapse', 'Cortex', 'Neural', 'Neuron', 'Dendrite', 'Axon', 'Glial', 'Receptor', 'Spike', 'Plasticity'];
-  const trie = new NeurotechInterfaceTrieEngine(initial);
-  const get = id => document.getElementById(id);
-
-  function search() {
-    const val = input.value;
-    const prefixMatches = trie.findWordsWithPrefix(val);
-    const fuzzyMatches = trie.fuzzySearch(val, 2);
-
-    get('prefix-list').replaceChildren(...prefixMatches.map(w => {
-      const li = document.createElement('li');
-      li.textContent = w;
-      return li;
-    }));
-
-    get('fuzzy-list').replaceChildren(...fuzzyMatches.map(m => {
-      const li = document.createElement('li');
-      li.textContent = `${m.word} (edit distance: ${m.distance})`;
-      return li;
-    }));
-  }
-
-  input.addEventListener('input', search);
-  get('add-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const w = get('new-word').value;
-    if (trie.insert(w)) {
-      get('status').textContent = `Inserted: ${w}`;
-      get('new-word').value = '';
-      search();
-    } else {
-      get('status').textContent = `Word already exists.`;
-    }
-  });
-  search();
-}
-if (typeof document !== 'undefined') mount();
