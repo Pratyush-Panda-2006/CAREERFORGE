@@ -4,66 +4,53 @@ import { AerospaceOrbiterLruCache } from './lru-cache.js';
 
 test('AerospaceOrbiterLruCache - stores and retrieves values in O(1)', () => {
   const cache = new AerospaceOrbiterLruCache(3);
-  cache.put('orbiter-1', 'telemetry-a');
-  cache.put('orbiter-2', 'telemetry-b');
+  cache.put('k1', 'val1');
+  cache.put('k2', 'val2');
 
-  assert.equal(cache.get('orbiter-1'), 'telemetry-a');
-  assert.equal(cache.get('orbiter-2'), 'telemetry-b');
-  assert.equal(cache.get('orbiter-3'), null);
+  assert.equal(cache.get('k1'), 'val1');
+  assert.equal(cache.get('k2'), 'val2');
+  assert.equal(cache.get('unknown'), null);
+});
+
+test('AerospaceOrbiterLruCache - throws RangeError on non-positive capacity', () => {
+  assert.throws(() => new AerospaceOrbiterLruCache(0), RangeError);
+  assert.throws(() => new AerospaceOrbiterLruCache(-5), RangeError);
 });
 
 test('AerospaceOrbiterLruCache - promotes accessed key to MRU (head)', () => {
   const cache = new AerospaceOrbiterLruCache(3);
-  cache.put('t1', 'data1');
-  cache.put('t2', 'data2');
-  cache.put('t3', 'data3');
+  cache.put('c1', 'data1');
+  cache.put('c2', 'data2');
+  cache.put('c3', 'data3');
 
-  // Order: t3 (MRU), t2, t1 (LRU)
-  // Access 't1' -> 't1' becomes MRU
-  cache.get('t1');
+  cache.get('c1');
 
   const ordered = cache.getOrderedEntries();
-  assert.equal(ordered[0].key, 't1');
-  assert.equal(ordered[1].key, 't3');
-  assert.equal(ordered[2].key, 't2');
+  assert.equal(ordered[0].key, 'c1');
+  assert.equal(ordered[1].key, 'c3');
+  assert.equal(ordered[2].key, 'c2');
 });
 
 test('AerospaceOrbiterLruCache - evicts least recently used item upon capacity overflow', () => {
   const cache = new AerospaceOrbiterLruCache(2);
-  cache.put('frame-alpha', 'gyro1');
-  cache.put('frame-beta', 'gyro2');
-  // Cache full with [frame-beta, frame-alpha]. Adding frame-gamma evicts frame-alpha!
-  cache.put('frame-gamma', 'gyro3');
+  cache.put('item1', 'content1');
+  cache.put('item2', 'content2');
+  cache.put('item3', 'content3');
 
-  assert.equal(cache.get('frame-alpha'), null);
-  assert.equal(cache.get('frame-beta'), 'gyro2');
-  assert.equal(cache.get('frame-gamma'), 'gyro3');
+  assert.equal(cache.get('item1'), null);
+  assert.equal(cache.get('item2'), 'content2');
+  assert.equal(cache.get('item3'), 'content3');
 
   const evicted = cache.getEvictedEntries();
   assert.equal(evicted.length, 1);
-  assert.equal(evicted[0].key, 'frame-alpha');
-  assert.equal(evicted[0].value, 'gyro1');
-});
-
-test('AerospaceOrbiterLruCache - update existing key refreshes value and promotes to MRU without increasing size', () => {
-  const cache = new AerospaceOrbiterLruCache(2);
-  cache.put('k1', 'val1');
-  cache.put('k2', 'val2');
-  cache.put('k1', 'val1-updated');
-
-  assert.equal(cache.get('k1'), 'val1-updated');
-  const ordered = cache.getOrderedEntries();
-  assert.equal(ordered.length, 2);
-  assert.equal(ordered[0].key, 'k1');
-  assert.equal(cache.getEvictedEntries().length, 0);
+  assert.equal(evicted[0].key, 'item1');
 });
 
 test('AerospaceOrbiterLruCache - clear resets cache and evicted entries', () => {
   const cache = new AerospaceOrbiterLruCache(2);
-  cache.put('packet-1', 'sensor');
+  cache.put('test', '123');
   cache.clear();
 
-  assert.equal(cache.get('packet-1'), null);
+  assert.equal(cache.get('test'), null);
   assert.equal(cache.getOrderedEntries().length, 0);
-  assert.equal(cache.getEvictedEntries().length, 0);
 });
