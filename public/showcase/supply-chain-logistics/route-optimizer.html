@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capacitated Vehicle Routing & 2-Opt Fleet Optimization Workbench</title>
+  <link rel="stylesheet" href="route-optimizer.css">
+</head>
+<body class="logistics-body">
+  <div class="logistics-container" id="logistics-optimizer-container">
+    <header class="logistics-header">
+      <div class="logistics-badge">Supply Chain Fleet Telematics</div>
+      <h1>Multi-Stop CVRP Delivery Route Optimizer (2-Opt Local Search)</h1>
+      <p class="subtitle">Autonomous client-side vehicle routing with payload capacity constraints, Euclidean distance cost matrices, and heuristic edge-swapping.</p>
+    </header>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label for="scenario-select">Delivery Network Topology:</label>
+        <select id="scenario-select" class="logistics-select">
+          <option value="metro" selected>Metropolitan Hub (12 Customer Nodes, 3 Clusters)</option>
+          <option value="regional">Regional Distribution (High Payload, Long Haul)</option>
+          <option value="suburbs">Clustered Suburbs (Tight Quadrants)</option>
+        </select>
+      </div>
+      <button id="reoptimize-btn" class="logistics-btn">Re-Optimize Vehicle Tours</button>
+    </div>
+
+    <!-- Fleet KPIs -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Fleet Mileage</div>
+        <div class="metric-val highlight-cyan" id="metric-total-dist">-- km</div>
+        <div class="metric-hint">Combined multi-vehicle transit distance</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">2-Opt Distance Saved</div>
+        <div class="metric-val highlight-emerald" id="metric-dist-saved">-- km</div>
+        <div class="metric-hint">Mileage eliminated via edge swaps</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Active Vehicle Fleet</div>
+        <div class="metric-val" id="metric-vehicle-count">-- Vehicles</div>
+        <div class="metric-hint">Max Payload Capacity: 500 kg / veh</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Estimated Fleet Fuel Cost</div>
+        <div class="metric-val highlight-amber" id="metric-fuel-cost">--</div>
+        <div class="metric-hint">Calculated @ 0.28 L/km &amp; $1.45/L</div>
+      </div>
+    </div>
+
+    <!-- Visualizers Grid -->
+    <div class="visualizer-grid">
+      <div class="viz-card">
+        <h3>2D Delivery Network Tour Visualizer (Depot &amp; Waypoint Nodes)</h3>
+        <canvas id="route-map-canvas" width="560" height="320"></canvas>
+      </div>
+
+      <div class="viz-card">
+        <h3>Active Fleet Vehicle Tours &amp; Payload Utilization</h3>
+        <div class="routes-container" id="vehicle-routes-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="route-optimizer.js"></script>
+</body>
+</html>
