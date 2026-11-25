@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Packet Entropy & Threat Detection Workbench</title>
+  <link rel="stylesheet" href="packet-analyzer.css">
+</head>
+<body class="sentinel-body">
+  <div class="sentinel-container" id="sentinel-analyzer-container">
+    <header class="sentinel-header">
+      <div class="sentinel-badge">Sentinel Heuristic Packet Inspection</div>
+      <h1>Real-Time Network Packet Entropy & Attack Signature Analyzer</h1>
+      <p class="subtitle">Autonomous client-side Shannon entropy calculation, sliding-window volumetric flood detection, and heuristic exploit pattern analysis.</p>
+    </header>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label for="scenario-select">Traffic Inspection Scenario:</label>
+        <select id="scenario-select" class="sentinel-select">
+          <option value="sqli" selected>SQL Injection Exfiltration Attack (Exploit Signature)</option>
+          <option value="benign">Benign HTTPS Traffic Header (Low Risk)</option>
+          <option value="synflood">Volumetric SYN Flood DDoS Surge (Rate Anomaly)</option>
+          <option value="shellcode">Encrypted Shellcode NOP-Sled Exploit (High Entropy)</option>
+        </select>
+      </div>
+      <button id="run-audit-btn" class="sentinel-btn">Capture & Inspect Stream</button>
+    </div>
+
+    <!-- Telemetry Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Shannon Byte Entropy</div>
+        <div class="metric-val" id="metric-entropy-val">4.20 bits/byte</div>
+        <span class="metric-pill pill-normal" id="metric-entropy-badge">NORMAL DISTRIBUTION</span>
+        <div class="metric-hint">Threshold: &gt; 7.2 indicates packed/encrypted payload</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Sliding-Window Traffic Rate</div>
+        <div class="metric-val" id="metric-rate-val">18 pkts/sec</div>
+        <span class="metric-pill pill-normal" id="metric-rate-badge">RATE NORMAL</span>
+        <div class="metric-hint">Threshold: &gt; 50 pkts/sec triggers volumetric alert</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Threat Severity Assessment</div>
+        <div class="metric-val" id="metric-threat-score">65/100</div>
+        <div class="threat-level-tag" id="metric-threat-level">HIGH</div>
+        <div class="metric-hint" id="metric-recommendation">Review mitigative countermeasures</div>
+      </div>
+    </div>
+
+    <!-- Visualizers Grid -->
+    <div class="visualizer-grid">
+      <div class="viz-card">
+        <h3>Payload Byte Value Frequency Distribution Histogram (0 - 255)</h3>
+        <canvas id="entropy-hist-canvas" width="560" height="200"></canvas>
+        <div class="hist-legend">
+          <span>0 (0x00)</span>
+          <span>Byte Value Spectrum</span>
+          <span>255 (0xFF)</span>
+        </div>
+      </div>
+
+      <div class="viz-card">
+        <h3>Identified Exploit Signatures & Vulnerability Vectors</h3>
+        <div class="signatures-container" id="signature-matches-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="packet-analyzer.js"></script>
+</body>
+</html>
