@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renewable Microgrid Energy Arbitrage & Battery Dispatch Optimizer</title>
+  <link rel="stylesheet" href="energy-optimizer.css">
+</head>
+<body class="grid-body">
+  <div class="grid-container" id="microgrid-optimizer-container">
+    <header class="grid-header">
+      <div class="grid-badge">Smart Microgrid Storage Arbitrage</div>
+      <h1>Renewable Energy Dispatch & Battery State-of-Charge Optimizer</h1>
+      <p class="subtitle">Autonomous client-side multi-source generation modeling, dynamic Time-of-Use tariff arbitrage, and lifecycle-protective battery dispatch.</p>
+    </header>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label for="scenario-select">Microgrid Weather & Load Scenario:</label>
+        <select id="scenario-select" class="grid-select">
+          <option value="sunny" selected>Sunny Day (Solar Peak + High Arbitrage Export)</option>
+          <option value="stormy">Stormy Night (Wind Surge + High Off-Peak Generation)</option>
+          <option value="heavy_load">Commercial Peak Load (Heavy Grid Strain + Storage Shaving)</option>
+        </select>
+      </div>
+      <button id="run-dispatch-btn" class="grid-btn">Re-Optimize 24-Hour Dispatch</button>
+    </div>
+
+    <!-- Battery State-of-Charge Visual Bar -->
+    <div class="soc-card">
+      <div class="soc-header">
+        <span>Battery State-of-Charge (SoC)</span>
+        <strong id="battery-soc-text">50% SoC</strong>
+      </div>
+      <div class="soc-progress-track">
+        <div class="soc-progress-bar" id="battery-soc-gauge"></div>
+      </div>
+      <div class="soc-limits">
+        <span>Min DoD Limit: 20%</span>
+        <span>Nominal Capacity: 100 kWh</span>
+        <span>Max Safety Ceiling: 95%</span>
+      </div>
+    </div>
+
+    <!-- Telemetry Metrics Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Renewable Generation</div>
+        <div class="metric-val highlight-amber" id="metric-total-gen">-- kWh</div>
+        <div class="metric-hint">Combined Solar PV + Wind Turbines</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Commercial Load Demand</div>
+        <div class="metric-val highlight-rose" id="metric-total-load">-- kWh</div>
+        <div class="metric-hint">Total facility power consumed</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Grid Import Deficit</div>
+        <div class="metric-val" id="metric-grid-import">-- kWh</div>
+        <div class="metric-hint">Energy pulled from utility grid</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Net Economic Arbitrage Savings</div>
+        <div class="metric-val highlight-emerald" id="metric-net-savings">--</div>
+        <div class="metric-hint">Savings vs unbuffered grid consumption</div>
+      </div>
+    </div>
+
+    <!-- 24-Hour Dispatch Canvas Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>24-Hour Sequential Generation, Load & Battery Dispatch Trajectory</h3>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-color color-gen"></span> Renewables (kW)</span>
+          <span class="legend-item"><span class="legend-color color-load"></span> Facility Load (kW)</span>
+          <span class="legend-item"><span class="legend-color color-soc"></span> Battery SoC (%)</span>
+        </div>
+      </div>
+      <canvas id="dispatch-chart-canvas" width="1100" height="260"></canvas>
+    </div>
+
+    <!-- Hourly Breakdown Table -->
+    <div class="table-card">
+      <h3>Hourly Microgrid Power Flow Breakdown (First 12 Hours)</h3>
+      <table class="grid-table">
+        <thead>
+          <tr>
+            <th>Hour</th>
+            <th>Solar PV</th>
+            <th>Wind</th>
+            <th>Load</th>
+            <th>Battery Flow</th>
+            <th>State-of-Charge</th>
+            <th>Grid Interaction</th>
+          </tr>
+        </thead>
+        <tbody id="hourly-table-body">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module" src="energy-optimizer.js"></script>
+</body>
+</html>
