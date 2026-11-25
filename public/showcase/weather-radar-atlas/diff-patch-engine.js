@@ -42,12 +42,7 @@ export class WeatherRadarAtlasDiffPatchEngine {
     for (let d = trace.length - 1; d > 0; d--) {
       const v = trace[d];
       const k = x - y;
-      let prevK;
-      if (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) {
-        prevK = k + 1;
-      } else {
-        prevK = k - 1;
-      }
+      let prevK = (k === -d || (k !== d && (v[k - 1] ?? -1) < (v[k + 1] ?? -1))) ? k + 1 : k - 1;
       const prevX = v[prevK] ?? 0;
       const prevY = prevX - prevK;
 
@@ -85,7 +80,7 @@ export class WeatherRadarAtlasDiffPatchEngine {
     return diff;
   }
 
-  toUnifiedFormat(diff, fileA = 'a/file.txt', fileB = 'b/file.txt') {
+  toUnifiedFormat(diff, fileA = 'a/config.yaml', fileB = 'b/config.yaml') {
     if (!Array.isArray(diff)) throw new TypeError('Diff must be an array');
     if (diff.length === 0) return '';
     const hasChanges = diff.some(d => d.type !== 'equal');
@@ -141,25 +136,3 @@ export class WeatherRadarAtlasDiffPatchEngine {
     throw new TypeError('Patch must be unified string or diff array');
   }
 }
-
-function mount() {
-  const form = document.getElementById('diff-form'); if (!form) return;
-  const get = id => document.getElementById(id);
-  const engine = new WeatherRadarAtlasDiffPatchEngine();
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const orig = get('original').value;
-    const mod = get('modified').value;
-    const diff = engine.computeDiff(orig, mod);
-    const unified = engine.toUnifiedFormat(diff);
-    get('unified').textContent = unified || '(No differences detected)';
-    get('diff-output').replaceChildren(...diff.map(item => {
-      const div = document.createElement('div');
-      div.className = `diff-line diff-${item.type}`;
-      div.textContent = `${item.type === 'insert' ? '+' : item.type === 'delete' ? '-' : ' '} ${item.text}`;
-      return div;
-    }));
-    get('patched-preview').textContent = engine.applyPatch(orig, diff);
-  });
-}
-if (typeof document !== 'undefined') mount();
