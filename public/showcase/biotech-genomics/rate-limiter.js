@@ -1,122 +1,64 @@
 export class BiotechGenomicsTokenBucketRateLimiter {
-  constructor(capacity = 10, refillRate = 2, clock = () => Date.now()) {
-    if (capacity <= 0 || refillRate < 0) {
-      throw new RangeError('Capacity must be > 0 and refillRate >= 0');
+  constructor({ capacity = 10, refillPerSecond = 2, maxConcurrent = 3, maxQueue = 100, clock = () => performance.now() } = {}) {
+    for (const [name, value, max] of [['capacity', capacity, 1000], ['refillPerSecond', refillPerSecond, 1000]]) {
+      if (!Number.isFinite(value) || value <= 0 || value > max) throw new RangeError(`${name} must be greater than 0 and at most ${max}.`);
     }
-    this.capacity = capacity;
-    this.refillRate = refillRate; // tokens per second
-    this.clock = clock;
+    if (!Number.isInteger(maxConcurrent) || maxConcurrent < 1 || maxConcurrent > 20) throw new RangeError('Concurrency must be 1–20.');
+    if (!Number.isInteger(maxQueue) || maxQueue < 1 || maxQueue > 100) throw new RangeError('Queue limit must be 1–100.');
+    if (typeof clock !== 'function') throw new TypeError('Clock must be a function.');
+    Object.assign(this, { capacity, refillPerSecond, maxConcurrent, maxQueue, clock });
+    this.lastTime = clock();
     this.tokens = capacity;
-    this.lastRefill = this.clock();
+    this.queue = [];
+    this.active = [];
+    this.sequence = 0;
+    this.metrics = { accepted: 0, completed: 0, throttled: 0, cancelled: 0 };
   }
 
   refill() {
-    const now = this.clock();
-    const elapsedSeconds = Math.max(0, (now - this.lastRefill) / 1000);
-    const addedTokens = elapsedSeconds * this.refillRate;
-    this.tokens = Math.min(this.capacity, this.tokens + addedTokens);
-    this.lastRefill = now;
+    const time = this.clock();
+    const now = Math.max(time, this.lastTime);
+    this.tokens = Math.min(this.capacity, this.tokens + (now - this.lastTime) * this.refillPerSecond / 1000);
+    this.lastTime = now;
     return this.tokens;
   }
 
   tryConsume(tokens = 1) {
-    if (tokens <= 0) return false;
+    if (!Number.isFinite(tokens) || tokens <= 0 || tokens > this.capacity) throw new RangeError('Token cost must be positive and no larger than capacity.');
     this.refill();
-    if (this.tokens >= tokens) {
-      this.tokens -= tokens;
-      return true;
-    }
-    return false;
+    if (this.tokens < tokens) return false;
+    this.tokens -= tokens;
+    return true;
   }
 
   getAvailableTokens() {
+    return this.refill();
+  }
+
+  enqueue({ id, tokens = 1, priority = 0, durationMs = 800 } = {}) {
+    if (typeof id !== 'string' || !id.trim() || id.length > 64) throw new TypeError('Request ID must contain 1–64 characters.');
+    if (this.queue.length >= this.maxQueue) { this.metrics.throttled++; return false; }
+    this.queue.push({ id, tokens, priority, durationMs, order: this.sequence++ });
+    return true;
+  }
+
+  tick() {
     this.refill();
-    return Math.floor(this.tokens * 100) / 100;
+    const now = this.lastTime;
+    const completed = this.active.filter(job => job.endsAt <= now);
+    this.active = this.active.filter(job => job.endsAt > now);
+    this.metrics.completed += completed.length;
+    const started = [];
+    while (this.queue.length && this.active.length < this.maxConcurrent) {
+      const next = this.queue[0];
+      if (this.tokens < next.tokens) break;
+      this.tokens -= next.tokens;
+      this.queue.shift();
+      const job = { ...next, startedAt: now, endsAt: now + next.durationMs };
+      this.active.push(job);
+      started.push({ ...job });
+      this.metrics.accepted++;
+    }
+    return { started, completed: completed.map(job => ({ ...job })) };
   }
 }
-
-function mount() {
-  const root = document.querySelector('[data-biotech-genomics-rate-limiter-lab]');
-  if (!root) return;
-
-  const limiter = new BiotechGenomicsTokenBucketRateLimiter(10, 2);
-  const get = id => root.querySelector(`#${id}`);
-
-  let totalRequests = 0;
-  let acceptedRequests = 0;
-  let throttledRequests = 0;
-
-  function updateDisplay() {
-    const available = limiter.getAvailableTokens();
-    const pct = Math.max(0, Math.min(100, (available / limiter.capacity) * 100));
-
-    const fillMeter = get('bucket-fill');
-    if (fillMeter) {
-      fillMeter.style.height = `${pct}%`;
-    }
-
-    const availableDisplay = get('available-tokens');
-    if (availableDisplay) {
-      availableDisplay.textContent = available.toFixed(1);
-    }
-
-    const maxDisplay = get('max-capacity');
-    if (maxDisplay) {
-      maxDisplay.textContent = String(limiter.capacity);
-    }
-
-    const statsElem = get('stats-display');
-    if (statsElem) {
-      const dropRate = totalRequests > 0 ? ((throttledRequests / totalRequests) * 100).toFixed(1) : '0.0';
-      statsElem.textContent = `Total: ${totalRequests} | Accepted: ${acceptedRequests} | Throttled: ${throttledRequests} (${dropRate}%)`;
-    }
-  }
-
-  function logEvent(count, accepted) {
-    const logList = get('event-log');
-    if (!logList) return;
-
-    const row = document.createElement('div');
-    row.className = `log-entry ${accepted ? 'log-accepted' : 'log-throttled'}`;
-
-    const time = new Date().toLocaleTimeString();
-    row.textContent = `[${time}] Genomic alignment query (${count} token${count > 1 ? 's' : ''}) -> ${accepted ? 'ALLOWED (200 OK)' : 'THROTTLED (429 Too Many Requests)'}`;
-
-    logList.prepend(row);
-    while (logList.children.length > 30) {
-      logList.removeChild(logList.lastChild);
-    }
-  }
-
-  function handleRequest(count) {
-    totalRequests += count;
-    const allowed = limiter.tryConsume(count);
-    if (allowed) {
-      acceptedRequests += count;
-    } else {
-      throttledRequests += count;
-    }
-    logEvent(count, allowed);
-    updateDisplay();
-  }
-
-  get('send-1-btn')?.addEventListener('click', () => handleRequest(1));
-  get('burst-3-btn')?.addEventListener('click', () => handleRequest(3));
-  get('flood-8-btn')?.addEventListener('click', () => handleRequest(8));
-
-  get('reset-btn')?.addEventListener('click', () => {
-    limiter.tokens = limiter.capacity;
-    limiter.lastRefill = Date.now();
-    totalRequests = 0;
-    acceptedRequests = 0;
-    throttledRequests = 0;
-    const logList = get('event-log');
-    if (logList) logList.replaceChildren();
-    updateDisplay();
-  });
-
-  setInterval(updateDisplay, 250);
-  updateDisplay();
-}
-
-if (typeof document !== 'undefined') mount();
