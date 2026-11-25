@@ -1,62 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Myers Diff &amp; Patch Engine | Legal Smart Contracts</title>
-  <link rel="stylesheet" href="./diff-patch-engine.css">
-  <script type="module" src="./diff-patch-engine.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegalSmartContracts - Myers Diff & Patch Engine</title>
+  <link rel="stylesheet" href="diff-patch-engine.css">
 </head>
 <body>
-  <main data-diff-lab>
-    <header>
-      <a href="./index.html">LEGAL SMART CONTRACTS</a>
-      <span>MYERS DIFF &amp; PATCH ENGINE</span>
+  <div class="diff-container" data-diff-lab>
+    <header class="header">
+      <h1>LegalSmartContracts Myers Diff & Patch Engine</h1>
+      <p class="subtitle">O(ND) difference computation, chunk boundary visualizer, and unified patch application</p>
     </header>
-
-    <section class="intro">
-      <p class="eyebrow">MYERS ALGORITHM / UNIFIED DIFF / REVISION PATCH</p>
-      <h1>Compute formal text diffs and patch smart contract clauses.</h1>
-      <p>Analyze line-by-line insertions, deletions, and unchanged chunks between revisions with mathematical Myers shortest-edit paths and roundtrip patch integrity.</p>
-    </section>
-
-    <section class="action-bar">
-      <button id="compute-btn" type="button">Recompute Diff &amp; Patch</button>
-      <span id="stats" class="stats-badge">0 additions, 0 deletions</span>
-    </section>
-
-    <div class="split-editor">
-      <section class="editor-pane">
-        <label for="original-text">Original Contract Source (v1.0)</label>
-        <textarea id="original-text" spellcheck="false"></textarea>
+    <main class="grid-layout">
+      <section class="card input-card">
+        <h2>Original Configuration (v1.0)</h2>
+        <textarea id="original-text" rows="8">stream: standard\nbitrate: 128k\nchannels: stereo</textarea>
       </section>
-
-      <section class="editor-pane">
-        <label for="modified-text">Modified Contract Source (v1.1)</label>
-        <textarea id="modified-text" spellcheck="false"></textarea>
+      <section class="card input-card">
+        <h2>Modified Configuration (v1.1)</h2>
+        <textarea id="modified-text" rows="8">stream: master\nbitrate: 320k\nchannels: spatial\ncodec: opus</textarea>
       </section>
-    </div>
-
-    <section class="visualizer-section">
-      <h2>Visual Chunk Diff Inspector</h2>
-      <div id="diff-preview" class="diff-viewer"></div>
-    </section>
-
-    <div class="split-editor">
-      <section class="editor-pane">
-        <h2>Generated Unified Diff Format</h2>
+      <section class="card diff-preview-card">
+        <h2>Chunk Boundary Visual Diff</h2>
+        <div id="diff-preview" class="diff-preview-box"></div>
+      </section>
+      <section class="card unified-card">
+        <h2>Unified Diff Format</h2>
         <pre id="unified-view" class="unified-box"></pre>
       </section>
-
-      <section class="editor-pane">
-        <label for="applied-preview">Applied Patch Preview (Roundtrip Output)</label>
-        <textarea id="applied-preview" readonly spellcheck="false"></textarea>
-      </section>
-    </div>
-
-    <footer>
-      Autonomous client-side Myers diff algorithm and unified patch generator. No network traffic or remote API dependencies.
-    </footer>
-  </main>
+    </main>
+  </div>
+  <script type="module" src="diff-patch-engine.js"></script>
 </body>
 </html>
