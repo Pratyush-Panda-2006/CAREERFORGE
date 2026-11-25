@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Automotive Hypercar - ROI Forecaster</title>
+  <link rel="stylesheet" href="roi-calculator.css">
+</head>
+<body class="roi-body">
+  <div class="roi-container">
+    <h2>Automotive Hypercar ROI Forecaster</h2>
+    <div id="savingsDisplay" class="savings-display">$0.00</div>
+  </div>
+  <script type="module">
+    import { AutomotiveHypercarRoiEngine } from './roi-calculator.js';
+    const engine = new AutomotiveHypercarRoiEngine();
+    const res = engine.calculateAnnualSavings();
+    document.getElementById('savingsDisplay').textContent = engine.formatCurrency(res.grossAnnualSavings);
+  </script>
+</body>
+</html>
