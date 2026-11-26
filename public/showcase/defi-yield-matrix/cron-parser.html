@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Build, translate and preview five-part cron schedules for DeFi Yield Matrix automation jobs.">
+  <title>Cron Schedule Builder — DeFi Yield Matrix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cron-parser.css">
+</head>
+<body class="cron-page">
+  <div class="cron-shell" data-cron-builder>
+    <header class="cron-hero">
+      <nav class="hero-nav" aria-label="Breadcrumb">
+        <a class="back-link" href="./index.html"><span aria-hidden="true">←</span> Yield Matrix</a>
+        <span class="engine-pill"><span class="engine-dot" aria-hidden="true"></span> Automation engine</span>
+      </nav>
+
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">DeFi Yield Matrix / Scheduling utility</p>
+          <h1>Cron schedules, <span class="gradient-text">decoded.</span></h1>
+          <p class="hero-subtitle">Compose a five-part cron expression, translate it into plain English, and preview the exact windows your yield automation will fire.</p>
+          <div class="hero-tags" aria-label="Capabilities">
+            <span>5-field cron</span>
+            <span>Plain-English output</span>
+            <span>Next 5 executions</span>
+          </div>
+        </div>
+
+        <aside class="next-brief" aria-label="Next scheduled execution">
+          <span class="brief-label">Next execution</span>
+          <strong class="brief-time" id="hero-next-run">—</strong>
+          <span class="brief-relative" id="hero-next-relative">Calculating…</span>
+          <span class="brief-zone">Local browser time</span>
+        </aside>
+      </div>
+    </header>
+
+    <main class="cron-layout">
+      <section class="panel builder-panel" aria-labelledby="builder-heading">
+        <header class="panel-head">
+          <div>
+            <p class="section-kicker">01 · Compose</p>
+            <h2 id="builder-heading">Schedule expression</h2>
+          </div>
+          <button type="button" class="ghost-button" id="reset-expression">Reset</button>
+        </header>
+
+        <div class="field-grid">
+          <label class="field-card" data-field-card="minute">
+            <span class="field-top"><span class="field-name">Minute</span><span class="field-range">0–59</span></span>
+            <input class="cron-input" id="cron-minute" type="text" value="0" autocomplete="off" spellcheck="false" aria-describedby="minute-hint">
+            <span class="field-hint" id="minute-hint">0 or */15</span>
+          </label>
+
+          <label class="field-card" data-field-card="hour">
+            <span class="field-top"><span class="field-name">Hour</span><span class="field-range">0–23</span></span>
+            <input class="cron-input" id="cron-hour" type="text" value="6" autocomplete="off" spellcheck="false" aria-describedby="hour-hint">
+            <span class="field-hint" id="hour-hint">9 or 9-17</span>
+          </label>
+
+          <label class="field-card" data-field-card="day of month">
+            <span class="field-top"><span class="field-name">Day</span><span class="field-range">1–31</span></span>
+            <input class="cron-input" id="cron-day" type="text" value="*" autocomplete="off" spellcheck="false" aria-describedby="day-hint">
+            <span class="field-hint" id="day-hint">day of month</span>
+          </label>
+
+          <label class="field-card" data-field-card="month">
+            <span class="field-top"><span class="field-name">Month</span><span class="field-range">1–12</span></span>
+            <input class="cron-input" id="cron-month" type="text" value="*" autocomplete="off" spellcheck="false" aria-describedby="month-hint">
+            <span class="field-hint" id="month-hint">JAN–DEC</span>
+          </label>
+
+          <label class="field-card" data-field-card="weekday">
+            <span class="field-top"><span class="field-name">Weekday</span><span class="field-range">0–6</span></span>
+            <input class="cron-input" id="cron-weekday" type="text" value="1-5" autocomplete="off" spellcheck="false" aria-describedby="weekday-hint">
+            <span class="field-hint" id="weekday-hint">0 = Sunday</span>
+          </label>
+        </div>
+
+        <div class="expression-output">
+          <div class="expression-label">
+            <span>Generated expression</span>
+            <span class="expression-badge">5 fields</span>
+          </div>
+          <div class="expression-row">
+            <code id="raw-expression">0 6 * * 1-5</code>
+            <button type="button" class="copy-button" id="copy-expression">Copy</button>
+          </div>
+          <div class="token-row" id="cron-tokens" aria-label="Cron field tokens"></div>
+        </div>
+
+        <div class="preset-block">
+          <span class="preset-label">Quick presets</span>
+          <div class="preset-row">
+            <button type="button" class="preset-chip" data-cron="*/15 * * * *">Every 15 min</button>
+            <button type="button" class="preset-chip" data-cron="0 6 * * *">Daily harvest</button>
+            <button type="button" class="preset-chip" data-cron="0 */6 * * *">Compound every 6h</button>
+            <button type="button" class="preset-chip" data-cron="0 9 * * 1-5">Weekday rebalance</button>
+            <button type="button" class="preset-chip" data-cron="30 8 * * 1,4">Mon / Thu DCA</button>
+            <button type="button" class="preset-chip" data-cron="0 12 1 * *">Monthly report</button>
+          </div>
+        </div>
+
+        <div class="error-banner" id="cron-error" role="alert" hidden></div>
+      </section>
+
+      <section class="panel translation-panel" aria-labelledby="translation-heading">
+        <header class="panel-head">
+          <div>
+            <p class="section-kicker">02 · Translate</p>
+            <h2 id="translation-heading">Plain-English schedule</h2>
+          </div>
+          <span class="live-badge">Live</span>
+        </header>
+
+        <div class="human-card">
+          <div class="human-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <circle cx="12" cy="12" r="8.5"></circle>
+              <path d="M12 7.5V12l3 2"></path>
+            </svg>
+          </div>
+          <p class="human-text" id="human-readable" aria-live="polite">At 06:00 on weekdays</p>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-card">
+            <span class="meta-label">Gap to next run</span>
+            <strong class="meta-value" id="cadence-value">—</strong>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Timezone</span>
+            <strong class="meta-value" id="timezone-value">Local time</strong>
+          </div>
+        </div>
+
+        <div class="legend" aria-label="Cron token legend">
+          <span class="legend-item"><span class="token-swatch swatch-wildcard"></span>Wildcard</span>
+          <span class="legend-item"><span class="token-swatch swatch-step"></span>Step</span>
+          <span class="legend-item"><span class="token-swatch swatch-range"></span>Range</span>
+          <span class="legend-item"><span class="token-swatch swatch-list"></span>List</span>
+          <span class="legend-item"><span class="token-swatch swatch-fixed"></span>Fixed</span>
+        </div>
+      </section>
+
+      <section class="panel schedule-panel" aria-labelledby="schedule-heading">
+        <header class="panel-head">
+          <div>
+            <p class="section-kicker">03 · Preview</p>
+            <h2 id="schedule-heading">Upcoming executions</h2>
+          </div>
+          <div class="schedule-actions">
+            <span class="count-badge" id="run-count">5 runs</span>
+            <button type="button" class="ghost-button" id="refresh-runs">Refresh</button>
+          </div>
+        </header>
+
+        <ol class="run-list" id="next-runs" aria-live="polite"></ol>
+        <p class="schedule-note">Runs are calculated in your browser's local timezone, starting from the next full minute.</p>
+      </section>
+    </main>
+
+    <footer class="cron-footer">
+      <span>DeFi Yield Matrix · Automation utilities</span>
+      <span>Cron syntax: minute hour day-of-month month day-of-week</span>
+    </footer>
+  </div>
+
+  <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+  <script type="module" src="./cron-parser.js"></script>
+</body>
+</html>
