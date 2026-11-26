@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VrMetaverseHub - Cron Expression Builder</title>
+  <link rel="stylesheet" href="./cron-parser.css">
+</head>
+<body>
+  <div class="cron-container" data-cron-lab>
+    <header class="cron-header">
+      <h2>Cron Schedule Expression Builder</h2>
+      <p class="subtitle">Translate 5-part cron syntax to natural human speech and visualize upcoming run cycles.</p>
+    </header>
+
+    <div class="cron-input-group">
+      <label for="cron-input">Cron Expression (min hour dom month dow)</label>
+      <input type="text" id="cron-input" value="0 6 * * 1-5" placeholder="* * * * *">
+      <div id="cron-error" class="error-msg hidden"></div>
+    </div>
+
+    <div class="quick-presets">
+      <span>Presets:</span>
+      <button class="quick-cron-btn" data-cron="* * * * *">Every Minute</button>
+      <button class="quick-cron-btn" data-cron="*/15 * * * *">Every 15m</button>
+      <button class="quick-cron-btn" data-cron="0 * * * *">Hourly</button>
+      <button class="quick-cron-btn" data-cron="0 0 * * *">Midnight Daily</button>
+      <button class="quick-cron-btn" data-cron="0 9 * * 1-5">Weekdays 9 AM</button>
+    </div>
+
+    <section class="cron-card">
+      <h3>Natural Translation</h3>
+      <div id="cron-human" class="human-readable-badge">Loading...</div>
+    </section>
+
+    <section class="cron-card">
+      <h3>Next 5 Upcoming Executions</h3>
+      <ul id="cron-schedule" class="run-list"></ul>
+    </section>
+  </div>
+  <script type="module" src="./cron-parser.js"></script>
+</body>
+</html>
