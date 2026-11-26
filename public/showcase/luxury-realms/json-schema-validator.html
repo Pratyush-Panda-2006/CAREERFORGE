@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luxury Realms - JSON Payload Schema Validator &amp; Lint Inspector</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./json-schema-validator.css">
+</head>
+<body class="schema-body">
+  <main class="schema-shell" data-schema-lab>
+    <header class="schema-header">
+      <a class="brand" href="./index.html">Luxury Realms</a>
+      <span class="lab-tag">REALMS-LAB &middot; CLIENT-SIDE LINTER</span>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">PAYLOAD INTEGRITY / SCHEMA LINT</p>
+      <h1 id="page-title">Inspect every payload before it reaches the concierge.</h1>
+      <p class="lede">
+        Audit nested reservation, aviation, and concierge JSON against strict schemas in real time.
+        The inspector checks required fields, types, ranges, enums, patterns, arrays, and unexpected properties.
+      </p>
+      <ul class="feature-list" aria-label="Inspector capabilities">
+        <li>Nested type checks</li>
+        <li>JSON Pointer paths</li>
+        <li>Payload line callouts</li>
+        <li>Zero network requests</li>
+      </ul>
+    </section>
+
+    <section class="controls" aria-label="Validation controls">
+      <div class="control-group">
+        <label for="template-select">Schema template</label>
+        <select id="template-select">
+          <option value="villa">Villa Booking &middot; Valid</option>
+          <option value="jet">Jet Manifest &middot; Valid</option>
+          <option value="concierge">Concierge Request &middot; Valid</option>
+          <option value="mismatch">Chalet Listing &middot; Mismatch Demo</option>
+        </select>
+      </div>
+      <button id="validate-btn" class="run-btn" type="button">Run validation</button>
+      <span id="status-badge" class="pill pill--pending" role="status" aria-live="polite">READY</span>
+    </section>
+
+    <div class="split-pane">
+      <section class="editor-pane" aria-labelledby="schema-title">
+        <header class="pane-head">
+          <div class="pane-title">
+            <span class="pane-index" aria-hidden="true">01</span>
+            <h2 id="schema-title">Schema definition</h2>
+          </div>
+          <span id="schema-meta" class="pane-meta">0 lines - 0 chars</span>
+        </header>
+        <label class="sr-only" for="schema-input">JSON schema definition</label>
+        <textarea id="schema-input" spellcheck="false" autocomplete="off" aria-describedby="schema-hint"></textarea>
+        <p id="schema-hint" class="pane-hint">Required fields, types, ranges, enums, and nested objects.</p>
+      </section>
+
+      <section class="editor-pane" aria-labelledby="payload-title">
+        <header class="pane-head">
+          <div class="pane-title">
+            <span class="pane-index" aria-hidden="true">02</span>
+            <h2 id="payload-title">JSON payload</h2>
+          </div>
+          <span id="payload-meta" class="pane-meta">0 lines - 0 chars</span>
+        </header>
+        <label class="sr-only" for="payload-input">JSON payload to validate</label>
+        <textarea id="payload-input" spellcheck="false" autocomplete="off" aria-describedby="payload-hint"></textarea>
+        <p id="payload-hint" class="pane-hint">Paste any JSON value. Validation runs as you type.</p>
+      </section>
+    </div>
+
+    <section class="report-card" aria-labelledby="report-title">
+      <header class="report-head">
+        <div>
+          <p class="eyebrow">DIAGNOSTICS</p>
+          <h2 id="report-title">Validation report</h2>
+        </div>
+        <div class="report-counter">
+          <span id="error-count">0</span>
+          <span id="error-label">violations</span>
+        </div>
+      </header>
+      <p id="report-summary" class="report-summary">Load a template or paste JSON to begin.</p>
+      <ol id="error-list" class="error-list" aria-live="polite"></ol>
+      <details class="raw-report-wrap">
+        <summary>Plain-text report</summary>
+        <pre id="raw-report" class="raw-report">No validation has been run yet.</pre>
+      </details>
+    </section>
+
+    <footer class="schema-footer">
+      Client-side only. Payloads stay in this page and are never uploaded, logged, or stored.
+    </footer>
+  </main>
+
+  <script type="module" src="./json-schema-validator.js"></script>
+</body>
+</html>
