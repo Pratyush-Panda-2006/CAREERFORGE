@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeurotechInterface - JSON Schema Validator</title>
+  <link rel="stylesheet" href="./json-schema-validator.css">
+</head>
+<body>
+  <div class="schema-container" data-schema-lab>
+    <header class="schema-header">
+      <h2>JSON Payload Schema Validator</h2>
+      <p class="subtitle">Real-time schema structural conformance and type inspector for NeurotechInterface.</p>
+    </header>
+
+    <div class="panes-grid">
+      <div class="pane">
+        <label for="schema-input">JSON Schema</label>
+        <textarea id="schema-input" rows="12">{
+  "type": "object",
+  "required": ["id", "status"],
+  "properties": {
+    "id": { "type": "integer", "minimum": 1 },
+    "status": { "type": "string", "enum": ["active", "pending", "archived"] }
+  }
+}</textarea>
+      </div>
+
+      <div class="pane">
+        <label for="payload-input">JSON Payload</label>
+        <textarea id="payload-input" rows="12">{
+  "id": 1,
+  "status": "active"
+}</textarea>
+      </div>
+    </div>
+
+    <section class="report-section">
+      <div class="report-header">
+        <h3>Inspection Report</h3>
+        <span id="validation-status" class="status-pill status-pass">PASS</span>
+      </div>
+      <pre id="validation-report" class="report-output"></pre>
+    </section>
+  </div>
+  <script type="module" src="./json-schema-validator.js"></script>
+</body>
+</html>
