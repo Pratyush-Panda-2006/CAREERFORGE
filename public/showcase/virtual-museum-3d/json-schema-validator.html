@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Museum 3D - Interactive JSON Payload Schema Validator</title>
+  <link rel="stylesheet" href="./json-schema-validator.css">
+</head>
+<body>
+  <div class="validator-container" data-schema-lab>
+    <header class="validator-header">
+      <div class="header-badge">MUSEUM-SCHEMA-LINT v2.1</div>
+      <h1>Virtual Museum 3D - JSON Payload Validator</h1>
+      <p class="subtitle">Real-time schema structural conformance, property type inspector, and error diagnostics for 3D digital museum artifacts.</p>
+    </header>
+
+    <!-- Schema template selector and actions bar -->
+    <div class="controls-toolbar">
+      <div class="template-selector-group">
+        <label for="template-select">Schema Template:</label>
+        <select id="template-select" class="template-select">
+          <option value="artifact">3D Artifact Metadata (Valid)</option>
+          <option value="exhibition">Gallery Exhibition Room (Valid)</option>
+          <option value="donor">Benefactor & Donor Record (Valid)</option>
+          <option value="mismatch">Broken Artifact Payload (Mismatch Demo)</option>
+        </select>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="validate-btn" class="primary-btn">▶ Run Validation</button>
+        <span id="validation-status" class="status-pill status-pass">PASS</span>
+      </div>
+    </div>
+
+    <!-- Split-pane editor layout -->
+    <div class="split-pane">
+      <section class="editor-pane">
+        <div class="pane-header">
+          <span class="pane-title">01 / JSON Schema Specification</span>
+          <span id="schema-meta" class="pane-meta">Type definition</span>
+        </div>
+        <textarea id="schema-input" class="code-editor" spellcheck="false" rows="14"></textarea>
+      </section>
+
+      <section class="editor-pane">
+        <div class="pane-header">
+          <span class="pane-title">02 / JSON Payload Input</span>
+          <span id="payload-meta" class="pane-meta">Instance object</span>
+        </div>
+        <textarea id="payload-input" class="code-editor" spellcheck="false" rows="14"></textarea>
+      </section>
+    </div>
+
+    <!-- Validation report section -->
+    <section class="report-section">
+      <div class="report-header">
+        <h3>Inspection Report & Error Callouts</h3>
+        <span id="error-summary-badge" class="error-count-badge">0 Violations</span>
+      </div>
+      <div id="error-callouts-container" class="error-callouts-list"></div>
+      <pre id="validation-report" class="report-output"></pre>
+    </section>
+  </div>
+
+  <script type="module" src="./json-schema-validator.js"></script>
+</body>
+</html>
