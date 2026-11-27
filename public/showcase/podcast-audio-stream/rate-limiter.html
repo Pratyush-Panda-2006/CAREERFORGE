@@ -3,54 +3,133 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Podcast Audio Stream - Token Bucket Rate Limiter</title>
-  <link rel="stylesheet" href="rate-limiter.css">
+  <meta name="description" content="Interactive client-side token bucket rate limiter and concurrency throttler for podcast audio streaming.">
+  <title>Token bucket rate limiter | Podcast Audio Stream</title>
+  <link rel="stylesheet" href="./rate-limiter.css">
+  <script type="module" src="./rate-limiter.js"></script>
 </head>
 <body>
-  <div class="limiter-container" data-rate-limiter-lab>
-    <header class="header">
-      <h1>Podcast Audio Stream Bitrate & API Limiter</h1>
-      <p class="subtitle">Autonomous Token Bucket rate limiter & concurrency throttler for real-time audio chunking and live listener bandwidth</p>
+  <main class="limiter-shell" data-rate-limiter-lab>
+    <header class="topbar">
+      <a class="back-link" href="./index.html">← AUDIO-LAB</a>
+      <span class="topbar-note">Client-side admission control · no network requests</span>
     </header>
 
-    <main class="grid-layout">
-      <!-- Token Bucket Status Card -->
-      <section class="card bucket-card">
-        <h2>Audio Stream Token Reservoir</h2>
-        <div class="bucket-box">
-          <div id="bucket-amount" class="bucket-amount">10.0 / 10 tokens</div>
-          <progress id="bucket-meter" max="10" value="10"></progress>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">STREAM INFRASTRUCTURE / TOKEN BUCKET</p>
+      <h1 id="page-title">Keep the stream inside its budget.</h1>
+      <p class="lede">Simulate listener surges against a token bucket with a fixed refill rate, burst capacity, priority queue, and a concurrency throttler. Every decision is computed locally in this page.</p>
+    </section>
+
+    <div class="workspace">
+      <section class="panel reservoir-panel" aria-labelledby="reservoir-title">
+        <div class="panel-heading">
+          <h2 id="reservoir-title">Token reservoir</h2>
+          <span class="panel-tag">2 tokens / sec</span>
         </div>
 
-        <div class="metrics-row">
-          <div class="metric-pill">
-            <span class="metric-label">Stream Chunks Delivered</span>
-            <span id="metric-accepted" class="metric-value">0</span>
+        <div class="bucket-visual" id="bucket-visual" style="--fill: 100" data-level="high">
+          <div class="bucket-liquid" aria-hidden="true">
+            <span class="wave wave-one"></span>
+            <span class="wave wave-two"></span>
           </div>
-          <div class="metric-pill">
-            <span class="metric-label">Bandwidth Throttled</span>
-            <span id="metric-throttled" class="metric-value">0</span>
+          <div class="bucket-readout">
+            <output id="bucket-amount">10.0</output>
+            <span>of <span id="bucket-capacity">10</span> tokens available</span>
           </div>
         </div>
 
-        <div class="actions-row">
-          <button id="consume-1-btn" class="btn btn-primary">Consume Audio Chunk (1 Token)</button>
-          <button id="flood-btn" class="btn btn-flood">Simulate Listener Surge (5 Tokens)</button>
+        <div class="meter-block">
+          <div class="meter-labels">
+            <label for="bucket-meter">Bucket fill level</label>
+            <output id="bucket-percent" for="bucket-meter">100%</output>
+          </div>
+          <progress id="bucket-meter" max="10" value="10">10 of 10 tokens</progress>
         </div>
+
+        <dl class="telemetry" aria-label="Request telemetry">
+          <div class="telemetry-item">
+            <dt>Started</dt>
+            <dd id="metric-accepted">0</dd>
+          </div>
+          <div class="telemetry-item">
+            <dt>Throttled</dt>
+            <dd id="metric-throttled">0</dd>
+          </div>
+          <div class="telemetry-item">
+            <dt>In flight</dt>
+            <dd id="metric-active">0</dd>
+          </div>
+          <div class="telemetry-item">
+            <dt>Queued</dt>
+            <dd id="metric-queued">0</dd>
+          </div>
+        </dl>
+
+        <div class="control-group" role="group" aria-label="Request flood simulator">
+          <button type="button" class="btn btn-primary" id="consume-1-btn">
+            <span>Direct token request</span><kbd>1 token</kbd>
+          </button>
+          <button type="button" class="btn btn-surge" id="flood-btn">
+            <span>Listener surge</span><kbd>×5</kbd>
+          </button>
+          <button type="button" class="btn btn-flood" id="burst-btn">
+            <span>Burst flood</span><kbd>×20</kbd>
+          </button>
+          <button type="button" class="btn btn-ghost" id="reset-btn">Reset engine</button>
+        </div>
+
+        <form class="request-form" id="enqueue-form">
+          <h3>Queue a request</h3>
+          <div class="form-grid">
+            <label>Priority
+              <select id="request-priority">
+                <option value="0">0 · bulk</option>
+                <option value="3">3 · standard</option>
+                <option value="6" selected>6 · live</option>
+                <option value="9">9 · emergency</option>
+              </select>
+            </label>
+            <label>Token cost
+              <input id="request-cost" type="number" min="1" max="10" step="1" value="1" required>
+            </label>
+            <label>Duration (ms)
+              <input id="request-duration" type="number" min="0" max="60000" step="100" value="900" required>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-submit">Enqueue request</button>
+        </form>
       </section>
 
-      <!-- Architecture Card -->
-      <section class="card info-card">
-        <h2>Algorithm Overview</h2>
-        <p style="font-size: 0.9rem; line-height: 1.5; color: #a78bfa; margin-bottom: 12px;">
-          The Token Bucket algorithm regulates bursty audio stream requests by accumulating tokens at a fixed replenishment rate up to a configured maximum burst capacity.
-        </p>
-        <p style="font-size: 0.85rem; color: #9ca3af;">
-          Burst Capacity: 10 Tokens · Refill Rate: 2.0 Tokens/sec · Strict O(1) admission evaluation with microsecond clock synchronization.
-        </p>
+      <section class="panel queue-panel" aria-labelledby="queue-title">
+        <div class="panel-heading">
+          <h2 id="queue-title">Concurrency throttler</h2>
+          <span class="panel-tag">max 3 in flight</span>
+        </div>
+
+        <div class="active-slots" id="active-slots" aria-label="Active request slots"></div>
+
+        <div class="queue-heading">
+          <h3>Priority queue</h3>
+          <span class="queue-count" id="queue-count">0 waiting</span>
+        </div>
+        <ul class="queue-list" id="queue-list">
+          <li class="queue-empty">Queue is empty.</li>
+        </ul>
       </section>
-    </main>
-  </div>
-  <script type="module" src="rate-limiter.js"></script>
+    </div>
+
+    <section class="panel log-panel" aria-labelledby="log-title">
+      <div class="panel-heading">
+        <h2 id="log-title">Rate-limited event log</h2>
+        <span class="panel-tag">newest first</span>
+      </div>
+      <ol class="event-log" id="event-log" aria-live="polite" aria-relevant="additions"></ol>
+    </section>
+
+    <footer class="footnote">
+      <p>Token bucket: capacity 10 · refill 2/sec · queue limit 20 · concurrency 3. Tokens refill continuously; queued jobs start only when a token is available and a concurrency slot is free.</p>
+    </footer>
+  </main>
 </body>
 </html>
