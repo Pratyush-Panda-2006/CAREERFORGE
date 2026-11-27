@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nonprofit Impact — Trie Typeahead &amp; Spell Distance Engine</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8C%B1%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./trie-search.css" />
+</head>
+<body class="nonprofit-trie-theme">
+  <a class="back-link" href="./index.html">← TerraInitia</a>
+
+  <main class="trie-shell">
+    <header class="trie-hero">
+      <p class="eyebrow">🌱 Nonprofit Impact · Core Engine</p>
+      <h1>Prefix Tree Typeahead &amp; Spell Distance</h1>
+      <p class="lede">
+        An in-memory trie indexes every climate programme. Prefix lookups walk shared edges,
+        while a trie-pruned Levenshtein pass surfaces spelling neighbours without scanning the lexicon.
+      </p>
+      <ul class="engine-pills" aria-label="Engine properties">
+        <li>O(prefix) completion</li>
+        <li>Code-point safe</li>
+        <li>Bounded 2,000 terms</li>
+      </ul>
+    </header>
+
+    <section class="panel search-panel" aria-labelledby="search-heading">
+      <div class="panel-head">
+        <div>
+          <h2 id="search-heading">Instant typeahead</h2>
+          <p class="panel-sub">Type a fragment to walk the trie, or misspell it to test edit distance.</p>
+        </div>
+        <label class="distance-control" for="edit-distance">
+          Fuzzy distance
+          <select id="edit-distance">
+            <option value="0">0 · exact</option>
+            <option value="1">1 edit</option>
+            <option value="2" selected>2 edits</option>
+            <option value="3">3 edits</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="search-field">
+        <span class="search-icon" aria-hidden="true">🔎</span>
+        <input
+          id="term-search"
+          type="text"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="suggestions"
+          aria-autocomplete="list"
+          aria-describedby="search-status"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Try “water”, “forest”, “solar”…"
+        />
+        <span class="key-hint" aria-hidden="true">↑ ↓ ↵</span>
+      </div>
+
+      <ul id="suggestions" class="suggestions" role="listbox" aria-label="Prefix completions" hidden></ul>
+      <p id="search-status" class="search-status" aria-live="polite">Booting the trie…</p>
+
+      <div class="fuzzy-block">
+        <h3>Did you mean?</h3>
+        <div id="fuzzy-list" class="fuzzy-list"></div>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Search telemetry">
+      <article class="metric">
+        <span class="metric-label">Indexed terms</span>
+        <strong id="metric-terms">0</strong>
+        <span class="metric-foot">lexicon size</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label">Trie nodes</span>
+        <strong id="metric-nodes">0</strong>
+        <span class="metric-foot">shared edges</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label">Prefix hits</span>
+        <strong id="metric-prefix">0</strong>
+        <span class="metric-foot">completions served</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label">Fuzzy hits</span>
+        <strong id="metric-fuzzy">0</strong>
+        <span class="metric-foot">suggestions served</span>
+      </article>
+      <article class="metric metric-wide">
+        <span class="metric-label">Last lookup</span>
+        <strong id="metric-time">0.00 ms</strong>
+        <span class="metric-foot">prefix + fuzzy pass</span>
+      </article>
+    </section>
+
+    <div class="workspace">
+      <section class="panel lexicon-panel" aria-labelledby="lexicon-heading">
+        <div class="panel-head">
+          <div>
+            <h2 id="lexicon-heading">Lexicon</h2>
+            <p class="panel-sub">Insert terms without rebuilding the index.</p>
+          </div>
+          <button type="button" id="reset-lexicon" class="ghost-button">Restore starters</button>
+        </div>
+
+        <form id="add-term-form" class="add-form">
+          <label class="sr-only" for="new-term">New programme term</label>
+          <input id="new-term" type="text" maxlength="64" placeholder="e.g. Water Wells" autocomplete="off" />
+          <button type="submit">Index term</button>
+        </form>
+        <p id="lexicon-status" class="lexicon-status" aria-live="polite"></p>
+
+        <ul id="lexicon-list" class="lexicon-list" aria-label="Indexed terms"></ul>
+      </section>
+
+      <section class="panel tree-panel" aria-labelledby="tree-heading">
+        <div class="panel-head">
+          <div>
+            <h2 id="tree-heading">Prefix subtree</h2>
+            <p id="tree-caption" class="panel-sub">Live projection · whole lexicon</p>
+          </div>
+        </div>
+        <div id="trie-tree" class="trie-tree"></div>
+      </section>
+    </div>
+
+    <section class="panel log-panel" aria-labelledby="log-heading">
+      <div class="panel-head">
+        <div>
+          <h2 id="log-heading">Engine event log</h2>
+          <p class="panel-sub">Newest first · capped at 60 entries.</p>
+        </div>
+        <button type="button" id="clear-log" class="ghost-button">Clear log</button>
+      </div>
+      <ol id="event-log" class="event-log" aria-live="polite"></ol>
+    </section>
+
+    <footer class="trie-footer">
+      <p>Client-side only · no network calls · <a href="./index.html">Back to the impact dashboard</a></p>
+    </footer>
+  </main>
+
+  <script type="module" src="./trie-search.js"></script>
+</body>
+</html>
