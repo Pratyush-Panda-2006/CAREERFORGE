@@ -1,0 +1,299 @@
+/**
+ * SaaS Launchpad - Interactive Feature Spotlight & Guided Tour Styling
+ */
+
+:root {
+  --saas-bg: #0b0f19;
+  --saas-card: #111827;
+  --saas-card-light: #1f2937;
+  --saas-border: rgba(255, 255, 255, 0.1);
+  --saas-primary: #3b82f6;
+  --saas-primary-hover: #2563eb;
+  --saas-primary-glow: rgba(59, 130, 246, 0.5);
+  --saas-cyan: #06b6d4;
+  --saas-emerald: #10b981;
+  --saas-text: #f3f4f6;
+  --saas-muted: #9ca3af;
+  --saas-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --saas-mono: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--saas-bg);
+  background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0b0f19 75%);
+  color: var(--saas-text);
+  font-family: var(--saas-font);
+  position: relative;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.tour-page-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tour-header {
+  border-bottom: 2px solid var(--saas-border);
+  padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-badge {
+  align-self: flex-start;
+  padding: 4px 10px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid var(--saas-primary);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--saas-mono);
+  color: var(--saas-cyan);
+  letter-spacing: 0.5px;
+}
+
+.tour-header h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.tour-header p {
+  margin: 0;
+  color: var(--saas-muted);
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  margin-top: 10px;
+}
+
+.showcase-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.feature-card {
+  background: var(--saas-card);
+  border: 1px solid var(--saas-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Pulse target focus ring */
+.feature-card.spotlight-active {
+  z-index: 1001;
+  border-color: var(--saas-primary);
+  box-shadow: 0 0 24px var(--saas-primary-glow), inset 0 0 12px rgba(59, 130, 246, 0.2);
+  animation: pulse-ring 2s infinite ease-in-out;
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--saas-primary-glow);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(59, 130, 246, 0.9);
+  }
+}
+
+.card-icon {
+  font-size: 2rem;
+}
+
+.feature-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--saas-muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.status-tag {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-family: var(--saas-mono);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--saas-emerald);
+  border: 1px solid var(--saas-emerald);
+}
+
+/* Dark spotlight scrim overlay */
+.tour-scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(6, 9, 16, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+/* Floating tooltip guidance balloon */
+.tour-tooltip {
+  position: absolute;
+  width: 320px;
+  background: #111827;
+  border: 1.5px solid var(--saas-primary);
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 1002;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 24px rgba(59, 130, 246, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.25s ease-out;
+}
+
+/* Floating tooltip arrow pointer styling */
+.tooltip-arrow {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #111827;
+  border: 1.5px solid var(--saas-primary);
+  transform: rotate(45deg);
+}
+
+.tour-tooltip.arrow-top .tooltip-arrow {
+  top: -7px;
+  left: 24px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.tour-tooltip.arrow-bottom .tooltip-arrow {
+  bottom: -7px;
+  left: 24px;
+  border-top: none;
+  border-left: none;
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.step-indicator {
+  font-size: 0.75rem;
+  font-family: var(--saas-mono);
+  color: var(--saas-cyan);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  color: var(--saas-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.text-btn:hover {
+  color: var(--saas-text);
+}
+
+.tooltip-title {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+
+.tooltip-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--saas-muted);
+  line-height: 1.45;
+}
+
+.tooltip-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+/* Step navigation dots */
+.step-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--saas-border);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.step-dot.active {
+  background: var(--saas-primary);
+  box-shadow: 0 0 8px var(--saas-primary);
+  width: 16px;
+  border-radius: 4px;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+.secondary-btn {
+  background: var(--saas-card-light);
+  color: var(--saas-text);
+  border: 1px solid var(--saas-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.secondary-btn:hover {
+  background: #374151;
+}
