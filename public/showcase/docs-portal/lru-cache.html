@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DocsPortal - LRU In-Memory Cache</title>
   <link rel="stylesheet" href="lru-cache.css">
 </head>
@@ -9,7 +10,41 @@
   <div class="lru-container">
     <h1>DocsPortal LRU In-Memory Cache</h1>
     <p>O(1) Hash-Map and Doubly-Linked-List backed cache with live eviction tracking</p>
+
+    <!-- Controls Panel -->
+    <div class="controls-panel">
+      <div class="capacity-control">
+        <label for="capacitySlider">Cache Capacity:</label>
+        <input type="range" id="capacitySlider" min="1" max="20" value="5">
+        <span id="capacityValue" class="capacity-value">5</span>
+      </div>
+
+      <div class="form-group">
+        <label for="keyInput">Key:</label>
+        <input type="text" id="keyInput" placeholder="Enter key">
+      </div>
+      <div class="form-group">
+        <label for="valueInput">Value:</label>
+        <input type="text" id="valueInput" placeholder="Enter value">
+      </div>
+      <button id="addBtn" class="action-btn">Add to Cache</button>
+    </div>
+
+    <!-- Cache State Display -->
+    <div class="cache-display">
+      <h2>Cache Order (Head → Tail)</h2>
+      <div id="orderedList" class="node-chain"></div>
+    </div>
+
+    <!-- Eviction Log -->
+    <div class="eviction-log-panel">
+      <h2>Eviction Log</h2>
+      <div id="evictionList" class="eviction-list">
+        <p class="empty-state">No evictions yet</p>
+      </div>
+    </div>
   </div>
+
   <script type="module" src="lru-cache.js"></script>
 </body>
 </html>
