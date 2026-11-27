@@ -2,14 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DeveloperPortfolio - Resilient WebSocket</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeveloperPortfolio - Resilient WebSocket Stream</title>
   <link rel="stylesheet" href="websocket-reconnect.css">
 </head>
 <body>
-  <div class="ws-container">
-    <h1>DeveloperPortfolio Resilient WebSocket Stream</h1>
-    <p>Heartbeat management & exponential backoff recovery</p>
-  </div>
+  <main class="ws-container">
+    <header class="ws-header">
+      <div>
+        <h1>DeveloperPortfolio Resilient WebSocket Stream</h1>
+        <p>Heartbeat management &amp; exponential backoff recovery</p>
+      </div>
+      <div class="state-pill disconnected" id="statePill" aria-live="polite">DISCONNECTED</div>
+    </header>
+
+    <!-- Connection state summary -->
+    <section class="connection-panel">
+      <div class="state-details" id="stateDetails">
+        <span class="reconnect-count">Attempts: <span id="reconnectCount">0</span></span>
+        <span class="queue-status">Queued: <span id="queueCount">0</span></span>
+        <span class="heartbeat-status">Heartbeats: <span id="heartbeatCount">0</span></span>
+      </div>
+    </section>
+
+    <!-- Controls -->
+    <section class="controls">
+      <button class="btn btn-connect" id="connectBtn">Connect</button>
+      <button class="btn btn-disconnect" id="disconnectBtn" disabled>Disconnect</button>
+      <button class="btn btn-dropout" id="dropoutBtn" disabled title="Repeat clicks while reconnecting to exhaust attempts">Simulate Drop</button>
+    </section>
+
+    <!-- Backoff countdown -->
+    <div class="backoff-timer" id="backoffTimer" style="display:none;">
+      <span class="backoff-label">Reconnecting in</span>
+      <span class="backoff-value"><span id="backoffCount">--</span>ms</span>
+      <span class="backoff-hint">exponential backoff + jitter</span>
+    </div>
+
+    <!-- Composer -->
+    <section class="composer-panel">
+      <h3>Send a message</h3>
+      <div class="composer">
+        <input
+          type="text"
+          id="messageInput"
+          class="message-input"
+          placeholder="Type a message (queued automatically while offline)"
+          autocomplete="off"
+        >
+        <button class="btn btn-send" id="sendBtn">Send</button>
+      </div>
+    </section>
+
+    <!-- Message queue -->
+    <section class="queue-panel">
+      <h3>Message Queue <span class="queue-badge" id="queueBadge">0</span></h3>
+      <div class="queue-log" id="queueLog">
+        <div class="empty-hint">No queued messages.</div>
+      </div>
+    </section>
+
+    <!-- Delivered messages -->
+    <section class="message-log-panel">
+      <h3>Delivered Messages</h3>
+      <div class="message-log" id="messageLog">
+        <div class="empty-hint">No messages delivered yet.</div>
+      </div>
+    </section>
+
+    <!-- Connection timeline -->
+    <section class="timeline-panel">
+      <h3>Connection Timeline</h3>
+      <div class="timeline-log" id="timelineLog">
+        <div class="empty-hint">Waiting for connection events...</div>
+      </div>
+    </section>
+  </main>
+
   <script type="module" src="websocket-reconnect.js"></script>
 </body>
 </html>
