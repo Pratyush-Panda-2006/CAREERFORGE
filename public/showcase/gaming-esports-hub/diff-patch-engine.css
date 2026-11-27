@@ -6,13 +6,164 @@
   --text-muted: #9ca3af;
   --accent-green: #10b981;
   --accent-red: #ef4444;
+  --accent-orange: #f59e0b;
+  --gutter-bg: #0e1117;
+  --line-number: #475569;
 }
-body { margin: 0; padding: 2rem; background-color: var(--bg-color); color: var(--text-main); font-family: system-ui, sans-serif; }
-.diff-container { max-width: 1000px; margin: 0 auto; }
+
+/* Split-view gutter layout */
+.diff-container {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+/* Vertical gutter on the left side */
+.gutter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3rem;
+  background: var(--gutter-bg);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding-top: 0.5rem;
+  font-size: 0.7rem;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Horizontal gutter between side-by-side panels */
+.horizontal-gutter {
+  height: 3rem;
+  background: var(--gutter-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Diff card column */
+.diff-col {
+  flex: 1;
+}
+
+/* Card styling */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Header */
 .header h1 { margin: 0 0 0.5rem 0; font-size: 1.8rem; color: #818cf8; }
 .subtitle { margin: 0 0 2rem 0; color: var(--text-muted); font-size: 0.95rem; }
-.grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; }
-.card h2 { margin: 0 0 1rem 0; font-size: 1.1rem; color: #c7d2fe; }
-textarea { width: 100%; box-sizing: border-box; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); padding: 0.75rem; font-family: monospace; font-size: 0.85rem; }
-.unified-box { background: rgba(0, 0, 0, 0.5); padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; overflow-x: auto; color: #a5b4fc; }
+
+/* Textarea styling */
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-main);
+  padding: 0.75rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Preview boxes */
+.diff-preview-box {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  min-height: 120px;
+  position: relative;
+}
+
+.unified-box {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  color: #a5b4fc;
+}
+
+/* Chunk boundary highlights */
+.chunk-boundary {
+  position: relative;
+  padding-left: 0.75rem;
+}
+
+.chunk-boundary::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.chunk-boundary.insertion::before {
+  background: var(--accent-green);
+  box-shadow: 0 0 8px var(--accent-green);
+}
+
+.chunk-boundary.deletion::before {
+  background: var(--accent-red);
+  box-shadow: 0 0 8px var(--accent-red);
+}
+
+/* Addition highlight strips (inline) */
+.add-strip, .del-strip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.add-strip {
+  background: var(--accent-green);
+  right: -12px;
+  box-shadow: -2px 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.del-strip {
+  background: var(--accent-red);
+  right: -12px;
+  box-shadow: -2px 0 6px rgba(239, 68, 68, 0.4);
+}
+
+/* Line number classes */
+.line-number {
+  color: var(--line-number);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Unified diff line prefixes */
+.unified-line.deleted { color: var(--accent-red); }
+.unified-line.inserted { color: var(--accent-green); }
+.unified-line.equal { color: var(--text-muted); }
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--gutter-bg); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }

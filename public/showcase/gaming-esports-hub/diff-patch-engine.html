@@ -12,25 +12,70 @@
       <h1>GamingEsportsHub Myers Diff & Patch Engine</h1>
       <p class="subtitle">O(ND) difference computation, chunk boundary visualizer, and unified patch application</p>
     </header>
+
+    <!-- Left split-view gutter (line numbers) -->
+    <div class="gutter" aria-label="Original line numbers">
+      <div class="horizontal-gutter"></div>
+      <div class="line-number" id="original-gutter">1</div>
+      <div class="horizontal-gutter"></div>
+      <div class="line-number" id="original-gutter">2</div>
+      <div class="horizontal-gutter"></div>
+      <div class="line-number" id="original-gutter">3</div>
+    </div>
+
     <main class="grid-layout">
-      <section class="card input-card">
+      <section class="card input-card diff-col">
         <h2>Original Configuration (v1.0)</h2>
         <textarea id="original-text" rows="8">stream: standard\nbitrate: 128k\nchannels: stereo</textarea>
+        <div class="gutter" style="order: 1; align-self: flex-end;">
+          <div class="horizontal-gutter"></div>
+          <div class="line-number">1</div>
+          <div class="horizontal-gutter"></div>
+          <div class="line-number">2</div>
+          <div class="horizontal-gutter"></div>
+          <div class="line-number">3</div>
+        </div>
       </section>
-      <section class="card input-card">
+
+      <section class="card input-card diff-col">
         <h2>Modified Configuration (v1.1)</h2>
         <textarea id="modified-text" rows="8">stream: master\nbitrate: 320k\nchannels: spatial\ncodec: opus</textarea>
+        <div class="gutter" style="order: 1; align-self: flex-end;">
+          <div class="horizontal-gutter"></div>
+          <div class="line-number">1</div>
+          <div class="horizontal-gutter"></div>
+          <div class="line-number">2</div>
+          <div class="horizontal-gutter"></div>
+          <div class="line-number">3</div>
+        </div>
       </section>
-      <section class="card diff-preview-card">
-        <h2>Chunk Boundary Visual Diff</h2>
-        <div id="diff-preview" class="diff-preview-box"></div>
-      </section>
-      <section class="card unified-card">
-        <h2>Unified Diff Format</h2>
-        <pre id="unified-view" class="unified-box"></pre>
-      </section>
+
+      <!-- Right split-view gutter (line numbers for modified) -->
+      <div class="gutter" aria-label="Modified line numbers">
+        <div class="horizontal-gutter"></div>
+        <div class="line-number" id="modified-gutter">1</div>
+        <div class="horizontal-gutter"></div>
+        <div class="line-number" id="modified-gutter">2</div>
+        <div class="horizontal-gutter"></div>
+        <div class="line-number" id="modified-gutter">3</div>
+      </div>
     </main>
+
+    <div class="chunk-boundary-visualizer" id="chunk-visualizer" style="margin-top: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-green); border-radius: 6px; color: var(--accent-green); font-size: 0.85rem; display: none;">
+      <strong>Chunk boundaries visualized above:</strong> Green strips = additions, Red strips = deletions
+    </div>
+
+    <section class="card diff-preview-card">
+      <h2>Chunk Boundary Visual Diff</h2>
+      <div id="diff-preview" class="diff-preview-box"></div>
+    </section>
+
+    <section class="card unified-card">
+      <h2>Unified Diff Format</h2>
+      <pre id="unified-view" class="unified-box"></pre>
+    </section>
   </div>
+
   <script type="module" src="diff-patch-engine.js"></script>
 </body>
 </html>

@@ -8,6 +8,8 @@ export class GamingEsportsHubDiffPatchEngine {
     const n = a.length;
     const m = b.length;
     const max = n + m;
+
+    // Myers O(ND) diff algorithm
     const v = { 1: 0 };
     const trace = [];
 
@@ -80,6 +82,29 @@ export class GamingEsportsHubDiffPatchEngine {
     return diff;
   }
 
+  /**
+   * Generate chunk boundary visual HTML for the diff preview.
+   * Each diff item gets a containing div with a left-side color strip
+   * indicating whether it's an insertion (green) or deletion (red).
+   */
+  generateChunkVisual(diff) {
+    if (!Array.isArray(diff)) throw new TypeError('Diff must be an array');
+    if (diff.length === 0) return '';
+
+    let html = '';
+    for (const item of diff) {
+      const className = item.type === 'insert'
+        ? 'chunk-boundary insertion'
+        : item.type === 'delete'
+          ? 'chunk-boundary deletion'
+          : 'chunk-boundary equal';
+      html += '<div class="' + className + '" title="' + item.type + ': ' + item.text + '">';
+      html += this._escapeHtml(item.text);
+      html += '</div>\n';
+    }
+    return html;
+  }
+
   toUnifiedFormat(diff, fileA = 'a/config.yaml', fileB = 'b/config.yaml') {
     if (!Array.isArray(diff)) throw new TypeError('Diff must be an array');
     if (diff.length === 0) return '';
@@ -89,16 +114,22 @@ export class GamingEsportsHubDiffPatchEngine {
     const lines = [
       `--- ${fileA}`,
       `+++ ${fileB}`,
-      `@@ -1,${diff.filter(d => d.type !== 'insert').length} +1,${diff.filter(d => d.type !== 'delete').length} @@`
+      this._computeHunkHeader(diff, fileA, fileB)
     ];
 
     for (const item of diff) {
-      if (item.type === 'equal') lines.push(` ${item.text}`);
-      else if (item.type === 'delete') lines.push(`-${item.text}`);
-      else if (item.type === 'insert') lines.push(`+${item.text}`);
+      if (item.type === 'equal') lines.push(' ' + item.text);
+      else if (item.type === 'delete') lines.push('-' + item.text);
+      else if (item.type === 'insert') lines.push('+' + item.text);
     }
 
     return lines.join('\n');
+  }
+
+  computeDiffWithVisual(original, modified) {
+    const diff = this.computeDiff(original, modified);
+    const visual = this.generateChunkVisual(diff);
+    return { diff, visual };
   }
 
   applyPatch(source, patch) {
@@ -134,5 +165,49 @@ export class GamingEsportsHubDiffPatchEngine {
     }
 
     throw new TypeError('Patch must be unified string or diff array');
+  }
+
+  _computeHunkHeader(diff, fileA, fileB) {
+    const sourceLines = diff.filter(d => d.type !== 'insert').length;
+    const targetLines = diff.filter(d => d.type !== 'delete').length;
+
+    let startA = 1, startB = 1;
+    let currentA = 0, currentB = 0;
+
+    for (const item of diff) {
+      if (item.type === 'equal') {
+        currentA++;
+        currentB++;
+      } else if (item.type === 'delete') {
+        currentA++;
+      } else if (item.type === 'insert') {
+        currentB++;
+      }
+      if (startA === 1 && currentA > 0 && (item.type === 'delete' || item.type === 'insert')) {
+        startA = Math.max(1, currentA - (item.type === 'delete' ? 1 : 0));
+        startB = Math.max(1, currentB - (item.type === 'insert' ? 1 : 0));
+      }
+    }
+
+    if (startA === 1 && diff.every(d => d.type === 'equal')) {
+      return '';
+    }
+
+    let endA = startA + sourceLines - 1;
+    let endB = startB + targetLines - 1;
+
+    return '@@ -' + startA + ',' + sourceLines + ' +' + startB + ',' + targetLines + ' @@';
+  }
+
+  _escapeHtml(text) {
+    if (typeof text !== 'string') return String(text);
+    return (
+      text
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"')
+        .replace(/'/g, '&#039;')
+    );
   }
 }
