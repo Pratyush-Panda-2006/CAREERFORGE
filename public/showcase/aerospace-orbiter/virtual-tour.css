@@ -1,0 +1,301 @@
+/**
+ * Aerospace Orbiter - Interactive Feature Spotlight & Guided Tour Styling
+ */
+
+:root {
+  --aero-bg: #090a0f;
+  --aero-card: rgba(18, 22, 34, 0.95);
+  --aero-card-light: rgba(30, 38, 58, 0.9);
+  --aero-border: rgba(255, 255, 255, 0.1);
+  --aero-accent: #38bdf8;
+  --aero-accent-glow: rgba(56, 189, 248, 0.5);
+  --aero-cyan: #00f0ff;
+  --aero-green: #10b981;
+  --aero-text: #f8fafc;
+  --aero-muted: #94a3b8;
+  --aero-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --aero-mono: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--aero-bg);
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.15), transparent),
+    radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.03), transparent);
+  color: var(--aero-text);
+  font-family: var(--aero-font);
+  position: relative;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.tour-page-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tour-header {
+  border-bottom: 2px solid var(--aero-border);
+  padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-badge {
+  align-self: flex-start;
+  padding: 4px 10px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid var(--aero-accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--aero-mono);
+  color: var(--aero-cyan);
+  letter-spacing: 0.5px;
+}
+
+.tour-header h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.tour-header p {
+  margin: 0;
+  color: var(--aero-muted);
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  margin-top: 10px;
+}
+
+.showcase-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.feature-card {
+  background: var(--aero-card);
+  border: 1px solid var(--aero-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+/* Pulse target focus ring */
+.feature-card.spotlight-active {
+  z-index: 1001;
+  border-color: var(--aero-accent);
+  box-shadow: 0 0 24px var(--aero-accent-glow), inset 0 0 12px rgba(56, 189, 248, 0.25);
+  animation: pulse-ring 2s infinite ease-in-out;
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--aero-accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(56, 189, 248, 0.9);
+  }
+}
+
+.card-icon {
+  font-size: 2rem;
+}
+
+.feature-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--aero-muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.status-tag {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-family: var(--aero-mono);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--aero-green);
+  border: 1px solid var(--aero-green);
+}
+
+/* Dark spotlight scrim overlay */
+.tour-scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 7, 12, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+/* Floating tooltip guidance balloon */
+.tour-tooltip {
+  position: absolute;
+  width: 320px;
+  background: #0f1422;
+  border: 1.5px solid var(--aero-accent);
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 1002;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 24px rgba(56, 189, 248, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.25s ease-out;
+}
+
+/* Floating tooltip arrow pointer styling */
+.tooltip-arrow {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #0f1422;
+  border: 1.5px solid var(--aero-accent);
+  transform: rotate(45deg);
+}
+
+.tour-tooltip.arrow-top .tooltip-arrow {
+  top: -7px;
+  left: 24px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.tour-tooltip.arrow-bottom .tooltip-arrow {
+  bottom: -7px;
+  left: 24px;
+  border-top: none;
+  border-left: none;
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.step-indicator {
+  font-size: 0.75rem;
+  font-family: var(--aero-mono);
+  color: var(--aero-cyan);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  color: var(--aero-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.text-btn:hover {
+  color: var(--aero-text);
+}
+
+.tooltip-title {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+
+.tooltip-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--aero-muted);
+  line-height: 1.45;
+}
+
+.tooltip-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+/* Step navigation dots */
+.step-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--aero-border);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.step-dot.active {
+  background: var(--aero-accent);
+  box-shadow: 0 0 8px var(--aero-accent);
+  width: 16px;
+  border-radius: 4px;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+.secondary-btn {
+  background: var(--aero-card-light);
+  color: var(--aero-text);
+  border: 1px solid var(--aero-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.secondary-btn:hover {
+  background: #28334d;
+}

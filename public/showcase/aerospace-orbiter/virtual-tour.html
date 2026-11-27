@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aerospace Orbiter - Feature Spotlight & Interactive Guided Tour</title>
+  <link rel="stylesheet" href="./virtual-tour.css">
+</head>
+<body>
+  <div class="tour-page-container">
+    <header class="tour-header">
+      <div class="header-badge">ORBITER-ONBOARDING v2.4</div>
+      <h1>Aerospace Orbiter - Flight Systems Spotlight & Tour</h1>
+      <p>Interactive step-by-step avionics spotlight controller, viewport anchor calculator, and telemetry guidance balloon</p>
+      <div class="header-actions">
+        <button id="start-tour-btn" class="primary-btn">▶ Launch Interactive Tour</button>
+      </div>
+    </header>
+
+    <!-- Simulated UI sections to spotlight -->
+    <main class="showcase-dashboard">
+      <section id="orbital-telemetry" class="feature-card">
+        <div class="card-icon">🛰️</div>
+        <h3>Orbital State Vector Telemetry</h3>
+        <p>Real-time Keplerian orbital elements: apoapsis, periapsis, orbital inclination, and true anomaly tracking.</p>
+        <span class="status-tag active">STABLE ORBIT</span>
+      </section>
+
+      <section id="propulsion-rcs" class="feature-card">
+        <div class="card-icon">🚀</div>
+        <h3>Reaction Control & Propulsion Array</h3>
+        <p>Continuous delta-v propellant accounting, thruster manifold pressure valves, and specific impulse telemetry.</p>
+        <span class="status-tag active">PRESSURIZED</span>
+      </section>
+
+      <section id="trajectory-planner" class="feature-card">
+        <div class="card-icon">🌌</div>
+        <h3>Orbital Maneuver & Transfer Planner</h3>
+        <p>Coplanar Hohmann transfer calculations, bi-elliptic transfer burns, and orbital rendezvous intercept trajectories.</p>
+        <span class="status-tag active">CALCULATED</span>
+      </section>
+
+      <section id="thermal-radiator" class="feature-card">
+        <div class="card-icon">🌡️</div>
+        <h3>Cryogenic Radiator & Thermal Bus</h3>
+        <p>Loop heat pipe circulation, deployed radiator orientation tracking, and equilibrium skin temperature balance.</p>
+        <span class="status-tag active">NOMINAL 295K</span>
+      </section>
+    </main>
+
+    <!-- Spotlight scrim overlay -->
+    <div id="tour-scrim" class="tour-scrim" style="display: none;"></div>
+
+    <!-- Floating tooltip guidance balloon -->
+    <div id="tour-tooltip" class="tour-tooltip" style="display: none;">
+      <div class="tooltip-arrow"></div>
+      <div class="tooltip-header">
+        <span id="step-indicator" class="step-indicator">Step 1 of 4</span>
+        <button id="skip-tour-btn" class="text-btn">✕ Abort Tour</button>
+      </div>
+      <h4 id="tooltip-title" class="tooltip-title">System Spotlight</h4>
+      <p id="tooltip-desc" class="tooltip-desc">Description of the highlighted avionics subsystem.</p>
+      <div class="tooltip-footer">
+        <div id="step-dots" class="step-dots"></div>
+        <div class="nav-buttons">
+          <button id="prev-step-btn" class="secondary-btn">Back</button>
+          <button id="next-step-btn" class="primary-btn">Next ➔</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./virtual-tour.js"></script>
+</body>
+</html>
