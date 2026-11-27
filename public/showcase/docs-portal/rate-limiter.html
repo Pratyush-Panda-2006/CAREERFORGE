@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DocsPortal - Token Bucket Rate Limiter</title>
   <link rel="stylesheet" href="rate-limiter.css">
 </head>
@@ -9,7 +10,139 @@
   <div class="limiter-container">
     <h1>DocsPortal Rate Limiter</h1>
     <p>Token Bucket concurrency & burst throttling engine</p>
+
+    <!-- Controls -->
+    <div class="limiter-controls">
+      <div class="control-group">
+        <label for="capacityInput" class="control-label">
+          Bucket Capacity (<em>C</em>)
+          <span class="control-val" id="capacityValDisplay">10 tokens</span>
+        </label>
+        <input type="number" id="capacityInput" min="1" max="100" value="10" step="1">
+      </div>
+
+      <div class="control-group">
+        <label for="refillRateInput" class="control-label">
+          Refill Rate (<em>r</em> tokens/sec)
+          <span class="control-val" id="refillRateDisplay">2 tokens/sec</span>
+        </label>
+        <input type="number" id="refillRateInput" min="0.1" max="100" step="0.1" value="2">
+      </div>
+
+      <div class="control-group">
+        <label for="maxConcurrentInput" class="control-label">
+          Max Concurrent (<em>n</em>)
+          <span class="control-val" id="maxConcurrentValDisplay">3</span>
+        </label>
+        <input type="number" id="maxConcurrentInput" min="1" max="20" value="3" step="1">
+      </div>
+
+      <div class="control-group">
+        <label for="maxQueueInput" class="control-label">
+          Max Queue (<em>q</em>)
+          <span class="control-val" id="maxQueueValDisplay">100</span>
+        </label>
+        <input type="number" id="maxQueueInput" min="1" max="500" value="100" step="1">
+      </div>
+    </div>
+
+    <!-- Bucket Visual -->
+    <div class="limiter-visual">
+      <div class="bucket-wrapper">
+        <svg class="bucket-svg" viewBox="0 0 100 200" aria-labelledby="bucketTitle bucketDesc">
+          <title id="bucketTitle">Token Bucket Visual</title>
+          <desc id="bucketDesc">Liquid bucket showing current fill level</desc>
+
+          <!-- Bucket outline -->
+          <path class="bucket-outline" d="M 10 10
+            C 10 40 90 40 90 10
+            L 90 170
+            C 90 160 10 160 10 170
+            Z" />
+
+          <!-- Liquid level -->
+          <path class="bucket-liquid" id="bucketLiquid" d="M 10 10
+            C 10 40 90 40 90 10
+            L 90 170
+            C 90 160 10 160 10 170
+            Z" />
+
+          <!-- Faucet -->
+          <g class="faucet">
+            <line x1="50" y1="170" x2="50" y2="180" />
+            <circle cx="50" cy="180" r="5" />
+          </g>
+
+          <!-- Capacity marker -->
+          <g class="capacity-markers">
+            <line x1="10" y1="10" x2="90" y2="10" stroke="rgba(255,255,255,0.2)" />
+            <line x1="10" y1="170" x2="90" y2="170" stroke="rgba(255,255,255,0.2)" />
+            <line x1="10" y1="70" x2="90" y2="70" stroke="rgba(255,255,255,0.2)" />
+            <text x="8" y="63" class="marker-label" fill="rgba(255,255,255,0.7)">0</text>
+            <text x="8" y="133" class="marker-label" fill="rgba(255,255,255,0.7)">50%</text>
+            <text x="8" y="23" class="marker-label" fill="rgba(255,255,255,0.7)">100%</text>
+          </g>
+        </svg>
+
+        <div class="bucket-fill-stats">
+          <span class="current-tokens" id="currentTokensDisplay">10</span>
+          <span class="tokens-denom">/ <span id="capacityDisplay">10</span> tokens</span>
+          <div class="bucket-status-tag" id="bucketStatusTag">HEALTHY</div>
+        </div>
+      </div>
+
+      <!-- Rate timeline -->
+      <div class="rate-timeline">
+        <span class="timeline-label">Rate</span>
+        <div class="timeline-bar">
+          <div class="timeline-fill" id="timelineFill" style="width: 0%"></div>
+        </div>
+        <span class="timeline-value" id="timelineValue">0 req/s</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="limiter-controls">
+      <div class="request-triggers">
+        <span class="control-label">Send Requests</span>
+        <div class="trigger-buttons">
+          <button type="button" class="btn-accept" id="btnSingle" data-tokens="1" aria-label="Send 1 request">
+            <span class="btn-icon">⚡</span> Single (1 tok)
+          </button>
+          <button type="button" class="btn-accept" id="btnBatch" data-tokens="3" aria-label="Send 3 requests">
+            <span class="btn-icon">📦</span> Batch (3 tok)
+          </button>
+          <button type="button" class="btn-throttle" id="btnBurst" data-tokens="8" aria-label="Send burst of 8 requests">
+            <span class="btn-icon">💥</span> Burst (8 tok)
+          </button>
+        </div>
+      </div>
+
+      <div class="traffic-scenarios">
+        <span class="control-label">Traffic Scenarios</span>
+        <div class="scenario-buttons">
+          <button type="button" class="btn-scenario" id="btnSteady" data-interval="100" aria-label="Steady stream of requests every 100ms">
+            Steady Stream (10/s)
+          </button>
+          <button type="button" class="btn-scenario" id="btnBurstTest" aria-label="Send 20 rapid requests">
+            Burst Test (20 reqs)
+          </button>
+          <button type="button" class="btn-scenario" id="btnReset" aria-label="Reset bucket to full capacity">
+            Instant Refill
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Log -->
+    <div class="limiter-log">
+      <span class="control-label">Event Log</span>
+      <div class="log-stream" id="logStream" aria-live="polite" role="log">
+        <div class="log-entry log-system">System initialized. Rate limiter ready.</div>
+      </div>
+    </div>
   </div>
+
   <script type="module" src="rate-limiter.js"></script>
 </body>
 </html>
