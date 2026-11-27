@@ -193,7 +193,7 @@ export class DocsPortalTourGuide {
     }
 
     let placement = 'bottom';
-    // Default placement: below the target centered horizontally with 12px gap
+    // Default placement: below target centered horizontally with 12px gap
     let top = targetRect.bottom + 12;
     let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
 

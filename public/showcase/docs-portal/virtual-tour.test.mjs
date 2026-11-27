@@ -189,3 +189,4 @@ describe('DocsPortalTourGuide (Docs Portal Feature Spotlight)', () => {
     assert.equal(guide.isCompleted(), true);
   });
 });
+
