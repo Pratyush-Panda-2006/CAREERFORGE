@@ -2,14 +2,132 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SaasLaunchpad - LRU In-Memory Cache</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Launchpad - LRU In-Memory Cache & Eviction Visualizer</title>
   <link rel="stylesheet" href="lru-cache.css">
 </head>
 <body>
-  <div class="lru-container">
-    <h1>SaasLaunchpad LRU In-Memory Cache</h1>
-    <p>O(1) Hash-Map and Doubly-Linked-List backed cache with live eviction tracking</p>
+  <div class="lru-container" data-lru-cache-app>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-badge">Core Engine • Memory Architecture</div>
+      <h1>SaaS Launchpad LRU Cache Visualizer</h1>
+      <p class="subtitle">
+        High-throughput Least-Recently-Used in-memory cache backed by a Doubly-Linked List and Hash-Map.
+        Features O(1) reads/writes, automatic LRU eviction, and live node chain state inspection.
+      </p>
+      <div class="tech-tags">
+        <span class="tag">O(1) Hash Map</span>
+        <span class="tag">Doubly-Linked List</span>
+        <span class="tag">Automatic Eviction</span>
+        <span class="tag">Telemetry Inspector</span>
+      </div>
+    </header>
+
+    <!-- Main Grid Dashboard -->
+    <main class="grid-layout">
+      <!-- Section 1: Capacity & Occupancy Meter -->
+      <section class="card capacity-card">
+        <div class="card-header">
+          <h2>Cache Capacity & Memory Occupancy</h2>
+          <span class="card-badge" id="capacity-badge">Dynamic Sizing</span>
+        </div>
+        <div class="capacity-control">
+          <label for="capacity-slider">
+            Max Capacity: <strong id="capacity-val" class="capacity-value">4</strong> entries
+          </label>
+          <input type="range" id="capacity-slider" min="2" max="8" value="4" class="slider">
+        </div>
+        <div class="progress-bar-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="occupancy-progress">
+          <div id="occupancy-bar" class="progress-bar-fill" style="width: 75%;"></div>
+        </div>
+        <div class="occupancy-meta">
+          <span id="occupancy-text" class="occupancy-status">3 / 4 slots used (75%)</span>
+          <span id="memory-state" class="occupancy-indicator optimal">Optimal Load</span>
+        </div>
+      </section>
+
+      <!-- Section 2: Operations Panel (Form & Quick Presets) -->
+      <section class="card operations-card">
+        <div class="card-header">
+          <h2>Cache Operations & Testing</h2>
+          <span class="card-badge">O(1) Mutators</span>
+        </div>
+        <div class="form-row">
+          <div class="input-group">
+            <label for="key-input">Cache Key</label>
+            <input type="text" id="key-input" placeholder="e.g. tenant:org_49:session" autocomplete="off">
+          </div>
+          <div class="input-group">
+            <label for="val-input">Cache Value</label>
+            <input type="text" id="val-input" placeholder="e.g. User: Sarah | Plan: Enterprise" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="insert-btn" class="btn btn-primary" title="Insert or update key-value in cache">
+            <span class="btn-icon">📥</span> PUT Entry
+          </button>
+          <button id="lookup-btn" class="btn btn-secondary" title="Retrieve key and promote to Head (MRU)">
+            <span class="btn-icon">🔍</span> GET Key
+          </button>
+          <button id="clear-btn" class="btn btn-outline" title="Purge entire cache and eviction log">
+            <span class="btn-icon">🗑️</span> Purge Cache
+          </button>
+        </div>
+
+        <!-- Preset Buttons for Easy Demo -->
+        <div class="presets-row">
+          <span class="presets-label">Sample Presets:</span>
+          <button class="btn-preset" data-key="auth:tenant_982" data-val="Role: Owner | MFA: Active">Auth Session</button>
+          <button class="btn-preset" data-key="ratelimit:api_tier" data-val="10k req/min | Allowed">Rate Quota</button>
+          <button class="btn-preset" data-key="feature:ai_copilot" data-val="Enabled: true | V2.4">Feature Flag</button>
+          <button class="btn-preset" data-key="billing:sub_410" data-val="Tier: Scale | Paid">Billing Status</button>
+        </div>
+
+        <!-- Operation Feedback Status -->
+        <div id="lookup-result" class="lookup-output" aria-live="polite"></div>
+      </section>
+
+      <!-- Section 3: Ordered Node Chain Visualizer -->
+      <section class="card chain-card">
+        <div class="card-header">
+          <h2>Doubly-Linked Node Chain (MRU ➔ LRU)</h2>
+          <div class="chain-legend">
+            <span class="legend-item"><span class="legend-dot mru"></span> Head (MRU)</span>
+            <span class="legend-item"><span class="legend-dot lru"></span> Tail (LRU)</span>
+          </div>
+        </div>
+        <p class="section-desc">
+          Nodes are dynamically shifted to <strong>Head (MRU)</strong> upon read or write.
+          When capacity is exceeded, the node at <strong>Tail (LRU)</strong> is immediately evicted.
+        </p>
+        <div id="node-chain" class="node-chain-container" role="region" aria-label="Cache Node Chain">
+          <!-- Populated dynamically via lru-cache.js -->
+        </div>
+      </section>
+
+      <!-- Section 4: Live Eviction Audit Log -->
+      <section class="card eviction-card">
+        <div class="card-header">
+          <h2>Eviction Audit Log</h2>
+          <span id="eviction-count-badge" class="count-badge">0 Evictions</span>
+        </div>
+        <p class="section-desc">
+          Real-time log of keys and payload snapshots purged from memory to maintain capacity constraints.
+        </p>
+        <div id="eviction-log" class="eviction-log-container" role="log" aria-label="Eviction History">
+          <!-- Populated dynamically via lru-cache.js -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>SaaS Launchpad • Zero-Merge-Conflict Modular Component</span>
+    </footer>
   </div>
+
   <script type="module" src="lru-cache.js"></script>
 </body>
 </html>
