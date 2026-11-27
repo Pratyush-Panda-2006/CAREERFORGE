@@ -54,3 +54,101 @@ test('DocsPortalLruCache - clear resets cache and evicted entries', () => {
   assert.equal(cache.get('test'), null);
   assert.equal(cache.getOrderedEntries().length, 0);
 });
+
+test('DocsPortalLruCache - eviction log entries have correct shape', () => {
+  const cache = new DocsPortalLruCache(1);
+  cache.put('first', 'val1');
+  cache.put('second', 'val2');
+
+  const evicted = cache.getEvictedEntries();
+  assert.equal(evicted.length, 1);
+  const entry = evicted[0];
+  assert.equal(typeof entry.key, 'string');
+  assert.equal(typeof entry.value, 'string');
+  assert.equal(typeof entry.timestamp, 'number');
+  assert.ok(entry.timestamp > 0);
+});
+
+test('DocsPortalLruCache - multiple evictions in order', () => {
+  const cache = new DocsPortalLruCache(2);
+  cache.put('a', '1');
+  cache.put('b', '2');
+  cache.put('c', '3'); // evicts 'a'
+  cache.put('d', '4'); // evicts 'b'
+
+  const evicted = cache.getEvictedEntries();
+  assert.equal(evicted.length, 2);
+  // 'a' was evicted first, then 'b'
+  assert.equal(evicted[0].key, 'a');
+  assert.equal(evicted[1].key, 'b');
+});
+
+test('DocsPortalLruCache - getOrderedEntries respects recency', () => {
+  const cache = new DocsPortalLruCache(5);
+  cache.put('first', '1');
+  cache.put('second', '2');
+  cache.put('third', '3');
+
+  // Access 'first' to promote it to MRU
+  cache.get('first');
+
+  const ordered = cache.getOrderedEntries();
+  // 'first' should be at the head (most recently used)
+  assert.equal(ordered[0].key, 'first');
+  // 'second' should be at the tail (least recently used among the three,
+  // since accessing 'first' shifts 'second' to LRU position)
+  assert.equal(ordered[ordered.length - 1].key, 'second');
+});
+
+test('DocsPortalLruCache - capacity of 1 behaves correctly', () => {
+  const cache = new DocsPortalLruCache(1);
+  cache.put('only', 'first');
+  assert.equal(cache.get('only'), 'first');
+
+  cache.put('new', 'second');
+  // 'only' should be evicted
+  assert.equal(cache.get('only'), null);
+  assert.equal(cache.get('new'), 'second');
+
+  const ordered = cache.getOrderedEntries();
+  assert.equal(ordered.length, 1);
+  assert.equal(ordered[0].key, 'new');
+});
+
+test('DocsPortalLruCache - event dispatching on cache operations', () => {
+  const cache = new DocsPortalLruCache(2);
+  const events = [];
+
+  cache._eventTarget.addEventListener('cache:hit', (e) => events.push(e));
+  cache._eventTarget.addEventListener('cache:miss', (e) => events.push(e));
+  cache._eventTarget.addEventListener('cache:insert', (e) => events.push(e));
+  cache._eventTarget.addEventListener('cache:evict', (e) => events.push(e));
+  cache._eventTarget.addEventListener('cache:update', (e) => events.push(e));
+  cache._eventTarget.addEventListener('cache:clear', (e) => events.push(e));
+
+  cache.put('a', '1');
+  cache.get('a');
+  cache.put('b', '2');
+  cache.get('c'); // miss
+  cache.put('c', '3');
+
+  assert.ok(events.some(e => e.type === 'cache:insert'));
+  assert.ok(events.some(e => e.type === 'cache:hit'));
+  assert.ok(events.some(e => e.type === 'cache:miss'));
+});
+
+test('DocsPortalLruCache - updates existing key without eviction', () => {
+  const cache = new DocsPortalLruCache(2);
+  cache.put('a', 'valA');
+  cache.put('b', 'valB');
+  cache.put('a', 'valA_updated');
+
+  // 'a' was already present, so no eviction should occur
+  assert.equal(cache.getOrderedEntries().length, 2);
+  // 'a' should now be MRU (head), 'b' should be LRU (tail.prev)
+  assert.equal(cache.getOrderedEntries()[0].key, 'a');
+  assert.equal(cache.getOrderedEntries()[1].key, 'b');
+
+  assert.equal(cache.get('a'), 'valA_updated');
+  assert.equal(cache.get('b'), 'valB');
+});
