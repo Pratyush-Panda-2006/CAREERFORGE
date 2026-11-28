@@ -1,0 +1,99 @@
+:root {
+  color-scheme: dark;
+  --bg: #090a0f;
+  --panel: #111723;
+  --accent: #0284c7;
+  --glow: #38bdf8;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+main { max-width: 44rem; margin: 0 auto; padding: 2rem 1rem; }
+a { color: var(--glow); }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+#volume { flex: 1 1 12rem; height: 6px; accent-color: var(--accent); }
+#level { min-width: 3.2rem; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.switch { display: inline-flex; gap: 0.4rem; align-items: center; cursor: pointer; }
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.7rem;
+  margin: 1rem 0;
+}
+
+button {
+  padding: 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: rgba(2, 132, 199, 0.15);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.08s, box-shadow 0.15s;
+}
+
+button:hover { box-shadow: 0 0 18px rgba(56, 189, 248, 0.35); }
+button:active { transform: scale(0.97); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
+
+.wave { display: flex; gap: 6px; justify-content: center; align-items: center; height: 2.5rem; }
+
+.wave i {
+  width: 6px;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--glow);
+  opacity: 0.35;
+  transform: scaleY(0.2);
+}
+
+.wave.active i { opacity: 1; animation: pulse 0.5s ease-in-out infinite alternate; }
+.wave.active i:nth-child(2) { animation-delay: 0.1s; }
+.wave.active i:nth-child(3) { animation-delay: 0.2s; }
+.wave.active i:nth-child(4) { animation-delay: 0.3s; }
+.wave.active i:nth-child(5) { animation-delay: 0.15s; }
+
+@keyframes pulse {
+  from { transform: scaleY(0.2); }
+  to { transform: scaleY(1); }
+}
+
+#scope {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+#status { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  button { transition: none; }
+  .wave.active i { animation: none; transform: scaleY(0.7); }
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skyway Express Sound Console</title>
+  <link rel="stylesheet" href="audio-synthesizer.css">
+</head>
+<body>
+  <main>
+    <a href="index.html">&larr; Back to Skyway Express</a>
+    <h1>Sound console</h1>
+    <p>Alert tones for the dispatch desk. They are synthesized in the browser, so no audio files are downloaded.</p>
+
+    <section class="controls" aria-label="Output">
+      <label for="volume">Volume</label>
+      <input id="volume" type="range" min="0" max="100" value="50">
+      <output id="level" for="volume">50%</output>
+      <label class="switch"><input id="mute" type="checkbox" role="switch"> Mute</label>
+    </section>
+
+    <section class="board" aria-label="Sound previews">
+      <button type="button" data-sound="click">Button click</button>
+      <button type="button" data-sound="navigation">Route change</button>
+      <button type="button" data-sound="success">Delivery confirmed</button>
+      <button type="button" data-sound="warning">Low battery warning</button>
+      <button type="button" data-sound="error">Flight error</button>
+    </section>
+
+    <div id="wave" class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <canvas id="scope" width="640" height="160" role="img" aria-label="Oscilloscope trace of the current sound"></canvas>
+    <p id="status" role="status">Choose a sound to preview.</p>
+  </main>
+  <script type="module" src="audio-synthesizer.js"></script>
+</body>
+</html>
