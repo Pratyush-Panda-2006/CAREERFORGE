@@ -84,6 +84,39 @@ export class EcommerceStoreLruCache {
     return entries;
   }
 
+  /**
+   * Returns the current memory occupancy as a percentage (0-100).
+   * O(1) computation based on capacity vs current size.
+   */
+  getMemoryOccupancy() {
+    return Math.round((this.map.size / this.capacity) * 100);
+  }
+
+  /**
+   * Returns a visual representation of the node chain as HTML.
+   * Used by the UI for the node chain diagram.
+   */
+  getNodeChainHTML() {
+    const entries = this.getOrderedEntries();
+    if (entries.length === 0) {
+      return '<span class="node">empty</span>';
+    }
+
+    let html = '';
+    // Head connector
+    html += '<div class="node connector"/><div class="key">H</div>';
+
+    for (const entry of entries) {
+      html += `<div class="node"><div class="key">${entry.key || ''}</div><div class="value">${String(entry.value).substring(0, 12)}${String(entry.value).length > 12 ? '...' : ''}</div></div>`;
+      html += '<div class="connector"/>';
+    }
+
+    // Tail connector
+    html += '<div class="key">T</div>';
+
+    return html;
+  }
+
   clear() {
     this.map.clear();
     this.evictedEntries = [];
