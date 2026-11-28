@@ -1,36 +1,174 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PodcastAudioStream - Myers Diff & Patch Engine</title>
-  <link rel="stylesheet" href="diff-patch-engine.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="In-browser Myers line diff and unified patch engine with chunk boundary visualizer for podcast configuration files.">
+  <title>Myers diff &amp; patch engine | Podcast Audio Stream</title>
+  <link rel="stylesheet" href="./diff-patch-engine.css">
+  <script type="module" src="./diff-patch-engine.js"></script>
 </head>
 <body>
-  <div class="diff-container" data-diff-lab>
-    <header class="header">
-      <h1>PodcastAudioStream Myers Diff & Patch Engine</h1>
-      <p class="subtitle">O(ND) difference computation, chunk boundary visualizer, and unified patch application</p>
+  <main class="diff-lab" data-diff-patch-lab>
+    <header class="topbar">
+      <a class="back-link" href="./index.html">← AUDIO-LAB</a>
+      <span class="topbar-note">Myers O(ND) · 100% client-side · nothing uploaded</span>
     </header>
-    <main class="grid-layout">
-      <section class="card input-card">
-        <h2>Original Configuration (v1.0)</h2>
-        <textarea id="original-text" rows="8">stream: standard\nbitrate: 128k\nchannels: stereo</textarea>
+
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">STREAM INFRASTRUCTURE / TEXT PATCHING</p>
+      <h1 id="page-title">Diff the config. Ship the patch.</h1>
+      <p class="lede">
+        Compare two revisions line by line with a Myers shortest edit script, inspect where each
+        chunk begins and ends, then apply the generated unified patch back onto the source.
+        Context validation catches stale files before they ship.
+      </p>
+    </section>
+
+    <noscript>
+      <p class="noscript">This lab computes diffs entirely in your browser. Enable JavaScript to run the Myers engine.</p>
+    </noscript>
+
+    <section class="toolbar" aria-label="Diff controls">
+      <label class="field">
+        <span class="field-label">Preset</span>
+        <select id="preset-select">
+          <option value="showNotes" selected>Show notes revision</option>
+          <option value="hlsManifest">HLS manifest ladder</option>
+          <option value="rssFeed">RSS feed metadata</option>
+          <option value="masteringChain">Mastering chain JSON</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="field-label">Context lines</span>
+        <select id="context-select">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="5">5</option>
+          <option value="8">8</option>
+        </select>
+      </label>
+
+      <label class="toggle">
+        <input type="checkbox" id="collapse-toggle">
+        <span>Collapse unchanged</span>
+      </label>
+
+      <div class="toolbar-actions">
+        <button type="button" class="btn btn-ghost" id="swap-btn">Swap revisions ⇄</button>
+        <button type="button" class="btn btn-primary" id="compute-btn">Recompute diff</button>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Diff statistics" aria-live="polite">
+      <div class="stat stat-add">
+        <span class="stat-label">Insertions</span>
+        <output id="stat-insertions">0</output>
+      </div>
+      <div class="stat stat-del">
+        <span class="stat-label">Deletions</span>
+        <output id="stat-deletions">0</output>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Unchanged</span>
+        <output id="stat-unchanged">0</output>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Chunks</span>
+        <output id="stat-chunks">0</output>
+      </div>
+      <div class="stat stat-wide">
+        <span class="stat-label">Similarity</span>
+        <output id="stat-similarity">100%</output>
+      </div>
+    </section>
+
+    <div class="editor-grid">
+      <section class="panel editor-panel" aria-labelledby="original-title">
+        <div class="panel-heading">
+          <h2 id="original-title">Original</h2>
+          <span class="panel-tag" id="original-meta">v1.0</span>
+        </div>
+        <label class="sr-only" for="original-text">Original revision text</label>
+        <textarea id="original-text" rows="11" spellcheck="false" autocomplete="off" placeholder="Paste the original revision here…"></textarea>
       </section>
-      <section class="card input-card">
-        <h2>Modified Configuration (v1.1)</h2>
-        <textarea id="modified-text" rows="8">stream: master\nbitrate: 320k\nchannels: spatial\ncodec: opus</textarea>
+
+      <section class="panel editor-panel" aria-labelledby="modified-title">
+        <div class="panel-heading">
+          <h2 id="modified-title">Modified</h2>
+          <span class="panel-tag" id="modified-meta">v1.1</span>
+        </div>
+        <label class="sr-only" for="modified-text">Modified revision text</label>
+        <textarea id="modified-text" rows="11" spellcheck="false" autocomplete="off" placeholder="Paste the modified revision here…"></textarea>
       </section>
-      <section class="card diff-preview-card">
-        <h2>Chunk Boundary Visual Diff</h2>
-        <div id="diff-preview" class="diff-preview-box"></div>
-      </section>
-      <section class="card unified-card">
-        <h2>Unified Diff Format</h2>
-        <pre id="unified-view" class="unified-box"></pre>
-      </section>
-    </main>
-  </div>
-  <script type="module" src="diff-patch-engine.js"></script>
+    </div>
+
+    <section class="panel split-panel" aria-labelledby="split-title">
+      <div class="panel-heading panel-heading-wrap">
+        <div>
+          <h2 id="split-title">Chunk boundary visualizer</h2>
+          <p class="panel-subtitle">Red strips are deletions, green strips are additions, and each header marks a unified hunk boundary.</p>
+        </div>
+        <div class="legend" aria-hidden="true">
+          <span class="legend-item legend-del"><i></i> deletion</span>
+          <span class="legend-item legend-add"><i></i> addition</span>
+          <span class="legend-item legend-equal"><i></i> unchanged</span>
+        </div>
+      </div>
+
+      <div class="split-head" aria-hidden="true">
+        <span>Original · v1.0</span>
+        <span>Modified · v1.1</span>
+      </div>
+
+      <div class="split-view" id="split-view" role="region" aria-label="Side-by-side diff"></div>
+    </section>
+
+    <section class="panel unified-panel" aria-labelledby="unified-title">
+      <div class="panel-heading">
+        <div>
+          <h2 id="unified-title">Unified patch</h2>
+          <p class="panel-subtitle">Standard <code>@@ -old,count +new,count @@</code> hunks with configurable context.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" id="copy-patch-btn">Copy patch</button>
+      </div>
+      <pre class="unified-view" id="unified-view" aria-label="Unified patch output"></pre>
+    </section>
+
+    <section class="panel apply-panel" aria-labelledby="apply-title">
+      <div class="panel-heading panel-heading-wrap">
+        <div>
+          <h2 id="apply-title">Patch apply preview</h2>
+          <p class="panel-subtitle">Apply the generated unified patch to a source and verify the result matches the modified revision.</p>
+        </div>
+        <div class="apply-controls">
+          <label class="field field-inline">
+            <span class="field-label">Apply to</span>
+            <select id="apply-target">
+              <option value="original" selected>Original (clean)</option>
+              <option value="modified">Modified (stale)</option>
+            </select>
+          </label>
+          <button type="button" class="btn btn-primary" id="apply-patch-btn">Apply patch</button>
+        </div>
+      </div>
+
+      <p class="apply-status is-idle" id="apply-status" role="status" aria-live="polite">
+        Run the diff to generate a patch, then apply it to the source.
+      </p>
+      <pre class="apply-preview" id="apply-preview"></pre>
+    </section>
+
+    <footer class="footnote">
+      <p>
+        Myers diff finds the shortest edit script in <code>O((N+M)·D)</code> time. Line endings are
+        normalised to <code>\n</code> for comparison, and a trailing newline is modelled as a final
+        empty line so EOF changes roundtrip exactly. All computation stays in this page.
+      </p>
+    </footer>
+  </main>
 </body>
 </html>
