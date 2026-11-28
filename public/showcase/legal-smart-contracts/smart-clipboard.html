@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LEX-ESCROW Clipboard History</title>
+  <link rel="stylesheet" href="smart-clipboard.css">
+</head>
+<body>
+  <main>
+    <a href="index.html">&larr; Back to LEX-ESCROW</a>
+    <h1>Clipboard history</h1>
+    <p>Text you copy on this page is kept here until you reload. Nothing is saved or sent anywhere.</p>
+    <button type="button" id="trigger" aria-expanded="false" aria-controls="drawer">Open history (<span id="count">0</span>)</button>
+    <h2>Sample clauses</h2>
+    <p>The escrow agent shall release funds within five business days of milestone approval.</p>
+    <pre>function release(uint256 milestone) external onlyArbiter {}</pre>
+    <p>https://example.com/agreements/escrow-v2</p>
+    <p>0x52908400098527886E0F7030069857D2E4169EE7</p>
+  </main>
+  <aside id="drawer" aria-label="Clipboard history" inert>
+    <header><h2>History</h2><button type="button" id="close">Close</button></header>
+    <input id="search" type="search" placeholder="Search snippets" aria-label="Search snippets">
+    <div class="chips" role="group" aria-label="Filter by format">
+      <button type="button" data-type="all" aria-pressed="true">All</button>
+      <button type="button" data-type="text" aria-pressed="false">Text</button>
+      <button type="button" data-type="code" aria-pressed="false">Code</button>
+      <button type="button" data-type="link" aria-pressed="false">Links</button>
+      <button type="button" data-type="address" aria-pressed="false">Addresses</button>
+    </div>
+    <p id="status" role="status"></p>
+    <ul id="history"></ul>
+    <button type="button" id="clear">Clear history</button>
+  </aside>
+  <script type="module" src="smart-clipboard.js"></script>
+</body>
+</html>
