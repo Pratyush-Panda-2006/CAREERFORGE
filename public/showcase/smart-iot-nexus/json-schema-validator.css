@@ -1,0 +1,326 @@
+/**
+ * Smart IoT Nexus - JSON Schema Validator Styling
+ */
+
+:root {
+  --iot-bg: #090a0f;
+  --iot-card: #12141e;
+  --iot-card-light: #1b1e2c;
+  --iot-border: rgba(255, 255, 255, 0.1);
+  --iot-accent: #f59e0b;
+  --iot-accent-glow: rgba(245, 158, 11, 0.45);
+  --iot-cyan: #38bdf8;
+  --iot-green: #10b981;
+  --iot-red: #ef4444;
+  --iot-text: #f8fafc;
+  --iot-muted: #94a3b8;
+  --iot-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --iot-mono: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--iot-bg);
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 158, 11, 0.12), transparent),
+    radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.03), transparent);
+  color: var(--iot-text);
+  font-family: var(--iot-font);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.validator-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.validator-header {
+  border-bottom: 2px solid var(--iot-border);
+  padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-badge {
+  align-self: flex-start;
+  padding: 4px 10px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--iot-accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--iot-mono);
+  color: var(--iot-accent);
+  letter-spacing: 0.5px;
+}
+
+.validator-header h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--iot-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* Controls Toolbar */
+.controls-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--iot-card);
+  border: 1px solid var(--iot-border);
+  border-radius: 10px;
+}
+
+.template-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.template-selector-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--iot-muted);
+}
+
+.template-select {
+  padding: 8px 12px;
+  background: var(--iot-card-light);
+  border: 1px solid var(--iot-border);
+  border-radius: 6px;
+  color: var(--iot-text);
+  font-family: var(--iot-font);
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.template-select:focus {
+  border-color: var(--iot-accent);
+  box-shadow: 0 0 0 2px var(--iot-accent-glow);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.primary-btn:hover {
+  opacity: 0.92;
+}
+
+/* Validation pass/fail pill badges */
+.status-pill {
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-family: var(--iot-mono);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-pass {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+}
+
+.status-fail {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+}
+
+.status-error {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+}
+
+/* Split-pane layout */
+.split-pane {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .split-pane {
+    grid-template-columns: 1fr;
+  }
+}
+
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  background: var(--iot-card);
+  border: 1px solid var(--iot-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--iot-border);
+}
+
+.pane-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: var(--iot-mono);
+  color: var(--iot-accent);
+}
+
+.pane-meta {
+  font-size: 0.74rem;
+  color: var(--iot-muted);
+}
+
+.code-editor {
+  padding: 14px;
+  background: #090b13;
+  color: #e2e8f0;
+  border: none;
+  font-family: var(--iot-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 280px;
+  outline: none;
+  tab-size: 2;
+  box-sizing: border-box;
+}
+
+.code-editor:focus {
+  background: #0b0e18;
+}
+
+/* Report Section */
+.report-section {
+  background: var(--iot-card);
+  border: 1px solid var(--iot-border);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.report-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.error-count-badge {
+  font-size: 0.78rem;
+  font-family: var(--iot-mono);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--iot-card-light);
+  color: var(--iot-muted);
+  border: 1px solid var(--iot-border);
+}
+
+/* Error line callouts */
+.error-callouts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.error-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-left: 4px solid var(--iot-red);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #fca5a5;
+  transition: background 0.2s;
+}
+
+.error-line-badge {
+  font-family: var(--iot-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.25);
+  color: #fee2e2;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.error-path {
+  font-family: var(--iot-mono);
+  color: var(--iot-cyan);
+  font-weight: 600;
+}
+
+.error-msg {
+  color: #fecaca;
+}
+
+.report-output {
+  margin: 0;
+  padding: 14px;
+  background: #090b13;
+  border: 1px solid var(--iot-border);
+  border-radius: 6px;
+  font-family: var(--iot-mono);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+}
