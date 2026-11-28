@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sentinel Colour Contrast Auditor</title>
+  <link rel="stylesheet" href="color-contrast-auditor.css">
+</head>
+<body>
+  <main>
+    <a href="index.html">&larr; Back to Sentinel</a>
+    <h1>Colour contrast auditor</h1>
+    <p>Check that alert and dashboard colours stay readable under WCAG 2.1.</p>
+    <section class="pickers">
+      <fieldset>
+        <legend>Text</legend>
+        <input type="color" id="fg-picker" value="#6ee7b7" aria-label="Pick text colour">
+        <input id="fg-hex" value="#6ee7b7" aria-label="Text colour hex" spellcheck="false">
+      </fieldset>
+      <fieldset>
+        <legend>Background</legend>
+        <input type="color" id="bg-picker" value="#030712" aria-label="Pick background colour">
+        <input id="bg-hex" value="#030712" aria-label="Background colour hex" spellcheck="false">
+      </fieldset>
+      <button type="button" id="swap">Swap colours</button>
+    </section>
+    <p id="error" role="alert"></p>
+    <div role="status">Contrast ratio <output id="ratio">--</output></div>
+    <meter id="gauge" min="0" max="21" low="3" high="4.5" optimum="21" aria-label="Contrast ratio out of 21"></meter>
+    <ul id="results"></ul>
+    <div id="preview">
+      <h2>Intrusion attempt blocked</h2>
+      <p>Normal text sample: 14 requests from an unknown device were rejected.</p>
+    </div>
+  </main>
+  <script type="module" src="color-contrast-auditor.js"></script>
+</body>
+</html>
