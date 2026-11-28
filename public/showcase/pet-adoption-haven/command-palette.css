@@ -1,0 +1,103 @@
+:root {
+  color-scheme: dark;
+  --bg: #090a0f;
+  --accent: #e11d48;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+main { max-width: 40rem; margin: 0 auto; padding: 2rem 1rem; }
+a { color: #fb7185; }
+
+button {
+  display: inline-flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: rgba(225, 29, 72, 0.15);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible { outline: 3px solid #fb7185; outline-offset: 2px; }
+
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+dialog {
+  width: min(36rem, calc(100vw - 2rem));
+  margin: 12vh auto auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(20, 22, 32, 0.82);
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(18px);
+}
+
+dialog::backdrop { background: rgba(3, 4, 8, 0.7); }
+
+.panel { display: flex; flex-direction: column; max-height: 70vh; }
+
+input {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+}
+
+input:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 16px 16px 0 0; }
+
+#palette-results { overflow-y: auto; padding: 0.4rem; }
+
+.group-title {
+  padding: 0.6rem 0.8rem 0.2rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.option { padding: 0.55rem 0.8rem; border-left: 3px solid transparent; border-radius: 8px; cursor: pointer; }
+.option[aria-selected="true"] { border-left-color: var(--accent); background: rgba(225, 29, 72, 0.22); }
+mark { background: transparent; color: #fb7185; font-weight: 700; }
+
+#palette-empty { margin: 0; padding: 1rem 1.2rem; color: var(--muted); }
+
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  padding: 0.7rem 1.2rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
