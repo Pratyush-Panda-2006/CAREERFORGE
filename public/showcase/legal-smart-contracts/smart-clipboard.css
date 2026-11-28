@@ -1,0 +1,26 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { min-height: 100vh; font: 15px/1.6 Inter, system-ui, sans-serif; background: #090a0f; color: #f8fafc; overflow-x: hidden; }
+main { max-width: 640px; margin: 0 auto; padding: 32px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; justify-items: start; }
+a { color: #a5b4fc; }
+p { color: #cbd5e1; overflow-wrap: anywhere; }
+pre { max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; font: .8rem/1.5 ui-monospace, monospace; }
+button, input { font: inherit; color: inherit; border-radius: 8px; }
+button { min-height: 40px; padding: 8px 14px; cursor: pointer; background: #312e81; border: 1px solid #6366f1; }
+input { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; }
+:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 2px; }
+#drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(380px, 100%); display: flex; flex-direction: column; gap: 12px; padding: 20px; background: #111827; border-left: 1px solid #374151; transform: translateX(100%); visibility: hidden; transition: transform .25s ease, visibility .25s; }
+#drawer.open { transform: none; visibility: visible; }
+header { display: flex; justify-content: space-between; align-items: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { min-height: 32px; padding: 4px 10px; font-size: .8rem; background: transparent; }
+.chips [aria-pressed="true"] { background: #4f46e5; }
+#status { min-height: 1.6em; font-size: .8rem; color: #86efac; }
+#history { flex: 1; overflow-y: auto; list-style: none; display: grid; align-content: start; gap: 10px; }
+#history li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 12px; border: 1px solid #374151; border-left: 3px solid #94a3b8; border-radius: 8px; }
+#history li.code { border-left-color: #fbbf24; }
+#history li.link { border-left-color: #38bdf8; }
+#history li.address { border-left-color: #34d399; }
+#history span { grid-column: 1 / -1; font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: #94a3b8; }
+#history pre { max-height: 6em; overflow: auto; }
+#history button { align-self: start; }
+@media (prefers-reduced-motion: reduce) { #drawer { transition: none; } }
