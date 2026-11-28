@@ -1,0 +1,19 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { min-height: 100vh; font: 15px/1.6 Inter, system-ui, sans-serif; background: #090a0f; color: #f8fafc; }
+main { max-width: 960px; margin: 0 auto; padding: 32px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; justify-items: start; }
+a { color: #6ee7b7; }
+p { color: #94a3b8; }
+button, input, select { font: inherit; color: inherit; background: #0f141c; border: 1px solid rgba(255, 255, 255, .18); border-radius: 10px; min-height: 42px; padding: 0 14px; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid #6ee7b7; outline-offset: 2px; }
+.card { width: min(360px, 100%); padding: 14px 16px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .12); border-radius: 16px; }
+summary { display: flex; align-items: center; gap: 12px; min-height: 42px; cursor: pointer; }
+#lamp { position: relative; width: 12px; height: 12px; border-radius: 50%; background: var(--lamp, #34d399); flex: none; }
+#lamp::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--lamp, #34d399); animation: ring 1.8s ease-out infinite; }
+.card[data-state="degraded"] { --lamp: #fbbf24; }
+.card[data-state="maintenance"] { --lamp: #f87171; }
+dl { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; padding-top: 12px; }
+dt { color: #94a3b8; }
+dd { font-variant-numeric: tabular-nums; }
+@keyframes ring { to { transform: scale(2.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #lamp::after { animation: none; opacity: 0; } }
