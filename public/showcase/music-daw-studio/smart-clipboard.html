@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beat-Forge Clipboard History</title>
+  <link rel="stylesheet" href="smart-clipboard.css">
+</head>
+<body>
+  <main>
+    <a href="index.html">&larr; Back to Beat-Forge</a>
+    <h1>Clipboard history</h1>
+    <p>Everything you copy on this page is stacked in the history drawer. It stays in memory and is gone after a reload.</p>
+    <button type="button" id="open-drawer" aria-haspopup="dialog">History (<span id="count">0</span>)</button>
+
+    <h2>Sample snippets</h2>
+    <section class="sample">
+      <pre id="sample-pattern">Kick: x...x...x...x...</pre>
+      <button type="button" data-sample="sample-pattern" aria-label="Copy the kick pattern">Copy</button>
+    </section>
+    <section class="sample">
+      <pre id="sample-synth">const lead = { wave: "sawtooth", cutoff: 1800, release: 0.4 };</pre>
+      <button type="button" data-sample="sample-synth" aria-label="Copy the synth preset">Copy</button>
+    </section>
+    <section class="sample">
+      <pre id="sample-link">https://developer.mozilla.org/docs/Web/API/Web_Audio_API</pre>
+      <button type="button" data-sample="sample-link" aria-label="Copy the Web Audio link">Copy</button>
+    </section>
+
+    <h2><label for="scratch">Scratch pad</label></h2>
+    <textarea id="scratch" rows="4" placeholder="Type notes, select them and copy"></textarea>
+    <p id="status" role="status"></p>
+  </main>
+
+  <dialog id="drawer" aria-labelledby="drawer-title">
+    <div class="drawer-body">
+      <header>
+        <h2 id="drawer-title">History</h2>
+        <button type="button" id="close-drawer">Close</button>
+      </header>
+      <input id="search" type="search" aria-label="Search copied snippets" placeholder="Search snippets">
+      <div class="chips" role="group" aria-label="Filter by type">
+        <button type="button" data-type="all" aria-pressed="true">All</button>
+        <button type="button" data-type="text" aria-pressed="false">Text</button>
+        <button type="button" data-type="code" aria-pressed="false">Code</button>
+        <button type="button" data-type="link" aria-pressed="false">Links</button>
+      </div>
+      <p id="feedback" role="status"></p>
+      <p id="empty"></p>
+      <ul id="history"></ul>
+      <button type="button" id="clear">Clear history</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="smart-clipboard.js"></script>
+</body>
+</html>
