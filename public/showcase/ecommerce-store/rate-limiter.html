@@ -9,7 +9,102 @@
   <div class="limiter-container">
     <h1>EcommerceStore Rate Limiter</h1>
     <p>Token Bucket concurrency & burst throttling engine</p>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="control-group">
+        <label>Capacity: <span id="capVal">10</span></label>
+        <input type="range" id="capacity" min="1" max="100" step="1" value="10">
+      </div>
+      <div class="control-group">
+        <label>Refill (/sec): <span id="refillVal">2</span></label>
+        <input type="range" id="refill" min="0.1" max="20" step="0.1" value="2">
+      </div>
+      <div class="control-group">
+        <label>Max Concurrent: <span id "maxConcurrentVal">3</span></label>
+        <input type="range" id="maxConcurrent" min="1" max="20" step="1" value="3">
+      </div>
+      <div class="control-group">
+        <label>Max Queue: <span id="maxQueueVal">100</span></label>
+        <input type="range" id="maxQueue" min="1" max="100" step="1" value="100">
+      </div>
+    </div>
+
+    <!-- Bucket Visual -->
+    <div class="bucket-wrapper">
+      <svg class="liquid-bucket" viewBox="0 0 100 200" width="200" height="200">
+        <defs>
+          <linearGradient id="bucketGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1e3a5f"/>
+            <stop offset="100%" stop-color="#0a2035"/>
+          </linearGradient>
+          <linearGradient id="liquidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#3b82f6"/>
+            <stop offset="50%" stop-color="#60a5fa"/>
+            <stop offset="100%" stop-color="#93c5fd"/>
+          </linearGradient>
+          <clipPath id="bucketClip">
+            <path id="bucketShape" d="M 10 180
+                     C 20 100, 80 100, 90 180
+                     L 90 140
+                     C 70 160, 30 160, 20 140
+                     Z"/>
+          </clipPath>
+        </defs>
+
+        <!-- Bucket outline -->
+        <path class="bucket-outline" d="M 10 180
+                 C 20 100, 80 100, 90 180
+                 L 90 140
+                 C 70 160, 30 160, 20 140
+                 Z"/>
+
+        <!-- Liquid level -->
+        <path class="liquid-level" id="liquidLevel" d="M 10 180
+                 C 20 180, 80 180, 90 180
+                 L 90 140
+                 C 70 140, 30 140, 20 140
+                 Z"/>
+      </svg>
+      <div class="fill-label" id="fillLabel">0 / 10 tokens</div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="buttons">
+      <button class="btn-start" id="btnStart">Start Flood Simulator</button>
+      <button class="btn-stop" id="btnStop" disabled>Stop</button>
+      <button class="btn-reset" id="btnReset">Reset</button>
+    </div>
+
+    <!-- Event Log -->
+    <div class="metrics-panel">
+      <h3>Rate-Limited Event Log</h3>
+      <div class="log-stream" id="eventLog">
+        <div class="log-entry system">System initialized - Rate Limeter ready</div>
+      </div>
+    </div>
+
+    <!-- Telemetry Metrics -->
+    <div class="telemetry">
+      <div class="metric-row">
+        <span class="metric-label">Accepted</span>
+        <span class="metric-value" id="metricAccepted">0</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Throttled</span>
+        <span class="metric-value" id="metricThrottled">0</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Active</span>
+        <span class="metric-value" id="metricActive">0</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Available Tokens</span>
+        <span class="metric-value" id="metricAvailable">10</span>
+      </div>
+    </div>
   </div>
+
   <script type="module" src="rate-limiter.js"></script>
 </body>
 </html>
