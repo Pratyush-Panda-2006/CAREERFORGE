@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paws &amp; Haven Command Palette</title>
+  <link rel="stylesheet" href="command-palette.css">
+</head>
+<body>
+  <main>
+    <a href="index.html">&larr; Back to Paws &amp; Haven</a>
+    <h1>Command palette</h1>
+    <p>Jump to any shelter tool from the keyboard. Press <kbd>Ctrl</kbd> + <kbd>K</kbd> (<kbd>&#8984;</kbd> + <kbd>K</kbd> on Mac) or use the button.</p>
+    <button type="button" id="open-palette" aria-haspopup="dialog">Search actions <kbd>Ctrl K</kbd></button>
+    <p id="status" role="status"></p>
+  </main>
+
+  <dialog id="palette" aria-label="Command palette">
+    <div class="panel">
+      <input id="palette-input" type="text" role="combobox" aria-expanded="true" aria-controls="palette-results"
+             aria-autocomplete="list" aria-label="Search actions" placeholder="Type to search, for example &quot;tour&quot;"
+             autocomplete="off" spellcheck="false">
+      <div id="palette-results" role="listbox" aria-label="Actions"></div>
+      <p id="palette-empty" role="status" hidden>No matching actions.</p>
+      <footer>
+        <span><kbd>&uarr;</kbd> <kbd>&darr;</kbd> move</span>
+        <span><kbd>Enter</kbd> run</span>
+        <span><kbd>Esc</kbd> close</span>
+      </footer>
+    </div>
+  </dialog>
+
+  <script type="module" src="command-palette.js"></script>
+</body>
+</html>
