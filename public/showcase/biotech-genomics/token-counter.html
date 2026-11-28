@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Biotech Genomics - Client-Side Tokenizer & Byte Analyzer</title>
+  <link rel="stylesheet" href="./token-counter.css">
+</head>
+<body>
+  <main class="token-container">
+    <header class="page-header">
+      <a href="index.html" class="back-link">&larr; Back to Biotech Genomics</a>
+      <div class="header-badge">GENOMIC-LLM-TOKENIZER v2.0</div>
+      <h1>Client-Side Tokenizer &amp; Sequence Analyzer</h1>
+      <p class="subtitle">Inspect token consumption, byte density, and word count for bioinformatics queries, FASTA headers, and LLM context windows.</p>
+    </header>
+
+    <section class="editor-section">
+      <div class="editor-label-bar">
+        <label for="text" class="field-label">Sequence / Prompt Text Area</label>
+        <label for="budget" class="budget-label">
+          Token Budget Limit:
+          <input id="budget" type="number" min="1" value="200" class="budget-input">
+        </label>
+      </div>
+      <textarea id="text" rows="8" class="text-editor" placeholder="Enter genomic sequence, FASTA record, or bioinformatics prompt...">>NC_000913.3 Escherichia coli str. K-12 substr. MG1655, complete genome
+AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC
+TTCTGAACTGGTTACCTGCCGTGAGTAAATTAAAATTTTATTGACTTAGGTCACTAAATACTTTAACCAA</textarea>
+    </section>
+
+    <!-- Real-time metric counter cards -->
+    <section class="metrics-grid">
+      <div class="metric-card" id="card-tokens">
+        <output id="tokens" class="metric-value">0</output>
+        <span class="metric-label">Tokens (Estimated)</span>
+      </div>
+      <div class="metric-card" id="card-words">
+        <output id="words" class="metric-value">0</output>
+        <span class="metric-label">Words</span>
+      </div>
+      <div class="metric-card" id="card-characters">
+        <output id="characters" class="metric-value">0</output>
+        <span class="metric-label">Characters</span>
+      </div>
+      <div class="metric-card" id="card-bytes">
+        <output id="bytes" class="metric-value">0</output>
+        <span class="metric-label">UTF-8 Bytes</span>
+      </div>
+    </section>
+
+    <div id="warning" class="warning-banner" role="status"></div>
+
+    <section class="pills-section">
+      <div class="section-header">
+        <h2>Tokenized Pill View</h2>
+        <span id="pill-count-tag" class="count-tag">0 tokens rendered</span>
+      </div>
+      <div id="pills" class="pills-display"></div>
+    </section>
+
+    <section class="frequency-section">
+      <h2>Most Frequent Characters</h2>
+      <ul id="frequency" class="frequency-list"></ul>
+    </section>
+  </main>
+
+  <script type="module" src="./token-counter.js"></script>
+</body>
+</html>
