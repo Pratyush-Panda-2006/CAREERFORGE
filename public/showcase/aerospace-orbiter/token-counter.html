@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ORBITER-X Token Counter</title>
+  <link rel="stylesheet" href="token-counter.css">
+</head>
+<body>
+  <main>
+    <a href="index.html">&larr; Back to ORBITER-X</a>
+    <h1>Token and byte counter</h1>
+    <p>Size uplink messages and AI prompts. Token numbers are estimates, not the output of any particular model's tokenizer. Text stays in your browser.</p>
+    <label for="text">Message</label>
+    <textarea id="text" rows="7">Telemetry check: apogee burn complete, altitude 35786 km.</textarea>
+    <label for="budget">Token budget <input id="budget" type="number" min="1" value="200"></label>
+    <section class="metrics">
+      <div><output id="tokens">0</output>Tokens (estimated)</div>
+      <div><output id="words">0</output>Words</div>
+      <div><output id="characters">0</output>Characters</div>
+      <div><output id="bytes">0</output>UTF-8 bytes</div>
+    </section>
+    <p id="warning" role="status"></p>
+    <h2>Token view</h2>
+    <div id="pills"></div>
+    <h2>Most frequent characters</h2>
+    <ul id="frequency"></ul>
+  </main>
+  <script type="module" src="token-counter.js"></script>
+</body>
+</html>
