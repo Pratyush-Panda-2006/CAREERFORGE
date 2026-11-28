@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VortexDEX Cron Schedule Builder</title>
+  <link rel="stylesheet" href="cron-parser.css">
+</head>
+<body>
+  <main>
+    <a href="index.html">&larr; Back to VortexDEX</a>
+    <h1>Cron schedule builder</h1>
+    <p>Plan recurring jobs such as funding-rate snapshots or settlement runs. Times use your local time zone.</p>
+    <form onsubmit="return false">
+      <label>Minute <input data-field value="*/15" autocomplete="off" spellcheck="false"></label>
+      <label>Hour <input data-field value="9-17" autocomplete="off" spellcheck="false"></label>
+      <label>Day <input data-field value="*" autocomplete="off" spellcheck="false"></label>
+      <label>Month <input data-field value="*" autocomplete="off" spellcheck="false"></label>
+      <label>Weekday <input data-field value="mon-fri" autocomplete="off" spellcheck="false"></label>
+    </form>
+    <div class="presets">
+      <button type="button" data-preset="0 */8 * * *">Funding every 8 hours</button>
+      <button type="button" data-preset="0 0 * * *">Daily settlement</button>
+      <button type="button" data-preset="30 6 1 * *">Monthly statement</button>
+    </div>
+    <code id="tokens"></code>
+    <p id="explanation" role="status"></p>
+    <h2>Next runs</h2>
+    <ol id="runs"></ol>
+  </main>
+  <script type="module" src="cron-parser.js"></script>
+</body>
+</html>
