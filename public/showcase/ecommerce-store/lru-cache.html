@@ -9,7 +9,38 @@
   <div class="lru-container">
     <h1>EcommerceStore LRU In-Memory Cache</h1>
     <p>O(1) Hash-Map and Doubly-Linked-List backed cache with live eviction tracking</p>
+
+    <!-- Controls Section -->
+    <div class="lru-controls">
+      <div class="capacity-control">
+        <label for="capacity">Cache Capacity:</label>
+        <input type="range" id="capacity" min="1" max="20" value="4">
+        <span id="capacityValue" class="capacity-value">4</span>
+      </div>
+      <button id="btnClear" class="btn-clear">Clear Cache</button>
+    </div>
+
+    <!-- Insertion Form -->
+    <div class="lru-form">
+      <h2>Insert Key-Value</h2>
+      <input type="text" id="inputKey" placeholder="Key" />
+      <input type="text" id="inputValue" placeholder="Value" />
+      <button id="btnPut" class="btn-put">Put</button>
+    </div>
+
+    <!-- Eviction Log -->
+    <div class="lru-eviction-log">
+      <h2>Eviction Log</h2>
+      <div id="evictionLog" class="eviction-log">No evictions yet.</div>
+    </div>
+
+    <!-- Ordered Node Chain Diagram -->
+    <div class="lru-node-diagram">
+      <h2>Node Chain (Head → Tail)</h2>
+      <div id="nodeChain" class="node-chain">Loading...</div>
+    </div>
   </div>
+
   <script type="module" src="lru-cache.js"></script>
 </body>
 </html>
